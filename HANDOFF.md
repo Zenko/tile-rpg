@@ -2,7 +2,7 @@
 
 For whoever picks up this project next (most likely another Claude). This covers what the game is, how it's built and published, how to change it safely, and how the owner likes to work.
 
-Current version: **v1.14.0**. The newest entry in `CHANGELOG` inside the game file is always the source of truth.
+Current version: **v1.15.0**. The newest entry in `CHANGELOG` inside the game file is always the source of truth.
 
 ---
 
@@ -100,7 +100,7 @@ Search for these banner comments (the `====` blocks). Line numbers drift, but ba
 - **Scenes (inside buildings).** `INTERIORS[id]` defines `title`, `who` (a string or function), `theme` and `greet` (a string or function), plus `actions`. Each action has a `kind` (`daily`, `advice`, `chest`, `memory`, `puzzle`, `minigame`, `oven`, `cook`, `deal`, `sleeves`, `seeds`, `mail`, `wings`, `exped`, and so on) and can have a `view()` that returns `{label, disabled}` for live buttons. Sub-menus use `scene.mode`. The cellar, the Festival Cup (the fountain) and the trading board (the Market sign) are special scenes rendered directly in `renderScene`. `sceneAction` routes in this order: leave, back, mini-game, prefixed ids (`dish:`, `wing:`, `exp-…`, `trade:`, …), special scenes, then action kinds.
 - **Battles.** `startBattle(opponent)` reads optional fields on the opponent: `profile`, `deck`, `isBoss`, `dungeon`, `cup`, `challenge`, `puzzle` (a saved board), `signature`, `isRival` and `startSpirit`. `btShowResult` has one branch per kind, and `closeBattle` returns you to the right scene. District bosses get a twist through `bossTwistFor()`.
 - **Mini-games.** Each `MINIGAMES` entry has `{house, icon, title, how, init, begin?, tap(st, value), render(st), scoreText, tiers or tierOf, lowerBetter?, pebbles?}`. Taps come from `data-mg` attributes on `pointerdown`. Timers are created with `miniEvery`/`miniAfter` so they're cleared automatically. `miniFinish(score)` awards the medal and prize, capped at 3 paid medals per game per day.
-- **Places in town.** Town Square has Wren's cottage, the Reading Nook, the cellar, Maple's bakery, Fern's cottage, the player's cottage (top right, by the Nook), the fountain (Festival Cup and challenges) and the sign (weather board). Market Row has Pip, Clover, Saffron and Tock, the Card Museum (east hedge), the sign (trading board) and Lumen's Lantern Market (night only, tile 4,5). The Harbor and the Garden have no buildings yet.
+- **Places in town.** Town Square has Wren's cottage, the Reading Nook, the cellar, Maple's bakery, Fern's cottage, the player's cottage (top right, by the Nook), the fountain (Festival Cup and challenges) and the sign (weather board). Market Row has Pip, Clover, Saffron and Tock, the Card Museum (east hedge), the sign (trading board) and Lumen's Lantern Market (night only, tile 4,5). The Harbor has Tam's Net Loft and the Garden has Iris's Glasshouse - one building each, placed at a fixed spot inside `proceduralMap()` (see §4/§10) rather than by hand-designing the rest of the layout.
 
 ## 8. Testing (how every change so far was checked)
 

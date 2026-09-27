@@ -2752,6 +2752,16 @@ const WEATHER_MUSIC_PROFILE = {
   fog:    { filter: 560,  wet: 1.35, tempoMin: 12, tempoMax: 19 },
   snow:   { filter: 700,  wet: 1.25, tempoMin: 12, tempoMax: 19 },
 };
+// Each district leans the same in-key chords a different way, so the town has a musical identity without ever
+// changing key: which of the 5 tones get picked (low/high/mixed), how much they shimmer, and how unhurried the
+// changes feel. The notes themselves always come from musicChords() - only the voicing and pacing shift here.
+const BIOME_MUSIC = {
+  meadow:  { voicing: 'mixed', shimmer: 0.6,  tempoMul: 1 },       // Town Square: the original balanced feel
+  bazaar:  { voicing: 'high',  shimmer: 0.5,  tempoMul: 0.82 },    // Market Row: brighter and a little quicker
+  harbor:  { voicing: 'low',   shimmer: 0.45, tempoMul: 1.25 },    // Quiet Harbor: deep and unhurried
+  orchard: { voicing: 'mixed', shimmer: 0.8,  tempoMul: 1.05 },    // Hollow Garden: more sparkle overhead
+};
+function biomeMusic() { return BIOME_MUSIC[BIOME_OF[state.currentDistrict] || 'meadow'] || BIOME_MUSIC.meadow; }
 function applyWeatherToMusic() {
   if (!MUSIC.nodes || !audioCtx) return;
   const kind = state.weather.current || 'clear';
@@ -2814,25 +2824,28 @@ function nextChord() {
   const alive = () => MUSIC.running && MUSIC.gen === gen;     // false once stopped OR restarted since this was scheduled
 
   // Move to a different chord (never repeat the same one twice in a row)
-  const chords = musicChords();
+  const chords = musicChords(), biome = biomeMusic();
   let idx;
   do { idx = Math.floor(Math.random() * chords.length); } while (idx === MUSIC.chordIndex);
   MUSIC.chordIndex = idx;
   const chord = chords[idx];
 
-  // Pick 3 or 4 of the 5 chord tones so the voicing changes every time
-  const pool = chord.notes.slice().sort(() => Math.random() - 0.5);
+  // Pick 3 or 4 of the 5 chord tones so the voicing changes every time - which tones lean low, high or mixed
+  // depends on the district's biome (see BIOME_MUSIC), never which notes exist.
+  const sorted = chord.notes.slice().sort((a, b) => a - b);
+  const pool = biome.voicing === 'low' ? sorted : biome.voicing === 'high' ? sorted.slice().reverse() : sorted.sort(() => Math.random() - 0.5);
   const count = 3 + (Math.random() < 0.5 ? 1 : 0);
   const hold = 6 + Math.random() * 6;
   pool.slice(0, count).forEach((f, i) => {
     // stagger entries slightly so the chord blooms instead of switching on at once
     setTimeout(() => { if (alive()) spawnVoice(ctx, nodes, f, hold); }, i * (900 + Math.random() * 1100));
   });
-  if (Math.random() < 0.6) setTimeout(() => { if (alive()) spawnShimmer(ctx, nodes, chord.notes[Math.floor(Math.random() * chord.notes.length)]); }, 3000 + Math.random() * 5000);
+  if (Math.random() < biome.shimmer) setTimeout(() => { if (alive()) spawnShimmer(ctx, nodes, chord.notes[Math.floor(Math.random() * chord.notes.length)]); }, 3000 + Math.random() * 5000);
 
-  // Re-roll the next change: drifts rather than ticks, paced a little slower under heavier weather
+  // Re-roll the next change: drifts rather than ticks, paced a little slower under heavier weather and biased
+  // by the district's own tempo (harbor lingers, market moves along).
   const prof = MUSIC.weatherProfile || WEATHER_MUSIC_PROFILE.clear;
-  MUSIC.timer = setTimeout(() => { if (alive()) nextChord(); }, (prof.tempoMin + Math.random() * (prof.tempoMax - prof.tempoMin)) * 1000);
+  MUSIC.timer = setTimeout(() => { if (alive()) nextChord(); }, (prof.tempoMin + Math.random() * (prof.tempoMax - prof.tempoMin)) * biome.tempoMul * 1000);
 }
 
 function startMusic() {
@@ -3110,6 +3123,8 @@ const TIPS = {
   challenges:  { icon: '🎯', title: 'Deck challenges', text: 'Three rules a day, like "only commons" or "no two cards the same". Win with a deck that follows the rule for a card prize. Keep a deck slot for challenges so switching is quick.' },
   minigames:  { icon: '🎲', title: 'Mini-games', text: 'Every house has a little game. Earn a bronze, silver or gold medal; the first three medals in each game every day pay Pebbles, and gold can turn up a card. Play as much as you like after that.' },
   forecast:   { icon: '🪧', title: 'The weather board', text: 'Signs show the forecast. Weather changes play: rain for fishing and growing, fog for finds, storms for Swift cards, snow for tougher bosses and richer prizes.' },
+  events:     { icon: '📅', title: 'Daily town events', text: "One event runs each day, shown next to the district name - a Fishing Derby, Market Day, Harvest Fair and more, each bending the rules a little in your favor." },
+  foils:      { icon: '✨', title: 'Foil cards', text: 'A shimmering foil is purely a collector\'s chase - the same card, just shinier. Your foil total shows at the top of Cards → Index and in your cottage trophy case.' },
 };
 function tipsSeen() { const p = state.progress; if (!p.tipsSeen || typeof p.tipsSeen !== 'object') p.tipsSeen = {}; return p.tipsSeen; }
 let tipQueue = [];
@@ -3196,6 +3211,7 @@ const QUEST_POOL = [
   { id: 'cardgift1', icon: '🃏', name: 'Give a neighbor a card',      goal: 1,  stat: 'cardsGifted',     reward: 'common' },
   { id: 'chal1',    icon: '🎯', name: 'Beat a deck challenge',        goal: 1,  stat: 'challengesWon',   reward: 'ultra' },
   { id: 'minigold', icon: '🥇', name: 'Win a gold medal in a mini-game', goal: 1, stat: 'minigameGolds', reward: 'rare' },
+  { id: 'foil1',    icon: '✨', name: 'Find a foil card',              goal: 1, stat: 'foilsFound',      reward: 'rare' },
   ...STEP_QUEST_TIERS
 ];
 
@@ -3235,7 +3251,8 @@ const WEEKLY_QUEST_POOL = [
   { id: 'w_donate8',  icon: '🏛️', name: 'Donate 8 cards to the museum', goal: 8, stat: 'donations',     reward: 'super' },
   { id: 'w_exped5',   icon: '🧭', name: 'Bring home 5 expeditions',  goal: 5,  stat: 'expeditionsDone', reward: 'super' },
   { id: 'w_chal6',    icon: '🎯', name: 'Beat 6 deck challenges',    goal: 6,  stat: 'challengesWon',   reward: 'mythic' },
-  { id: 'w_trade5',   icon: '🤝', name: 'Make 5 trades',             goal: 5,  stat: 'tradesDone',      reward: 'super' }
+  { id: 'w_trade5',   icon: '🤝', name: 'Make 5 trades',             goal: 5,  stat: 'tradesDone',      reward: 'super' },
+  { id: 'w_foil3',    icon: '✨', name: 'Find 3 foil cards',         goal: 3,  stat: 'foilsFound',      reward: 'mythic' }
 ];
 
 const ACHIEVEMENTS = [
@@ -3361,7 +3378,8 @@ const ACHIEVEMENTS = [
   { id: 'charms-3',    icon: '✦', name: 'Three charms',      test: () => activeCharms().length >= 3 },
   { id: 'challenge-10', icon: '🎯', name: '10 challenges',   test: () => (state.progress.totals.challengesWon || 0) >= 10 },
   { id: 'card-gifts-10', icon: '🃏', name: '10 cards given', test: () => (state.progress.totals.cardsGifted || 0) >= 10 },
-  { id: 'settled-in',  icon: '📜', name: 'Settled in',       test: () => !!(state.progress.story && state.progress.story.step >= STORY.length) },
+  { id: 'settled-in',  icon: '📜', name: 'Settled in',       test: () => !!(state.progress.story && state.progress.story.step >= STORY_ARC_LEN) },
+  { id: 'true-local',  icon: '🏘️', name: 'A true local',      test: () => !!(state.progress.story && state.progress.story.step >= STORY.length) },
   { id: 'first-foil',  icon: '✨', name: 'First foil',        test: () => (state.progress.totals.foilsFound || 0) >= 1 },
   { id: 'foil-10',     icon: '🌈', name: '10 foils',          test: () => (state.progress.totals.foilsFound || 0) >= 10 }
 ];
@@ -4121,7 +4139,14 @@ function proceduralMap(key) {
   while (q.length) { const c = q.shift(); [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(([dx, dy]) => { const nx = c.x + dx, ny = c.y + dy, k = nx + ',' + ny;
     if (nx < 0 || ny < 0 || nx >= W || ny >= H || seen.has(k) || SOLID_TERRAIN.includes(g[ny][nx])) return; seen.add(k); q.push({ x: nx, y: ny }); }); }
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (!SOLID_TERRAIN.includes(g[y][x]) && !seen.has(x + ',' + y)) g[y][x] = 'o';
-  return { w: W, h: H, rows: g.map(r => r.join('')), buildings: [], props: [], spawn };
+  // One fixed building per district - the layouts around them stay procedural placeholders (see HANDOFF),
+  // but the Harbor and the Garden each get one landmark worth walking to, the same way every other district has one.
+  const buildings = [];
+  if (key === 'harbor') { for (let dy = 2; dy <= 4; dy++) for (let dx = 2; dx <= 3; dx++) g[dy][dx] = '.';
+    buildings.push({ id: 'harbor-hut', type: 'nook', x: 2, y: 2, enter: 'harbor-hut', roof: '#3d6a86', roof2: '#2f5468' }); }
+  if (key === 'garden') { for (let dy = 2; dy <= 4; dy++) for (let dx = 9; dx <= 10; dx++) g[dy][dx] = '.';
+    buildings.push({ id: 'garden-glass', type: 'cottage', x: 9, y: 2, enter: 'garden-glass', roof: '#4c8a5e', roof2: '#3b6f4a' }); }
+  return { w: W, h: H, rows: g.map(r => r.join('')), buildings, props: [], spawn };
 }
 
 // Town layout: Town Square sits in the middle, with Market Row / Quiet Harbor / Hollow Garden one step
@@ -5218,6 +5243,16 @@ const INTERIORS = {
               { id: 'mg-gears', kind: 'minigame', game: 'gears', view: () => miniView('gears') },
               { id: 'sort', label: '🔧 Help sort the spare parts', kind: 'daily', pebbles: 2,
                 done: 'Springs here, cogs there. Tock pays you two Pebbles and a very small screw you did not ask for.', already: 'Tock waves you off. "Parts are sorted! Come back tomorrow."' }] },
+  'harbor-hut': { title: 'The Net Loft', who: '🦦', name: 'Tam', theme: 'cool',
+    greet: 'Salt in the air, gulls on the roof. Mind the nets drying by the door - I only just finished mending them.',
+    actions: [{ id: 'mend', label: '🪢 Help mend a net', kind: 'daily', pebbles: 4,
+      done: 'You work a knot loose and tie it back tighter. Tam presses four Pebbles into your hand. "Steady hands, you."', already: 'Tam pats the nets, all mended. "Nothing left to fix today - come back tomorrow."' },
+              { id: 'buoy', label: '🎣 Check the old buoy box', kind: 'chest', done: 'Something washed up in the buoy box, wedged between the floats.', already: 'Tam shrugs. "That box only ever had the one surprise in it."' }] },
+  'garden-glass': { title: 'The Glasshouse', who: '🐌', name: 'Iris', theme: 'warm',
+    greet: 'Careful of the watering cans! Everything in here grows a little slower than the sun, and a little stranger too.',
+    actions: [{ id: 'prune', label: '🌿 Help prune the vines', kind: 'daily', pebbles: 4,
+      done: 'You snip back the wandering vines. Iris slides four Pebbles across a potting bench. "For the help, dear."', already: 'Iris waves a leaf at you. "All pruned for today - the vines will grow back by tomorrow."' },
+              { id: 'pots', label: '🪴 Dig through the spare pots', kind: 'chest', done: 'Something is tucked under an upturned pot, waiting.', already: 'Iris smiles. "You already found what was hiding under there."' }] },
 };
 
 /* ---------------- Maple's bakery: bake a loaf in real time, then share it with neighbors ---------------- */
@@ -5553,6 +5588,7 @@ function trophySummary() {
   if (r) lines.push(`⚔️ ${r.won} matches won (best streak ${r.best})`);
   if (miniGoldCount()) lines.push(`🥇 gold in ${miniGoldCount()} of ${Object.keys(MINIGAMES).length} house games`);
   const pz = state.progress.puzzle; if (pz && pz.solved) lines.push(`🧩 ${pz.solved} puzzle${pz.solved === 1 ? '' : 's'} solved`);
+  const foilTotal = Object.values(foils()).reduce((a, b) => a + b, 0); if (foilTotal) lines.push(`✨ ${foilTotal} foil${foilTotal === 1 ? '' : 's'} shimmering in your collection`);
   return lines.length ? lines.join(' · ') : 'The trophy case is empty for now. Win the Festival Cup, go deep in the cellar, or land a legendary catch.';
 }
 
@@ -9666,9 +9702,11 @@ function renderAlmanac() {
   const own = baseOwnedSet();
   const setsHtml = `<div class="sets-box"><div class="section-title" style="margin-top:6px">Sets <span class="title-sub">own every card in a set for a lasting bonus</span></div>${CARD_SETS.map(st => { const n = setProgress(st), done = n === st.cards.length;
     return `<div class="set-row${done ? ' done' : ''}"><span class="set-name">${st.icon} ${st.name} <small>${n}/${st.cards.length}</small></span><span class="set-cards">${st.cards.map(id => `<span class="${own.has(id) ? 'have' : 'miss'}" title="${own.has(id) || disc.has(id) ? escapeHtml(cardDef(id).name) : '???'}">${cardDef(id).icon}</span>`).join('')}</span><span class="set-perk">${done ? '✓ ' : ''}${st.text}</span></div>`; }).join('')}</div>`;
+  const foilTotal = Object.values(foils()).reduce((a, b) => a + b, 0);
   document.getElementById('almProgress').innerHTML = setsHtml + `
     <div class="ap-top"><span><b>${found}</b> of ${total} discovered</span><span>${Math.round(found / total * 100)}%</span></div>
     <div class="q-bar"><div class="q-fill" style="width:${Math.round(found / total * 100)}%"></div></div>
+    ${foilTotal ? `<div class="alm-season">✨ ${foilTotal} foil${foilTotal === 1 ? '' : 's'} in your collection - look for the shimmer on any card.</div>` : ''}
     <div class="alm-season">${sd.icon} It's ${sd.name}: cards marked ${sd.icon} turn up more often for ${seasonDaysLeft()} more day${seasonDaysLeft() === 1 ? '' : 's'}.</div>`;
 
   grid.innerHTML = '';
@@ -10209,6 +10247,18 @@ function gameVersionLabel() {
    Each entry also carries the version it shipped in - every entry bumps the minor number (x.Y.0) from
    the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
 const CHANGELOG = [
+  {
+    date: '2026-09-27',
+    version: '1.15.0',
+    title: "New neighbors, a longer story, and a listen around town",
+    changes: [
+      "The Net Loft opens in Quiet Harbor and the Glasshouse opens in Hollow Garden - a neighbor, a daily Pebbles task and a once-a-day box to check in each.",
+      "The getting-started path keeps going after level 5: defeat a boss, see every district, meet the two new neighbors, beat Rook, complete a set and reach level 10 for a mythic card.",
+      "Each district now leans the ambient music its own way - deeper and slower by the water, brighter and quicker through the market, more sparkle in the garden.",
+      "Your foil total now shows at the top of Cards → Index and in your cottage trophy case.",
+      "A few small quest and tip gaps closed: a quest for finding your first foil, and first-time tips for daily events and foils.",
+    ],
+  },
   {
     date: '2026-09-27',
     version: '1.14.0',
@@ -11025,6 +11075,7 @@ const TITLES = [
   { ach: 'set-all',       name: 'Completionist' },
   { ach: 'challenge-10',  name: 'Rule Bender' },
   { ach: 'settled-in',    name: 'Local' },
+  { ach: 'true-local',    name: 'True Local' },
   { ach: 'foil-10',       name: 'Shiny Hunter' },
 ];
 function titleFor(achId) { return TITLES.find(t => t.ach === achId) || null; }
@@ -11411,6 +11462,7 @@ function noteTodayEvent() {
   pr.eventSeen = todayKey(); saveState();
   setTimeout(() => toast(`${ev.icon} Today in town: ${ev.name} - ${ev.text}`), 1500);
   logEvent(ev.icon, `Today in town: ${ev.name}. ${ev.text}`);
+  showTipOnce('events');
 }
 function packPrice(pack) { return Math.round(pack.cost * (eventIs('market-day') ? 0.8 : 1)); }
 
@@ -11432,33 +11484,47 @@ const STORY = [
   { icon: '🎴', text: 'Make the deck your own.',                     goal: 'Change a card in the Deck tab',              done: p => (p.deckEdits || 0) >= 1,            pebbles: 10 },
   { icon: '⭐', text: 'Settle in properly.',                          goal: 'Reach level 5',                              done: p => (p.level || 1) >= 5,                card: 'super' },
 ];
+// The path above ends onboarding; everyone who keeps playing gets these too, at their own pace, still one
+// step at a time in the same Rewards → Dailies slot. STORY_ARC_LEN marks where "getting started" ends.
+const STORY_ARC_LEN = STORY.length;
+STORY.push(
+  { icon: '👑', text: 'Face down a district boss.',                   goal: 'Defeat any district boss',                   done: p => (p.totals.bossesWon || 0) >= 1,     pebbles: 12 },
+  { icon: '🗺️', text: 'See the whole town.',                          goal: 'Visit every district',                       done: () => Object.keys(DISTRICTS).every(k => state.visitedDistricts.includes(k)), pebbles: 12 },
+  { icon: '🦦', text: "Meet the harbor and the garden's newest neighbors.", goal: 'Visit the Net Loft and the Glasshouse', done: p => !!(p.visited && p.visited['harbor-hut'] && p.visited['garden-glass']), pebbles: 10 },
+  { icon: '🎭', text: 'Take on your rival.',                          goal: 'Beat Rook in a match',                       done: p => (p.totals.rivalWins || 0) >= 1,     pebbles: 15 },
+  { icon: '🧩', text: 'Finish what you started.',                     goal: 'Complete any themed card set',               done: () => CARD_SETS.some(setComplete),        pebbles: 15 },
+  { icon: '⭐', text: 'Truly settle in.',                             goal: 'Reach level 10',                             done: p => (p.level || 1) >= 10,                card: 'mythic' },
+);
 function storyState() { const p = state.progress; if (!p.story || typeof p.story !== 'object') p.story = { step: 0, notified: -1 }; return p.story; }
 function storyStep() { const s = storyState(); return s.step < STORY.length ? STORY[s.step] : null; }
 function storyReady() { const st = storyStep(); return !!(st && st.done(state.progress)); }
+function storyArcLabel(step) { return step < STORY_ARC_LEN ? 'Getting started' : 'Making yourself at home'; }
 function claimStory() {
-  const s = storyState(), st = storyStep();
+  const s = storyState(), st = storyStep(), wasOnboarding = s.step < STORY_ARC_LEN;
   if (!st || !st.done(state.progress)) return;
   s.step++;
   if (st.pebbles) { addPebbles(st.pebbles); toast(`📜 Step done! +${st.pebbles} 🫧`); }
-  if (st.card) { const cid = randomCardId(st.card); state.ownedCards.push(cid); bumpStat('cardsFound', 1); setTimeout(() => showCardReveal(cid, 'Welcome to town!', true, 'Wren says: "You belong here now."'), 300); }
-  logEvent(st.icon, `Getting started: ${st.goal}.`);
+  if (st.card) { const cid = randomCardId(st.card); state.ownedCards.push(cid); bumpStat('cardsFound', 1);
+    setTimeout(() => showCardReveal(cid, wasOnboarding ? 'Welcome to town!' : 'A town that knows you', true, wasOnboarding ? 'Wren says: "You belong here now."' : 'Wren says: "Look at you - practically a local."'), 300); }
+  logEvent(st.icon, `${storyArcLabel(s.step - 1)}: ${st.goal}.`);
   saveState(); sfx('claim'); buzz(HAP.found);
   renderQuests(); checkAchievements();
 }
 function renderStory() {
   const slot = document.getElementById('storySlot'), s = storyState(), st = storyStep();
   if (!st) { slot.innerHTML = ''; return; }
-  const ready = st.done(state.progress);
+  const ready = st.done(state.progress), arc = storyArcLabel(s.step);
+  const arcStart = s.step < STORY_ARC_LEN ? 0 : STORY_ARC_LEN, arcLen = s.step < STORY_ARC_LEN ? STORY_ARC_LEN : STORY.length - STORY_ARC_LEN;
   slot.innerHTML = `<div class="story-card${ready ? ' ready' : ''}">
-    <div class="story-top"><span class="story-icon">${st.icon}</span><span class="story-text"><small>Getting started · step ${s.step + 1} of ${STORY.length}</small><b>${st.text}</b><span>${st.goal}</span></span>
+    <div class="story-top"><span class="story-icon">${st.icon}</span><span class="story-text"><small>${arc} · step ${s.step - arcStart + 1} of ${arcLen}</small><b>${st.text}</b><span>${st.goal}</span></span>
     ${ready ? '<button class="panel-action active" id="storyClaim">Claim</button>' : `<span class="q-count">${st.card ? 'a card' : `🫧 ${st.pebbles}`}</span>`}</div>
-    <div class="q-bar"><div class="q-fill" style="width:${Math.round(s.step / STORY.length * 100)}%"></div></div></div>`;
+    <div class="q-bar"><div class="q-fill" style="width:${Math.round((s.step - arcStart) / arcLen * 100)}%"></div></div></div>`;
   const b = document.getElementById('storyClaim'); if (b) b.addEventListener('click', claimStory);
 }
 // A nudge when the current step gets done, so nobody has to keep checking.
 function checkStory() {
   const s = storyState();
-  if (storyReady() && s.notified !== s.step) { s.notified = s.step; saveState(); toast('📜 Getting-started step done - claim it in Rewards'); }
+  if (storyReady() && s.notified !== s.step) { s.notified = s.step; saveState(); toast('📜 Next step ready - claim it in Rewards'); }
 }
 
 /* ============================================================
@@ -11480,7 +11546,7 @@ function reconcileFoils() {
   p.foilSnap = counts;
   if (found.length) {
     found.forEach(id => { const d = cardDef(id); setTimeout(() => toast(`✨ Foil! Your new ${d.icon} ${d.name} is a shiny one`), 1400); logEvent('✨', `Found a foil ${d.name}!`); });
-    bumpStat('foilsFound', found.length); sfx('mythic');
+    bumpStat('foilsFound', found.length); sfx('mythic'); showTipOnce('foils');
   }
   saveState();
 }
@@ -11522,6 +11588,8 @@ const GUIDE = [
     { icon: '🏪', name: 'Market stalls', where: 'Market Row', how: "Pip, Clover, Saffron's daily deal and Tock's card sleeves - each with a game.", lock: () => needs('market') },
     { icon: '🏛️', name: 'Card Museum & expeditions', where: 'Market Row, by the east hedge', how: 'Donate spare cards to six wings, and send spare cards on expeditions.', lock: () => needs('market') },
     { icon: '🏮', name: 'Lantern Market', where: 'Market Row, after dark', how: 'Night Packs, glowing decorations, and Pebbles for critters.', lock: () => needs('market') },
+    { icon: '🦦', name: 'The Net Loft', where: 'Quiet Harbor', how: "Tam mends nets for Pebbles, and keeps a buoy box worth checking once a day.", lock: () => needs('harbor') },
+    { icon: '🐌', name: 'The Glasshouse', where: 'Hollow Garden', how: 'Iris prunes vines for Pebbles, and has a box of spare pots worth digging through.', lock: () => needs('garden') },
   ] },
   { section: 'Collecting', items: [
     { icon: '🛍️', name: 'Packs & decorations', where: 'Shop tab', how: 'Spend Pebbles on packs, cosmetics and decorations for any district.' },
@@ -11529,7 +11597,7 @@ const GUIDE = [
     { icon: '🧩', name: 'Index & sets', where: 'Cards → Index', how: 'Every card in the game, and eight sets that give lasting bonuses when complete.' },
     { icon: '✦', name: 'Charms & mastery', where: 'Cards → My Cards', how: 'Charm cards for town perks; cards you play earn ★ mastery (★★★: +1 health in battle).' },
     { icon: '🤝', name: 'Trading board', where: 'The sign in Market Row', how: 'Three trades a day for spare cards.', lock: () => needs('market') },
-    { icon: '✨', name: 'Foil cards', where: 'Any new card', how: 'Now and then a new card arrives as a shimmering foil.' },
+    { icon: '✨', name: 'Foil cards', where: 'Any new card', how: 'Now and then a new card arrives as a shimmering foil. Your running total shows at the top of Cards → Index and in your cottage trophy case.' },
     { icon: '🎣', name: 'Fishing & gardening', where: 'River banks · Town Square soil', how: 'Fish and crops fill the Fish page, your pantry and your pockets.' },
   ] },
 ];
