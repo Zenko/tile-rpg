@@ -863,6 +863,7 @@ function saveState() {
   // the active deck slot always mirrors the live deck, whichever screen changed it
   if (Array.isArray(state.deckSlots) && state.deckSlots[state.activeDeckSlot]) state.deckSlots[state.activeDeckSlot].cards = state.deck.slice();
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
+  if (typeof cloudSaveDebounced === 'function') cloudSaveDebounced();   // optional Firestore backup - see js/cloud-save.js
 }
 
 function rollRarity(forBoss) {

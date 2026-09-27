@@ -109,6 +109,11 @@
           <div class="settings-row"><span>⏩ Fast battles</span><button class="toggle" id="fastToggle" aria-label="Toggle fast battle animations"></button></div>
           <div class="settings-row"><span>🔠 Larger text</span><button class="toggle" id="bigTextToggle" aria-label="Toggle larger text"></button></div>
           <div class="settings-row"><span>🌙 Calm motion</span><button class="toggle" id="calmToggle" aria-label="Toggle reduced motion"></button></div>
+          <div class="settings-row"><span>☁️ Cloud save</span><span id="cloudStatus">—</span></div>
+          <div class="controls" style="margin-top:6px">
+            <button id="cloudBackupBtn" class="btn btn-ghost">🔗 Back up your save</button>
+            <button id="cloudRestoreBtn" class="btn btn-ghost">📥 Restore a save</button>
+          </div>
         </div>
         <div class="controls" id="townControls">
           <button id="resetTown" class="btn btn-ghost">Start Over</button>
@@ -473,6 +478,14 @@
 <script src="js/world-map.js"></script>
 <script src="js/titles.js"></script>
 <script src="js/events-story-foils-guide.js"></script>
+<!-- Cloud save (optional): deliberately loaded last, after the whole game above has already loaded and
+     rendered from the local save, so a slow or unreachable connection to Google's CDN can never delay
+     actually playing. js/cloud-save.js checks for a missing `firebase` global and no-ops if these fail to
+     load - the game is fully playable on local storage alone either way. See HANDOFF §1a. -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="js/cloud-save.js"></script>
 <script>
 // Makes the game installable and playable offline. Service workers need a secure context (https or
 // localhost), so this is a silent no-op when the file is opened directly (file://) - normal local

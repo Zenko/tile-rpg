@@ -19,6 +19,15 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-27',
+    version: '1.17.0',
+    title: "Cloud save",
+    changes: [
+      "Your progress now backs up automatically in the background - no account needed, nothing to set up.",
+      "Settings → Back up your save: link an email so you can restore your progress on another device or browser with Settings → Restore a save.",
+    ],
+  },
+  {
+    date: '2026-09-27',
     version: '1.16.0',
     title: "Play offline",
     changes: [

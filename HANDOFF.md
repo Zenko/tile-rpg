@@ -2,7 +2,7 @@
 
 For whoever picks up this project next (most likely another Claude). This covers what the game is, how it's built and published, how to change it safely, and how the owner likes to work.
 
-Current version: **v1.16.0**. The newest entry in `CHANGELOG` (now `js/changelog.js`) is always the source of truth.
+Current version: **v1.17.0**. The newest entry in `CHANGELOG` (now `js/changelog.js`) is always the source of truth.
 
 ---
 
@@ -23,7 +23,23 @@ Tile RPG is a calm, mobile-first card-collecting town game. You walk around a ti
 
 - **Offline is done.** `sw.js` precaches every file in §4's table via the Cache API (cache-first, falling back to network for anything not precached). `manifest.json` makes it installable. Test this specifically with an actual HTTP server, not `file://` - service workers require a secure context and silently refuse to register under `file://` (the registration in `index.html` is wrapped in `.catch(() => {})` for exactly this reason, so normal `file://` testing is unaffected, it just never gets a service worker). A one-line static server for this: `node -e "require('http').createServer((q,r)=>require('fs').readFile('.'+decodeURIComponent(q.url.split('?')[0])||'./index.html',(e,d)=>{r.writeHead(e?404:200);r.end(d||'404');})).listen(8123)"`, then point Playwright/a browser at `http://localhost:8123/`.
 - **Publish checklist addition:** bump `CACHE_VERSION` in `sw.js` on every publish (see §2) - it's what makes a returning player's browser fetch the new files instead of serving last release from cache forever. It's independent of the game's own version number.
-- **Cloud saves are the next piece, not yet built.** The plan (agreed with the owner): keep the existing `localStorage` save as the fast, always-available local copy, and add Firestore as the durable/cross-device layer on top, using the Firebase **compat** SDK (not the modular v9+ one, which is ES-module-only and would break `file://` testing the same way `type="module"` scripts do). Auth is anonymous-by-default (a hidden account created on first play, so there's no login screen), with an optional "link an email" action in settings so a save can be recovered on another device. Sync should be local-first: write to `localStorage` immediately as always, push to Firestore in the background (debounced - `saveState()` is called very often, and the Firestore free tier has a daily write quota), and on load, compare local vs cloud timestamps and take the newer one. This needs a Firebase project the owner creates themselves (Claude has no Google account access) - see whoever's doing this work for the exact config values needed.
+- **Cloud saves are done (v1.17.0), in `js/cloud-save.js`.** `localStorage` stays the fast, always-available, offline-first save (nothing in `loadState()`'s own logic changed); Firestore is a background backup layered on top, using the Firebase **compat** SDK (`firebase-app-compat.js` / `firebase-auth-compat.js` / `firebase-firestore-compat.js`, loaded from `gstatic.com` - **not** the modular v9+ SDK, which is ES-module-only and would break `file://` testing the same way `type="module"` scripts do).
+  - **Loaded last, deliberately.** The three Firebase `<script>` tags and `js/cloud-save.js` sit at the very end of `index.html`, after every game file - so a slow or unreachable connection to Google's CDN can never delay the game itself loading and rendering from the local save. `cloud-save.js` calls its own `cloudInit()` at the bottom of the file, rather than being kicked off from the game's own start-up sequence, for the same reason.
+  - **Auth is anonymous by default** - a hidden account is created on first play, no login screen. `saveState()` (in `js/progression.js`) calls `cloudSaveDebounced()` after every local save, which coalesces bursts into one Firestore write every `CLOUD_SAVE_DEBOUNCE_MS` (currently 8s) - `saveState()` is called very often, and the Firestore free tier has a daily write quota. On sign-in (including the very first one), `cloudPullThenReconcile()` compares the cloud copy's `savedAt` against the local `state.cloudSavedAt` and takes whichever is newer - "last write wins," no field-level merge. This is a deliberately simple policy for a casual game in playtesting; revisit if it ever causes a real complaint.
+  - **"Back up your save" / "Restore a save"** (Settings, next to Comfort settings) link or sign into an email + password on top of the same hidden anonymous account (`linkWithCredential` / `signInWithEmailAndPassword`), using `prompt()` for the two text inputs - deliberately the simplest possible UI for a first cut, not a polished modal. Restoring always takes the cloud copy unconditionally (the player just said which save they want), everything else uses the timestamp comparison above.
+  - **Everything in this file checks `typeof firebase !== 'undefined'` and no-ops if it's missing**, so a blocked/unreachable CDN, or a genuinely offline player, degrades to "exactly like before this file existed" rather than breaking anything. This is also why `sw.js` does **not** precache the three Firebase CDN scripts (cross-origin, and pointless to cache something that's useless without a live connection anyway) - only `js/cloud-save.js` itself.
+  - **Firestore security rules** (paste into the Firebase console → Firestore → Rules): one document per user, keyed by their auth `uid`, readable/writable only by that same authenticated user:
+    ```
+    rules_version = '2';
+    service cloud.firestore {
+      match /databases/{database}/documents {
+        match /saves/{uid} {
+          allow read, write: if request.auth != null && request.auth.uid == uid;
+        }
+      }
+    }
+    ```
+  - **Known gap: this was built and tested without ever reaching a live Firestore/Auth call.** Whichever sandbox this was built in had `gstatic.com`/`googleapis.com` blocked by its own network policy (an environment-level restriction on that Claude session, unrelated to real players' browsers) - confirmed the graceful no-op path works perfectly (all 22+ Playwright smoke tests still pass with the Firebase scripts failing to load), but the actual sign-in/read/write calls have only been verified by reading, not by running. **Whoever picks this up next: load the live site once, open dev tools, and confirm `cloudStatus` in Settings actually shows "Backed up automatically" (not stuck on "Offline") and that a `saves/<uid>` document appears in the Firestore console after playing a bit.**
 
 ## 2. Hosting and publishing
 
@@ -86,7 +102,8 @@ Each file below still has the same banner comments (the `====` blocks) it had wh
 | `js/notes.js` | (sub-banners) | Journal → Notes: the list, PNG export, the drawing canvas. |
 | `js/world-map.js` | (sub-banners) | The plus-shaped town overlay/radar. |
 | `js/titles.js` | (sub-banners) | Earned titles, `switchTab`, `updateHud`. |
-| `js/events-story-foils-guide.js` | `DAILY TOWN EVENTS` … `FEEDBACK FOR TESTERS` | Daily events, the getting-started **and post-onboarding** story (`STORY`, `STORY_ARC_LEN`), foils, the Town Guide, comfort settings, tester feedback, and **the start-up code** (`loadState(); … renderTown(); updateHud();`) - this file must stay **last** in load order because start-up uses everything else. |
+| `js/events-story-foils-guide.js` | `DAILY TOWN EVENTS` … `FEEDBACK FOR TESTERS` | Daily events, the getting-started **and post-onboarding** story (`STORY`, `STORY_ARC_LEN`), foils, the Town Guide, comfort settings, tester feedback, and **the start-up code** (`loadState(); … renderTown(); updateHud();`) - this file must load before `js/cloud-save.js`, but otherwise last among the game's own files, because start-up uses everything else. |
+| *(3 Firebase CDN scripts)* / `js/cloud-save.js` | - | Loaded **last of all**, after every file above - see §1a. Firestore backup on top of the local save: `cloudInit`, `cloudSaveDebounced` (hooked into `saveState()`), `cloudPullThenReconcile`, the "Back up"/"Restore" buttons. |
 
 ## 5. Conventions to keep
 
