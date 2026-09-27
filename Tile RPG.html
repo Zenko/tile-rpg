@@ -1155,6 +1155,30 @@ body.in-scene .screen { position: relative; overflow: hidden; }
 .alm-card .ac-museum { position: absolute; bottom: 4px; left: 5px; font-size: 0.66rem; line-height: 1; }
 .talk-cards { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 8px 0 0; }
 .talk-cards .talk-sub { width: 100%; min-height: 0; margin: 0 0 2px; font-size: 0.74rem; }
+/* ---------- getting started, events, guide, foils, comfort ---------- */
+.story-card { text-align: left; background: linear-gradient(135deg, rgba(217,160,102,0.16), var(--stone)); border: 1px solid var(--stone-edge); border-radius: 16px; padding: 12px 14px; margin-bottom: 10px; }
+.story-card.ready { border-color: var(--accent); animation: gift-glow 2.2s ease-in-out infinite; }
+.story-top { display: flex; align-items: center; gap: 10px; }
+.story-icon { font-size: 1.6rem; }
+.story-text { flex: 1; display: flex; flex-direction: column; gap: 1px; }
+.story-text small { font-size: 0.62rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em; }
+.story-text b { font-size: 0.86rem; }
+.story-text span { font-size: 0.72rem; color: var(--ink-soft); }
+.event-banner { background: rgba(217,160,102,0.16); border: 1px solid var(--accent); border-radius: 12px; padding: 8px 12px; font-size: 0.78rem; margin-bottom: 10px; text-align: center; }
+.pack .btn s { opacity: 0.6; font-size: 0.75em; }
+#journalSeg .seg-btn { font-size: 0.72rem; padding: 8px 3px; }
+.guide-today { background: var(--stone); border: 1px solid var(--accent); border-radius: 14px; padding: 10px 12px; font-size: 0.76rem; line-height: 1.5; margin-bottom: 4px; }
+.guide-item { align-items: flex-start; }
+.guide-item.locked { opacity: 0.6; }
+.guide-how { font-size: 0.72rem; color: var(--ink); line-height: 1.4; margin-top: 2px; }
+.foil { position: relative; animation: foil-shift 4s linear infinite; }
+.card-mini.foil::before, .alm-card.foil::before { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 3;
+  background: linear-gradient(115deg, transparent 25%, rgba(255,255,255,0.45) 45%, transparent 60%); background-size: 250% 100%; animation: foil-sheen 2.6s linear infinite; }
+@keyframes foil-shift { 0% { filter: hue-rotate(0deg) saturate(1.3); } 100% { filter: hue-rotate(360deg) saturate(1.3); } }
+@keyframes foil-sheen { 0% { background-position: 120% 0; } 100% { background-position: -120% 0; } }
+.foil-tag { font-size: 0.66rem; font-weight: 700; color: #ffd98a; }
+html.big-text { font-size: 112%; }
+html.calm *, html.calm *::before, html.calm *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 .sc-pips .pip-label { font-size: 0.74rem; color: var(--ink-soft); line-height: 12px; letter-spacing: 0.02em; }
 .sc-bubble { background: var(--stone); border: 1px solid var(--stone-edge); border-radius: 16px; padding: 14px 16px; font-size: 0.9rem; line-height: 1.5; color: var(--ink); box-shadow: 0 1px 6px var(--shadow); min-height: 64px; }
 .sc-actions { display: flex; flex-direction: column; gap: 8px; }
@@ -1341,10 +1365,14 @@ body.in-scene .screen { position: relative; overflow: hidden; }
             <span class="vol-num" id="sfxVolNum">70</span>
           </div>
           <div class="settings-row"><span>📳 Haptics</span><button class="toggle" id="hapticToggle" aria-label="Toggle haptics"></button></div>
+          <div class="settings-row"><span>⏩ Fast battles</span><button class="toggle" id="fastToggle" aria-label="Toggle fast battle animations"></button></div>
+          <div class="settings-row"><span>🔠 Larger text</span><button class="toggle" id="bigTextToggle" aria-label="Toggle larger text"></button></div>
+          <div class="settings-row"><span>🌙 Calm motion</span><button class="toggle" id="calmToggle" aria-label="Toggle reduced motion"></button></div>
         </div>
         <div class="controls" id="townControls">
           <button id="resetTown" class="btn btn-ghost">Start Over</button>
           <button id="feedbackBtn" class="btn btn-ghost">💬 Feedback</button>
+          <button id="bugBtn" class="btn btn-ghost">🐞 Report a bug</button>
         </div>
         <div class="pm-version" id="pmVersion"></div>
       </div>
@@ -1373,10 +1401,14 @@ body.in-scene .screen { position: relative; overflow: hidden; }
           <button class="seg-btn" id="segNotes">Notes</button>
           <button class="seg-btn active" id="segEventLog">Log</button>
           <button class="seg-btn" id="segBattles">Battles</button>
+          <button class="seg-btn" id="segGuide">Guide</button>
           <button class="seg-btn" id="segChangelog">Updates</button>
         </div>
         <div id="eventLogView">
           <div class="panel-list" id="eventLogList"></div>
+        </div>
+        <div id="guideView" class="hidden">
+          <div id="guideList"></div>
         </div>
         <div id="battlesView" class="hidden">
           <div class="bl-stats" id="battleStats"></div>
@@ -1486,6 +1518,7 @@ body.in-scene .screen { position: relative; overflow: hidden; }
           <button class="seg-btn" id="segHistory">History</button>
         </div>
         <div id="dailiesView">
+          <div id="storySlot"></div>
           <div id="giftSlot"></div>
           <div class="section-title">Today's Quests</div>
           <div id="questList"></div>
@@ -3327,7 +3360,10 @@ const ACHIEVEMENTS = [
   { id: 'set-all',     icon: '🏅', name: 'Every set',        test: () => CARD_SETS.every(setComplete) },
   { id: 'charms-3',    icon: '✦', name: 'Three charms',      test: () => activeCharms().length >= 3 },
   { id: 'challenge-10', icon: '🎯', name: '10 challenges',   test: () => (state.progress.totals.challengesWon || 0) >= 10 },
-  { id: 'card-gifts-10', icon: '🃏', name: '10 cards given', test: () => (state.progress.totals.cardsGifted || 0) >= 10 }
+  { id: 'card-gifts-10', icon: '🃏', name: '10 cards given', test: () => (state.progress.totals.cardsGifted || 0) >= 10 },
+  { id: 'settled-in',  icon: '📜', name: 'Settled in',       test: () => !!(state.progress.story && state.progress.story.step >= STORY.length) },
+  { id: 'first-foil',  icon: '✨', name: 'First foil',        test: () => (state.progress.totals.foilsFound || 0) >= 1 },
+  { id: 'foil-10',     icon: '🌈', name: '10 foils',          test: () => (state.progress.totals.foilsFound || 0) >= 10 }
 ];
 
 const DAILY_QUEST_COUNT = 20;
@@ -3512,7 +3548,7 @@ function updateQuestBadge() {
   ensureWeeklyQuests();
   const claimable = pr.quests.some(q => !q.claimed && questProgress(q) >= questDef(q.id).goal)
     || (pr.weeklyQuests || []).some(q => !q.claimed && weeklyQuestProgress(q) >= weeklyQuestDef(q.id).goal);
-  const show = giftReady() || claimable;
+  const show = giftReady() || claimable || storyReady();
   let dot = btn.querySelector('.dot');
   if (show && !dot) { dot = document.createElement('span'); dot.className = 'dot'; btn.appendChild(dot); }
   if (!show && dot) dot.remove();
@@ -3540,7 +3576,7 @@ const XP_PER_STAT = {
   steps: 0.25, cardsFound: 15, battlesWon: 40, bossesWon: 150, fishCaught: 18,
   favours: 30, spiritsMet: 10, districtsVisited: 60, decorationsPlaced: 12,
   breadBaked: 8, breadShared: 10, spellsCast: 3, seedsPlanted: 3, seedsFound: 5, cropsHarvested: 5, rivalWins: 60,
-  minigamesPlayed: 5, minigameGolds: 10,
+  minigamesPlayed: 5, minigameGolds: 10, talks: 1, foilsFound: 20,
   donations: 6, expeditionsDone: 25, tradesDone: 15, cardsGifted: 10, challengesWon: 40, setsCompleted: 60, masteryRanks: 15, charmsSet: 2,
   dishesCooked: 10, dishesGiven: 10, snacksEaten: 2, puzzlesSolved: 40, cupRoundsWon: 30, cupTrophies: 100, bugsCaught: 8, lettersRead: 2,
 };
@@ -3555,6 +3591,7 @@ function addXP(amount) {
   if (!amount) return;
   if (hasPerk('xp')) amount *= 1.1;
   amount *= 1 + cardBonus('xp');
+  if (eventIs('double-xp')) amount *= 2;
   const pr = ensureLevel();
   pr.xp += amount;
   let levelsGained = 0, bonusLevel = null;
@@ -3604,6 +3641,7 @@ function renderQuests() {
   ensureWeeklyQuests();
   const pr = state.progress;
 
+  renderStory();
   const slot = document.getElementById('giftSlot');
   const ready = giftReady();
   slot.innerHTML = `
@@ -4674,7 +4712,9 @@ function renderTown(justMoved) {
   tickItems(data);
   districtNameEl.textContent = def.name;
   const sd = seasonDef();
-  document.getElementById('seasonTag').textContent = ` · ${sd.icon} ${sd.name}`;
+  const ev = eventNow();
+  document.getElementById('seasonTag').textContent = ` · ${sd.icon} ${sd.name} · ${ev.icon} ${ev.name}`;
+  noteTodayEvent();
   townView.dataset.season = seasonNow();
   noteSeasonChange();
   if (!layoutTown()) return;
@@ -4867,7 +4907,7 @@ function interactWith(kind, t) {
   } else if (kind === 'prop' && t.type === 'sign' && state.currentDistrict === 'market') {
     sfx('claim'); openScene('trades');
   } else if (kind === 'prop' && t.type === 'sign') {
-    showProp('🪧', t.title + ' · weather board', `${t.desc} ${forecastText()}`); showTipOnce('forecast');
+    showProp('🪧', t.title + ' · weather board', `${t.desc} ${forecastText()} Today: ${eventNow().icon} ${eventNow().name} - ${eventNow().text}`); showTipOnce('forecast');
   } else if (kind === 'prop') {
     const data = ensureDistrictData(state.currentDistrict);
     if (!data.propFinds) data.propFinds = {};
@@ -4882,7 +4922,7 @@ function interactWith(kind, t) {
     else showProp(PROP_ICON.door, 'Closed for now', t.locked || 'The door is shut.');
   } else if (kind === 'spirit') {
     bumpStat('spiritsMet', 1);
-    const cloudy = weatherIs('cloudy');                       // overcast days bring spirits closer: double XP
+    const cloudy = weatherIs('cloudy') || eventIs('spirit-parade');   // overcast days (and the Spirit Parade) bring spirits closer: double XP
     if (cloudy) addXP(XP_PER_STAT.spiritsMet);
     showCardReveal(t.cardId, 'A card spirit appears', false, t.story + (cloudy ? ' ☁️ The clouds make it linger.' : ''), XP_PER_STAT.spiritsMet * (cloudy ? 2 : 1));
     if (!state.companion) {                             // no companion yet: this one could come along
@@ -5193,7 +5233,7 @@ function ovenView() {
   if (left > 0) return { label: `⏳ In the oven… ${fmtClock(left)}`, disabled: true };
   return { label: '🍞 Take out the fresh loaf' };
 }
-function bakeMs() { return Math.round(BAKE_MS * (1 - Math.min(0.5, cardBonus('bake')))); }
+function bakeMs() { return Math.round(BAKE_MS * (1 - Math.min(0.5, cardBonus('bake'))) * (eventIs('baking-day') ? 0.5 : 1)); }
 function fmtClock(ms) { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; }
 function ovenAction() {
   const ov = ovenState();
@@ -5262,6 +5302,11 @@ function snackDishes() { return RECIPES.filter(r => r.battle && dishCount(r.id) 
 
 /* ---------------- Saffron's spice stall: one deal a day, the same for everyone that day ---------------- */
 function spiceDeal() {
+  const d = spiceDealBase();
+  if (eventIs('market-day')) d.price = Math.round(d.price * 0.8);
+  return d;
+}
+function spiceDealBase() {
   const rnd = seeded('spice-' + todayKey());
   if (rnd() < 0.5) {
     const packs = PACKS.filter(p => ['brook', 'orchard', 'aurora', 'spellbook'].includes(p.id));
@@ -5372,7 +5417,7 @@ function cellarFloor(i) {
   if (!isDeepFloor(i)) return CELLAR.floors[i];
   const n = i + 1, depth = i - CELLAR.floors.length + 1, guardian = n % 5 === 0;
   const f = guardian ? DEEP_GUARDIANS[(n / 5 - 1) % DEEP_GUARDIANS.length] : DEEP_FOES[(i - CELLAR.floors.length) % DEEP_FOES.length];
-  return Object.assign({}, f, { deep: true, depth, guardian, pebbles: 5 + depth + (guardian ? 8 : 0),
+  return Object.assign({}, f, { deep: true, depth, guardian, pebbles: (5 + depth + (guardian ? 8 : 0)) * (eventIs('cellar-night') ? 2 : 1),
     profile: { level: depth >= 4 ? 'smart' : 'normal', spirit: Math.min(34, 18 + depth + (guardian ? 3 : 0)) } });
 }
 // A deep deck gets rarer with depth and leans on the floor's keyword.
@@ -5645,7 +5690,7 @@ function renderScene() {
     sceneView.dataset.theme = 'warm';
     document.getElementById('scTitle').textContent = '🪧 The Trading Board';
     document.getElementById('scWho').textContent = '🪧';
-    pips.innerHTML = `<span class="pip-label">New offers every morning · ${tradesState().offers.filter(o => o.done).length}/3 traded today</span>`;
+    pips.innerHTML = `<span class="pip-label">New offers every morning · ${tradesState().offers.filter(o => o.done).length}/${tradesState().offers.length} traded today</span>`;
     acts.innerHTML = tradeButtons();
   } else if (mini && scene.id === mini.house) {
     // a mini-game fills the stage; the buttons below only offer another go or a way back
@@ -5826,7 +5871,8 @@ function cupWin() {
   state.wins++; bumpStat('battlesWon', 1); bumpStat('cupRoundsWon', 1);
   cs.spirit = Math.max(1, battle.G.p[0].spirit);
   cs.best = Math.max(cs.best || 0, round + 1);
-  addPebbles(r.pebbles);
+  const cupPeb = r.pebbles * (eventIs('festival-day') ? 2 : 1);
+  addPebbles(cupPeb);
   const icon = btGet('battleEndIcon'), endCard = btGet('battleEndCard');
   icon.className = 'big-icon reveal-icon';
   let extra = '';
@@ -5852,7 +5898,7 @@ function cupWin() {
     } else extra = 'Another clean sweep this week.';
   }
   saveState();
-  battleEndStats.innerHTML = `<b>+${r.pebbles} 🫧</b> ${extra}`;
+  battleEndStats.innerHTML = `<b>+${cupPeb} 🫧</b> ${extra}`;
   btGet('battleRetryBtn').classList.add('hidden');
   sparkleBurst(btGet('battleSparkles'), ['🏆', '✨', '🎉'], round === 2 ? 24 : 10);
   sfx(round === 2 ? 'mythic' : 'win'); buzz(HAP.win); bumpPill('pillWins');
@@ -6264,7 +6310,7 @@ const fishState = () => {
   return f;
 };
 // Rain makes the scarcer fish (anything that isn't the everyday Minnow/Perch) bite more often.
-function fishWeight(f) { return f.weight * (f.weight < 20 && !f.legendary ? (weatherFx().rareFish || 1) : 1); }
+function fishWeight(f) { return f.weight * (f.weight < 20 && !f.legendary ? (weatherFx().rareFish || 1) * (eventIs('fishing-derby') ? 2 : 1) : 1); }
 function pickFish() {
   const pool = FISH.filter(fishAvailable);
   const total = pool.reduce((s, f) => s + fishWeight(f), 0); let r = Math.random() * total;
@@ -6389,7 +6435,7 @@ function fishLand(fish) {
       cardId = randomCardId(rollRewardRarity(false));
       state.ownedCards.push(cardId); bumpStat('cardsFound', 1); bumpPill('pillCards');
       line = 'Something heavier than a fish. A card, tied up in the weeds!';
-    } else { addPebbles(fish.pebbles); line = `${fish.blurb} +${fish.pebbles} Pebble${fish.pebbles > 1 ? 's' : ''}`; }
+    } else { const peb = fish.pebbles * (eventIs('fishing-derby') ? 2 : 1); addPebbles(peb); line = `${fish.blurb} +${peb} Pebble${peb > 1 ? 's' : ''}${eventIs('fishing-derby') ? ' (derby!)' : ''}`; }
   } else { line = `${fish.blurb} You let it go.`; }
   saveState(); updateHud();
   fishing.phase = 'idle'; e.btn.classList.remove('wait', 'bite', 'reeling');
@@ -6546,6 +6592,7 @@ function talkEls() { return { ov: document.getElementById('talkOverlay'), name: 
 function activeCount() { return Object.values(reqState().list).filter(r => r.state === 'active').length; }
 function openTalk(f) {
   talkTo = f; const e = talkEls();
+  bumpStat('talks', 1);
   e.name.textContent = f.name;
   e.ov.classList.remove('hidden'); sfx('tap');
   renderTalk();
@@ -6689,6 +6736,7 @@ function notePlayerPlay(ev) {
 
 /* stepping inside a building completes a visit request for that building */
 function noteVisit(buildingId) {
+  const pv = state.progress; if (!pv.visited || typeof pv.visited !== 'object') pv.visited = {}; pv.visited[buildingId] = true;
   const rs = reqState(); let any = false;
   Object.values(rs.list).forEach(r => { if (r.kind === 'visit' && r.state === 'active' && !r.visited && r.building === buildingId) { r.visited = true; any = true; } });
   if (any) { saveState(); toast('👋 You passed on the hello.'); }
@@ -7989,6 +8037,11 @@ function buildTradeOffers() {
   // 3. a collector paying well
   const want3 = pickSpare('rare');
   offers.push(Object.assign(who(), { kind: 'buyer', want: want3, pebbles: RELEASE_VALUE[cardDef(want3).rarity] * 3, done: false }));
+  if (eventIs('swap-day')) {                              // Swap Day: one more swap and one more buyer
+    const w4 = pickSpare('common'), r4 = cardDef(w4).rarity, fresh4 = cardPool(r4).filter(c => !disc.has(c.id) && c.id !== offers[0].give);
+    if (fresh4.length) offers.push(Object.assign(who(), { kind: 'swap', want: w4, give: fresh4[rand(fresh4.length)].id, done: false }));
+    const w5 = pickSpare('rare'); offers.push(Object.assign(who(), { kind: 'buyer', want: w5, pebbles: RELEASE_VALUE[cardDef(w5).rarity] * 3, done: false }));
+  }
   return offers;
 }
 function bundlePicks(o) {
@@ -8145,7 +8198,7 @@ function cropIcon(c) { return cropStage(c) === 2 ? seedDef(c.seed).icon : cropSt
 function tickCrops() {
   const d = state.districtData.square;
   if (!d || !Array.isArray(d.crops) || !d.crops.length) return false;
-  const now = Date.now(), rate = (weatherIs('rain') ? 1.5 : 1) * (hasPerk('crops') ? 1.25 : 1) * (1 + cardBonus('crops'));
+  const now = Date.now(), rate = (weatherIs('rain') ? 1.5 : 1) * (hasPerk('crops') ? 1.25 : 1) * (1 + cardBonus('crops')) * (eventIs('harvest-fair') ? 1.5 : 1);
   let changed = false;
   d.crops.forEach(c => {
     const before = cropStage(c);
@@ -8203,7 +8256,7 @@ function cropCardRarity(floor) {
 function harvestCrop(c) {
   const data = ensureDistrictData('square'), s = seedDef(c.seed);
   data.crops = data.crops.filter(x => x.uid !== c.uid);
-  addPebbles(s.pebbles + (hasPerk('harvest') ? 2 : 0) + cardBonus('harvestPebbles'));
+  addPebbles(s.pebbles + (hasPerk('harvest') ? 2 : 0) + cardBonus('harvestPebbles') + (eventIs('harvest-fair') ? 3 : 0));
   addXP(s.xp);
   addIngredient(CROP_INGREDIENT[c.seed], 1);                 // every harvest also stocks the pantry
   bumpStat('cropsHarvested', 1);
@@ -8305,7 +8358,7 @@ function shuffle(arr) {
    You are always seat 0 (you go first); the neighbor is seat 1.
    ============================================================ */
 let battleToken = 0;
-const btWait = ms => new Promise(r => setTimeout(r, ms));
+const btWait = ms => new Promise(r => setTimeout(r, prefs.fast ? ms * 0.45 : ms));   // "Fast battles" trims every pause
 const btToast = m => toast(m, true);
 const btGet = id => document.getElementById(id);
 const btAlive = token => battle && battle.token === token && !battle.ended;
@@ -8453,6 +8506,7 @@ function btCardEl(c, cls, mine) {
     <div class="stats"><span class="pw">⚔${c.power}</span><span class="hp ${c.hp < c.grit ? 'hurt' : ''}">♥${c.hp}</span></div>`;
   const sleeve = mine ? currentSleeve() : null;
   const mr = mine ? masteryRank(c.id) : 0;
+  if (mine && hasFoil(c.id)) el.classList.add('foil');
   if (mr) { el.classList.add('mastered', 'mastery-' + mr); el.insertAdjacentHTML('beforeend', `<span class="mastery-stars">${'★'.repeat(mr)}</span>`); }
   if (sleeve && sleeve.id) { el.classList.add('sleeved', 'sleeve-' + sleeve.id); el.insertAdjacentHTML('afterbegin', `<span class="sleeve-fx"></span><span class="sleeve-mark">${sleeve.icon}</span>`); }
   if (c.shield) el.classList.add('shielded');
@@ -9199,7 +9253,7 @@ function rollPackRarity(pack) {
 function buyPack(packId, price) {
   const pack = PACKS.find(p => p.id === packId);
   if (!pack) return false;
-  const cost = typeof price === 'number' ? price : pack.cost;
+  const cost = typeof price === 'number' ? price : packPrice(pack);
   if (state.progress.pebbles < cost) return false;   // guard: can't go negative
   state.progress.pebbles -= cost;
   const id = randomCardId(rollPackRarity(pack), pack.only);
@@ -9428,8 +9482,9 @@ function renderPacks() {
       ${spares > 0 ? '<button class="panel-action active" id="goRelease">Release</button>' : ''}
     </div>`;
 
+  if (eventIs('market-day')) box.insertAdjacentHTML('beforeend', '<div class="event-banner">🛍️ Market Day: every pack is 20% off today!</div>');
   PACKS.forEach(pack => {
-    const can = peb >= pack.cost;
+    const price = packPrice(pack), can = peb >= price;
     const el = document.createElement('div');
     el.className = 'pack' + (can ? '' : ' cant');
     el.innerHTML = `
@@ -9439,7 +9494,7 @@ function renderPacks() {
         <div class="pk-floor">${pack.floorLabel}</div>
         <div class="pk-desc">${pack.desc}</div>
       </div>
-      <button class="btn" ${can ? '' : 'disabled'}>🫧 ${pack.cost}</button>`;
+      <button class="btn" ${can ? '' : 'disabled'}>${price < pack.cost ? `<s>${pack.cost}</s> ` : ''}🫧 ${price}</button>`;
     el.querySelector('.btn').addEventListener('click', () => {
       ensureAudio();
       if (buyPack(pack.id)) { /* reveal overlay handles feedback */ }
@@ -9636,7 +9691,7 @@ function renderAlmanac() {
         const el = document.createElement('div');
         if (disc.has(def.id)) {
           const isNew = !firstOpen && !seen.has(def.id);
-          el.className = `alm-card rarity-${def.rarity}` + (isNew ? ' fresh' : '');
+          el.className = `alm-card rarity-${def.rarity}` + (isNew ? ' fresh' : '') + (hasFoil(def.id) ? ' foil' : '');
           el.innerHTML = `
             ${isNew ? '<span class="ac-new">New</span>' : ''}
             ${inSeason(def.id) ? `<span class="ac-season">${sd.icon}</span>` : ''}
@@ -9792,13 +9847,13 @@ function renderCollection() {
       const item = document.createElement('div');
       item.className = 'panel-item' + (spare > 0 ? ' has-spare' : '');
       item.innerHTML = `
-        <div class="card-mini rarity-${def.rarity}${def.crafted ? ' crafted' : ''}">
+        <div class="card-mini rarity-${def.rarity}${def.crafted ? ' crafted' : ''}${foilCount(id) ? ' foil' : ''}">
           <span class="c-cost">${def.cost}</span>
           <span class="c-icon">${def.icon}</span>
           <span class="c-power">${cardStatsText(def)}</span>
         </div>
         <span class="panel-text">
-          <div class="panel-name">${def.name} ${counts[id] > 1 ? '× ' + counts[id] : ''}</div>
+          <div class="panel-name">${def.name} ${counts[id] > 1 ? '× ' + counts[id] : ''}${foilCount(id) ? ` <span class="foil-tag">✨ ${foilCount(id)} foil</span>` : ''}</div>
           <div class="panel-desc">${RARITY_LABEL[def.rarity]} · costs ${def.cost}⚡${inDeck ? ` · ${inDeck} in deck` : ''}${isDonated(id) ? ' · 🏛️' : ''}</div>
           <div class="mastery-line">${masteryLine(id)}</div>
           ${hasAbility(def) ? `<div class="panel-ability">${cardAbilityHtml(def)}</div>` : ''}
@@ -10068,11 +10123,13 @@ function renderJournal() {
   renderNotesList();
   renderChangelog();
   renderBattleLog();
+  renderGuide();
 }
 
 const JOURNAL_SEGMENTS = {
   eventlog: { btn: 'segEventLog', view: 'eventLogView' },
   battles: { btn: 'segBattles', view: 'battlesView' },
+  guide: { btn: 'segGuide', view: 'guideView' },
   notes: { btn: 'segNotes', view: 'notesView' },
   changelog: { btn: 'segChangelog', view: 'changelogView' },
 };
@@ -10129,6 +10186,7 @@ function switchJournalSegment(key) {
 }
 document.getElementById('segEventLog').addEventListener('click', () => switchJournalSegment('eventlog'));
 document.getElementById('segBattles').addEventListener('click', () => switchJournalSegment('battles'));
+document.getElementById('segGuide').addEventListener('click', () => switchJournalSegment('guide'));
 document.getElementById('segNotes').addEventListener('click', () => switchJournalSegment('notes'));
 document.getElementById('segChangelog').addEventListener('click', () => switchJournalSegment('changelog'));
 
@@ -10151,6 +10209,19 @@ function gameVersionLabel() {
    Each entry also carries the version it shipped in - every entry bumps the minor number (x.Y.0) from
    the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
 const CHANGELOG = [
+  {
+    date: '2026-09-27',
+    version: '1.14.0',
+    title: "A warmer welcome, daily events, foils and comfort settings",
+    changes: [
+      "Getting started: a 12-step path for new arrivals at the top of Rewards → Dailies, with Pebbles at each step and a card at the end.",
+      "Journal → Guide: every part of the game in one place - what it is, where to find it, and what still has to unlock.",
+      "Daily town events: a Fishing Derby, Market Day, Harvest Fair, Double XP Day and more. Today's event shows next to the district name.",
+      "Foil cards: any card you get has a small chance to arrive as a shimmering foil.",
+      "New settings: Fast battles, Larger text and Calm motion (in your profile).",
+      "Feedback and the new Report a bug button now include your game version, device and recent activity, so problems are easier to fix.",
+    ],
+  },
   {
     date: '2026-09-27',
     version: '1.13.0',
@@ -10953,6 +11024,8 @@ const TITLES = [
   { ach: 'mastery-10',    name: 'Card Master' },
   { ach: 'set-all',       name: 'Completionist' },
   { ach: 'challenge-10',  name: 'Rule Bender' },
+  { ach: 'settled-in',    name: 'Local' },
+  { ach: 'foil-10',       name: 'Shiny Hunter' },
 ];
 function titleFor(achId) { return TITLES.find(t => t.ach === achId) || null; }
 function unlockedTitles() { return TITLES.filter(t => state.progress.achievements.includes(t.ach)); }
@@ -11112,6 +11185,7 @@ document.getElementById('pillSky').addEventListener('click', () => {
   toast(`${s.icon} It's ${s.label}${weatherPart}.`);
   const fx = weatherEffectLine(); if (fx) toast(fx);
   const sd = seasonDef(); toast(`${sd.icon} ${sd.name} · ${seasonDaysLeft()} day${seasonDaysLeft() === 1 ? '' : 's'} left`);
+  const tev = eventNow(); toast(`${tev.icon} ${tev.name}: ${tev.text}`);
   const ws = state.weather; if (ws.next && ws.next !== weatherNow() && WEATHER_KINDS[ws.next]) toast(`Next: ${WEATHER_KINDS[ws.next].icon || '☀️'} ${WEATHER_KINDS[ws.next].name} in ~${Math.max(1, Math.round((ws.changesAt - ws.elapsed) / 60000))} min`);
 });
 
@@ -11130,6 +11204,7 @@ function updateHud() {
   updateJournalBadge();
   updateLevelHud();
   checkSets();
+  reconcileFoils();
   maybeFlushCardLog();
 }
 
@@ -11185,14 +11260,7 @@ document.getElementById('battleContinueBtn').addEventListener('click', () => clo
 document.getElementById('resetTown').addEventListener('click', () => {
   if (confirm('Start over? This clears your collection, character, and progress.')) resetGame();
 });
-document.getElementById('feedbackBtn').addEventListener('click', () => {
-  sfx('nav'); buzz(HAP.tap);
-  const msg = prompt("What's on your mind? This opens your email app to send it to the developer.");
-  if (!msg || !msg.trim()) return;
-  const subject = encodeURIComponent('Tile RPG feedback');
-  const body = encodeURIComponent(msg.trim() + `\n\n— sent from Tile RPG ${gameVersionLabel()}`);
-  window.location.href = `mailto:imzenko@gmail.com?subject=${subject}&body=${body}`;
-});
+document.getElementById('feedbackBtn').addEventListener('click', () => sendFeedback('feedback'));
 document.getElementById('visitShopBtn').addEventListener('click', () => {
   sfx('nav'); buzz(HAP.tap);
   closePlayerMenu();
@@ -11253,7 +11321,7 @@ function townSignature() {
 }
 
 setInterval(() => {
-  if (!inBattle) { checkMail(); checkExpeditions(); }
+  if (!inBattle) { checkMail(); checkExpeditions(); checkStory(); }
   const rivalMoved = syncRival();
   const cropsGrew = tickCrops();
   if (!inBattle && !inScene && !townPanel.classList.contains('hidden')) {
@@ -11273,6 +11341,9 @@ function syncToggles() {
   soundToggle.classList.toggle('on', prefs.sound);
   musicToggle.classList.toggle('on', prefs.music);
   hapticToggle.classList.toggle('on', prefs.haptics);
+  document.getElementById('fastToggle').classList.toggle('on', !!prefs.fast);
+  document.getElementById('bigTextToggle').classList.toggle('on', !!prefs.bigText);
+  document.getElementById('calmToggle').classList.toggle('on', !!prefs.calm);
   [['musicVol', 'musicVolNum', prefs.musicVol, !(prefs.sound && prefs.music)], ['sfxVol', 'sfxVolNum', prefs.sfxVol, !prefs.sound]].forEach(([id, numId, v, off]) => {
     const el = document.getElementById(id), pct = Math.round(v * 100);
     el.value = pct; el.style.setProperty('--fill', pct + '%');
@@ -11316,7 +11387,202 @@ hapticToggle.addEventListener('click', () => {
   if (prefs.haptics) buzz(HAP.win);
 });
 
+/* ============================================================
+   DAILY TOWN EVENTS
+   One event a day, the same for everyone that day, each bending one system a little.
+   Read through eventIs(); announced once a day and shown next to the district name.
+   ============================================================ */
+const TOWN_EVENTS = [
+  { id: 'market-day',    icon: '🛍️', name: 'Market Day',    text: "Card packs and Saffron's daily deal are 20% off." },
+  { id: 'fishing-derby', icon: '🎣', name: 'Fishing Derby', text: 'Fish pay double Pebbles, and rare fish bite more often.' },
+  { id: 'spirit-parade', icon: '👻', name: 'Spirit Parade', text: 'Wandering spirits give double XP.' },
+  { id: 'harvest-fair',  icon: '🌽', name: 'Harvest Fair',  text: 'Crops grow 50% faster, and every harvest pays +3 Pebbles.' },
+  { id: 'swap-day',      icon: '🤝', name: 'Swap Day',      text: 'The trading board has five offers instead of three.' },
+  { id: 'double-xp',     icon: '⭐', name: 'Double XP Day', text: 'Everything you do earns double XP.' },
+  { id: 'cellar-night',  icon: '🕯️', name: 'Cellar Night',  text: 'Deep cellar floors pay double Pebbles.' },
+  { id: 'baking-day',    icon: '🥐', name: 'Baking Day',    text: 'Bread bakes twice as fast.' },
+  { id: 'festival-day',  icon: '🎉', name: 'Festival Day',  text: 'Festival Cup rounds pay double Pebbles.' },
+];
+function eventNow() { return TOWN_EVENTS[Math.floor(seeded('event-' + todayKey())() * TOWN_EVENTS.length)]; }
+function eventIs(id) { return eventNow().id === id; }
+function noteTodayEvent() {
+  const pr = state.progress, ev = eventNow();
+  if (pr.eventSeen === todayKey()) return;
+  pr.eventSeen = todayKey(); saveState();
+  setTimeout(() => toast(`${ev.icon} Today in town: ${ev.name} - ${ev.text}`), 1500);
+  logEvent(ev.icon, `Today in town: ${ev.name}. ${ev.text}`);
+}
+function packPrice(pack) { return Math.round(pack.cost * (eventIs('market-day') ? 0.8 : 1)); }
+
+/* ============================================================
+   GETTING STARTED: a short guided path for someone new to town
+   One step at a time, shown at the top of Rewards → Dailies. Each step pays a little; the last pays a card.
+   ============================================================ */
+const STORY = [
+  { icon: '👣', text: 'Take a stroll around the square.',            goal: 'Walk 30 steps',                              done: p => (p.totals.steps || 0) >= 30,        pebbles: 5 },
+  { icon: '💬', text: 'Say hello to a neighbor.',                    goal: 'Tap a neighbor and chat',                    done: p => (p.totals.talks || 0) >= 1,         pebbles: 5 },
+  { icon: '⚔️', text: 'Try a friendly card match.',                  goal: 'Win a match against a neighbor',             done: p => (p.totals.battlesWon || 0) >= 1,    pebbles: 10 },
+  { icon: '🎁', text: 'Open the gift waiting for you.',              goal: 'Claim the daily gift (Rewards → Dailies)',   done: p => !!p.lastGift,                       pebbles: 5 },
+  { icon: '🏡', text: 'Drop in on Wren, who welcomed you.',          goal: "Visit Wren's Cottage in Town Square",        done: p => !!(p.visited && p.visited.cottage), pebbles: 5 },
+  { icon: '🍞', text: "Bake something at Maple's.",                  goal: 'Bake a loaf at the bakery',                  done: p => (p.totals.breadBaked || 0) >= 1,    pebbles: 8 },
+  { icon: '🎣', text: 'Cast a line by the river.',                   goal: 'Catch a fish (tap water with a fish in it)', done: p => (p.totals.fishCaught || 0) >= 1,    pebbles: 8 },
+  { icon: '🎲', text: 'Play a little game in one of the houses.',    goal: 'Finish any house mini-game',                 done: p => (p.totals.minigamesPlayed || 0) >= 1, pebbles: 8 },
+  { icon: '🌱', text: 'Start a garden of your own.',                 goal: "Plant a seed (buy one at Fern's Cottage)",   done: p => (p.totals.seedsPlanted || 0) >= 1,  pebbles: 10 },
+  { icon: '🛍️', text: 'Treat yourself.',                             goal: 'Open a card pack in the Shop',               done: p => (p.packsOpened || 0) >= 1,          pebbles: 10 },
+  { icon: '🎴', text: 'Make the deck your own.',                     goal: 'Change a card in the Deck tab',              done: p => (p.deckEdits || 0) >= 1,            pebbles: 10 },
+  { icon: '⭐', text: 'Settle in properly.',                          goal: 'Reach level 5',                              done: p => (p.level || 1) >= 5,                card: 'super' },
+];
+function storyState() { const p = state.progress; if (!p.story || typeof p.story !== 'object') p.story = { step: 0, notified: -1 }; return p.story; }
+function storyStep() { const s = storyState(); return s.step < STORY.length ? STORY[s.step] : null; }
+function storyReady() { const st = storyStep(); return !!(st && st.done(state.progress)); }
+function claimStory() {
+  const s = storyState(), st = storyStep();
+  if (!st || !st.done(state.progress)) return;
+  s.step++;
+  if (st.pebbles) { addPebbles(st.pebbles); toast(`📜 Step done! +${st.pebbles} 🫧`); }
+  if (st.card) { const cid = randomCardId(st.card); state.ownedCards.push(cid); bumpStat('cardsFound', 1); setTimeout(() => showCardReveal(cid, 'Welcome to town!', true, 'Wren says: "You belong here now."'), 300); }
+  logEvent(st.icon, `Getting started: ${st.goal}.`);
+  saveState(); sfx('claim'); buzz(HAP.found);
+  renderQuests(); checkAchievements();
+}
+function renderStory() {
+  const slot = document.getElementById('storySlot'), s = storyState(), st = storyStep();
+  if (!st) { slot.innerHTML = ''; return; }
+  const ready = st.done(state.progress);
+  slot.innerHTML = `<div class="story-card${ready ? ' ready' : ''}">
+    <div class="story-top"><span class="story-icon">${st.icon}</span><span class="story-text"><small>Getting started · step ${s.step + 1} of ${STORY.length}</small><b>${st.text}</b><span>${st.goal}</span></span>
+    ${ready ? '<button class="panel-action active" id="storyClaim">Claim</button>' : `<span class="q-count">${st.card ? 'a card' : `🫧 ${st.pebbles}`}</span>`}</div>
+    <div class="q-bar"><div class="q-fill" style="width:${Math.round(s.step / STORY.length * 100)}%"></div></div></div>`;
+  const b = document.getElementById('storyClaim'); if (b) b.addEventListener('click', claimStory);
+}
+// A nudge when the current step gets done, so nobody has to keep checking.
+function checkStory() {
+  const s = storyState();
+  if (storyReady() && s.notified !== s.step) { s.notified = s.step; saveState(); toast('📜 Getting-started step done - claim it in Rewards'); }
+}
+
+/* ============================================================
+   FOIL CARDS
+   Any card that joins your collection has a small chance to be a shiny foil. Foils are purely a collector's chase:
+   they shimmer everywhere the card is shown. Found by comparing the collection with the last snapshot, so every
+   way of getting a card counts without each one having to remember to roll.
+   ============================================================ */
+const FOIL_ODDS = 0.02;
+function foils() { const p = state.progress; if (!p.foils || typeof p.foils !== 'object') p.foils = {}; return p.foils; }
+function foilCount(id) { return foils()[id] || 0; }
+function hasFoil(id) { const b = BattleEngine.baseIdOf(id); return Object.keys(foils()).some(k => BattleEngine.baseIdOf(k) === b && foils()[k] > 0); }
+function reconcileFoils() {
+  const p = state.progress, counts = ownedCardCounts(), f = foils();
+  if (!p.foilSnap) { p.foilSnap = counts; return; }
+  const found = [];
+  Object.keys(counts).forEach(id => { for (let i = 0; i < counts[id] - (p.foilSnap[id] || 0); i++) if (Math.random() < FOIL_ODDS) { f[id] = (f[id] || 0) + 1; found.push(id); } });
+  Object.keys(f).forEach(id => { f[id] = Math.min(f[id], counts[id] || 0); if (!f[id]) delete f[id]; });   // a foil you gave away is gone
+  p.foilSnap = counts;
+  if (found.length) {
+    found.forEach(id => { const d = cardDef(id); setTimeout(() => toast(`✨ Foil! Your new ${d.icon} ${d.name} is a shiny one`), 1400); logEvent('✨', `Found a foil ${d.name}!`); });
+    bumpStat('foilsFound', found.length); sfx('mythic');
+  }
+  saveState();
+}
+
+/* ============================================================
+   TOWN GUIDE (Journal → Guide)
+   Every system in one place: what it is, where to find it, and what (if anything) still has to unlock.
+   ============================================================ */
+const needs = (district) => districtUnlocked(district) ? '' : `Opens with ${DISTRICTS[district].name} (${districtLockReason(district).replace(/^Needs /, '')})`;
+const GUIDE = [
+  { section: 'Around town', items: [
+    { icon: '🗺️', name: 'Districts', where: 'Walk off the edge of a map, or tap the mini-map', how: 'Market Row, Quiet Harbor and Hollow Garden open as you win matches and level up.' },
+    { icon: '🌦️', name: 'Weather & forecast', where: 'Any sign · the sky button, top right', how: 'Rain helps fishing and gardens, fog hides more finds, storms power Swift cards, snow toughens bosses but pays more.' },
+    { icon: '🌸', name: 'Seasons', where: 'Everywhere, one real week each', how: "Trees, music and weather change, and each season's cards turn up more often." },
+    { icon: '📅', name: 'Daily events', where: 'Shown next to the district name', how: 'One a day - a Fishing Derby, Market Day, Harvest Fair and more.' },
+    { icon: '🗝️', name: 'Hidden cards & chests', where: 'Grass, flowers and props everywhere', how: 'Walk through flowers, poke at props, and follow a golden glow to a chest.' },
+    { icon: '✨', name: 'Night critters', where: 'Every district, after dark', how: 'Tap a glowing critter to catch it. Trade them at the Lantern Market.' },
+    { icon: '👻', name: 'Companion spirits', where: 'Tap a wandering spirit', how: 'Invite one along; it follows you and lends a small perk.' },
+  ] },
+  { section: 'Neighbors', items: [
+    { icon: '💬', name: 'Favours', where: 'Tap any neighbor', how: 'Small daily requests for Pebbles or cards. Track them in Rewards → Favours.' },
+    { icon: '💞', name: 'Friendship', where: 'Tap any neighbor', how: 'Favours, gifts (bread, dishes, cards they love) and wins earn hearts. 3 hearts: signature match. 5: a keepsake.' },
+    { icon: '🎭', name: 'Rook, your rival', where: 'A different district each time', how: 'Appears after your first win. Eight chapters, each harder, with a unique final prize.', lock: () => (state.progress.totals.battlesWon || 0) >= 1 ? '' : 'Appears after your first win' },
+    { icon: '📬', name: 'Letters', where: 'Your cottage mailbox (Town Square)', how: 'Neighbors write to you, sometimes with a gift.' },
+  ] },
+  { section: 'Card battles', items: [
+    { icon: '⚔️', name: 'Friendly matches', where: 'Tap a neighbor → Friendly match', how: 'Win a card every time. Tap "How battles work" in the Deck tab for the rules.' },
+    { icon: '👹', name: 'District bosses', where: 'Each district, 30 minutes on, 30 off', how: 'Every boss bends one rule of the match, and pays super rare or better.' },
+    { icon: '🕯️', name: 'The cellar', where: 'Town Square, top middle', how: 'Three floors, then an endless deep climb with guardians every 5th floor.' },
+    { icon: '🏆', name: 'Festival Cup', where: 'The fountain in Town Square', how: 'Three matches in a row with no healing. Sweep it for the weekly trophy.' },
+    { icon: '🎯', name: 'Deck challenges', where: 'The fountain in Town Square', how: 'Three deck rules a day, each with a card prize.' },
+    { icon: '🧩', name: 'Daily puzzle', where: 'The Reading Nook', how: 'A fixed board to win in one turn. New every day.' },
+  ] },
+  { section: 'Houses & shops', items: [
+    { icon: '🏠', name: 'Your cottage', where: 'Town Square, beside the Reading Nook', how: 'Mailbox, shelves, framed cards, trophies, and the Tidy Up game.' },
+    { icon: '🍞', name: "Maple's Bakery", where: 'Town Square, bottom left', how: 'Bake bread, cook dishes from your pantry, and play Cake Toppings.' },
+    { icon: '🌱', name: "Fern's Cottage", where: 'Town Square, the blue house', how: 'Seeds for your garden, and Weed the Beds.' },
+    { icon: '🫖', name: "Wren's Cottage & the Reading Nook", where: 'Town Square, top', how: 'Tea, advice, the memory game, the card quiz and the daily puzzle.' },
+    { icon: '🏪', name: 'Market stalls', where: 'Market Row', how: "Pip, Clover, Saffron's daily deal and Tock's card sleeves - each with a game.", lock: () => needs('market') },
+    { icon: '🏛️', name: 'Card Museum & expeditions', where: 'Market Row, by the east hedge', how: 'Donate spare cards to six wings, and send spare cards on expeditions.', lock: () => needs('market') },
+    { icon: '🏮', name: 'Lantern Market', where: 'Market Row, after dark', how: 'Night Packs, glowing decorations, and Pebbles for critters.', lock: () => needs('market') },
+  ] },
+  { section: 'Collecting', items: [
+    { icon: '🛍️', name: 'Packs & decorations', where: 'Shop tab', how: 'Spend Pebbles on packs, cosmetics and decorations for any district.' },
+    { icon: '🔨', name: 'Workshop', where: 'Cards → Craft', how: 'Refine two copies into a stronger card, or trade three up a rarity.' },
+    { icon: '🧩', name: 'Index & sets', where: 'Cards → Index', how: 'Every card in the game, and eight sets that give lasting bonuses when complete.' },
+    { icon: '✦', name: 'Charms & mastery', where: 'Cards → My Cards', how: 'Charm cards for town perks; cards you play earn ★ mastery (★★★: +1 health in battle).' },
+    { icon: '🤝', name: 'Trading board', where: 'The sign in Market Row', how: 'Three trades a day for spare cards.', lock: () => needs('market') },
+    { icon: '✨', name: 'Foil cards', where: 'Any new card', how: 'Now and then a new card arrives as a shimmering foil.' },
+    { icon: '🎣', name: 'Fishing & gardening', where: 'River banks · Town Square soil', how: 'Fish and crops fill the Fish page, your pantry and your pockets.' },
+  ] },
+];
+function renderGuide() {
+  const box = document.getElementById('guideList'), ev = eventNow(), sd = seasonDef();
+  box.innerHTML = `<div class="guide-today"><b>Today:</b> ${ev.icon} ${ev.name} - ${ev.text}<br>${sd.icon} ${sd.name}, ${seasonDaysLeft()} day${seasonDaysLeft() === 1 ? '' : 's'} left · ${forecastText()}</div>` +
+    GUIDE.map(g => `<div class="section-title">${g.section}</div>` + g.items.map(it => { const lock = it.lock ? it.lock() : '';
+      return `<div class="panel-item guide-item${lock ? ' locked' : ''}"><span class="panel-icon">${it.icon}</span><span class="panel-text">
+        <div class="panel-name">${it.name}</div><div class="panel-desc">📍 ${it.where}</div><div class="guide-how">${lock ? '🔒 ' + escapeHtml(lock) : it.how}</div></span></div>`; }).join('')).join('');
+}
+
+/* ============================================================
+   COMFORT SETTINGS: fast battles, larger text, calmer motion
+   ============================================================ */
+function applyComfortPrefs() {
+  document.documentElement.classList.toggle('big-text', !!prefs.bigText);
+  document.documentElement.classList.toggle('calm', !!prefs.calm);
+}
+[['fastToggle', 'fast'], ['bigTextToggle', 'bigText'], ['calmToggle', 'calm']].forEach(([id, key]) => {
+  document.getElementById(id).addEventListener('click', () => {
+    prefs[key] = !prefs[key]; savePrefs(); applyComfortPrefs(); syncToggles(); sfx('tap');
+    if (key === 'bigText' && !inBattle) renderTown();
+  });
+});
+
+/* ============================================================
+   FEEDBACK FOR TESTERS: every note carries enough context to act on
+   ============================================================ */
+function testerInfo() {
+  const pr = ensureLevel(), w = WEATHER_KINDS[weatherNow()];
+  const ua = navigator.userAgent.replace(/\s*\(KHTML, like Gecko\)/, '').slice(0, 160);
+  const recent = (state.progress.eventLog || []).slice(0, 4).map(e => `  - ${String(e.text).replace(/<[^>]+>/g, '')}`).join('\n');
+  return [`— Tile RPG ${gameVersionLabel()}`,
+    `Level ${pr.level} · ${state.wins} wins · ${state.ownedCards.length} cards · in ${DISTRICTS[state.currentDistrict].name}`,
+    `${w ? w.name : ''} · ${seasonDef().name} · ${eventNow().name} · ${inBattle ? 'in a battle' : inScene && scene ? 'inside ' + scene.id : 'in town'}`,
+    `Screen ${window.innerWidth}×${window.innerHeight} · touch ${'ontouchstart' in window ? 'yes' : 'no'}`,
+    `Device: ${ua}`,
+    recent ? `Recent:\n${recent}` : ''].filter(Boolean).join('\n');
+}
+function sendFeedback(kind) {
+  sfx('nav'); buzz(HAP.tap);
+  const bug = kind === 'bug';
+  const msg = prompt(bug ? 'What happened, and what did you expect to happen? (Your game version and device are added for you.)'
+                         : "What's on your mind? This opens your email app to send it to the developer.");
+  if (!msg || !msg.trim()) return;
+  const subject = encodeURIComponent(bug ? 'Tile RPG bug report' : 'Tile RPG feedback');
+  const body = encodeURIComponent((msg.trim() + '\n\n' + testerInfo()).slice(0, 1600));
+  window.location.href = `mailto:imzenko@gmail.com?subject=${subject}&body=${body}`;
+}
+document.getElementById('bugBtn').addEventListener('click', () => sendFeedback('bug'));
+
 loadState();
+applyComfortPrefs();
 ensureQuests();
 migrateMapV2();
 sanitizeCards();
