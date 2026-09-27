@@ -2,7 +2,7 @@
 
 For whoever picks up this project next (most likely another Claude). This covers what the game is, how it's built and published, how to change it safely, and how the owner likes to work.
 
-Current version: **v1.15.0**. The newest entry in `CHANGELOG` inside the game file is always the source of truth.
+Current version: **v1.16.0**. The newest entry in `CHANGELOG` (now `js/changelog.js`) is always the source of truth.
 
 ---
 
@@ -15,8 +15,15 @@ Tile RPG is a calm, mobile-first card-collecting town game. You walk around a ti
   - `css/style.css` - all CSS (colours as variables on `:root`; biome palettes on `.town-view[data-biome=…]`; seasonal foliage on `[data-season=…]`).
   - `assets/sprites.js` - every game icon as an inline SVG `<symbol>`, written into the document via `document.write()` from a plain `<script src>` at the spot the markup used to hold them inline. **This is deliberate, not a workaround to remove**: Chromium does not support `<use href="external.svg#id">` (cross-document SVG sprite references), only same-document `#id` fragments, and `fetch()`/XHR of a local file is blocked by CORS when the game is opened via `file://`. `document.write` from a script tag is the one technique that gets external-file editability *and* keeps the symbols in the same document *and* keeps working when someone just double-clicks the file. **To swap in your own art:** edit this file, keep the same `id`s (`s-oak`, `b-cottage`, `p-fountain`, …), and nothing else needs to change.
   - `js/*.js` - ~22 files, one per subsystem (see §4's table for exactly which). All classic `<script>` tags, **not** ES modules - `type="module"` blocks `file://` testing (browsers refuse cross-origin module loads from the filesystem), so everything shares one global scope via plain script tags, same as if it were still one file.
+  - `manifest.json` / `sw.js` / `assets/icon-*.png` - makes the game an installable, fully offline-capable PWA (added post-v1.15.0; see the new §1a below). The icons are a placeholder (a card emoji on a green square) until the owner's own art replaces them.
 - **`Tile RPG.html`** now just forwards to `index.html` (this is the reverse of before v1.15.0's split, when `index.html` forwarded to `Tile RPG.html`) - kept so old bookmarks/links to that filename still work.
 - To run it, open `index.html` in a browser. For a phone-sized view, use a 400×860 viewport.
+
+### 1a. Offline support (PWA) and the plan for cloud saves
+
+- **Offline is done.** `sw.js` precaches every file in §4's table via the Cache API (cache-first, falling back to network for anything not precached). `manifest.json` makes it installable. Test this specifically with an actual HTTP server, not `file://` - service workers require a secure context and silently refuse to register under `file://` (the registration in `index.html` is wrapped in `.catch(() => {})` for exactly this reason, so normal `file://` testing is unaffected, it just never gets a service worker). A one-line static server for this: `node -e "require('http').createServer((q,r)=>require('fs').readFile('.'+decodeURIComponent(q.url.split('?')[0])||'./index.html',(e,d)=>{r.writeHead(e?404:200);r.end(d||'404');})).listen(8123)"`, then point Playwright/a browser at `http://localhost:8123/`.
+- **Publish checklist addition:** bump `CACHE_VERSION` in `sw.js` on every publish (see §2) - it's what makes a returning player's browser fetch the new files instead of serving last release from cache forever. It's independent of the game's own version number.
+- **Cloud saves are the next piece, not yet built.** The plan (agreed with the owner): keep the existing `localStorage` save as the fast, always-available local copy, and add Firestore as the durable/cross-device layer on top, using the Firebase **compat** SDK (not the modular v9+ one, which is ES-module-only and would break `file://` testing the same way `type="module"` scripts do). Auth is anonymous-by-default (a hidden account created on first play, so there's no login screen), with an optional "link an email" action in settings so a save can be recovered on another device. Sync should be local-first: write to `localStorage` immediately as always, push to Firestore in the background (debounced - `saveState()` is called very often, and the Firestore free tier has a daily write quota), and on load, compare local vs cloud timestamps and take the newer one. This needs a Firebase project the owner creates themselves (Claude has no Google account access) - see whoever's doing this work for the exact config values needed.
 
 ## 2. Hosting and publishing
 
@@ -33,7 +40,7 @@ Tile RPG is a calm, mobile-first card-collecting town game. You walk around a ti
 So `git push` from this folder always goes out as Zenko, even while the work account is active. Leave the work account active for `gh`. For `gh api` calls against this repo, prefix with `GH_TOKEN=$(gh auth token --user Zenko)`.
 
 **Standing instruction from the owner: always publish.** When a batch of changes is finished and tested:
-1. Add a `CHANGELOG` entry (see §5), commit, and `git push origin main`.
+1. Add a `CHANGELOG` entry (see §5) for player-facing changes, bump `CACHE_VERSION` in `sw.js` (see §1a - every publish needs this, even an internal-only change, so returning players' service workers pick up the new files), commit, and `git push origin main`.
 2. Wait for Pages: `GH_TOKEN=$(gh auth token --user Zenko) gh api repos/Zenko/tile-rpg/pages/builds/latest --jq '.status + " " + .commit'` until it says `built` with your commit.
 3. Load the live link and confirm the version label and that there are no page errors.
 4. Tell the owner the link.

@@ -19,6 +19,14 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-27',
+    version: '1.16.0',
+    title: "Play offline",
+    changes: [
+      "Tile RPG can now be installed (look for \"Add to Home Screen\" or your browser's install icon) and works fully offline once you've loaded it a first time - no connection needed to walk around town, battle or open packs.",
+    ],
+  },
+  {
+    date: '2026-09-27',
     version: '1.15.0',
     title: "New neighbors, a longer story, and a listen around town",
     changes: [

@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Tile RPG: a calm card-collecting town</title>
 <link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#121715">
+<link rel="icon" href="assets/icon-192.png">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 <body>
 
@@ -467,5 +473,13 @@
 <script src="js/world-map.js"></script>
 <script src="js/titles.js"></script>
 <script src="js/events-story-foils-guide.js"></script>
+<script>
+// Makes the game installable and playable offline. Service workers need a secure context (https or
+// localhost), so this is a silent no-op when the file is opened directly (file://) - normal local
+// testing is unaffected either way.
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+}
+</script>
 </body>
 </html>
