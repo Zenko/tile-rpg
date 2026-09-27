@@ -10,9 +10,13 @@ Current version: **v1.15.0**. The newest entry in `CHANGELOG` inside the game fi
 
 Tile RPG is a calm, mobile-first card-collecting town game. You walk around a tile map, meet neighbours, battle with a 12-card deck, collect cards, fish, garden, cook, decorate, and so on. It's in a **playtesting phase** with a small group of testers.
 
-- **Everything is one file:** `Tile RPG.html`, about 11,600 lines. HTML, CSS and JS are inline, with no build step, no dependencies and no assets. Sprites are inline SVG `<symbol>`s, and sound and music are generated live with the Web Audio API.
-- `index.html` only forwards to `Tile RPG.html`, so the GitHub Pages root link opens the game.
-- To run it, open `Tile RPG.html` in a browser. For a phone-sized view, use a 400×860 viewport.
+- **`index.html` is the real game**, split across plain files with **no build step and no dependencies** (as of v1.15.0's file split - see §4):
+  - `index.html` - the HTML shell (head, all the panel/overlay markup) plus a `<script src>` for each JS file below, loaded **in this exact order**.
+  - `css/style.css` - all CSS (colours as variables on `:root`; biome palettes on `.town-view[data-biome=…]`; seasonal foliage on `[data-season=…]`).
+  - `assets/sprites.js` - every game icon as an inline SVG `<symbol>`, written into the document via `document.write()` from a plain `<script src>` at the spot the markup used to hold them inline. **This is deliberate, not a workaround to remove**: Chromium does not support `<use href="external.svg#id">` (cross-document SVG sprite references), only same-document `#id` fragments, and `fetch()`/XHR of a local file is blocked by CORS when the game is opened via `file://`. `document.write` from a script tag is the one technique that gets external-file editability *and* keeps the symbols in the same document *and* keeps working when someone just double-clicks the file. **To swap in your own art:** edit this file, keep the same `id`s (`s-oak`, `b-cottage`, `p-fountain`, …), and nothing else needs to change.
+  - `js/*.js` - ~22 files, one per subsystem (see §4's table for exactly which). All classic `<script>` tags, **not** ES modules - `type="module"` blocks `file://` testing (browsers refuse cross-origin module loads from the filesystem), so everything shares one global scope via plain script tags, same as if it were still one file.
+- **`Tile RPG.html`** now just forwards to `index.html` (this is the reverse of before v1.15.0's split, when `index.html` forwarded to `Tile RPG.html`) - kept so old bookmarks/links to that filename still work.
+- To run it, open `index.html` in a browser. For a phone-sized view, use a 400×860 viewport.
 
 ## 2. Hosting and publishing
 
@@ -46,29 +50,36 @@ Commit messages end with a `Co-Authored-By:` line for the Claude model doing the
 - They want playtesters to be able to find their way around, so every new system gets a first-time tip, a Town Guide entry and a changelog line.
 - The in-game Feedback and Report-a-bug buttons open an email to the owner (the address is in the `sendFeedback` code). They chose to keep it public.
 
-## 4. Map of the file
+## 4. Map of the files
 
-Search for these banner comments (the `====` blocks). Line numbers drift, but banners don't.
+Each file below still has the same banner comments (the `====` blocks) it had when this was one file - they're the sub-section anchors *inside* each file. The table maps file → banner(s) → what lives there, in the **exact load order** `index.html` uses (this order matters - see the load-order gotcha in §9).
 
-| Banner / anchor | What lives there |
-|---|---|
-| `<style>` (top) | All CSS. Colours are variables on `:root`; each biome's palette is on `.town-view[data-biome=…]`; seasonal foliage is on `[data-season=…]`. |
-| Markup after `<body>` | HUD, tab panels (Town, Journal, Cards, Deck, Shop, Rewards), `#sceneView`, `#battleView`, and the overlays (`#pickupOverlay`, `#levelUpOverlay`, `#tipOverlay`, `#talkOverlay`, `#fishOverlay`, …). |
-| `CARD_POOL` | Every card. **Append new cards to the end only** (deck share codes store cards by their position in this list). |
-| `BEGIN BATTLE ENGINE` … `END BATTLE ENGINE` | `BattleEngine`: pure rules with no DOM access. Keywords, spells (`SPELLS`), boss twists (`TWISTS`), AI (`aiNextAction`, `spellPlan`), `suggestDeck`, `boost`. |
-| `PREFS, SOUND, HAPTICS, TOAST` / `AMBIENT MUSIC` / `WEATHER AMBIENCE` | Audio. The seasonal chord sets are in `MUSIC.SEASON_CHORDS`. |
-| `FIRST-TIME TIPS` | `TIPS` and `showTipOnce(id)`, which queues behind any other open overlay. |
-| `PROGRESSION: DAILY GIFT, QUESTS, ACHIEVEMENTS` | `QUEST_POOL`, `WEEKLY_QUEST_POOL`, `ACHIEVEMENTS`, `XP_PER_STAT`, `bumpStat`, `addXP`, `TITLES`. |
-| `TOWN MAPS` | `MAP_SQUARE` and `MAP_MARKET` (hand-built JSON), `proceduralMap`, `getMap`, `findPath`, `DISTRICT_LINKS`. |
-| `DAY/NIGHT CYCLE + WEATHER` | `skyPhase(atMs)`, `WEATHER_KINDS`, `WEATHER_EFFECTS`/`weatherFx()`, and a forecast that rolls the next weather one change ahead (`state.weather.next`). `SEASONS` sits just above `weatherNow()`. |
-| `HOUSES AND THE CELLAR` | `INTERIORS` (every enterable building), the scene screen (`openScene`, `renderScene`, `sceneAction`), the bakery, cooking, the spice stall, sleeves, the cottage and letters, the cellar and deep floors, and the Festival Cup. |
-| `WANDERING NEIGHBORS, BOSSES AND GRAVES` | Wandering, graves, and the boss 30-minutes-on / 30-minutes-off clock. |
-| `FISHING` / `VILLAGER REQUESTS` / `NEIGHBOR FRIENDSHIP` / `THE RIVAL` | Each self-contained. Favours are `makeRequest`, `requestDone` and `completeRequest`. |
-| `DAILY PUZZLE` / `MEMORY MATCH` / `HOUSE MINI-GAMES` | The puzzle is generated from a seed and checked by a search-based solver. `MINIGAMES` holds 10 games on one shared framework (see §7). |
-| `AFTER DARK` / `COMPANION` / `MORE USES FOR CARDS` / `GARDENING` | Night market and critters, companion perks, charms, sets, mastery, museum, expeditions, trading board, deck challenges, card gifting, seeds and crops. |
-| `TURN-BASED BATTLE` | Battle UI: `startBattle`, the `btRender*` functions, input, `btAnimate` (one branch per engine event type), `btFinish`, `btShowResult` (one reward branch per opponent kind), `closeBattle`. |
-| `RELEASE + PACKS` onwards | Workshop crafting, packs, the Shop, Index/collection/deck panels, filters, deck codes, deck slots, journal, battle history, `CHANGELOG`, world map, cosmetics, titles, `updateHud`, `switchTab`. |
-| `DAILY TOWN EVENTS` … `FEEDBACK FOR TESTERS` | The v1.14 batch: events, getting-started story, foils, Town Guide, comfort settings, tester feedback. **This block must stay just above the start-up code** (`loadState(); … renderTown(); updateHud();`) because start-up uses those `const`s. |
+| File | Banner(s) it holds | What lives there |
+|---|---|---|
+| `css/style.css` | - | All CSS (see §1). |
+| `assets/sprites.js` | - | Every sprite `<symbol>` (see §1). |
+| `js/data-and-engine.js` | (top-of-script constants) | Storage keys, `PACKS`, `DECORATION_ITEMS`, `CARD_POOL` (**append new cards to the end only** - deck share codes store cards by position), `BEGIN/END BATTLE ENGINE` (`BattleEngine`: pure rules, no DOM - keywords, spells `SPELLS`, boss twists `TWISTS`, AI `aiNextAction`/`spellPlan`, `suggestDeck`, `boost`), `KW`, `RARITY_LABEL`, NPC name/species pools, `DISTRICTS`. |
+| `js/audio.js` | `PREFS, SOUND, HAPTICS, TOAST` / `AMBIENT MUSIC` / `WEATHER AMBIENCE` | Audio. Seasonal chords in `MUSIC.SEASON_CHORDS`; per-district voicing/tempo/shimmer in `BIOME_MUSIC`/`biomeMusic()`. |
+| `js/progression.js` | `FIRST-TIME TIPS` / `PROGRESSION: DAILY GIFT, QUESTS, ACHIEVEMENTS` | `TIPS`/`showTipOnce(id)`, `QUEST_POOL`, `WEEKLY_QUEST_POOL`, `ACHIEVEMENTS`, `XP_PER_STAT`, `bumpStat`, `addXP`, `TITLES`, `loadState()`/`saveState()`. |
+| `js/maps.js` | `TOWN MAPS` | `MAP_SQUARE`/`MAP_MARKET` (hand-built JSON), `proceduralMap` (now also places the Harbor's and Garden's one building each - see §7), `getMap`, `findPath`, `DISTRICT_LINKS`. |
+| `js/town-render-weather.js` | `TOWN MAP: drawing…` / `DAY/NIGHT CYCLE + WEATHER` | Town rendering, camera, tap-to-walk, `interactWith`, `skyPhase(atMs)`, `WEATHER_KINDS`/`weatherFx()`, the weather forecast, `SEASONS`. |
+| `js/houses-and-cellar.js` | `HOUSES AND THE CELLAR` | `INTERIORS` (every enterable building, including the Net Loft and Glasshouse), `openScene`/`renderScene`/`sceneAction`, the bakery, cooking, spice stall, sleeves, cottage/letters, the cellar, the Festival Cup. |
+| `js/neighbors-bosses.js` | `WANDERING NEIGHBORS, BOSSES AND GRAVES` | Wandering, graves, the boss 30-on/30-off clock. |
+| `js/fishing.js` | `FISHING` | Cast, wait for a bite, reel in. |
+| `js/requests-friendship-rival.js` | `VILLAGER REQUESTS` / `NEIGHBOR FRIENDSHIP` / `THE RIVAL` | Favours (`makeRequest`, `requestDone`, `completeRequest`), friendship hearts, Rook. |
+| `js/puzzle-memory-minigames.js` | `DAILY PUZZLE` / `MEMORY MATCH` / `HOUSE MINI-GAMES` | The puzzle (seeded, solved by search), the memory game, `MINIGAMES` (10 games on one shared framework - see §7). |
+| `js/afterdark-companion-cards.js` | `AFTER DARK` / `COMPANION` / `MORE USES FOR CARDS` | Night market/critters, companion perks, charms, sets, mastery, museum, expeditions, trading board, deck challenges, card gifting. |
+| `js/gardening.js` | `GARDENING` | Seeds and crops. |
+| `js/battle-ui.js` | `TURN-BASED BATTLE` | `startBattle`, `btRender*`, input, `btAnimate` (one branch per engine event), `btFinish`, `btShowResult`, `closeBattle`. |
+| `js/shop-economy.js` | `RELEASE + PACKS` | Releasing spares, the Shop's pack list. |
+| `js/workshop-and-starter.js` | (sub-banners) | Workshop crafting (refine/trade-up), starter deck and the move into turn-based battle, `renderPacks`. |
+| `js/collection-tools.js` | (sub-banners) | Search/filter/sort for My Cards and Deck, deck codes (`deckCode`/`parseDeckCode`), deck slots. |
+| `js/journal-history.js` | (sub-banners) | The event log/notebook, battle history. |
+| `js/changelog.js` | (sub-banners) | `gameVersionLabel()` and **`CHANGELOG`** - the file you'll touch almost every release (see §5). |
+| `js/notes.js` | (sub-banners) | Journal → Notes: the list, PNG export, the drawing canvas. |
+| `js/world-map.js` | (sub-banners) | The plus-shaped town overlay/radar. |
+| `js/titles.js` | (sub-banners) | Earned titles, `switchTab`, `updateHud`. |
+| `js/events-story-foils-guide.js` | `DAILY TOWN EVENTS` … `FEEDBACK FOR TESTERS` | Daily events, the getting-started **and post-onboarding** story (`STORY`, `STORY_ARC_LEN`), foils, the Town Guide, comfort settings, tester feedback, and **the start-up code** (`loadState(); … renderTown(); updateHud();`) - this file must stay **last** in load order because start-up uses everything else. |
 
 ## 5. Conventions to keep
 
@@ -113,7 +124,7 @@ const { chromium } = require('playwright'), path = require('path');
   const b = await chromium.launch(), page = await (await b.newContext({ viewport: { width: 400, height: 860 } })).newPage();
   const errors = []; page.on('pageerror', e => errors.push(e.message)); page.on('console', m => m.type() === 'error' && errors.push(m.text()));
   page.on('dialog', d => setTimeout(() => d.accept().catch(() => {}), 50));
-  await page.goto('file://' + path.resolve('Tile RPG.html')); await page.waitForTimeout(600);
+  await page.goto('file://' + path.resolve('index.html')); await page.waitForTimeout(600);
   await page.evaluate(() => { Object.keys(TIPS).forEach(k => tipsSeen()[k] = true); saveState(); });   // tips would block clicks
   await require(path.resolve(process.argv[2]))(page, console.log);
   console.log(errors.length ? 'ERRORS\n' + errors.join('\n') : 'OK'); await b.close(); process.exit(errors.length ? 1 : 0);
@@ -121,7 +132,7 @@ const { chromium } = require('playwright'), path = require('path');
 ```
 
 Useful habits:
-- **Syntax check:** pull out the `<script>` contents and run `node --check` on them.
+- **Syntax check:** `for f in js/*.js assets/sprites.js; do node --check "$f"; done` - each file must be independently valid, since browsers parse each `<script src>` as its own unit (unlike the old single `<script>` block).
 - **Engine simulation:** in `page.evaluate`, run thousands of `BattleEngine.newGame` → `aiTurn`/`endTurn` loops. Check that every game ends, no board holds more than 4 cards, and no card at 0 health stays on the board, and compare win rates.
 - **Forcing a result:** set `battle.G.over = true; battle.G.winner = 0` (or 1), clear `G.events`, and call `btFinish()`.
 - **Dismiss overlays before clicking:** the tip, pickup and level-up overlays sit above everything else.
@@ -137,11 +148,12 @@ Useful habits:
 - **The rival lives inside a district's `npcs` list** while visiting. `syncRival()` is the single source of truth and never moves Rook mid-conversation or mid-battle.
 - **Foils are detected by comparing collection snapshots** (`reconcileFoils` in `updateHud`), so every way of gaining a card counts without each one rolling separately.
 - **Shared global names.** `rand(n)` and `timerBar` are defined in the mini-games section and used by later sections.
+- **Cross-file load order matters for top-level references, but not for anything inside a function.** All `js/*.js` files share one global scope (see §1), loaded in the order in `index.html`. A function can freely call another function from *any* file, in *any* order, because by the time a user can click anything, every file has already finished loading. The one real trap: a top-level `const X = { ... }` or `[ ... ]` that references another function or const **by bare identifier** (not wrapped in `() => …`) is evaluated immediately, at parse time - if that identifier's file hasn't loaded yet, it throws and silently kills the rest of that script file (later `const`s in the *same* file never get created either, which shows up as confusing "X is not defined" errors somewhere else entirely). This is exactly what broke `INTERIORS` the first time `houses-and-cellar.js` was split out (`view: puzzleView` needed `puzzle-memory-minigames.js`, which loads later) - fixed by wrapping it lazily: `view: () => puzzleView()`. **When adding a new top-level object/array that reaches for a function or const from another file, always wrap it in an arrow function** (`() => …`) rather than passing the bare identifier, and this whole class of bug can't happen regardless of load order.
 
 ## 10. Open ideas and tuning notes
 
-- Not done by choice: hand-designing the Harbor and Garden maps, and save export/import.
-- Other ideas that came up: pass-and-play battles on one device, a longer story arc across districts, and district-specific music.
+- Not done by choice: hand-designing the full Harbor and Garden maps (each still gets one hand-placed building inside `proceduralMap()`, see §7), save export/import, and pass-and-play battles on one device (the battle UI hardcodes "you are always seat 0" in ~40+ places - see the `TURN-BASED BATTLE` banner in `js/battle-ui.js` - so this would need real UI rework, not a quick add).
+- **The owner plans to replace the sprite art in `assets/sprites.js` with custom assets at some point.** When that happens: swap each `<symbol>`'s contents, keep the same `id`s, and nothing in any `js/*.js` file needs to change (see §1).
 - Numbers to watch in playtesting:
   - Tidy Up's gold threshold (16 in 20 seconds) may be too generous.
   - The Harbor Keeper's tide is the strongest boss twist.
