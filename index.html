@@ -371,6 +371,10 @@
 
 <script src="assets/sprites.js"></script>
 <div class="toast" id="toast"></div>
+<div class="update-banner" id="updateBanner">
+  <span>A new version is ready.</span>
+  <button type="button" id="updateBannerBtn">Refresh</button>
+</div>
 
 <div class="overlay hidden" id="pickupOverlay">
   <div class="overlay-card" id="pickupCard">
@@ -550,8 +554,29 @@
 // localhost), so this is a silent no-op when the file is opened directly (file://) - normal local
 // testing is unaffected either way.
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      // Chrome only rechecks sw.js on its own schedule (as infrequently as once a day), which is too
+      // slow for an installed home-screen shortcut that a player might reopen without a fresh navigation.
+      // Ask explicitly whenever the page becomes visible, plus hourly for anyone who leaves a tab open.
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') reg.update().catch(() => {});
+      });
+      setInterval(() => reg.update().catch(() => {}), 60 * 60 * 1000);
+    }).catch(() => {});
+
+    // sw.js calls skipWaiting()/clients.claim() so a new version activates itself the moment it's fetched,
+    // without waiting for the player to close every tab - but the *already-loaded* page keeps running the
+    // old JS/CSS until it's reloaded. `controllerchange` fires right when that handover happens; the guard
+    // skips the very first one (an uncontrolled page just gaining its first-ever controller isn't an update).
+    let hadController = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (hadController) document.getElementById('updateBanner').classList.add('show');
+      hadController = true;
+    });
+  });
 }
+document.getElementById('updateBannerBtn').addEventListener('click', () => location.reload());
 </script>
 </body>
 </html>

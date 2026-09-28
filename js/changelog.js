@@ -19,6 +19,15 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-28',
+    version: '1.31.0',
+    title: "Faster updates",
+    changes: [
+      "The game now checks for updates whenever you reopen it, instead of waiting for the browser to notice on its own - a banner offers to refresh when a new version is ready.",
+      "Fixes home-screen shortcuts (Android \"Add to Home Screen\") sometimes staying stuck on an old version even after clearing the app's cache.",
+    ],
+  },
+  {
+    date: '2026-09-28',
     version: '1.30.0',
     title: "Quieter weather",
     changes: [
