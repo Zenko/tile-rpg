@@ -2,7 +2,7 @@
 
 For whoever picks up this project next (most likely another Claude). This covers what the game is, how it's built and published, how to change it safely, and how the owner likes to work.
 
-Current version: **v1.17.0**. The newest entry in `CHANGELOG` (now `js/changelog.js`) is always the source of truth.
+Current version: **v1.18.0**. The newest entry in `CHANGELOG` (now `js/changelog.js`) is always the source of truth.
 
 ---
 
@@ -39,7 +39,8 @@ Tile RPG is a calm, mobile-first card-collecting town game. You walk around a ti
       }
     }
     ```
-  - **Known gap: this was built and tested without ever reaching a live Firestore/Auth call.** Whichever sandbox this was built in had `gstatic.com`/`googleapis.com` blocked by its own network policy (an environment-level restriction on that Claude session, unrelated to real players' browsers) - confirmed the graceful no-op path works perfectly (all 22+ Playwright smoke tests still pass with the Firebase scripts failing to load), but the actual sign-in/read/write calls have only been verified by reading, not by running. **Whoever picks this up next: load the live site once, open dev tools, and confirm `cloudStatus` in Settings actually shows "Backed up automatically" (not stuck on "Offline") and that a `saves/<uid>` document appears in the Firestore console after playing a bit.**
+  - **This was built and tested from a sandbox with `gstatic.com`/`googleapis.com` blocked by its own network policy** (an environment-level restriction on that Claude session, unrelated to real players' browsers) - confirmed the graceful no-op path works perfectly (all Playwright smoke tests pass with the Firebase scripts failing to load), but couldn't exercise a live sign-in/read/write from that sandbox itself. **The owner has since verified it live**: `cloudStatus` in Settings shows "Backed up automatically", a `saves/<uid>` document appears in the Firestore console after playing, and the full backup → restore-on-another-device loop works.
+  - **"Back up"/"Restore" open a real modal** (`#cloudOverlay` in `index.html`, wired in `js/cloud-save.js`'s `cloudOpenModal`/`cloudCloseModal`), not `prompt()` - added in v1.18.0 once the underlying sync was confirmed working live. It sits at `z-index: 55` since it's opened from inside the player menu (`z-index: 50`) - see the overlay-stacking gotcha below if adding another overlay that can open from inside another one.
 
 ## 2. Hosting and publishing
 
@@ -165,7 +166,7 @@ Useful habits:
 
 ## 9. Gotchas learned the hard way
 
-- **Overlay stacking order.** `#pickupOverlay` and `#levelUpOverlay` are at z-index 22 and `#tipOverlay` at 23, so reveals show above the talk card and the result screen. `closeBattle` also hides `#mulliganOverlay`.
+- **Overlay stacking order.** `#pickupOverlay` and `#levelUpOverlay` are at z-index 22 and `#tipOverlay` at 23, so reveals show above the talk card and the result screen. `closeBattle` also hides `#mulliganOverlay`. The player menu (`#playerMenu`) is much higher, at z-index 50 (it's a full-screen slide-down panel, not a small card) - any overlay that can be opened from inside it, like `#cloudOverlay` (55), needs a z-index above that or it renders hidden behind the menu.
 - **The scene stage is rebuilt.** The memory game and mini-games replace `#scStage`'s contents, so `#scWho` doesn't exist while they're running. `memoryLeaveStage()`/`miniLeaveStage()` restore it. `renderHomeShelf()` runs on every scene render and removes itself outside the cottage.
 - **Placement works per district.** Decoration placement and planting take `placingDecoration.district`; seeds always go to `square`.
 - **Neighbours are known by district + name** (`neighborKey`), and names are unique within a district because friendship depends on them.

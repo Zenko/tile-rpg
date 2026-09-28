@@ -18,6 +18,14 @@ function gameVersionLabel() {
    the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
 const CHANGELOG = [
   {
+    date: '2026-09-28',
+    version: '1.18.0',
+    title: "A nicer cloud save screen",
+    changes: [
+      "Back up your save and Restore a save now open a proper screen instead of plain browser pop-ups, with a password field that actually hides what you type.",
+    ],
+  },
+  {
     date: '2026-09-27',
     version: '1.17.0',
     title: "Cloud save",

@@ -91,27 +91,45 @@ function cloudPullThenReconcile(force) {
   }).catch(() => { cloudSyncing = false; });
 }
 
-function cloudEmailPrompt(promptTitle) {
-  const email = prompt(promptTitle + '\n\nEmail:');
-  if (!email) return null;
-  const password = prompt('Password (6+ characters):');
-  if (!password) return null;
-  return { email, password };
+// The email+password modal (#cloudOverlay in index.html) - a real overlay in the game's own style rather
+// than prompt(), partly for the look, partly because prompt() shows a password in plain text with no masking.
+let cloudModalResolve = null;
+function cloudOpenModal(title, desc, submitLabel) {
+  document.getElementById('cloudModalTitle').textContent = title;
+  document.getElementById('cloudModalDesc').textContent = desc;
+  document.getElementById('cloudModalSubmit').textContent = submitLabel;
+  const emailEl = document.getElementById('cloudEmailInput'), passEl = document.getElementById('cloudPasswordInput');
+  emailEl.value = ''; passEl.value = '';
+  document.getElementById('cloudOverlay').classList.remove('hidden');
+  setTimeout(() => emailEl.focus(), 50);
+  return new Promise(resolve => { cloudModalResolve = resolve; });
 }
+function cloudCloseModal(result) {
+  document.getElementById('cloudOverlay').classList.add('hidden');
+  if (cloudModalResolve) { const r = cloudModalResolve; cloudModalResolve = null; r(result); }
+}
+document.getElementById('cloudModalCancel').addEventListener('click', () => { sfx('nav'); cloudCloseModal(null); });
+document.getElementById('cloudModalSubmit').addEventListener('click', () => {
+  const email = document.getElementById('cloudEmailInput').value.trim();
+  const password = document.getElementById('cloudPasswordInput').value;
+  if (!email || !email.includes('@')) { toast('Enter a valid email.'); sfx('tie'); return; }
+  if (password.length < 6) { toast('Password needs to be at least 6 characters.'); sfx('tie'); return; }
+  sfx('claim'); cloudCloseModal({ email, password });
+});
 
-function cloudBackup() {
+async function cloudBackup() {
   if (!cloudAvailable() || !cloudUser) { toast('☁️ No connection right now - try again later.'); return; }
   if (!cloudUser.isAnonymous) { toast(`☁️ Already backed up to ${cloudUser.email}.`); return; }
-  const cred = cloudEmailPrompt('Back up your save to an email + password.\nUse this same email to restore it on another device.');
+  const cred = await cloudOpenModal('Back up your save', 'Choose an email and password. Use the same ones to restore this save on another device.', 'Back up');
   if (!cred) return;
   cloudUser.linkWithCredential(firebase.auth.EmailAuthProvider.credential(cred.email, cred.password))
     .then(() => { cloudSetStatus(`Backed up to ${cred.email}`); toast('☁️ Your save is backed up.'); })
     .catch(e => toast('☁️ Could not back up: ' + e.message));
 }
 
-function cloudRestore() {
+async function cloudRestore() {
   if (!cloudAvailable()) { toast('☁️ No connection right now - try again later.'); return; }
-  const cred = cloudEmailPrompt('Restore a save from another device.\nEnter the email you backed it up with.');
+  const cred = await cloudOpenModal('Restore a save', 'Enter the email and password you backed this save up with.', 'Restore');
   if (!cred) return;
   firebase.auth().signInWithEmailAndPassword(cred.email, cred.password)
     .then(() => cloudPullThenReconcile(true))

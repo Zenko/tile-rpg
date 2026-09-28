@@ -456,6 +456,19 @@
   </div>
 </div>
 
+<div class="overlay hidden" id="cloudOverlay">
+  <div class="overlay-card">
+    <h2 id="cloudModalTitle">Back up your save</h2>
+    <p id="cloudModalDesc">Choose an email and password. Use the same ones to restore this save on another device.</p>
+    <input type="email" id="cloudEmailInput" class="name-input" placeholder="Email" autocomplete="email" inputmode="email">
+    <input type="password" id="cloudPasswordInput" class="name-input" placeholder="Password (6+ characters)" autocomplete="new-password">
+    <div class="controls">
+      <button id="cloudModalCancel" class="btn btn-ghost">Cancel</button>
+      <button id="cloudModalSubmit" class="btn">Back up</button>
+    </div>
+  </div>
+</div>
+
 <script src="js/data-and-engine.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/progression.js"></script>
