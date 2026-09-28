@@ -19,6 +19,15 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-28',
+    version: '1.33.0',
+    title: "Fix audio pumping",
+    changes: [
+      "The last audio pass wasn't enough - the master limiter was configured as an always-on compressor rather than a peak safety net, which caused audible pumping/ducking every time a new music voice or sound effect played. It now stays fully out of the way until something actually risks clipping.",
+      "Also shortened the reverb tail, which was smearing notes into each other and adding unnecessary CPU load.",
+    ],
+  },
+  {
+    date: '2026-09-28',
     version: '1.32.0',
     title: "Clearer ambience, smoother performance",
     changes: [

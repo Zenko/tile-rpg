@@ -23,9 +23,14 @@ function ensureAudio() {
       masterGain = audioCtx.createGain();
       sfxBus = audioCtx.createGain();
       musicBus = audioCtx.createGain();
-      // A gentle limiter so overlapping pads + effects can never clip or get harsh
+      // A peak safety limiter, not a "glue" compressor: it should only catch occasional peaks, not sit
+      // engaged on ordinary listening levels. The original settings (-14dB threshold, 6:1 ratio, 24dB knee)
+      // meant the compressor was almost always doing some gain reduction on the pad's normal level, which
+      // is audible as constant pumping/ducking every time a new voice or SFX fires - reported as "muffled,
+      // compressed, not smooth." A much higher threshold with a tight knee means it stays fully transparent
+      // until something actually gets close to clipping.
       const limiter = audioCtx.createDynamicsCompressor();
-      limiter.threshold.value = -14; limiter.knee.value = 24; limiter.ratio.value = 6; limiter.attack.value = 0.01; limiter.release.value = 0.3;
+      limiter.threshold.value = -4; limiter.knee.value = 4; limiter.ratio.value = 4; limiter.attack.value = 0.003; limiter.release.value = 0.15;
       sfxBus.connect(masterGain); musicBus.connect(masterGain);
       masterGain.connect(limiter); limiter.connect(audioCtx.destination);
       applyVolumes(true);
@@ -124,7 +129,10 @@ function buildMusicGraph(ctx) {
   const out = ctx.createGain();            out.gain.value = 0.0001;       // fades in/out as a whole
   const dry = ctx.createGain();            dry.gain.value = 0.65;
   const wet = ctx.createGain();            wet.gain.value = 0.55;
-  const reverb = makeReverb(ctx, 5.5, 2.2);
+  // Shorter than the original 5.5s/2.2 decay: a long convolution tail both costs more CPU per audio callback
+  // (continuous on a low-power phone) and smears transients into each other, reading as muddiness on top of
+  // the compressor pumping fixed above.
+  const reverb = makeReverb(ctx, 3.2, 1.8);
 
   // Breathing low-pass: the pad slowly opens and closes. Raised from the original 900Hz/±380 range, which
   // cut most of the pad's harmonic content and read as muffled rather than calm - see WEATHER_MUSIC_PROFILE
