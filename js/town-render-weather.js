@@ -88,7 +88,7 @@ const WEATHER_LOG = {
 // What each kind of weather actually changes. `short` goes on the battle chip and in toasts; the numbers are read
 // by the systems they touch (fishing, finds, chests, spirits, battles, rewards) through weatherIs()/WEATHER_EFFECTS.
 const WEATHER_EFFECTS = {
-  clear:  null,
+  clear:  { short: 'Daily tasks pay a little extra', dailyBonus: 1 },
   cloudy: { short: 'Spirits give double XP' },
   rain:   { short: 'Fish bite sooner, rare fish more often', biteSpeed: 0.6, rareFish: 2.5 },
   storm:  { short: '💨 Swift cards +1 power in battle', swiftBonus: 1 },
@@ -271,8 +271,9 @@ function applyWeather(instant) {
   if (!weatherEl) return;
   maybeRollWeather();
   const kind = state.weather.current;
-  const hasOverlay = kind === 'rain' || kind === 'storm' || kind === 'snow' || kind === 'fog';
-  weatherEl.className = 'town-weather' + (hasOverlay ? ' on weather-' + kind : '');   // cloudy softens the sky tint only, no overlay animation
+  // every kind now has its own gentle overlay: drifting sunbeams for clear, soft cloud-shadows for cloudy,
+  // alongside the existing rain/storm/snow/fog effects - so the sky never just sits there doing nothing.
+  weatherEl.className = 'town-weather on weather-' + kind;
   if (kind === 'snow' && !snowFlakes.length) buildSnowFlakes();
   if ((kind === 'rain' || kind === 'storm') && !rainBuilt) buildRainDrops(kind === 'storm');
   const weatherText = document.getElementById('hudWeatherText');
@@ -364,7 +365,7 @@ let skyEl = null, vignetteEl = null, weatherEl = null, snowFieldEl = null;
 function buildSkyLayers() {
   skyEl = document.createElement('div'); skyEl.className = 'town-sky';
   weatherEl = document.createElement('div'); weatherEl.className = 'town-weather'; weatherEl.id = 'townWeather';
-  weatherEl.innerHTML = `<div class="fog-layer f1"></div><div class="fog-layer f2"></div><div class="rain-layer"></div><div class="lightning"></div><div class="snow-field" id="snowField"></div>`;
+  weatherEl.innerHTML = `<div class="fog-layer f1"></div><div class="fog-layer f2"></div><div class="rain-layer"></div><div class="lightning"></div><div class="snow-field" id="snowField"></div><div class="sun-rays"></div><div class="cloud-shadow c1"></div><div class="cloud-shadow c2"></div>`;
   vignetteEl = document.createElement('div'); vignetteEl.className = 'town-vignette';
   townView.appendChild(skyEl); townView.appendChild(weatherEl); townView.appendChild(vignetteEl);
   snowFieldEl = weatherEl.querySelector('#snowField');
@@ -719,6 +720,7 @@ function grantHiddenCard(label) {
   state.ownedCards.push(cardId);
   saveState(); updateHud();
   bumpPill('pillCards'); bumpStat('cardsFound', 1);
+  if (weatherIs('fog')) bumpStat('foggyFinds', 1);
   if (isNewCard) toast('📖 New entry in your Index');
   sfx('claim'); buzz(HAP.tap);
   showCardReveal(cardId, label, false, null, XP_PER_STAT.cardsFound);

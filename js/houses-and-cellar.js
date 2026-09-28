@@ -647,7 +647,9 @@ function sceneAction(actId) {
   else if (a.kind === 'cook') { scene.mode = 'cook'; scene.text = `Maple ties on an apron. "What shall we make?" ${pantryLine()}`; sfx('tap'); showTipOnce('cook'); }
   else if (a.kind === 'daily') {
     if (st[a.id] === todayKey()) { scene.text = a.already; }
-    else { st[a.id] = todayKey(); scene.text = a.done; addPebbles(a.pebbles); toast(`🫧 +${a.pebbles} Pebbles`); sfx('claim'); }
+    else { st[a.id] = todayKey(); scene.text = a.done;
+      const pebbles = a.pebbles + (weatherFx().dailyBonus || 0);
+      addPebbles(pebbles); toast(`🫧 +${pebbles} Pebbles`); sfx('claim'); }
   } else if (a.kind === 'memory') {
     memoryNewGame(); scene.text = `Match all ${memory.pairs} pairs. Olwen watches with quiet interest.`; sfx('tap'); renderScene(); renderMemoryGrid(); return;
   } else if (a.kind === 'advice') {

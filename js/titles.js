@@ -190,16 +190,27 @@ function closePlayerMenu() {
 document.getElementById('avatarChip').addEventListener('click', () => { if (inBattle) return; ensureAudio(); sfx('nav'); buzz(HAP.tap); openPlayerMenu(); });
 document.getElementById('playerMenuClose').addEventListener('click', closePlayerMenu);
 document.getElementById('playerMenuBackdrop').addEventListener('click', closePlayerMenu);
+// One clean overlay instead of a stack of toasts firing one after another - everything worth knowing about
+// right now (time, weather and its effect, season, today's event, and the forecast) at a glance together.
 document.getElementById('pillSky').addEventListener('click', () => {
-  const s = skyPhase(), kind = state.weather.current || 'clear';
-  const w = WEATHER_KINDS[kind];
-  const weatherPart = kind !== 'clear' && w ? `, ${w.name.toLowerCase()}` : '';
-  toast(`${s.icon} It's ${s.label}${weatherPart}.`);
-  const fx = weatherEffectLine(); if (fx) toast(fx);
-  const sd = seasonDef(); toast(`${sd.icon} ${sd.name} · ${seasonDaysLeft()} day${seasonDaysLeft() === 1 ? '' : 's'} left`);
-  const tev = eventNow(); toast(`${tev.icon} ${tev.name}: ${tev.text}`);
-  const ws = state.weather; if (ws.next && ws.next !== weatherNow() && WEATHER_KINDS[ws.next]) toast(`Next: ${WEATHER_KINDS[ws.next].icon || '☀️'} ${WEATHER_KINDS[ws.next].name} in ~${Math.max(1, Math.round((ws.changesAt - ws.elapsed) / 60000))} min`);
+  sfx('tap');
+  const s = skyPhase(), kind = state.weather.current || 'clear', w = WEATHER_KINDS[kind];
+  const sd = seasonDef(), tev = eventNow(), ws = state.weather;
+  const label = s.label.replace(/^the /i, ''), timeLabel = label.charAt(0).toUpperCase() + label.slice(1);
+  document.getElementById('wxTitle').textContent = kind === 'clear' ? timeLabel : `${w.name} · ${timeLabel}`;
+  const rows = [
+    { icon: w.icon || s.icon, text: (WEATHER_EFFECTS[kind] || {}).short || 'No special effect right now.' },
+    { icon: sd.icon, text: `${sd.name} · ${seasonDaysLeft()} day${seasonDaysLeft() === 1 ? '' : 's'} left this season` },
+    { icon: tev.icon, text: `${tev.name}: ${tev.text}` },
+  ];
+  if (ws.next && ws.next !== weatherNow() && WEATHER_KINDS[ws.next]) {
+    const mins = Math.max(1, Math.round((ws.changesAt - ws.elapsed) / 60000));
+    rows.push({ icon: WEATHER_KINDS[ws.next].icon || '☀️', text: `Next: ${WEATHER_KINDS[ws.next].name} in ~${mins} min` });
+  }
+  document.getElementById('wxRows').innerHTML = rows.map(r => `<div class="wx-row"><span class="wx-icon">${r.icon}</span><span>${r.text}</span></div>`).join('');
+  document.getElementById('weatherOverlay').classList.remove('hidden');
 });
+document.getElementById('weatherOverlayClose').addEventListener('click', () => { sfx('nav'); document.getElementById('weatherOverlay').classList.add('hidden'); });
 
 function updateHud() {
   cardCountEl.textContent = state.ownedCards.length;

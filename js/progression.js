@@ -22,7 +22,7 @@ const TIPS = {
   trades:      { icon: '🤝', title: 'The trading board', text: 'Three new offers every morning: swap a spare for a card you have never had, bundle three spares for a rarer card, or sell one to a collector for three times its release value.' },
   challenges:  { icon: '🎯', title: 'Deck challenges', text: 'Three rules a day, like "only commons" or "no two cards the same". Win with a deck that follows the rule for a card prize. Keep a deck slot for challenges so switching is quick.' },
   minigames:  { icon: '🎲', title: 'Mini-games', text: 'Every house has a little game. Earn a bronze, silver or gold medal; the first three medals in each game every day pay Pebbles, and gold can turn up a card. Play as much as you like after that.' },
-  forecast:   { icon: '🪧', title: 'The weather board', text: 'Signs show the forecast. Weather changes play: rain for fishing and growing, fog for finds, storms for Swift cards, snow for tougher bosses and richer prizes.' },
+  forecast:   { icon: '🪧', title: 'The weather board', text: 'Signs show the forecast. Weather changes play: clear pays a little extra on daily tasks, cloudy doubles spirit XP, rain helps fishing and growing, fog turns up more finds, storms boost Swift cards, snow toughens bosses for richer prizes.' },
   events:     { icon: '📅', title: 'Daily town events', text: "One event runs each day, shown next to the district name - a Fishing Derby, Market Day, Harvest Fair and more, each bending the rules a little in your favor." },
   foils:      { icon: '✨', title: 'Foil cards', text: 'A shimmering foil is purely a collector\'s chase - the same card, just shinier. Your foil total shows at the top of Cards → Index and in your cottage trophy case.' },
 };
@@ -112,6 +112,8 @@ const QUEST_POOL = [
   { id: 'chal1',    icon: '🎯', name: 'Beat a deck challenge',        goal: 1,  stat: 'challengesWon',   reward: 'ultra' },
   { id: 'minigold', icon: '🥇', name: 'Win a gold medal in a mini-game', goal: 1, stat: 'minigameGolds', reward: 'rare' },
   { id: 'foil1',    icon: '✨', name: 'Find a foil card',              goal: 1, stat: 'foilsFound',      reward: 'rare' },
+  { id: 'rainyfish1', icon: '🌧️', name: 'Catch a fish while it rains', goal: 1, stat: 'rainyFish',       reward: 'rare' },
+  { id: 'foggyfind1', icon: '🌫️', name: 'Find a card in the fog',      goal: 1, stat: 'foggyFinds',      reward: 'rare' },
   ...STEP_QUEST_TIERS
 ];
 

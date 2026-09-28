@@ -156,6 +156,7 @@ function fishLand(fish) {
   addIngredient('fish', 1);                                   // every catch goes in the pantry too
   if (!f.best || !fishDef(f.best) || fish.pebbles > fishDef(f.best).pebbles) f.best = fish.id;
   bumpStat('fishCaught', 1);
+  if (weatherIs('rain')) bumpStat('rainyFish', 1);
   if (firstOfKind) logEvent(fish.icon, `New in the fish log: ${fish.name}.`);
   if (fish.legendary) logEvent('🌟', `Landed the legendary ${fish.name}!`);
   const rewarded = f.rewarded < FISH_DAILY_REWARDED;

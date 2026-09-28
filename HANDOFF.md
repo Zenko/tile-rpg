@@ -2,7 +2,7 @@
 
 For whoever picks up this project next (most likely another Claude). This covers what the game is, how it's built and published, how to change it safely, and how the owner likes to work.
 
-Current version: **v1.20.0**. The newest entry in `CHANGELOG` (now `js/changelog.js`) is always the source of truth.
+Current version: **v1.21.0**. The newest entry in `CHANGELOG` (now `js/changelog.js`) is always the source of truth.
 
 ---
 
@@ -86,7 +86,7 @@ Each file below still has the same banner comments (the `====` blocks) it had wh
 | `js/audio.js` | `PREFS, SOUND, HAPTICS, TOAST` / `AMBIENT MUSIC` / `WEATHER AMBIENCE` | Audio. Seasonal chords in `MUSIC.SEASON_CHORDS`; per-district voicing/tempo/shimmer in `BIOME_MUSIC`/`biomeMusic()`. |
 | `js/progression.js` | `FIRST-TIME TIPS` / `PROGRESSION: DAILY GIFT, QUESTS, ACHIEVEMENTS` | `TIPS`/`showTipOnce(id)`, `QUEST_POOL`, `WEEKLY_QUEST_POOL`, `ACHIEVEMENTS`, `XP_PER_STAT`, `bumpStat`, `addXP`, `TITLES`, `loadState()`/`saveState()`. |
 | `js/maps.js` | `TOWN MAPS` | `MAP_SQUARE`/`MAP_MARKET` (hand-built JSON), `proceduralMap` (now also places the Harbor's and Garden's one building each - see §7), `getMap`, `findPath`, `DISTRICT_LINKS`. |
-| `js/town-render-weather.js` | `TOWN MAP: drawing…` / `DAY/NIGHT CYCLE + WEATHER` | Town rendering, camera, tap-to-walk, `interactWith`, `skyPhase(atMs)`, `WEATHER_KINDS`/`weatherFx()`, the weather forecast, `SEASONS`. |
+| `js/town-render-weather.js` | `TOWN MAP: drawing…` / `DAY/NIGHT CYCLE + WEATHER` | Town rendering, camera, tap-to-walk, `interactWith`, `skyPhase(atMs)`, `WEATHER_KINDS`/`WEATHER_EFFECTS`/`weatherFx()` (every kind, including `clear`, now has an effect - see §5), the weather forecast, `SEASONS`. The `#pillSky` HUD badge (wired in `js/titles.js`) opens `#weatherOverlay` with everything at once, rather than a stack of toasts. |
 | `js/houses-and-cellar.js` | `HOUSES AND THE CELLAR` | `INTERIORS` (every enterable building, including the Net Loft and Glasshouse), `openScene`/`renderScene`/`sceneAction`, the bakery, cooking, spice stall, sleeves, cottage/letters, the cellar, the Festival Cup. |
 | `js/neighbors-bosses.js` | `WANDERING NEIGHBORS, BOSSES AND GRAVES` | Wandering, graves, the boss 30-on/30-off clock. |
 | `js/fishing.js` | `FISHING` | Cast, wait for a bite, reel in. Which water tiles are fishable (`m.fishTiles`, computed in `js/maps.js`) reshuffles every `FISH_ROTATE_MS` (10 min) rather than being fixed forever - see the note there. |
@@ -184,3 +184,4 @@ Useful habits:
   - The Harbor Keeper's tide is the strongest boss twist.
   - The Spellbook set bonus (+1 opening card) and stacked Shield charms (+Spirit at the start) are the strongest perks.
   - The bake time (6 minutes), crop times (5 to 40 minutes), Rook's 20-minute stay per district and the heart thresholds (3/7/12/18/25) are all single constants.
+  - `clear`'s new `dailyBonus` (+1 Pebble on every `kind: 'daily'` scene action - see §5) was picked as "the smallest amount that's still noticeable," not simulated. Clear is also the single most common roll (`WEATHER_KINDS.clear.weight`), so this is the perk a player sees most often - worth a second look if it turns out to feel too strong or too invisible in playtesting.

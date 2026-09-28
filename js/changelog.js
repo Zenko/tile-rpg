@@ -19,6 +19,17 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-28',
+    version: '1.21.0',
+    title: "Weather, front and centre",
+    changes: [
+      "Tap the sky badge (top right) for the full picture in one place: time, weather and its effect, season, today's event and the forecast.",
+      "Clear skies now do something too: daily tasks around town pay a little extra Pebbles.",
+      "Clear and cloudy days now get their own gentle visual touch - drifting sunbeams and soft cloud-shadows - joining the rain, fog, snow and storm effects already there.",
+      "Two new quests: catch a fish while it's raining, and find a hidden card in the fog.",
+    ],
+  },
+  {
+    date: '2026-09-28',
     version: '1.20.0',
     title: "The water moves, and a nicer feedback screen",
     changes: [
