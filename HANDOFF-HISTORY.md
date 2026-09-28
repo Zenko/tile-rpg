@@ -1,0 +1,35 @@
+# Tile RPG — incident history
+
+Full postmortems for bugs referenced from `HANDOFF.md` §9. Nobody needs to read this file to make a change — the *rules* these incidents produced are already in `HANDOFF.md`. Read a section here only if you're debugging a recurrence of that exact class of bug and want the full trail (what was tried, what turned out to be a red herring, how it was actually confirmed).
+
+---
+
+## The storm-lightning animation getting "stuck" (v1.21.0 → v1.23.0)
+
+An `animation` enabled purely by a CSS class match (rather than always running, gated only by opacity) can get "stuck" on some mobile browsers even after the class stops matching. v1.21.0's storm lightning (`.town-weather.weather-storm .lightning { animation: lightning-flash 7s infinite; }`) kept flashing every ~7s on a real phone in *any* weather, not just storm - the class-based toggle wasn't reliably stopping the already-running animation. Every other weather layer (fog, rain, snow, and the sun-rays/cloud-shadow added in the same release) uses the safer pattern instead: the `animation` is declared unconditionally on the element and always running, and only *visibility* (`opacity`) is gated by the weather class - lightning was the one exception.
+
+Fixed in v1.23.0 by driving it directly in JS instead of trusting the class match: `applyWeather()` now sets `lightningEl.style.animation = kind === 'storm' ? '' : 'none'` on **every** tick (not just when the weather changes), so an inline `none` forcibly overrides any lingering class-based animation state regardless of what the class list says.
+
+**Rule that came out of this** (in `HANDOFF.md` §9): when gating an infinite CSS animation (not just its opacity) behind a class, prefer the "always animate, gate opacity" pattern used everywhere else in this file - if the animation itself must be turned on/off, do it explicitly in JS with `element.style.animation`, not by relying on the class match alone.
+
+## The rain/snow "glitch" reports (v1.23.0 → v1.25.0)
+
+The player's follow-up report after the v1.23.0 lightning fix turned out to be a second, unrelated thing (v1.24.0). A screenshot and screen recording sent after the lightning fix showed the "glitches" happening while the weather badge plainly read *Rain*, not storm - so this wasn't the lightning bug recurring, it was the ordinary `.rain-drop` effect itself (unchanged since before the file split) being mistaken for a glitch. Bright, high-contrast, long diagonal streaks against a dark scene read as screen corruption rather than rain, and weather now rolls every 4-10 minutes of play instead of rarely changing, so players see rain - and this effect - far more often than before.
+
+Fixed by softening the look (`css/style.css` `.rain-drop`/`.town-weather.weather-storm .rain-drop`): thinner (2px→1px), shorter (9-13%→4-7%), lower-contrast/more blue-grey color, gentler rotation (12°→8°), with more of them at once (`js/town-render-weather.js`'s `buildRainDrops()`, count 40→60) so it reads as a shower rather than a few stark scratches.
+
+**Lesson:** when a player reports a vague visual "glitch," don't assume it's the same bug as the last one just because the wording sounds similar - check what the weather/state actually was in their evidence before re-diagnosing.
+
+Related, kept from the v1.22.0 attempt at this same bug (didn't turn out to be the actual cause, but both are still good practice): avoid `filter: blur()` on anything animated that can stay visible for a long stretch of normal play (a GPU-compositing cost invisible in desktop testing) - the cloud-shadow effect gets its soft look from the gradient's own falloff instead. And `applyWeather()` skips its DOM writes entirely via a `lastAppliedWeather` guard when the weather kind hasn't actually changed, rather than re-touching the layer on every 2s/5s tick regardless.
+
+**The general lesson:** this game is tested almost entirely in desktop headless Chromium (see `HANDOFF.md` §8), and a real device can behave differently for anything animation/filter/transform-heavy. When a player reports a visual glitch that can't be reproduced in the usual harness (checked computed styles over time, even recorded and frame-analyzed real video - all showed nothing), look for a class-gated CSS animation rather than assuming the JS logic itself is at fault.
+
+## The actual root cause: animating `top`/`margin-left` on 60+ elements (v1.25.0)
+
+Found after the v1.24.0 rain-visual fix still didn't satisfy the player. `rain-fall` and `snow-fall` animated the `top` (and `margin-left`) CSS properties on 60+ rain drops (22 snowflakes) simultaneously, every frame, forever, whenever it was raining or snowing. `top`/`margin-left` are layout properties - animating them forces the browser to recompute page layout on every single frame for every one of those elements, which is expensive enough on a mid-range phone to make the whole page's renderer drop or tear frames, not just the rain layer itself.
+
+That's why the symptoms looked so scattered and unrelated across reports: a dialog card (`#sceneryOverlay`) appearing to vanish on its own after ~1s, and separately water tiles' background flickering on and off while the fish sprite sitting on top of them stayed put - both were real screenshots/recordings, pixel-sampled and confirmed genuine (not video-compression artifacts: fixed-pixel sampling across full-resolution extracted frames showed a real, repeated flip between the tile's water color and its plain ground color at the same screen coordinates). Neither the dialog nor the water tile's own code was ever touched by anything that would explain it - the common factor was that both reports came from sessions where it was raining, and a torn/dropped frame during a `top`-animated rain layer's reflow can visibly corrupt unrelated parts of the same paint.
+
+Fixed by switching both animations to `transform: translateY(...)` (rain) and `transform: translate(x, y)` (snow), which the compositor can run on the GPU without ever touching layout. Since a percentage inside `translate()` is relative to the *element's own* box (not its parent, unlike `top`/`left`), the actual pixel fall-distance is now computed once in JS (`buildRainDrops()`/`buildSnowFlakes()`) from the layer's real `clientHeight` and passed in via a `--fall` custom property that the keyframes read.
+
+**Lesson that came out of this** (in `HANDOFF.md` §9): when a player's "glitch" reports keep circling back and each specific-looking fix (a stuck animation, an ugly effect) doesn't fully resolve it, and the common thread across their evidence is a *system* (here, "it happens when it's raining") rather than a specific element, suspect a performance/compositing issue in that system before re-diagnosing individual symptoms - a dropped or torn frame can visibly corrupt anything else on screen at that instant, not just the layer that's under load. When adding any looping CSS animation that will run continuously across many elements on a real device, always animate `transform`/`opacity`, never `top`/`left`/`margin`/`width`/`height`.

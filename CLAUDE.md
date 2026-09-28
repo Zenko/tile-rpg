@@ -1,6 +1,6 @@
 # Tile RPG
 
-Read **HANDOFF.md** before changing anything. It covers the file layout, conventions, testing and gotchas.
+Read **HANDOFF.md** before changing anything. It covers the file layout, conventions, testing and gotchas. `HANDOFF-HISTORY.md` has the full postmortems behind HANDOFF's §9 rules - optional reading, only needed if you're debugging a recurrence of one of those bugs.
 
 Short version:
 - The game is `index.html` plus `css/style.css`, `assets/sprites.js` and ~22 files under `js/` (no build step, no bundler - see HANDOFF §1 and §4 for the full file map and why plain `<script src>` tags are used instead of ES modules). `Tile RPG.html` just forwards to `index.html`, kept for old links.
