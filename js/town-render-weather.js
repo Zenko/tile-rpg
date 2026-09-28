@@ -533,8 +533,14 @@ function renderTown(justMoved) {
   if (townBuiltFor !== key || !townWorld || !townWorld.isConnected) buildWorld(key);
   else { applyWeather(); applySky(); }
   renderEntities(data);
-  positionPlayer(false);
-  updateCamera(false);
+  // Skip re-syncing position/camera while a walk is in progress: startWalk()'s own step() already calls
+  // positionPlayer(true)/updateCamera(true) every STEP_MS with the transition it wants. Any *other* trigger
+  // of renderTown() landing mid-step (the periodic town tick, an item pickup, a wander sync) used to call
+  // these with animate=false, which sets transition:none and re-applies the same final transform - snapping
+  // the in-flight camera/player animation instantly to its endpoint instead of letting it finish gliding,
+  // visible as a brief flash/jump (screen glitch report, confirmed by capturing townWorld's style mid-step).
+  const walking = playerEl && playerEl.classList.contains('walking');
+  if (!walking) { positionPlayer(false); updateCamera(false); }
   updateAmbient();
   renderRadar();
 }

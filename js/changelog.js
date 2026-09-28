@@ -19,6 +19,14 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-28',
+    version: '1.34.0',
+    title: "Fix a walking screen flash",
+    changes: [
+      "Fixed a brief visual glitch some players could see while walking - a flash of a slightly different scene (camera/neighbors shifted) for a fraction of a second. It happened when the game's regular background check landed in the middle of a walking step and cut the smooth camera glide short. Walking should look consistently smooth now.",
+    ],
+  },
+  {
+    date: '2026-09-28',
     version: '1.33.0',
     title: "Fix audio pumping",
     changes: [
