@@ -338,11 +338,13 @@ function buildWeatherBed(ctx, kind) {
   const out = ctx.createGain(); out.gain.value = 0.0001;
   const src = noiseSource(ctx);
   const filter = ctx.createBiquadFilter();
-  let targetGain = 0.18;
-  if (kind === 'rain') { filter.type = 'bandpass'; filter.frequency.value = 3200; filter.Q.value = 0.5; targetGain = 0.16; }
-  else if (kind === 'storm') { filter.type = 'bandpass'; filter.frequency.value = 2600; filter.Q.value = 0.45; targetGain = 0.22; }
-  else if (kind === 'fog' || kind === 'cloudy') { filter.type = 'lowpass'; filter.frequency.value = 500; filter.Q.value = 0.3; targetGain = 0.06; }
-  else { filter.type = 'lowpass'; filter.frequency.value = 300; targetGain = 0.05; }
+  // Kept well under the music's own gain - these are meant to sit under the chords as a faint
+  // texture, not compete with them (a shared bus, so turning music down turns this down too).
+  let targetGain = 0.07;
+  if (kind === 'rain') { filter.type = 'bandpass'; filter.frequency.value = 3200; filter.Q.value = 0.5; targetGain = 0.065; }
+  else if (kind === 'storm') { filter.type = 'bandpass'; filter.frequency.value = 2600; filter.Q.value = 0.45; targetGain = 0.09; }
+  else if (kind === 'fog' || kind === 'cloudy') { filter.type = 'lowpass'; filter.frequency.value = 500; filter.Q.value = 0.3; targetGain = 0.025; }
+  else { filter.type = 'lowpass'; filter.frequency.value = 300; targetGain = 0.02; }
   // A slow gain wobble so the noise bed breathes instead of sitting perfectly flat
   const wobble = ctx.createOscillator(); wobble.type = 'sine'; wobble.frequency.value = 0.07 + Math.random() * 0.05;
   const wobbleDepth = ctx.createGain(); wobbleDepth.gain.value = targetGain * 0.18;
@@ -353,7 +355,7 @@ function buildWeatherBed(ctx, kind) {
   if (kind === 'storm') {
     rumble = noiseSource(ctx); rumbleFilter = ctx.createBiquadFilter();
     rumbleFilter.type = 'lowpass'; rumbleFilter.frequency.value = 90; rumbleFilter.Q.value = 0.7;
-    const rumbleGain = ctx.createGain(); rumbleGain.gain.value = 0.14;
+    const rumbleGain = ctx.createGain(); rumbleGain.gain.value = 0.06;
     rumble.connect(rumbleFilter); rumbleFilter.connect(rumbleGain); rumbleGain.connect(out);
     rumble.start();
   }
@@ -372,7 +374,7 @@ function thunderCrack() {
   filter.frequency.exponentialRampToValueAtTime(120, t0 + 1.4);
   const gain = ctx.createGain();
   gain.gain.setValueAtTime(0.0001, t0);
-  gain.gain.exponentialRampToValueAtTime(0.5, t0 + 0.06);
+  gain.gain.exponentialRampToValueAtTime(0.22, t0 + 0.06);
   gain.gain.exponentialRampToValueAtTime(0.0001, t0 + (1.6 + Math.random() * 0.8));
   src.connect(filter); filter.connect(gain); gain.connect(musicBus);
   src.start(t0); src.stop(t0 + 2.6);

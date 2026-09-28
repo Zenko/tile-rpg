@@ -19,6 +19,15 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-28',
+    version: '1.30.0',
+    title: "Quieter weather",
+    changes: [
+      "Rain, storms, fog and cloudy hums are all noticeably quieter now - meant to sit faintly under the music, not compete with it.",
+      "Thunder cracks softer too.",
+    ],
+  },
+  {
+    date: '2026-09-28',
     version: '1.29.0',
     title: "Weather and seasons",
     changes: [
