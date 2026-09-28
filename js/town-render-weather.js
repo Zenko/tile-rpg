@@ -267,10 +267,16 @@ function buildRainDrops(storm) {
   }
   rainBuilt = true;
 }
+let lastAppliedWeather = null;
 function applyWeather(instant) {
   if (!weatherEl) return;
   maybeRollWeather();
   const kind = state.weather.current;
+  // Skip the DOM writes below entirely when nothing changed - applyWeather() runs on every 2s/5s tick
+  // regardless of whether the weather did anything, and re-touching a layer full of running CSS
+  // transitions/animations on every tick is unnecessary work this loop never needed to do.
+  if (kind === lastAppliedWeather && !instant) return;
+  lastAppliedWeather = kind;
   // every kind now has its own gentle overlay: drifting sunbeams for clear, soft cloud-shadows for cloudy,
   // alongside the existing rain/storm/snow/fog effects - so the sky never just sits there doing nothing.
   weatherEl.className = 'town-weather on weather-' + kind;

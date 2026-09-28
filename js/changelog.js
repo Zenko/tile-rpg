@@ -19,6 +19,14 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-28',
+    version: '1.22.0',
+    title: "Fixed a screen flash after the last weather update",
+    changes: [
+      "Fixed an intermittent screen flash some players saw every few seconds, regardless of weather - a mobile GPU rendering quirk from the new cloudy-day effect, and unnecessary repeated redraws of the weather layer.",
+    ],
+  },
+  {
+    date: '2026-09-28',
     version: '1.21.0',
     title: "Weather, front and centre",
     changes: [
