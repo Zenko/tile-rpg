@@ -2,7 +2,7 @@
 
 For whoever picks up this project next (most likely another Claude). This covers what the game is, how it's built and published, how to change it safely, and how the owner likes to work.
 
-Current version: **v1.26.0**. The newest entry in `CHANGELOG` (now `js/changelog.js`) is always the source of truth.
+Current version: **v1.27.0**. The newest entry in `CHANGELOG` (now `js/changelog.js`) is always the source of truth.
 
 ---
 
