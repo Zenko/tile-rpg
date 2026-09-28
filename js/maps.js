@@ -84,9 +84,25 @@ function entryTileFor(m, dir, at) {
   return { x: at, y: m.h - 2 }; // 'S'
 }
 
+// A minority of water tiles are ever fishable at once - the visible swimming-fish sprite (drawn in
+// buildWorld from this same set) is the only tell, and only those tiles will open the fishing overlay.
+// Which ones light up reshuffles every FISH_ROTATE_MS, seeded by district + a time bucket, so the school
+// moves around rather than sitting in the same spots forever. getMap() re-checks the bucket on every call
+// (which is often - most renders call it), so a reshuffle takes effect the moment the bucket ticks over.
+const FISH_ROTATE_MS = 10 * 60 * 1000;
+function refreshFishTiles(m, key) {
+  const bucket = Math.floor(Date.now() / FISH_ROTATE_MS);
+  if (m.fishBucket === bucket) return;
+  m.fishBucket = bucket;
+  const frnd = seeded('fish-' + key + '-' + bucket);
+  const tiles = {};
+  for (let y = 0; y < m.h; y++) for (let x = 0; x < m.w; x++) if (m.rows[y][x] === '~' && frnd() < 0.3) tiles[x + ',' + y] = true;
+  m.fishTiles = tiles;
+}
+
 const MAP_CACHE = {};
 function getMap(key) {
-  if (MAP_CACHE[key]) return MAP_CACHE[key];
+  if (MAP_CACHE[key]) { refreshFishTiles(MAP_CACHE[key], key); return MAP_CACHE[key]; }
   const HAND_MAPS = { square: MAP_SQUARE, market: MAP_MARKET };
   const def = HAND_MAPS[key] || proceduralMap(key);
   const m = { key, w: def.w, h: def.h, rows: def.rows.slice(), spawn: def.spawn, biome: BIOME_OF[key] || 'meadow', buildings: [], props: def.props.map(p => Object.assign({}, p)), solid: [], entries: {}, exits: {} };
@@ -109,11 +125,7 @@ function getMap(key) {
   const q = [m.spawn]; m.reach[m.spawn.y][m.spawn.x] = true;
   while (q.length) { const c = q.shift(); [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(([dx, dy]) => { const nx = c.x + dx, ny = c.y + dy;
     if (nx < 0 || ny < 0 || nx >= m.w || ny >= m.h || m.reach[ny][nx] || m.solid[ny][nx]) return; m.reach[ny][nx] = true; q.push({ x: nx, y: ny }); }); }
-  // A minority of water tiles are ever fishable - the visible fish sprite (drawn in buildWorld from this
-  // same set) is the only tell, and only those tiles will open the fishing overlay.
-  const frnd = seeded('fish-' + key);
-  m.fishTiles = {};
-  for (let y = 0; y < m.h; y++) for (let x = 0; x < m.w; x++) if (m.rows[y][x] === '~' && frnd() < 0.3) m.fishTiles[x + ',' + y] = true;
+  m.fishTiles = {}; refreshFishTiles(m, key);
   MAP_CACHE[key] = m;
   return m;
 }

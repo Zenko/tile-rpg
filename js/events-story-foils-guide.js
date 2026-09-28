@@ -197,16 +197,37 @@ function testerInfo() {
     `Device: ${ua}`,
     recent ? `Recent:\n${recent}` : ''].filter(Boolean).join('\n');
 }
-function sendFeedback(kind) {
+// A real overlay (like #cloudOverlay - see js/cloud-save.js) instead of prompt(), so a longer bug report or
+// piece of feedback can actually be seen and edited while typing, not squeezed into one browser pop-up line.
+let feedbackModalResolve = null;
+async function sendFeedback(kind) {
   sfx('nav'); buzz(HAP.tap);
   const bug = kind === 'bug';
-  const msg = prompt(bug ? 'What happened, and what did you expect to happen? (Your game version and device are added for you.)'
-                         : "What's on your mind? This opens your email app to send it to the developer.");
+  document.getElementById('feedbackModalTitle').textContent = bug ? 'Report a bug' : 'Send feedback';
+  document.getElementById('feedbackModalDesc').textContent = bug
+    ? 'What happened, and what did you expect to happen? Your game version and device are added for you.'
+    : "What's on your mind? This opens your email app to send it to the developer.";
+  document.getElementById('feedbackModalSubmit').textContent = bug ? 'Report' : 'Send';
+  const textEl = document.getElementById('feedbackTextInput');
+  textEl.value = '';
+  document.getElementById('feedbackOverlay').classList.remove('hidden');
+  setTimeout(() => textEl.focus(), 50);
+  const msg = await new Promise(resolve => { feedbackModalResolve = resolve; });
   if (!msg || !msg.trim()) return;
   const subject = encodeURIComponent(bug ? 'Tile RPG bug report' : 'Tile RPG feedback');
   const body = encodeURIComponent((msg.trim() + '\n\n' + testerInfo()).slice(0, 1600));
   window.location.href = `mailto:imzenko@gmail.com?subject=${subject}&body=${body}`;
 }
+function closeFeedbackModal(result) {
+  document.getElementById('feedbackOverlay').classList.add('hidden');
+  if (feedbackModalResolve) { const r = feedbackModalResolve; feedbackModalResolve = null; r(result); }
+}
+document.getElementById('feedbackModalCancel').addEventListener('click', () => { sfx('nav'); closeFeedbackModal(null); });
+document.getElementById('feedbackModalSubmit').addEventListener('click', () => {
+  const val = document.getElementById('feedbackTextInput').value;
+  if (!val.trim()) { toast('Type a message first.'); sfx('tie'); return; }
+  sfx('claim'); closeFeedbackModal(val);
+});
 document.getElementById('bugBtn').addEventListener('click', () => sendFeedback('bug'));
 
 loadState();

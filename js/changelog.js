@@ -19,6 +19,15 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-28',
+    version: '1.20.0',
+    title: "The water moves, and a nicer feedback screen",
+    changes: [
+      "Fishing spots now drift to new places on the water every so often, instead of sitting in the same spots forever.",
+      "Feedback and Report a bug now open a proper screen with a real text box, instead of a plain browser pop-up.",
+    ],
+  },
+  {
+    date: '2026-09-28',
     version: '1.19.0',
     title: "My Cards, tuned up for mobile",
     changes: [

@@ -329,7 +329,10 @@ function townSignature() {
   const bossSig = data.boss ? [data.boss.defeated, data.boss.defeated && data.boss.grave ? graveLeft(data.boss) <= 0 : false].join(':') : '';
   // night-time things: Lumen's stall, how many critters are out, and whether mail is waiting
   const nightSig = [isNightNow(), (data.bugs || []).length, unreadMail()].join(':');
-  return itemSig + '#' + npcSig + '#' + bossSig + '#' + nightSig;
+  // which water tiles have fish reshuffles every FISH_ROTATE_MS (see maps.js) - include the bucket so a
+  // reshuffle while standing in town is picked up by this same signature check, not just on next visit
+  const fishSig = Math.floor(Date.now() / FISH_ROTATE_MS);
+  return itemSig + '#' + npcSig + '#' + bossSig + '#' + nightSig + '#' + fishSig;
 }
 
 setInterval(() => {

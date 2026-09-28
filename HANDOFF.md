@@ -2,7 +2,7 @@
 
 For whoever picks up this project next (most likely another Claude). This covers what the game is, how it's built and published, how to change it safely, and how the owner likes to work.
 
-Current version: **v1.19.0**. The newest entry in `CHANGELOG` (now `js/changelog.js`) is always the source of truth.
+Current version: **v1.20.0**. The newest entry in `CHANGELOG` (now `js/changelog.js`) is always the source of truth.
 
 ---
 
@@ -89,7 +89,7 @@ Each file below still has the same banner comments (the `====` blocks) it had wh
 | `js/town-render-weather.js` | `TOWN MAP: drawing…` / `DAY/NIGHT CYCLE + WEATHER` | Town rendering, camera, tap-to-walk, `interactWith`, `skyPhase(atMs)`, `WEATHER_KINDS`/`weatherFx()`, the weather forecast, `SEASONS`. |
 | `js/houses-and-cellar.js` | `HOUSES AND THE CELLAR` | `INTERIORS` (every enterable building, including the Net Loft and Glasshouse), `openScene`/`renderScene`/`sceneAction`, the bakery, cooking, spice stall, sleeves, cottage/letters, the cellar, the Festival Cup. |
 | `js/neighbors-bosses.js` | `WANDERING NEIGHBORS, BOSSES AND GRAVES` | Wandering, graves, the boss 30-on/30-off clock. |
-| `js/fishing.js` | `FISHING` | Cast, wait for a bite, reel in. |
+| `js/fishing.js` | `FISHING` | Cast, wait for a bite, reel in. Which water tiles are fishable (`m.fishTiles`, computed in `js/maps.js`) reshuffles every `FISH_ROTATE_MS` (10 min) rather than being fixed forever - see the note there. |
 | `js/requests-friendship-rival.js` | `VILLAGER REQUESTS` / `NEIGHBOR FRIENDSHIP` / `THE RIVAL` | Favours (`makeRequest`, `requestDone`, `completeRequest`), friendship hearts, Rook. |
 | `js/puzzle-memory-minigames.js` | `DAILY PUZZLE` / `MEMORY MATCH` / `HOUSE MINI-GAMES` | The puzzle (seeded, solved by search), the memory game, `MINIGAMES` (10 games on one shared framework - see §7). |
 | `js/afterdark-companion-cards.js` | `AFTER DARK` / `COMPANION` / `MORE USES FOR CARDS` | Night market/critters, companion perks, charms, sets, mastery, museum, expeditions, trading board, deck challenges, card gifting. |
@@ -103,7 +103,7 @@ Each file below still has the same banner comments (the `====` blocks) it had wh
 | `js/notes.js` | (sub-banners) | Journal → Notes: the list, PNG export, the drawing canvas. |
 | `js/world-map.js` | (sub-banners) | The plus-shaped town overlay/radar. |
 | `js/titles.js` | (sub-banners) | Earned titles, `switchTab`, `updateHud`. |
-| `js/events-story-foils-guide.js` | `DAILY TOWN EVENTS` … `FEEDBACK FOR TESTERS` | Daily events, the getting-started **and post-onboarding** story (`STORY`, `STORY_ARC_LEN`), foils, the Town Guide, comfort settings, tester feedback, and **the start-up code** (`loadState(); … renderTown(); updateHud();`) - this file must load before `js/cloud-save.js`, but otherwise last among the game's own files, because start-up uses everything else. |
+| `js/events-story-foils-guide.js` | `DAILY TOWN EVENTS` … `FEEDBACK FOR TESTERS` | Daily events, the getting-started **and post-onboarding** story (`STORY`, `STORY_ARC_LEN`), foils, the Town Guide, comfort settings, tester feedback (`sendFeedback`, opening `#feedbackOverlay` - the same real-modal pattern as `#cloudOverlay`, not `prompt()`), and **the start-up code** (`loadState(); … renderTown(); updateHud();`) - this file must load before `js/cloud-save.js`, but otherwise last among the game's own files, because start-up uses everything else. |
 | *(3 Firebase CDN scripts)* / `js/cloud-save.js` | - | Loaded **last of all**, after every file above - see §1a. Firestore backup on top of the local save: `cloudInit`, `cloudSaveDebounced` (hooked into `saveState()`), `cloudPullThenReconcile`, the "Back up"/"Restore" buttons. |
 
 ## 5. Conventions to keep
