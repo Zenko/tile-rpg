@@ -787,6 +787,9 @@ function interactWith(kind, t) {
   } else if (kind === 'decoration') {
     const def = DECORATION_ITEMS.find(x => x.id === t.id);
     showProp(def ? def.icon : '❔', def ? def.name : 'A decoration', (def ? def.desc : 'Something you placed here.') + ' You set this down yourself.');
+  } else if (kind === 'companion') {
+    if (!state.companion) return;
+    sfx('tap'); buzz(HAP.tap); showTipOnce('companionPlay'); openScene('companion');
   }
 }
 // A rare hidden card, found on the ground or tucked near a prop - mostly common, rarely rare, and
@@ -821,6 +824,9 @@ function handleMapTap(tx, ty) {
   if (grv) { showGrave(grv); return; }
   const bug = bugAt(data, tx, ty);
   if (bug) { walkThen(adjacentTo(bug), () => catchBug(bug)); return; }
+  if (state.companion && state.companionPos && tx === state.companionPos.x && ty === state.companionPos.y) {
+    walkThen(adjacentTo(state.companionPos), () => interactWith('companion')); return;
+  }
   if (lanternOpen() && tx === LANTERN_TILE.x && ty === LANTERN_TILE.y) { walkThen(adjacentTo(LANTERN_TILE), () => { sfx('claim'); openScene('lantern'); showTipOnce('lantern'); }); return; }
   const spirit = (data.spirits || []).find(s => s.x === tx && s.y === ty);
   if (spirit) { walkThen(adjacentTo(spirit), () => interactWith('spirit', spirit)); return; }

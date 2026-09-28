@@ -19,6 +19,15 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-28',
+    version: '1.36.0',
+    title: "Hide and Seek with your companion, easier-to-claim rewards",
+    changes: [
+      "New mini-game: tap your companion in town any time to play Hide and Seek. It ducks behind something nearby, and you tap where it's hiding from memory - rounds get quicker and add more hiding spots the longer your streak runs. Counts toward the usual mini-game quests and medals.",
+      "Dailies and Weekly now sort quests that are ready to claim to the top, so you never have to scroll past in-progress ones to find the Claim button.",
+    ],
+  },
+  {
+    date: '2026-09-28',
     version: '1.35.0',
     title: "More smoothness, bigger tap targets",
     changes: [

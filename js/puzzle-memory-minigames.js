@@ -411,6 +411,24 @@ function tidyItem(prev) {
   return { bin, icon };
 }
 
+/* ---------- 🙈 Hide and Seek (tap your own companion in town) ---------- */
+const HIDESEEK_SPOTS = ['🌳', '🪴', '🧺', '🛢️', '🪣', '🌻'];
+function hideseekNext(g) {
+  const st = g.st;
+  st.spots = Math.min(3 + Math.floor(st.round / 2), HIDESEEK_SPOTS.length);
+  st.spot = rand(st.spots);
+  st.phase = 'peek';
+  miniRender();
+  const peekMs = Math.max(350, 900 - st.round * 60);
+  miniAfter(peekMs, s => {
+    s.phase = 'seek';
+    s.seekTotal = Math.max(1400, 2600 - s.round * 80);
+    s.seekLeft = s.seekTotal;
+    s.seekEndsAt = Date.now() + s.seekTotal;
+    miniRender();
+  });
+}
+
 const HAGGLE_POT = [0, 1, 2, 4, 6, 9, 12, 16, 20];
 const MINIGAMES = {
   tea: { house: 'cottage', icon: '🫖', title: 'Perfect Pour',
@@ -577,6 +595,38 @@ const MINIGAMES = {
     },
     render: st => `<div class="mg-info">Moves: ${st.moves} · gold in 5 or fewer</div>
       <div class="lanterns">${st.on.map((o, i) => `<button class="lantern${o ? ' lit' : ''}" data-mg="${i}">🏮</button>`).join('')}</div>` },
+
+  hideseek: { house: 'companion', icon: '🙈', title: 'Hide and Seek',
+    how: "Your companion ducks behind something nearby for a moment - watch closely, then tap where it's hiding. Gets quicker each round, and there are more places to hide.",
+    tiers: { bronze: 3, silver: 6, gold: 9 }, scoreText: s => `Found ${s} time${s === 1 ? '' : 's'}.`,
+    init: () => ({ round: 0, spots: 3, spot: 0, phase: 'peek', seekLeft: 0, seekTotal: 1, wrongPick: -1 }),
+    begin: g => {
+      // One steady tick for the whole game (not restarted per round) drives the seek countdown; rounds
+      // themselves are chained through miniAfter, same pattern as Cake Toppings' frostNext().
+      miniEvery(80, st => {
+        if (st.phase !== 'seek') return;
+        st.seekLeft = st.seekEndsAt - Date.now();
+        if (st.seekLeft <= 0) { st.phase = 'missed'; sfx('soft'); miniAfter(700, s => miniFinish(s.round)); return; }
+        miniRender();
+      });
+      hideseekNext(g);
+    },
+    tap: (st, v) => {
+      if (st.phase !== 'seek') return;
+      const pick = +v;
+      if (pick === st.spot) { st.round++; st.phase = 'found'; sfx('claim'); buzz(HAP.found); miniAfter(500, () => hideseekNext(mini)); }
+      else { st.phase = 'missed'; st.wrongPick = pick; sfx('soft'); miniAfter(700, s => miniFinish(s.round)); }
+    },
+    render: st => {
+      const companionIcon = (state.companion && state.companion.icon) || '🐾';
+      const note = st.phase === 'peek' ? '👀 Watch closely…' : st.phase === 'seek' ? 'Where did they go?'
+        : st.phase === 'found' ? '🎉 Found them!' : '🙈 Not there…';
+      return `${st.phase === 'seek' ? timerBar(st.seekLeft, st.seekTotal) : ''}<div class="mg-info">${note} · round ${st.round + 1}</div>
+        <div class="hideseek-spots">${Array.from({ length: st.spots }, (_, i) => {
+          const reveal = i === st.spot && st.phase !== 'seek';
+          return `<button class="hs-spot${reveal ? ' reveal' : ''}${st.phase === 'missed' && i === st.wrongPick ? ' wrong' : ''}" data-mg="${i}" ${st.phase === 'seek' ? '' : 'disabled'}>${reveal ? companionIcon : HIDESEEK_SPOTS[i]}</button>`;
+        }).join('')}</div>`;
+    } },
 };
 
 

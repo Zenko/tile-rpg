@@ -124,7 +124,7 @@ const GUIDE = [
     { icon: '📅', name: 'Daily events', where: 'Shown next to the district name', how: 'One a day - a Fishing Derby, Market Day, Harvest Fair and more.' },
     { icon: '🗝️', name: 'Hidden cards & chests', where: 'Grass, flowers and props everywhere', how: 'Walk through flowers, poke at props, and follow a golden glow to a chest.' },
     { icon: '✨', name: 'Night critters', where: 'Every district, after dark', how: 'Tap a glowing critter to catch it. Trade them at the Lantern Market.' },
-    { icon: '👻', name: 'Companion spirits', where: 'Tap a wandering spirit', how: 'Invite one along; it follows you and lends a small perk.' },
+    { icon: '👻', name: 'Companion spirits', where: 'Tap a wandering spirit', how: 'Invite one along; it follows you and lends a small perk. Tap it again any time to play Hide and Seek together.' },
     { icon: '🎒', name: 'Inventory', where: 'Tap your avatar → 🎒 View Inventory', how: 'Pantry ingredients, cooked dishes, seeds and spare decorations, all in one list - tap Plant or Place to use one right from there.' },
   ] },
   { section: 'Neighbors', items: [
