@@ -75,7 +75,9 @@ const WEATHER_KINDS = {
 };
 function rollWeather(isNight) {
   const tilt = seasonDef().weather || {};
-  const entries = Object.entries(WEATHER_KINDS).map(([k, v]) => [k, v.weight(isNight) * (tilt[k] || 1)]);
+  // `k in tilt ? tilt[k] : 1`, not `tilt[k] || 1` - a season's explicit `snow: 0` (winter-exclusive snow) is a
+  // falsy value that `||` would silently replace with the default 1, undoing the whole point of setting it.
+  const entries = Object.entries(WEATHER_KINDS).map(([k, v]) => [k, v.weight(isNight) * (k in tilt ? tilt[k] : 1)]);
   const total = entries.reduce((s, [, w]) => s + w, 0);
   let r = Math.random() * total;
   for (const [k, w] of entries) { if ((r -= w) <= 0) return k; }
@@ -99,11 +101,14 @@ const WEATHER_EFFECTS = {
    A season recolours the trees, swaps the music's chord set, tilts the weather, and makes its own cards turn up
    more often (3x as likely within their rarity, from packs, prizes and finds alike). */
 const SEASONS = {
-  spring: { icon: '🌸', name: 'Spring', weather: { rain: 1.5, cloudy: 1.2 },
+  // snow: 0 on every season but winter makes it a winter-exclusive weather kind, not just a rare one elsewhere -
+  // rollWeather()'s `tilt[k] || 1` would otherwise leave it at WEATHER_KINDS.snow's ordinary base weight the
+  // rest of the year. Winter's own tilt is what makes snow common there instead of merely possible.
+  spring: { icon: '🌸', name: 'Spring', weather: { rain: 1.5, cloudy: 1.2, snow: 0 },
     cards: ['sprout', 'blossom', 'sakura-petal', 'cherry-blossom-storm', 'clover', 'lily', 'foxglove', 'moth', 'dove', 'garden-spirit', 'rain-shower', 'starfall-unicorn'] },
-  summer: { icon: '☀️', name: 'Summer', weather: { clear: 1.4, storm: 1.4 },
+  summer: { icon: '☀️', name: 'Summer', weather: { clear: 1.4, storm: 1.4, snow: 0 },
     cards: ['firefly', 'reed', 'feather', 'gale', 'thunderhead', 'storm-lily', 'lucky-cat', 'festival-drum', 'koi', 'paper-fan', 'sunbeam', 'phoenix-ember'] },
-  autumn: { icon: '🍂', name: 'Autumn', weather: { fog: 1.8, cloudy: 1.3 },
+  autumn: { icon: '🍂', name: 'Autumn', weather: { fog: 1.8, cloudy: 1.3, snow: 0 },
     cards: ['acorn', 'autumn-maple', 'dew-leaf', 'harvest-lantern', 'hollow-log', 'twig-bundle', 'pinewood-owl', 'moth-queen', 'hedgehog', 'copper-carp', 'harvest', 'ironroot-treant'] },
   winter: { icon: '❄️', name: 'Winter', weather: { snow: 3.5, clear: 0.8 },
     cards: ['winter-hare', 'glacier-spirit', 'crystal-spire', 'quartz-cluster', 'moonstone', 'snail', 'geode', 'northern-lights', 'moonlit-shrine', 'stone-lantern', 'moonlit-tide', 'celestial-owl'] },
@@ -175,6 +180,13 @@ function updateAmbient() {
   setTimeout(() => { textEl.textContent = text; iconEl.textContent = icon || s.icon; wrap.classList.remove('fading'); }, 220);
 }
 function maybeRollWeather() {
+  // Snow is winter-exclusive (see SEASONS' snow: 0 tilt elsewhere), but the season clock (real weeks) and the
+  // weather clock (active-play minutes) run independently, so a snowy spell - or a pre-rolled forecast of one -
+  // can still be sitting in state.weather when the season turns. Clear it out rather than let it linger or
+  // making good on a forecast the new season no longer allows; this also cleans up an older save from before
+  // snow was winter-only.
+  if (state.weather.current === 'snow' && seasonNow() !== 'winter') state.weather.changesAt = 0;
+  if (state.weather.next === 'snow' && seasonNow() !== 'winter') state.weather.next = null;
   // Scheduled on state.weather.elapsed (a plain, non-wrapping clock) rather than state.sky.elapsedMs,
   // which wraps every DAY_LEN_MS - comparing against a wrapped clock could push changesAt past the wrap
   // point and freeze the weather forever, since the wrapped clock would never reach it again.
@@ -384,7 +396,7 @@ let skyEl = null, vignetteEl = null, weatherEl = null, snowFieldEl = null, light
 function buildSkyLayers() {
   skyEl = document.createElement('div'); skyEl.className = 'town-sky';
   weatherEl = document.createElement('div'); weatherEl.className = 'town-weather'; weatherEl.id = 'townWeather';
-  weatherEl.innerHTML = `<div class="fog-layer f1"></div><div class="fog-layer f2"></div><div class="rain-layer"></div><div class="lightning"></div><div class="snow-field" id="snowField"></div><div class="sun-rays"></div><div class="cloud-shadow c1"></div><div class="cloud-shadow c2"></div>`;
+  weatherEl.innerHTML = `<div class="fog-layer f1"></div><div class="fog-layer f2"></div><div class="fog-layer f3"></div><div class="rain-layer"></div><div class="lightning"></div><div class="snow-field" id="snowField"></div><div class="sun-rays"></div><div class="cloud-shadow c1"></div><div class="cloud-shadow c2"></div>`;
   vignetteEl = document.createElement('div'); vignetteEl.className = 'town-vignette';
   townView.appendChild(skyEl); townView.appendChild(weatherEl); townView.appendChild(vignetteEl);
   snowFieldEl = weatherEl.querySelector('#snowField');

@@ -19,6 +19,16 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-28',
+    version: '1.29.0',
+    title: "Weather and seasons",
+    changes: [
+      "Fog is redone: soft drifting cloud banks instead of one flat grey band, closer to what actual mist looks like from above.",
+      "Weather now fades in and out more gradually instead of snapping to the new look.",
+      "Snow is winter-only from now on - no more the odd snowy day in spring or summer.",
+    ],
+  },
+  {
+    date: '2026-09-28',
     version: '1.28.0',
     title: "A place for your things",
     changes: [
