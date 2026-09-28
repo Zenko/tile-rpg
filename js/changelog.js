@@ -19,6 +19,15 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-28',
+    version: '1.28.0',
+    title: "A place for your things",
+    changes: [
+      "New: Inventory. Tap your avatar → 🎒 View Inventory to see everything you're carrying - pantry ingredients, cooked dishes, seeds and spare decorations - in one list instead of hunting through buildings.",
+      "Plant a seed or place a decoration straight from the Inventory list.",
+    ],
+  },
+  {
+    date: '2026-09-28',
     version: '1.27.0',
     title: "A tidier Shop",
     changes: [

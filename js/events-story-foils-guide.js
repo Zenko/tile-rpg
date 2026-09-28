@@ -125,6 +125,7 @@ const GUIDE = [
     { icon: '🗝️', name: 'Hidden cards & chests', where: 'Grass, flowers and props everywhere', how: 'Walk through flowers, poke at props, and follow a golden glow to a chest.' },
     { icon: '✨', name: 'Night critters', where: 'Every district, after dark', how: 'Tap a glowing critter to catch it. Trade them at the Lantern Market.' },
     { icon: '👻', name: 'Companion spirits', where: 'Tap a wandering spirit', how: 'Invite one along; it follows you and lends a small perk.' },
+    { icon: '🎒', name: 'Inventory', where: 'Tap your avatar → 🎒 View Inventory', how: 'Pantry ingredients, cooked dishes, seeds and spare decorations, all in one list - tap Plant or Place to use one right from there.' },
   ] },
   { section: 'Neighbors', items: [
     { icon: '💬', name: 'Favours', where: 'Tap any neighbor', how: 'Small daily requests for Pebbles or cards. Track them in Rewards → Favours.' },
