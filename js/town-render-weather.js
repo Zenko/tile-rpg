@@ -253,11 +253,11 @@ let rainBuilt = false, rainLayerEl = null;
 function buildRainDrops(storm) {
   if (!rainLayerEl) return;
   rainLayerEl.innerHTML = '';
-  const count = 40;
+  const count = 60;
   for (let i = 0; i < count; i++) {
     const d = document.createElement('div'); d.className = 'rain-drop';
     const speed = storm ? 0.75 : 1;   // storms fall a bit quicker than plain rain, but both are gentler than before
-    const left = Math.random() * 100, dur = (1.7 + Math.random() * 0.9) * speed, len = 6 + Math.random() * 4;
+    const left = Math.random() * 100, dur = (1.7 + Math.random() * 0.9) * speed, len = 4 + Math.random() * 3;
     // Negative delay spread across the FULL duration (not a fraction of it) so drops are already mid-fall,
     // spread evenly through the whole visible band, the instant the layer appears.
     const delay = Math.random() * dur;

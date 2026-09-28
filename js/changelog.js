@@ -19,6 +19,14 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-28',
+    version: '1.24.0',
+    title: "Softer rain",
+    changes: [
+      "Turned down the rain: the falling streaks were bright and long enough to look like screen glitches rather than rain, especially at night. They're now thinner, softer, and more numerous, so a rainy day reads as rain instead of static.",
+    ],
+  },
+  {
+    date: '2026-09-28',
     version: '1.23.0',
     title: "Fixed the storm lightning getting stuck",
     changes: [
