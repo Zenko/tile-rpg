@@ -19,6 +19,14 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-28',
+    version: '1.25.0',
+    title: "Fixed real rain and snow glitching",
+    changes: [
+      "Found the actual cause of the flashing/tearing some players saw during rain or snow: those effects were animating a layout property on dozens of elements at once every frame, which is heavy enough to make some phones drop or tear a frame. They're now driven by GPU-friendly transforms instead, which should be far smoother.",
+    ],
+  },
+  {
+    date: '2026-09-28',
     version: '1.24.0',
     title: "Softer rain",
     changes: [

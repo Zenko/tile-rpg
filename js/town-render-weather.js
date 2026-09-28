@@ -240,11 +240,15 @@ function buildSnowFlakes() {
   snowFieldEl.innerHTML = '';
   snowFlakes = [];
   const count = 22;
+  // Pixel fall distance for the transform-based animation (see snow-fall's CSS comment) - computed once from
+  // the layer's real height, since a percentage inside translate() is relative to the flake itself, not the layer.
+  const fall = (snowFieldEl.clientHeight || 600) * 1.26;
   for (let i = 0; i < count; i++) {
     const f = document.createElement('div'); f.className = 'snow-flake';
     const size = 3 + Math.random() * 4, left = Math.random() * 100, dur = 6 + Math.random() * 7, delay = Math.random() * dur;
     f.style.left = left + '%'; f.style.width = size + 'px'; f.style.height = size + 'px';
     f.style.setProperty('--drift', (Math.random() * 40 - 20) + 'px');
+    f.style.setProperty('--fall', fall + 'px');
     f.style.animationDuration = dur + 's'; f.style.animationDelay = '-' + delay + 's';
     snowFieldEl.appendChild(f);
   }
@@ -254,6 +258,9 @@ function buildRainDrops(storm) {
   if (!rainLayerEl) return;
   rainLayerEl.innerHTML = '';
   const count = 60;
+  // Pixel fall distance for the transform-based animation (see rain-fall's CSS comment) - computed once from
+  // the layer's real height, since a percentage inside translateY() is relative to the drop itself, not the layer.
+  const fall = (rainLayerEl.clientHeight || 600) * 1.48;
   for (let i = 0; i < count; i++) {
     const d = document.createElement('div'); d.className = 'rain-drop';
     const speed = storm ? 0.75 : 1;   // storms fall a bit quicker than plain rain, but both are gentler than before
@@ -262,6 +269,7 @@ function buildRainDrops(storm) {
     // spread evenly through the whole visible band, the instant the layer appears.
     const delay = Math.random() * dur;
     d.style.left = left + '%'; d.style.height = len + '%';
+    d.style.setProperty('--fall', fall + 'px');
     d.style.animationDuration = dur + 's'; d.style.animationDelay = '-' + delay + 's';
     rainLayerEl.appendChild(d);
   }
