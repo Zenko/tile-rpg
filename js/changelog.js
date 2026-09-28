@@ -19,6 +19,14 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-28',
+    version: '1.23.0',
+    title: "Fixed the storm lightning getting stuck",
+    changes: [
+      "Found it: the storm lightning flash could keep firing every few seconds even outside a storm, on some phones, because its animation wasn't being fully stopped when the weather changed away from storm. It's now switched on and off directly, so it can't get stuck anymore.",
+    ],
+  },
+  {
+    date: '2026-09-28',
     version: '1.22.0',
     title: "Fixed a screen flash after the last weather update",
     changes: [

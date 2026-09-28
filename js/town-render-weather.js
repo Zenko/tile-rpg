@@ -272,6 +272,11 @@ function applyWeather(instant) {
   if (!weatherEl) return;
   maybeRollWeather();
   const kind = state.weather.current;
+  // Enforced on every call, not just when the weather changes: an infinite CSS animation enabled purely by
+  // a .weather-storm class match has been seen to keep running on some mobile browsers even after the class
+  // stops matching (a stale-animation rendering quirk) - reads as a lightning-like flash turning up in
+  // weather that was never storm. Explicitly setting `animation: none` every tick forces it off regardless.
+  if (lightningEl) lightningEl.style.animation = kind === 'storm' ? '' : 'none';
   // Skip the DOM writes below entirely when nothing changed - applyWeather() runs on every 2s/5s tick
   // regardless of whether the weather did anything, and re-touching a layer full of running CSS
   // transitions/animations on every tick is unnecessary work this loop never needed to do.
@@ -367,7 +372,7 @@ function buildWorld(key) {
 }
 
 /* ---------------- sky (day/night tint) + weather overlays, sit above the world but inside town-view ---------------- */
-let skyEl = null, vignetteEl = null, weatherEl = null, snowFieldEl = null;
+let skyEl = null, vignetteEl = null, weatherEl = null, snowFieldEl = null, lightningEl = null;
 function buildSkyLayers() {
   skyEl = document.createElement('div'); skyEl.className = 'town-sky';
   weatherEl = document.createElement('div'); weatherEl.className = 'town-weather'; weatherEl.id = 'townWeather';
@@ -376,6 +381,8 @@ function buildSkyLayers() {
   townView.appendChild(skyEl); townView.appendChild(weatherEl); townView.appendChild(vignetteEl);
   snowFieldEl = weatherEl.querySelector('#snowField');
   rainLayerEl = weatherEl.querySelector('.rain-layer');
+  lightningEl = weatherEl.querySelector('.lightning');
+  if (lightningEl) lightningEl.style.animation = 'none';   // freshly built: force it off until applyWeather() below says otherwise
   rainBuilt = false;
   applyWeather(true); applySky(true);
 }
