@@ -134,9 +134,12 @@ function setCardsView(view) {
 function renderFishLog() {
   const box = document.getElementById('fishLogView'), f = fishState();
   const caught = FISH.filter(x => f.caught[x.id]).length, pct = Math.round(caught / FISH.length * 100);
+  const goalNote = caught >= FISH.length ? '🏷️ Master Angler earned - every fish in the log.'
+    : `Catch them all for the Master Angler title${f.caught['star-koi'] ? '' : '; a legendary catch alone earns Legend Catcher'}.`;
   box.innerHTML = `<div class="alm-progress"><div class="ap-top"><span><b>${caught}</b> of ${FISH.length} fish caught · ${f.total || 0} landed in all</span><span>${pct}%</span></div>
     <div class="q-bar"><div class="q-fill" style="width:${pct}%"></div></div></div>
-    <div class="shop-note" style="margin:0 4px 10px">Some fish only bite at night, in certain weather, or in Quiet Harbor. ${fishAvailableNote()}</div>`;
+    <div class="shop-note" style="margin:0 4px 10px">Some fish only bite at night, in certain weather, or in Quiet Harbor. ${fishAvailableNote()}</div>
+    <div class="shop-note" style="margin:0 4px 10px">${goalNote}</div>`;
   const row = document.createElement('div');
   row.className = 'alm-row';
   FISH.forEach(x => {

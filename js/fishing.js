@@ -30,11 +30,13 @@ const FISH_CARD_ODDS = 1 / 14;       // chance that a rewarded catch is a card o
 const FISH_DAILY_REWARDED = 8;       // rewarded catches per day; fishing itself is never blocked
 const FISH_WAIT_MS = [1500, 4000];   // random wait before a bite
 const FISH_BITE_MS = 1100;           // how long the bite window stays open
+const FISH_LEGEND_PITY = 150;        // hook this many non-legendary fish in a row and the next one is guaranteed the Starlight Koi
+const FISH_BIG_ODDS = 0.1;           // chance any ordinary catch turns out to be a big one (bonus pebbles, a little flourish)
 const NIBBLE_LINES = ['The float sits still.', 'A dragonfly lands on the line.', 'Ripples spread. Not yet.', 'Something brushes the line.'];
 
 const fishState = () => {
   const p = state.progress;
-  if (!p.fishing) p.fishing = { day: todayKey(), rewarded: 0, caught: {}, total: 0, best: null };
+  if (!p.fishing) p.fishing = { day: todayKey(), rewarded: 0, caught: {}, total: 0, best: null, sinceLegendary: 0 };
   const f = p.fishing;
   if (f.day !== todayKey()) { f.day = todayKey(); f.rewarded = 0; }
   if (!f.caught) f.caught = {};
@@ -44,6 +46,10 @@ const fishState = () => {
 function fishWeight(f) { return f.weight * (f.weight < 20 && !f.legendary ? (weatherFx().rareFish || 1) * (eventIs('fishing-derby') ? 2 : 1) : 1); }
 function pickFish() {
   const pool = FISH.filter(fishAvailable);
+  // A very long dry spell on the legendary Starlight Koi (whose catch weight is tiny by design) guarantees
+  // the next hook is one, rather than leaving it a lottery ticket most players never actually see.
+  const koi = fishDef('star-koi');
+  if ((fishState().sinceLegendary || 0) >= FISH_LEGEND_PITY && koi && fishAvailable(koi)) return koi;
   const total = pool.reduce((s, f) => s + fishWeight(f), 0); let r = Math.random() * total;
   for (const f of pool) { r -= fishWeight(f); if (r <= 0) return f; }
   return pool[0] || FISH[0];
@@ -78,7 +84,9 @@ function openFishing(spot) {
   const e = fishEls();
   e.art.className = 'fish-art'; e.art.textContent = '🎣';
   e.msg.textContent = 'A quiet spot by the water.';
-  e.sub.textContent = weatherIs('rain') ? '🌧️ The rain has the fish biting. Cast your line.' : 'Cast your line and wait for a bite.';
+  const rainNote = weatherIs('rain') ? '🌧️ The rain has the fish biting. ' : '';
+  const condNote = fishAvailableNote();
+  e.sub.textContent = rainNote + (condNote || 'Cast your line and wait for a bite.');
   e.btn.textContent = 'Cast line'; e.btn.disabled = false; e.btn.classList.remove('wait', 'bite', 'reeling'); e.tally.textContent = fishTallyText();
   e.bar.classList.add('hidden'); e.fill.style.width = '32%'; e.fill.classList.remove('danger');
   e.ov.classList.remove('hidden'); sfx('tap');
@@ -153,6 +161,7 @@ function fishLand(fish) {
   const e = fishEls(), f = fishState();
   const firstOfKind = !f.caught[fish.id];
   f.caught[fish.id] = (f.caught[fish.id] || 0) + 1; f.total = (f.total || 0) + 1;
+  f.sinceLegendary = fish.legendary ? 0 : (f.sinceLegendary || 0) + 1;
   addIngredient('fish', 1);                                   // every catch goes in the pantry too
   if (!f.best || !fishDef(f.best) || fish.pebbles > fishDef(f.best).pebbles) f.best = fish.id;
   bumpStat('fishCaught', 1);
@@ -160,6 +169,7 @@ function fishLand(fish) {
   if (firstOfKind) logEvent(fish.icon, `New in the fish log: ${fish.name}.`);
   if (fish.legendary) logEvent('🌟', `Landed the legendary ${fish.name}!`);
   const rewarded = f.rewarded < FISH_DAILY_REWARDED;
+  const isBig = !fish.legendary && Math.random() < FISH_BIG_ODDS;   // a rare bonus-sized catch - flourish and a bit more, nothing to chase deliberately
   let line = fish.blurb, cardId = null;
   if (rewarded) {
     f.rewarded++;
@@ -167,13 +177,17 @@ function fishLand(fish) {
       cardId = randomCardId(rollRewardRarity(false));
       state.ownedCards.push(cardId); bumpStat('cardsFound', 1); bumpPill('pillCards');
       line = 'Something heavier than a fish. A card, tied up in the weeds!';
-    } else { const peb = fish.pebbles * (eventIs('fishing-derby') ? 2 : 1); addPebbles(peb); line = `${fish.blurb} +${peb} Pebble${peb > 1 ? 's' : ''}${eventIs('fishing-derby') ? ' (derby!)' : ''}`; }
+    } else {
+      const peb = Math.round(fish.pebbles * (eventIs('fishing-derby') ? 2 : 1) * (isBig ? 1.5 : 1));
+      addPebbles(peb);
+      line = `${isBig ? "It's a big one! " : ''}${fish.blurb} +${peb} Pebble${peb > 1 ? 's' : ''}${eventIs('fishing-derby') ? ' (derby!)' : ''}`;
+    }
   } else { line = `${fish.blurb} You let it go.`; }
   saveState(); updateHud();
   fishing.phase = 'idle'; e.btn.classList.remove('wait', 'bite', 'reeling');
   e.bar.classList.add('hidden');
-  e.art.className = 'fish-art caught'; e.art.textContent = cardId ? '🃏' : fish.icon;
-  e.msg.textContent = cardId ? 'A card!' : (firstOfKind ? `New catch: ${fish.name}!` : `You caught a ${fish.name}!`);
+  e.art.className = 'fish-art caught' + (isBig ? ' big' : ''); e.art.textContent = cardId ? '🃏' : fish.icon;
+  e.msg.textContent = cardId ? 'A card!' : (firstOfKind ? `New catch: ${fish.name}!` : isBig ? `A big ${fish.name}!` : `You caught a ${fish.name}!`);
   e.sub.textContent = line; e.tally.textContent = fishTallyText();
   e.btn.textContent = 'Cast again'; e.btn.disabled = false;
   sfx(cardId || fish.legendary ? 'rare' : 'claim'); buzz(fish.legendary ? HAP.big : HAP.win);

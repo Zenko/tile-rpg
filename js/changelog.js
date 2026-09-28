@@ -19,6 +19,17 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-28',
+    version: '1.26.0',
+    title: "A better day of fishing",
+    changes: [
+      "The fishing spot now tells you what's actually biting right now - night fish, weather fish, or whatever's local to that shore - instead of leaving you to guess.",
+      "Fish long enough without a legendary catch and the Starlight Koi stops being a lottery ticket: the next bite is guaranteed to be one.",
+      "Every so often a catch turns out to be a big one - a little flourish and some bonus Pebbles.",
+      "The Fish page now says outright what completing it earns you: the Master Angler title.",
+    ],
+  },
+  {
+    date: '2026-09-28',
     version: '1.25.0',
     title: "Fixed real rain and snow glitching",
     changes: [
