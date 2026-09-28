@@ -639,12 +639,26 @@ input.vol:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px rgba(127,1
 .dk-tip { margin: 2px 10px 10px; padding: 8px 12px; border-radius: 12px; background: var(--stone); border: 1px solid var(--stone-edge); font-size: 0.76rem; line-height: 1.4; color: var(--ink-soft); text-align: center; }
 .dk-tip.hidden { display: none; }
 .card-filter { margin: 0 0 10px; }
-.cf-row { display: flex; gap: 6px; margin-bottom: 6px; }
-.cf-search { flex: 1; min-width: 0; border: 1px solid var(--stone-edge); background: var(--stone); color: var(--ink); border-radius: 999px; padding: 8px 12px; font-size: 0.8rem; font-family: inherit; -webkit-user-select: text; user-select: text; }
-.cf-sort { border: 1px solid var(--stone-edge); background: var(--stone); color: var(--ink); border-radius: 999px; padding: 0 10px; font-size: 0.76rem; font-family: inherit; }
-.cf-chips { display: flex; gap: 5px; flex-wrap: wrap; }
-.cf-chip { border: 1px solid var(--stone-edge); background: var(--stone); color: var(--ink-soft); border-radius: 999px; padding: 4px 9px; font-size: 0.66rem; cursor: pointer; font-family: inherit; }
-.cf-chip.active { background: var(--water); border-color: var(--water); color: #fff; }
+.cf-row { display: flex; gap: 6px; margin-bottom: 8px; }
+.cf-search { flex: 1; min-width: 0; border: 1px solid var(--stone-edge); background: var(--stone); color: var(--ink); border-radius: 999px; padding: 0 14px; height: 40px; font-size: 0.85rem; font-family: inherit; -webkit-user-select: text; user-select: text; }
+.cf-sort-btn { flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px; height: 40px; border: 1px solid var(--stone-edge); background: var(--stone); color: var(--ink); border-radius: 999px; padding: 0 14px; font-size: 0.8rem; font-weight: 600; font-family: inherit; cursor: pointer; white-space: nowrap; }
+.cf-sort-btn .cf-caret { font-size: 0.65rem; color: var(--ink-soft); }
+/* A horizontal-scrolling strip, like a mobile game's inventory filters, rather than a wrapping form row.
+   Negative margin + padding lets the row bleed to the panel's edges so the last chip isn't flush against it. */
+.cf-chips { display: flex; gap: 7px; overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; -webkit-overflow-scrolling: touch; margin: 0 -14px; padding: 0 14px 2px; }
+.cf-chips::-webkit-scrollbar { display: none; }
+.cf-chip { flex-shrink: 0; display: inline-flex; align-items: center; height: 40px; border: 1px solid var(--stone-edge); background: var(--stone); color: var(--ink-soft); border-radius: 999px; padding: 0 15px; font-size: 0.8rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease; }
+.cf-chip.active { color: #fff; border-color: transparent; }
+.cf-chip[data-r="all"].active { background: var(--ink-soft); }
+.cf-chip[data-r="common"].active { background: var(--water); }
+.cf-chip[data-r="rare"].active { background: var(--rare); }
+.cf-chip[data-r="ultra"].active { background: var(--epic); }
+.cf-chip[data-r="super"].active { background: var(--accent); }
+.cf-chip[data-r="mythic"].active { background: var(--mythic); }
+.cf-chip[data-r="spell"].active { background: #b48ee0; }
+.sort-options { display: flex; flex-direction: column; gap: 6px; margin: 4px 0 16px; }
+.sort-opt { border: 1px solid var(--stone-edge); background: var(--stone); color: var(--ink); border-radius: 12px; padding: 12px 14px; font-size: 0.9rem; font-family: inherit; cursor: pointer; text-align: left; }
+.sort-opt.active { border-color: var(--water); background: var(--water); color: #fff; font-weight: 600; }
 .dk-slots { display: flex; gap: 6px; margin: 0 0 10px; align-items: stretch; }
 .dk-slot { flex: 1; min-width: 0; border: 1px solid var(--stone-edge); background: var(--stone); color: var(--ink-soft); border-radius: 12px; padding: 6px 4px; cursor: pointer; font-family: inherit; display: flex; flex-direction: column; align-items: center; gap: 1px; }
 .dk-slot:active { transform: scale(0.96); }

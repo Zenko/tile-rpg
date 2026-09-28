@@ -25,17 +25,33 @@ function renderFilterBar(boxId, rerender) {
   if (!box.dataset.built) {
     box.dataset.built = '1';
     box.innerHTML = `<div class="cf-row"><input type="search" class="cf-search" placeholder="Search cards or keywords" aria-label="Search cards">
-      <select class="cf-sort" aria-label="Sort cards">${Object.keys(SORTS).map(k => `<option value="${k}">${SORTS[k]}</option>`).join('')}</select></div>
+      <button class="cf-sort-btn" aria-label="Sort cards">Sort: <span class="cf-sort-label"></span><span class="cf-caret">▾</span></button></div>
       <div class="cf-chips">${FILTER_CHIPS.map(([k, l]) => `<button class="cf-chip" data-r="${k}">${l}</button>`).join('')}</div>`;
     box.querySelector('.cf-search').addEventListener('input', e => { cardFilter.q = e.target.value; rerender(); });
-    box.querySelector('.cf-sort').addEventListener('change', e => { cardFilter.sort = e.target.value; sfx('tap'); rerender(); });
+    box.querySelector('.cf-sort-btn').addEventListener('click', () => { sfx('tap'); openSortOverlay(rerender); });
     box.querySelectorAll('.cf-chip').forEach(b => b.addEventListener('click', () => { cardFilter.rarity = b.dataset.r; sfx('tap'); rerender(); }));
   }
   const input = box.querySelector('.cf-search');
   if (input.value !== cardFilter.q) input.value = cardFilter.q;
-  box.querySelector('.cf-sort').value = cardFilter.sort;
+  box.querySelector('.cf-sort-label').textContent = SORTS[cardFilter.sort];
   box.querySelectorAll('.cf-chip').forEach(b => b.classList.toggle('active', b.dataset.r === cardFilter.rarity));
 }
+
+// A custom "Sort by" sheet in place of a native <select>, which pops the OS's own picker on mobile and
+// looks out of place in a game that skins every other control itself. Shared by both filter bars (My Cards
+// and the Deck tab), so it just remembers which one to refresh when a choice is made.
+let sortOverlayRerender = null;
+function openSortOverlay(rerender) {
+  sortOverlayRerender = rerender;
+  const box = document.getElementById('sortOptions');
+  box.innerHTML = Object.keys(SORTS).map(k => `<button class="sort-opt${k === cardFilter.sort ? ' active' : ''}" data-s="${k}">${SORTS[k]}</button>`).join('');
+  box.querySelectorAll('.sort-opt').forEach(b => b.addEventListener('click', () => {
+    cardFilter.sort = b.dataset.s; sfx('claim'); closeSortOverlay(); if (sortOverlayRerender) sortOverlayRerender();
+  }));
+  document.getElementById('sortOverlay').classList.remove('hidden');
+}
+function closeSortOverlay() { document.getElementById('sortOverlay').classList.add('hidden'); }
+document.getElementById('sortOverlayClose').addEventListener('click', () => { sfx('nav'); closeSortOverlay(); });
 
 /* ---------------- deck codes: a short text version of a deck, to share or keep ----------------
    Each card is its place in CARD_POOL (base 36) plus any crafted suffix, e.g. "TRPG1:0,0,1,1,2~p.guard". New cards

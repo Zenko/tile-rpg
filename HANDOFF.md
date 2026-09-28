@@ -2,7 +2,7 @@
 
 For whoever picks up this project next (most likely another Claude). This covers what the game is, how it's built and published, how to change it safely, and how the owner likes to work.
 
-Current version: **v1.18.0**. The newest entry in `CHANGELOG` (now `js/changelog.js`) is always the source of truth.
+Current version: **v1.19.0**. The newest entry in `CHANGELOG` (now `js/changelog.js`) is always the source of truth.
 
 ---
 
@@ -97,7 +97,7 @@ Each file below still has the same banner comments (the `====` blocks) it had wh
 | `js/battle-ui.js` | `TURN-BASED BATTLE` | `startBattle`, `btRender*`, input, `btAnimate` (one branch per engine event), `btFinish`, `btShowResult`, `closeBattle`. |
 | `js/shop-economy.js` | `RELEASE + PACKS` | Releasing spares, the Shop's pack list. |
 | `js/workshop-and-starter.js` | (sub-banners) | Workshop crafting (refine/trade-up), starter deck and the move into turn-based battle, `renderPacks`. |
-| `js/collection-tools.js` | (sub-banners) | Search/filter/sort for My Cards and Deck, deck codes (`deckCode`/`parseDeckCode`), deck slots. |
+| `js/collection-tools.js` | (sub-banners) | Search/filter/sort for My Cards and Deck (`renderFilterBar`, shared by both tabs; the rarity chips are colour-coded per rarity in CSS by `data-r`, and "Sort by" opens `#sortOverlay` rather than a native `<select>` - see v1.19.0), deck codes (`deckCode`/`parseDeckCode`), deck slots. |
 | `js/journal-history.js` | (sub-banners) | The event log/notebook, battle history. |
 | `js/changelog.js` | (sub-banners) | `gameVersionLabel()` and **`CHANGELOG`** - the file you'll touch almost every release (see §5). |
 | `js/notes.js` | (sub-banners) | Journal → Notes: the list, PNG export, the drawing canvas. |

@@ -19,6 +19,16 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-28',
+    version: '1.19.0',
+    title: "My Cards, tuned up for mobile",
+    changes: [
+      "Bigger, colour-coded filter chips in My Cards and the Deck tab - each rarity now has its own colour, with real tap targets instead of tiny text.",
+      "Sort now opens a proper \"Sort by\" screen instead of a plain browser dropdown.",
+      "Filter chips now scroll sideways instead of wrapping onto a second line.",
+    ],
+  },
+  {
+    date: '2026-09-28',
     version: '1.18.0',
     title: "A nicer cloud save screen",
     changes: [
