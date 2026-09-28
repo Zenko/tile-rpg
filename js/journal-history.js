@@ -67,7 +67,7 @@ function renderJournal() {
     pr.eventLog.forEach(e => {
       const el = document.createElement('div');
       el.className = 'log-entry';
-      el.innerHTML = `<span class="le-icon">${e.icon}</span><span class="le-text">${e.text}<div class="le-time">${fmtLogTime(e.at)}</div></span>`;
+      el.innerHTML = `<span class="le-icon">${e.icon}</span><span class="le-text">${escapeHtml(e.text)}<div class="le-time">${fmtLogTime(e.at)}</div></span>`;
       eventLogList.appendChild(el);
     });
   }

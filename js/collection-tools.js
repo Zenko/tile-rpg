@@ -144,7 +144,7 @@ function renderCollection() {
           ${spare > 0 ? `<div class="spare-tag">${spare} spare</div>` : ''}
         </span>
         <div class="row-actions">
-          <button class="panel-action charm-btn${charms().includes(id) ? ' active' : ''}" data-charm="${id}" title="Use as a charm">✦</button>
+          <button class="panel-action charm-btn${charms().includes(id) ? ' active' : ''}" data-charm="${id}" title="Use as a charm" aria-label="Use as a charm">✦</button>
           ${spare > 0 ? `<button class="panel-action release-btn" data-release="${id}">Release<br>+🫧 ${value}</button>` : ''}
         </div>
       `;

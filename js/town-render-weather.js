@@ -467,7 +467,15 @@ function positionPlayer(animate) {
 function renderEntities(data) {
   if (!townWorld) return;
   const m = getMap(state.currentDistrict);
-  townWorld.querySelectorAll('.ent:not(.player)').forEach(e => e.remove());
+  // npc/boss/spirit elements are handled separately below and reused by id rather than destroyed and
+  // recreated here - they're the ones that can have an in-flight CSS transition (a spirit's own 500ms
+  // drift, or moveFighter's wander step) or a continuously-running idle bob, and recreating them on every
+  // renderTown() call (even the periodic tick where nothing about them changed) snapped those transitions
+  // instantly and restarted the bob's phase - the same flash/jump bug class fixed for the camera in
+  // HANDOFF §9, just on these elements instead. Everything else here has no such in-flight state, so it's
+  // still simplest and safe to fully rebuild.
+  const oldEntityEls = entityElsById, oldSpiritEls = spiritElsById;
+  townWorld.querySelectorAll('.ent:not(.player):not(.npc):not(.boss):not(.spirit)').forEach(e => e.remove());
   entityElsById = new Map(); spiritElsById = new Map();
   const add = (cls, x, y, html) => {
     const e = document.createElement('div'); e.className = 'ent ' + cls; e.dataset.x = x; e.dataset.y = y;
@@ -489,17 +497,28 @@ function renderEntities(data) {
     const e = add('item', it.x, it.y, '<span>🃏</span>');
     if (ITEM_DESPAWN_MS - (Date.now() - it.spawnedAt) < 6000) e.classList.add('despawning');
   });
+  const liveSpiritIds = new Set();
   (data.spirits || []).forEach(s => {
-    const def = cardDef(s.cardId);
-    const e = add('spirit', s.x, s.y, `<span>${def ? def.icon : '✨'}</span>`);
-    e.dataset.id = s.id;
+    liveSpiritIds.add(s.id);
+    let e = oldSpiritEls.get(s.id);
+    if (e && e.isConnected) {
+      // reused as-is: only sync position, never recreate, so any in-flight drift transition finishes smoothly
+      e.dataset.x = s.x; e.dataset.y = s.y;
+      e.style.setProperty('--x', s.x); e.style.setProperty('--y', s.y); e.style.zIndex = s.y * 2 + 1;
+    } else {
+      const def = cardDef(s.cardId);
+      e = add('spirit', s.x, s.y, `<span>${def ? def.icon : '✨'}</span>`);
+      e.dataset.id = s.id;
+    }
     spiritElsById.set(s.id, e);
   });
+  oldSpiritEls.forEach((el, id) => { if (!liveSpiritIds.has(id) && el.isConnected) el.remove(); });
   if (data.chest) add('chest-glow', data.chest.x, data.chest.y, '<span class="chest-glow-core"></span><span class="chest-icon">🗝️</span>');
   if (state.companion && state.companionPos) { const ce = add('companion', state.companionPos.x, state.companionPos.y, `<span>${state.companion.icon}</span>`); ce.style.zIndex = state.companionPos.y * 2 + 2; }
   if (lanternOpen()) { const lv = add('vendor', LANTERN_TILE.x, LANTERN_TILE.y, '<span>🦉</span><div class="ent-name">Lantern Market</div>'); lv.style.zIndex = LANTERN_TILE.y * 2 + 2; }
   (data.bugs || []).forEach(b => { const def = bugDef(b.kind); add('bug' + (def && def.legendary ? ' legendary' : ''), b.x, b.y, `<span>${def ? def.icon : '✨'}</span>`); });
   if (state.currentDistrict === 'square' && unreadMail()) { const mf = add('mail-flag', 11, 1, '<span>📬</span>'); mf.style.zIndex = 60; }
+  const liveFighterIds = new Set();
   [...data.npcs, ...(data.boss ? [data.boss] : [])].forEach(f => {
     if (f.defeated) {
       if (!f.grave) return;
@@ -508,14 +527,26 @@ function renderEntities(data) {
     }
     // Alive-but-hidden: the boss is off on its 30-minutes-off half of the cycle, so skip it entirely.
     if (f.isBoss && !bossVisible()) return;
-    const portrait = f.isBoss ? '<span>👹</span>' : `<span>${opponentPortrait(f)}</span>`;
+    liveFighterIds.add(f.id);
     // close friends (3+ hearts) wear a little heart by their name; the rival gets a star
     const tag = f.isRival ? ' ⭐' : (!f.isBoss && friendHearts(f) >= SIG_HEARTS ? ' 💞' : '');
-    const e = add(f.isBoss ? 'boss' : 'npc' + (f.isRival ? ' rival' : ''), f.x, f.y, portrait + `<div class="ent-name">${escapeHtml(f.name)}${tag}</div>`);
-    e.dataset.id = f.id;
+    const cls = f.isBoss ? 'boss' : 'npc' + (f.isRival ? ' rival' : '');
+    let e = oldEntityEls.get(f.id);
+    if (e && e.isConnected && e.className === 'ent ' + cls) {
+      // reused as-is: only sync position/name, never recreate, so an in-flight wander transition and the
+      // idle bob animation both continue instead of snapping/restarting
+      e.dataset.x = f.x; e.dataset.y = f.y;
+      e.style.setProperty('--x', f.x); e.style.setProperty('--y', f.y); e.style.zIndex = f.y * 2 + 1;
+      const nameEl = e.querySelector('.ent-name'); if (nameEl) nameEl.innerHTML = `${escapeHtml(f.name)}${tag}`;
+    } else {
+      const portrait = f.isBoss ? '<span>👹</span>' : `<span>${opponentPortrait(f)}</span>`;
+      e = add(cls, f.x, f.y, portrait + `<div class="ent-name">${escapeHtml(f.name)}${tag}</div>`);
+      e.dataset.id = f.id;
+    }
     entityElsById.set(f.id, e);
     if (f.justArrived) { e.classList.add('npc-arrive'); f.justArrived = false; }
   });
+  oldEntityEls.forEach((el, id) => { if (!liveFighterIds.has(id) && el.isConnected) el.remove(); });
 }
 
 function renderTown(justMoved) {

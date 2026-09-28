@@ -19,6 +19,16 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-28',
+    version: '1.35.0',
+    title: "More smoothness, bigger tap targets",
+    changes: [
+      "Neighbors and drifting spirits should no longer visibly snap or flicker in place - the same underlying smoothness fix from last update, extended to them.",
+      "Several small icon buttons (world map, drawing tools, the charm toggle, deleting a note) are now easier to tap accurately, especially with bigger fingers or on the move.",
+      "Assorted small robustness fixes under the hood.",
+    ],
+  },
+  {
+    date: '2026-09-28',
     version: '1.34.0',
     title: "Fix a walking screen flash",
     changes: [

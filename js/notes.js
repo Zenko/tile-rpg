@@ -25,7 +25,7 @@ function renderNotesList() {
     const icon = n.type === 'draw' ? '🖌️' : '✏️';
     const thumb = n.type === 'draw' && n.drawing ? `<img class="note-thumb" src="${n.drawing}" alt="">` : `<div class="panel-icon">${icon}</div>`;
     const title = n.title.trim() ? escapeHtml(n.title.trim()) : (n.type === 'draw' ? 'Untitled drawing' : 'Untitled note');
-    el.innerHTML = `${thumb}<div class="panel-text"><div class="panel-name">${title}</div><div class="panel-desc">${escapeHtml(notePreview(n))} · ${fmtLogTime(n.updatedAt)}</div></div><button class="note-delete-btn" title="Delete note">🗑️</button>`;
+    el.innerHTML = `${thumb}<div class="panel-text"><div class="panel-name">${title}</div><div class="panel-desc">${escapeHtml(notePreview(n))} · ${fmtLogTime(n.updatedAt)}</div></div><button class="note-delete-btn" title="Delete note" aria-label="Delete note">🗑️</button>`;
     el.addEventListener('click', () => { sfx('nav'); buzz(HAP.tap); openNoteEditor(n.id); });
     el.querySelector('.note-delete-btn').addEventListener('click', (ev) => {
       ev.stopPropagation();

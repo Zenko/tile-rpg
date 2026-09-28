@@ -26,7 +26,20 @@ function startBattle(opponent) {
   const oppDeck = (Array.isArray(opponent.deck) && opponent.deck.length === DECK_SIZE) ? opponent.deck : buildDeckForOpponent(DECK_SIZE, isBoss);
   const twistKind = bossTwistFor(opponent);
   let G;
-  if (opponent.puzzle) { G = JSON.parse(opponent.puzzle); G.rng = Math.random; G.events = []; }   // a fixed board, already mid-turn
+  if (opponent.puzzle) {
+    // A fixed board, already mid-turn. Unlike every other JSON.parse in the codebase this one had no
+    // try/catch - a corrupted stored snapshot (a botched migration, a localStorage write cut short) would
+    // throw here and break the puzzle rematch permanently for that save, since the bad string persists
+    // across reloads. Clear it so puzzleState() rebuilds a fresh one (next day; matches the existing
+    // "no puzzle today" bail-out in startPuzzle()) instead of crashing every time it's opened.
+    try { G = JSON.parse(opponent.puzzle); G.rng = Math.random; G.events = []; }
+    catch (e) {
+      if (state.progress.puzzle) state.progress.puzzle.snap = null;
+      saveState();
+      toast("That puzzle board didn't load right");
+      return;
+    }
+  }
   else {
     G = BattleEngine.newGame(state.deck.slice(), oppDeck.slice(), Math.random, { spirit: [BattleEngine.RULES.spirit, profile.spirit], mods: { swiftBonus: fx.swiftBonus || 0 },
       twist: twistKind ? { side: 1, kind: twistKind } : null, startSpirit: opponent.startSpirit ? [opponent.startSpirit, null] : null });
