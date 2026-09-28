@@ -19,6 +19,15 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-28',
+    version: '1.32.0',
+    title: "Clearer ambience, smoother performance",
+    changes: [
+      "The background music and weather ambience are noticeably clearer now - they were being over-filtered and over-reverbed, which made them sound muffled. Still calm, just less dull.",
+      "Smoothed out some behind-the-scenes performance rough edges (how often the game saves, how it tracks wandering neighbors and spirits) - shouldn't be noticeable, just steadier on older phones.",
+    ],
+  },
+  {
+    date: '2026-09-28',
     version: '1.31.0',
     title: "Faster updates",
     changes: [

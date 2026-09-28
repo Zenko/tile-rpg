@@ -113,7 +113,7 @@ function makeReverb(ctx, seconds, decay) {
     let lp = 0;
     for (let i = 0; i < len; i++) {
       const env = Math.pow(1 - i / len, decay);
-      lp += ((Math.random() * 2 - 1) - lp) * 0.28;       // one-pole low-pass keeps the tail dark and soft
+      lp += ((Math.random() * 2 - 1) - lp) * 0.45;       // one-pole low-pass keeps the tail soft without going muffled
       d[i] = lp * env;
     }
   }
@@ -122,14 +122,16 @@ function makeReverb(ctx, seconds, decay) {
 
 function buildMusicGraph(ctx) {
   const out = ctx.createGain();            out.gain.value = 0.0001;       // fades in/out as a whole
-  const dry = ctx.createGain();            dry.gain.value = 0.55;
-  const wet = ctx.createGain();            wet.gain.value = 0.9;
+  const dry = ctx.createGain();            dry.gain.value = 0.65;
+  const wet = ctx.createGain();            wet.gain.value = 0.55;
   const reverb = makeReverb(ctx, 5.5, 2.2);
 
-  // Breathing low-pass: the pad slowly opens and closes
-  const filter = ctx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 900; filter.Q.value = 0.6;
+  // Breathing low-pass: the pad slowly opens and closes. Raised from the original 900Hz/±380 range, which
+  // cut most of the pad's harmonic content and read as muffled rather than calm - see WEATHER_MUSIC_PROFILE
+  // below for the same fix applied per weather kind.
+  const filter = ctx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 1500; filter.Q.value = 0.5;
   const lfo = ctx.createOscillator();      lfo.type = 'sine'; lfo.frequency.value = 0.045;           // one breath ≈ 22s
-  const lfoDepth = ctx.createGain();       lfoDepth.gain.value = 380;
+  const lfoDepth = ctx.createGain();       lfoDepth.gain.value = 450;
   lfo.connect(lfoDepth); lfoDepth.connect(filter.frequency); lfo.start();
 
   // Gentle stereo drift
@@ -151,13 +153,17 @@ function buildMusicGraph(ctx) {
 
 // How the calm pad itself leans with the weather: darker/dimmer and more spacious when it's grey out,
 // brighter and drier when it's clear. Chord changes also breathe slower under heavier weather.
+// Filter frequencies raised and wet/reverb levels brought back under the dry signal across the board - the
+// original values (as low as 480Hz, with wet exceeding dry under any non-clear weather) made the pad sound
+// muffled rather than atmospheric, especially on phone speakers. Weather still darkens/wets the pad relative
+// to clear, just from a brighter, clearer starting point.
 const WEATHER_MUSIC_PROFILE = {
-  clear:  { filter: 1100, wet: 0.8,  tempoMin: 9,  tempoMax: 15 },
-  cloudy: { filter: 850,  wet: 0.95, tempoMin: 10, tempoMax: 16 },
-  rain:   { filter: 650,  wet: 1.15, tempoMin: 11, tempoMax: 18 },
-  storm:  { filter: 480,  wet: 1.3,  tempoMin: 13, tempoMax: 20 },
-  fog:    { filter: 560,  wet: 1.35, tempoMin: 12, tempoMax: 19 },
-  snow:   { filter: 700,  wet: 1.25, tempoMin: 12, tempoMax: 19 },
+  clear:  { filter: 1700, wet: 0.45, tempoMin: 9,  tempoMax: 15 },
+  cloudy: { filter: 1350, wet: 0.55, tempoMin: 10, tempoMax: 16 },
+  rain:   { filter: 1050, wet: 0.68, tempoMin: 11, tempoMax: 18 },
+  storm:  { filter: 820,  wet: 0.78, tempoMin: 13, tempoMax: 20 },
+  fog:    { filter: 900,  wet: 0.8,  tempoMin: 12, tempoMax: 19 },
+  snow:   { filter: 1150, wet: 0.75, tempoMin: 12, tempoMax: 19 },
 };
 // Each district leans the same in-key chords a different way, so the town has a musical identity without ever
 // changing key: which of the 5 tones get picked (low/high/mixed), how much they shimmer, and how unhurried the

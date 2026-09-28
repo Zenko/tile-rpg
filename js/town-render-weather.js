@@ -5,6 +5,10 @@ const townView = document.getElementById('townGrid');
 const VIEW_COLS = 7, STEP_MS = 140;
 let viewRows = 7;
 let townWorld = null, townBuiltFor = null, tilePx = 48, playerEl = null, walkToken = 0;
+// Rebuilt every renderEntities() call (elements don't survive a rebuild), so the wander ticks in
+// js/neighbors-bosses.js can look an npc/boss/spirit's element up by id instead of re-querying the DOM
+// by attribute selector every 400-600ms.
+let entityElsById = new Map(), spiritElsById = new Map();
 let inScene = false, scene = null;
 const sceneView = document.getElementById('sceneView');
 
@@ -464,6 +468,7 @@ function renderEntities(data) {
   if (!townWorld) return;
   const m = getMap(state.currentDistrict);
   townWorld.querySelectorAll('.ent:not(.player)').forEach(e => e.remove());
+  entityElsById = new Map(); spiritElsById = new Map();
   const add = (cls, x, y, html) => {
     const e = document.createElement('div'); e.className = 'ent ' + cls; e.dataset.x = x; e.dataset.y = y;
     e.style.setProperty('--x', x); e.style.setProperty('--y', y); e.style.zIndex = y * 2 + 1; e.innerHTML = html; townWorld.appendChild(e); return e;
@@ -488,6 +493,7 @@ function renderEntities(data) {
     const def = cardDef(s.cardId);
     const e = add('spirit', s.x, s.y, `<span>${def ? def.icon : '✨'}</span>`);
     e.dataset.id = s.id;
+    spiritElsById.set(s.id, e);
   });
   if (data.chest) add('chest-glow', data.chest.x, data.chest.y, '<span class="chest-glow-core"></span><span class="chest-icon">🗝️</span>');
   if (state.companion && state.companionPos) { const ce = add('companion', state.companionPos.x, state.companionPos.y, `<span>${state.companion.icon}</span>`); ce.style.zIndex = state.companionPos.y * 2 + 2; }
@@ -507,6 +513,7 @@ function renderEntities(data) {
     const tag = f.isRival ? ' ⭐' : (!f.isBoss && friendHearts(f) >= SIG_HEARTS ? ' 💞' : '');
     const e = add(f.isBoss ? 'boss' : 'npc' + (f.isRival ? ' rival' : ''), f.x, f.y, portrait + `<div class="ent-name">${escapeHtml(f.name)}${tag}</div>`);
     e.dataset.id = f.id;
+    entityElsById.set(f.id, e);
     if (f.justArrived) { e.classList.add('npc-arrive'); f.justArrived = false; }
   });
 }
@@ -518,7 +525,7 @@ function renderTown(justMoved) {
   districtNameEl.textContent = def.name;
   const sd = seasonDef();
   const ev = eventNow();
-  document.getElementById('seasonTag').textContent = ` · ${sd.icon} ${sd.name} · ${ev.icon} ${ev.name}`;
+  seasonTagEl.textContent = ` · ${sd.icon} ${sd.name} · ${ev.icon} ${ev.name}`;
   noteTodayEvent();
   townView.dataset.season = seasonNow();
   noteSeasonChange();

@@ -129,8 +129,7 @@ function wanderStep(m, data, f) {
   return stepToward(m, data, f, f.homeX, f.homeY);
 }
 function fighterEl(f) {
-  if (!townWorld) return null;
-  return townWorld.querySelector(f.isBoss ? '.ent.boss' : `.ent.npc[data-id="${f.id}"]`);
+  return entityElsById.get(f.id) || null;
 }
 function moveFighter(f, to) {
   f.x = to.x; f.y = to.y;
@@ -179,7 +178,7 @@ function wanderSpiritsTick() {
       if (state.playerPos.x === nx && state.playerPos.y === ny) continue;
       if (data.spirits.some(o => o !== s && o.x === nx && o.y === ny)) continue;
       s.x = nx; s.y = ny;
-      const el = townWorld.querySelector(`.ent.spirit[data-id="${s.id}"]`);
+      const el = spiritElsById.get(s.id);
       if (el) { el.dataset.x = nx; el.dataset.y = ny; el.style.setProperty('--x', nx); el.style.setProperty('--y', ny); el.style.zIndex = ny * 2 + 1; }
       break;
     }

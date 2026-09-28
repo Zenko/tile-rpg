@@ -728,6 +728,7 @@ const questsPanel = document.getElementById('questsPanel');
 const battleView = document.getElementById('battleView');
 const townLog = document.getElementById('townLog');
 const districtNameEl = document.getElementById('districtName');
+const seasonTagEl = document.getElementById('seasonTag');
 
 const cardCountEl = document.getElementById('cardCount');
 const winCountEl = document.getElementById('winCount');
@@ -863,12 +864,29 @@ function loadState() {
   } catch (e) { /* ignore */ }
 }
 
+// saveState() is called very often (several times per action in places) - the JSON.stringify + localStorage
+// write is real synchronous work on the whole state tree, so bursts of calls are coalesced into one write
+// every SAVE_STATE_DEBOUNCE_MS rather than writing on every single call (the same lesson cloud-save.js's
+// own cloudSaveDebounced already applied to the Firestore side). Flushed immediately when the tab is hidden
+// or unloaded so nothing is lost if the player switches away or closes the game mid-debounce.
+const SAVE_STATE_DEBOUNCE_MS = 600;
+let saveStateTimer = null, saveStatePending = false;
 function saveState() {
   // the active deck slot always mirrors the live deck, whichever screen changed it
   if (Array.isArray(state.deckSlots) && state.deckSlots[state.activeDeckSlot]) state.deckSlots[state.activeDeckSlot].cards = state.deck.slice();
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
+  saveStatePending = true;
+  clearTimeout(saveStateTimer);
+  saveStateTimer = setTimeout(flushSaveState, SAVE_STATE_DEBOUNCE_MS);
   if (typeof cloudSaveDebounced === 'function') cloudSaveDebounced();   // optional Firestore backup - see js/cloud-save.js
 }
+function flushSaveState() {
+  if (!saveStatePending) return;
+  saveStatePending = false;
+  clearTimeout(saveStateTimer);
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
+}
+document.addEventListener('visibilitychange', () => { if (document.hidden) flushSaveState(); });
+window.addEventListener('pagehide', flushSaveState);
 
 function rollRarity(forBoss) {
   const w = Math.min(state.wins, 12);
