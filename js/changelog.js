@@ -19,6 +19,17 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-28',
+    version: '1.27.0',
+    title: "A tidier Shop",
+    changes: [
+      "Shop > Items now shows how many decorations you've collected at a glance.",
+      "Filter the shop by Plants, Seating, Lighting or Ornaments instead of scrolling one long list.",
+      "Museum-only decorations you haven't earned yet now show up as a locked trophy, with which wing unlocks them.",
+      "Night-only decorations are visible in the shop any time of day, clearly marked as sold after dark instead of just vanishing from the list.",
+    ],
+  },
+  {
+    date: '2026-09-28',
     version: '1.26.0',
     title: "A better day of fishing",
     changes: [

@@ -178,6 +178,14 @@ function fishAvailableNote() {
 }
 
 let shopSubView = 'packs';   // 'packs' | 'customize' | 'items'
+let itemsCat = 'all';   // filter chip for the Items shop list: 'all' or a DECORATION_ITEMS 'cat'
+const ITEM_CATS = [
+  { id: 'all', label: 'All', icon: '🗂️' },
+  { id: 'plant', label: 'Plants', icon: '🌱' },
+  { id: 'seating', label: 'Seating', icon: '🪑' },
+  { id: 'lighting', label: 'Lighting', icon: '💡' },
+  { id: 'ornament', label: 'Ornaments', icon: '🎀' }
+];
 
 function setShopView(view) {
   shopSubView = view;
@@ -385,14 +393,17 @@ function renderCustomize() {
   box.appendChild(colorRow);
 }
 
+function haveDecoItem(item) { return decorationInventoryCount(item.id) > 0 || allDecorations().some(d => d.deco.id === item.id); }
+
 function renderItems() {
   const box = document.getElementById('itemsView');
   const peb = state.progress.pebbles;
+  const collected = DECORATION_ITEMS.filter(haveDecoItem).length;
   box.innerHTML = `
     <div class="wallet">
       <div>
         <div class="w-amt">🫧 ${peb}</div>
-        <div class="w-sub">Decorate any district with something new.</div>
+        <div class="w-sub">Decorate any district with something new. ${collected}/${DECORATION_ITEMS.length} decorations collected.</div>
       </div>
     </div>`;
 
@@ -440,13 +451,38 @@ function renderItems() {
     });
   }
 
+  const lockedMuseum = DECORATION_ITEMS.filter(item => item.museum && !haveDecoItem(item));
+  if (lockedMuseum.length) {
+    const mTitle = document.createElement('div');
+    mTitle.className = 'section-title';
+    mTitle.textContent = 'Museum trophies';
+    box.appendChild(mTitle);
+    lockedMuseum.forEach(item => {
+      const w = MUSEUM_WINGS.find(x => x.deco === item.id);
+      const row = document.createElement('div');
+      row.className = 'panel-item';
+      row.innerHTML = `
+        <span class="panel-icon" style="filter:grayscale(1) opacity(0.55)">${item.icon}</span>
+        <span class="panel-text"><div class="panel-name">${item.name}</div><div class="panel-desc">${w ? `Finish the ${w.name} to earn this · ${wingProgress(w)}/${w.cards.length} donated` : 'Earned through the museum'}</div></span>`;
+      box.appendChild(row);
+    });
+  }
+
   const shopTitle = document.createElement('div');
   shopTitle.className = 'section-title';
   shopTitle.textContent = 'Shop';
   box.appendChild(shopTitle);
 
-  DECORATION_ITEMS.filter(item => !item.night && !item.museum).forEach(item => {
-    const can = peb >= item.cost;
+  const chips = document.createElement('div');
+  chips.className = 'cr-chips';
+  chips.innerHTML = ITEM_CATS.map(c => `<button class="cr-chip${c.id === itemsCat ? ' active' : ''}" data-cat="${c.id}">${c.icon} ${c.label}</button>`).join('');
+  box.appendChild(chips);
+
+  const shopItems = DECORATION_ITEMS.filter(item => !item.museum && (itemsCat === 'all' || item.cat === itemsCat));
+  const night = isNightNow();
+  shopItems.forEach(item => {
+    const lockedToNight = item.night && !night;
+    const can = peb >= item.cost && !lockedToNight;
     const el = document.createElement('div');
     el.className = 'pack' + (can ? '' : ' cant');
     el.innerHTML = `
@@ -454,11 +490,22 @@ function renderItems() {
       <div class="pk-body">
         <div class="pk-name">${item.name}</div>
         <div class="pk-desc">${item.desc}</div>
+        ${item.night ? `<div class="pk-floor">🌙 ${lockedToNight ? 'Only sold after dark - come back at night' : 'Night decoration'}</div>` : ''}
       </div>
       <button class="btn" ${can ? '' : 'disabled'}>🫧 ${item.cost}</button>`;
     el.querySelector('.btn').addEventListener('click', () => { ensureAudio(); buyDecoration(item); });
     box.appendChild(el);
   });
+  if (!shopItems.length) {
+    const empty = document.createElement('div');
+    empty.className = 'shop-note';
+    empty.textContent = 'Nothing in this category yet.';
+    box.appendChild(empty);
+  }
+
+  box.querySelectorAll('[data-cat]').forEach(btn => btn.addEventListener('click', () => {
+    sfx('nav'); buzz(HAP.tap); itemsCat = btn.dataset.cat; renderItems();
+  }));
 
   const note = document.createElement('div');
   note.className = 'shop-note';
