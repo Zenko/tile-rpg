@@ -19,6 +19,14 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-29',
+    version: '1.39.0',
+    title: "Redesigned mailbox",
+    changes: [
+      "The mailbox is now a proper inbox: each letter is a card you tap to expand right in place, instead of reading it in a separate line up top. Letters with a gift still waiting float to the top, unread ones show a dot, and you can now delete letters you don't need to keep (gifts have to be claimed first, so nothing gets lost by accident).",
+    ],
+  },
+  {
+    date: '2026-09-29',
     version: '1.38.0',
     title: "Fix cut-off mail and scene text",
     changes: [

@@ -489,22 +489,47 @@ function checkMail(force) {
     }
   }
 }
-function mailButtons() {
+// The mailbox is a list of expandable cards (see renderMailList) rather than a flat list of buttons whose
+// body text showed up disconnected, in the scene bubble above - scene.mailOpen (reset fresh every time the
+// mailbox is opened, never saved) tracks which cards are currently expanded.
+function mailSortKey(l) { return (l.gift && !l.claimed) ? 0 : (!l.read ? 1 : 2); }
+function renderMailList() {
   const list = mailState().list;
-  if (!list.length) return '';
-  return list.slice(0, 12).map(l => sceneBtn('letter:' + l.id, `${l.read ? '' : '🔵 '}${l.icon} ${escapeHtml(l.subject)} <small>from ${escapeHtml(l.from)}</small>`)).join('') +
-    list.filter(l => l.gift && !l.claimed).slice(0, 3).map(l => sceneBtn('claim:' + l.id, `🎁 Take the gift from ${escapeHtml(l.from)}: ${giftText(l.gift)}`)).join('');
+  if (!list.length) return '<div class="panel-desc">Nothing yet. Neighbors write once they get to know you.</div>';
+  if (!scene.mailOpen) scene.mailOpen = {};
+  // Actionable letters float to the top - gifts still waiting, then unread, then everything else - same
+  // idea as sorting claimable quests to the top of Dailies/Weekly.
+  const sorted = list.slice(0, 40).map((l, i) => ({ l, i })).sort((a, b) => mailSortKey(a.l) - mailSortKey(b.l) || a.i - b.i);
+  return `<div class="panel-list mail-list">${sorted.map(({ l }) => {
+    const open = !!scene.mailOpen[l.id], hasGift = l.gift && !l.claimed;
+    return `<div class="panel-item mail-item${l.read ? '' : ' unread'}${open ? ' open' : ''}" data-act="toggle:${l.id}">
+      <span class="panel-icon">${l.icon}</span>
+      <span class="panel-text">
+        <div class="panel-name">${escapeHtml(l.subject)}${!l.read ? '<span class="mail-dot"></span>' : ''}${hasGift ? ' 🎁' : ''}</div>
+        <div class="panel-desc">from ${escapeHtml(l.from)} · ${fmtLogTime(l.at)}</div>
+        ${open ? `<div class="mail-body">${escapeHtml(l.body)}</div>
+          <div class="mail-item-actions">
+            ${hasGift ? `<button class="btn mail-claim-btn" data-act="claim:${l.id}">🎁 Take the gift: ${giftText(l.gift)}</button>`
+              : `<button class="btn btn-ghost mail-delete-btn" data-act="delete:${l.id}">🗑️ Delete</button>`}
+          </div>` : ''}
+      </span>
+      <span class="mail-chevron">${open ? '▲' : '▼'}</span>
+    </div>`;
+  }).join('')}</div>`;
 }
-function readLetter(id) {
+function toggleMailItem(id) {
   const l = mailState().list.find(x => x.id === id);
-  if (!l) return '';
-  if (!l.read) { l.read = true; bumpStat('lettersRead', 1); saveState(); }
+  if (!l) return;
+  if (!scene.mailOpen) scene.mailOpen = {};
+  const opening = !scene.mailOpen[id];
+  scene.mailOpen[id] = opening;
+  if (opening && !l.read) { l.read = true; bumpStat('lettersRead', 1); saveState(); }
   sfx('flip');
-  return `${l.icon} "${l.body}" - ${l.from}${l.gift && !l.claimed ? `  (Enclosed: ${giftText(l.gift)})` : ''}`;
+  renderScene();
 }
 function claimLetter(id) {
   const l = mailState().list.find(x => x.id === id);
-  if (!l || !l.gift || l.claimed) return '';
+  if (!l || !l.gift || l.claimed) return;
   const g = l.gift;
   l.claimed = true; l.read = true;
   if (g.kind === 'pebbles') addPebbles(g.n);
@@ -513,7 +538,19 @@ function claimLetter(id) {
   else if (g.kind === 'bread') state.progress.bread = Math.min(BREAD_MAX, breadCount() + 1);
   else if (g.kind === 'card') { const cid = randomCardId(g.rarity); state.ownedCards.push(cid); bumpStat('cardsFound', 1); showCardReveal(cid, `A gift from ${l.from}`, true); }
   saveState(); sfx('claim'); buzz(HAP.found);
-  return `You unwrap it: ${giftText(g)}. How kind of ${l.from}.`;
+  if (g.kind !== 'card') toast(`🎁 ${giftText(g)} - thanks, ${l.from}!`);
+  renderScene();
+}
+// Keeps a gift from being thrown away unclaimed by mistake - claim it first, then delete is offered instead.
+function deleteLetter(id) {
+  const ms = mailState(), l = ms.list.find(x => x.id === id);
+  if (!l) return;
+  if (l.gift && !l.claimed) { toast('Claim the gift first'); return; }
+  if (!confirm("Delete this letter? This can't be undone.")) return;
+  ms.list = ms.list.filter(x => x.id !== id);
+  if (scene.mailOpen) delete scene.mailOpen[id];
+  saveState(); sfx('nav'); buzz(HAP.tap);
+  renderScene();
 }
 
 function sceneBtn(id, label, disabled) { return `<button class="btn sc-btn" data-act="${id}" ${disabled ? 'disabled' : ''}>${label}</button>`; }
@@ -582,7 +619,13 @@ function renderScene() {
     else if (scene.mode === 'cook') acts.innerHTML = cookButtons() + sceneBtn('back', '← Back to the counter');
     else if (scene.mode === 'decorate') acts.innerHTML = shelfButtons() + sceneBtn('back', '← Done');
     else if (scene.mode === 'favs') acts.innerHTML = favButtons() + sceneBtn('back', '← Done');
-    else if (scene.mode === 'mail') acts.innerHTML = mailButtons() + sceneBtn('back', '← Close the mailbox');
+    else if (scene.mode === 'mail') {
+      const ms = mailState(), gifts = ms.list.filter(l => l.gift && !l.claimed).length;
+      document.getElementById('scText').textContent = ms.list.length
+        ? `${ms.list.length} letter${ms.list.length === 1 ? '' : 's'}${gifts ? ` · 🎁 ${gifts} to claim` : ''}`
+        : 'Nothing yet. Neighbors write once they get to know you.';
+      acts.innerHTML = renderMailList() + sceneBtn('back', '← Close the mailbox');
+    }
     else if (scene.mode === 'wings') acts.innerHTML = museumWingButtons() + sceneBtn('back', '← Back to the curator');
     else if (scene.mode === 'wing') acts.innerHTML = museumCardButtons(scene.wing) + sceneBtn('wings-back', '← All wings');
     else if (scene.mode === 'exped') acts.innerHTML = expedButtons();
@@ -624,8 +667,9 @@ function sceneAction(actId) {
   if (actId.startsWith('nightdeco:')) { const d = DECORATION_ITEMS.find(x => x.id === actId.slice(10)); if (d) { if (state.progress.pebbles < d.cost) { scene.text = `That one is 🫧 ${d.cost}.`; sfx('tie'); } else { buyDecoration(d); scene.text = `${d.icon} Lumen wraps the ${d.name} in dark paper. Place it from Shop → Items.`; } } renderScene(); return; }
   if (actId.startsWith('shelf:')) { scene.text = shelfAction(actId.slice(6)); renderScene(); return; }
   if (actId.startsWith('fav:')) { scene.text = toggleFav(actId.slice(4)); renderScene(); return; }
-  if (actId.startsWith('letter:')) { scene.text = readLetter(actId.slice(7)); renderScene(); return; }
-  if (actId.startsWith('claim:')) { scene.text = claimLetter(actId.slice(6)); renderScene(); return; }
+  if (actId.startsWith('toggle:')) { toggleMailItem(actId.slice(7)); return; }
+  if (actId.startsWith('claim:')) { claimLetter(actId.slice(6)); return; }
+  if (actId.startsWith('delete:')) { deleteLetter(actId.slice(7)); return; }
   if (actId.startsWith('seed:')) { const t = seedAction(actId.slice(5)); if (scene) { scene.text = t; renderScene(); } return; }   // planting leaves the scene
   const it = INTERIORS[scene.id], a = it.actions.find(x => x.id === actId), st = buildingState(scene.id);
   if (!a) return;
@@ -635,7 +679,7 @@ function sceneAction(actId) {
   else if (a.kind === 'seeds') { scene.mode = 'seeds'; scene.text = seedsIntro(); sfx('tap'); }
   else if (a.kind === 'puzzle') { startPuzzle(); return; }
   else if (a.kind === 'minigame') { miniStart(a.game); return; }
-  else if (a.kind === 'mail') { scene.mode = 'mail'; scene.text = mailState().list.length ? 'Your letters, newest first. Tap one to read it.' : 'Nothing yet. Neighbors write once they get to know you.'; sfx('tap'); }
+  else if (a.kind === 'mail') { scene.mode = 'mail'; scene.mailOpen = {}; sfx('tap'); }
   else if (a.kind === 'decorate') { scene.mode = 'decorate'; scene.text = `Put decorations from your collection on the shelves (up to ${SHELF_MAX}). They come back to your decorations if you clear the shelves.`; sfx('tap'); }
   else if (a.kind === 'favs') { scene.mode = 'favs'; scene.text = `Frame up to ${FAV_MAX} favourite cards on the wall.`; sfx('tap'); }
   else if (a.kind === 'trophies') { scene.text = trophySummary(); sfx('tap'); }

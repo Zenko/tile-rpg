@@ -209,6 +209,17 @@ input { -webkit-user-select: text; user-select: text; }
 .panel-desc { font-size: 0.68rem; color: var(--ink-soft); }
 .panel-ability { font-size: 0.68rem; color: var(--accent); margin-top: 1px; }
 
+/* Mailbox: each letter is an expandable card built on .panel-item/.panel-list rather than the flat stack
+   of pill buttons every other scene action uses - see renderMailList() in houses-and-cellar.js. */
+.mail-item { align-items: flex-start; cursor: pointer; transition: border-color 0.15s ease; }
+.mail-item.unread { border-color: var(--water); }
+.mail-item.open { background: var(--board-bg); }
+.mail-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--water-glow); margin-left: 5px; vertical-align: middle; box-shadow: 0 0 5px var(--water-glow); }
+.mail-chevron { font-size: 0.6rem; color: var(--ink-soft); padding-top: 3px; flex-shrink: 0; }
+.mail-body { font-size: 0.78rem; line-height: 1.45; color: var(--ink); margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--stone-edge); animation: pop-in 0.2s ease; }
+.mail-item-actions { display: flex; margin-top: 8px; animation: pop-in 0.2s ease; }
+.mail-claim-btn, .mail-delete-btn { font-size: 0.72rem; padding: 8px 14px; min-height: 36px; }
+
 .panel-action {
   border: 1px solid var(--stone-edge); background: var(--board-bg); border-radius: 999px; min-height: 32px;
   padding: 6px 12px; font-size: 0.7rem; cursor: pointer; color: var(--ink);
