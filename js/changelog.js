@@ -19,6 +19,16 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-29',
+    version: '1.43.0',
+    title: "Craft, Deck and What's New, redesigned",
+    changes: [
+      "Craft: refining a card now expands its power/health choice right on the card instead of always showing both buttons, and trade-up cards are picked by tapping the card itself.",
+      "Deck: the options (Auto-fill, Clear, Share/Load code) and filters are now tucked behind two small buttons instead of always sitting on screen, so the card list isn't crowded out.",
+      "What's New is now a compact timeline: only the newest update is expanded by default, and older ones tap open instead of filling the whole screen with text.",
+    ],
+  },
+  {
+    date: '2026-09-29',
     version: '1.42.0',
     title: "Smarter offline updates",
     changes: [
@@ -462,18 +472,38 @@ const CHANGELOG = [
     ],
   },
 ];
+// Which entries are expanded, keyed by version - a compact vertical timeline of collapsed tiles reads far
+// better than 40+ entries all fully expanded at once. The newest entry opens by default (that's the point
+// of "What's New"); everything older starts collapsed and expands in place on tap, same idiom as the
+// mailbox's mail-item/mail-body (see renderMailList in houses-and-cellar.js).
+let clOpen = null;
 function renderChangelog() {
+  if (!clOpen) { clOpen = {}; if (CHANGELOG[0]) clOpen[CHANGELOG[0].version] = true; }
   const listEl = document.getElementById('changelogList');
   listEl.innerHTML = '';
   const versionLine = document.getElementById('clVersionLine');
   if (versionLine) versionLine.textContent = 'You\'re on ' + gameVersionLabel();
   CHANGELOG.forEach(entry => {
+    const open = !!clOpen[entry.version];
     const el = document.createElement('div');
-    el.className = 'cl-entry';
-    el.innerHTML = `<div class="cl-head"><span class="cl-title">${escapeHtml(entry.title)}</span><span class="cl-date">${fmtChangelogDate(entry.date)}</span></div>
-      <ul class="cl-list">${entry.changes.map(c => `<li>${escapeHtml(c)}</li>`).join('')}</ul>`;
+    el.className = 'cl-entry' + (open ? ' open' : '');
+    el.dataset.toggleCl = entry.version;
+    el.innerHTML = `<div class="cl-head">
+        <span class="cl-dot"></span>
+        <span class="cl-v">v${entry.version}</span>
+        <span class="cl-title">${escapeHtml(entry.title)}</span>
+        <span class="cl-date">${fmtChangelogDate(entry.date)}</span>
+        <span class="cl-chevron">${open ? '▲' : '▼'}</span>
+      </div>
+      ${open ? `<ul class="cl-list">${entry.changes.map(c => `<li>${escapeHtml(c)}</li>`).join('')}</ul>` : ''}`;
     listEl.appendChild(el);
   });
+  listEl.querySelectorAll('[data-toggle-cl]').forEach(el => el.addEventListener('click', () => {
+    const v = el.dataset.toggleCl;
+    sfx('flip');
+    clOpen[v] = !clOpen[v];
+    renderChangelog();
+  }));
 }
 function markChangelogSeen() {
   const pr = state.progress;

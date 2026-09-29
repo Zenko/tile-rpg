@@ -341,11 +341,22 @@ input { -webkit-user-select: text; user-select: text; }
 .bl-entry.lost { border-left-color: var(--lose-glow); }
 .bl-entry .bl-result { font-size: 1rem; flex-shrink: 0; }
 .bl-prize { font-size: 0.72rem; color: var(--accent); margin-top: 1px; }
-.cl-entry { background: var(--stone); border: 1px solid var(--stone-edge); border-radius: 12px; padding: 12px 14px; }
-.cl-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; }
-.cl-title { font-size: 0.86rem; font-weight: 700; color: var(--ink); }
-.cl-date { font-size: 0.68rem; color: var(--ink-soft); }
-.cl-list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 5px; }
+/* Compact vertical timeline: each entry is a collapsed tile by default (title + version + date visible,
+   details hidden) with a dot-and-line connector down the left edge, expanding in place on tap - see
+   renderChangelog() in changelog.js. Cuts what used to be 40+ fully-expanded entries down to a scannable
+   list, with only the newest one open by default. */
+#changelogList { padding-left: 6px; }
+.cl-entry { position: relative; background: var(--stone); border: 1px solid var(--stone-edge); border-radius: 12px; padding: 10px 12px 10px 26px; cursor: pointer; transition: background-color 0.15s ease; }
+.cl-entry.open { background: var(--board-bg); }
+.cl-entry:not(:last-child)::before { content: ''; position: absolute; left: 3px; top: 22px; width: 2px; height: calc(100% - 8px); background: var(--stone-edge); }
+.cl-dot { position: absolute; left: -1px; top: 15px; width: 8px; height: 8px; border-radius: 50%; background: var(--stone-edge); box-shadow: 0 0 0 3px var(--stone); }
+.cl-entry.open .cl-dot { background: var(--water); box-shadow: 0 0 0 3px var(--board-bg), 0 0 6px var(--water-glow); }
+.cl-head { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.cl-v { font-size: 0.66rem; font-weight: 700; color: var(--water); background: var(--board-bg); border-radius: 999px; padding: 2px 7px; flex-shrink: 0; }
+.cl-title { font-size: 0.84rem; font-weight: 700; color: var(--ink); flex: 1; min-width: 0; }
+.cl-date { font-size: 0.66rem; color: var(--ink-soft); flex-shrink: 0; }
+.cl-chevron { font-size: 0.6rem; color: var(--ink-soft); flex-shrink: 0; }
+.cl-list { margin: 8px 0 0; padding: 8px 0 0 18px; border-top: 1px dashed var(--stone-edge); display: flex; flex-direction: column; gap: 5px; animation: pop-in 0.2s ease; }
 .cl-list li { font-size: 0.78rem; color: var(--ink); line-height: 1.45; }
 .cl-version-line { text-align: center; margin-bottom: 10px; }
 .pm-version { text-align: center; font-size: 0.66rem; color: var(--ink-soft); margin-top: 14px; }
@@ -731,6 +742,14 @@ input.vol:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px rgba(127,1
 .dk-actions .panel-action { min-height: 40px; padding: 8px 20px; }
 .dk-actions .panel-action:disabled { opacity: 0.4; }
 
+/* Options and filters are collapsed by default (see deckToggleSection in collection-tools.js) - these
+   two small toggles replace what used to be four always-visible rows above the card list. */
+.dk-toolbar { display: flex; justify-content: center; gap: 8px; margin: 2px 0 10px; }
+.dk-tool-btn { border: 1px solid var(--stone-edge); background: var(--stone); color: var(--ink); border-radius: 999px; min-height: 38px; padding: 7px 16px; font-size: 0.78rem; font-weight: 600; font-family: inherit; cursor: pointer; }
+.dk-tool-btn:active { transform: scale(0.95); }
+.dk-tool-btn.active { background: var(--water); border-color: var(--water); color: #fff; }
+.dk-options { animation: pop-in 0.2s ease; margin-bottom: 4px; }
+
 .panel-action:disabled { opacity: 0.4; cursor: default; }
 
 
@@ -746,12 +765,33 @@ input.vol:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px rgba(127,1
 .cr-chip small { opacity: 0.65; margin-left: 2px; }
 .cr-chip.active { background: var(--water); color: white; border-color: var(--water); }
 .cr-tray { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 4px 0 12px; }
-.cr-slot { width: 52px; height: 68px; border-radius: 10px; border: 1.5px dashed var(--stone-edge); display: flex; align-items: center; justify-content: center; color: var(--ink-soft); font-size: 0.72rem; background: transparent; padding: 0; font-family: inherit; }
+.cr-slot { width: 52px; height: 68px; border-radius: 10px; border: 1.5px dashed var(--stone-edge); display: flex; align-items: center; justify-content: center; color: var(--ink-soft); font-size: 0.72rem; background: transparent; padding: 0; font-family: inherit; transition: border-color 0.2s ease; }
 .cr-slot.filled { border-style: solid; border-color: transparent; cursor: pointer; }
+.cr-slot.filled.just-picked { animation: pop-in 0.25s ease; }
+.cr-slot.next { border-color: var(--water); animation: pulse-dot 1.4s ease-in-out infinite; }
 .cr-slot.result { border-style: solid; border-color: #e2b64c; color: #8a6a10; font-weight: 600; text-align: center; text-transform: capitalize; line-height: 1.15; padding: 2px; }
 .cr-arrow { color: var(--ink-soft); font-size: 1.1rem; }
 .cr-go { display: flex; flex-direction: column; align-items: center; margin-top: 12px; }
 .cr-go .btn:disabled { opacity: 0.5; }
+.cr-go .btn.cr-ready { animation: bt_pulseBtn 1.6s ease-in-out infinite; }
+
+/* Refine rows: tapping the card/row itself expands an inline stat-choice picker in place, rather than
+   showing both refine buttons on every row up front - same "expand in place" idiom as the mailbox's
+   mail-item/mail-body (see houses-and-cellar.js renderMailList). */
+.cr-refine-row { cursor: pointer; align-items: flex-start; flex-wrap: wrap; transition: background-color 0.15s ease, transform 0.1s ease; }
+.cr-refine-row:active { transform: scale(0.99); }
+.cr-refine-row.open { background: var(--board-bg); }
+.cr-chevron { font-size: 0.6rem; color: var(--ink-soft); padding-top: 8px; flex-shrink: 0; }
+.cr-refine-choice { flex-basis: 100%; display: flex; gap: 8px; margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--stone-edge); animation: pop-in 0.2s ease; }
+.cr-refine-choice .panel-action { flex: 1; }
+
+/* Trade-up candidate rows: the whole row is the tap target (not a small "Add" button), so picking a
+   card feels like touching the card itself. */
+.cr-pick-row { cursor: pointer; transition: transform 0.1s ease, background-color 0.15s ease; }
+.cr-pick-row:active { transform: scale(0.99); background: var(--board-bg); }
+.cr-pick-row.disabled { cursor: default; opacity: 0.55; }
+.cr-pick-hint { font-size: 0.78rem; font-weight: 700; color: var(--water); flex-shrink: 0; padding: 0 4px; }
+.cr-pick-row.disabled .cr-pick-hint { color: var(--ink-soft); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }

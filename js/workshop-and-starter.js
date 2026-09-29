@@ -201,6 +201,7 @@ function setShopView(view) {
 }
 
 let craftSel = { rarity: 'common', picks: [] };
+let refineOpenId = null;   // which refinable card's stat-choice row is expanded, if any (accordion - only one at a time)
 
 function aOrAn(label) { return (/^[aeiou]/i.test(label) ? 'an ' : 'a ') + label; }
 
@@ -225,19 +226,25 @@ function renderCraft() {
   if (!refinable.length) {
     ref.innerHTML += `<div class="cr-empty">Get a second copy of any card to refine it.</div>`;
   } else {
+    if (!refinable.includes(refineOpenId)) refineOpenId = null;
     refinable.forEach(id => {
       const def = cardDef(id), skills = craftableSkills(id);
       const why = { p: refineBlockReason(id, 'p'), g: refineBlockReason(id, 'g') };
+      const open = refineOpenId === id;
       const row = document.createElement('div');
-      row.className = 'panel-item';
+      row.className = 'panel-item cr-refine-row' + (open ? ' open' : '');
+      row.dataset.toggleRefine = id;
       row.innerHTML = `${miniCardHtml(def)}
         <span class="panel-text">
           <div class="panel-name">${def.name}</div>
           <div class="panel-desc">${counts[id]} owned · uses 2</div>
           <div class="panel-desc">${why.p && why.g ? why.p : (skills.length ? `May gain: ${skills.map(k => KW[k].icon).join(' ')}` : 'No skill possible: it already has 2')}</div>
         </span>
-        <button class="panel-action" data-refine="${id}" data-stat="p" ${why.p ? 'disabled' : ''} aria-label="Refine ${def.name} for plus one power">+1 ⚔</button>
-        <button class="panel-action" data-refine="${id}" data-stat="g" ${why.g ? 'disabled' : ''} aria-label="Refine ${def.name} for plus one health">+1 ♥</button>`;
+        <span class="cr-chevron">${open ? '▲' : '▼'}</span>
+        ${open ? `<div class="cr-refine-choice">
+          <button class="panel-action" data-refine="${id}" data-stat="p" ${why.p ? 'disabled' : ''} aria-label="Refine ${def.name} for plus one power">+1 ⚔ Power</button>
+          <button class="panel-action" data-refine="${id}" data-stat="g" ${why.g ? 'disabled' : ''} aria-label="Refine ${def.name} for plus one health">+1 ♥ Health</button>
+        </div>` : ''}`;
       ref.appendChild(row);
     });
   }
@@ -262,8 +269,8 @@ function renderCraft() {
   for (let i = 0; i < CRAFT.tradeCount; i++) {
     const id = craftSel.picks[i];
     tray.innerHTML += id
-      ? `<button class="cr-slot filled" data-unpick="${i}" aria-label="Remove ${cardDef(id).name} from the trade">${miniCardHtml(cardDef(id))}</button>`
-      : `<div class="cr-slot"><span>?</span></div>`;
+      ? `<button class="cr-slot filled${i === craftSel.picks.length - 1 ? ' just-picked' : ''}" data-unpick="${i}" aria-label="Remove ${cardDef(id).name} from the trade">${miniCardHtml(cardDef(id))}</button>`
+      : `<div class="cr-slot${i === craftSel.picks.length ? ' next' : ''}"><span>?</span></div>`;
   }
   tray.innerHTML += `<div class="cr-arrow">→</div><div class="cr-slot result"><span>${RARITY_LABEL[target]}</span></div>`;
   trade.appendChild(tray);
@@ -275,11 +282,13 @@ function renderCraft() {
   } else {
     list.forEach(id => {
       const def = cardDef(id), left = tradable(id) - picked(id);
+      const canPick = left > 0 && craftSel.picks.length < CRAFT.tradeCount;
       const row = document.createElement('div');
-      row.className = 'panel-item';
+      row.className = 'panel-item cr-pick-row' + (canPick ? '' : ' disabled');
+      if (canPick) row.dataset.pick = id;
       row.innerHTML = `${miniCardHtml(def)}
         <span class="panel-text"><div class="panel-name">${def.name}</div><div class="panel-desc">${tradable(id)} spare${picked(id) ? ` · ${picked(id)} chosen` : ''}</div></span>
-        <button class="panel-action" data-pick="${id}" ${left > 0 && craftSel.picks.length < CRAFT.tradeCount ? '' : 'disabled'}>Add</button>`;
+        <span class="cr-pick-hint">${canPick ? '+ Add' : (picked(id) ? '✓' : '')}</span>`;
       trade.appendChild(row);
     });
   }
@@ -287,21 +296,30 @@ function renderCraft() {
   const whyNot = need === 0 ? tradeBlockReason(craftSel.picks) : '';
   const go = document.createElement('div');
   go.className = 'cr-go';
-  go.innerHTML = `<button class="btn" id="craftGo" ${need === 0 && !whyNot ? '' : 'disabled'}>${need === 0 ? `Combine into ${aOrAn(RARITY_LABEL[target])} card` : `Pick ${need} more`}</button>${whyNot ? `<div class="cr-empty">${whyNot}</div>` : ''}`;
+  const ready = need === 0 && !whyNot;
+  go.innerHTML = `<button class="btn${ready ? ' cr-ready' : ''}" id="craftGo" ${ready ? '' : 'disabled'}>${need === 0 ? `Combine into ${aOrAn(RARITY_LABEL[target])} card` : `Pick ${need} more`}</button>${whyNot ? `<div class="cr-empty">${whyNot}</div>` : ''}`;
   trade.appendChild(go);
   box.appendChild(trade);
 
   // ----- events -----
-  box.querySelectorAll('[data-refine]').forEach(btn => btn.addEventListener('click', () => {
+  box.querySelectorAll('[data-toggle-refine]').forEach(row => row.addEventListener('click', () => {
+    const id = row.dataset.toggleRefine;
+    sfx('nav'); buzz(HAP.tap);
+    refineOpenId = refineOpenId === id ? null : id;
+    renderCraft();
+  }));
+  box.querySelectorAll('[data-refine]').forEach(btn => btn.addEventListener('click', e => {
+    e.stopPropagation();
     ensureAudio();
     if (!refineCard(btn.dataset.refine, btn.dataset.stat)) { toast('That cannot be refined right now'); sfx('tie'); }
+    else refineOpenId = null;
     renderCraft();
   }));
   box.querySelectorAll('[data-rar]').forEach(btn => btn.addEventListener('click', () => {
     sfx('nav'); buzz(HAP.tap); craftSel = { rarity: btn.dataset.rar, picks: [] }; renderCraft();
   }));
-  box.querySelectorAll('[data-pick]').forEach(btn => btn.addEventListener('click', () => {
-    const id = btn.dataset.pick;
+  box.querySelectorAll('[data-pick]').forEach(row => row.addEventListener('click', () => {
+    const id = row.dataset.pick;
     if (craftSel.picks.length >= CRAFT.tradeCount || picked(id) >= tradable(id)) return;
     craftSel.picks.push(id); sfx('tap'); buzz(HAP.tap); renderCraft();
   }));

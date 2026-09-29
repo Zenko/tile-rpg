@@ -277,16 +277,22 @@
         <div class="dk-curve" id="deckCurve"></div>
         <div class="dk-kws" id="deckKws"></div>
         <div class="dk-tip hidden" id="deckTip"></div>
-        <div class="dk-actions">
-          <button class="panel-action active" id="deckAuto">Auto-fill</button>
-          <button class="panel-action" id="deckClear">Clear</button>
-          <button class="panel-action" id="deckHelp">How battles work</button>
+        <div class="dk-toolbar">
+          <button class="dk-tool-btn" id="deckOptionsToggle" aria-expanded="false">⚙️ Options</button>
+          <button class="dk-tool-btn" id="deckFilterToggle" aria-expanded="false">🔍 Filter</button>
         </div>
-        <div class="dk-actions">
-          <button class="panel-action" id="deckShare">📋 Share code</button>
-          <button class="panel-action" id="deckLoad">📥 Load a code</button>
+        <div class="dk-options hidden" id="deckOptions">
+          <div class="dk-actions">
+            <button class="panel-action active" id="deckAuto">Auto-fill</button>
+            <button class="panel-action" id="deckClear">Clear</button>
+            <button class="panel-action" id="deckHelp">How battles work</button>
+          </div>
+          <div class="dk-actions">
+            <button class="panel-action" id="deckShare">📋 Share code</button>
+            <button class="panel-action" id="deckLoad">📥 Load a code</button>
+          </div>
         </div>
-        <div class="card-filter" id="deckFilter"></div>
+        <div class="card-filter hidden" id="deckFilter"></div>
         <div class="panel-list" id="deckList"></div>
       </div>
 

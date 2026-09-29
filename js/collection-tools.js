@@ -312,6 +312,17 @@ function renderDeckPanel() {
   if (deckSizeHudEl) deckSizeHudEl.textContent = `${state.deck.length}/${DECK_SIZE}`;
 }
 
+// Options and filters both start collapsed - the deck screen's most common job (add/remove a few
+// cards) doesn't need either visible, and revealing them on tap keeps the default view uncluttered.
+function deckToggleSection(btn, panel) {
+  const open = panel.classList.toggle('hidden') === false;
+  btn.classList.toggle('active', open);
+  btn.setAttribute('aria-expanded', String(open));
+  sfx('nav'); buzz(HAP.tap);
+}
+document.getElementById('deckOptionsToggle').addEventListener('click', function () { deckToggleSection(this, document.getElementById('deckOptions')); });
+document.getElementById('deckFilterToggle').addEventListener('click', function () { deckToggleSection(this, document.getElementById('deckFilter')); });
+
 document.getElementById('deckHelp').addEventListener('click', () => btShowHelp());
 document.getElementById('deckAuto').addEventListener('click', () => {
   if (state.deck.length >= DECK_SIZE) return;
