@@ -212,6 +212,17 @@ const EXCLUSIVE_HINT = { cellar: 'found deep in the cellar', rival: "a rival's f
 
 const RARITY_ORDER = ['common', 'rare', 'ultra', 'super', 'mythic'];
 
+// Card art: a CARD_POOL entry may optionally carry `art: 'assets/cards/<id>.png'`. Every place that shows
+// a card's own icon/art (not a keyword icon, recipe icon, etc.) should call this instead of reading
+// `def.icon` directly, so art can be dropped in card-by-card with the emoji staying as a fallback for
+// every card that doesn't have one yet. The <img> is sized in em so it drops into any of the existing
+// font-size-driven icon containers (see .card-art-img in style.css) without per-call-site CSS.
+function cardArtHtml(def, cls) {
+  return def.art
+    ? `<img class="card-art-img${cls ? ' ' + cls : ''}" src="${def.art}" alt="${escapeHtml(def.name)}">`
+    : `<span class="card-emoji${cls ? ' ' + cls : ''}">${def.icon}</span>`;
+}
+
 /* BEGIN BATTLE ENGINE */
 /* Pure rules for the turn-based card battle. No DOM. Reads card stats from CARD_POOL.
    - Spirit (health) 20 each. Board up to 4. Energy 1..5, +1 per turn. Second player: +1 card, and +1 energy on its first 2 turns.

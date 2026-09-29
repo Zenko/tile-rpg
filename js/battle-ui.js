@@ -158,8 +158,8 @@ function btCardEl(c, cls, mine) {
   el.className = `card rarity-${def.rarity} ${cls || ''}` + (c.spell ? ' spell' : '');
   el.dataset.uid = c.uid;
   el.innerHTML = c.spell
-    ? `<div class="cost">${c.cost}</div><div class="icon">${def.icon}</div><div class="nm">${def.name}</div><div class="spell-tag">✨ Spell</div>`
-    : `<div class="cost">${c.cost}</div><div class="icon">${def.icon}</div><div class="nm">${def.name}</div>
+    ? `<div class="cost">${c.cost}</div><div class="icon">${cardArtHtml(def)}</div><div class="nm">${def.name}</div><div class="spell-tag">✨ Spell</div>`
+    : `<div class="cost">${c.cost}</div><div class="icon">${cardArtHtml(def)}</div><div class="nm">${def.name}</div>
     <div class="kws">${c.kw.map(k => `<span>${KW[k].icon}</span>`).join('')}</div>
     <div class="stats"><span class="pw">⚔${c.power}</span><span class="hp ${c.hp < c.grit ? 'hurt' : ''}">♥${c.hp}</span></div>`;
   const sleeve = mine ? currentSleeve() : null;
@@ -289,7 +289,7 @@ function btShowTip(c, hint) {
     ? `<div class="kw">✨ <b>Spell.</b> ${spellText(def)}</div><div class="kw" style="color:var(--ink-soft)">Resolves at once and does not take a board slot.</div>`
     : `<div class="kw">⚔ <b>${c.power}</b> power &nbsp; ♥ <b>${c.hp}</b>${c.hp < c.grit ? ' / ' + c.grit : ''} health</div>
     ${c.kw.map(k => `<div class="kw">${KW[k].icon} <b>${KW[k].name}.</b> ${KW[k].text}</div>`).join('') || '<div class="kw" style="color:var(--ink-soft)">No keywords.</div>'}`;
-  tip.innerHTML = `<div class="t-h"><span class="ic">${def.icon}</span><b>${def.name}</b><small>${RARITY_LABEL[def.rarity]} · costs ${c.cost}</small></div>
+  tip.innerHTML = `<div class="t-h"><span class="ic">${cardArtHtml(def)}</span><b>${def.name}</b><small>${RARITY_LABEL[def.rarity]} · costs ${c.cost}</small></div>
     ${body}
     ${hint ? `<div class="hint">${hint}</div>` : ''}`;
   tip.classList.add('show'); battleView.classList.add('tip-open');
@@ -439,7 +439,7 @@ function btSpellFlash(def) {
   if (!field) return;
   const f = document.createElement('div');
   f.className = 'spell-flash rarity-' + def.rarity;
-  f.innerHTML = `<span class="sf-icon">${def.icon}</span><span class="sf-name">${def.name}</span>`;
+  f.innerHTML = `<span class="sf-icon">${cardArtHtml(def)}</span><span class="sf-name">${def.name}</span>`;
   field.appendChild(f); setTimeout(() => f.remove(), 900);
 }
 
@@ -553,7 +553,7 @@ function btShowResult(won, yielded) {
     icon.className = 'big-icon reveal-icon';
     if (tier >= 1) endCard.classList.add('glow-' + rewardDef.rarity);
     battleEndTitle.textContent = battle.isBoss ? `${npc.name} yields.` : `${npc.name} offers a card.`;
-    battleEndStats.innerHTML = `You won with <b>${Math.max(0, G.p[0].spirit)}</b> Spirit left after ${turns} turns and received<br><b>${rewardDef.icon} ${rewardDef.name}</b> <span class="rarity-tag rt-${rewardDef.rarity}" style="margin:4px 0 0">${RARITY_LABEL[rewardDef.rarity]}</span>`;
+    battleEndStats.innerHTML = `You won with <b>${Math.max(0, G.p[0].spirit)}</b> Spirit left after ${turns} turns and received<br><b>${cardArtHtml(rewardDef)} ${rewardDef.name}</b> <span class="rarity-tag rt-${rewardDef.rarity}" style="margin:4px 0 0">${RARITY_LABEL[rewardDef.rarity]}</span>`;
     btGet('battleRetryBtn').classList.add('hidden');
     sparkleBurst(btGet('battleSparkles'), ['✨', '🌟', '🌿'], battle.isBoss ? 20 : 10);
     sfx(battle.isBoss || tier >= 3 ? 'mythic' : 'win'); buzz(HAP.win);

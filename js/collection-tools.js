@@ -96,7 +96,7 @@ function renderCharmBar() {
     <div class="charm-slots">${[0, 1, 2].map(i => {
       if (i >= open) return `<div class="charm-slot locked">🔒<small>level ${CHARM_SLOT_LEVELS[i]}</small></div>`;
       const id = c[i] && own.has(c[i]) ? c[i] : null, info = id && charmInfo(id);
-      return id ? `<button class="charm-slot on" data-uncharm="${i}"><span>${cardDef(id).icon}</span><small>${info ? info.text : 'no effect'}</small></button>` : '<div class="charm-slot"><span>✦</span><small>empty</small></div>';
+      return id ? `<button class="charm-slot on" data-uncharm="${i}"><span>${cardArtHtml(cardDef(id))}</span><small>${info ? info.text : 'no effect'}</small></button>` : '<div class="charm-slot"><span>✦</span><small>empty</small></div>';
     }).join('')}</div>`;
   collectionList.appendChild(bar);
   bar.querySelectorAll('[data-uncharm]').forEach(b => b.addEventListener('click', () => { clearCharm(+b.dataset.uncharm); renderCollection(); }));
@@ -133,7 +133,7 @@ function renderCollection() {
       item.innerHTML = `
         <div class="card-mini rarity-${def.rarity}${def.crafted ? ' crafted' : ''}${foilCount(id) ? ' foil' : ''}">
           <span class="c-cost">${def.cost}</span>
-          <span class="c-icon">${def.icon}</span>
+          <span class="c-icon">${cardArtHtml(def)}</span>
           <span class="c-power">${cardStatsText(def)}</span>
         </div>
         <span class="panel-text">
@@ -270,7 +270,7 @@ function renderDeckPanel() {
       item.innerHTML = `
         <div class="card-mini rarity-${def.rarity}${def.crafted ? ' crafted' : ''}">
           <span class="c-cost">${def.cost}</span>
-          <span class="c-icon">${def.icon}</span>
+          <span class="c-icon">${cardArtHtml(def)}</span>
           <span class="c-power">${cardStatsText(def)}</span>
         </div>
         <span class="panel-text">

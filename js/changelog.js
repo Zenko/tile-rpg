@@ -19,6 +19,14 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-29',
+    version: '1.41.0',
+    title: "Card-art groundwork",
+    changes: [
+      "Under the hood: cards can now optionally carry real artwork alongside their emoji, everywhere a card's icon is shown (hand, battle, collection, packs, rewards). No visible change yet - every card still shows its emoji until we start dropping in art.",
+    ],
+  },
+  {
+    date: '2026-09-29',
     version: '1.40.0',
     title: "Fix duplicate neighbors, add a Profile and opt-in notifications",
     changes: [

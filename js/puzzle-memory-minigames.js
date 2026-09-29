@@ -94,7 +94,7 @@ function puzzleWin() {
     const cid = randomCardId(rollRewardRarity(false)), def = cardDef(cid);
     state.ownedCards.push(cid); bumpStat('cardsFound', 1); bumpStat('puzzlesSolved', 1); bumpPill('pillCards');
     endCard.classList.add('glow-' + def.rarity);
-    battleEndStats.innerHTML = `Olwen claps quietly. Day ${pz.streak} of your streak.<br><b>${def.icon} ${def.name}</b> <span class="rarity-tag rt-${def.rarity}" style="margin:4px 0 0">${RARITY_LABEL[def.rarity]}</span>`;
+    battleEndStats.innerHTML = `Olwen claps quietly. Day ${pz.streak} of your streak.<br><b>${cardArtHtml(def)} ${def.name}</b> <span class="rarity-tag rt-${def.rarity}" style="margin:4px 0 0">${RARITY_LABEL[def.rarity]}</span>`;
     logEvent('🧩', `Solved the daily puzzle (streak ${pz.streak}).`);
     sfx('win');
   } else { battleEndStats.innerHTML = 'Solved again - the prize was already yours today. Come back tomorrow for a new board.'; sfx('claim'); }

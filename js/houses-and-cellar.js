@@ -804,7 +804,7 @@ function cupWin() {
       const cid = randomCardId(Math.random() < 0.35 ? 'mythic' : 'super'), def = cardDef(cid);
       state.ownedCards.push(cid); noteCardsFound(1); bumpPill('pillCards');
       endCard.classList.add('glow-' + def.rarity);
-      extra = `The ${s.icon} trophy goes on your shelf at home, with<br><b>${def.icon} ${def.name}</b> <span class="rarity-tag rt-${def.rarity}" style="margin:4px 0 0">${RARITY_LABEL[def.rarity]}</span>`;
+      extra = `The ${s.icon} trophy goes on your shelf at home, with<br><b>${cardArtHtml(def)} ${def.name}</b> <span class="rarity-tag rt-${def.rarity}" style="margin:4px 0 0">${RARITY_LABEL[def.rarity]}</span>`;
       logEvent('🏆', `Won the ${cupName()}!`);
     } else extra = 'Another clean sweep this week.';
   }
@@ -851,7 +851,7 @@ function dungeonWin() {
     const def = cardDef(cardId), isNew = !discoveredSet().has(BattleEngine.baseIdOf(cardId));
     state.ownedCards.push(cardId); bumpStat('cardsFound', 1); bumpPill('pillCards');
     if (RARITY_ORDER.indexOf(def.rarity) >= 1) endCard.classList.add('glow-' + def.rarity);
-    cardLine = `<br>${heading}: <b>${def.icon} ${def.name}</b> <span class="rarity-tag rt-${def.rarity}" style="margin:4px 0 0">${RARITY_LABEL[def.rarity]}</span>`;
+    cardLine = `<br>${heading}: <b>${cardArtHtml(def)} ${def.name}</b> <span class="rarity-tag rt-${def.rarity}" style="margin:4px 0 0">${RARITY_LABEL[def.rarity]}</span>`;
     if (isNew) setTimeout(() => toast('📖 New entry in your Index'), 900);
   }
   if (f.deep && newBest) { logEvent('🕳️', `New cellar record: floor ${st.floor}.`); setTimeout(() => toast(`🕳️ New record: floor ${st.floor}`), 1200); }

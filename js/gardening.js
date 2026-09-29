@@ -137,7 +137,7 @@ function showCardReveal(cardId, heading, isGift, note, xpGained) {
   card.className = 'overlay-card' + (tier >= 1 ? ' glow-' + def.rarity : '');
 
   const icon = document.getElementById('pickupIcon');
-  icon.textContent = def.icon;
+  icon.innerHTML = cardArtHtml(def);
   icon.classList.remove('reveal-icon'); void icon.offsetWidth; icon.classList.add('reveal-icon');
 
   const tag = document.getElementById('pickupRarity');

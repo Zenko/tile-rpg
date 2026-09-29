@@ -512,7 +512,7 @@ function challengeWin() {
     const rr = rollRewardRarity(false), cid = randomCardId(battle.npc.challenge.i === 2 && RARITY_ORDER.indexOf(rr) < 2 ? 'ultra' : rr), def = cardDef(cid);
     state.ownedCards.push(cid); noteCardsFound(1); bumpPill('pillCards');
     endCard.classList.add('glow-' + def.rarity);
-    battleEndStats.innerHTML = `A win on today's rules earns<br><b>${def.icon} ${def.name}</b> <span class="rarity-tag rt-${def.rarity}" style="margin:4px 0 0">${RARITY_LABEL[def.rarity]}</span>`;
+    battleEndStats.innerHTML = `A win on today's rules earns<br><b>${cardArtHtml(def)} ${def.name}</b> <span class="rarity-tag rt-${def.rarity}" style="margin:4px 0 0">${RARITY_LABEL[def.rarity]}</span>`;
     logEvent('🎯', `Beat today's "${r.text}" challenge.`);
   } else { addPebbles(4); battleEndStats.innerHTML = 'Beaten again - <b>+4 🫧</b>. The card prize comes once a day.'; }
   saveState();

@@ -206,7 +206,7 @@ function aOrAn(label) { return (/^[aeiou]/i.test(label) ? 'an ' : 'a ') + label;
 
 function miniCardHtml(def) {
   return `<div class="card-mini rarity-${def.rarity}${def.crafted ? ' crafted' : ''}">
-      <span class="c-cost">${def.cost}</span><span class="c-icon">${def.icon}</span><span class="c-power">${cardStatsText(def)}</span></div>`;
+      <span class="c-cost">${def.cost}</span><span class="c-icon">${cardArtHtml(def)}</span><span class="c-power">${cardStatsText(def)}</span></div>`;
 }
 
 function renderCraft() {
@@ -554,7 +554,7 @@ function renderAlmanac() {
   const sd = seasonDef();
   const own = baseOwnedSet();
   const setsHtml = `<div class="sets-box"><div class="section-title" style="margin-top:6px">Sets <span class="title-sub">own every card in a set for a lasting bonus</span></div>${CARD_SETS.map(st => { const n = setProgress(st), done = n === st.cards.length;
-    return `<div class="set-row${done ? ' done' : ''}"><span class="set-name">${st.icon} ${st.name} <small>${n}/${st.cards.length}</small></span><span class="set-cards">${st.cards.map(id => `<span class="${own.has(id) ? 'have' : 'miss'}" title="${own.has(id) || disc.has(id) ? escapeHtml(cardDef(id).name) : '???'}">${cardDef(id).icon}</span>`).join('')}</span><span class="set-perk">${done ? '✓ ' : ''}${st.text}</span></div>`; }).join('')}</div>`;
+    return `<div class="set-row${done ? ' done' : ''}"><span class="set-name">${st.icon} ${st.name} <small>${n}/${st.cards.length}</small></span><span class="set-cards">${st.cards.map(id => `<span class="${own.has(id) ? 'have' : 'miss'}" title="${own.has(id) || disc.has(id) ? escapeHtml(cardDef(id).name) : '???'}">${cardArtHtml(cardDef(id))}</span>`).join('')}</span><span class="set-perk">${done ? '✓ ' : ''}${st.text}</span></div>`; }).join('')}</div>`;
   const foilTotal = Object.values(foils()).reduce((a, b) => a + b, 0);
   document.getElementById('almProgress').innerHTML = setsHtml + `
     <div class="ap-top"><span><b>${found}</b> of ${total} discovered</span><span>${Math.round(found / total * 100)}%</span></div>
@@ -589,7 +589,7 @@ function renderAlmanac() {
             ${isDonated(def.id) ? '<span class="ac-museum">🏛️</span>' : ''}
             ${owned > 1 ? `<span class="ac-count">×${owned}</span>` : ''}
             <span class="ac-cost">${def.cost}</span>
-            <span class="ac-icon">${def.icon}</span>
+            <span class="ac-icon">${cardArtHtml(def)}</span>
             <span class="ac-power">${cardStatsText(def)}</span>
             <span class="ac-name">${def.name}</span>
             ${def.kw.length ? `<span class="ac-kw">${kwIcons(def)}</span>` : ''}`;
@@ -598,7 +598,7 @@ function renderAlmanac() {
         } else {
           el.className = 'alm-card unknown';
           el.innerHTML = `
-            <span class="ac-icon">${def.icon}</span>
+            <span class="ac-icon">${cardArtHtml(def)}</span>
             <span class="ac-name">???</span>
             <span class="ac-rar rt-${def.rarity}" style="background:var(--${def.rarity === 'common' ? 'water' : def.rarity === 'rare' ? 'rare' : def.rarity === 'ultra' ? 'epic' : def.rarity === 'super' ? 'accent' : 'mythic'})">${RARITY_LABEL[def.rarity]}</span>
             <span class="ac-hint">costs ${def.cost} ⚡</span>

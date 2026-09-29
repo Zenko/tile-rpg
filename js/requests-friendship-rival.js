@@ -365,7 +365,7 @@ function signatureWin() {
   if (cardId) {
     const def = cardDef(cardId);
     endCard.classList.add('glow-' + def.rarity);
-    battleEndStats.innerHTML = `A signature win, and ${s.name} hands over<br><b>${def.icon} ${def.name}</b> <span class="rarity-tag rt-${def.rarity}" style="margin:4px 0 0">${RARITY_LABEL[def.rarity]}</span>`;
+    battleEndStats.innerHTML = `A signature win, and ${s.name} hands over<br><b>${cardArtHtml(def)} ${def.name}</b> <span class="rarity-tag rt-${def.rarity}" style="margin:4px 0 0">${RARITY_LABEL[def.rarity]}</span>`;
   } else battleEndStats.innerHTML = `Another signature win. <b>+${pebbles} 🫧</b><br><small>The card prize comes once a day.</small>`;
   btGet('battleRetryBtn').classList.add('hidden');
   sparkleBurst(btGet('battleSparkles'), ['🌟', '💞', '✨'], 14);
@@ -490,7 +490,7 @@ function rivalWin() {
   icon.textContent = '🎭'; icon.className = 'big-icon reveal-icon';
   endCard.classList.add('glow-' + def.rarity);
   battleEndTitle.textContent = `Rook: "${line}"`;
-  battleEndStats.innerHTML = `${!done ? `Rivalry <b>${rv.chapter}/${RIVAL.chapters}</b>. ` : ''}Rook hands over<br><b>${def.icon} ${def.name}</b> <span class="rarity-tag rt-${def.rarity}" style="margin:4px 0 0">${RARITY_LABEL[def.rarity]}</span>${done ? '<br><b>+10 🫧</b>' : ''}`;
+  battleEndStats.innerHTML = `${!done ? `Rivalry <b>${rv.chapter}/${RIVAL.chapters}</b>. ` : ''}Rook hands over<br><b>${cardArtHtml(def)} ${def.name}</b> <span class="rarity-tag rt-${def.rarity}" style="margin:4px 0 0">${RARITY_LABEL[def.rarity]}</span>${done ? '<br><b>+10 🫧</b>' : ''}`;
   btGet('battleRetryBtn').classList.add('hidden');
   sparkleBurst(btGet('battleSparkles'), ['🎭', '✨', '🌟'], rv.chapter >= RIVAL.chapters && !done ? 24 : 12);
   sfx(!done && rv.chapter >= RIVAL.chapters ? 'mythic' : 'win'); buzz(HAP.win); bumpPill('pillWins');
