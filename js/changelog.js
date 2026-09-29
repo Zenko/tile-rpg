@@ -19,6 +19,14 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-29',
+    version: '1.42.0',
+    title: "Smarter offline updates",
+    changes: [
+      "Under the hood: the offline/installable version of the game now figures out which files to save for offline play by reading the page itself, instead of a hand-kept list - no visible change, just fewer chances for a new file to be missed.",
+    ],
+  },
+  {
+    date: '2026-09-29',
     version: '1.41.0',
     title: "Card-art groundwork",
     changes: [

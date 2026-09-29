@@ -1,46 +1,35 @@
 // Service worker: makes the game installable and fully playable offline.
 // Bump CACHE_VERSION on every publish (see HANDOFF §2's publish checklist) so returning players
 // pick up the new files instead of a stale cache - it does not need to match the game's own version.
-const CACHE_VERSION = 'v26';
+const CACHE_VERSION = 'v27';
 const CACHE_NAME = 'tile-rpg-' + CACHE_VERSION;
 
-const PRECACHE_URLS = [
-  './',
-  './index.html',
-  './manifest.json',
-  './css/style.css',
-  './assets/sprites.js',
-  './assets/icon-192.png',
-  './assets/icon-512.png',
-  './js/afterdark-companion-cards.js',
-  './js/audio.js',
-  './js/battle-ui.js',
-  './js/changelog.js',
-  './js/cloud-save.js',
-  './js/collection-tools.js',
-  './js/data-and-engine.js',
-  './js/events-story-foils-guide.js',
-  './js/fishing.js',
-  './js/gardening.js',
-  './js/houses-and-cellar.js',
-  './js/journal-history.js',
-  './js/maps.js',
-  './js/neighbors-bosses.js',
-  './js/notes.js',
-  './js/progression.js',
-  './js/puzzle-memory-minigames.js',
-  './js/requests-friendship-rival.js',
-  './js/shop-economy.js',
-  './js/titles.js',
-  './js/town-render-weather.js',
-  './js/workshop-and-starter.js',
-  './js/world-map.js',
-];
+// The precache list used to be a hand-maintained copy of every <script src> in index.html - easy to forget
+// to update when a file is added, and then that file silently doesn't work offline. Instead this reads
+// index.html and manifest.json themselves at install time and precaches whatever same-origin files they
+// already reference, so there is only one place (index.html) to keep up to date, not two.
+const CORE_URLS = ['./', './index.html', './manifest.json'];
+function sameOriginUrl(raw) {
+  if (/^(https?:)?\/\//i.test(raw) || raw.startsWith('data:') || raw.startsWith('mailto:')) return null;
+  return './' + raw.replace(/^\.?\//, '');
+}
+async function buildPrecacheUrls() {
+  const urls = new Set(CORE_URLS);
+  const html = await (await fetch('./index.html')).text();
+  const re = /<(?:script|link)\b[^>]*?(?:src|href)="([^"]+)"[^>]*>/gi;
+  let m;
+  while ((m = re.exec(html))) { const u = sameOriginUrl(m[1]); if (u) urls.add(u); }
+  try {
+    const manifest = await (await fetch('./manifest.json')).json();
+    (manifest.icons || []).forEach(icon => { const u = sameOriginUrl(icon.src); if (u) urls.add(u); });
+  } catch (e) { /* manifest fetch/parse failed - the core list above is still enough to install */ }
+  return [...urls];
+}
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(PRECACHE_URLS))
+    buildPrecacheUrls()
+      .then(urls => caches.open(CACHE_NAME).then(cache => cache.addAll(urls)))
       .then(() => self.skipWaiting())
   );
 });
