@@ -183,6 +183,39 @@ function applyComfortPrefs() {
     if (key === 'bigText' && !inBattle) renderTown();
   });
 });
+// Separate from the loop above: turning this on needs an async permission prompt first, and turning it on
+// or off should immediately (re)schedule or cancel whatever's currently pending (a loaf in the oven, the
+// boss's next appearance) rather than waiting for the next natural trigger.
+// Restores scheduling after a reload/reopen - anything already in flight (a loaf mid-bake, the boss
+// currently hidden) needs to be rescheduled since the setTimeout from whenever it originally started is
+// long gone. Called once at start-up (if notifications are already on) and right after turning them on.
+function scheduleAllPendingNotifs() {
+  if (!notifsEnabled()) return;
+  const ov = ovenState();
+  if (ov.startedAt) scheduleLocalNotify('bread', ov.startedAt + (ov.ms || BAKE_MS), '🍞 Bread is ready!', 'Your loaf at the bakery is done baking.');
+  const wait = msUntilBossAppear();
+  if (wait > 0) scheduleLocalNotify('boss', Date.now() + wait, '👹 The boss is back', 'A district boss has returned - good luck!');
+}
+document.getElementById('notifsToggle').addEventListener('click', async () => {
+  sfx('tap');
+  if (prefs.notifs) {
+    prefs.notifs = false; savePrefs(); syncToggles();
+    Object.keys(notifTimers).forEach(k => clearTimeout(notifTimers[k]));
+    return;
+  }
+  const granted = await requestNotifPermission();
+  if (!granted) { syncToggles(); return; }
+  prefs.notifs = true; savePrefs(); syncToggles();
+  toast('🔔 Notifications on');
+  scheduleAllPendingNotifs();
+});
+document.getElementById('presenceToggle').addEventListener('click', () => {
+  sfx('tap');
+  prefs.sharePresence = !prefs.sharePresence; savePrefs(); syncToggles();
+  if (prefs.sharePresence) { pushPresence(); toast("👋 Sharing that you're playing"); }
+  else removePresence();
+  fetchWhosPlaying();
+});
 
 /* ============================================================
    FEEDBACK FOR TESTERS: every note carries enough context to act on
@@ -243,6 +276,7 @@ advanceClock();
 renderTown();
 updateHud();
 syncToggles();
+scheduleAllPendingNotifs();
 checkAchievements();
 if (__mig && __mig.granted.length) setTimeout(() => toast(__mig.brandNew ? '🌱 A starter deck is ready. Tap a neighbor to battle.' : '📦 Battles use 12-card decks now. Starter cards were added and your deck is filled.'), 900);
 

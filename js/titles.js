@@ -162,6 +162,32 @@ function renderCharacterPanel() {
   document.getElementById('avatarPreviewEmoji').textContent = state.character.emoji;
   renderTitleSwatches();
   renderCompanionBox();
+  renderProfileStats();
+  fetchWhosPlaying();
+}
+// A glanceable summary of progress in the player menu - the numbers already existed (testerInfo() in
+// js/events-story-foils-guide.js assembles a similar set for bug-report emails), they just weren't shown
+// to the player anywhere as an actual screen.
+function profileStatValues() {
+  const t = state.progress.totals || {}, pr = ensureLevel();
+  const friends = Object.values(friendsState()).filter(fr => fr.points > 0).length;
+  return [
+    { icon: '⭐', label: 'Level', value: pr.level },
+    { icon: '🏆', label: 'Wins', value: state.wins || 0 },
+    { icon: '🃏', label: 'Cards', value: state.ownedCards.length },
+    { icon: '✨', label: 'Foils', value: t.foilsFound || 0 },
+    { icon: '🏅', label: 'Milestones', value: `${state.progress.achievements.length}/${ACHIEVEMENTS.length}` },
+    { icon: '💞', label: 'Friends', value: friends },
+    { icon: '🕳️', label: 'Cellar best', value: cellarBest() },
+    { icon: '👣', label: 'Steps', value: t.steps || 0 },
+  ];
+}
+function renderProfileStats() {
+  const box = document.getElementById('profileStatsGrid');
+  if (!box) return;
+  box.innerHTML = profileStatValues().map(s =>
+    `<div class="profile-stat"><span class="ps-icon">${s.icon}</span><span class="ps-value">${s.value}</span><span class="ps-label">${s.label}</span></div>`
+  ).join('');
 }
 function moreInShopHint() {
   const hint = document.createElement('div');
@@ -440,6 +466,8 @@ function syncToggles() {
   document.getElementById('fastToggle').classList.toggle('on', !!prefs.fast);
   document.getElementById('bigTextToggle').classList.toggle('on', !!prefs.bigText);
   document.getElementById('calmToggle').classList.toggle('on', !!prefs.calm);
+  document.getElementById('notifsToggle').classList.toggle('on', notifsEnabled());
+  document.getElementById('presenceToggle').classList.toggle('on', !!prefs.sharePresence);
   [['musicVol', 'musicVolNum', prefs.musicVol, !(prefs.sound && prefs.music)], ['sfxVol', 'sfxVolNum', prefs.sfxVol, !prefs.sound]].forEach(([id, numId, v, off]) => {
     const el = document.getElementById(id), pct = Math.round(v * 100);
     el.value = pct; el.style.setProperty('--fill', pct + '%');

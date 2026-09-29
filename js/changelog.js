@@ -19,6 +19,17 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-29',
+    version: '1.40.0',
+    title: "Fix duplicate neighbors, add a Profile and opt-in notifications",
+    changes: [
+      "Fixed a bug where a neighbor (most visibly Rook and the district boss) could briefly appear twice, side by side. Sorry about that!",
+      "New Profile section in the player menu: a glance at your level, wins, cards, foils, milestones, friendships, cellar record and steps, all in one place.",
+      "New opt-in setting: turn on Notify Me to get a notification when bread finishes baking or the district boss returns, even if you've stepped away from the tab. Off by default.",
+      "New opt-in Who's Playing glance, also in the player menu - see the other testers' names, levels and last-seen time if they've chosen to share it too. Not a leaderboard, just a friendly \"who's around.\"",
+    ],
+  },
+  {
+    date: '2026-09-29',
     version: '1.39.0',
     title: "Redesigned mailbox",
     changes: [

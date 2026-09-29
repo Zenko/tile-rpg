@@ -63,6 +63,51 @@ function cloudPush() {
   if (!ref || cloudSyncing) return;
   state.cloudSavedAt = Date.now();
   ref.set({ json: JSON.stringify(state), savedAt: state.cloudSavedAt }).catch(() => { /* offline - Firestore queues this and retries automatically */ });
+  pushPresence();   // piggybacks on the same debounce - see WHO'S PLAYING below, no extra write-quota pressure
+}
+
+/* ============================================================
+   WHO'S PLAYING: an opt-in, low-pressure glance at the other testers - not a leaderboard, just name, level,
+   current district and when they last played. Uses the same anonymous-auth Firestore project as saves, but
+   a separate collection ('players') since this is genuinely different data: visible to every signed-in
+   tester, not just its owner. That needs its own security rule added in the Firebase console alongside the
+   existing 'saves' rule (see HANDOFF.md §1a for the exact rule to paste in) - until that's done, every
+   read/write here just fails silently, same as any other offline/unreachable case in this file.
+   Off by default and a separate toggle from cloud save itself (prefs.sharePresence) - sharing your name and
+   activity with the other testers is a different call than just backing up your own save privately.
+   ============================================================ */
+const PRESENCE_COLLECTION = 'players';
+const PRESENCE_STALE_MS = 14 * 24 * 60 * 60 * 1000;   // don't show someone who hasn't played in two weeks
+function presenceSharingOn() { return !!prefs.sharePresence; }
+function pushPresence() {
+  if (!presenceSharingOn() || !cloudReady || !cloudDb || !cloudUser) return;
+  cloudDb.collection(PRESENCE_COLLECTION).doc(cloudUser.uid).set({
+    name: (state.character && state.character.name) || 'A player',
+    emoji: (state.character && state.character.emoji) || '🙂',
+    level: ensureLevel().level,
+    district: (DISTRICTS[state.currentDistrict] && DISTRICTS[state.currentDistrict].name) || '',
+    lastSeen: Date.now(),
+  }).catch(() => { /* offline - this is just a nice-to-have glance, not core save data */ });
+}
+// Removes you from the list right away when you opt out, rather than lingering until PRESENCE_STALE_MS.
+function removePresence() {
+  if (!cloudReady || !cloudDb || !cloudUser) return;
+  cloudDb.collection(PRESENCE_COLLECTION).doc(cloudUser.uid).delete().catch(() => {});
+}
+async function fetchWhosPlaying() {
+  const box = document.getElementById('whosPlayingList');
+  if (!box) return;
+  if (!cloudAvailable() || !cloudReady) { box.innerHTML = '<div class="panel-desc">Not connected right now.</div>'; return; }
+  box.innerHTML = '<div class="panel-desc">Loading…</div>';
+  try {
+    const snap = await cloudDb.collection(PRESENCE_COLLECTION).orderBy('lastSeen', 'desc').limit(20).get();
+    const now = Date.now();
+    const rows = snap.docs.map(d => d.data()).filter(p => now - (p.lastSeen || 0) < PRESENCE_STALE_MS);
+    box.innerHTML = rows.length ? rows.map(p => `<div class="panel-item"><span class="panel-icon">${p.emoji || '🙂'}</span><span class="panel-text">
+        <div class="panel-name">${escapeHtml(p.name || 'A player')} · Lv ${p.level || 1}</div>
+        <div class="panel-desc">${escapeHtml(p.district || '')}${p.district ? ' · ' : ''}${fmtLogTime(p.lastSeen)}</div></span></div>`).join('')
+      : '<div class="panel-desc">Nobody sharing yet - turn it on in Settings and be the first!</div>';
+  } catch (e) { box.innerHTML = "<div class=\"panel-desc\">Couldn't load right now.</div>"; }
 }
 
 // force=true (from the explicit "Restore a save" button) always takes the cloud copy, since the player just

@@ -1,12 +1,51 @@
 /* ============================================================
    PREFS, SOUND, HAPTICS, TOAST
    ============================================================ */
-let prefs = { sound: true, haptics: true, music: true, musicVol: 0.5, sfxVol: 0.7 };   // sound = master mute for everything
+let prefs = { sound: true, haptics: true, music: true, musicVol: 0.5, sfxVol: 0.7, notifs: false, sharePresence: false };   // sound = master mute for everything; notifs/sharePresence default off - one needs a permission grant, the other shares your name/activity with other testers
 try { const pr = JSON.parse(localStorage.getItem(PREFS_KEY) || 'null'); if (pr) prefs = Object.assign(prefs, pr); } catch (e) { /* ignore */ }
 // Repair anything a corrupted/edited save could hand us
 ['musicVol', 'sfxVol'].forEach(k => { const v = Number(prefs[k]); prefs[k] = (isFinite(v) ? Math.min(1, Math.max(0, v)) : 0.5); });
 prefs.sound = prefs.sound !== false; prefs.music = prefs.music !== false; prefs.haptics = prefs.haptics !== false;
 function savePrefs() { try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch (e) { /* ignore */ } }
+
+/* ============================================================
+   LOCAL TIMER NOTIFICATIONS (opt-in, no server)
+   The PWA already ships a service worker, so a player who leaves the tab open or backgrounded - not fully
+   closed or killed, mobile OSes vary on how long that keeps running - can get a local notification when a
+   real-time wait finishes: bread at the bakery, or the district boss's 30-minute cycle (see ovenAction() in
+   js/houses-and-cellar.js and checkBossCycle() in js/neighbors-bosses.js for where these get scheduled).
+   Deliberately scoped to just those two: crop growth's rate changes with weather/perks/events after
+   planting, so there's no fixed "ready at" timestamp to schedule against up front the way there is for the
+   other two. This needs no push infrastructure since it only ever fires from code already running in this
+   tab - a genuinely closed/killed app still won't notify, same as any other client-only PWA feature.
+   ============================================================ */
+function notifsEnabled() { return !!prefs.notifs && 'Notification' in window && Notification.permission === 'granted'; }
+async function requestNotifPermission() {
+  if (!('Notification' in window)) { toast("This browser can't show notifications"); return false; }
+  if (Notification.permission === 'granted') return true;
+  if (Notification.permission === 'denied') { toast('Notifications are blocked - check your browser/site settings'); return false; }
+  try { return (await Notification.requestPermission()) === 'granted'; } catch (e) { return false; }
+}
+function localNotify(title, body, tag) {
+  if (!notifsEnabled() || document.visibilityState === 'visible') return;   // already looking at it - no need to nag
+  try {
+    if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+      navigator.serviceWorker.ready.then(reg => reg.showNotification(title, { body, tag, icon: 'assets/icon-192.png', badge: 'assets/icon-192.png' })).catch(() => {});
+    } else {
+      new Notification(title, { body, tag, icon: 'assets/icon-192.png' });
+    }
+  } catch (e) { /* ignore */ }
+}
+const notifTimers = {};
+// Re-callable any time (on the triggering action, and once at start-up for anything already pending) -
+// clears any previous timer under the same key first, so re-scheduling the same wait never double-fires.
+function scheduleLocalNotify(key, atMs, title, body) {
+  clearTimeout(notifTimers[key]);
+  if (!notifsEnabled()) return;
+  const delay = atMs - Date.now();
+  if (delay <= 0) return;
+  notifTimers[key] = setTimeout(() => localNotify(title, body, key), delay);
+}
 
 let userHasTouched = false;
 let audioCtx = null, masterGain = null, sfxBus = null, musicBus = null;

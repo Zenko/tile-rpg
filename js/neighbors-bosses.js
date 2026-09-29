@@ -223,6 +223,7 @@ function checkBossCycle() {
       if (el) { el.classList.add('boss-vanish'); setTimeout(() => { if (inTown) renderTown(); }, 650); }
       if (inTown) toast(`👹 ${data.boss.name} has slipped away for now.`);
     }
+    scheduleLocalNotify('boss', now + msUntilBossAppear(now), '👹 The boss is back', 'A district boss has returned - good luck!');
   } else {
     bossCycleState.announced = false;
     if (inTown) renderTown();

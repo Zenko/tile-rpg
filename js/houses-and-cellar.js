@@ -97,7 +97,11 @@ function bakeMs() { return Math.round(BAKE_MS * (1 - Math.min(0.5, cardBonus('ba
 function fmtClock(ms) { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; }
 function ovenAction() {
   const ov = ovenState();
-  if (!ov.startedAt) { ov.startedAt = Date.now(); ov.ms = bakeMs(); saveState(); sfx('tap'); return 'Maple slides your loaf into the oven. "Off you go - it will not burn, I promise."'; }
+  if (!ov.startedAt) {
+    ov.startedAt = Date.now(); ov.ms = bakeMs(); saveState(); sfx('tap');
+    scheduleLocalNotify('bread', ov.startedAt + ov.ms, '🍞 Bread is ready!', 'Your loaf at the bakery is done baking.');
+    return 'Maple slides your loaf into the oven. "Off you go - it will not burn, I promise."';
+  }
   if (Date.now() - ov.startedAt < (ov.ms || BAKE_MS)) return 'Not yet. It smells wonderful, though.';
   ov.startedAt = null;
   bumpStat('breadBaked', 1);

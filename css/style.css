@@ -547,6 +547,12 @@ body.in-battle .toast.show { transform: translateX(-50%) translateY(0); }
 .ach.locked { opacity: 0.4; } .ach.locked .a-ico { filter: grayscale(1); }
 .ach.fresh { animation: bump 0.6s ease; border-color: var(--accent); }
 .ach .a-title { display: block; font-size: 0.5rem; color: var(--accent); margin-top: 2px; line-height: 1.1; }
+/* Profile stats: a glanceable summary in the player menu, same tile shape as .ach above */
+.profile-stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.profile-stat { background: var(--stone); border: 1px solid var(--stone-edge); border-radius: 14px; padding: 10px 4px 8px; text-align: center; display: flex; flex-direction: column; align-items: center; }
+.profile-stat .ps-icon { font-size: 1.3rem; margin-bottom: 2px; }
+.profile-stat .ps-value { font-size: 0.95rem; font-weight: 700; color: var(--ink); }
+.profile-stat .ps-label { font-size: 0.56rem; color: var(--ink-soft); line-height: 1.2; }
 .title-row { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
 .title-chip { border: 1px solid var(--stone-edge); background: var(--stone); color: var(--ink); border-radius: 999px; padding: 6px 12px; font-size: 0.72rem; cursor: pointer; font-family: inherit; }
 .title-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }

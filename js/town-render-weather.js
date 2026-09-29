@@ -536,9 +536,18 @@ function renderEntities(data) {
     const tag = f.isRival ? ' ⭐' : (!f.isBoss && friendHearts(f) >= SIG_HEARTS ? ' 💞' : '');
     const cls = f.isBoss ? 'boss' : 'npc' + (f.isRival ? ' rival' : '');
     let e = oldEntityEls.get(f.id);
-    if (e && e.isConnected && e.className === 'ent ' + cls) {
-      // reused as-is: only sync position/name, never recreate, so an in-flight wander transition and the
-      // idle bob animation both continue instead of snapping/restarting
+    if (e && e.isConnected) {
+      // Reused as-is: only sync position/name/rival-status, never recreate, so an in-flight wander
+      // transition and the idle bob animation both continue instead of snapping/restarting. Previously
+      // this required an *exact* className match to reuse - but a one-shot class added elsewhere
+      // (npc-arrive on arrival, boss-appear-cycle/boss-vanish on the boss's 30-min cycle - see
+      // js/neighbors-bosses.js) permanently changed the element's className, so it never matched again:
+      // every later render fell into the "create new" branch below *without ever removing the stale old
+      // element* (its id was still "live", so the end-of-loop cleanup skipped it), leaving both on screen -
+      // the duplicate Rook/boss sightings reported by a player. Toggling just the `rival` class (the only
+      // thing about identity that can actually change) instead of gating reuse on the whole className fixes
+      // the duplication without also wiping a still-playing one-shot animation class on every render.
+      e.classList.toggle('rival', !!f.isRival);
       e.dataset.x = f.x; e.dataset.y = f.y;
       e.style.setProperty('--x', f.x); e.style.setProperty('--y', f.y); e.style.zIndex = f.y * 2 + 1;
       const nameEl = e.querySelector('.ent-name'); if (nameEl) nameEl.innerHTML = `${escapeHtml(f.name)}${tag}`;
