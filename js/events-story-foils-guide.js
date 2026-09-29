@@ -249,6 +249,18 @@ function testerInfo() {
     `Device: ${ua}`,
     recent ? `Recent:\n${recent}` : ''].filter(Boolean).join('\n');
 }
+// The same facts as testerInfo(), as structured fields, so a feedback document in Firestore can be
+// scanned/filtered by name or level instead of only read as one block of text.
+function testerData() {
+  const pr = ensureLevel();
+  return {
+    name: (state.character && state.character.name) || 'A player',
+    emoji: (state.character && state.character.emoji) || '',
+    level: pr.level, wins: state.wins || 0, cards: state.ownedCards.length,
+    district: DISTRICTS[state.currentDistrict] ? DISTRICTS[state.currentDistrict].name : '',
+    version: gameVersionLabel(), screen: `${window.innerWidth}x${window.innerHeight}`,
+  };
+}
 // A real overlay (like #cloudOverlay - see js/cloud-save.js) instead of prompt(), so a longer bug report or
 // piece of feedback can actually be seen and edited while typing, not squeezed into one browser pop-up line.
 let feedbackModalResolve = null;
@@ -257,8 +269,8 @@ async function sendFeedback(kind) {
   const bug = kind === 'bug';
   document.getElementById('feedbackModalTitle').textContent = bug ? 'Report a bug' : 'Send feedback';
   document.getElementById('feedbackModalDesc').textContent = bug
-    ? 'What happened, and what did you expect to happen? Your game version and device are added for you.'
-    : "What's on your mind? It's sent straight to the developer, right from here.";
+    ? 'What happened, and what did you expect to happen? Your name, level, game version and device are added for you.'
+    : "What's on your mind? It's sent straight to the developer, along with your name, level and game version.";
   document.getElementById('feedbackModalSubmit').textContent = bug ? 'Report' : 'Send';
   const textEl = document.getElementById('feedbackTextInput');
   textEl.value = '';
@@ -266,7 +278,7 @@ async function sendFeedback(kind) {
   setTimeout(() => textEl.focus(), 50);
   const msg = await new Promise(resolve => { feedbackModalResolve = resolve; });
   if (!msg || !msg.trim()) return;
-  const sent = await pushFeedback(kind, msg.trim(), testerInfo());
+  const sent = await pushFeedback(kind, msg.trim(), testerInfo(), testerData());
   if (sent) { toast(bug ? '🐞 Bug reported - thank you!' : '💬 Feedback sent - thank you!'); sfx('claim'); return; }
   // Firestore unreachable or its security rule isn't set up yet - fall back to the old mailto: link
   // rather than the message just disappearing.

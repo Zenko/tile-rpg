@@ -105,10 +105,10 @@ function removePresence() {
    case here, and sendFeedback() falls back to the old mailto: link so a message is never just lost.
    ============================================================ */
 const FEEDBACK_COLLECTION = 'feedback';
-async function pushFeedback(kind, text, info) {
+async function pushFeedback(kind, text, info, player) {
   if (!cloudAvailable() || !cloudDb) return false;
   try {
-    await cloudDb.collection(FEEDBACK_COLLECTION).add({ kind, text, info, uid: cloudUser ? cloudUser.uid : null, at: Date.now() });
+    await cloudDb.collection(FEEDBACK_COLLECTION).add({ kind, text, info, player: player || null, uid: cloudUser ? cloudUser.uid : null, at: Date.now() });
     return true;
   } catch (e) { return false; }
 }

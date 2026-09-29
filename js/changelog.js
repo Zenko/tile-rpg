@@ -19,6 +19,14 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-29',
+    version: '1.46.0',
+    title: "Feedback now includes who sent it",
+    changes: [
+      "Feedback and bug reports now include your player name, level, wins, cards and game version, so the developer can tell whose note it is. The feedback box says so before you send.",
+    ],
+  },
+  {
+    date: '2026-09-29',
     version: '1.45.0',
     title: "A snack before battle now clearly helps, plus more fixes",
     changes: [
