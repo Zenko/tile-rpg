@@ -18,6 +18,14 @@ function gameVersionLabel() {
    the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
 const CHANGELOG = [
   {
+    date: '2026-09-29',
+    version: '1.37.0',
+    title: "Hide and Seek moves into town",
+    changes: [
+      "Hide and Seek is no longer a pop-up screen - it now plays out right on the town map. Your companion actually ducks behind a real spot nearby (a bush, a bench, whatever's around) while the rest of the town keeps going around you, and you tap the real tile from memory instead of picking from a little grid of icons.",
+    ],
+  },
+  {
     date: '2026-09-28',
     version: '1.36.0',
     title: "Hide and Seek with your companion, easier-to-claim rewards",

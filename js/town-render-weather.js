@@ -514,7 +514,11 @@ function renderEntities(data) {
   });
   oldSpiritEls.forEach((el, id) => { if (!liveSpiritIds.has(id) && el.isConnected) el.remove(); });
   if (data.chest) add('chest-glow', data.chest.x, data.chest.y, '<span class="chest-glow-core"></span><span class="chest-icon">🗝️</span>');
-  if (state.companion && state.companionPos) { const ce = add('companion', state.companionPos.x, state.companionPos.y, `<span>${state.companion.icon}</span>`); ce.style.zIndex = state.companionPos.y * 2 + 2; }
+  // Hidden mid-round during Hide and Seek (see HIDESEEK below) rather than shown sitting on its hiding
+  // spot - state.companionPos still tracks where it is, renderEntities just skips drawing it.
+  if (state.companion && state.companionPos && !(HIDESEEK.active && HIDESEEK.phase === 'seek')) {
+    const ce = add('companion', state.companionPos.x, state.companionPos.y, `<span>${state.companion.icon}</span>`); ce.style.zIndex = state.companionPos.y * 2 + 2;
+  }
   if (lanternOpen()) { const lv = add('vendor', LANTERN_TILE.x, LANTERN_TILE.y, '<span>🦉</span><div class="ent-name">Lantern Market</div>'); lv.style.zIndex = LANTERN_TILE.y * 2 + 2; }
   (data.bugs || []).forEach(b => { const def = bugDef(b.kind); add('bug' + (def && def.legendary ? ' legendary' : ''), b.x, b.y, `<span>${def ? def.icon : '✨'}</span>`); });
   if (state.currentDistrict === 'square' && unreadMail()) { const mf = add('mail-flag', 11, 1, '<span>📬</span>'); mf.style.zIndex = 60; }
@@ -789,7 +793,7 @@ function interactWith(kind, t) {
     showProp(def ? def.icon : '❔', def ? def.name : 'A decoration', (def ? def.desc : 'Something you placed here.') + ' You set this down yourself.');
   } else if (kind === 'companion') {
     if (!state.companion) return;
-    sfx('tap'); buzz(HAP.tap); showTipOnce('companionPlay'); openScene('companion');
+    sfx('tap'); buzz(HAP.tap); showTipOnce('companionPlay'); startHideSeek();
   }
 }
 // A rare hidden card, found on the ground or tucked near a prop - mostly common, rarely rare, and
@@ -808,6 +812,7 @@ function grantHiddenCard(label) {
 function decorationAt(data, x, y) { return (data.decorations || []).find(d => d.x === x && d.y === y) || null; }
 function handleMapTap(tx, ty) {
   if (inBattle || inScene) return;
+  if (HIDESEEK.active) { handleHideSeekTap(tx, ty); return; }
   if (placingDecoration) { handleDecorationTap(tx, ty); return; }
   const m = getMap(state.currentDistrict), data = ensureDistrictData(state.currentDistrict);
   if (tx < 0 || ty < 0 || tx >= m.w || ty >= m.h) return;
@@ -847,6 +852,144 @@ function handleMapTap(tx, ty) {
   tapRing(tx, ty);
   walkThen((x, y) => x === tx && y === ty, null);
 }
+
+/* ---------------- Hide and Seek: tap your own companion in town ----------------
+   Played live on the real map instead of a modal grid of abstract icons - the companion actually hides at
+   a real nearby tile (state.companionPos moves there, renderEntities hides it mid-round), a handful of real
+   tiles glow as candidate spots (same .town-tile outline approach as decoration placement, just above), and
+   guessing is a normal map tap intercepted at the top of handleMapTap. Every other town system (weather,
+   wandering neighbors, the day/night clock) keeps running underneath, since nothing here pauses them.
+   gen mirrors MUSIC/WEATHER_AUDIO: bumped on every start/round/end so a stale setTimeout from a cancelled
+   or already-finished round can never fire late. */
+let HIDESEEK = { active: false, gen: 0, round: 0, spots: [], spot: null, phase: 'idle', seekEndsAt: 0, seekTotal: 1, tickTimer: null };
+
+function hideseekCandidateSpots(radius) {
+  const m = getMap(state.currentDistrict), data = ensureDistrictData(state.currentDistrict);
+  const occ = occupiedSet(data), p = state.playerPos, out = [];
+  for (let dy = -radius; dy <= radius; dy++) for (let dx = -radius; dx <= radius; dx++) {
+    if (!dx && !dy) continue;
+    const x = p.x + dx, y = p.y + dy;
+    if (x < 0 || y < 0 || x >= m.w || y >= m.h) continue;
+    if (m.solid[y][x] || m.entries[x + ',' + y] || m.exits[x + ',' + y]) continue;
+    if (occ.has(x + ',' + y)) continue;
+    out.push({ x, y });
+  }
+  return out;
+}
+function hideseekEl(x, y) { return townWorld && townWorld.querySelector(`.town-tile[data-x="${x}"][data-y="${y}"]`); }
+function hideseekHighlight() {
+  if (!townWorld) return;
+  const valid = new Set(HIDESEEK.spots.map(s => s.x + ',' + s.y));
+  townWorld.querySelectorAll('.town-tile').forEach(el => {
+    el.classList.toggle('hideseek-spot', HIDESEEK.phase === 'seek' && valid.has(el.dataset.x + ',' + el.dataset.y));
+  });
+}
+function hideseekClearHighlight() {
+  if (!townWorld) return;
+  townWorld.querySelectorAll('.town-tile').forEach(el => el.classList.remove('hideseek-spot', 'hideseek-found', 'hideseek-wrong'));
+}
+function hideseekHint(text, showTimer) {
+  document.getElementById('hideseekHintText').textContent = text;
+  document.getElementById('hideseekTimerWrap').classList.toggle('hidden', !showTimer);
+}
+function startHideSeek() {
+  if (inBattle || inScene || placingDecoration || !state.companion || HIDESEEK.active) return;
+  cancelWalk(); setChase(null); pendingWalk = null;
+  HIDESEEK = { active: true, gen: HIDESEEK.gen + 1, round: 0, spots: [], spot: null, phase: 'idle', seekEndsAt: 0, seekTotal: 1, tickTimer: null };
+  document.getElementById('districtLabel').classList.add('hidden');
+  document.getElementById('hideseekHint').classList.remove('hidden');
+  hideseekRound();
+}
+function hideseekRound() {
+  const gen = HIDESEEK.gen;
+  const radius = Math.min(2 + Math.floor(HIDESEEK.round / 3), 4);
+  const wantSpots = Math.min(3 + Math.floor(HIDESEEK.round / 2), 6);
+  const pool = shuffledArr(hideseekCandidateSpots(radius));
+  const n = Math.min(wantSpots, pool.length);
+  if (n < 2) { hideseekFinish(); return; }   // nowhere left nearby to hide - end gracefully rather than stall
+  HIDESEEK.spots = pool.slice(0, n);
+  HIDESEEK.spot = HIDESEEK.spots[rand(HIDESEEK.spots.length)];
+  HIDESEEK.phase = 'peek';
+  state.companionPos = { x: HIDESEEK.spot.x, y: HIDESEEK.spot.y };
+  hideseekClearHighlight();
+  hideseekHint(`👀 Watch closely… round ${HIDESEEK.round + 1}`, false);
+  renderTown();
+  const peekMs = Math.max(500, 1100 - HIDESEEK.round * 60);
+  setTimeout(() => {
+    if (HIDESEEK.gen !== gen) return;
+    HIDESEEK.phase = 'seek';
+    HIDESEEK.seekTotal = Math.max(1800, 3200 - HIDESEEK.round * 90);
+    HIDESEEK.seekEndsAt = Date.now() + HIDESEEK.seekTotal;
+    hideseekHint('Where did they go? Tap a glowing spot!', true);
+    renderTown();          // hides the companion and lights up the candidate tiles
+    hideseekHighlight();
+    hideseekTick(gen);
+  }, peekMs);
+}
+function hideseekTick(gen) {
+  clearTimeout(HIDESEEK.tickTimer);
+  const bar = document.getElementById('hideseekTimerBar');
+  const step = () => {
+    if (HIDESEEK.gen !== gen || HIDESEEK.phase !== 'seek') return;
+    const left = HIDESEEK.seekEndsAt - Date.now();
+    if (bar) bar.style.width = Math.max(0, left / HIDESEEK.seekTotal * 100) + '%';
+    if (left <= 0) { hideseekMiss(null); return; }
+    HIDESEEK.tickTimer = setTimeout(step, 80);
+  };
+  step();
+}
+function handleHideSeekTap(tx, ty) {
+  if (HIDESEEK.phase !== 'seek') return;
+  const isSpot = HIDESEEK.spots.some(s => s.x === tx && s.y === ty);
+  if (!isSpot) { townLog.textContent = 'Tap one of the glowing spots.'; return; }
+  clearTimeout(HIDESEEK.tickTimer);
+  if (tx === HIDESEEK.spot.x && ty === HIDESEEK.spot.y) hideseekFound(tx, ty);
+  else hideseekMiss({ x: tx, y: ty });
+}
+function hideseekFound(tx, ty) {
+  const gen = HIDESEEK.gen;
+  HIDESEEK.phase = 'found'; HIDESEEK.round++;
+  const el = hideseekEl(tx, ty); if (el) el.classList.add('hideseek-found');
+  hideseekHint('🎉 Found them!', false);
+  sfx('claim'); buzz(HAP.found);
+  renderTown();
+  setTimeout(() => { if (HIDESEEK.gen === gen) hideseekRound(); }, 550);
+}
+function hideseekMiss(wrongTile) {
+  const gen = HIDESEEK.gen;
+  HIDESEEK.phase = 'missed';
+  if (wrongTile) { const el = hideseekEl(wrongTile.x, wrongTile.y); if (el) el.classList.add('hideseek-wrong'); }
+  const trueEl = hideseekEl(HIDESEEK.spot.x, HIDESEEK.spot.y); if (trueEl) trueEl.classList.add('hideseek-found');
+  state.companionPos = { x: HIDESEEK.spot.x, y: HIDESEEK.spot.y };   // reveal where it really was
+  hideseekHint(wrongTile ? '🙈 Not there…' : '⏱️ Too slow…', false);
+  sfx('soft');
+  renderTown();
+  setTimeout(() => { if (HIDESEEK.gen === gen) hideseekFinish(); }, 900);
+}
+function hideseekFinish() {
+  const score = HIDESEEK.round;
+  HIDESEEK.active = false; HIDESEEK.phase = 'idle'; HIDESEEK.gen++;
+  clearTimeout(HIDESEEK.tickTimer);
+  hideseekClearHighlight();
+  document.getElementById('hideseekHint').classList.add('hidden');
+  document.getElementById('districtLabel').classList.remove('hidden');
+  const def = MINIGAMES.hideseek, r = awardMinigameResult('hideseek', score);
+  townLog.textContent = `${def.scoreText(score)} ${r.tier ? MEDAL[r.tier] + '! ' : ''}${r.rewardText}`;
+  sfx(r.tier === 'gold' ? 'win' : r.tier ? 'claim' : 'soft'); if (r.tier) buzz(HAP.found);
+  renderTown();
+  if (r.cardId) setTimeout(() => showCardReveal(r.cardId, 'Hide and Seek prize', true), 400);
+}
+function cancelHideSeek(silent) {
+  if (!HIDESEEK.active) return;
+  HIDESEEK.active = false; HIDESEEK.gen++;
+  clearTimeout(HIDESEEK.tickTimer);
+  hideseekClearHighlight();
+  document.getElementById('hideseekHint').classList.add('hidden');
+  document.getElementById('districtLabel').classList.remove('hidden');
+  if (!silent) { sfx('nav'); buzz(HAP.tap); townLog.textContent = 'You stop the game.'; }
+  renderTown();
+}
+document.getElementById('hideseekStopBtn').addEventListener('click', () => cancelHideSeek());
 
 /* ---------------- decoration placement: buy in Shop > Items, then tap a glowing tile in whichever district you are in ----------------
    Decorations don't block movement (unlike map props), so placement never needs the "would this wall off

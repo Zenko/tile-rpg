@@ -290,17 +290,18 @@ function miniTier(def, score) {
   const t = def.tiers;
   return score >= t.gold ? 'gold' : score >= t.silver ? 'silver' : score >= t.bronze ? 'bronze' : null;
 }
-function miniFinish(score) {
-  if (!mini || mini.done) return;
-  miniClearTimers();
-  mini.done = true;
-  const def = mini.def, ms = miniState(mini.id), tier = miniTier(def, score);
+// Shared by every mini-game - the scene-modal ones (tea, quiz, ...) and any played live on the map itself
+// (Hide and Seek, see town-render-weather.js) - so tiers, pebbles, the daily reward cap, gold card odds and
+// the minigamesPlayed/minigameGolds stat bumps (which the existing quests/achievements already track) are
+// exactly the same regardless of how a game is presented. The caller decides how to show the result.
+function awardMinigameResult(id, score) {
+  const def = MINIGAMES[id], ms = miniState(id), tier = miniTier(def, score);
   ms.plays++;
   const better = ms.best === null || (def.lowerBetter ? score < ms.best : score > ms.best);
   if (better && (tier || !def.lowerBetter)) ms.best = score;
   bumpStat('minigamesPlayed', 1);
-  let reward = '', cardId = null;
-  if (!tier) reward = 'No medal this time - have another go.';
+  let rewardText = '', cardId = null;
+  if (!tier) rewardText = 'No medal this time - have another go.';
   else {
     if (tier === 'gold') { ms.golds++; bumpStat('minigameGolds', 1); }
     if (ms.rewarded < MINI_DAILY_REWARDED) {
@@ -308,15 +309,22 @@ function miniFinish(score) {
       const peb = (def.pebbles ? def.pebbles(score) : TIER_PEBBLES[tier]) + cardBonus('miniPebbles');
       if (peb) addPebbles(peb);
       if (tier === 'gold' && Math.random() < MINI_GOLD_CARD_ODDS) { cardId = randomCardId(memoryRollRarity()); state.ownedCards.push(cardId); bumpStat('cardsFound', 1); bumpPill('pillCards'); }
-      reward = `+${peb} 🫧${cardId ? ' and a card!' : ''}`;
-    } else reward = "Today's prizes are used up, but it still counts toward your best.";
+      rewardText = `+${peb} 🫧${cardId ? ' and a card!' : ''}`;
+    } else rewardText = "Today's prizes are used up, but it still counts toward your best.";
   }
   saveState(); updateHud();
-  scene.text = `${def.scoreText(score)} ${tier ? MEDAL[tier] + '!' : ''} ${reward}${better && tier ? ' ⭐ New best!' : ''}`;
-  sfx(tier === 'gold' ? 'win' : tier ? 'claim' : 'soft'); if (tier) buzz(HAP.found);
   logEvent(def.icon, `Played ${def.title}: ${def.scoreText(score)}${tier ? ' ' + MEDAL[tier] + '.' : ''}`);
+  return { tier, rewardText, cardId, better };
+}
+function miniFinish(score) {
+  if (!mini || mini.done) return;
+  miniClearTimers();
+  mini.done = true;
+  const def = mini.def, r = awardMinigameResult(mini.id, score);
+  scene.text = `${def.scoreText(score)} ${r.tier ? MEDAL[r.tier] + '!' : ''} ${r.rewardText}${r.better && r.tier ? ' ⭐ New best!' : ''}`;
+  sfx(r.tier === 'gold' ? 'win' : r.tier ? 'claim' : 'soft'); if (r.tier) buzz(HAP.found);
   renderScene();
-  if (cardId) setTimeout(() => showCardReveal(cardId, `${def.title} prize`, true), 400);
+  if (r.cardId) setTimeout(() => showCardReveal(r.cardId, `${def.title} prize`, true), 400);
 }
 document.getElementById('scStage').addEventListener('pointerdown', e => {
   const b = e.target.closest('[data-mg]');
@@ -409,24 +417,6 @@ function tidyItem(prev) {
   let bin, icon;
   do { bin = Object.keys(TIDY_BINS)[rand(3)]; icon = TIDY_BINS[bin].things[rand(6)]; } while (prev && prev.icon === icon);
   return { bin, icon };
-}
-
-/* ---------- 🙈 Hide and Seek (tap your own companion in town) ---------- */
-const HIDESEEK_SPOTS = ['🌳', '🪴', '🧺', '🛢️', '🪣', '🌻'];
-function hideseekNext(g) {
-  const st = g.st;
-  st.spots = Math.min(3 + Math.floor(st.round / 2), HIDESEEK_SPOTS.length);
-  st.spot = rand(st.spots);
-  st.phase = 'peek';
-  miniRender();
-  const peekMs = Math.max(350, 900 - st.round * 60);
-  miniAfter(peekMs, s => {
-    s.phase = 'seek';
-    s.seekTotal = Math.max(1400, 2600 - s.round * 80);
-    s.seekLeft = s.seekTotal;
-    s.seekEndsAt = Date.now() + s.seekTotal;
-    miniRender();
-  });
 }
 
 const HAGGLE_POT = [0, 1, 2, 4, 6, 9, 12, 16, 20];
@@ -596,37 +586,13 @@ const MINIGAMES = {
     render: st => `<div class="mg-info">Moves: ${st.moves} · gold in 5 or fewer</div>
       <div class="lanterns">${st.on.map((o, i) => `<button class="lantern${o ? ' lit' : ''}" data-mg="${i}">🏮</button>`).join('')}</div>` },
 
-  hideseek: { house: 'companion', icon: '🙈', title: 'Hide and Seek',
-    how: "Your companion ducks behind something nearby for a moment - watch closely, then tap where it's hiding. Gets quicker each round, and there are more places to hide.",
-    tiers: { bronze: 3, silver: 6, gold: 9 }, scoreText: s => `Found ${s} time${s === 1 ? '' : 's'}.`,
-    init: () => ({ round: 0, spots: 3, spot: 0, phase: 'peek', seekLeft: 0, seekTotal: 1, wrongPick: -1 }),
-    begin: g => {
-      // One steady tick for the whole game (not restarted per round) drives the seek countdown; rounds
-      // themselves are chained through miniAfter, same pattern as Cake Toppings' frostNext().
-      miniEvery(80, st => {
-        if (st.phase !== 'seek') return;
-        st.seekLeft = st.seekEndsAt - Date.now();
-        if (st.seekLeft <= 0) { st.phase = 'missed'; sfx('soft'); miniAfter(700, s => miniFinish(s.round)); return; }
-        miniRender();
-      });
-      hideseekNext(g);
-    },
-    tap: (st, v) => {
-      if (st.phase !== 'seek') return;
-      const pick = +v;
-      if (pick === st.spot) { st.round++; st.phase = 'found'; sfx('claim'); buzz(HAP.found); miniAfter(500, () => hideseekNext(mini)); }
-      else { st.phase = 'missed'; st.wrongPick = pick; sfx('soft'); miniAfter(700, s => miniFinish(s.round)); }
-    },
-    render: st => {
-      const companionIcon = (state.companion && state.companion.icon) || '🐾';
-      const note = st.phase === 'peek' ? '👀 Watch closely…' : st.phase === 'seek' ? 'Where did they go?'
-        : st.phase === 'found' ? '🎉 Found them!' : '🙈 Not there…';
-      return `${st.phase === 'seek' ? timerBar(st.seekLeft, st.seekTotal) : ''}<div class="mg-info">${note} · round ${st.round + 1}</div>
-        <div class="hideseek-spots">${Array.from({ length: st.spots }, (_, i) => {
-          const reveal = i === st.spot && st.phase !== 'seek';
-          return `<button class="hs-spot${reveal ? ' reveal' : ''}${st.phase === 'missed' && i === st.wrongPick ? ' wrong' : ''}" data-mg="${i}" ${st.phase === 'seek' ? '' : 'disabled'}>${reveal ? companionIcon : HIDESEEK_SPOTS[i]}</button>`;
-        }).join('')}</div>`;
-    } },
+  // Metadata only - Hide and Seek isn't played through the scene-modal mini/miniStart/miniRender plumbing
+  // above (no house, init, begin, tap or render here). It's played live on the town map itself: tap your
+  // own companion to start (see the HIDESEEK game object and handleHideSeekTap() in town-render-weather.js).
+  // This entry only exists so awardMinigameResult()/miniState()/miniView() - the tier/pebble/quest-stat
+  // machinery every mini-game shares - work for it exactly like any other.
+  hideseek: { icon: '🙈', title: 'Hide and Seek',
+    tiers: { bronze: 3, silver: 6, gold: 9 }, scoreText: s => `Found ${s} time${s === 1 ? '' : 's'}.` },
 };
 
 

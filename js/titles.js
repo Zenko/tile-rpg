@@ -303,6 +303,7 @@ function updateHud() {
 function switchTab(key) {
   if (inBattle) return;
   if (placingDecoration && key !== 'town') cancelPlacingDecoration(true);
+  if (HIDESEEK.active && key !== 'town') cancelHideSeek(true);
   Object.entries(tabs).forEach(([k, t]) => {
     const active = k === key;
     t.btn.classList.toggle('active', active);

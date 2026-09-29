@@ -1206,12 +1206,14 @@ body.in-scene .screen { position: relative; overflow: hidden; }
 .lanterns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; max-width: 260px; }
 .lantern { aspect-ratio: 1; border: 1px solid var(--stone-edge); border-radius: 50%; background: #1d1b24; font-size: 2.4rem; filter: grayscale(1) brightness(0.45); transition: filter 0.2s ease, box-shadow 0.2s ease; }
 .lantern.lit { filter: none; box-shadow: 0 0 22px rgba(255,180,90,0.75); background: #3a2a22; }
-/* hide and seek (companion) */
-.hideseek-spots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; max-width: 300px; }
-.hs-spot { aspect-ratio: 1; border: 2px solid var(--stone-edge); background: var(--board-bg); border-radius: 18px; font-size: 2.1rem; transition: transform 0.15s ease, box-shadow 0.15s ease; }
-.hs-spot.reveal { transform: scale(1.1); box-shadow: 0 0 0 3px var(--accent), 0 0 16px rgba(217,160,102,0.7); background: rgba(217,160,102,0.2); }
-.hs-spot.wrong { box-shadow: 0 0 0 3px var(--lose-glow); }
-.hs-spot:disabled:not(.reveal) { opacity: 0.7; }
+/* hide and seek (companion) - played live on the actual town tiles, not a modal grid; see HIDESEEK in
+   town-render-weather.js. Mirrors .town-tile.placeable's outline approach (decoration placement) rather
+   than introducing a new highlight language. */
+.town-tile.hideseek-spot { outline: 3px dashed var(--accent, #d98a3d); outline-offset: -3px; cursor: pointer; animation: hideseek-pulse 1.1s ease-in-out infinite; }
+@keyframes hideseek-pulse { 50% { outline-color: var(--water-glow); } }
+.town-tile.hideseek-found { outline: 3px solid var(--win-glow); animation: none; }
+.town-tile.hideseek-wrong { outline: 3px solid var(--lose-glow); animation: none; }
+.hideseek-timer { margin: -2px 0 8px; }
 /* ---------- card uses ---------- */
 .charm-bar { margin-bottom: 6px; }
 .charm-slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }

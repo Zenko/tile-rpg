@@ -78,12 +78,6 @@ const INTERIORS = {
     actions: [{ id: 'prune', label: '🌿 Help prune the vines', kind: 'daily', pebbles: 4,
       done: 'You snip back the wandering vines. Iris slides four Pebbles across a potting bench. "For the help, dear."', already: 'Iris waves a leaf at you. "All pruned for today - the vines will grow back by tomorrow."' },
               { id: 'pots', label: '🪴 Dig through the spare pots', kind: 'chest', done: 'Something is tucked under an upturned pot, waiting.', already: 'Iris smiles. "You already found what was hiding under there."' }] },
-  // Not a real building - tapping your own companion in town opens this like any other scene (see
-  // interactWith's 'companion' branch in town-render-weather.js). `name` and `title` stay plain strings
-  // (unlike `who`/`greet`) because renderScene() only ever reads them as-is, never calls them as functions.
-  companion: { title: 'Play Time', who: () => (state.companion ? state.companion.icon : '🐾'), name: 'your companion', theme: 'warm',
-    greet: () => `${state.companion ? state.companion.name : 'Your companion'} bounces around your feet, clearly hoping you'll play.`,
-    actions: [{ id: 'mg-hideseek', kind: 'minigame', game: 'hideseek', view: () => miniView('hideseek') }] },
 };
 
 /* ---------------- Maple's bakery: bake a loaf in real time, then share it with neighbors ---------------- */
