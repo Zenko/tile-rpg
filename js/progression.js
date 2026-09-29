@@ -668,7 +668,9 @@ function renderFavours() {
     list.innerHTML = '<div class="panel-desc">No favours accepted yet - chat with a neighbor in town and see if they need a hand.</div>';
     return;
   }
-  active.forEach(r => {
+  // Ready-to-hand-in favours sort to the top, same as Dailies/Weekly's claimRank - otherwise a finished
+  // favour can sit buried below several still-in-progress ones.
+  active.slice().sort((a, b) => (requestDone(b) ? 1 : 0) - (requestDone(a) ? 1 : 0)).forEach(r => {
     const ready = requestDone(r);
     const el = document.createElement('div');
     el.className = 'quest' + (ready ? ' done' : '');

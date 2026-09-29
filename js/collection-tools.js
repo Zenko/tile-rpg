@@ -1,5 +1,6 @@
 /* ---------------- search, filter and sort for My Cards and the Deck tab (one shared setting) ---------------- */
 const cardFilter = { q: '', rarity: 'all', sort: 'rarity' };
+let collFilterOpen = true;   // My Cards' filter starts open (browse-first screen); setCardsView() reads this instead of forcing it open every time the tab is shown
 const FILTER_CHIPS = [['all', 'All'], ['common', 'Common'], ['rare', 'Rare'], ['ultra', 'Ultra'], ['super', 'Super'], ['mythic', 'Mythic'], ['spell', '✨ Spells']];
 const SORTS = { rarity: 'Rarity', cost: 'Cost', power: 'Power', name: 'Name' };
 function filterSortCards(ids) {
@@ -52,6 +53,8 @@ function openSortOverlay(rerender) {
 }
 function closeSortOverlay() { document.getElementById('sortOverlay').classList.add('hidden'); }
 document.getElementById('sortOverlayClose').addEventListener('click', () => { sfx('nav'); closeSortOverlay(); });
+// Tapping the dimmed backdrop closes it too, same as the player menu/inventory panels.
+document.getElementById('sortOverlay').addEventListener('click', e => { if (e.target.id === 'sortOverlay') closeSortOverlay(); });
 
 /* ---------------- deck codes: a short text version of a deck, to share or keep ----------------
    Each card is its place in CARD_POOL (base 36) plus any crafted suffix, e.g. "TRPG1:0,0,1,1,2~p.guard". New cards
@@ -312,16 +315,19 @@ function renderDeckPanel() {
   if (deckSizeHudEl) deckSizeHudEl.textContent = `${state.deck.length}/${DECK_SIZE}`;
 }
 
-// Options and filters both start collapsed - the deck screen's most common job (add/remove a few
-// cards) doesn't need either visible, and revealing them on tap keeps the default view uncluttered.
-function deckToggleSection(btn, panel) {
+// Shared toggle behavior for any button/panel pair that shows or hides a section - used by Deck's
+// Options/Filter toggles (both start collapsed: the deck screen's most common job, adding/removing a
+// few cards, needs neither visible up front) and My Cards' Filter toggle (starts open: My Cards is a
+// browse-first screen where the filter is usually wanted right away, but can still be tucked away).
+function panelToggleSection(btn, panel) {
   const open = panel.classList.toggle('hidden') === false;
   btn.classList.toggle('active', open);
   btn.setAttribute('aria-expanded', String(open));
   sfx('nav'); buzz(HAP.tap);
 }
-document.getElementById('deckOptionsToggle').addEventListener('click', function () { deckToggleSection(this, document.getElementById('deckOptions')); });
-document.getElementById('deckFilterToggle').addEventListener('click', function () { deckToggleSection(this, document.getElementById('deckFilter')); });
+document.getElementById('deckOptionsToggle').addEventListener('click', function () { panelToggleSection(this, document.getElementById('deckOptions')); });
+document.getElementById('deckFilterToggle').addEventListener('click', function () { panelToggleSection(this, document.getElementById('deckFilter')); });
+document.getElementById('collFilterToggle').addEventListener('click', function () { panelToggleSection(this, document.getElementById('collFilter')); collFilterOpen = this.classList.contains('active'); });
 
 document.getElementById('deckHelp').addEventListener('click', () => btShowHelp());
 document.getElementById('deckAuto').addEventListener('click', () => {

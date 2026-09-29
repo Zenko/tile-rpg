@@ -228,13 +228,15 @@ input { -webkit-user-select: text; user-select: text; }
 .panel-action:active { background: var(--stone-edge); transform: scale(0.94); }
 .panel-action.active { background: var(--water); color: white; border-color: var(--water); }
 
-.deco-actions { display: flex; gap: 5px; flex-shrink: 0; }
+.deco-actions { display: flex; gap: 6px; flex-shrink: 0; }
 .deco-mini-btn {
-  width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--stone-edge); background: var(--board-bg);
-  color: var(--ink); font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--stone-edge); background: var(--board-bg);
+  color: var(--ink); font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
   padding: 0; font-family: inherit;
 }
 .deco-mini-btn:active { transform: scale(0.9); background: var(--stone-edge); }
+/* A little extra distance before Delete, and a distinct tone, so it doesn't sit flush against Move/Store. */
+.deco-mini-btn[data-del] { margin-left: 4px; color: #c26a5a; }
 
 /* Card art: an <img> dropped in via cardArtHtml() (data-and-engine.js) in place of a card's emoji icon.
    Sized in em so it fills whatever font-size the surrounding icon container already sets (.icon, .c-icon,
@@ -261,6 +263,17 @@ input { -webkit-user-select: text; user-select: text; }
 
 .customize-section { margin-bottom: 16px; }
 .customize-label { font-size: 0.76rem; color: var(--ink-soft); margin-bottom: 6px; }
+/* Settings and Who's Playing collapse behind these - a plain-looking label button rather than a chip,
+   so the player menu's overall look doesn't change, just what's expanded by default. */
+button.customize-label.pm-disclosure {
+  display: flex; align-items: center; gap: 6px; width: 100%; background: none; border: none; padding: 0;
+  font-family: inherit; text-align: left; cursor: pointer; margin-bottom: 8px;
+}
+.pm-disclosure .title-sub { flex: 1; }
+.pm-chevron { font-size: 0.6rem; transition: transform 0.2s ease; flex-shrink: 0; }
+.pm-disclosure.active .pm-chevron { transform: rotate(180deg); }
+.settings-group-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; color: var(--ink-soft); margin: 14px 2px 6px; }
+.settings-group-label:first-child { margin-top: 2px; }
 .swatch-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 8px; justify-items: center; }
 .emoji-swatch, .color-swatch {
   width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
@@ -585,8 +598,11 @@ body.in-battle .toast.show { transform: translateX(-50%) translateY(0); }
 
 /* ===== Almanac ===== */
 .seg { display: flex; background: var(--stone); border: 1px solid var(--stone-edge); border-radius: 999px; padding: 3px; margin: 0 auto 12px; max-width: 360px; }
-#rewardsSeg { max-width: 100%; }
-#rewardsSeg .seg-btn { font-size: 0.7rem; padding: 8px 3px; }
+/* 5 tabs don't fit at readable size in a fixed-width segmented bar, so these two scroll horizontally
+   instead of shrinking their labels down to 0.7rem - same overflow-x idiom as .cf-chips. */
+.seg.seg-scroll { max-width: 100%; overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; -webkit-overflow-scrolling: touch; justify-content: flex-start; }
+.seg.seg-scroll::-webkit-scrollbar { display: none; }
+.seg.seg-scroll .seg-btn { flex: none; padding: 8px 16px; white-space: nowrap; }
 .seg-btn { flex: 1; border: none; background: transparent; color: var(--ink-soft); font-family: inherit; font-size: 0.8rem; padding: 8px 6px; border-radius: 999px; cursor: pointer; min-height: 36px; transition: background 0.2s ease, color 0.2s ease; }
 .seg-btn.active { background: var(--water); color: white; font-weight: 600; }
 
@@ -847,7 +863,7 @@ body.in-battle .screen { position: relative; overflow: hidden; padding-bottom: c
 #battleView.bt-boss .bt-portrait#btOppPortrait { background: var(--boss-glow, #c96f6f); box-shadow: 0 0 8px 1px rgba(201,111,111,0.55); }
 
 
-#battleView .bt-mini { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--stone-edge); background: var(--stone); color: var(--ink); font-size: 0.9rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; padding: 0; font-family: inherit; box-shadow: 0 1px 4px var(--shadow); }
+#battleView .bt-mini { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--stone-edge); background: var(--stone); color: var(--ink); font-size: 1rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; padding: 0; font-family: inherit; box-shadow: 0 1px 4px var(--shadow); }
 #battleView .bt-mini:active { transform: scale(0.9); }
 #battleView.tip-open .coach { visibility: hidden; }   /* the sheet sits over it */
 #battleView .tip { pointer-events: none; }   /* an info sheet: taps go through to what is under it, so it can never hide a button */
@@ -1315,11 +1331,12 @@ body.in-scene .screen { position: relative; overflow: hidden; }
 .story-text span { font-size: 0.72rem; color: var(--ink-soft); }
 .event-banner { background: rgba(217,160,102,0.16); border: 1px solid var(--accent); border-radius: 12px; padding: 8px 12px; font-size: 0.78rem; margin-bottom: 10px; text-align: center; }
 .pack .btn s { opacity: 0.6; font-size: 0.75em; }
-#journalSeg .seg-btn { font-size: 0.72rem; padding: 8px 3px; }
 .guide-today { background: var(--stone); border: 1px solid var(--accent); border-radius: 14px; padding: 10px 12px; font-size: 0.76rem; line-height: 1.5; margin-bottom: 4px; }
-.guide-item { align-items: flex-start; }
-.guide-item.locked { opacity: 0.6; }
-.guide-how { font-size: 0.72rem; color: var(--ink); line-height: 1.4; margin-top: 2px; }
+.guide-item { align-items: flex-start; cursor: pointer; transition: background-color 0.15s ease; }
+.guide-item.locked { opacity: 0.6; cursor: default; }
+.guide-item.open { background: var(--board-bg); }
+.guide-how { font-size: 0.72rem; color: var(--ink); line-height: 1.4; margin-top: 4px; padding-top: 4px; border-top: 1px dashed var(--stone-edge); animation: pop-in 0.2s ease; }
+.guide-chevron { font-size: 0.6rem; color: var(--ink-soft); padding-top: 3px; flex-shrink: 0; }
 .foil { position: relative; animation: foil-shift 4s linear infinite; }
 .card-mini.foil::before, .alm-card.foil::before { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 3;
   background: linear-gradient(115deg, transparent 25%, rgba(255,255,255,0.45) 45%, transparent 60%); background-size: 250% 100%; animation: foil-sheen 2.6s linear infinite; }

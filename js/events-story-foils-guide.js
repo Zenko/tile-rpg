@@ -162,12 +162,30 @@ const GUIDE = [
     { icon: '🎣', name: 'Fishing & gardening', where: 'River banks · Town Square soil', how: 'Fish and crops fill the Fish page, your pantry and your pockets.' },
   ] },
 ];
+// Collapsed by default (keyed by item name) - with ~30 entries across 5 sections, showing every "how"
+// description at once was the same wall-of-text problem the Changelog had. Tapping a row expands just
+// its own details in place, same idiom as mail-item/cl-entry.
+let guideOpen = {};
 function renderGuide() {
   const box = document.getElementById('guideList'), ev = eventNow(), sd = seasonDef();
   box.innerHTML = `<div class="guide-today"><b>Today:</b> ${ev.icon} ${ev.name} - ${ev.text}<br>${sd.icon} ${sd.name}, ${seasonDaysLeft()} day${seasonDaysLeft() === 1 ? '' : 's'} left · ${forecastText()}</div>` +
-    GUIDE.map(g => `<div class="section-title">${g.section}</div>` + g.items.map(it => { const lock = it.lock ? it.lock() : '';
-      return `<div class="panel-item guide-item${lock ? ' locked' : ''}"><span class="panel-icon">${it.icon}</span><span class="panel-text">
-        <div class="panel-name">${it.name}</div><div class="panel-desc">📍 ${it.where}</div><div class="guide-how">${lock ? '🔒 ' + escapeHtml(lock) : it.how}</div></span></div>`; }).join('')).join('');
+    GUIDE.map(g => `<div class="section-title">${g.section}</div>` + g.items.map(it => {
+      const lock = it.lock ? it.lock() : '';
+      const open = !!guideOpen[it.name];
+      // A lock reason answers "why can't I do this yet" - show it right away rather than gating it
+      // behind a tap; only the (usually longer) "how" text for unlocked items collapses.
+      return `<div class="panel-item guide-item${lock ? ' locked' : ''}${open ? ' open' : ''}"${lock ? '' : ` data-toggle-guide="${escapeHtml(it.name)}"`}>
+        <span class="panel-icon">${it.icon}</span><span class="panel-text">
+        <div class="panel-name">${it.name}</div><div class="panel-desc">📍 ${it.where}</div>
+        ${lock ? `<div class="guide-how">🔒 ${escapeHtml(lock)}</div>` : (open ? `<div class="guide-how">${it.how}</div>` : '')}</span>
+        ${lock ? '' : `<span class="guide-chevron">${open ? '▲' : '▼'}</span>`}</div>`;
+    }).join('')).join('');
+  box.querySelectorAll('[data-toggle-guide]').forEach(el => el.addEventListener('click', () => {
+    const name = el.dataset.toggleGuide;
+    sfx('nav');
+    guideOpen[name] = !guideOpen[name];
+    renderGuide();
+  }));
 }
 
 /* ============================================================

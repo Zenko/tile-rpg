@@ -19,6 +19,20 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-29',
+    version: '1.44.0',
+    title: "A round of small UI/UX fixes",
+    changes: [
+      "The Town Guide is now a compact list that expands one entry at a time, instead of showing every entry's full description at once.",
+      "A favour that's ready to hand in now floats to the top of Rewards → Favours, same as Dailies and Weekly already did.",
+      "Tapping the dimmed background behind World Map, Weather and Sort-by now closes them, like the player menu already does.",
+      "A few small buttons (battle Help/Yield, decoration Move/Store/Delete) are now bigger and easier to tap accurately.",
+      "The player menu's Settings and Who's Playing sections now start tucked away behind a tap, and Settings is grouped into Audio / Accessibility & battles / Notifications & privacy instead of one long list.",
+      "My Cards now has the same optional Filter toggle Deck just got, so both screens work the same way.",
+      "The Journal and Rewards tab bars now scroll sideways instead of shrinking their labels to fit 5 tabs.",
+    ],
+  },
+  {
+    date: '2026-09-29',
     version: '1.43.0',
     title: "Craft, Deck and What's New, redesigned",
     changes: [

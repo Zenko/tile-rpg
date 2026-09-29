@@ -117,7 +117,8 @@ function setCardsView(view) {
   document.getElementById('segMine').classList.toggle('active', view === 'mine');
   document.getElementById('segAlmanac').classList.toggle('active', view === 'almanac');
   collectionList.classList.toggle('hidden', view !== 'mine');
-  document.getElementById('collFilter').classList.toggle('hidden', view !== 'mine');
+  document.getElementById('collFilterToolbar').classList.toggle('hidden', view !== 'mine');
+  document.getElementById('collFilter').classList.toggle('hidden', view !== 'mine' || !collFilterOpen);
   document.getElementById('almanacGrid').classList.toggle('hidden', view !== 'almanac');
   document.getElementById('almProgress').classList.toggle('hidden', view !== 'almanac');
   document.getElementById('segCraft').classList.toggle('active', view === 'craft');

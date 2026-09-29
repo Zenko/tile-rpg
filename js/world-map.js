@@ -58,6 +58,9 @@ function openWorldMap() { renderWorldMap(); document.getElementById('worldMapOve
 function closeWorldMap() { document.getElementById('worldMapOverlay').classList.add('hidden'); }
 document.getElementById('mapRadarBtn').addEventListener('click', openWorldMap);
 document.getElementById('worldMapClose').addEventListener('click', closeWorldMap);
+// Tapping the dimmed backdrop closes it too, like the player menu/inventory panels already do - only
+// when the tap lands on the backdrop itself, not on the card sitting inside it.
+document.getElementById('worldMapOverlay').addEventListener('click', e => { if (e.target.id === 'worldMapOverlay') closeWorldMap(); });
 
 function crossExit(exit) {
   const def = DISTRICTS[exit.to];

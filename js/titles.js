@@ -217,6 +217,12 @@ document.getElementById('avatarChip').addEventListener('click', () => { if (inBa
 document.getElementById('playerMenuClose').addEventListener('click', closePlayerMenu);
 document.getElementById('playerMenuBackdrop').addEventListener('click', closePlayerMenu);
 
+// Settings and Who's Playing both start collapsed - between avatar customization, profile stats and these
+// two, the player menu was the single most cluttered always-expanded screen in the game. Reuses the same
+// toggle/panel idiom as Deck's Options/Filter buttons (see panelToggleSection in collection-tools.js).
+document.getElementById('settingsToggle').addEventListener('click', function () { panelToggleSection(this, document.getElementById('settingsBody')); });
+document.getElementById('whosPlayingToggle').addEventListener('click', function () { panelToggleSection(this, document.getElementById('whosPlayingList')); });
+
 /* ---------------- inventory: one place to see and use everything you're carrying ----------------
    Deliberately not a new item-tracking system of its own - it just reads the storage each subsystem
    already owns (pantry(), dishes(), seedInv(), state.decorationInventory) and gives it a shared window,
@@ -306,6 +312,8 @@ document.getElementById('pillSky').addEventListener('click', () => {
   document.getElementById('weatherOverlay').classList.remove('hidden');
 });
 document.getElementById('weatherOverlayClose').addEventListener('click', () => { sfx('nav'); document.getElementById('weatherOverlay').classList.add('hidden'); });
+// Tapping the dimmed backdrop closes it too, same as the player menu/inventory panels.
+document.getElementById('weatherOverlay').addEventListener('click', e => { if (e.target.id === 'weatherOverlay') document.getElementById('weatherOverlay').classList.add('hidden'); });
 
 function updateHud() {
   cardCountEl.textContent = state.ownedCards.length;

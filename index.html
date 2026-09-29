@@ -93,37 +93,44 @@
           <div class="profile-stats-grid" id="profileStatsGrid"></div>
         </div>
         <div class="customize-section">
-          <div class="customize-label">Who's Playing <span class="title-sub">a glance at the other testers, not a leaderboard</span></div>
-          <div class="panel-list" id="whosPlayingList"></div>
+          <button class="customize-label pm-disclosure" id="whosPlayingToggle" aria-expanded="false">Who's Playing <span class="title-sub">a glance at the other testers, not a leaderboard</span><span class="pm-chevron">▼</span></button>
+          <div class="panel-list hidden" id="whosPlayingList"></div>
         </div>
 
         <button id="openInventoryBtn" class="btn shop-cta-btn">🎒 View Inventory</button>
         <button id="visitShopBtn" class="btn shop-cta-btn">🛍️ Visit Shop For Items</button>
 
         <div class="customize-section">
-          <div class="customize-label">Settings</div>
-          <div class="settings-row"><span>🔊 Sound</span><button class="toggle" id="soundToggle" aria-label="Toggle all sound"></button></div>
-          <div class="settings-row"><span>🎵 Music</span><button class="toggle" id="musicToggle" aria-label="Toggle music"></button></div>
-          <div class="vol-row" id="musicVolRow">
-            <span class="vol-lbl">Music</span>
-            <input type="range" class="vol" id="musicVol" min="0" max="100" step="1" aria-label="Music volume">
-            <span class="vol-num" id="musicVolNum">50</span>
-          </div>
-          <div class="vol-row" id="sfxVolRow">
-            <span class="vol-lbl">Effects</span>
-            <input type="range" class="vol" id="sfxVol" min="0" max="100" step="1" aria-label="Effects volume">
-            <span class="vol-num" id="sfxVolNum">70</span>
-          </div>
-          <div class="settings-row"><span>📳 Haptics</span><button class="toggle" id="hapticToggle" aria-label="Toggle haptics"></button></div>
-          <div class="settings-row"><span>⏩ Fast battles</span><button class="toggle" id="fastToggle" aria-label="Toggle fast battle animations"></button></div>
-          <div class="settings-row"><span>🔠 Larger text</span><button class="toggle" id="bigTextToggle" aria-label="Toggle larger text"></button></div>
-          <div class="settings-row"><span>🌙 Calm motion</span><button class="toggle" id="calmToggle" aria-label="Toggle reduced motion"></button></div>
-          <div class="settings-row"><span>🔔 Notify me (bread, boss)</span><button class="toggle" id="notifsToggle" aria-label="Toggle notifications for bread baking and the district boss"></button></div>
-          <div class="settings-row"><span>👋 Share that I'm playing</span><button class="toggle" id="presenceToggle" aria-label="Toggle sharing your name and activity with other testers"></button></div>
-          <div class="settings-row"><span>☁️ Cloud save</span><span id="cloudStatus">—</span></div>
-          <div class="controls" style="margin-top:6px">
-            <button id="cloudBackupBtn" class="btn btn-ghost">🔗 Back up your save</button>
-            <button id="cloudRestoreBtn" class="btn btn-ghost">📥 Restore a save</button>
+          <button class="customize-label pm-disclosure" id="settingsToggle" aria-expanded="false">Settings<span class="pm-chevron">▼</span></button>
+          <div class="hidden" id="settingsBody">
+            <div class="settings-group-label">Audio</div>
+            <div class="settings-row"><span>🔊 Sound</span><button class="toggle" id="soundToggle" aria-label="Toggle all sound"></button></div>
+            <div class="settings-row"><span>🎵 Music</span><button class="toggle" id="musicToggle" aria-label="Toggle music"></button></div>
+            <div class="vol-row" id="musicVolRow">
+              <span class="vol-lbl">Music</span>
+              <input type="range" class="vol" id="musicVol" min="0" max="100" step="1" aria-label="Music volume">
+              <span class="vol-num" id="musicVolNum">50</span>
+            </div>
+            <div class="vol-row" id="sfxVolRow">
+              <span class="vol-lbl">Effects</span>
+              <input type="range" class="vol" id="sfxVol" min="0" max="100" step="1" aria-label="Effects volume">
+              <span class="vol-num" id="sfxVolNum">70</span>
+            </div>
+            <div class="settings-row"><span>📳 Haptics</span><button class="toggle" id="hapticToggle" aria-label="Toggle haptics"></button></div>
+
+            <div class="settings-group-label">Accessibility &amp; battles</div>
+            <div class="settings-row"><span>⏩ Fast battles</span><button class="toggle" id="fastToggle" aria-label="Toggle fast battle animations"></button></div>
+            <div class="settings-row"><span>🔠 Larger text</span><button class="toggle" id="bigTextToggle" aria-label="Toggle larger text"></button></div>
+            <div class="settings-row"><span>🌙 Calm motion</span><button class="toggle" id="calmToggle" aria-label="Toggle reduced motion"></button></div>
+
+            <div class="settings-group-label">Notifications &amp; privacy</div>
+            <div class="settings-row"><span>🔔 Notify me (bread, boss)</span><button class="toggle" id="notifsToggle" aria-label="Toggle notifications for bread baking and the district boss"></button></div>
+            <div class="settings-row"><span>👋 Share that I'm playing</span><button class="toggle" id="presenceToggle" aria-label="Toggle sharing your name and activity with other testers"></button></div>
+            <div class="settings-row"><span>☁️ Cloud save</span><span id="cloudStatus">—</span></div>
+            <div class="controls" style="margin-top:6px">
+              <button id="cloudBackupBtn" class="btn btn-ghost">🔗 Back up your save</button>
+              <button id="cloudRestoreBtn" class="btn btn-ghost">📥 Restore a save</button>
+            </div>
           </div>
         </div>
         <div class="controls" id="townControls">
@@ -178,7 +185,7 @@
       </div>
 
       <div id="journalPanel" class="panel hidden">
-        <div class="seg" id="journalSeg">
+        <div class="seg seg-scroll" id="journalSeg">
           <button class="seg-btn" id="segNotes">Notes</button>
           <button class="seg-btn active" id="segEventLog">Log</button>
           <button class="seg-btn" id="segBattles">Battles</button>
@@ -253,6 +260,9 @@
           <button class="seg-btn" id="segFish">Fish</button>
         </div>
         <div class="alm-progress hidden" id="almProgress"></div>
+        <div class="dk-toolbar" id="collFilterToolbar">
+          <button class="dk-tool-btn active" id="collFilterToggle" aria-expanded="true">🔍 Filter</button>
+        </div>
         <div class="card-filter" id="collFilter"></div>
         <div class="panel-list" id="collectionList"></div>
         <div class="alm-grid hidden" id="almanacGrid"></div>
@@ -297,7 +307,7 @@
       </div>
 
       <div id="questsPanel" class="panel hidden">
-        <div class="seg" id="rewardsSeg">
+        <div class="seg seg-scroll" id="rewardsSeg">
           <button class="seg-btn active" id="segDailies">Dailies</button>
           <button class="seg-btn" id="segWeekly">Weekly</button>
           <button class="seg-btn" id="segMilestones">Milestones</button>
