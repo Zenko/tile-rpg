@@ -19,6 +19,14 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-29',
+    version: '1.38.0',
+    title: "Fix cut-off mail and scene text",
+    changes: [
+      "A longer letter, request or event description could get visually cut off and overlapped by the buttons below it (worst in the mailbox with several letters listed). That screen now always gives the text its full height and scrolls instead.",
+    ],
+  },
+  {
+    date: '2026-09-29',
     version: '1.37.0',
     title: "Hide and Seek moves into town",
     changes: [
