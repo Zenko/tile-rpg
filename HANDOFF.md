@@ -54,6 +54,14 @@ Tile RPG is a calm, mobile-first card-collecting town game. You walk around a ti
     }
     ```
     Add this alongside the existing `saves` rule (same `rules_version = '2'` block). Off by default and its own toggle (`prefs.sharePresence`, separate from cloud save itself) - sharing your name/activity with other testers is a different call than just backing up your own save privately. Until this rule is added, `pushPresence()`/`fetchWhosPlaying()` in `js/cloud-save.js` just fail silently like any other unreachable-Firestore case - **this was built and tested the same way as the original cloud save rule above (sandbox network blocked, so only the graceful-failure path was actually exercised) and needs the same live verification once the rule is in place.**
+  - **Feedback/bug reports need a third Firestore rule** - `sendFeedback()` (js/events-story-foils-guide.js) now writes straight to a `feedback` collection via `pushFeedback()` (js/cloud-save.js) instead of opening a `mailto:` link, so it needs its own **write-only** rule (nobody, not even the submitting player, ever reads it back through the app - only the owner does, from the Firebase console):
+    ```
+    match /feedback/{doc} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if false;
+    }
+    ```
+    Add this alongside the existing `saves`/`players` rules. Until it's added, `pushFeedback()` fails silently and `sendFeedback()` falls back to the old `mailto:` link, so a message is never actually lost - just worth adding this rule promptly so testers' reports land where they're meant to. Same "sandbox network blocked" caveat as above: the graceful-failure/mailto-fallback path is what's actually been exercised, not a live Firestore write.
 
 ## 2. Hosting and publishing
 
@@ -182,6 +190,8 @@ Useful habits:
 
 ## 9. Gotchas learned the hard way
 
+- **A building's interior can open a tabbed panel instead of a scene.** `openScene`/`closeScene` (scenes, full-screen, simple) and `switchTab`/`tabs` (panels, e.g. Shop's Packs/Customize/Items) are two independent screen systems with no shared plumbing. The Card Shop (`INTERIORS['card-shop']` in `js/houses-and-cellar.js`) bridges them with one action kind: `{ kind: 'gotoshop' }` → `sceneAction()` does `closeScene(); switchTab('shop'); return;` - no new UI, just reuses the whole existing Shop screen. Copy this pattern for any other building that should open a `panel`/tab instead of its own scene.
+- **`state.progress.questHistory` outlived its own display tab.** Rewards' "History" tab was merged into Journal's Log (v1.45.0) and removed, but `logQuestHistory()`/`ensureQuestHistory()` (progression.js) still run on every quest claim - the array itself is read by four achievements (`first-weekly`, `weekly-10`, `quests-50`, `quests-150`). Don't delete those functions along with a display change; check `ACHIEVEMENTS`' `test()` closures before removing any state array that looks display-only.
 - **Overlay stacking order.** `#pickupOverlay` and `#levelUpOverlay` are at z-index 22 and `#tipOverlay` at 23, so reveals show above the talk card and the result screen. `closeBattle` also hides `#mulliganOverlay`. The player menu (`#playerMenu`) is much higher, at z-index 50 (it's a full-screen slide-down panel, not a small card) - any overlay that can be opened from inside it, like `#cloudOverlay` (55), needs a z-index above that or it renders hidden behind the menu.
 - **The scene stage is rebuilt.** The memory game and mini-games replace `#scStage`'s contents, so `#scWho` doesn't exist while they're running. `memoryLeaveStage()`/`miniLeaveStage()` restore it. `renderHomeShelf()` runs on every scene render and removes itself outside the cottage.
 - **Placement works per district.** Decoration placement and planting take `placingDecoration.district`; seeds always go to `square`.

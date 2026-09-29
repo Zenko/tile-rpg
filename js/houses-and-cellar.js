@@ -62,6 +62,9 @@ const INTERIORS = {
     greet: () => `One deal a day, and when it's gone, it's gone. ${spiceDealLine()}`,
     actions: [{ id: 'deal', kind: 'deal', view: spiceDealView },
               { id: 'mg-haggle', kind: 'minigame', game: 'haggle', view: () => miniView('haggle') }] },
+  'card-shop': { title: 'The Card Shop', who: '🦎', name: 'Zeph', theme: 'warm',
+    greet: 'Packs, sleeves, decorations - if it has to do with cards, you will find it here. Come on in and have a look.',
+    actions: [{ id: 'browse', label: '🛍️ Browse the shop', kind: 'gotoshop' }] },
   'stall-tinker': { title: "Tock's Tinker Stall", who: '🦝', name: 'Tock', theme: 'cool',
     greet: 'Sleeves! Fancy card sleeves! Your cards will look their best in a match - only your side sees the shine, mind you.',
     actions: [{ id: 'sleeves', label: '🎴 Browse card sleeves', kind: 'sleeves' },
@@ -677,6 +680,7 @@ function sceneAction(actId) {
   if (actId.startsWith('seed:')) { const t = seedAction(actId.slice(5)); if (scene) { scene.text = t; renderScene(); } return; }   // planting leaves the scene
   const it = INTERIORS[scene.id], a = it.actions.find(x => x.id === actId), st = buildingState(scene.id);
   if (!a) return;
+  if (a.kind === 'gotoshop') { closeScene(); switchTab('shop'); return; }
   if (a.kind === 'oven') { scene.text = ovenAction(); }
   else if (a.kind === 'deal') { scene.text = spiceDealAction(); }
   else if (a.kind === 'sleeves') { scene.mode = 'sleeves'; scene.text = `Pick a sleeve. You're wearing ${currentSleeve().name}.`; sfx('tap'); }

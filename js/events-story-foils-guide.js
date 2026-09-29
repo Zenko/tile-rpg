@@ -146,7 +146,7 @@ const GUIDE = [
     { icon: '🍞', name: "Maple's Bakery", where: 'Town Square, bottom left', how: 'Bake bread, cook dishes from your pantry, and play Cake Toppings.' },
     { icon: '🌱', name: "Fern's Cottage", where: 'Town Square, the blue house', how: 'Seeds for your garden, and Weed the Beds.' },
     { icon: '🫖', name: "Wren's Cottage & the Reading Nook", where: 'Town Square, top', how: 'Tea, advice, the memory game, the card quiz and the daily puzzle.' },
-    { icon: '🏪', name: 'Market stalls', where: 'Market Row', how: "Pip, Clover, Saffron's daily deal and Tock's card sleeves - each with a game.", lock: () => needs('market') },
+    { icon: '🏪', name: 'Market stalls', where: 'Market Row', how: "Pip, Clover, Saffron's daily deal, Tock's card sleeves and Zeph's Card Shop - each with a game (the Card Shop opens straight into the Shop tab).", lock: () => needs('market') },
     { icon: '🏛️', name: 'Card Museum & expeditions', where: 'Market Row, by the east hedge', how: 'Donate spare cards to six wings, and send spare cards on expeditions.', lock: () => needs('market') },
     { icon: '🏮', name: 'Lantern Market', where: 'Market Row, after dark', how: 'Night Packs, glowing decorations, and Pebbles for critters.', lock: () => needs('market') },
     { icon: '🦦', name: 'The Net Loft', where: 'Quiet Harbor', how: "Tam mends nets for Pebbles, and keeps a buoy box worth checking once a day.", lock: () => needs('harbor') },
@@ -258,7 +258,7 @@ async function sendFeedback(kind) {
   document.getElementById('feedbackModalTitle').textContent = bug ? 'Report a bug' : 'Send feedback';
   document.getElementById('feedbackModalDesc').textContent = bug
     ? 'What happened, and what did you expect to happen? Your game version and device are added for you.'
-    : "What's on your mind? This opens your email app to send it to the developer.";
+    : "What's on your mind? It's sent straight to the developer, right from here.";
   document.getElementById('feedbackModalSubmit').textContent = bug ? 'Report' : 'Send';
   const textEl = document.getElementById('feedbackTextInput');
   textEl.value = '';
@@ -266,6 +266,10 @@ async function sendFeedback(kind) {
   setTimeout(() => textEl.focus(), 50);
   const msg = await new Promise(resolve => { feedbackModalResolve = resolve; });
   if (!msg || !msg.trim()) return;
+  const sent = await pushFeedback(kind, msg.trim(), testerInfo());
+  if (sent) { toast(bug ? '🐞 Bug reported - thank you!' : '💬 Feedback sent - thank you!'); sfx('claim'); return; }
+  // Firestore unreachable or its security rule isn't set up yet - fall back to the old mailto: link
+  // rather than the message just disappearing.
   const subject = encodeURIComponent(bug ? 'Tile RPG bug report' : 'Tile RPG feedback');
   const body = encodeURIComponent((msg.trim() + '\n\n' + testerInfo()).slice(0, 1600));
   window.location.href = `mailto:imzenko@gmail.com?subject=${subject}&body=${body}`;

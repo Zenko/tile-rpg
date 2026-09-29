@@ -68,14 +68,39 @@ function parseDeckCode(code) {
   const ids = m[1].split(',').map(part => { const mm = /^([0-9a-z]+)(~.*)?$/i.exec(part); if (!mm) return null; const c = CARD_POOL[parseInt(mm[1], 36)]; return c ? c.id + (mm[2] || '') : null; });
   return ids.filter(id => id && cardDef(id)).slice(0, DECK_SIZE);
 }
-function shareDeck() {
-  const code = deckCode(state.deck);
-  const done = () => { toast('📋 Deck code copied'); sfx('claim'); };
-  try { navigator.clipboard.writeText(code).then(done, () => prompt('Copy your deck code:', code)); }
-  catch (e) { prompt('Copy your deck code:', code); }
+// A real overlay (like #feedbackOverlay/#cloudOverlay) instead of prompt()/alert(), so a single-line
+// input (rename a deck, paste a code) looks and behaves like the rest of the game's modals rather than
+// a bare unstyled browser popup. Promise-based, same shape as sendFeedback()/cloudOpenModal().
+let textPromptResolve = null;
+function openTextPrompt({ title, desc, value, placeholder, submitLabel, readonly, maxlength }) {
+  document.getElementById('textPromptTitle').textContent = title || '';
+  const descEl = document.getElementById('textPromptDesc');
+  descEl.textContent = desc || ''; descEl.classList.toggle('hidden', !desc);
+  document.getElementById('textPromptSubmit').textContent = submitLabel || 'OK';
+  const input = document.getElementById('textPromptInput');
+  input.value = value || ''; input.placeholder = placeholder || ''; input.readOnly = !!readonly;
+  if (maxlength) input.maxLength = maxlength; else input.removeAttribute('maxlength');
+  document.getElementById('textPromptOverlay').classList.remove('hidden');
+  setTimeout(() => { input.focus(); if (readonly) input.select(); }, 50);
+  return new Promise(resolve => { textPromptResolve = resolve; });
 }
-function loadDeckCode() {
-  const code = prompt('Paste a deck code (it goes into the deck you are using now):');
+function closeTextPrompt(result) {
+  document.getElementById('textPromptOverlay').classList.add('hidden');
+  if (textPromptResolve) { const r = textPromptResolve; textPromptResolve = null; r(result); }
+}
+document.getElementById('textPromptCancel').addEventListener('click', () => { sfx('nav'); closeTextPrompt(null); });
+document.getElementById('textPromptSubmit').addEventListener('click', () => { sfx('claim'); closeTextPrompt(document.getElementById('textPromptInput').value); });
+document.getElementById('textPromptInput').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('textPromptSubmit').click(); });
+document.getElementById('textPromptOverlay').addEventListener('click', e => { if (e.target.id === 'textPromptOverlay') { sfx('nav'); closeTextPrompt(null); } });
+
+async function shareDeck() {
+  const code = deckCode(state.deck);
+  try { await navigator.clipboard.writeText(code); toast('📋 Deck code copied'); sfx('claim'); return; }
+  catch (e) { /* no clipboard access - fall through to the manual-copy modal below */ }
+  await openTextPrompt({ title: 'Your deck code', desc: "Couldn't copy automatically - select the code below and copy it yourself.", value: code, readonly: true, submitLabel: 'Done' });
+}
+async function loadDeckCode() {
+  const code = await openTextPrompt({ title: 'Load a deck code', desc: 'Paste a deck code below. It replaces the deck you are using now.', placeholder: 'TRPG1:...', submitLabel: 'Load' });
   if (code === null) return;
   const ids = parseDeckCode(code);
   if (!ids || !ids.length) { toast("That doesn't look like a deck code"); sfx('tie'); return; }
@@ -211,9 +236,9 @@ function switchDeckSlot(i) {
   toast(deck.length < want.length ? `🎴 ${slots[i].name}: some cards are gone - Auto-fill can top it up` : `🎴 Now using ${slots[i].name}`);
   renderDeckPanel(); updateHud();
 }
-function renameDeckSlot() {
+async function renameDeckSlot() {
   const slots = ensureDeckSlots(), s = slots[state.activeDeckSlot];
-  const name = prompt('Name this deck', s.name);
+  const name = await openTextPrompt({ title: 'Name this deck', value: s.name, submitLabel: 'Save', maxlength: 16 });
   if (name && name.trim()) { s.name = name.trim().slice(0, 16); saveState(); renderDeckPanel(); }
 }
 function renderDeckSlots() {

@@ -68,41 +68,52 @@
         </div>
         <input type="text" id="nameInput" class="name-input" placeholder="Your name" maxlength="16">
 
-        <div class="customize-section">
-          <div class="customize-label">Avatar</div>
-          <div class="swatch-row" id="emojiSwatches"></div>
-        </div>
-        <div class="customize-section">
-          <div class="customize-label">Accessory</div>
-          <div class="swatch-row" id="accessorySwatches"></div>
-        </div>
-        <div class="customize-section">
-          <div class="customize-label">Color</div>
-          <div class="swatch-row" id="colorSwatches"></div>
-        </div>
-        <div class="customize-section">
-          <div class="customize-label">Companion</div>
-          <div id="companionBox"></div>
-        </div>
-        <div class="customize-section">
-          <div class="customize-label">Title <span class="title-sub">shown under your name in town · earned from Milestones</span></div>
-          <div class="title-row" id="titleSwatches"></div>
-        </div>
-        <div class="customize-section">
-          <div class="customize-label">Profile</div>
-          <div class="profile-stats-grid" id="profileStatsGrid"></div>
-        </div>
-        <div class="customize-section">
-          <button class="customize-label pm-disclosure" id="whosPlayingToggle" aria-expanded="false">Who's Playing <span class="title-sub">a glance at the other testers, not a leaderboard</span><span class="pm-chevron">▼</span></button>
-          <div class="panel-list hidden" id="whosPlayingList"></div>
+        <div class="seg" id="pmSeg">
+          <button class="seg-btn active" id="segPmCustomize">Customize</button>
+          <button class="seg-btn" id="segPmProfile">Profile</button>
+          <button class="seg-btn" id="segPmSocial">Social</button>
+          <button class="seg-btn" id="segPmSettings">Settings</button>
         </div>
 
-        <button id="openInventoryBtn" class="btn shop-cta-btn">🎒 View Inventory</button>
-        <button id="visitShopBtn" class="btn shop-cta-btn">🛍️ Visit Shop For Items</button>
+        <div id="pmCustomizeView">
+          <div class="customize-section">
+            <div class="customize-label">Avatar</div>
+            <div class="swatch-row" id="emojiSwatches"></div>
+          </div>
+          <div class="customize-section">
+            <div class="customize-label">Accessory</div>
+            <div class="swatch-row" id="accessorySwatches"></div>
+          </div>
+          <div class="customize-section">
+            <div class="customize-label">Color</div>
+            <div class="swatch-row" id="colorSwatches"></div>
+          </div>
+          <div class="customize-section">
+            <div class="customize-label">Companion</div>
+            <div id="companionBox"></div>
+          </div>
+          <div class="customize-section">
+            <div class="customize-label">Title <span class="title-sub">shown under your name in town · earned from Milestones</span></div>
+            <div class="title-row" id="titleSwatches"></div>
+          </div>
+        </div>
 
-        <div class="customize-section">
-          <button class="customize-label pm-disclosure" id="settingsToggle" aria-expanded="false">Settings<span class="pm-chevron">▼</span></button>
-          <div class="hidden" id="settingsBody">
+        <div id="pmProfileView" class="hidden">
+          <div class="customize-section">
+            <div class="customize-label">Profile</div>
+            <div class="profile-stats-grid" id="profileStatsGrid"></div>
+          </div>
+        </div>
+
+        <div id="pmSocialView" class="hidden">
+          <div class="customize-section">
+            <div class="customize-label">Who's Playing <span class="title-sub">a glance at the other testers, not a leaderboard</span></div>
+            <div class="panel-list" id="whosPlayingList"></div>
+          </div>
+        </div>
+
+        <div id="pmSettingsView" class="hidden">
+          <div class="customize-section">
             <div class="settings-group-label">Audio</div>
             <div class="settings-row"><span>🔊 Sound</span><button class="toggle" id="soundToggle" aria-label="Toggle all sound"></button></div>
             <div class="settings-row"><span>🎵 Music</span><button class="toggle" id="musicToggle" aria-label="Toggle music"></button></div>
@@ -133,6 +144,10 @@
             </div>
           </div>
         </div>
+
+        <button id="openInventoryBtn" class="btn shop-cta-btn">🎒 View Inventory</button>
+        <button id="visitShopBtn" class="btn shop-cta-btn">🛍️ Visit Shop For Items</button>
+
         <div class="controls" id="townControls">
           <button id="resetTown" class="btn btn-ghost">Start Over</button>
           <button id="feedbackBtn" class="btn btn-ghost">💬 Feedback</button>
@@ -307,12 +322,11 @@
       </div>
 
       <div id="questsPanel" class="panel hidden">
-        <div class="seg seg-scroll" id="rewardsSeg">
+        <div class="seg" id="rewardsSeg">
           <button class="seg-btn active" id="segDailies">Dailies</button>
           <button class="seg-btn" id="segWeekly">Weekly</button>
           <button class="seg-btn" id="segMilestones">Milestones</button>
           <button class="seg-btn" id="segFavours">Favours</button>
-          <button class="seg-btn" id="segHistory">History</button>
         </div>
         <div id="dailiesView">
           <div id="storySlot"></div>
@@ -332,9 +346,6 @@
           <div id="favoursList"></div>
           <div class="section-title">Friends</div>
           <div class="panel-list" id="friendsList"></div>
-        </div>
-        <div id="historyView" class="hidden">
-          <div class="panel-list" id="questLogHistoryList"></div>
         </div>
       </div>
 
@@ -364,6 +375,7 @@
           <span class="bt-portrait" id="btYouPortrait">🙂</span>
           <span class="who" id="btYouName">You</span>
           <div class="spirit" id="btYouSpirit"><div class="fill"></div><div class="num"></div></div>
+          <span class="snack-badge hidden" id="btYouSnackBadge"></span>
           <span class="deckcount" id="btYouDeck"></span>
           <button class="bt-mini" id="btHelp" aria-label="How battles work">?</button>
           <button class="bt-mini" id="btYield" aria-label="Step away from this battle">🏳️</button>
@@ -412,9 +424,8 @@
 <div class="overlay hidden" id="pickupOverlay">
   <div class="overlay-card" id="pickupCard">
     <div class="sparkles" id="pickupSparkles"></div>
-    <div class="big-icon reveal-icon" id="pickupIcon">🃏</div>
-    <div><span class="rarity-tag rt-common" id="pickupRarity">common</span></div>
     <h2 id="pickupTitle">You found a card</h2>
+    <div class="reveal-card-frame"><div class="reveal-card" id="pickupCardFace"></div></div>
     <p id="pickupDesc"></p>
     <button id="pickupInvite" class="btn btn-ghost hidden" style="margin-bottom:8px">✨ Invite it to come along</button>
     <button id="pickupContinue" class="btn">Nice</button>
@@ -535,6 +546,18 @@
     <div class="controls">
       <button id="feedbackModalCancel" class="btn btn-ghost">Cancel</button>
       <button id="feedbackModalSubmit" class="btn">Send</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="textPromptOverlay">
+  <div class="overlay-card">
+    <h2 id="textPromptTitle">Name this deck</h2>
+    <p id="textPromptDesc"></p>
+    <input type="text" id="textPromptInput" class="name-input" maxlength="40">
+    <div class="controls">
+      <button id="textPromptCancel" class="btn btn-ghost">Cancel</button>
+      <button id="textPromptSubmit" class="btn">OK</button>
     </div>
   </div>
 </div>

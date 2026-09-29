@@ -202,9 +202,31 @@ document.getElementById('nameInput').addEventListener('input', (e) => {
   updateHud();
 });
 
+// Customize/Profile/Social/Settings as tabs rather than an always-expanded stack (or the disclosure
+// toggles this replaced) - same .seg/.seg-btn idiom as Journal/Rewards/Shop. Kept in module state (not
+// saved) so reopening the menu returns to whichever tab was last open, like cardsView/shopSubView do.
+let pmView = 'customize';
+const PM_SEGMENTS = {
+  customize: { btn: 'segPmCustomize', view: 'pmCustomizeView' },
+  profile: { btn: 'segPmProfile', view: 'pmProfileView' },
+  social: { btn: 'segPmSocial', view: 'pmSocialView' },
+  settings: { btn: 'segPmSettings', view: 'pmSettingsView' },
+};
+function switchPmSegment(key) {
+  pmView = key;
+  Object.entries(PM_SEGMENTS).forEach(([k, s]) => {
+    document.getElementById(s.btn).classList.toggle('active', k === key);
+    document.getElementById(s.view).classList.toggle('hidden', k !== key);
+  });
+}
+Object.entries(PM_SEGMENTS).forEach(([key, s]) => {
+  document.getElementById(s.btn).addEventListener('click', () => { sfx('nav'); buzz(HAP.tap); switchPmSegment(key); });
+});
+
 function openPlayerMenu() {
   renderCharacterPanel();
   syncToggles();
+  switchPmSegment(pmView);
   document.getElementById('pmVersion').textContent = 'Tile RPG ' + gameVersionLabel();
   document.getElementById('playerMenuBackdrop').classList.remove('hidden');
   document.getElementById('playerMenu').classList.remove('hidden');
@@ -216,12 +238,6 @@ function closePlayerMenu() {
 document.getElementById('avatarChip').addEventListener('click', () => { if (inBattle) return; ensureAudio(); sfx('nav'); buzz(HAP.tap); openPlayerMenu(); });
 document.getElementById('playerMenuClose').addEventListener('click', closePlayerMenu);
 document.getElementById('playerMenuBackdrop').addEventListener('click', closePlayerMenu);
-
-// Settings and Who's Playing both start collapsed - between avatar customization, profile stats and these
-// two, the player menu was the single most cluttered always-expanded screen in the game. Reuses the same
-// toggle/panel idiom as Deck's Options/Filter buttons (see panelToggleSection in collection-tools.js).
-document.getElementById('settingsToggle').addEventListener('click', function () { panelToggleSection(this, document.getElementById('settingsBody')); });
-document.getElementById('whosPlayingToggle').addEventListener('click', function () { panelToggleSection(this, document.getElementById('whosPlayingList')); });
 
 /* ---------------- inventory: one place to see and use everything you're carrying ----------------
    Deliberately not a new item-tracking system of its own - it just reads the storage each subsystem

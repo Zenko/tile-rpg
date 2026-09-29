@@ -411,7 +411,7 @@ function claimQuest(index) {
   logQuestHistory('daily', def, id);
   saveState();
   updateHud();
-  logEvent('🎯', `Completed quest: ${def.name}.`);
+  logEvent('🎯', `Completed quest: ${def.name} · ${RARITY_LABEL[cardDef(id).rarity]} reward.`);
   showCardReveal(id, 'Quest complete', true);
   renderQuests();
   checkAchievements();
@@ -429,7 +429,7 @@ function claimWeeklyQuest(index) {
   logQuestHistory('weekly', def, id);
   saveState();
   updateHud();
-  logEvent('🏵️', `Completed weekly quest: ${def.name}.`);
+  logEvent('🏵️', `Completed weekly quest: ${def.name} · ${RARITY_LABEL[cardDef(id).rarity]} reward.`);
   showCardReveal(id, 'Weekly quest complete', true);
   renderQuests();
   checkAchievements();
@@ -639,7 +639,6 @@ function renderQuests() {
   pr.freshAch = null;
 
   renderFavours();
-  renderQuestHistory();
 }
 
 // A read-only tracker for neighbor favours - the only way to check one used to be finding that neighbor
@@ -687,30 +686,15 @@ function renderFavours() {
   });
 }
 
-// Completed dailies and weeklies both land here, newest first - the Rewards tab's own record of what
-// you've already claimed, so Dailies/Weekly only ever have to show what's still active.
-function renderQuestHistory() {
-  const histList = document.getElementById('questLogHistoryList');
-  const hist = ensureQuestHistory();
-  histList.innerHTML = '';
-  if (!hist.length) {
-    histList.innerHTML = '<div class="panel-desc">Nothing completed yet.</div>';
-  } else {
-    hist.forEach(h => {
-      const el = document.createElement('div');
-      el.className = 'log-entry';
-      el.innerHTML = `<span class="le-icon">${h.icon}</span><span class="le-text">${escapeHtml(h.name)}<span class="q-kind">${h.kind === 'weekly' ? 'Weekly' : 'Daily'}</span><div class="le-time">${fmtLogTime(h.at)} · ${h.reward} reward</div></span>`;
-      histList.appendChild(el);
-    });
-  }
-}
-
+// Completed dailies/weeklies still feed state.progress.questHistory (logQuestHistory, above) since
+// achievements count it (first-weekly, weekly-10, quests-50, quests-150) - only the standalone "History"
+// tab that once displayed it is gone now; a completed quest already gets a Journal → Log entry from
+// claimQuest()/claimWeeklyQuest() (with its reward tier included), so nothing shown here was lost.
 const REWARDS_SEGMENTS = {
   dailies: { btn: 'segDailies', view: 'dailiesView' },
   weekly: { btn: 'segWeekly', view: 'weeklyView' },
   milestones: { btn: 'segMilestones', view: 'milestonesView' },
   favours: { btn: 'segFavours', view: 'favoursView' },
-  history: { btn: 'segHistory', view: 'historyView' },
 };
 function switchRewardsSegment(key) {
   sfx('nav'); buzz(HAP.tap);
@@ -723,7 +707,6 @@ document.getElementById('segDailies').addEventListener('click', () => switchRewa
 document.getElementById('segWeekly').addEventListener('click', () => switchRewardsSegment('weekly'));
 document.getElementById('segMilestones').addEventListener('click', () => switchRewardsSegment('milestones'));
 document.getElementById('segFavours').addEventListener('click', () => switchRewardsSegment('favours'));
-document.getElementById('segHistory').addEventListener('click', () => switchRewardsSegment('history'));
 
 
 const townGrid = document.getElementById('townGrid');
@@ -752,7 +735,6 @@ const collectionList = document.getElementById('collectionList');
 const deckList = document.getElementById('deckList');
 
 const pickupOverlay = document.getElementById('pickupOverlay');
-const pickupIcon = document.getElementById('pickupIcon');
 const pickupTitle = document.getElementById('pickupTitle');
 const pickupDesc = document.getElementById('pickupDesc');
 

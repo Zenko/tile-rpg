@@ -263,15 +263,7 @@ input { -webkit-user-select: text; user-select: text; }
 
 .customize-section { margin-bottom: 16px; }
 .customize-label { font-size: 0.76rem; color: var(--ink-soft); margin-bottom: 6px; }
-/* Settings and Who's Playing collapse behind these - a plain-looking label button rather than a chip,
-   so the player menu's overall look doesn't change, just what's expanded by default. */
-button.customize-label.pm-disclosure {
-  display: flex; align-items: center; gap: 6px; width: 100%; background: none; border: none; padding: 0;
-  font-family: inherit; text-align: left; cursor: pointer; margin-bottom: 8px;
-}
-.pm-disclosure .title-sub { flex: 1; }
-.pm-chevron { font-size: 0.6rem; transition: transform 0.2s ease; flex-shrink: 0; }
-.pm-disclosure.active .pm-chevron { transform: rotate(180deg); }
+#pmSeg { margin-bottom: 14px; }
 .settings-group-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; color: var(--ink-soft); margin: 14px 2px 6px; }
 .settings-group-label:first-child { margin-top: 2px; }
 .swatch-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 8px; justify-items: center; }
@@ -522,6 +514,32 @@ body.in-battle .toast.show { transform: translateX(-50%) translateY(0); }
 .spark { position: absolute; font-size: 0.9rem; opacity: 0; animation: spark 1.6s ease-out forwards; }
 @keyframes spark { 0% { opacity: 0; transform: translateY(20px) scale(0.5); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-50px) scale(1.1); } }
 .overlay-card { position: relative; }
+
+/* The card-reveal popup (showCardReveal, js/gardening.js) shows the actual card face - same cost/art/
+   name/keywords/stats markup as a battle-hand card (cardFaceHtml/btCardEl in data-and-engine.js/battle-ui.js)
+   - instead of a bare icon and a line of stats text, so a found card looks like the same object you'll
+   see again in your hand, in Collection, and in Craft. Sized up for a reveal moment; #battleView's .card
+   rules don't reach here since this sits outside #battleView, so the essentials are restated at this scale. */
+.reveal-card-frame { display: flex; justify-content: center; margin: 4px 0 14px; }
+.reveal-card {
+  position: relative; width: 132px; aspect-ratio: 3 / 4; border-radius: 16px; color: #fff;
+  display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+  padding: 10px 8px 8px; box-shadow: 0 6px 18px var(--shadow);
+}
+.reveal-card.rarity-common { background: linear-gradient(135deg, var(--water-glow), var(--water)); }
+.reveal-card.rarity-rare { background: linear-gradient(135deg, #c9bce8, var(--rare)); }
+.reveal-card.rarity-ultra { background: linear-gradient(135deg, #a8cbe8, var(--epic)); }
+.reveal-card.rarity-super { background: linear-gradient(135deg, #f0cf94, var(--accent)); }
+.reveal-card.rarity-mythic { background: linear-gradient(135deg, #eaa8c4, var(--mythic)); box-shadow: 0 0 16px rgba(217,143,176,.55); }
+.reveal-card .cost { position: absolute; top: -10px; left: -10px; width: 32px; height: 32px; border-radius: 50%; background: var(--ink); color: var(--stone); font-size: 1rem; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px var(--shadow); }
+.reveal-card .icon { font-size: 2.6rem; line-height: 1; margin-top: 10px; }
+.reveal-card .nm { font-size: 0.88rem; font-weight: 700; opacity: .95; text-align: center; line-height: 1.15; padding: 0 2px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.reveal-card .kws { font-size: 1.1rem; min-height: 18px; display: flex; gap: 4px; }
+.reveal-card .stats { width: 100%; display: flex; justify-content: space-between; padding: 0 8px; font-weight: 800; font-size: 1.15rem; }
+.reveal-card .stats .pw, .reveal-card .stats .hp { text-shadow: 0 1px 2px rgba(0,0,0,.35); }
+.reveal-card.spell { justify-content: flex-start; }
+.reveal-card.spell::after { content: ''; position: absolute; inset: 4px; border-radius: 12px; border: 1.5px dashed rgba(255,255,255,.55); pointer-events: none; }
+.reveal-card .spell-tag { margin-top: auto; font-size: 0.72rem; font-weight: 800; letter-spacing: .04em; background: rgba(0,0,0,.28); border-radius: 999px; padding: 3px 10px; }
 
 /* ===== Level-up celebration ===== */
 .level-up-card { text-align: center; box-shadow: 0 0 0 2px var(--accent, #d98a3d), 0 0 40px rgba(217,160,102,0.5); overflow: hidden; }
@@ -884,6 +902,10 @@ body.in-battle .screen { position: relative; overflow: hidden; padding-bottom: c
 @keyframes bt_shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
 @keyframes bt_pulseHeal { 0%,100%{transform:scale(1)} 50%{transform:scale(1.06)} }
 #battleView .deckcount { font-size:.68rem; color:var(--ink-soft); white-space:nowrap; }
+/* Stays up for the whole match once a snack is eaten - the spirit bar alone doesn't show the bonus
+   clearly (it raises max spirit right along with current spirit, so a full bar still reads as full),
+   so this badge is the one persistent reminder that the buff is active. See eatSnack/btSyncSnackBadge. */
+#battleView .snack-badge { font-size: 1.05rem; flex-shrink: 0; animation: pop-in 0.3s ease; }
 #battleView .side.target-glow { box-shadow:0 0 0 3px var(--boss-glow), 0 0 18px rgba(201,111,111,.5); cursor:pointer; animation:bt_tglow 1s ease-in-out infinite; }
 @keyframes bt_tglow { 50% { box-shadow:0 0 0 3px var(--boss-glow), 0 0 26px rgba(201,111,111,.8); } }
 #battleView .field { position: relative; z-index: 2; flex:1; min-height:0; display:flex; flex-direction:column; justify-content:center; gap:6px; padding:8px 0; }

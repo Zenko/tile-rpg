@@ -94,6 +94,24 @@ function removePresence() {
   if (!cloudReady || !cloudDb || !cloudUser) return;
   cloudDb.collection(PRESENCE_COLLECTION).doc(cloudUser.uid).delete().catch(() => {});
 }
+
+/* ============================================================
+   FEEDBACK: sendFeedback() (js/events-story-foils-guide.js) used to hand the typed message to a mailto:
+   link, which just opens the player's email app - not everyone has one set up on the device they're
+   testing on, and it leaves the game the moment they hit send. This writes straight to Firestore instead,
+   in a `feedback` collection separate from `saves`/`players` since it's write-only: the player never
+   reads it back, only the owner does, from the Firebase console. Needs its own security rule (see
+   HANDOFF.md §1a) - until that's pasted in, this fails silently like any other unreachable-Firestore
+   case here, and sendFeedback() falls back to the old mailto: link so a message is never just lost.
+   ============================================================ */
+const FEEDBACK_COLLECTION = 'feedback';
+async function pushFeedback(kind, text, info) {
+  if (!cloudAvailable() || !cloudDb) return false;
+  try {
+    await cloudDb.collection(FEEDBACK_COLLECTION).add({ kind, text, info, uid: cloudUser ? cloudUser.uid : null, at: Date.now() });
+    return true;
+  } catch (e) { return false; }
+}
 async function fetchWhosPlaying() {
   const box = document.getElementById('whosPlayingList');
   if (!box) return;

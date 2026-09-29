@@ -105,6 +105,24 @@ function eatSnack(id) {
   bumpStat('snacksEaten', 1); saveState();
   sfx('claim'); buzz(HAP.found);
   btRender(); btRenderMulliganHand(); renderSnackRow();
+  // The spirit bar alone doesn't make a max-spirit boost visible (it raises current and max together,
+  // so a full bar still looks full) - this floater is the immediate "yes, that did something" moment.
+  const bonusText = [r.battle.spirit ? `+${r.battle.spirit} Max Spirit` : '', r.battle.draw ? `+${r.battle.draw} Card` : ''].filter(Boolean).join(' · ');
+  if (bonusText) btFloater(btGet('btYouBar'), bonusText, 'heal');
+}
+// The one persistent, whole-match reminder that a snack buff is active - called from btRender() so it
+// always reflects battle.snack, including resetting to hidden on a fresh battle where it's unset.
+function btSyncSnackBadge() {
+  const badge = btGet('btYouSnackBadge');
+  if (!badge || !battle) return;
+  if (battle.snack) {
+    const r = recipeDef(battle.snack);
+    badge.classList.remove('hidden');
+    badge.textContent = r ? r.icon : '🍽️';
+    badge.title = r ? `${r.name}: ${r.desc.replace(/^Eat before a match: /, '')}` : 'Snack eaten';
+  } else {
+    badge.classList.add('hidden');
+  }
 }
 
 // Shows the actual opening hand (not just a blind yes/no) so the choice to keep or redraw is an informed one.
@@ -280,7 +298,7 @@ function btCoach() {
   el.textContent = t;
 }
 
-function btRender(o) { o = o || {}; btRenderBars(); btRenderGems(); btRenderBoards(o.entering); btRenderHand(o.drawn); btCoach(); }
+function btRender(o) { o = o || {}; btRenderBars(); btSyncSnackBadge(); btRenderGems(); btRenderBoards(o.entering); btRenderHand(o.drawn); btCoach(); }
 
 /* ---------------- card info sheet ---------------- */
 function btShowTip(c, hint) {

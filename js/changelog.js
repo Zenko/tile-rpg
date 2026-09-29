@@ -19,6 +19,20 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-29',
+    version: '1.45.0',
+    title: "A snack before battle now clearly helps, plus more fixes",
+    changes: [
+      "Fixed snacks/dishes eaten before a match: the boost always worked, but was easy to miss since the spirit bar looked identical at full health. There's now a badge next to your spirit bar for the whole match, and a floater the moment you eat.",
+      "Deck's Share/Load code and rename-deck now open a proper in-game dialog instead of a plain browser pop-up.",
+      "Found and revealed cards now show the actual card face (cost, art, keywords, power/health) instead of just an icon and a line of text - the same look as My Cards, Craft and battle.",
+      "Feedback and bug reports now send straight from the game instead of opening your email app.",
+      "Merged Rewards' History tab into Journal's Log - a completed quest already showed up in both places; now it's just the one place, with its reward included.",
+      "New: a Card Shop in Market Row, run by Zeph - walk in and browse the same Shop you'd open from the player menu.",
+      "Player menu is now tabbed (Customize / Profile / Social / Settings) instead of one long scroll with a couple of expandable sections.",
+    ],
+  },
+  {
+    date: '2026-09-29',
     version: '1.44.0',
     title: "A round of small UI/UX fixes",
     changes: [

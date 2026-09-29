@@ -223,6 +223,17 @@ function cardArtHtml(def, cls) {
     : `<span class="card-emoji${cls ? ' ' + cls : ''}">${def.icon}</span>`;
 }
 
+// The full card-face markup (cost/art/name/keywords/stats) shared by the battle-hand card (btCardEl) and
+// the card-reveal popup (showCardReveal) - built from a card's base def rather than a live battle instance,
+// so it always shows the card's resting stats (def.grit, not a damaged battle-instance hp).
+function cardFaceHtml(def) {
+  return def.spell
+    ? `<div class="cost">${def.cost}</div><div class="icon">${cardArtHtml(def)}</div><div class="nm">${def.name}</div><div class="spell-tag">✨ Spell</div>`
+    : `<div class="cost">${def.cost}</div><div class="icon">${cardArtHtml(def)}</div><div class="nm">${def.name}</div>
+    <div class="kws">${def.kw.map(k => `<span>${KW[k].icon}</span>`).join('')}</div>
+    <div class="stats"><span class="pw">⚔${def.power}</span><span class="hp">♥${def.grit}</span></div>`;
+}
+
 /* BEGIN BATTLE ENGINE */
 /* Pure rules for the turn-based card battle. No DOM. Reads card stats from CARD_POOL.
    - Spirit (health) 20 each. Board up to 4. Energy 1..5, +1 per turn. Second player: +1 card, and +1 energy on its first 2 turns.

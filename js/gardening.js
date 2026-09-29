@@ -136,16 +136,13 @@ function showCardReveal(cardId, heading, isGift, note, xpGained) {
   const card = document.getElementById('pickupCard');
   card.className = 'overlay-card' + (tier >= 1 ? ' glow-' + def.rarity : '');
 
-  const icon = document.getElementById('pickupIcon');
-  icon.innerHTML = cardArtHtml(def);
-  icon.classList.remove('reveal-icon'); void icon.offsetWidth; icon.classList.add('reveal-icon');
-
-  const tag = document.getElementById('pickupRarity');
-  tag.className = 'rarity-tag rt-' + def.rarity;
-  tag.textContent = RARITY_LABEL[def.rarity];
+  const face = document.getElementById('pickupCardFace');
+  face.className = `reveal-card rarity-${def.rarity}` + (def.spell ? ' spell' : '');
+  face.innerHTML = cardFaceHtml(def);
+  face.classList.remove('reveal-icon'); void face.offsetWidth; face.classList.add('reveal-icon');
 
   pickupTitle.textContent = heading || 'You found a card';
-  pickupDesc.innerHTML = `<b>${def.name}</b><br>costs ${def.cost} ⚡ · ${def.spell ? '✨ spell' : `⚔ ${def.power} · ♥ ${def.grit}`}` + (hasAbility(def) ? `<br><span style="color:var(--accent)">${cardAbilityHtml(def)}</span>` : '') + (note ? `<br><b>${note}</b>` : '') + (xpGained ? `<br><span class="xp-gain-tag">+${Math.round(xpGained)} XP</span>` : '');
+  pickupDesc.innerHTML = `<span class="rarity-tag rt-${def.rarity}">${RARITY_LABEL[def.rarity]}</span>` + (hasAbility(def) ? `<br><span style="color:var(--accent)">${cardAbilityHtml(def)}</span>` : '') + (note ? `<br><b>${note}</b>` : '') + (xpGained ? `<br><span class="xp-gain-tag">+${Math.round(xpGained)} XP</span>` : '');
 
   const sparkCounts = [0, 4, 8, 14, 22];
   sparkleBurst(document.getElementById('pickupSparkles'), ['✨', '🌟', '·'], sparkCounts[tier] || 0);
