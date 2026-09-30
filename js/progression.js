@@ -17,6 +17,7 @@ const TIPS = {
   cellarDeep: { icon: '🕳️', title: 'The deep cellar', text: 'From here on it is a run: a loss or climbing out ends it and the cellar rests. Every 5th floor is a guardian with a rare prize.' },
   rival:      { icon: '🎭', title: 'A rival', text: 'Rook moves between districts. Every win sends them off to build a stronger deck - eight chapters in all, with a unique final prize.' },
   friends:    { icon: '💞', title: 'Friendship', text: 'Favours, gifts and friendly wins earn hearts. At 3 hearts a neighbor plays their signature deck with you; at 5 they give you a keepsake.' },
+  inspect:    { icon: '🔍', title: 'Look closer', text: 'Press and hold any card - in your collection, the deck, a battle or the Index - to see it large, with its full name, rules and story.' },
   spells:     { icon: '✨', title: 'Spell cards', text: 'Spells are cast from your hand for an instant effect and never take a board slot. Aimed spells ignore Guard.' },
   museum:      { icon: '🏛️', title: 'The Card Museum', text: 'Donate spare copies of cards to fill six wings. The museum never takes your last copy or one your deck uses. Each finished wing pays Pebbles and gives a keepsake decoration.' },
   expeditions: { icon: '🧭', title: 'Expeditions', text: 'Send up to three spare cards away for a while - two teams at once. Swift cards travel faster, Guards keep the team safe, Echo cards find treasure, and stronger teams bring back more. Your cards come home with loot and a little mastery.' },

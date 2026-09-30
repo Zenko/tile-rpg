@@ -6,7 +6,7 @@
   --water: #4f8f86;
   --water-glow: #6badA2;
   --ink: #e4ece8;
-  --ink-soft: #9db0a8;
+  --ink-soft: #aebfb8;
   --shadow: rgba(0, 0, 0, 0.35);
   --overlay-bg: rgba(0, 0, 0, 0.5);
   --board-bg: rgba(255, 255, 255, 0.05);
@@ -823,7 +823,7 @@ input.vol:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px rgba(127,1
    card feels like touching the card itself. */
 .cr-pick-row { cursor: pointer; transition: transform 0.1s ease, background-color 0.15s ease; }
 .cr-pick-row:active { transform: scale(0.99); background: var(--board-bg); }
-.cr-pick-row.disabled { cursor: default; opacity: 0.55; }
+.cr-pick-row.disabled { cursor: default; opacity: 0.7; }
 .cr-pick-hint { font-size: 0.78rem; font-weight: 700; color: var(--water); flex-shrink: 0; padding: 0 4px; }
 .cr-pick-row.disabled .cr-pick-hint { color: var(--ink-soft); }
 
@@ -1510,3 +1510,71 @@ html.calm *, html.calm *::before, html.calm *::after { animation-duration: 0.01m
 @keyframes talk-react { 0% { transform: scale(1); } 35% { transform: scale(1.18) rotate(-6deg); } 70% { transform: scale(.96) rotate(4deg); } 100% { transform: scale(1); } }
 @keyframes talk-float { 0% { transform: translate(-50%, 0); opacity: 0; } 20% { opacity: 1; } 100% { transform: translate(-50%, -34px); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .talk-portrait, .talk-portrait.react { animation: none; } .talk-float { animation-duration: .01s; } }
+
+/* ============================================================
+   UI POLISH (see js/ui-polish.js)
+   ============================================================ */
+/* spacing / type tokens - new UI uses these; older screens can adopt them as they are touched */
+:root { --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 24px; --fs-sm: .78rem; --fs-md: .92rem; --fs-lg: 1.15rem; --tap: 44px; }
+.cr-title { font-size: var(--fs-lg); margin: 0 0 var(--sp-2); }
+.cr-desc { font-size: var(--fs-md); margin-bottom: var(--sp-3); }
+.cr-chip { min-height: var(--tap); }
+.cr-chip small { opacity: .8; }
+.cr-chip.short:not(.active) { border-style: dashed; opacity: .7; }
+
+/* tips: a non-blocking banner above the bottom nav instead of a full-screen modal */
+#tipOverlay.tip-banner { background: none; backdrop-filter: none; align-items: flex-end; justify-content: center; pointer-events: none; padding: 0 12px calc(env(safe-area-inset-bottom, 0px) + 88px); z-index: 24; }
+#tipOverlay.tip-banner.hidden { opacity: 0; transform: translateY(12px); }
+#tipOverlay.tip-banner .overlay-card { pointer-events: auto; width: 100%; max-width: 420px; padding: 12px 14px; display: grid; grid-template-columns: auto 1fr auto; grid-template-areas: "icon title ok" "icon text ok"; column-gap: 12px; row-gap: 2px; align-items: center; text-align: left; box-shadow: 0 8px 30px rgba(0,0,0,.45); border: 1px solid var(--stone-edge); animation: sheet-up .3s ease; }
+#tipOverlay.tip-banner .big-icon { grid-area: icon; font-size: 1.8rem; margin: 0; }
+#tipOverlay.tip-banner h2 { grid-area: title; font-size: .95rem; margin: 0; font-weight: 600; }
+#tipOverlay.tip-banner p { grid-area: text; margin: 0; font-size: .8rem; line-height: 1.35; }
+#tipOverlay.tip-banner .btn { grid-area: ok; padding: 8px 14px; font-size: .78rem; }
+
+/* bottom sheets */
+.overlay.sheet, .overlay.inspect-overlay { align-items: flex-end; }
+.overlay.sheet .overlay-card, .overlay.inspect-overlay .overlay-card { width: min(100vw, 480px); max-width: none; max-height: 92vh; overflow-y: auto; border-radius: 22px 22px 0 0; padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); animation: sheet-up .32s cubic-bezier(.2, .9, .3, 1); transition: transform .2s ease; }
+.overlay.sheet.hidden .overlay-card { transform: translateY(24px); }
+.sheet-handle { width: 44px; height: 5px; border-radius: 999px; background: var(--stone-edge); margin: -14px auto 12px; touch-action: none; cursor: grab; position: relative; }
+.sheet-handle::after { content: ''; position: absolute; inset: -14px -30px; }   /* a generous invisible grab area */
+@keyframes sheet-up { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+.inspect-overlay { z-index: 70; }
+
+/* card inspect */
+.ins-card { position: relative; width: 132px; height: 176px; margin: 0 auto 12px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: var(--board-bg); box-shadow: 0 0 0 2px var(--stone-edge), 0 8px 24px rgba(0,0,0,.4); }
+.ins-card.rarity-rare { box-shadow: 0 0 0 2px var(--rare), 0 8px 24px rgba(0,0,0,.4); }
+.ins-card.rarity-ultra { box-shadow: 0 0 0 2px var(--epic), 0 8px 24px rgba(0,0,0,.4); }
+.ins-card.rarity-super { box-shadow: 0 0 0 2px var(--accent), 0 0 24px rgba(217,160,102,.4); }
+.ins-card.rarity-mythic { box-shadow: 0 0 0 2px var(--mythic), 0 0 30px rgba(217,143,176,.5); }
+.ins-cost { position: absolute; top: 8px; left: 8px; min-width: 26px; height: 26px; border-radius: 50%; background: var(--stone); display: flex; align-items: center; justify-content: center; font-size: .85rem; font-weight: 700; }
+.ins-icon { font-size: 4.2rem; line-height: 1; }
+.inspect-overlay h2 { margin: 0 0 2px; }
+.ins-sub { font-size: var(--fs-sm); color: var(--ink-soft); margin-bottom: var(--sp-2); }
+.ins-stat { display: flex; gap: var(--sp-4); justify-content: center; font-size: 1.15rem; font-weight: 600; margin-bottom: var(--sp-2); }
+.ins-abilities { font-size: var(--fs-sm); line-height: 1.5; text-align: left; background: var(--board-bg); border-radius: 12px; padding: var(--sp-2) var(--sp-3); margin-bottom: var(--sp-2); }
+.ins-abilities.dim { color: var(--ink-soft); text-align: center; }
+.ins-note { font-size: var(--fs-sm); color: #d9a441; margin-bottom: var(--sp-2); }
+.ins-story { font-style: italic; margin: var(--sp-2) 0; }
+.ins-own { font-size: var(--fs-sm); color: var(--ink-soft); margin-bottom: var(--sp-3); }
+[data-inspect] { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+
+/* battle damage preview */
+#battleView .card .badge.prev { bottom: -11px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: .62rem; font-weight: 700; background: var(--stone); color: var(--ink); border-radius: 999px; padding: 2px 6px; box-shadow: 0 1px 4px var(--shadow); z-index: 5; }
+
+/* HUD */
+.hud-stat[role="button"] { cursor: pointer; }
+.hud-clock { font-size: .66rem; opacity: .75; font-weight: 600; }
+.hud-xp-bar { height: 6px; }
+.fly-reward { position: fixed; z-index: 95; font-size: 1.5rem; pointer-events: none; transform: translate(-50%, -50%); animation: fly-reward .8s cubic-bezier(.5, 0, .75, .3) forwards; }
+@keyframes fly-reward { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.6); } 15% { opacity: 1; transform: translate(-50%, -50%) scale(1.25); } 100% { opacity: .2; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(.5); } }
+
+/* consistent press feedback */
+.btn:not(:disabled):active, .cr-chip:active, .panel-action:active, .talk-topic:active, .snack-btn:active, .hud-stat[role="button"]:active { transform: scale(.96); }
+.panel-item[data-pick]:active { transform: scale(.985); background: var(--board-bg); }
+.cr-chip, .panel-action, .talk-topic, .snack-btn, .hud-stat { transition: transform .1s ease; }
+
+/* accessibility: visible keyboard focus, and honour the OS "reduce motion" setting everywhere */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}

@@ -207,7 +207,7 @@ let refineOpenId = null;   // which refinable card's stat-choice row is expanded
 function aOrAn(label) { return (/^[aeiou]/i.test(label) ? 'an ' : 'a ') + label; }
 
 function miniCardHtml(def) {
-  return `<div class="card-mini rarity-${def.rarity}${def.crafted ? ' crafted' : ''}">
+  return `<div class="card-mini rarity-${def.rarity}${def.crafted ? ' crafted' : ''}" data-inspect="${def.id}">
       <span class="c-cost">${def.cost}</span><span class="c-icon">${cardArtHtml(def)}</span><span class="c-power">${cardStatsText(def)}</span></div>`;
 }
 
@@ -263,7 +263,7 @@ function renderCraft() {
   const avail = r => Object.keys(counts).filter(id => cardDef(id).rarity === r).reduce((n, id) => n + tradable(id), 0);
   trade.innerHTML = `<div class="cr-title">🔁 Trade up</div>
     <div class="cr-desc">Combine <b>${CRAFT.tradeCount} cards of one rarity</b> into <b>1 random card of the next rarity</b>, with a <b>${pct(CRAFT.tradeSkillChance)}% chance it comes with a skill</b>. Cards in your deck are never used.</div>
-    <div class="cr-chips">${steps.map(r => `<button class="cr-chip${r === craftSel.rarity ? ' active' : ''}" data-rar="${r}">${RARITY_LABEL[r]} <small>${avail(r)}</small></button>`).join('')}</div>`;
+    <div class="cr-chips">${steps.map(r => `<button class="cr-chip${r === craftSel.rarity ? ' active' : ''}${avail(r) < CRAFT.tradeCount ? ' short' : ''}" data-rar="${r}" title="${avail(r) < CRAFT.tradeCount ? `Needs ${CRAFT.tradeCount - avail(r)} more spare ${RARITY_LABEL[r].toLowerCase()} card${CRAFT.tradeCount - avail(r) === 1 ? '' : 's'}` : 'Ready to trade'}">${RARITY_LABEL[r]} <small>${avail(r)}/${CRAFT.tradeCount}</small></button>`).join('')}</div>`;
   const target = nextRarity(craftSel.rarity);
   const tray = document.createElement('div');
   tray.className = 'cr-tray';
@@ -283,7 +283,7 @@ function renderCraft() {
     .sort((a, b) => (cardDef(a).crafted ? 1 : 0) - (cardDef(b).crafted ? 1 : 0) || cardDef(a).cost - cardDef(b).cost || (a < b ? -1 : 1));
   if (!list.length) {
     const empty = document.createElement('div'); empty.className = 'cr-empty';
-    empty.textContent = `No spare ${RARITY_LABEL[craftSel.rarity].toLowerCase()} cards outside your deck yet.`;
+    empty.textContent = `No spare ${RARITY_LABEL[craftSel.rarity].toLowerCase()} cards outside your deck yet. Collect ${CRAFT.tradeCount} spares to trade up.`;
     trade.appendChild(empty);
   } else {
     list.forEach(id => {
@@ -607,6 +607,7 @@ function renderAlmanac() {
         if (disc.has(def.id)) {
           const isNew = !firstOpen && !seen.has(def.id);
           el.className = `alm-card rarity-${def.rarity}` + (isNew ? ' fresh' : '') + (hasFoil(def.id) ? ' foil' : '');
+          el.dataset.inspect = def.id;
           el.innerHTML = `
             ${isNew ? '<span class="ac-new">New</span>' : ''}
             ${inSeason(def.id) ? `<span class="ac-season">${sd.icon}</span>` : ''}

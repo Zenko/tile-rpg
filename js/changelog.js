@@ -19,6 +19,20 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-30',
+    version: '1.50.0',
+    title: "A round of interface polish",
+    changes: [
+      "Press and hold any card - in Cards, Deck, the Index, Craft, the memory game or a battle - to see it large with its rules and story.",
+      "Tips now slide in as a small banner above the tab bar instead of covering the whole screen.",
+      "Battles show what an attack would do (💥 KO, 🫧 blocked, or the health left) on every enemy card you can hit, and unique or enhanced enemy cards explain themselves when tapped.",
+      "Talk cards, Feedback and Back up now slide up as bottom sheets. Drag the handle down or tap outside to close.",
+      "Rewards fly up to the Cards and Pebbles counters, and tapping those counters opens Cards or the Shop.",
+      "Craft's Trade up chips show progress (like 1/3) and dim until you have enough spares.",
+      "Clearer text contrast, bigger tap targets, visible keyboard focus, press feedback on buttons, and reduced-motion is respected everywhere.",
+    ],
+  },
+  {
+    date: '2026-09-30',
     version: '1.49.0',
     title: "Livelier neighbors, softer cellar, travel fade",
     changes: [

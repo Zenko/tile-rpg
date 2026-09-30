@@ -179,6 +179,7 @@ function btCardEl(c, cls, mine) {
   const el = document.createElement('div');
   el.className = `card rarity-${def.rarity} ${cls || ''}` + (c.spell ? ' spell' : '');
   el.dataset.uid = c.uid;
+  el.dataset.inspect = c.id;
   el.innerHTML = c.spell
     ? `<div class="cost">${c.cost}</div><div class="icon">${cardArtHtml(def)}</div><div class="nm">${def.name}</div><div class="spell-tag">✨ Spell</div>`
     : `<div class="cost">${c.cost}</div><div class="icon">${cardArtHtml(def)}</div><div class="nm">${def.name}</div>
@@ -260,6 +261,7 @@ function btRenderBoards(entering) {
         const cls = (entering === c.uid ? 'enter ' : '') + (mine && !canAct ? 'exhausted ' : '') + (mine && !c.ready ? 'sleep ' : '') +
                     (canAct ? 'can-act ' : '') + (sel && sel.uid === c.uid ? 'selected ' : '') + (!mine && tCards.has(c.uid) ? 'targetable' : '');
         const el = btCardEl(c, cls, mine);
+        if (!mine && tCards.has(c.uid) && sel && sel.kind === 'attack') btAddPreviewBadge(el, c, G.p[0].board.find(x => x.uid === sel.uid));
         el.addEventListener('click', () => btOnBoardCard(k === 'You' ? 'you' : 'opp', c));
         slot.appendChild(el);
       } else if (k === 'You' && sel && sel.kind === 'play' && !btSelIsSpell()) slot.classList.add('drop');
@@ -267,6 +269,16 @@ function btRenderBoards(entering) {
     }
   });
   btGet('btOppBar').classList.toggle('target-glow', tFace);
+}
+
+// Damage preview on a targetable enemy card while an attacker is selected: 💥 = it would be knocked out, 🫧 = its
+// Shield soaks the hit, otherwise the health it would have left. ⚠ = the attacker takes a lethal thorns prick back.
+function btAddPreviewBadge(el, target, attacker) {
+  if (!attacker) return;
+  const pw = attacker.power + (attacker.kw.includes('bloom') ? 1 : 0);
+  const txt = target.shield ? '🫧 blocked' : pw >= target.hp ? '💥 KO' : `♥${target.hp - pw} left`;
+  const risky = target.kw.includes('thorns') && attacker.hp <= 1;
+  el.insertAdjacentHTML('beforeend', `<span class="badge prev">${txt}${risky ? ' ⚠' : ''}</span>`);
 }
 
 function btRenderHand(drawnUid) {
@@ -316,6 +328,7 @@ function btShowTip(c, hint) {
     ${c.kw.map(k => `<div class="kw">${KW[k].icon} <b>${KW[k].name}.</b> ${KW[k].text}</div>`).join('') || '<div class="kw" style="color:var(--ink-soft)">No keywords.</div>'}`;
   tip.innerHTML = `<div class="t-h"><span class="ic">${cardArtHtml(def)}</span><b>${def.name}</b><small>${RARITY_LABEL[def.rarity]} · costs ${c.cost}</small></div>
     ${body}
+    ${def.foe ? '<div class="kw">✦ <b>Unique.</b> Only opponents carry this card.</div>' : def.crafted ? '<div class="kw">＋ <b>Enhanced.</b> A sharpened version of an ordinary card.</div>' : ''}
     ${hint ? `<div class="hint">${hint}</div>` : ''}`;
   tip.classList.add('show'); battleView.classList.add('tip-open');
   btPlaceTip();

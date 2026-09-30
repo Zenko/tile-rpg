@@ -214,7 +214,7 @@ function renderMemoryGrid() {
   stage.innerHTML = `<div class="mem-grid">${memory.cards.map(c => {
     const shown = c.matched || memory.flipped.includes(c.key);
     const def = shown ? cardDef(c.baseId) : null;
-    return `<button class="mem-tile ${shown ? 'up' : 'down'} ${c.matched ? 'matched' : ''}" data-key="${c.key}" ${c.matched || memory.busy ? 'disabled' : ''}>
+    return `<button class="mem-tile ${shown ? 'up' : 'down'} ${c.matched ? 'matched' : ''}" data-key="${c.key}" ${shown ? `data-inspect="${c.baseId}"` : ''} ${c.matched || memory.busy ? 'disabled' : ''}>
       ${shown ? `<span class="mi">${def.icon}</span><span class="mn">${def.name}</span>` : '<span class="mb">🌿</span>'}
     </button>`;
   }).join('')}</div>`;

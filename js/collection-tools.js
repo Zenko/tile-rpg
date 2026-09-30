@@ -159,7 +159,7 @@ function renderCollection() {
       const item = document.createElement('div');
       item.className = 'panel-item' + (spare > 0 ? ' has-spare' : '');
       item.innerHTML = `
-        <div class="card-mini rarity-${def.rarity}${def.crafted ? ' crafted' : ''}${foilCount(id) ? ' foil' : ''}">
+        <div class="card-mini rarity-${def.rarity}${def.crafted ? ' crafted' : ''}${foilCount(id) ? ' foil' : ''}" data-inspect="${id}">
           <span class="c-cost">${def.cost}</span>
           <span class="c-icon">${cardArtHtml(def)}</span>
           <span class="c-power">${cardStatsText(def)}</span>
@@ -296,7 +296,7 @@ function renderDeckPanel() {
       const item = document.createElement('div');
       item.className = 'panel-item';
       item.innerHTML = `
-        <div class="card-mini rarity-${def.rarity}${def.crafted ? ' crafted' : ''}">
+        <div class="card-mini rarity-${def.rarity}${def.crafted ? ' crafted' : ''}" data-inspect="${id}">
           <span class="c-cost">${def.cost}</span>
           <span class="c-icon">${cardArtHtml(def)}</span>
           <span class="c-power">${cardStatsText(def)}</span>

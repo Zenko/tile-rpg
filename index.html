@@ -30,11 +30,11 @@
       </div>
 
       <div class="hud-resources">
-        <div class="hud-stat" id="pillCards" title="Cards owned">
+        <div class="hud-stat" id="pillCards" title="Cards owned - tap to open Cards" role="button" tabindex="0">
           <span class="hs-icon">🃏</span>
           <span class="hs-bar"><span class="hs-fill hs-fill-cards"></span><span class="hs-val" id="cardCount">0</span></span>
         </div>
-        <div class="hud-stat" id="pillPebbles" title="Pebbles">
+        <div class="hud-stat" id="pillPebbles" title="Pebbles - tap to open the Shop" role="button" tabindex="0">
           <span class="hs-icon">🫧</span>
           <span class="hs-bar"><span class="hs-fill hs-fill-pebbles"></span><span class="hs-val" id="pebbleCount">0</span></span>
         </div>
@@ -478,7 +478,7 @@
   </div>
 </div>
 
-<div class="overlay hidden" id="tipOverlay">
+<div class="overlay tip-banner hidden" id="tipOverlay">
   <div class="overlay-card tip-card">
     <div class="big-icon" id="tipIcon">💡</div>
     <h2 id="tipTitle"></h2>
@@ -487,8 +487,13 @@
   </div>
 </div>
 
-<div class="overlay hidden" id="talkOverlay">
+<div class="overlay inspect-overlay hidden" id="inspectOverlay" aria-modal="true">
+  <div class="overlay-card sheet-card" id="inspectCard"></div>
+</div>
+
+<div class="overlay sheet hidden" id="talkOverlay">
   <div class="overlay-card" id="talkCard">
+    <div class="sheet-handle" data-sheet-handle></div>
     <div class="talk-portrait" id="talkPortrait" aria-hidden="true"></div>
     <div class="talk-name" id="talkName">Neighbor</div>
     <div class="talk-hearts hidden" id="talkHearts"></div>
@@ -540,7 +545,7 @@
   </div>
 </div>
 
-<div class="overlay hidden" id="feedbackOverlay">
+<div class="overlay sheet hidden" id="feedbackOverlay">
   <div class="overlay-card">
     <h2 id="feedbackModalTitle">Send feedback</h2>
     <p id="feedbackModalDesc">What's on your mind? This opens your email app to send it to the developer.</p>
@@ -564,7 +569,7 @@
   </div>
 </div>
 
-<div class="overlay hidden" id="cloudOverlay">
+<div class="overlay sheet hidden" id="cloudOverlay">
   <div class="overlay-card">
     <h2 id="cloudModalTitle">Back up your save</h2>
     <p id="cloudModalDesc">Choose an email and password. Use the same ones to restore this save on another device.</p>
@@ -598,6 +603,7 @@
 <script src="js/notes.js"></script>
 <script src="js/world-map.js"></script>
 <script src="js/titles.js"></script>
+<script src="js/ui-polish.js"></script>
 <script src="js/events-story-foils-guide.js"></script>
 <!-- Cloud save (optional): deliberately loaded last, after the whole game above has already loaded and
      rendered from the local save, so a slow or unreachable connection to Google's CDN can never delay
