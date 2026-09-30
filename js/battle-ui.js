@@ -23,7 +23,11 @@ function startBattle(opponent) {
   const weather = weatherNow(), fx = weatherFx();
   if (isBoss && fx.bossSpirit) profile.spirit += fx.bossSpirit;
   const companionSpirit = hasPerk('spirit') && !opponent.puzzle;
-  const oppDeck = (Array.isArray(opponent.deck) && opponent.deck.length === DECK_SIZE) ? opponent.deck : buildDeckForOpponent(DECK_SIZE, isBoss);
+  // Plain neighbors and district bosses get a fresh deck each fight, scaled to how many wins you have (their stored deck
+  // predates enhanced and unique foe cards). Every other kind of opponent brings its own deck.
+  const plainFoe = !opponent.dungeon && !opponent.cup && !opponent.challenge && !opponent.signature && !opponent.isRival && !opponent.puzzle;
+  const oppDeck = plainFoe ? buildDeckForOpponent(DECK_SIZE, isBoss, null, opponent.name)
+    : (Array.isArray(opponent.deck) && opponent.deck.length === DECK_SIZE) ? opponent.deck : buildDeckForOpponent(DECK_SIZE, isBoss);
   const twistKind = bossTwistFor(opponent);
   let G;
   if (opponent.puzzle) {
@@ -58,7 +62,7 @@ function startBattle(opponent) {
   battle = { npc: opponent, isBoss, G, profile, weather, sel: null, busy: false, ended: false, rewarded: false, yieldArmed: false, token: ++battleToken, startedAt: Date.now() };
   const chip = weather === 'storm' ? '⛈️ Swift +1 power' : weather === 'snow' ? (isBoss ? '❄️ Boss +2 Spirit · richer prize' : '❄️ Richer prize') : '';
   const tw = twistKind ? BattleEngine.TWISTS[twistKind] : null;
-  btGet('btWeather').textContent = opponent.puzzle ? '🧩 Ending your turn resets the board' : [tw ? `${tw.icon} ${tw.text}` : '', chip].filter(Boolean).join(' · ');
+  btGet('btWeather').textContent = opponent.puzzle ? '🧩 Ending your turn resets the board' : [tw ? `${tw.icon} ${tw.text}` : '', chip, plainFoe ? '✦ Seasoned deck: unique & enhanced cards' : ''].filter(Boolean).join(' · ');
   battle.puzzle = !!opponent.puzzle;
 
   townPanel.classList.add('hidden');
@@ -186,6 +190,9 @@ function btCardEl(c, cls, mine) {
   if (mr) { el.classList.add('mastered', 'mastery-' + mr); el.insertAdjacentHTML('beforeend', `<span class="mastery-stars">${'★'.repeat(mr)}</span>`); }
   if (sleeve && sleeve.id) { el.classList.add('sleeved', 'sleeve-' + sleeve.id); el.insertAdjacentHTML('afterbegin', `<span class="sleeve-fx"></span><span class="sleeve-mark">${sleeve.icon}</span>`); }
   if (c.shield) el.classList.add('shielded');
+  // opponent-only extras: unique foe cards, and enhanced (crafted "+") versions of ordinary cards
+  if (!mine && def.foe) { el.classList.add('foe-card'); el.insertAdjacentHTML('beforeend', '<span class="badge foe">✦</span>'); }
+  else if (!mine && def.crafted) el.classList.add('enhanced-card');
   if (c.kw.includes('guard')) { el.classList.add('guarding'); el.insertAdjacentHTML('beforeend', '<span class="badge grd">🛡️</span>'); }
   if (/(^| )sleep( |$)/.test(cls || '')) el.insertAdjacentHTML('beforeend', '<span class="badge zz">💤</span>');
   return el;

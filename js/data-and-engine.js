@@ -208,6 +208,23 @@ const CARD_POOL = [
   { id: 'deep-wyrm', name: 'Deep Wyrm', icon: '🐉', rarity: 'mythic', cost: 5, power: 9, grit: 9, kw: ['bloom', 'guard'], exclusive: 'cellar' },
   { id: 'rooks-ace', name: "Rook's Ace", icon: '🎭', rarity: 'mythic', cost: 4, power: 7, grit: 6, kw: ['swift', 'echo'], exclusive: 'rival' },
 ];
+/* Foe cards: unique cards that only opponents carry (neighbors, bosses, cellar floors). They are deliberately NOT in
+   CARD_POOL - so they never show up in packs, the Index, deck codes or rewards - but defOf() knows them, so the battle
+   engine and card art treat them like any other card. `tier` is the earliest foe tier that may field them (see
+   foeTierFor in progression.js). */
+const FOE_CARDS = [
+  { id: 'market-cat',     name: 'Market Cat',     icon: '🐈', rarity: 'rare',   cost: 2, power: 3, grit: 2, kw: ['swift'],           foe: true, tier: 1 },
+  { id: 'lamplighter',    name: 'Lamplighter',    icon: '🏮', rarity: 'rare',   cost: 2, power: 2, grit: 3, kw: ['mend'],            foe: true, tier: 1 },
+  { id: 'pebble-golem',   name: 'Pebble Golem',   icon: '🗿', rarity: 'rare',   cost: 3, power: 3, grit: 5, kw: ['guard'],           foe: true, tier: 1 },
+  { id: 'thorn-hare',     name: 'Thorn Hare',     icon: '🐇', rarity: 'ultra',  cost: 3, power: 4, grit: 3, kw: ['swift', 'thorns'], foe: true, tier: 2 },
+  { id: 'wisp-keeper',    name: 'Wisp Keeper',    icon: '🕯️', rarity: 'ultra',  cost: 3, power: 3, grit: 4, kw: ['mend', 'shield'],  foe: true, tier: 2 },
+  { id: 'bell-ringer',    name: 'Bell Ringer',    icon: '🛎️', rarity: 'ultra',  cost: 3, power: 3, grit: 4, kw: ['echo', 'rally'],   foe: true, tier: 2 },
+  { id: 'storm-heron',    name: 'Storm Heron',    icon: '🦅', rarity: 'super',  cost: 4, power: 5, grit: 4, kw: ['swift', 'drain'],  foe: true, tier: 3 },
+  { id: 'iron-tortoise',  name: 'Iron Tortoise',  icon: '🐢', rarity: 'super',  cost: 4, power: 4, grit: 7, kw: ['guard', 'thorns'], foe: true, tier: 3 },
+  { id: 'ember-fox',      name: 'Ember Fox',      icon: '🦊', rarity: 'super',  cost: 4, power: 6, grit: 4, kw: ['swift', 'bloom'],  foe: true, tier: 3 },
+  { id: 'night-regent',   name: 'Night Regent',   icon: '🦉', rarity: 'mythic', cost: 5, power: 7, grit: 7, kw: ['guard', 'drain'],  foe: true, tier: 4 },
+  { id: 'tide-leviathan', name: 'Tide Leviathan', icon: '🐋', rarity: 'mythic', cost: 5, power: 7, grit: 8, kw: ['shield', 'echo'],  foe: true, tier: 4 },
+];
 const EXCLUSIVE_HINT = { cellar: 'found deep in the cellar', rival: "a rival's final prize" };
 
 const RARITY_ORDER = ['common', 'rare', 'ultra', 'super', 'mythic'];
@@ -303,7 +320,7 @@ const BattleEngine = (function () {
   const MAX_KEYWORDS = 2;
   function baseIdOf(id) { const i = String(id).indexOf('~'); return i < 0 ? id : id.slice(0, i); }
   function defOf(id) {
-    if (!DEFS) DEFS = new Map(CARD_POOL.map(c => [c.id, c]));
+    if (!DEFS) DEFS = new Map(CARD_POOL.concat(FOE_CARDS).map(c => [c.id, c]));
     let d = DEFS.get(id);
     if (d) return d;
     if (typeof id !== 'string') return undefined;

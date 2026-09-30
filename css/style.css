@@ -1454,9 +1454,9 @@ html.calm *, html.calm *::before, html.calm *::after { animation-duration: 0.01m
 /* ---------- memory match ---------- */
 .sc-stage.memory-stage { padding: 10px; background: var(--stone); }
 .sc-stage.memory-stage::before, .sc-stage.memory-stage::after { display: none; }
-.mem-grid { display: grid; grid-template-columns: repeat(var(--mcols), 1fr); gap: 8px; width: 100%; height: 100%; }
+.mem-grid { display: grid; grid-template-columns: repeat(var(--mcols), minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr); gap: 8px; width: 100%; height: 100%; min-width: 0; }
 .mem-tile { border: none; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 4px; padding: 4px; cursor: pointer; font-family: inherit; transition: transform .15s ease; }
+  gap: 4px; padding: 4px; cursor: pointer; font-family: inherit; transition: transform .15s ease; min-width: 0; min-height: 0; overflow: hidden; }
 .mem-tile.down { background: var(--stone-edge); }
 .mem-tile.down .mb { font-size: 2.4rem; opacity: .55; }
 .mem-tile.up { background: var(--water-glow); }
@@ -1465,3 +1465,8 @@ html.calm *, html.calm *::before, html.calm *::after { animation-duration: 0.01m
 .mem-tile .mi { font-size: 2.1rem; line-height: 1; }
 .mem-tile .mn { font-size: .68rem; line-height: 1.15; text-align: center; color: var(--ink); max-width: 92%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+
+/* ---------- opponent-only cards (see buildDeckForOpponent) ---------- */
+.card.foe-card { box-shadow: 0 0 0 2px #d9a441, 0 0 10px rgba(217, 164, 65, .55); }
+.card.enhanced-card { box-shadow: 0 0 0 1.5px rgba(217, 164, 65, .7); }
+.card .badge.foe { position: absolute; top: 2px; left: 2px; font-size: .7rem; line-height: 1; color: #d9a441; pointer-events: none; }

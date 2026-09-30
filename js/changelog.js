@@ -18,6 +18,15 @@ function gameVersionLabel() {
    the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
 const CHANGELOG = [
   {
+    date: '2026-09-30',
+    version: '1.47.0',
+    title: "Tougher opponents, and a memory game fix",
+    changes: [
+      "Neighbors, district bosses and the cellar floors now field unique cards you can't find anywhere else (marked with a gold ✦) plus enhanced + cards. Each neighbor keeps their own favourites, and it all grows tougher as you win more and go deeper into the cellar.",
+      "Fixed the Reading Nook memory game grid running off the side of the screen on bigger boards.",
+    ],
+  },
+  {
     date: '2026-09-29',
     version: '1.46.0',
     title: "Feedback now includes who sent it",

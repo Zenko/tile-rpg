@@ -253,14 +253,15 @@ const CELLAR = {
     { name: 'The Root Keeper', icon: '🌳', theme: 'grove', pebbles: 7, final: true, blurb: 'Roots as thick as your arm coil around an old chest.' },
   ],
 };
-function themedDeck(theme) {
+// The three shallow floors climb the foe tiers (see buildDeckForOpponent): unique foe cards and enhanced "+" cards, more of them each floor.
+function themedDeck(theme, floor) {
   const pools = {
     swarm: ['reed', 'reed', 'flintstone', 'flintstone', 'sprout', 'sprout', 'feather', 'feather', 'gale', 'moth', 'droplet', 'toadstool', 'tide'],
     wall:  ['pebble', 'pebble', 'geode', 'geode', 'boulder', 'boulder', 'bubble', 'bubble', 'lantern', 'moonstone', 'droplet', 'toadstool', 'cloud'],
     grove: ['moth', 'moth', 'blossom', 'blossom', 'lily', 'lily', 'droplet', 'droplet', 'aurora-stag', 'deep-current', 'mountain-heart', 'dove', 'cloud'],
   };
   const counts = {}; pools[theme].forEach(id => { counts[id] = Math.min(MAX_COPIES, (counts[id] || 0) + 1); });
-  return BattleEngine.suggestDeck(counts);
+  return foeEnhanceDeck(BattleEngine.suggestDeck(counts), Math.min(4, (floor || 0) + 1), 'cellar-' + theme);
 }
 /* ---------------- the deep: past the Root Keeper the cellar keeps going, one harder floor at a time ----------------
    Floors 1-3 are the old hand-made floors (a loss there costs nothing, retry as often as you like). From floor 4 on
@@ -298,7 +299,9 @@ function deepDeck(fl) {
     pool.push(src[Math.floor(Math.random() * src.length)].id);
   }
   const counts = {}; pool.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
-  return BattleEngine.suggestDeck(counts);
+  // Depth adds more unique foe cards and more enhanced "+" cards, with extra keywords becoming likelier.
+  return foeEnhanceDeck(BattleEngine.suggestDeck(counts), 4, fl.name,
+    { foeCount: Math.min(3, 1 + Math.floor(d / 4)), enhanced: Math.min(6, 2 + Math.floor(d / 2)), skill: Math.min(0.6, 0.25 + d * 0.03) });
 }
 function cellarState() {
   const st = buildingState('cellar');
@@ -654,7 +657,7 @@ function sceneAction(actId) {
     const st = cellarState(); if (st.resting) return;
     const f = cellarFloor(st.floor);
     if (f.deep) st.inRun = true;
-    const foe = { id: 'cellar-' + st.floor, name: f.name, icon: f.icon, deck: f.deep ? deepDeck(f) : themedDeck(f.theme), isBoss: !!(f.final || f.guardian), rewardCard: null, defeated: false,
+    const foe = { id: 'cellar-' + st.floor, name: f.name, icon: f.icon, deck: f.deep ? deepDeck(f) : themedDeck(f.theme, st.floor), isBoss: !!(f.final || f.guardian), rewardCard: null, defeated: false,
                   profile: f.profile, dungeon: { id: 'cellar', district: state.currentDistrict, floor: st.floor, deep: !!f.deep } };
     sfx('tap'); buzz(HAP.tap); startBattle(foe); return;
   }

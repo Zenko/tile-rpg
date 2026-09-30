@@ -982,15 +982,67 @@ function weightedTownCardId(rarity) {
 const BASE_COMMONS = ['sprout','sprout','sprout','pebble','pebble','pebble','reed','reed','reed','droplet','droplet','toadstool','toadstool','bubble','flintstone','moth'];
 
 // Opponent decks are built the same way the Deck tab's Auto-fill builds yours: from a pool of cards, with a healthy cost curve.
-function buildDeckForOpponent(count, forBoss) {
+/* Opponent decks used to be a plain pool of random cards, which made neighbors and the old cellar floors easy.
+   They now scale with a "foe tier" (1 gentle .. 4 boss) and get two things a normal deck doesn't:
+     - Foe cards: unique cards only opponents carry (FOE_CARDS). Each neighbor is seeded by their name, so the same
+       neighbor keeps fielding the same few uniques and can be learned.
+     - Enhanced cards: the same crafted "+" versions the Workshop makes (+1 power or +1 grit, sometimes with an extra
+       keyword), swapped in for some of the ordinary cards.
+   Tuned by simulation against a normal player deck - see HANDOFF §5's Balance note. */
+const FOE_COUNT = [1, 1, 1, 2], FOE_ENHANCED = [2, 3, 3, 3], FOE_SKILL_CHANCE = [0, 0.2, 0.3, 0.4];
+const FOE_SKILLS = ['guard', 'swift', 'shield', 'mend', 'thorns', 'drain', 'rally', 'echo'];
+function foeTierFor(isBoss) {
+  const w = state.wins;
+  if (isBoss) return w < 5 ? 3 : 4;
+  return w < 3 ? 1 : w < 8 ? 2 : 3;
+}
+function foeSeedHash(str) { let h = 7; str = String(str || ''); for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0; return h; }
+function buildDeckForOpponent(count, forBoss, tier, seed) {
+  tier = Math.max(1, Math.min(4, tier || foeTierFor(forBoss)));
+  const rarityFor = () => {
+    const r = Math.random();
+    if (tier <= 3) return rollRarity(false);
+    return r < 0.35 ? 'super' : (Math.random() < 0.55 ? 'ultra' : 'rare');
+  };
   const pool = BASE_COMMONS.slice();
-  for (let i = 0; i < 14; i++) {
-    const rarity = forBoss ? (Math.random() < 0.35 ? 'super' : (Math.random() < 0.55 ? 'ultra' : 'rare')) : rollRarity(false);
-    pool.push(randomCardId(rarity));
-  }
+  for (let i = 0; i < 14; i++) pool.push(randomCardId(rarityFor()));
   const counts = {};
   pool.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
-  return BattleEngine.suggestDeck(counts);
+  return foeEnhanceDeck(BattleEngine.suggestDeck(counts), tier, seed);
+}
+// Swaps unique foe cards and enhanced "+" variants into an already-built deck (also used for the cellar's themed decks).
+function foeEnhanceDeck(deck, tier, seed, extra) {
+  deck = deck.slice();
+  extra = extra || {};
+  const def = id => BattleEngine.defOf(id);
+  // Unique foe cards: a small, name-seeded set for this opponent, each swapped in for a similarly priced card.
+  const fp = FOE_CARDS.filter(c => c.tier <= tier);
+  const h = foeSeedHash(seed);
+  const picks = [];
+  for (let i = 0; i < (extra.foeCount != null ? extra.foeCount : FOE_COUNT[tier - 1]) && fp.length; i++) {
+    // the opponent's own favourites come from their seed; later slots (and unseeded opponents) are random
+    const c = seed != null && i < 2 ? fp[(h + i * 7) % fp.length] : fp[Math.floor(Math.random() * fp.length)];
+    if (!picks.includes(c)) picks.push(c);
+  }
+  picks.forEach(fc => {
+    const slots = deck.map((id, i) => i).filter(i => !def(deck[i]).foe && !def(deck[i]).spell && Math.abs(def(deck[i]).cost - fc.cost) <= 1);
+    if (slots.length) deck[slots[Math.floor(Math.random() * slots.length)]] = fc.id;
+  });
+  // Enhanced cards: crafted "+" variants of ordinary cards.
+  const free = deck.map((id, i) => i).filter(i => { const d = def(deck[i]); return !d.foe && !d.spell; });
+  const swaps = shuffledArr(free).slice(0, extra.enhanced != null ? extra.enhanced : FOE_ENHANCED[tier - 1]);
+  swaps.forEach(i => {
+    const base = def(deck[i]), st = Math.random() < 0.5 ? 'p' : 'g';
+    let sk = '';
+    if (Math.random() < (extra.skill != null ? extra.skill : FOE_SKILL_CHANCE[tier - 1]) && base.kw.length < BattleEngine.MAX_KEYWORDS) {
+      const opts = FOE_SKILLS.filter(k => !base.kw.includes(k));
+      sk = opts[Math.floor(Math.random() * opts.length)];
+    }
+    let vid = BattleEngine.variantId(deck[i], st, sk);
+    if (!def(vid)) vid = BattleEngine.variantId(deck[i], st, '');
+    if (def(vid)) deck[i] = vid;
+  });
+  return deck;
 }
 
 // How hard an opponent is: chosen at battle time from how many battles you have won.
