@@ -19,6 +19,14 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-30',
+    version: '1.53.0',
+    title: "Card Shop screens scroll properly",
+    changes: [
+      "Fixed the \"Back to the counter\" button floating over the packs, items and customize lists in the Card Shop. The list now scrolls by itself and the button stays at the bottom.",
+    ],
+  },
+  {
+    date: '2026-09-30',
     version: '1.52.0',
     title: "Deck moves into Cards; the Card Shop stays put",
     changes: [

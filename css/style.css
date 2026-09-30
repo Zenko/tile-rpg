@@ -1582,5 +1582,8 @@ html.calm *, html.calm *::before, html.calm *::after { animation-duration: 0.01m
 /* Card Shop: the Packs / Customize / Items views live inside the scene (see mountShopView) */
 #sceneView.shop-mode .sc-stage, #sceneView.shop-mode .sc-pips { display: none; }
 #sceneView.shop-mode .sc-bubble { padding: 8px 14px; font-size: .8rem; min-height: 0; }
-.sc-shop-host { flex: 1 1 auto; min-height: 0; text-align: left; }
+/* the host scrolls on its own so the Back button stays put underneath it instead of floating over the list */
+.sc-shop-host { flex: 1 1 0; min-height: 0; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; text-align: left; padding: 0 2px 8px; scrollbar-width: none; }
+.sc-shop-host::-webkit-scrollbar { display: none; }
+#sceneView.shop-mode { overflow: hidden; }
 .sc-shop-host.hidden { display: none; }
