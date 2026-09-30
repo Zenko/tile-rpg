@@ -1470,3 +1470,9 @@ html.calm *, html.calm *::before, html.calm *::after { animation-duration: 0.01m
 .card.foe-card { box-shadow: 0 0 0 2px #d9a441, 0 0 10px rgba(217, 164, 65, .55); }
 .card.enhanced-card { box-shadow: 0 0 0 1.5px rgba(217, 164, 65, .7); }
 .card .badge.foe { position: absolute; top: 2px; left: 2px; font-size: .7rem; line-height: 1; color: #d9a441; pointer-events: none; }
+
+/* Trade up: the chosen cards and the Combine button stay together and pinned to the top while the spare-card list scrolls under them. */
+.cr-dock { position: sticky; top: 0; z-index: 5; margin: 0 -4px 10px; padding: 8px 4px 10px; background: var(--bg-top); border-bottom: 1px solid var(--stone-edge); box-shadow: 0 6px 10px -6px rgba(0, 0, 0, .5); }
+.cr-dock .cr-tray { margin: 0 0 8px; }
+.cr-dock .cr-go { margin-top: 0; }
+.cr-dock .cr-go .btn { width: 100%; min-height: 44px; }

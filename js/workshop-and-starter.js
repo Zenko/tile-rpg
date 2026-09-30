@@ -274,12 +274,17 @@ function renderCraft() {
       : `<div class="cr-slot${i === craftSel.picks.length ? ' next' : ''}"><span>?</span></div>`;
   }
   tray.innerHTML += `<div class="cr-arrow">→</div><div class="cr-slot result"><span>${RARITY_LABEL[target]}</span></div>`;
-  trade.appendChild(tray);
+  const dock = document.createElement('div');
+  dock.className = 'cr-dock';
+  dock.appendChild(tray);
+  trade.appendChild(dock);
 
   const list = Object.keys(counts).filter(id => cardDef(id).rarity === craftSel.rarity && tradable(id) > 0)
     .sort((a, b) => (cardDef(a).crafted ? 1 : 0) - (cardDef(b).crafted ? 1 : 0) || cardDef(a).cost - cardDef(b).cost || (a < b ? -1 : 1));
   if (!list.length) {
-    trade.innerHTML += `<div class="cr-empty">No spare ${RARITY_LABEL[craftSel.rarity].toLowerCase()} cards outside your deck yet.</div>`;
+    const empty = document.createElement('div'); empty.className = 'cr-empty';
+    empty.textContent = `No spare ${RARITY_LABEL[craftSel.rarity].toLowerCase()} cards outside your deck yet.`;
+    trade.appendChild(empty);
   } else {
     list.forEach(id => {
       const def = cardDef(id), left = tradable(id) - picked(id);
@@ -299,7 +304,7 @@ function renderCraft() {
   go.className = 'cr-go';
   const ready = need === 0 && !whyNot;
   go.innerHTML = `<button class="btn${ready ? ' cr-ready' : ''}" id="craftGo" ${ready ? '' : 'disabled'}>${need === 0 ? `Combine into ${aOrAn(RARITY_LABEL[target])} card` : `Pick ${need} more`}</button>${whyNot ? `<div class="cr-empty">${whyNot}</div>` : ''}`;
-  trade.appendChild(go);
+  dock.appendChild(go);
   box.appendChild(trade);
 
   // ----- events -----

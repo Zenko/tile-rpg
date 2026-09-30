@@ -19,6 +19,14 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-30',
+    version: '1.48.0',
+    title: "Easier trading up",
+    changes: [
+      "On the Craft screen, your chosen cards and the Combine button now sit together and stay pinned at the top while you scroll your spare cards, so there's no more swiping to the bottom to finish a trade.",
+    ],
+  },
+  {
+    date: '2026-09-30',
     version: '1.47.0',
     title: "Tougher opponents, and a memory game fix",
     changes: [
