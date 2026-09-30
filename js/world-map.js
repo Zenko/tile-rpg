@@ -62,6 +62,27 @@ document.getElementById('worldMapClose').addEventListener('click', closeWorldMap
 // when the tap lands on the backdrop itself, not on the card sitting inside it.
 document.getElementById('worldMapOverlay').addEventListener('click', e => { if (e.target.id === 'worldMapOverlay') closeWorldMap(); });
 
+/* Travel transition: a quick fade to a tinted "arriving at..." card, with the actual district swap happening while
+   the screen is covered so the map never visibly pops. Input is blocked for the ~0.9s it lasts. `swap` runs once at
+   the midpoint; if reduced motion is on, the swap happens at once with only a brief fade. */
+let travelFading = false;
+const TRAVEL_ICON = { square: '⛲', market: '🏪', harbor: '⚓', garden: '🌻' };
+function withTravelTransition(key, swap) {
+  const def = DISTRICTS[key];
+  if (travelFading || !def) { swap(); return; }
+  travelFading = true;
+  const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const el = document.createElement('div');
+  el.className = 'travel-fade theme-' + def.theme;
+  el.innerHTML = `<div class="tf-inner"><div class="tf-icon">${TRAVEL_ICON[key] || '🗺️'}</div><div class="tf-name">${def.name}</div><div class="tf-sub">${state.visitedDistricts.includes(key) ? 'Heading over…' : 'A new place…'}</div></div>`;
+  document.body.appendChild(el);
+  requestAnimationFrame(() => el.classList.add('on'));
+  setTimeout(() => {
+    try { swap(); } finally {
+      setTimeout(() => { el.classList.remove('on'); setTimeout(() => { el.remove(); travelFading = false; }, 320); }, reduce ? 60 : 380);
+    }
+  }, reduce ? 40 : 300);
+}
 function crossExit(exit) {
   const def = DISTRICTS[exit.to];
   if (!districtUnlocked(exit.to)) {
@@ -70,6 +91,9 @@ function crossExit(exit) {
     return;
   }
   cancelWalk(); setChase(null); pendingWalk = null;
+  withTravelTransition(exit.to, () => crossExitNow(exit, def));
+}
+function crossExitNow(exit, def) {
   state.currentDistrict = exit.to;
   const firstVisit = !state.visitedDistricts.includes(exit.to);
   if (firstVisit) { state.visitedDistricts.push(exit.to); bumpStat('districtsVisited', 1); }
@@ -84,6 +108,10 @@ function crossExit(exit) {
   sfx('claim'); buzz(HAP.tap);
 }
 function travelToDistrict(key) {
+  if (key !== state.currentDistrict) withTravelTransition(key, () => travelToDistrictNow(key));
+  else travelToDistrictNow(key);
+}
+function travelToDistrictNow(key) {
   state.currentDistrict = key;
   if (!state.visitedDistricts.includes(key)) { state.visitedDistricts.push(key); bumpStat('districtsVisited', 1); }
   state.playerPos = Object.assign({}, getMap(key).spawn);

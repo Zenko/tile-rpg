@@ -19,6 +19,17 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-30',
+    version: '1.49.0',
+    title: "Livelier neighbors, softer cellar, travel fade",
+    changes: [
+      "Talking to a neighbor is more of a conversation: a portrait that reacts, a speech bubble that types out (tap it to skip), and small-talk topics - the weather, town gossip and favourite cards. Your first chat of the day with each neighbor earns a little friendship.",
+      "Traveling between districts now fades through a tinted \"arriving at…\" screen instead of popping.",
+      "The cellar is gentler: the first three floors are easier, and the deep floors ramp up more slowly.",
+      "The Craft screen's Trade up block no longer has its own background.",
+    ],
+  },
+  {
+    date: '2026-09-30',
     version: '1.48.0',
     title: "Easier trading up",
     changes: [

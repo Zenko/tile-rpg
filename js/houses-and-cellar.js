@@ -248,9 +248,9 @@ function sleeveAction(id) {
 const CELLAR = {
   cooldownMs: 5 * 60 * 1000,
   floors: [
-    { name: 'Cellar Rats', icon: '🐀', theme: 'swarm', pebbles: 2, blurb: 'Something small and quick scurries between the barrels.' },
-    { name: 'The Stone Wall', icon: '🧱', theme: 'wall', pebbles: 4, blurb: 'A slow, stubborn guardian fills the whole passage.' },
-    { name: 'The Root Keeper', icon: '🌳', theme: 'grove', pebbles: 7, final: true, blurb: 'Roots as thick as your arm coil around an old chest.' },
+    { name: 'Cellar Rats', icon: '🐀', theme: 'swarm', pebbles: 2, profile: { level: 'gentle', spirit: 15 }, blurb: 'Something small and quick scurries between the barrels.' },
+    { name: 'The Stone Wall', icon: '🧱', theme: 'wall', pebbles: 4, profile: { level: 'normal', spirit: 16 }, blurb: 'A slow, stubborn guardian fills the whole passage.' },
+    { name: 'The Root Keeper', icon: '🌳', theme: 'grove', pebbles: 7, final: true, profile: { level: 'normal', spirit: 18 }, blurb: 'Roots as thick as your arm coil around an old chest.' },
   ],
 };
 // The three shallow floors climb the foe tiers (see buildDeckForOpponent): unique foe cards and enhanced "+" cards, more of them each floor.
@@ -261,7 +261,7 @@ function themedDeck(theme, floor) {
     grove: ['moth', 'moth', 'blossom', 'blossom', 'lily', 'lily', 'droplet', 'droplet', 'aurora-stag', 'deep-current', 'mountain-heart', 'dove', 'cloud'],
   };
   const counts = {}; pools[theme].forEach(id => { counts[id] = Math.min(MAX_COPIES, (counts[id] || 0) + 1); });
-  return foeEnhanceDeck(BattleEngine.suggestDeck(counts), Math.min(4, (floor || 0) + 1), 'cellar-' + theme);
+  return foeEnhanceDeck(BattleEngine.suggestDeck(counts), Math.max(1, Math.min(2, floor || 0)), 'cellar-' + theme);
 }
 /* ---------------- the deep: past the Root Keeper the cellar keeps going, one harder floor at a time ----------------
    Floors 1-3 are the old hand-made floors (a loss there costs nothing, retry as often as you like). From floor 4 on
@@ -286,7 +286,7 @@ function cellarFloor(i) {
   const n = i + 1, depth = i - CELLAR.floors.length + 1, guardian = n % 5 === 0;
   const f = guardian ? DEEP_GUARDIANS[(n / 5 - 1) % DEEP_GUARDIANS.length] : DEEP_FOES[(i - CELLAR.floors.length) % DEEP_FOES.length];
   return Object.assign({}, f, { deep: true, depth, guardian, pebbles: (5 + depth + (guardian ? 8 : 0)) * (eventIs('cellar-night') ? 2 : 1),
-    profile: { level: depth >= 4 ? 'smart' : 'normal', spirit: Math.min(34, 18 + depth + (guardian ? 3 : 0)) } });
+    profile: { level: depth >= 6 ? 'smart' : 'normal', spirit: Math.min(30, 16 + Math.ceil(depth * 0.8) + (guardian ? 2 : 0)) } });
 }
 // A deep deck gets rarer with depth and leans on the floor's keyword.
 function deepDeck(fl) {
@@ -301,7 +301,7 @@ function deepDeck(fl) {
   const counts = {}; pool.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
   // Depth adds more unique foe cards and more enhanced "+" cards, with extra keywords becoming likelier.
   return foeEnhanceDeck(BattleEngine.suggestDeck(counts), 4, fl.name,
-    { foeCount: Math.min(3, 1 + Math.floor(d / 4)), enhanced: Math.min(6, 2 + Math.floor(d / 2)), skill: Math.min(0.6, 0.25 + d * 0.03) });
+    { foeCount: Math.min(2, 1 + Math.floor(d / 5)), enhanced: Math.min(5, 1 + Math.floor(d / 2)), skill: Math.min(0.5, 0.2 + d * 0.03) });
 }
 function cellarState() {
   const st = buildingState('cellar');

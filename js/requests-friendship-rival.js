@@ -129,9 +129,81 @@ function openTalk(f) {
   e.ov.classList.remove('hidden'); sfx('tap');
   renderTalk();
 }
+/* The neighbor's portrait, a speech bubble that types out (tap it to finish at once) and a few small-talk topics,
+   so the card feels like a conversation rather than a form. Text is typed only when it changes, since renderTalk()
+   runs again after every action. */
+let talkSaid = '', talkTypeTimer = null;
+function talkSay(text) {
+  const el = document.getElementById('talkText');
+  if (text === talkSaid) return;
+  talkSaid = text; clearInterval(talkTypeTimer);
+  const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce || text.length < 3) { el.textContent = text; return; }
+  let i = 0; el.textContent = '';
+  talkTypeTimer = setInterval(() => {
+    i += 2; el.textContent = text.slice(0, i);
+    if (i >= text.length) { clearInterval(talkTypeTimer); el.textContent = text; }
+  }, 22);
+}
+function talkFinishTyping() { clearInterval(talkTypeTimer); if (talkSaid) document.getElementById('talkText').textContent = talkSaid; }
+function talkReact(emoji) {
+  const pt = document.getElementById('talkPortrait');
+  pt.classList.remove('react'); void pt.offsetWidth; pt.classList.add('react');
+  const fl = document.createElement('span'); fl.className = 'talk-float'; fl.textContent = emoji;
+  pt.appendChild(fl); setTimeout(() => fl.remove(), 1100);
+}
+const TALK_WEATHER = {
+  clear:  ['Lovely and bright, isn\'t it? Good day for a wander.', 'Not a cloud to complain about. I could sit out in this all afternoon.'],
+  cloudy: ['A bit grey, but I don\'t mind. It keeps the glare off the cards.', 'Cloudy days are for slow walks and warm drinks.'],
+  rain:   ['Listen to that rain on the roofs. I do love the sound.', 'Puddles everywhere! Mind your step.'],
+  storm:  ['Quite the storm! Everything feels a little faster in this weather.', 'Thunder always makes my cards tingle. Stay dry, friend.'],
+  fog:    ['I can barely see the fountain. It\'s peaceful, in a strange way.', 'Fog again. Things look softer when you can\'t see them clearly.'],
+  snow:   ['Snow! Everything is so quiet under it.', 'Winter suits this town. Come and find me by the warm windows later.']
+};
+const TALK_GOSSIP = [
+  place => `Things are calm around ${place}. I like it that way.`,
+  place => `Someone left a card on a bench in ${place} yesterday. Finders keepers, I suppose!`,
+  place => `I heard the boss of ${place} has been in a mood lately. Bring a good deck.`,
+  place => `Have you tried the bakery? Nothing beats warm bread while you walk through ${place}.`,
+  place => `I saw a spirit drifting through ${place} earlier. Keep your eyes open.`
+];
+const TALK_TOPICS = [
+  { id: 'weather', label: '🌤️ The weather' },
+  { id: 'town',    label: '🏘️ Around town' },
+  { id: 'cards',   label: '🎴 Favourite cards' }
+];
+function talkTopicReply(id, f) {
+  if (id === 'weather') { const l = TALK_WEATHER[weatherNow()] || TALK_WEATHER.clear; return l[Math.floor(Math.random() * l.length)]; }
+  if (id === 'town') return TALK_GOSSIP[Math.floor(Math.random() * TALK_GOSSIP.length)](DISTRICTS[state.currentDistrict] ? DISTRICTS[state.currentDistrict].name : 'town');
+  const k = KW[signatureTheme(f)];
+  return `I'm partial to ${k.icon} ${k.name} cards. ${k.text} Bring me one and I'll never forget it.`;
+}
+function talkChatsToday() { const p = state.progress; if (!p.chats || p.chats.day !== todayKey()) p.chats = { day: todayKey(), done: {} }; return p.chats; }
+function renderTalkTopics(f) {
+  const box = document.getElementById('talkTopics');
+  const show = !f.isBoss && !f.isRival && !f._thanks;
+  box.classList.toggle('hidden', !show);
+  if (!show) return;
+  const used = f._topics || (f._topics = {});
+  box.innerHTML = TALK_TOPICS.map(t => `<button class="talk-topic${used[t.id] ? ' used' : ''}" data-topic="${t.id}">${t.label}</button>`).join('');
+  box.querySelectorAll('[data-topic]').forEach(b => b.addEventListener('click', () => {
+    if (!talkTo) return;
+    const id = b.dataset.topic; talkTo._topics = talkTo._topics || {}; talkTo._topics[id] = true;
+    talkSaid = ''; talkSay(talkTopicReply(id, talkTo)); sfx('tap'); buzz(HAP.tap);
+    const chats = talkChatsToday(), key = neighborKey(talkTo);
+    if (!chats.done[key]) { chats.done[key] = true; saveState(); talkReact('💞'); addFriendship(talkTo, 1, 'chat'); renderTalkFriendship(talkTo); }
+    else talkReact('💬');
+    b.classList.add('used');
+  }));
+}
 function renderTalk() {
   if (!talkTo) return;
   const f = talkTo, e = talkEls(), rs = reqState(), r = rs.list[f.id];
+  const pt = document.getElementById('talkPortrait');
+  if (!pt.firstChild || pt.dataset.for !== f.id) { pt.dataset.for = f.id; pt.textContent = opponentPortrait(f); talkSaid = ''; }
+  const mood = (!f.isBoss && !f.isRival && friendHearts(f) >= 3) ? '😊' : '';
+  pt.dataset.mood = mood;
+  renderTalkTopics(f);
   e.fight.classList.remove('hidden'); e.main.classList.remove('hidden'); e.main.disabled = false; e.tag.textContent = '';
   e.fight.textContent = '⚔️ Friendly match'; e.name.textContent = f.name;
   if (f.isRival) { renderRivalTalk(f); return; }
@@ -145,27 +217,28 @@ function renderTalk() {
   if (bd) dishBtn.textContent = `🎁 Give ${bd.icon} ${bd.name}`;
   renderTalkFriendship(f);
   if (f._thanks) {                                    // just handed over a loaf: let them say thank you first
-    e.text.textContent = f._thanks; e.sub.textContent = r && r.state === 'active' && !requestDone(r) ? `${r.hint}  (${requestProgressText(r)})` : 'They tuck the loaf away carefully.';
+    talkSay(f._thanks); e.sub.textContent = r && r.state === 'active' && !requestDone(r) ? `${r.hint}  (${requestProgressText(r)})` : 'They tuck the loaf away carefully.';
     e.main.classList.add('hidden');
+    if (!f._reacted) { f._reacted = true; talkReact('❤️'); }
     return;
   }
   if (!r) {
-    e.text.textContent = 'Hello there. Fancy a chat, or a friendly match?';
+    talkSay('Hello there. Fancy a chat, or a friendly match?');
     e.sub.textContent = 'I might have a small favour to ask.';
     e.main.textContent = '💬 Chat'; e.main.dataset.act = 'ask';
   } else if (r.state === 'open') {
-    e.text.textContent = r.text; e.sub.textContent = r.hint;
+    talkSay(r.text); e.sub.textContent = r.hint;
     e.tag.textContent = r.reward ? `Reward: a ${REQ_WIN_RARITY} card or better` : `Reward: 🫧 ${r.pebbles} Pebbles`;
     if (activeCount() >= REQ_MAX_ACTIVE) { e.main.textContent = 'You have two favours open already'; e.main.disabled = true; e.main.dataset.act = ''; }
     else { e.main.textContent = '✅ Happy to help'; e.main.dataset.act = 'accept'; }
   } else if (r.state === 'active') {
-    e.text.textContent = requestDone(r) ? 'You did it? Wonderful!' : r.text;
+    talkSay(requestDone(r) ? 'You did it? Wonderful!' : r.text);
     e.sub.textContent = requestDone(r) ? 'Thank you, truly.' : `${r.hint}  (${requestProgressText(r)})`;
     e.tag.textContent = r.reward ? `Reward: a ${REQ_WIN_RARITY} card or better` : `Reward: 🫧 ${r.pebbles} Pebbles`;
     if (requestDone(r)) { e.main.textContent = '🎁 Hand it in'; e.main.dataset.act = 'complete'; }
     else { e.main.textContent = 'Still working on it'; e.main.disabled = true; e.main.dataset.act = ''; }
   } else {
-    e.text.textContent = 'Thanks again for the help earlier.';
+    talkSay('Thanks again for the help earlier.');
     e.sub.textContent = 'Nothing else today. Come back tomorrow.';
     e.main.classList.add('hidden');
   }
@@ -197,7 +270,8 @@ function completeRequest(f) {
   toast(rewardCard ? '🎁 A card, as thanks' : `🫧 +${r.pebbles} Pebbles`);
   if (rewardCard) setTimeout(() => showCardReveal(rewardCard, `A gift from ${f.name}`, true), 300);
 }
-function closeTalk() { document.getElementById('talkCards').classList.add('hidden'); if (talkTo) delete talkTo._thanks; talkTo = null; talkEls().ov.classList.add('hidden'); }
+function closeTalk() { document.getElementById('talkCards').classList.add('hidden'); clearInterval(talkTypeTimer); talkSaid = ''; document.getElementById('talkPortrait').dataset.for = ''; if (talkTo) { delete talkTo._thanks; delete talkTo._topics; delete talkTo._reacted; } talkTo = null; talkEls().ov.classList.add('hidden'); }
+document.getElementById('talkBubble').addEventListener('click', talkFinishTyping);
 document.getElementById('talkMain').addEventListener('click', e => { const a = e.currentTarget.dataset.act; if (a) talkAct(a); });
 document.getElementById('talkGift').addEventListener('click', () => { if (talkTo) shareBread(talkTo); });
 document.getElementById('talkDish').addEventListener('click', () => { if (talkTo) giveDish(talkTo); });
@@ -455,7 +529,7 @@ function renderRivalTalk(f) {
   const e = talkEls(), rv = rivalState(), done = rv.chapter >= RIVAL.chapters;
   showTipOnce('rival');
   e.name.textContent = `🎭 Rook · ${done ? 'rival and friend' : `rivalry ${rv.chapter}/${RIVAL.chapters}`}`;
-  e.text.textContent = `"${rivalLine().hello}"`;
+  talkSay(`"${rivalLine().hello}"`);
   e.sub.textContent = done ? 'The rivalry is settled, but Rook still loves a match.' : 'Every time you win, Rook comes back with a stronger deck.';
   e.tag.textContent = done ? 'Prize: a rare card or better, and 🫧 10' : rv.chapter === RIVAL.chapters - 1 ? "Prize: Rook's finale card, found nowhere else" : `Prize: ${rivalPrizeLabel(rv.chapter + 1)}`;
   e.main.classList.add('hidden');
