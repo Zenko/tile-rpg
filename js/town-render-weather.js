@@ -77,7 +77,11 @@ const WEATHER_KINDS = {
   fog:    { icon: '🌫️', name: 'Fog', weight: (n) => n ? 1.6 : 1 },
   snow:   { icon: '❄️', name: 'Snow', weight: () => 0.9 }
 };
+// TEMPORARY test switch: while set, only these kinds can roll (for chasing the screen-flash report). Set to null to
+// restore normal weather.
+const WEATHER_TEST_ONLY = ['rain', 'storm'];
 function rollWeather(isNight) {
+  if (WEATHER_TEST_ONLY) return WEATHER_TEST_ONLY[Math.random() < 0.5 ? 0 : 1];
   const tilt = seasonDef().weather || {};
   // `k in tilt ? tilt[k] : 1`, not `tilt[k] || 1` - a season's explicit `snow: 0` (winter-exclusive snow) is a
   // falsy value that `||` would silently replace with the default 1, undoing the whole point of setting it.
@@ -189,6 +193,8 @@ function maybeRollWeather() {
   // can still be sitting in state.weather when the season turns. Clear it out rather than let it linger or
   // making good on a forecast the new season no longer allows; this also cleans up an older save from before
   // snow was winter-only.
+  // Test switch (see WEATHER_TEST_ONLY): a saved weather outside the allowed set is replaced immediately.
+  if (WEATHER_TEST_ONLY && (!WEATHER_TEST_ONLY.includes(state.weather.current) || !WEATHER_TEST_ONLY.includes(state.weather.next))) state.weather.changesAt = 0;
   if (state.weather.current === 'snow' && seasonNow() !== 'winter') state.weather.changesAt = 0;
   if (state.weather.next === 'snow' && seasonNow() !== 'winter') state.weather.next = null;
   // Scheduled on state.weather.elapsed (a plain, non-wrapping clock) rather than state.sky.elapsedMs,
