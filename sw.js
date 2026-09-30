@@ -1,7 +1,7 @@
 // Service worker: makes the game installable and fully playable offline.
 // Bump CACHE_VERSION on every publish (see HANDOFF §2's publish checklist) so returning players
 // pick up the new files instead of a stale cache - it does not need to match the game's own version.
-const CACHE_VERSION = 'v38';
+const CACHE_VERSION = 'v39';
 const CACHE_NAME = 'tile-rpg-' + CACHE_VERSION;
 
 // The precache list used to be a hand-maintained copy of every <script src> in index.html - easy to forget
@@ -15,7 +15,7 @@ function sameOriginUrl(raw) {
 }
 async function buildPrecacheUrls() {
   const urls = new Set(CORE_URLS);
-  const html = await (await fetch('./index.html')).text();
+  const html = await (await fetch('./index.html', { cache: 'reload' })).text();
   const re = /<(?:script|link)\b[^>]*?(?:src|href)="([^"]+)"[^>]*>/gi;
   let m;
   while ((m = re.exec(html))) { const u = sameOriginUrl(m[1]); if (u) urls.add(u); }
@@ -29,7 +29,10 @@ async function buildPrecacheUrls() {
 self.addEventListener('install', event => {
   event.waitUntil(
     buildPrecacheUrls()
-      .then(urls => caches.open(CACHE_NAME).then(cache => cache.addAll(urls)))
+      // cache: 'reload' skips the browser's own HTTP cache. GitHub Pages sends max-age=600, so without it a new
+      // service worker could precache the *previous* publish's CSS/JS if the phone had fetched them in the last
+      // ten minutes - the new version would then "install" while still showing the old screens.
+      .then(urls => caches.open(CACHE_NAME).then(cache => cache.addAll(urls.map(u => new Request(u, { cache: 'reload' })))))
       .then(() => self.skipWaiting())
   );
 });
