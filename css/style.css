@@ -1578,3 +1578,9 @@ html.calm *, html.calm *::before, html.calm *::after { animation-duration: 0.01m
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
+
+/* Card Shop: the Packs / Customize / Items views live inside the scene (see mountShopView) */
+#sceneView.shop-mode .sc-stage, #sceneView.shop-mode .sc-pips { display: none; }
+#sceneView.shop-mode .sc-bubble { padding: 8px 14px; font-size: .8rem; min-height: 0; }
+.sc-shop-host { flex: 1 1 auto; min-height: 0; text-align: left; }
+.sc-shop-host.hidden { display: none; }

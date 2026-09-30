@@ -753,7 +753,6 @@ const tabs = {
   town: { btn: document.getElementById('tabTown'), panel: townPanel },
   journal: { btn: document.getElementById('tabJournal'), panel: journalPanel },
   collection: { btn: document.getElementById('tabCollection'), panel: collectionPanel },
-  deck: { btn: document.getElementById('tabDeck'), panel: deckPanel },
   shop: { btn: document.getElementById('tabShop') || document.createElement('button'), panel: shopPanel },
   quests: { btn: document.getElementById('tabQuests'), panel: questsPanel }
 };
@@ -982,7 +981,7 @@ function weightedTownCardId(rarity) {
 // Cheap everyday cards every opponent can draw on, so their decks always have a playable early game.
 const BASE_COMMONS = ['sprout','sprout','sprout','pebble','pebble','pebble','reed','reed','reed','droplet','droplet','toadstool','toadstool','bubble','flintstone','moth'];
 
-// Opponent decks are built the same way the Deck tab's Auto-fill builds yours: from a pool of cards, with a healthy cost curve.
+// Opponent decks are built the same way the Deck's Auto-fill builds yours: from a pool of cards, with a healthy cost curve.
 /* Opponent decks used to be a plain pool of random cards, which made neighbors and the old cellar floors easy.
    They now scale with a "foe tier" (1 gentle .. 4 boss) and get two things a normal deck doesn't:
      - Foe cards: unique cards only opponents carry (FOE_CARDS). Each neighbor is seeded by their name, so the same

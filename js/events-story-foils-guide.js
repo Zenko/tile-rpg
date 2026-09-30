@@ -41,7 +41,7 @@ const STORY = [
   { icon: '🎲', text: 'Play a little game in one of the houses.',    goal: 'Finish any house mini-game',                 done: p => (p.totals.minigamesPlayed || 0) >= 1, pebbles: 8 },
   { icon: '🌱', text: 'Start a garden of your own.',                 goal: "Plant a seed (buy one at Fern's Cottage)",   done: p => (p.totals.seedsPlanted || 0) >= 1,  pebbles: 10 },
   { icon: '🛍️', text: 'Treat yourself.',                             goal: 'Open a card pack at the Card Shop',               done: p => (p.packsOpened || 0) >= 1,          pebbles: 10 },
-  { icon: '🎴', text: 'Make the deck your own.',                     goal: 'Change a card in the Deck tab',              done: p => (p.deckEdits || 0) >= 1,            pebbles: 10 },
+  { icon: '🎴', text: 'Make the deck your own.',                     goal: 'Change a card in Cards → Deck',              done: p => (p.deckEdits || 0) >= 1,            pebbles: 10 },
   { icon: '⭐', text: 'Settle in properly.',                          goal: 'Reach level 5',                              done: p => (p.level || 1) >= 5,                card: 'super' },
 ];
 // The path above ends onboarding; everyone who keeps playing gets these too, at their own pace, still one
@@ -134,7 +134,7 @@ const GUIDE = [
     { icon: '📬', name: 'Letters', where: 'Your cottage mailbox (Town Square)', how: 'Neighbors write to you, sometimes with a gift.' },
   ] },
   { section: 'Card battles', items: [
-    { icon: '⚔️', name: 'Friendly matches', where: 'Tap a neighbor → Friendly match', how: 'Win a card every time. Tap "How battles work" in the Deck tab for the rules.' },
+    { icon: '⚔️', name: 'Friendly matches', where: 'Tap a neighbor → Friendly match', how: 'Win a card every time. Tap "How battles work" in Cards → Deck for the rules.' },
     { icon: '👹', name: 'District bosses', where: 'Each district, 30 minutes on, 30 off', how: 'Every boss bends one rule of the match, and pays super rare or better.' },
     { icon: '🕯️', name: 'The cellar', where: 'Town Square, top middle', how: 'Three floors, then an endless deep climb with guardians every 5th floor.' },
     { icon: '🏆', name: 'Festival Cup', where: 'The fountain in Town Square', how: 'Three matches in a row with no healing. Sweep it for the weekly trophy.' },

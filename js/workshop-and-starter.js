@@ -110,12 +110,16 @@ function buyPack(packId, price) {
   return id;
 }
 
-let cardsView = 'mine';   // 'mine' | 'almanac' | 'craft'
+let cardsView = 'mine';   // 'mine' | 'deck' | 'almanac' | 'craft' | 'fish'  (the Deck used to be its own bottom tab; it is now a segment of Cards)
 
+// Opens Cards on its Deck segment - the one place that used to be `switchTab('deck')`.
+function openDeck() { switchTab('collection'); setCardsView('deck'); }
 function setCardsView(view) {
   cardsView = view;
   document.getElementById('segMine').classList.toggle('active', view === 'mine');
   document.getElementById('segAlmanac').classList.toggle('active', view === 'almanac');
+  document.getElementById('segDeck').classList.toggle('active', view === 'deck');
+  document.getElementById('deckPanel').classList.toggle('hidden', view !== 'deck');
   collectionList.classList.toggle('hidden', view !== 'mine');
   document.getElementById('collFilterToolbar').classList.toggle('hidden', view !== 'mine');
   document.getElementById('collFilter').classList.toggle('hidden', view !== 'mine' || !collFilterOpen);
@@ -128,6 +132,7 @@ function setCardsView(view) {
   if (view === 'almanac') renderAlmanac();
   else if (view === 'craft') renderCraft();
   else if (view === 'fish') renderFishLog();
+  else if (view === 'deck') renderDeckPanel();
   else renderCollection();
 }
 

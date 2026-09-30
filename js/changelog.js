@@ -19,6 +19,15 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-30',
+    version: '1.52.0',
+    title: "Deck moves into Cards; the Card Shop stays put",
+    changes: [
+      "The Deck is now a segment of Cards (My Cards · Deck · Index · Craft · Fish), so the bottom bar is down to four tabs: Town, Journal, Cards and Rewards.",
+      "In the Card Shop, Packs, Customize and Items now open right on the shop counter, just like the sleeves - no more jumping to another screen. Place and Move still take you back out to the map.",
+    ],
+  },
+  {
+    date: '2026-09-30',
     version: '1.51.0',
     title: "The Card Shop is the shop",
     changes: [

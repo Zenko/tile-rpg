@@ -64,10 +64,10 @@ const INTERIORS = {
               { id: 'mg-haggle', kind: 'minigame', game: 'haggle', view: () => miniView('haggle') }] },
   'card-shop': { title: 'The Card Shop', who: '🦎', name: 'Zeph', theme: 'warm',
     greet: 'Packs, sleeves, decorations, a fresh look for your character - if it has to do with cards, you will find it here. Have a look around.',
-    actions: [{ id: 'packs', label: '🎁 Card packs', kind: 'gotoshop', shopView: 'packs' },
+    actions: [{ id: 'packs', label: '🎁 Card packs', kind: 'shopmode', mode: 'packs' },
               { id: 'sleeves', label: '🎴 Card sleeves', kind: 'sleeves' },
-              { id: 'customize', label: '🎨 Customize', kind: 'gotoshop', shopView: 'customize' },
-              { id: 'items', label: '🪑 Items & decorations', kind: 'gotoshop', shopView: 'items' }] },
+              { id: 'customize', label: '🎨 Customize', kind: 'shopmode', mode: 'customize' },
+              { id: 'items', label: '🪑 Items & decorations', kind: 'shopmode', mode: 'items' }] },
   'stall-tinker': { title: "Tock's Tinker Stall", who: '🦝', name: 'Tock', theme: 'cool',
     greet: 'Sleeves! Fancy card sleeves! Your cards will look their best in a match - only your side sees the shine, mind you.',
     actions: [{ id: 'sleeves', label: '🎴 Browse card sleeves', kind: 'sleeves' },
@@ -325,7 +325,7 @@ function endCellarRun(st, reason) {
 function cellarBest() { return Math.max(state.progress.cellarBest || 0, cellarState().best || 0); }
 function deckAdvice() {
   const d = state.deck.map(cardDef).filter(Boolean);
-  if (d.length < DECK_SIZE) return `Your deck holds ${d.length} of ${DECK_SIZE} cards. Fill it in the Deck tab first, then we can talk shape.`;
+  if (d.length < DECK_SIZE) return `Your deck holds ${d.length} of ${DECK_SIZE} cards. Fill it in Cards → Deck first, then we can talk shape.`;
   const cheap = d.filter(c => c.cost <= 2).length, avg = d.reduce((n, c) => n + c.cost, 0) / d.length;
   const has = k => d.filter(c => c.kw.includes(k)).length;
   if (cheap < 4) return `Only ${cheap} of your cards cost 1 or 2. Your first turns will feel slow. Try to have at least 5 cheap cards.`;
@@ -354,7 +354,24 @@ function openScene(id) {
   else { const g = INTERIORS[id].greet; scene.text = typeof g === 'function' ? g() : g; }
   renderScene();
 }
+/* The Card Shop's Packs / Customize / Items screens are the same views the Shop panel uses (renderPacks,
+   renderCustomize, renderItems draw into #packsView, #customizeView, #itemsView by id). While the Card Shop scene
+   is in one of those modes we simply move that element into the scene, so the player never leaves the shop counter;
+   leaving the mode puts them back in #shopPanel, where the profile menu's "Visit shop" and the Pebbles fallback
+   still find them. */
+const CARD_SHOP_MODES = ['packs', 'customize', 'items'];
+function shopModeActive(view) { return !!(inScene && scene && scene.id === 'card-shop' && (view ? scene.mode === view : CARD_SHOP_MODES.includes(scene.mode))); }
+function mountShopView(view) {
+  const panel = document.getElementById('shopPanel'), host = document.getElementById('scShopHost');
+  ['packsView', 'customizeView', 'itemsView'].forEach(id => { const el = document.getElementById(id); if (el && el.parentElement !== panel) panel.appendChild(el); });   // always park them home first
+  sceneView.classList.toggle('shop-mode', !!view);
+  if (!view) { host.classList.add('hidden'); return; }
+  host.classList.remove('hidden');
+  host.appendChild(document.getElementById(view + 'View'));
+  setShopView(view);
+}
 function closeScene() {
+  mountShopView(null);
   miniStop();
   inScene = false; scene = null; if (typeof memory !== 'undefined') { memory = null; memoryLeaveStage(); }
   sceneView.classList.add('hidden');
@@ -627,7 +644,9 @@ function renderScene() {
     document.getElementById('scWho').textContent = typeof it.who === 'function' ? it.who() : it.who;
     pips.innerHTML = '';
     renderHomeShelf();
-    if (scene.mode === 'sleeves') acts.innerHTML = sleeveButtons() + sceneBtn('back', '← Back to the counter');
+    mountShopView(shopModeActive() ? scene.mode : null);
+    if (shopModeActive()) acts.innerHTML = sceneBtn('back', '← Back to the counter');
+    else if (scene.mode === 'sleeves') acts.innerHTML = sleeveButtons() + sceneBtn('back', '← Back to the counter');
     else if (scene.mode === 'seeds') acts.innerHTML = seedButtons() + sceneBtn('back', '← Back');
     else if (scene.mode === 'cook') acts.innerHTML = cookButtons() + sceneBtn('back', '← Back to the counter');
     else if (scene.mode === 'decorate') acts.innerHTML = shelfButtons() + sceneBtn('back', '← Done');
@@ -686,6 +705,7 @@ function sceneAction(actId) {
   if (actId.startsWith('seed:')) { const t = seedAction(actId.slice(5)); if (scene) { scene.text = t; renderScene(); } return; }   // planting leaves the scene
   const it = INTERIORS[scene.id], a = it.actions.find(x => x.id === actId), st = buildingState(scene.id);
   if (!a) return;
+  if (a.kind === 'shopmode') { scene.mode = a.mode; scene.text = { packs: 'Fresh packs, straight off the shelf. Spend as much or as little as you like.', customize: 'A new look, perhaps? Everything here is just for you.', items: 'Decorations for every district. Tap Place after buying to put one down.' }[a.mode]; sfx('tap'); renderScene(); return; }
   if (a.kind === 'gotoshop') { closeScene(); switchTab('shop'); if (a.shopView) setShopView(a.shopView); return; }
   if (a.kind === 'oven') { scene.text = ovenAction(); }
   else if (a.kind === 'deal') { scene.text = spiceDealAction(); }
@@ -772,7 +792,7 @@ function cupIntro() {
 }
 function cupAction(act) {
   const cs = cupState();
-  if (act === 'chal') { scene.mode = 'chal'; scene.text = "Today's deck challenges: win using a deck that follows the rule. Tip: keep a deck for them in one of your Deck tab slots."; sfx('tap'); showTipOnce('challenges'); renderScene(); return; }
+  if (act === 'chal') { scene.mode = 'chal'; scene.text = "Today's deck challenges: win using a deck that follows the rule. Tip: keep a deck for them in one of your deck slots (Cards → Deck)."; sfx('tap'); showTipOnce('challenges'); renderScene(); return; }
   if (act === 'chal-back') { scene.mode = null; scene.text = cupIntro(); renderScene(); return; }
   if (act.startsWith('chal-play:')) { startChallenge(+act.slice(10)); return; }
   if (act === 'cup-enter') {

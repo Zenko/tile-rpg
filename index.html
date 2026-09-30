@@ -270,6 +270,7 @@
       <div id="collectionPanel" class="panel hidden">
         <div class="seg" id="cardsSeg">
           <button class="seg-btn active" id="segMine">My Cards</button>
+          <button class="seg-btn" id="segDeck">Deck</button>
           <button class="seg-btn" id="segAlmanac">Index</button>
           <button class="seg-btn" id="segCraft">Craft</button>
           <button class="seg-btn" id="segFish">Fish</button>
@@ -283,6 +284,30 @@
         <div class="alm-grid hidden" id="almanacGrid"></div>
         <div class="hidden" id="craftView"></div>
         <div class="hidden" id="fishLogView"></div>
+        <div id="deckPanel" class="hidden">
+          <div class="dk-slots" id="deckSlots"></div>
+          <div class="deck-count" id="deckHeader"></div>
+          <div class="dk-curve" id="deckCurve"></div>
+          <div class="dk-kws" id="deckKws"></div>
+          <div class="dk-tip hidden" id="deckTip"></div>
+          <div class="dk-toolbar">
+            <button class="dk-tool-btn" id="deckOptionsToggle" aria-expanded="false">⚙️ Options</button>
+            <button class="dk-tool-btn" id="deckFilterToggle" aria-expanded="false">🔍 Filter</button>
+          </div>
+          <div class="dk-options hidden" id="deckOptions">
+            <div class="dk-actions">
+              <button class="panel-action active" id="deckAuto">Auto-fill</button>
+              <button class="panel-action" id="deckClear">Clear</button>
+              <button class="panel-action" id="deckHelp">How battles work</button>
+            </div>
+            <div class="dk-actions">
+              <button class="panel-action" id="deckShare">📋 Share code</button>
+              <button class="panel-action" id="deckLoad">📥 Load a code</button>
+            </div>
+          </div>
+          <div class="card-filter hidden" id="deckFilter"></div>
+          <div class="panel-list" id="deckList"></div>
+        </div>
       </div>
 
       <div id="shopPanel" class="panel hidden">
@@ -294,31 +319,6 @@
         <div class="hidden" id="packsView"></div>
         <div class="hidden" id="customizeView"></div>
         <div class="hidden" id="itemsView"></div>
-      </div>
-
-      <div id="deckPanel" class="panel hidden">
-        <div class="dk-slots" id="deckSlots"></div>
-        <div class="deck-count" id="deckHeader"></div>
-        <div class="dk-curve" id="deckCurve"></div>
-        <div class="dk-kws" id="deckKws"></div>
-        <div class="dk-tip hidden" id="deckTip"></div>
-        <div class="dk-toolbar">
-          <button class="dk-tool-btn" id="deckOptionsToggle" aria-expanded="false">⚙️ Options</button>
-          <button class="dk-tool-btn" id="deckFilterToggle" aria-expanded="false">🔍 Filter</button>
-        </div>
-        <div class="dk-options hidden" id="deckOptions">
-          <div class="dk-actions">
-            <button class="panel-action active" id="deckAuto">Auto-fill</button>
-            <button class="panel-action" id="deckClear">Clear</button>
-            <button class="panel-action" id="deckHelp">How battles work</button>
-          </div>
-          <div class="dk-actions">
-            <button class="panel-action" id="deckShare">📋 Share code</button>
-            <button class="panel-action" id="deckLoad">📥 Load a code</button>
-          </div>
-        </div>
-        <div class="card-filter hidden" id="deckFilter"></div>
-        <div class="panel-list" id="deckList"></div>
       </div>
 
       <div id="questsPanel" class="panel hidden">
@@ -354,6 +354,7 @@
         <div class="sc-stage" id="scStage"><div class="sc-rug"></div><div class="sc-who" id="scWho"></div></div>
         <div class="sc-pips" id="scPips"></div>
         <div class="sc-bubble" id="scText"></div>
+        <div class="sc-shop-host hidden" id="scShopHost"></div>
         <div class="sc-actions" id="scActions"></div>
       </div>
 
@@ -407,7 +408,6 @@
     <button class="tab-btn active" id="tabTown"><span class="t-icon">🏘️</span><span>Town</span></button>
     <button class="tab-btn" id="tabJournal"><span class="t-icon">📓</span><span>Journal</span></button>
     <button class="tab-btn" id="tabCollection"><span class="t-icon">🃏</span><span>Cards</span></button>
-    <button class="tab-btn" id="tabDeck"><span class="t-icon">🎴</span><span>Deck</span></button>
     <button class="tab-btn" id="tabQuests"><span class="t-icon">🎁</span><span>Rewards</span></button>
   </nav>
 

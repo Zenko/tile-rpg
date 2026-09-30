@@ -1,4 +1,4 @@
-/* ---------------- search, filter and sort for My Cards and the Deck tab (one shared setting) ---------------- */
+/* ---------------- search, filter and sort for My Cards and the Deck segment (one shared setting) ---------------- */
 const cardFilter = { q: '', rarity: 'all', sort: 'rarity' };
 let collFilterOpen = true;   // My Cards' filter starts open (browse-first screen); setCardsView() reads this instead of forcing it open every time the tab is shown
 const FILTER_CHIPS = [['all', 'All'], ['common', 'Common'], ['rare', 'Rare'], ['ultra', 'Ultra'], ['super', 'Super'], ['mythic', 'Mythic'], ['spell', '✨ Spells']];
@@ -40,7 +40,7 @@ function renderFilterBar(boxId, rerender) {
 
 // A custom "Sort by" sheet in place of a native <select>, which pops the OS's own picker on mobile and
 // looks out of place in a game that skins every other control itself. Shared by both filter bars (My Cards
-// and the Deck tab), so it just remembers which one to refresh when a choice is made.
+// and the Deck segment), so it just remembers which one to refresh when a choice is made.
 let sortOverlayRerender = null;
 function openSortOverlay(rerender) {
   sortOverlayRerender = rerender;

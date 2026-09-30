@@ -1064,6 +1064,7 @@ function beginPlacementUI(text) {
 // item: a DECORATION_ITEMS entry. movingUid: pass an existing placed decoration's uid to relocate it (within its own
 // district) instead of spending one from inventory - its old spot is freed up (and highlightable) while you choose.
 function startPlacingDecoration(item, movingUid) {
+  if (inScene && typeof shopModeActive === 'function' && shopModeActive()) closeScene();   // Place/Move from the Card Shop's Items: step back out to the map first
   if (inBattle || inScene) return;
   let movingOriginal = null, district = state.currentDistrict;
   if (movingUid) {
@@ -1116,7 +1117,7 @@ function handleDecorationTap(tx, ty) {
   placingDecoration = null;
   endPlacementUI();
   renderTown();
-  if (!shopPanel.classList.contains('hidden') && shopSubView === 'items') renderItems();
+  if ((!shopPanel.classList.contains('hidden') && shopSubView === 'items') || shopModeActive('items')) renderItems();
 }
 function buyDecoration(item) {
   if (state.progress.pebbles < item.cost) { toast('Not enough Pebbles yet'); sfx('tie'); return; }

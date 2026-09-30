@@ -364,7 +364,6 @@ function switchTab(key) {
   // A dot on the Cards tab always means "new Index entries" - jump straight to the Index instead of
   // whatever segment was last open, so tapping the badge actually shows what's new.
   if (key === 'collection') setCardsView(almanacHasNew() ? 'almanac' : cardsView);
-  if (key === 'deck') renderDeckPanel();
   if (key === 'shop') setShopView(shopSubView);
   if (key === 'quests') renderQuests();
   if (key === 'town') renderTown();
@@ -380,6 +379,7 @@ Object.entries(tabs).forEach(([key, t]) => {
 });
 
 document.getElementById('segMine').addEventListener('click', () => { sfx('nav'); buzz(HAP.tap); setCardsView('mine'); });
+document.getElementById('segDeck').addEventListener('click', () => { sfx('nav'); buzz(HAP.tap); setCardsView('deck'); });
 document.getElementById('segAlmanac').addEventListener('click', () => { sfx('nav'); buzz(HAP.tap); setCardsView('almanac'); });
 document.getElementById('segCraft').addEventListener('click', () => { sfx('nav'); buzz(HAP.tap); setCardsView('craft'); });
 document.getElementById('segFish').addEventListener('click', () => { sfx('nav'); buzz(HAP.tap); setCardsView('fish'); });
@@ -393,7 +393,7 @@ document.getElementById('pickupInvite').addEventListener('click', e => { inviteC
 document.getElementById('pickupContinue').addEventListener('click', () => {
   pickupOverlay.classList.add('hidden'); document.getElementById('pickupInvite').classList.add('hidden'); sfx('tap'); checkAchievements();
   if (typeof resumePendingWalk === 'function') resumePendingWalk();
-  if (!shopPanel.classList.contains('hidden') && shopSubView === 'packs') renderPacks();
+  if ((!shopPanel.classList.contains('hidden') && shopSubView === 'packs') || shopModeActive('packs')) renderPacks();
   if (!collectionPanel.classList.contains('hidden') && cardsView === 'craft') renderCraft();
 });
 document.getElementById('sceneryContinue').addEventListener('click', () => sceneryOverlay.classList.add('hidden'));

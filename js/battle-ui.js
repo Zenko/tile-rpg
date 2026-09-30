@@ -13,7 +13,7 @@ function startBattle(opponent) {
   const cleaned = state.deck.filter(id => !!cardDef(id));
   if (cleaned.length !== state.deck.length) { state.deck = cleaned; saveState(); }
   if (!opponent.puzzle && state.deck.length < DECK_SIZE) {
-    townLog.textContent = `You need a full ${DECK_SIZE}-card deck before battling. Visit the Deck tab.`;
+    townLog.textContent = `You need a full ${DECK_SIZE}-card deck before battling. Open Cards → Deck.`;
     toast(`Fill your ${DECK_SIZE}-card deck first`);
     return;
   }
