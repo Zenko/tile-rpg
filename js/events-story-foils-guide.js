@@ -40,7 +40,7 @@ const STORY = [
   { icon: '🎣', text: 'Cast a line by the river.',                   goal: 'Catch a fish (tap water with a fish in it)', done: p => (p.totals.fishCaught || 0) >= 1,    pebbles: 8 },
   { icon: '🎲', text: 'Play a little game in one of the houses.',    goal: 'Finish any house mini-game',                 done: p => (p.totals.minigamesPlayed || 0) >= 1, pebbles: 8 },
   { icon: '🌱', text: 'Start a garden of your own.',                 goal: "Plant a seed (buy one at Fern's Cottage)",   done: p => (p.totals.seedsPlanted || 0) >= 1,  pebbles: 10 },
-  { icon: '🛍️', text: 'Treat yourself.',                             goal: 'Open a card pack in the Shop',               done: p => (p.packsOpened || 0) >= 1,          pebbles: 10 },
+  { icon: '🛍️', text: 'Treat yourself.',                             goal: 'Open a card pack at the Card Shop',               done: p => (p.packsOpened || 0) >= 1,          pebbles: 10 },
   { icon: '🎴', text: 'Make the deck your own.',                     goal: 'Change a card in the Deck tab',              done: p => (p.deckEdits || 0) >= 1,            pebbles: 10 },
   { icon: '⭐', text: 'Settle in properly.',                          goal: 'Reach level 5',                              done: p => (p.level || 1) >= 5,                card: 'super' },
 ];
@@ -146,14 +146,14 @@ const GUIDE = [
     { icon: '🍞', name: "Maple's Bakery", where: 'Town Square, bottom left', how: 'Bake bread, cook dishes from your pantry, and play Cake Toppings.' },
     { icon: '🌱', name: "Fern's Cottage", where: 'Town Square, the blue house', how: 'Seeds for your garden, and Weed the Beds.' },
     { icon: '🫖', name: "Wren's Cottage & the Reading Nook", where: 'Town Square, top', how: 'Tea, advice, the memory game, the card quiz and the daily puzzle.' },
-    { icon: '🏪', name: 'Market stalls', where: 'Market Row', how: "Pip, Clover, Saffron's daily deal, Tock's card sleeves and Zeph's Card Shop - each with a game (the Card Shop opens straight into the Shop tab).", lock: () => needs('market') },
+    { icon: '🏪', name: 'Market stalls', where: 'Market Row', how: "Pip, Clover, Saffron's daily deal, Tock's card sleeves and Zeph's Card Shop - each with a game (the Card Shop is where you buy packs, sleeves, cosmetics and decorations).", lock: () => needs('market') },
     { icon: '🏛️', name: 'Card Museum & expeditions', where: 'Market Row, by the east hedge', how: 'Donate spare cards to six wings, and send spare cards on expeditions.', lock: () => needs('market') },
     { icon: '🏮', name: 'Lantern Market', where: 'Market Row, after dark', how: 'Night Packs, glowing decorations, and Pebbles for critters.', lock: () => needs('market') },
     { icon: '🦦', name: 'The Net Loft', where: 'Quiet Harbor', how: "Tam mends nets for Pebbles, and keeps a buoy box worth checking once a day.", lock: () => needs('harbor') },
     { icon: '🐌', name: 'The Glasshouse', where: 'Hollow Garden', how: 'Iris prunes vines for Pebbles, and has a box of spare pots worth digging through.', lock: () => needs('garden') },
   ] },
   { section: 'Collecting', items: [
-    { icon: '🛍️', name: 'Packs & decorations', where: 'Shop tab', how: 'Spend Pebbles on packs, cosmetics and decorations for any district.' },
+    { icon: '🛍️', name: 'Packs & decorations', where: 'Market Row → Card Shop', how: 'Spend Pebbles on packs, sleeves, cosmetics and decorations for any district. Until Market Row opens, tap your 🫧 Pebbles counter to browse.' },
     { icon: '🔨', name: 'Workshop', where: 'Cards → Craft', how: 'Refine two copies into a stronger card, or trade three up a rarity.' },
     { icon: '🧩', name: 'Index & sets', where: 'Cards → Index', how: 'Every card in the game, and eight sets that give lasting bonuses when complete.' },
     { icon: '✦', name: 'Charms & mastery', where: 'Cards → My Cards', how: 'Charm cards for town perks; cards you play earn ★ mastery (★★★: +1 health in battle).' },
@@ -229,7 +229,7 @@ document.getElementById('notifsToggle').addEventListener('click', async () => {
 });
 document.getElementById('presenceToggle').addEventListener('click', () => {
   sfx('tap');
-  prefs.sharePresence = !prefs.sharePresence; savePrefs(); syncToggles();
+  prefs.sharePresence = !prefs.sharePresence; prefs.presenceChosen = true; savePrefs(); syncToggles();
   if (prefs.sharePresence) { pushPresence(); toast("👋 Sharing that you're playing"); }
   else removePresence();
   fetchWhosPlaying();

@@ -754,7 +754,7 @@ const tabs = {
   journal: { btn: document.getElementById('tabJournal'), panel: journalPanel },
   collection: { btn: document.getElementById('tabCollection'), panel: collectionPanel },
   deck: { btn: document.getElementById('tabDeck'), panel: deckPanel },
-  shop: { btn: document.getElementById('tabShop'), panel: shopPanel },
+  shop: { btn: document.getElementById('tabShop') || document.createElement('button'), panel: shopPanel },
   quests: { btn: document.getElementById('tabQuests'), panel: questsPanel }
 };
 

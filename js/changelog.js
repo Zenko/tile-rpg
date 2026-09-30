@@ -19,6 +19,15 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-09-30',
+    version: '1.51.0',
+    title: "The Card Shop is the shop",
+    changes: [
+      "The Shop tab is gone from the bottom bar. Everything it sold now lives in Zeph's Card Shop on Market Row: card packs, card sleeves, Customize, and Items & decorations. Until Market Row opens, tap your 🫧 Pebbles counter to browse.",
+      "\"Share that I'm playing\" is now on by default (you can switch it off in Settings any time, and your choice is remembered).",
+    ],
+  },
+  {
+    date: '2026-09-30',
     version: '1.50.0',
     title: "A round of interface polish",
     changes: [

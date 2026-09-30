@@ -73,7 +73,7 @@ function cloudPush() {
    tester, not just its owner. That needs its own security rule added in the Firebase console alongside the
    existing 'saves' rule (see HANDOFF.md §1a for the exact rule to paste in) - until that's done, every
    read/write here just fails silently, same as any other offline/unreachable case in this file.
-   Off by default and a separate toggle from cloud save itself (prefs.sharePresence) - sharing your name and
+   On by default (until the player switches it off) and a separate toggle from cloud save itself (prefs.sharePresence) - sharing your name and
    activity with the other testers is a different call than just backing up your own save privately.
    ============================================================ */
 const PRESENCE_COLLECTION = 'players';

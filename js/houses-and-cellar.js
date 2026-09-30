@@ -63,8 +63,11 @@ const INTERIORS = {
     actions: [{ id: 'deal', kind: 'deal', view: spiceDealView },
               { id: 'mg-haggle', kind: 'minigame', game: 'haggle', view: () => miniView('haggle') }] },
   'card-shop': { title: 'The Card Shop', who: '🦎', name: 'Zeph', theme: 'warm',
-    greet: 'Packs, sleeves, decorations - if it has to do with cards, you will find it here. Come on in and have a look.',
-    actions: [{ id: 'browse', label: '🛍️ Browse the shop', kind: 'gotoshop' }] },
+    greet: 'Packs, sleeves, decorations, a fresh look for your character - if it has to do with cards, you will find it here. Have a look around.',
+    actions: [{ id: 'packs', label: '🎁 Card packs', kind: 'gotoshop', shopView: 'packs' },
+              { id: 'sleeves', label: '🎴 Card sleeves', kind: 'sleeves' },
+              { id: 'customize', label: '🎨 Customize', kind: 'gotoshop', shopView: 'customize' },
+              { id: 'items', label: '🪑 Items & decorations', kind: 'gotoshop', shopView: 'items' }] },
   'stall-tinker': { title: "Tock's Tinker Stall", who: '🦝', name: 'Tock', theme: 'cool',
     greet: 'Sleeves! Fancy card sleeves! Your cards will look their best in a match - only your side sees the shine, mind you.',
     actions: [{ id: 'sleeves', label: '🎴 Browse card sleeves', kind: 'sleeves' },
@@ -237,7 +240,7 @@ function sleeveAction(id) {
   const ch = ensureSleeves(), s = SLEEVES.find(x => x.id === id);
   if (!s) return '';
   if (!ch.unlockedSleeves.includes(s.id)) {
-    if (state.progress.pebbles < s.cost) { sfx('tie'); return `"That one's 🫧 ${s.cost}," says Tock, polishing it anyway.`; }
+    if (state.progress.pebbles < s.cost) { sfx('tie'); return `"That one's 🫧 ${s.cost}," says ${scene && INTERIORS[scene.id] ? INTERIORS[scene.id].name : 'Tock'}, polishing it anyway.`; }
     state.progress.pebbles -= s.cost; ch.unlockedSleeves.push(s.id);
     logEvent('🎴', `Bought the ${s.name} card sleeve for 🫧 ${s.cost}.`);
     bumpPill('pillPebbles'); sfx('claim'); buzz(HAP.found);
@@ -392,7 +395,7 @@ function shelfButtons() {
   const h = homeState(), full = h.shelf.length >= SHELF_MAX;
   const own = DECORATION_ITEMS.filter(d => decorationInventoryCount(d.id) > 0);
   return own.map(d => sceneBtn('shelf:' + d.id, `${d.icon} Put a ${d.name} on the shelf (${decorationInventoryCount(d.id)})`, full)).join('') +
-    (own.length ? '' : sceneBtn('shelf:none', 'No decorations in storage - buy some in Shop → Items', true)) +
+    (own.length ? '' : sceneBtn('shelf:none', 'No decorations in storage - buy some at the Card Shop → Items', true)) +
     sceneBtn('shelf:clear', `📦 Clear the shelves (${h.shelf.length}/${SHELF_MAX})`, !h.shelf.length);
 }
 function shelfAction(id) {
@@ -683,7 +686,7 @@ function sceneAction(actId) {
   if (actId.startsWith('seed:')) { const t = seedAction(actId.slice(5)); if (scene) { scene.text = t; renderScene(); } return; }   // planting leaves the scene
   const it = INTERIORS[scene.id], a = it.actions.find(x => x.id === actId), st = buildingState(scene.id);
   if (!a) return;
-  if (a.kind === 'gotoshop') { closeScene(); switchTab('shop'); return; }
+  if (a.kind === 'gotoshop') { closeScene(); switchTab('shop'); if (a.shopView) setShopView(a.shopView); return; }
   if (a.kind === 'oven') { scene.text = ovenAction(); }
   else if (a.kind === 'deal') { scene.text = spiceDealAction(); }
   else if (a.kind === 'sleeves') { scene.mode = 'sleeves'; scene.text = `Pick a sleeve. You're wearing ${currentSleeve().name}.`; sfx('tap'); }

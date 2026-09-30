@@ -1,8 +1,10 @@
 /* ============================================================
    PREFS, SOUND, HAPTICS, TOAST
    ============================================================ */
-let prefs = { sound: true, haptics: true, music: true, musicVol: 0.5, sfxVol: 0.7, notifs: false, sharePresence: false };   // sound = master mute for everything; notifs/sharePresence default off - one needs a permission grant, the other shares your name/activity with other testers
+let prefs = { sound: true, haptics: true, music: true, musicVol: 0.5, sfxVol: 0.7, notifs: false, sharePresence: true, presenceChosen: false };   // sound = master mute for everything; notifs default off (needs a permission grant); sharePresence defaults ON until the player toggles it (presenceChosen)
 try { const pr = JSON.parse(localStorage.getItem(PREFS_KEY) || 'null'); if (pr) prefs = Object.assign(prefs, pr); } catch (e) { /* ignore */ }
+// An older save stored the old default (off) without the player ever choosing it, so treat that as "not chosen yet" and use the new default.
+if (!prefs.presenceChosen) prefs.sharePresence = true;
 // Repair anything a corrupted/edited save could hand us
 ['musicVol', 'sfxVol'].forEach(k => { const v = Number(prefs[k]); prefs[k] = (isFinite(v) ? Math.min(1, Math.max(0, v)) : 0.5); });
 prefs.sound = prefs.sound !== false; prefs.music = prefs.music !== false; prefs.haptics = prefs.haptics !== false;
