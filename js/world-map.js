@@ -267,10 +267,12 @@ const MAT_OPTIONS = [
   { id: 'aurora',  name: 'Aurora',          cost: 40 }
 ];
 // Avatar borders (v1.74.0): the ring around your portrait, everywhere it appears (top bar, in town, battles, Character tab).
-// Always thick (BORDER_W). `native` styles use the browser's own border-style; `grad` styles paint a gradient into the
+// Thick by default (BORDER_WIDTHS). `native` styles use the browser's own border-style; `grad` styles paint a gradient into the
 // border area instead (and some ignore your border colour: `fixed`); `glow` adds a soft halo in the border colour.
-// Saved as state.character.avBorder / avBorderColor / unlockedAvBorders (the plain `border` field is an old, deleted one).
-const BORDER_W = '5px';
+// Saved as state.character.avBorder / avBorderColor / avBorderW / unlockedAvBorders (the plain `border` field is an old, deleted one).
+// Width is its own free choice (Character > Look): thin, medium or thick. Thick is the default.
+const BORDER_WIDTHS = [{ id: 'thin', name: 'Thin', px: '2px' }, { id: 'medium', name: 'Medium', px: '3.5px' }, { id: 'thick', name: 'Thick', px: '5px' }];
+const borderWidthDef = id => BORDER_WIDTHS.find(w => w.id === id) || BORDER_WIDTHS[2];
 const BORDER_OPTIONS = [
   { id: 'solid',   name: 'Solid',      cost: 0,  native: 'solid' },
   { id: 'dashed',  name: 'Dashed',     cost: 12, native: 'dashed' },

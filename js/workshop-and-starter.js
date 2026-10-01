@@ -569,7 +569,7 @@ function shopCosmeticSwatch(kind, value, label, cost, isEquipped, isUnlocked) {
   else if (kind === 'stage') { el.style.background = stageGradient(stageDef(value)); el.innerHTML = `<span>${label}</span>`; el.title = label; }
   else if (kind === 'border') {                   // a little avatar ring, drawn with the same code as the real one
     const ch = state.character, prev = document.createElement('span'); prev.className = 'bd-prev';
-    applyAvatarStyle(prev, { color: ch.color, avBorder: value, avBorderColor: ch.avBorderColor });
+    applyAvatarStyle(prev, { color: ch.color, avBorder: value, avBorderColor: ch.avBorderColor, avBorderW: ch.avBorderW });
     el.appendChild(prev); el.title = label; el.setAttribute('aria-label', label);
   }
   else { el.textContent = value || '🚫'; if (label) el.title = label; }

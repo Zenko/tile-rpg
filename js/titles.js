@@ -56,6 +56,7 @@ function ensureCosmeticUnlocks() {
   if (!Array.isArray(ch.unlockedAvBorders)) ch.unlockedAvBorders = [BORDER_OPTIONS[0].id];
   if (!BORDER_OPTIONS.some(b => b.id === ch.avBorder)) ch.avBorder = BORDER_OPTIONS[0].id;
   if (!ch.unlockedAvBorders.includes(ch.avBorder)) ch.unlockedAvBorders.push(ch.avBorder);
+  if (!BORDER_WIDTHS.some(w => w.id === ch.avBorderW)) ch.avBorderW = 'thick';
   if (ch.avBorderColor != null && !/^#[0-9a-f]{6}$/i.test(ch.avBorderColor)) ch.avBorderColor = null;   // null = the default sea-glass ring
   // Grandfather in whatever this save already had picked, even if it predates today's five-item lists.
   if (ch.emoji && !ch.unlockedEmojis.includes(ch.emoji)) ch.unlockedEmojis.push(ch.emoji);
@@ -97,7 +98,7 @@ function applyAvatarStyle(el, character) {
   const bg = character.color || 'var(--water-glow)', def = borderDef(character.avBorder);
   const col = /^#[0-9a-f]{6}$/i.test(character.avBorderColor || '') ? character.avBorderColor : 'var(--water)';
   el.style.setProperty('--av-bg', bg);
-  el.style.setProperty('--av-border-w', BORDER_W);
+  el.style.setProperty('--av-border-w', borderWidthDef(character.avBorderW).px);
   if (def.grad) {
     el.style.setProperty('--av-border-style', 'solid');
     el.style.setProperty('--av-border-color', 'transparent');

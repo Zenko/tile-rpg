@@ -18,6 +18,15 @@ function gameVersionLabel() {
    the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
 const CHANGELOG = [
   {
+    version: '1.75.0',
+    date: '2026-10-01',
+    title: "Border widths and a proper battle ending",
+    changes: [
+      "Choose how thick your avatar border is: Thin, Medium or Thick (the default). It's free, in Character > Look.",
+      "When a battle ends, the results window now stays on screen while the screen fades out, then the town fades back in. The fade is longer than before so you can see it."
+    ]
+  },
+  {
     version: '1.74.0',
     date: '2026-10-01',
     title: "Make your ring your own",

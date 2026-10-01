@@ -117,6 +117,11 @@ function charDrawLook(box) {
   charSection(box, 'Avatar border · the ring around your portrait');
   box.appendChild(row('', BORDER_OPTIONS.filter(o => ch.unlockedAvBorders.includes(o.id)).map(o => shopCosmeticSwatch('border', o.id, o.name, o.cost, ch.avBorder === o.id, true))));
   const curB = borderDef(ch.avBorder);
+  charSection(box, 'Border width');
+  const wrow = document.createElement('div'); wrow.className = 'title-row bd-widths';
+  wrow.innerHTML = BORDER_WIDTHS.map(w => `<button class="title-chip${ch.avBorderW === w.id ? ' active' : ''}" data-bw="${w.id}">${w.name}</button>`).join('');
+  wrow.querySelectorAll('[data-bw]').forEach(b => b.addEventListener('click', () => { sfx('nav'); buzz(HAP.tap); state.character.avBorderW = b.dataset.bw; saveState(); updateHud(); renderTown(); renderCharacterTab(); }));
+  box.appendChild(wrow);
   charSection(box, 'Border colour' + (curB.fixed ? ' · this border keeps its own colours' : ''));
   const cw = document.createElement('div'); cw.className = 'swatch-row shop-swatch-row bd-colors';
   const pick = c => { state.character.avBorderColor = c; saveState(); updateHud(); renderTown(); renderCharacterTab(); };

@@ -342,18 +342,21 @@ const SCENE_TIPS = { bakery: 'bakery', house2: 'garden' };
    it's covered, then fades back, the same idea as the district travel card but shorter. While it runs, further taps
    on the same trigger are ignored. With motion off (Calm mode / reduced motion) the swap just happens at once. */
 let doorFading = false;
-function withDoorFade(swap) {
+function withDoorFade(swap, inMs, outMs) {
+  inMs = inMs || 190; outMs = outMs || 280;      // a battle's exit passes longer ones (see closeBattle)
   if (doorFading) return;
   if (!btMotionOk()) { swap(); return; }
   doorFading = true;
   const v = document.createElement('div'); v.className = 'door-fade'; document.body.appendChild(v);
+  v.style.transition = `opacity ${inMs}ms ease-in-out`;
   requestAnimationFrame(() => v.classList.add('on'));
   setTimeout(() => {
     try { swap(); } finally {
+      v.style.transition = `opacity ${outMs}ms ease-in-out`;
       v.classList.remove('on');
-      setTimeout(() => { v.remove(); doorFading = false; }, 280);
+      setTimeout(() => { v.remove(); doorFading = false; }, outMs);
     }
-  }, 190);
+  }, inMs);
 }
 // Town taps use this: fade in. Code that opens a scene as part of something bigger (travel, the shop button) calls openScene directly.
 function openSceneFx(id) { withDoorFade(() => openScene(id)); }

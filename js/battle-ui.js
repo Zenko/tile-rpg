@@ -957,15 +957,18 @@ function btShowResult(won, yielded) {
 }
 
 function closeBattle(retry) {
+  if (battle && battle.closing) return;                 // a second tap on Continue while the fade is running
   const fromDungeon = !!(battle && battle.npc && battle.npc.dungeon), fromPuzzle = !!(battle && battle.npc && battle.npc.puzzle), fromCup = !!(battle && battle.npc && battle.npc.cup),
         fromChallenge = !!(battle && battle.npc && battle.npc.challenge);
-  battleEndOverlay.classList.add('hidden');
-  btGet('mulliganOverlay').classList.add('hidden');
   if (battle) { battle.ended = true; battleToken++; }
-  if (retry && battle) { startBattle(battle.npc); return; }
-  // Leaving fades the same way entering does (v1.74.0): cover, swap while covered, uncover. If a fade is somehow already
+  if (retry && battle) { battleEndOverlay.classList.add('hidden'); btGet('mulliganOverlay').classList.add('hidden'); startBattle(battle.npc); return; }
+  if (battle) battle.closing = true;
+  // The results window stays up while the screen fades out behind it to the page colour (about half a second), the town
+  // is swapped in while covered, then it fades back (v1.75.0, the "fade through" exit). If a fade is somehow already
   // running we swap at once rather than skip it, since this is the only place a battle ever closes.
   const leave = () => {
+    battleEndOverlay.classList.add('hidden');
+    btGet('mulliganOverlay').classList.add('hidden');
     inBattle = false;
     btHideTip();
     battleView.classList.add('hidden');
@@ -980,7 +983,7 @@ function closeBattle(retry) {
     else if (fromCup) openScene('cup');
     else if (fromChallenge) { openScene('cup'); scene.mode = 'chal'; scene.text = 'The challenge board, again.'; renderScene(); }
   };
-  if (doorFading) leave(); else withDoorFade(leave);
+  if (doorFading) leave(); else withDoorFade(leave, 430, 560);
 }
 
 /* ---------------- yield, help, wiring ---------------- */
