@@ -18,6 +18,16 @@ function gameVersionLabel() {
    the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
 const CHANGELOG = [
   {
+    version: '1.79.0',
+    date: '2026-10-01',
+    title: "Light mode, properly",
+    changes: [
+      "Light mode now reaches inside buildings: the sheet, speech and buttons use the light colours, and the room itself is lighter. Mini-games and the memory game follow the theme too.",
+      "The town map is no longer dark green in both themes. In light mode it uses a softer mid-tone palette (greens, sandy paths, brighter water) in every district; dark mode keeps its deep colours.",
+      "Removed a stray scrollbar on speech bubbles in buildings."
+    ]
+  },
+  {
     version: '1.78.0',
     date: '2026-10-01',
     title: "Smoother town",

@@ -2,7 +2,7 @@
    dark = "Slate glass", light = "Sand and sea glass". The dark values are on bare :root, so they are also
    the fallback. The game world (town map, battles, building interiors) stays dark in both themes: the light
    theme re-declares the dark tokens on those containers, so the art keeps its night colours. */
-:root, :root[data-theme="light"] #battleView, :root[data-theme="light"] #sceneView, :root[data-theme="light"] .town-map-wrap, :root[data-theme="light"] #fishOverlay {
+:root, :root[data-theme="light"] #battleView, :root[data-theme="light"] .town-map-wrap, :root[data-theme="light"] #fishOverlay {
   color-scheme: dark;
   --bg-top: #1b2128;
   --bg-bottom: #12161b;
@@ -1680,7 +1680,7 @@ body.in-fishing .toast.show { transform: translateX(-50%) translateY(0); }
 /* The dark-scoped game-world containers must also reset the inherited text colour, which would otherwise
    still be the light theme's dark ink (custom properties re-resolve on the element, but `color` is inherited
    as an already-computed value). */
-:root[data-theme="light"] #battleView, :root[data-theme="light"] #sceneView, :root[data-theme="light"] .town-map-wrap, :root[data-theme="light"] #fishOverlay { color: var(--ink); }
+:root[data-theme="light"] #battleView, :root[data-theme="light"] .town-map-wrap, :root[data-theme="light"] #fishOverlay { color: var(--ink); }
 
 /* ===== Tabletop battle layout (v1.58.0) =====
    The two boards sit on a tilted glass table (perspective on .field, rotateX on .table), Spirit is a ring around
@@ -2176,7 +2176,7 @@ html.calm .bottom-nav::before, html.calm #bottomNav .tab-btn .t-icon { transitio
 #sceneView.sc-std .sc-head { position: absolute; left: 0; right: 0; top: calc(var(--sc-stage-h) * .74 + 12px); justify-content: center; padding: 0; z-index: 3; pointer-events: none; }
 #sceneView.sc-std .sc-head b { padding: 5px 18px; border-radius: 14px; background: #46362a; color: #e8d9bd; font-family: var(--f-display); font-weight: 500; font-size: 1rem; box-shadow: 0 3px 10px rgba(0,0,0,.35); }
 #sceneView.sc-std .sc-pips:empty { display: none; }
-#sceneView.sc-std .sc-bubble { position: absolute; left: 22px; right: 22px; top: calc(var(--hud-h, 70px) + 24px); z-index: 4; margin: 0; text-align: center; background: color-mix(in srgb, var(--stone) 94%, transparent); box-shadow: 0 6px 18px rgba(0,0,0,.3); max-height: calc(var(--sc-stage-h) - var(--hud-h, 70px) - 90px); overflow-y: auto; }
+#sceneView.sc-std .sc-bubble { position: absolute; left: 22px; right: 22px; top: calc(var(--hud-h, 70px) + 24px); z-index: 4; margin: 0; text-align: center; background: color-mix(in srgb, var(--stone) 94%, transparent); box-shadow: 0 6px 18px rgba(0,0,0,.3); }
 #sceneView.sc-std .sc-bubble::after { content: ''; position: absolute; left: 50%; bottom: -8px; width: 16px; height: 16px; margin-left: -8px; transform: rotate(45deg); background: color-mix(in srgb, var(--stone) 94%, transparent); border-right: 1px solid var(--stone-edge); border-bottom: 1px solid var(--stone-edge); }
 #sceneView.sc-std .sc-bubble:empty { display: none; }
 #sceneView.sc-std .sc-actions { position: relative; z-index: 5; flex: 1 1 auto; min-height: 0; overflow-y: auto; margin-top: -24px; gap: 10px; padding: 14px 16px calc(24px + env(safe-area-inset-bottom, 0px)); background: var(--stone); border-top: 1px solid var(--stone-edge); border-radius: 28px 28px 0 0; box-shadow: 0 -10px 30px rgba(0,0,0,.35); }
@@ -2216,4 +2216,23 @@ html.calm #sceneView.sc-std, html.calm #sceneView.sc-std * { animation: none !im
    button, menus) and every overlay scrim now use a plain translucent fill instead. */
 *, *::before, *::after { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
 .map-radar-btn { background: rgba(18,22,18,0.72); }
+
+/* ===== Light theme: building screens and the town map (v1.79.0) =====
+   Building screens now follow the theme instead of staying dark: the sheet, speech and buttons use the light tokens
+   (nothing to override, since #sceneView no longer re-declares the dark ones) and the interior itself gets lighter
+   wall/floor/counter colours. The town map used to be dark green in both themes; in the light theme it now uses a
+   mid-tone palette (soft greens, sandy paths, brighter water) so it reads as daytime next to the cream bars, while
+   the dark theme keeps its deep colours. Names on the map keep their dark outline, so they stay readable on either. */
+:root[data-theme="light"] #sceneView[data-theme="warm"] { --sc-wall: #d8ba8e; --sc-floor: #b99063; --sc-rug: #d9806a; --sc-win: #f6e6a8; --sc-counter: #c99c66; }
+:root[data-theme="light"] #sceneView[data-theme="cool"] { --sc-wall: #a3b8d6; --sc-floor: #b9a58d; --sc-rug: #7f9fcf; --sc-win: #f6e6a8; --sc-counter: #8fa0bc; }
+:root[data-theme="light"] #sceneView[data-theme="dark"] { --sc-wall: #7b758a; --sc-floor: #5b566c; --sc-rug: #7a6a84; --sc-win: #d8d3e6; --sc-counter: #4f4a5e; }
+:root[data-theme="light"] #sceneView.sc-std .sc-stage { box-shadow: inset 0 80px 60px -40px rgba(0,0,0,.18); }
+:root[data-theme="light"] #sceneView.sc-std .sc-actions { box-shadow: 0 -10px 30px rgba(75,74,70,.18); }
+:root[data-theme="light"] #sceneView.sc-std .sc-bubble { box-shadow: 0 6px 18px rgba(75,74,70,.2); }
+:root[data-theme="light"] #sceneView.sc-std .sc-head b { background: #6b4f33; color: #f4e8d0; }
+:root[data-theme="light"] .town-view[data-biome="meadow"] { --ground:#759c60;--ground2:#6e955a;--ground3:#7ba466;--tuft:#97bd80;--path:#c4ae82;--path-edge:#a8946a;--path-dot:#d3c19a;--leaf1:#4f9467;--leaf2:#62ab7b;--leaf3:#85c79a;--pine1:#3b7d5a;--pine2:#4e956f;--water:#5a98b8;--water2:#86bcd4;--shore:#d2c598;--stone:#9c9b94;--stone2:#7f7e78;--stone3:#b4b3ab;--plank:#a78655;--plank2:#8a6c42;--tshadow:rgba(40,50,30,.28);--well-in:#2b3d46 }
+:root[data-theme="light"] .town-view[data-biome="bazaar"] { --ground:#b39d6a;--ground2:#ab9562;--ground3:#b9a472;--tuft:#c6b482;--path:#d4c294;--path-edge:#b9a678;--path-dot:#e0d1ab;--leaf1:#b58a3a;--leaf2:#c99f4a;--leaf3:#dcb866;--pine1:#8b6a2c;--pine2:#a07f3a;--water:#5a98b8;--water2:#86bcd4;--shore:#d9ca9c;--stone:#a39e8c;--stone2:#86806f;--stone3:#bab5a3;--plank:#a78655;--plank2:#8a6c42;--tshadow:rgba(60,45,20,.28) }
+:root[data-theme="light"] .town-view[data-biome="harbor"] { --ground:#7c9f8f;--ground2:#749888;--ground3:#85a898;--tuft:#9fbfaf;--path:#c9bb90;--path-edge:#afa078;--path-dot:#d8cca6;--leaf1:#4a9482;--leaf2:#5aa896;--leaf3:#7cc4b2;--pine1:#3b7d72;--pine2:#4c9487;--water:#4f8cb0;--water2:#7db5d1;--shore:#d4c8a0;--stone:#9aa2a4;--stone2:#7e8789;--stone3:#b2babc;--plank:#a78655;--plank2:#8a6c42;--tshadow:rgba(30,50,55,.28) }
+:root[data-theme="light"] .town-view[data-biome="orchard"] { --ground:#729b5c;--ground2:#6b9455;--ground3:#79a363;--tuft:#94bc7e;--path:#c4ae82;--path-edge:#a8946a;--path-dot:#d3c19a;--leaf1:#4d9a58;--leaf2:#62b06d;--leaf3:#86cc90;--pine1:#3c8060;--pine2:#4f9873;--water:#5a98b8;--water2:#86bcd4;--shore:#d2c598;--stone:#9c9b94;--stone2:#7f7e78;--stone3:#b4b3ab;--plank:#a78655;--plank2:#8a6c42;--tshadow:rgba(40,50,30,.28) }
+:root[data-theme="light"] .town-view[data-biome][data-season="winter"] { --ground3:#b9c9c4; --tuft:#c8d6d2; --leaf1:#98aeaa; --leaf2:#b9cdc9; --pine1:#5d8279; --pine2:#e7f0ee; }
 
