@@ -372,23 +372,22 @@
       <div id="battleView" class="hidden">
         <div class="bt-backdrop" id="btBackdrop"><div class="bt-bd-sky"></div><div class="bt-bd-scene"></div><div class="bt-bd-texture"></div><div class="bt-bd-you"></div><div class="bt-bd-scrim"></div></div>
         <div class="side" id="btOppBar">
-          <span class="bt-portrait" id="btOppPortrait">🙂</span>
-          <span class="who" id="btOppName">Neighbor</span>
-          <div class="spirit" id="btOppSpirit"><div class="fill"></div><div class="num"></div></div>
-          <span class="deckcount" id="btOppDeck"></span>
+          <div class="spirit" id="btOppSpirit"><span class="bt-portrait" id="btOppPortrait">🙂</span><div class="fill"></div><div class="num"></div></div>
+          <div class="nmv"><span class="who" id="btOppName">Neighbor</span><span class="deckcount" id="btOppDeck"></span></div>
         </div>
+        <div class="divider"><span class="msg" id="btMsg">Your turn</span><span class="bt-weather" id="btWeather"></span></div>
         <div class="field">
-          <div class="board" id="btOppBoard"></div>
-          <div class="divider"><span class="msg" id="btMsg">Your turn</span><span class="bt-weather" id="btWeather"></span></div>
-          <div class="coach" id="btCoach"></div>
-          <div class="board" id="btYouBoard"></div>
+          <div class="table">
+            <div class="board" id="btOppBoard"></div>
+            <div class="seam"></div>
+            <div class="board" id="btYouBoard"></div>
+          </div>
         </div>
-        <div class="side" id="btYouBar" style="margin-bottom:6px">
-          <span class="bt-portrait" id="btYouPortrait">🙂</span>
-          <span class="who" id="btYouName">You</span>
-          <div class="spirit" id="btYouSpirit"><div class="fill"></div><div class="num"></div></div>
+        <div class="coach" id="btCoach"></div>
+        <div class="side" id="btYouBar">
+          <div class="spirit" id="btYouSpirit"><span class="bt-portrait" id="btYouPortrait">🙂</span><div class="fill"></div><div class="num"></div></div>
+          <div class="nmv"><span class="who" id="btYouName">You</span><span class="deckcount" id="btYouDeck"></span></div>
           <span class="snack-badge hidden" id="btYouSnackBadge"></span>
-          <span class="deckcount" id="btYouDeck"></span>
           <button class="bt-mini" id="btHelp" aria-label="How battles work">?</button>
           <button class="bt-mini" id="btYield" aria-label="Step away from this battle">🏳️</button>
         </div>

@@ -1660,3 +1660,43 @@ html.calm *, html.calm *::before, html.calm *::after { animation-duration: 0.01m
    still be the light theme's dark ink (custom properties re-resolve on the element, but `color` is inherited
    as an already-computed value). */
 :root[data-theme="light"] #battleView, :root[data-theme="light"] #sceneView, :root[data-theme="light"] .town-map-wrap { color: var(--ink); }
+
+/* ===== Tabletop battle layout (v1.58.0) =====
+   The two boards sit on a tilted glass table (perspective on .field, rotateX on .table), Spirit is a ring around
+   each portrait, and the hand fans out. Cards are dragged from the hand onto the table (see btStartDrag in
+   js/battle-ui.js). These rules override the older flat-layout battle rules above; the element ids are unchanged. */
+#battleView .side { background: none; border: 0; box-shadow: none; padding: 2px 8px; gap: 12px; border-left: 0; border-radius: 0; }
+#battleView #btYouBar { border-left: 0; margin-bottom: 4px; }
+#battleView .nmv { display: flex; flex-direction: column; min-width: 0; flex: 1; text-align: left; }
+#battleView .nmv .who { font-family: var(--f-display); font-size: 1.1rem; font-weight: 500; flex: none; }
+#battleView .spirit { position: relative; flex: none; width: 62px; height: 62px; border-radius: 50%; overflow: visible;
+  background: conic-gradient(var(--ring, var(--water)) var(--p, 100%), color-mix(in srgb, var(--hl) 14%, transparent) 0); box-shadow: 0 0 14px color-mix(in srgb, var(--water) 30%, transparent); display: grid; place-items: center; }
+#battleView .spirit.low { --ring: var(--lose-glow); }
+#battleView .spirit .fill { display: none; }
+#battleView .spirit .bt-portrait { width: calc(100% - 8px); height: calc(100% - 8px); font-size: 1.7rem; box-shadow: none; }
+#battleView .spirit .num { inset: auto; right: -10px; bottom: -6px; width: auto; min-width: 38px; display: block; padding: 1px 6px; text-align: center; font-size: .66rem; background: var(--bg-bottom); border: 1px solid var(--water); border-radius: 999px; color: var(--ink); text-shadow: none; font-variant-numeric: tabular-nums; }
+#battleView .side.turn .spirit { box-shadow: 0 0 0 2px var(--water), 0 0 18px color-mix(in srgb, var(--water) 55%, transparent); }
+#battleView .side.target-glow { box-shadow: none; animation: none; }
+#battleView .side.target-glow .spirit { box-shadow: 0 0 0 3px var(--boss-glow), 0 0 22px rgba(201,111,111,.7); animation: bt_tglow 1s ease-in-out infinite; }
+#battleView .divider { position: relative; z-index: 3; justify-content: flex-start; padding: 0 10px; min-height: 26px; }
+#battleView .divider .msg { background: color-mix(in srgb, var(--stone) 85%, transparent); }
+#battleView .field { perspective: 900px; align-items: center; justify-content: center; padding: 2px 4px; flex-direction: row; }
+#battleView .table { width: 100%; transform: rotateX(24deg); transform-origin: 50% 55%; padding: 6px; border-radius: 18px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--water) 7%, transparent), color-mix(in srgb, var(--water) 18%, transparent));
+  border: 1px solid color-mix(in srgb, var(--water) 35%, transparent); box-shadow: 0 30px 36px rgba(0,0,0,.4), inset 0 0 36px color-mix(in srgb, var(--water) 12%, transparent); }
+#battleView .table .board { background: none; border: 0; padding: 6px 4px; }
+#battleView .table #btYouBoard { border: 0; }
+#battleView .seam { height: 2px; margin: 4px 12px; background: linear-gradient(90deg, transparent, var(--water), transparent); box-shadow: 0 0 12px var(--water); }
+#battleView .coach { position: relative; z-index: 3; min-height: 18px; }
+#battleView .hand { height: 120px; gap: 0; padding: 14px 6px 0; overflow: visible; }
+#battleView .hand .hcard { margin: 0 -4px; height: 100px; transform: translateY(var(--dy, 0px)) rotate(var(--rot, 0deg)); transform-origin: 50% 150%; transition: transform .2s ease; }
+#battleView .hand .card { touch-action: none; -webkit-user-select: none; user-select: none; }
+/* dragging a card from the hand onto the table */
+#battleView .card.drag-ghost { position: fixed; left: 0; top: 0; z-index: 60; margin: 0; pointer-events: none; transition: none; will-change: transform; animation: none; box-shadow: 0 16px 30px rgba(0,0,0,.5), 0 0 0 2px var(--water); }
+#battleView .card.drag-origin { opacity: .25; filter: saturate(.4); }
+#battleView .slot.drop-zone { border-color: rgba(141,188,203,.7); background: rgba(141,188,203,.1); }
+#battleView .slot.drop-next { animation: bt_dropNext 1.2s ease-in-out infinite; }
+@keyframes bt_dropNext { 50% { box-shadow: 0 0 14px 2px rgba(141,188,203,.6); } }
+#battleView .slot.drop-hover { border-style: solid; border-color: var(--water); background: rgba(141,188,203,.3); box-shadow: 0 0 16px var(--water); animation: none; }
+#battleView .table.cast-zone { box-shadow: 0 30px 36px rgba(0,0,0,.4), 0 0 0 2px var(--accent), 0 0 26px color-mix(in srgb, var(--accent) 45%, transparent); }
+#battleView .card.drop-hover { box-shadow: 0 0 0 3px #fff, 0 0 20px rgba(255,240,180,.9); }

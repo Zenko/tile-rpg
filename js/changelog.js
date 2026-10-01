@@ -19,6 +19,16 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-10-01',
+    version: '1.58.0',
+    title: "Battles on a tabletop",
+    changes: [
+      "The battle screen has a new look: both sides' cards sit on a tilted glass table, Spirit is a ring around each portrait, and your hand fans out at the bottom.",
+      "Drag a card from your hand onto the table to play it. Drop it on a slot to choose where it goes. Spells with no aim can be dropped anywhere on the table, and aimed spells are dropped on an enemy card.",
+      "Tapping still works: tap a card to read it, tap again to play it.",
+    ],
+  },
+  {
+    date: '2026-10-01',
     version: '1.57.0',
     title: "Slate glass dark theme",
     changes: [
