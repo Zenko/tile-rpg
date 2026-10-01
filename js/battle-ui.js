@@ -963,19 +963,24 @@ function closeBattle(retry) {
   btGet('mulliganOverlay').classList.add('hidden');
   if (battle) { battle.ended = true; battleToken++; }
   if (retry && battle) { startBattle(battle.npc); return; }
-  inBattle = false;
-  btHideTip();
-  battleView.classList.add('hidden');
-  townPanel.classList.remove('hidden');
-  document.getElementById('bottomNav').style.display = '';
-  document.body.classList.remove('in-battle');
-  townLog.textContent = 'The town settles back into quiet.';
-  renderTown();
-  updateHud();
-  if (fromDungeon) openScene('cellar');
-  else if (fromPuzzle) openScene('nook');
-  else if (fromCup) openScene('cup');
-  else if (fromChallenge) { openScene('cup'); scene.mode = 'chal'; scene.text = 'The challenge board, again.'; renderScene(); }
+  // Leaving fades the same way entering does (v1.74.0): cover, swap while covered, uncover. If a fade is somehow already
+  // running we swap at once rather than skip it, since this is the only place a battle ever closes.
+  const leave = () => {
+    inBattle = false;
+    btHideTip();
+    battleView.classList.add('hidden');
+    townPanel.classList.remove('hidden');
+    document.getElementById('bottomNav').style.display = '';
+    document.body.classList.remove('in-battle');
+    townLog.textContent = 'The town settles back into quiet.';
+    renderTown();
+    updateHud();
+    if (fromDungeon) openScene('cellar');
+    else if (fromPuzzle) openScene('nook');
+    else if (fromCup) openScene('cup');
+    else if (fromChallenge) { openScene('cup'); scene.mode = 'chal'; scene.text = 'The challenge board, again.'; renderScene(); }
+  };
+  if (doorFading) leave(); else withDoorFade(leave);
 }
 
 /* ---------------- yield, help, wiring ---------------- */

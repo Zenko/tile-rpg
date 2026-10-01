@@ -266,6 +266,29 @@ const MAT_OPTIONS = [
   { id: 'stars',   name: 'Starfield',       cost: 32 },
   { id: 'aurora',  name: 'Aurora',          cost: 40 }
 ];
+// Avatar borders (v1.74.0): the ring around your portrait, everywhere it appears (top bar, in town, battles, Character tab).
+// Always thick (BORDER_W). `native` styles use the browser's own border-style; `grad` styles paint a gradient into the
+// border area instead (and some ignore your border colour: `fixed`); `glow` adds a soft halo in the border colour.
+// Saved as state.character.avBorder / avBorderColor / unlockedAvBorders (the plain `border` field is an old, deleted one).
+const BORDER_W = '5px';
+const BORDER_OPTIONS = [
+  { id: 'solid',   name: 'Solid',      cost: 0,  native: 'solid' },
+  { id: 'dashed',  name: 'Dashed',     cost: 12, native: 'dashed' },
+  { id: 'dotted',  name: 'Dotted',     cost: 12, native: 'dotted' },
+  { id: 'double',  name: 'Double',     cost: 15, native: 'double' },
+  { id: 'groove',  name: 'Groove',     cost: 15, native: 'groove' },
+  { id: 'ridge',   name: 'Ridge',      cost: 15, native: 'ridge' },
+  { id: 'glow',    name: 'Glow',       cost: 22, native: 'solid', glow: true },
+  { id: 'neon',    name: 'Neon dashes', cost: 28, native: 'dashed', glow: true },
+  { id: 'twotone', name: 'Two-tone',   cost: 18, grad: c => `conic-gradient(${c} 0 50%, color-mix(in srgb, ${c} 45%, #fff) 50% 100%)` },
+  { id: 'candy',   name: 'Candy stripe', cost: 20, grad: c => `repeating-conic-gradient(${c} 0 15deg, #fff 15deg 30deg)` },
+  { id: 'sunset',  name: 'Sunset fade', cost: 24, grad: c => `linear-gradient(135deg, ${c}, color-mix(in srgb, ${c} 35%, #ff8fb1))` },
+  { id: 'rainbow', name: 'Rainbow',    cost: 30, fixed: true, grad: () => 'conic-gradient(#e86a6a, #f0c05a, #7fbf8a, #6fc3d6, #7a8fe0, #c27ad6, #e86a6a)' },
+  { id: 'gold',    name: 'Gilded',     cost: 36, fixed: true, glow: true, grad: () => 'conic-gradient(#f6e3a1, #c9962d, #fff0b8, #a87420, #f6e3a1)' }
+];
+const borderDef = id => BORDER_OPTIONS.find(b => b.id === id) || BORDER_OPTIONS[0];
+// Free colours for the ring (the first is the old default, sea glass). A custom colour can be picked too.
+const BORDER_COLORS = ['#8dbccb', '#e8cb88', '#d98a3d', '#b1615e', '#c27a9c', '#9a86c9', '#6a96c2', '#6a9f7c', '#7fbf8a', '#b17a63', '#e9edf1', '#2c3641'];
 // Backdrops for the Character tab's stage (you and your companion). 'live' follows the real sky and weather; the
 // rest are painted from the sky/ground colours and a few emoji scattered over them (see stageHtml() in js/character-tab.js).
 // Same Shop-and-equip flow as the mats: ids live in state.character.unlockedStages / state.character.stage.

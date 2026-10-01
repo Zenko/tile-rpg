@@ -99,7 +99,7 @@ function charDrawLook(box) {
   const ch = state.character;
   const row = (cls, kids) => { const r = document.createElement('div'); r.className = 'swatch-row shop-swatch-row' + (cls ? ' ' + cls : ''); kids.forEach(k => r.appendChild(k)); return r; };
   const lockedLeft = EMOJI_OPTIONS.filter(o => !ch.unlockedEmojis.includes(o.emoji)).length + ACCESSORY_OPTIONS.filter(o => !ch.unlockedAccessories.includes(o.icon)).length +
-    COLOR_OPTIONS.filter(o => !ch.unlockedColors.includes(o.color)).length + MAT_OPTIONS.filter(o => !ch.unlockedMats.includes(o.id)).length + STAGE_OPTIONS.filter(o => !ch.unlockedStages.includes(o.id)).length;
+    COLOR_OPTIONS.filter(o => !ch.unlockedColors.includes(o.color)).length + MAT_OPTIONS.filter(o => !ch.unlockedMats.includes(o.id)).length + BORDER_OPTIONS.filter(o => !ch.unlockedAvBorders.includes(o.id)).length + STAGE_OPTIONS.filter(o => !ch.unlockedStages.includes(o.id)).length;
   const shop = document.createElement('button'); shop.className = 'panel-action ch-shop';
   shop.innerHTML = `🛍️ Shop for more looks<small>${lockedLeft ? `${lockedLeft} more to unlock at the Card Shop` : 'You have every look - nice!'}</small>`;
   shop.addEventListener('click', goToCardShop);
@@ -114,6 +114,23 @@ function charDrawLook(box) {
   box.appendChild(row('', ACCESSORY_OPTIONS.filter(o => ch.unlockedAccessories.includes(o.icon)).map(o => shopCosmeticSwatch('accessory', o.icon, o.label, o.cost, ch.accessory === o.icon, true))));
   charSection(box, 'Colour');
   box.appendChild(row('', COLOR_OPTIONS.filter(o => ch.unlockedColors.includes(o.color)).map(o => shopCosmeticSwatch('color', o.color, '', o.cost, ch.color === o.color, true))));
+  charSection(box, 'Avatar border · the ring around your portrait');
+  box.appendChild(row('', BORDER_OPTIONS.filter(o => ch.unlockedAvBorders.includes(o.id)).map(o => shopCosmeticSwatch('border', o.id, o.name, o.cost, ch.avBorder === o.id, true))));
+  const curB = borderDef(ch.avBorder);
+  charSection(box, 'Border colour' + (curB.fixed ? ' · this border keeps its own colours' : ''));
+  const cw = document.createElement('div'); cw.className = 'swatch-row shop-swatch-row bd-colors';
+  const pick = c => { state.character.avBorderColor = c; saveState(); updateHud(); renderTown(); renderCharacterTab(); };
+  BORDER_COLORS.forEach((c, i) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'color-swatch shop-swatch bd-color' + ((ch.avBorderColor || BORDER_COLORS[0]).toLowerCase() === c ? ' active' : '');
+    b.style.background = c; b.setAttribute('aria-label', 'Border colour ' + (i + 1));
+    b.addEventListener('click', () => { sfx('nav'); buzz(HAP.tap); pick(i === 0 ? null : c); });
+    cw.appendChild(b);
+  });
+  const custom = document.createElement('label'); custom.className = 'color-swatch shop-swatch bd-color bd-custom'; custom.title = 'Pick any colour';
+  custom.innerHTML = '<span aria-hidden="true">+</span><input type="color" aria-label="Pick a custom border colour">';
+  const ci = custom.querySelector('input'); ci.value = /^#[0-9a-f]{6}$/i.test(ch.avBorderColor || '') ? ch.avBorderColor : BORDER_COLORS[0];
+  ci.addEventListener('change', () => { sfx('nav'); buzz(HAP.tap); pick(ci.value.toLowerCase()); });
+  cw.appendChild(custom); box.appendChild(cw);
   charSection(box, 'Table mat · your side in battles');
   box.appendChild(row('shop-mat-row', MAT_OPTIONS.filter(o => ch.unlockedMats.includes(o.id)).map(o => shopCosmeticSwatch('mat', o.id, o.name, o.cost, ch.mat === o.id, true))));
   charSection(box, 'Backdrop · behind you and your companion');

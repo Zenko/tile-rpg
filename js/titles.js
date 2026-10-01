@@ -53,6 +53,10 @@ function ensureCosmeticUnlocks() {
   if (!ch.unlockedStages.includes(ch.stage)) ch.unlockedStages.push(ch.stage);
   if (!MAT_OPTIONS.some(m => m.id === ch.mat)) ch.mat = MAT_OPTIONS[0].id;
   if (!ch.unlockedMats.includes(ch.mat)) ch.unlockedMats.push(ch.mat);
+  if (!Array.isArray(ch.unlockedAvBorders)) ch.unlockedAvBorders = [BORDER_OPTIONS[0].id];
+  if (!BORDER_OPTIONS.some(b => b.id === ch.avBorder)) ch.avBorder = BORDER_OPTIONS[0].id;
+  if (!ch.unlockedAvBorders.includes(ch.avBorder)) ch.unlockedAvBorders.push(ch.avBorder);
+  if (ch.avBorderColor != null && !/^#[0-9a-f]{6}$/i.test(ch.avBorderColor)) ch.avBorderColor = null;   // null = the default sea-glass ring
   // Grandfather in whatever this save already had picked, even if it predates today's five-item lists.
   if (ch.emoji && !ch.unlockedEmojis.includes(ch.emoji)) ch.unlockedEmojis.push(ch.emoji);
   if (ch.color && !ch.unlockedColors.includes(ch.color)) ch.unlockedColors.push(ch.color);
@@ -64,14 +68,15 @@ function buyCosmetic(kind, value, cost) {
   const ch = state.character, pr = state.progress;
   if (pr.pebbles < cost) { toast('Not enough Pebbles yet'); sfx('tie'); return false; }
   pr.pebbles -= cost;
-  const key = kind === 'emoji' ? 'unlockedEmojis' : kind === 'accessory' ? 'unlockedAccessories' : kind === 'mat' ? 'unlockedMats' : kind === 'stage' ? 'unlockedStages' : 'unlockedColors';
+  const key = kind === 'emoji' ? 'unlockedEmojis' : kind === 'accessory' ? 'unlockedAccessories' : kind === 'mat' ? 'unlockedMats' : kind === 'stage' ? 'unlockedStages' : kind === 'border' ? 'unlockedAvBorders' : 'unlockedColors';
   if (!ch[key].includes(value)) ch[key].push(value);
   if (kind === 'emoji') ch.emoji = value;
   else if (kind === 'accessory') ch.accessory = value;
   else if (kind === 'mat') ch.mat = value;
   else if (kind === 'stage') ch.stage = value;
+  else if (kind === 'border') ch.avBorder = value;
   else ch.color = value;
-  const label = kind === 'emoji' ? `the ${value} look` : kind === 'accessory' ? `the ${value} accessory` : kind === 'mat' ? `the ${MAT_OPTIONS.find(m => m.id === value).name} table mat` : kind === 'stage' ? `the ${STAGE_OPTIONS.find(m => m.id === value).name} backdrop` : 'a new color';
+  const label = kind === 'emoji' ? `the ${value} look` : kind === 'accessory' ? `the ${value} accessory` : kind === 'mat' ? `the ${MAT_OPTIONS.find(m => m.id === value).name} table mat` : kind === 'stage' ? `the ${STAGE_OPTIONS.find(m => m.id === value).name} backdrop` : kind === 'border' ? `the ${borderDef(value).name} avatar border` : 'a new color';
   logEvent(kind === 'emoji' ? value : '✨', `Bought and equipped ${label} for 🫧 ${cost}.`);
   saveState();
   updateHud();
@@ -82,18 +87,30 @@ function buyCosmetic(kind, value, cost) {
   return true;
 }
 
-// Applies the player's background, border colour and border style to any avatar element (HUD portrait,
-// in-town badge, menu preview) so all three stay visually in sync with a single source of truth.
-// Border is intentionally not a per-player customization anymore - every avatar gets the same fixed
-// solid ring (there's nothing to pick, so no picker row for it).
+// Applies the player's background and border (style + colour, see BORDER_OPTIONS in js/world-map.js) to any avatar
+// element (HUD portrait, in-town badge, battle portrait, Character tab) so all of them stay in sync from one place.
+// The CSS for each of those reads --av-border-w / --av-border-style / --av-border-color. Native styles just set those;
+// gradient styles make the border transparent and paint the gradient behind it (border-box layer under a padding-box layer
+// of the avatar colour), which still follows the round corners.
 function applyAvatarStyle(el, character) {
   if (!el) return;
-  el.style.setProperty('--av-bg', character.color || 'var(--water-glow)');
-  el.style.background = character.color || 'var(--water-glow)';
-  el.style.setProperty('--av-border-color', 'var(--water)');
-  el.style.setProperty('--av-border-style', 'solid');
-  el.style.setProperty('--av-border-w', '3px');
-  el.classList.remove('av-glow');
+  const bg = character.color || 'var(--water-glow)', def = borderDef(character.avBorder);
+  const col = /^#[0-9a-f]{6}$/i.test(character.avBorderColor || '') ? character.avBorderColor : 'var(--water)';
+  el.style.setProperty('--av-bg', bg);
+  el.style.setProperty('--av-border-w', BORDER_W);
+  if (def.grad) {
+    el.style.setProperty('--av-border-style', 'solid');
+    el.style.setProperty('--av-border-color', 'transparent');
+    el.style.background = `linear-gradient(${bg}, ${bg}) padding-box, ${def.grad(col)} border-box`;
+    el.style.backgroundOrigin = 'border-box';
+  } else {
+    el.style.setProperty('--av-border-style', def.native);
+    el.style.setProperty('--av-border-color', col);
+    el.style.background = bg; el.style.backgroundOrigin = '';
+  }
+  // the halo uses the border colour; gradient styles that ignore it get a fitting one of their own
+  el.style.setProperty('--av-glow-color', def.id === 'gold' ? '#e8cb88' : col);
+  el.classList.toggle('av-glow', !!def.glow);
   el.dataset.accessory = character.accessory || '';
 }
 

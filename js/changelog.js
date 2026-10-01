@@ -18,6 +18,16 @@ function gameVersionLabel() {
    the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
 const CHANGELOG = [
   {
+    version: '1.74.0',
+    date: '2026-10-01',
+    title: "Make your ring your own",
+    changes: [
+      "Your avatar now has a thick border by default, and you can change it. Thirteen styles in the Card Shop (Customize): Solid is free, then Dashed, Dotted, Double, Groove, Ridge, Glow, Neon dashes, Two-tone, Candy stripe, Sunset fade, Rainbow and Gilded.",
+      "Pick the border colour for free in Character > Look: twelve colours, or any colour you like with the + swatch.",
+      "Leaving a battle now fades back to town, the same way you fade in."
+    ]
+  },
+  {
     version: '1.73.0',
     date: '2026-10-01',
     title: "A proper entrance for battles",

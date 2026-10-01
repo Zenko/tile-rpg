@@ -405,13 +405,13 @@ function renderCustomize() {
     <div class="wallet">
       <div>
         <div class="w-amt">🫧 ${peb}</div>
-        <div class="w-sub">Unlock emojis, accessories, colors, table mats and backdrops for good.</div>
+        <div class="w-sub">Unlock emojis, accessories, colors, avatar borders, table mats and backdrops for good.</div>
       </div>
     </div>`;
 
   const custNote = document.createElement('div');
   custNote.className = 'shop-note';
-  custNote.textContent = 'Buying an emoji, accessory, color or table mat unlocks it for good and equips it right away.';
+  custNote.textContent = 'Buying an emoji, accessory, color, avatar border or table mat unlocks it for good and equips it right away.';
   box.appendChild(custNote);
 
   const emojiRow = document.createElement('div'); emojiRow.className = 'swatch-row shop-swatch-row';
@@ -423,6 +423,11 @@ function renderCustomize() {
   const colorRow = document.createElement('div'); colorRow.className = 'swatch-row shop-swatch-row';
   COLOR_OPTIONS.forEach(o => colorRow.appendChild(shopCosmeticSwatch('color', o.color, '', o.cost, ch.color === o.color, ch.unlockedColors.includes(o.color))));
   box.appendChild(colorRow);
+  const bdLabel = document.createElement('div'); bdLabel.className = 'shop-note'; bdLabel.textContent = 'Avatar borders: the ring around your portrait. Pick its colour for free in Character > Look.';
+  box.appendChild(bdLabel);
+  const bdRow = document.createElement('div'); bdRow.className = 'swatch-row shop-swatch-row';
+  BORDER_OPTIONS.forEach(o => bdRow.appendChild(shopCosmeticSwatch('border', o.id, o.name + (o.fixed ? ' (own colours)' : ''), o.cost, ch.avBorder === o.id, ch.unlockedAvBorders.includes(o.id))));
+  box.appendChild(bdRow);
   const matLabel = document.createElement('div'); matLabel.className = 'shop-note'; matLabel.textContent = 'Table mats: the cloth on your side of the battle table.';
   box.appendChild(matLabel);
   const matRow = document.createElement('div'); matRow.className = 'swatch-row shop-swatch-row shop-mat-row';
@@ -558,10 +563,15 @@ function renderItems() {
 // price and buy-then-equip on tap (via buyCosmetic).
 function shopCosmeticSwatch(kind, value, label, cost, isEquipped, isUnlocked) {
   const el = document.createElement('div');
-  el.className = (kind === 'color' ? 'color-swatch' : kind === 'mat' ? 'mat-swatch mat-' + value : kind === 'stage' ? 'mat-swatch stage-swatch' : 'emoji-swatch') + ' shop-swatch' + (isEquipped ? ' active' : '') + (isUnlocked ? '' : ' locked');
+  el.className = (kind === 'color' ? 'color-swatch' : kind === 'mat' ? 'mat-swatch mat-' + value : kind === 'stage' ? 'mat-swatch stage-swatch' : kind === 'border' ? 'emoji-swatch border-swatch' : 'emoji-swatch') + ' shop-swatch' + (isEquipped ? ' active' : '') + (isUnlocked ? '' : ' locked');
   if (kind === 'color') el.style.background = value;
   else if (kind === 'mat') { el.innerHTML = `<span>${label}</span>`; el.title = label; }
   else if (kind === 'stage') { el.style.background = stageGradient(stageDef(value)); el.innerHTML = `<span>${label}</span>`; el.title = label; }
+  else if (kind === 'border') {                   // a little avatar ring, drawn with the same code as the real one
+    const ch = state.character, prev = document.createElement('span'); prev.className = 'bd-prev';
+    applyAvatarStyle(prev, { color: ch.color, avBorder: value, avBorderColor: ch.avBorderColor });
+    el.appendChild(prev); el.title = label; el.setAttribute('aria-label', label);
+  }
   else { el.textContent = value || '🚫'; if (label) el.title = label; }
   if (!isUnlocked) {
     const tag = document.createElement('span');
@@ -573,7 +583,7 @@ function shopCosmeticSwatch(kind, value, label, cost, isEquipped, isUnlocked) {
     ensureAudio();
     if (isUnlocked) {
       sfx('nav'); buzz(HAP.tap);
-      const field = kind === 'emoji' ? 'emoji' : kind === 'accessory' ? 'accessory' : kind === 'mat' ? 'mat' : kind === 'stage' ? 'stage' : 'color';
+      const field = kind === 'emoji' ? 'emoji' : kind === 'accessory' ? 'accessory' : kind === 'mat' ? 'mat' : kind === 'stage' ? 'stage' : kind === 'border' ? 'avBorder' : 'color';
       state.character[field] = value;
       saveState(); updateHud(); renderTown(); renderCustomize(); if (typeof renderCharacterTab === 'function') renderCharacterTab();
     } else {
