@@ -300,6 +300,10 @@ function btRenderBars() {
     sp.style.setProperty('--p', pct + '%');   // the Spirit ring around the portrait is a conic-gradient driven by this
     sp.querySelector('.num').textContent = `${Math.max(0, p.spirit)}/${p.maxSpirit}`;
     sp.classList.toggle('low', p.spirit <= Math.ceil(p.maxSpirit * 0.3));
+    const sb = btGet('bt' + k + 'Sbar');       // the life bar under the name: always readable at a glance
+    sb.querySelector('.fill').style.width = pct + '%';
+    sb.querySelector('.sn').textContent = `♥ ${Math.max(0, p.spirit)} / ${p.maxSpirit}`;
+    sb.classList.toggle('low', p.spirit <= Math.ceil(p.maxSpirit * 0.3));
     btGet('bt' + k + 'Deck').textContent = `🃏 ${p.deck.length}`;
     btGet('bt' + k + 'Bar').classList.toggle('turn', G.active === i && !G.over);
   });
@@ -335,12 +339,14 @@ function btRenderBoards(entering) {
         const el = btCardEl(c, cls, mine);
         if (!mine && tCards.has(c.uid) && sel && sel.kind === 'attack') btAddPreviewBadge(el, c, G.p[0].board.find(x => x.uid === sel.uid));
         el.addEventListener('click', () => btOnBoardCard(k === 'You' ? 'you' : 'opp', c));
+        if (canAct) el.addEventListener('pointerdown', e => btStartDrag(e, c, 'board'));
         slot.appendChild(el);
       } else if (k === 'You' && sel && sel.kind === 'play' && !btSelIsSpell()) slot.classList.add('drop');
       box.appendChild(slot);
     }
   });
   btGet('btOppBar').classList.toggle('target-glow', tFace);
+  btGet('btAtkFace').classList.toggle('hidden', !tFace);   // a big, obvious button for hitting the Spirit directly
 }
 
 // Damage preview on a targetable enemy card while an attacker is selected: 💥 = it would be knocked out, 🫧 = its
@@ -425,11 +431,13 @@ function btHideTip() { btGet('btTip').classList.remove('show'); battleView.class
    aim go anywhere on the table, and aimed spells go onto an enemy card. Anything else puts the card back. */
 const DRAG_MIN = 8;
 let btDragEndedAt = 0, btDrag = null, btDropHintShown = false;
-function btStartDrag(e, c) {
+function btStartDrag(e, c, from) {
   if (!battle || battle.busy || battle.G.over || battle.G.active !== 0 || btDrag) return;
   if (e.pointerType === 'mouse' && e.button !== 0) return;
-  if (!BattleEngine.canPlay(battle.G, 0, c.uid).ok) return;        // unaffordable cards just show why when tapped
-  btDrag = { c, sx: e.clientX, sy: e.clientY, active: false, ghost: null, id: e.pointerId };
+  from = from || 'hand';
+  if (from === 'hand' && !BattleEngine.canPlay(battle.G, 0, c.uid).ok) return;        // unaffordable cards just show why when tapped
+  if (from === 'board' && !(c.ready && c.attacks === 0)) return;
+  btDrag = { c, from, sx: e.clientX, sy: e.clientY, active: false, ghost: null, id: e.pointerId };
   window.addEventListener('pointermove', btDragMove);
   window.addEventListener('pointerup', btDragEnd);
   window.addEventListener('pointercancel', btDragEnd);
@@ -438,9 +446,9 @@ function btDragKind(c) { return !c.spell ? 'creature' : BattleEngine.spellNeedsT
 function btDragBegin() {
   const d = btDrag, c = d.c;
   if (battle.sel) { battle.sel = null; btHideTip(); btRender(); }   // drop any earlier selection (this rebuilds the hand)
-  const origin = battleView.querySelector(`#btHand .card[data-uid="${c.uid}"]`);
+  const origin = battleView.querySelector(`${d.from === 'board' ? '#btYouBoard' : '#btHand'} .card[data-uid="${c.uid}"]`);
   if (!origin) { btDragCleanup(); return; }
-  d.active = true; d.origin = origin; d.kind = btDragKind(c);
+  d.active = true; d.origin = origin; d.kind = d.from === 'board' ? 'attack' : btDragKind(c);
   const r = origin.getBoundingClientRect(); d.w = r.width; d.h = r.height;
   const g = origin.cloneNode(true);
   g.classList.remove('playable', 'selected', 'draw'); g.classList.add('drag-ghost');
@@ -452,7 +460,12 @@ function btDragBegin() {
     slots.forEach(s => s.classList.add('drop-zone'));
     const next = slots.find(s => !s.querySelector('.card')); if (next) next.classList.add('drop-next');
   } else if (d.kind === 'spell') battleView.querySelector('.table').classList.add('cast-zone');
-  else battleView.querySelectorAll('#btOppBoard .card').forEach(x => x.classList.add('targetable'));
+  else if (d.kind === 'attack') {
+    // light up everything this card may legally hit: enemy cards, and the enemy Spirit when no Guard stands in the way
+    const legal = BattleEngine.legalTargets(battle.G, 0, c.uid), ids = new Set(legal.filter(t => t.kind === 'card').map(t => t.uid));
+    battleView.querySelectorAll('#btOppBoard .card').forEach(x => { if (ids.has(+x.dataset.uid)) x.classList.add('targetable'); });
+    if (legal.some(t => t.kind === 'spirit')) { btGet('btOppBar').classList.add('target-glow'); d.glow = true; }
+  } else battleView.querySelectorAll('#btOppBoard .card').forEach(x => x.classList.add('targetable'));
   sfx('tap'); buzz(HAP.tap);
 }
 function btDragPlace(x, y) {
@@ -469,6 +482,13 @@ function btDragTarget() {
     const slot = el.closest('#btYouBoard .slot'); if (slot) return { slot, index: [...slot.parentNode.children].indexOf(slot) };
     return el.closest('#btYouRow') ? { slot: null, index: null } : null;
   }
+  if (d.kind === 'attack') {
+    const legal = BattleEngine.legalTargets(battle.G, 0, d.c.uid), card = el.closest('#btOppBoard .card');
+    if (card) return { card, ok: legal.some(t => t.kind === 'card' && t.uid === +card.dataset.uid) };
+    // anywhere above the enemy row counts as "at the opponent": drag up past their cards to hit their Spirit
+    if (el.closest('#btOppBar, .divider') || d.cy < btGet('btOppBoard').getBoundingClientRect().top) return { face: true, ok: legal.some(t => t.kind === 'spirit') };
+    return null;
+  }
   if (d.kind === 'spell') return el.closest('.table') ? { slot: null } : null;
   const card = el.closest('#btOppBoard .card'); return card ? { card } : null;
 }
@@ -476,7 +496,8 @@ function btDragHover(t) {
   const d = btDrag;
   battleView.querySelectorAll('.drop-hover').forEach(x => x.classList.remove('drop-hover'));
   if (t && t.slot) t.slot.classList.add('drop-hover');
-  if (t && t.card) t.card.classList.add('drop-hover');
+  if (t && t.card && (t.ok !== false)) t.card.classList.add('drop-hover');
+  btGet('btOppBar').classList.toggle('drop-hover', !!(t && t.face && t.ok));
 }
 function btDragMove(e) {
   const d = btDrag; if (!d || (d.id !== undefined && e.pointerId !== d.id)) return;
@@ -493,6 +514,8 @@ function btDragCleanup() {
   window.removeEventListener('pointerup', btDragEnd);
   window.removeEventListener('pointercancel', btDragEnd);
   const d = btDrag; btDrag = null;
+  if (d && d.glow && !(battle && battle.sel && battle.sel.kind === 'attack')) btGet('btOppBar').classList.remove('target-glow');
+  btGet('btOppBar').classList.remove('drop-hover');
   if (d && d.ghost) d.ghost.remove();
   if (d && d.origin) d.origin.classList.remove('drag-origin');
   battleView.querySelectorAll('.drop-zone, .drop-next, .drop-hover, .cast-zone').forEach(x => x.classList.remove('drop-zone', 'drop-next', 'drop-hover', 'cast-zone'));
@@ -506,7 +529,13 @@ function btDragEnd(e) {
   btDragCleanup(); btDragEndedAt = Date.now();
   if (!battle || battle.busy || battle.G.over || battle.G.active !== 0) return;
   if (!t) {
-    if (!cancelled && !btDropHintShown) { btDropHintShown = true; btToast(kind === 'aimed' ? 'Drop it on an enemy card to aim it' : 'Drop it on your side of the table to play it'); }
+    if (!cancelled && !btDropHintShown) { btDropHintShown = true; btToast(kind === 'attack' ? 'Drop it on an enemy card, or drag up to hit their Spirit' : kind === 'aimed' ? 'Drop it on an enemy card to aim it' : 'Drop it on your side of the table to play it'); }
+    return;
+  }
+  if (kind === 'attack') {
+    if (!t.ok) { btToast('A Guard must be attacked first'); return; }
+    battle.sel = null; btHideTip();
+    btDoAttack(c.uid, t.face ? { kind: 'spirit' } : { kind: 'card', uid: +t.card.dataset.uid });
     return;
   }
   battle.sel = null; btHideTip();
@@ -543,6 +572,7 @@ function btOnHandCard(c) {
 
 function btOnBoardCard(side, c) {
   if (!battle || battle.busy || battle.G.over) return;
+  if (Date.now() - btDragEndedAt < 350) return;   // the click after a drag is not a tap
   const G = battle.G;
   if (side === 'you') {
     if (G.active !== 0) return btShowTip(c, '');
@@ -572,6 +602,72 @@ function btOnBoardCard(side, c) {
   }
 }
 
+/* ---------------- battle effects: attacked, defended and spells ----------------
+   Everything here is a short-lived element (or a Web Animations API flight) appended to the battle view or a card;
+   nothing touches the board's own transforms. They are skipped under Calm motion / reduced motion (btMotionOk). */
+const SPELL_FX = { 'spark': ['#ffd36b', 'bolt'], 'thunderclap': ['#bcd8ff', 'sweep'], 'moonlit-tide': ['#7fd0e8', 'sweep'], 'starfall': ['#ffe9a8', 'bolt'],
+  'rain-shower': ['#8de0a0', 'rise'], 'harvest': ['#c9b6ff', 'draw'], 'gust': ['#bfeaff', 'whoosh'], 'sunbeam': ['#ffd98a', 'rise'], 'second-wind': ['#c9f0ff', 'rise'] };
+function btCenter(el) { if (!el) return null; const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, r }; }
+function btFx(cls, x, y, ms, style) {
+  const el = document.createElement('div'); el.className = 'fx ' + cls; el.style.left = x + 'px'; el.style.top = y + 'px';
+  if (style) Object.entries(style).forEach(([k, v]) => el.style.setProperty(k, v));
+  battleView.appendChild(el); setTimeout(() => el.remove(), ms); return el;
+}
+// Little overlays that live inside a card for a moment.
+function btCardFx(cardEl, cls, ms, style) {
+  if (!cardEl || !btMotionOk()) return;
+  const s = document.createElement('span'); s.className = cls; if (style) Object.entries(style).forEach(([k, v]) => s.style.setProperty(k, v));
+  cardEl.appendChild(s); setTimeout(() => s.remove(), ms);
+}
+function btSlashFx(cardEl, gold) { btCardFx(cardEl, 'fx-slash' + (gold ? ' gold' : ''), 520); }
+function btShieldFx(cardEl) { btCardFx(cardEl, 'fx-shield', 700); }
+function btShake(hard) {
+  if (!btMotionOk()) return;
+  const c = hard ? 'shake-hard' : 'shake'; battleView.classList.remove('shake', 'shake-hard'); void battleView.offsetWidth; battleView.classList.add(c);
+  setTimeout(() => battleView.classList.remove(c), 340);
+}
+// A colour wash around the edge of the screen: red when you are hit, gold when you land one on their Spirit.
+function btVignette(kind) { if (!btMotionOk()) return; const el = document.createElement('div'); el.className = 'fx fx-vig ' + kind; battleView.appendChild(el); setTimeout(() => el.remove(), 650); }
+// Bar hit/heal flashes go on both the ring and the life bar.
+function btSpiritFlash(who, cls, ms) {
+  const k = who === 0 ? 'You' : 'Opp';
+  [btGet('bt' + k + 'Spirit'), btGet('bt' + k + 'Sbar')].forEach(el => { el.classList.add(cls); setTimeout(() => el.classList.remove(cls), ms || 420); });
+}
+function btSpellFx(def, e) {
+  return new Promise(res => {
+    if (!btMotionOk()) return res();
+    const [col, kind] = SPELL_FX[def.spell] || ['#ffe9a8', 'bolt'], mine = e.who === 0;
+    const from = btCenter(btGet(mine ? 'btHand' : 'btOppHand')), tgtEl = e.target ? document.querySelector(`#battleView .card[data-uid="${e.target.uid}"]`) : null;
+    const enemyRow = btCenter(btGet(mine ? 'btOppBoard' : 'btYouBoard')), ownRow = btCenter(btGet(mine ? 'btYouBoard' : 'btOppBoard'));
+    const to = tgtEl ? btCenter(tgtEl) : kind === 'draw' ? btCenter(btGet(mine ? 'btHand' : 'btOppHand')) : (kind === 'sweep' || kind === 'bolt') ? enemyRow : ownRow;
+    if (!from || !to) return res();
+    const orb = btFx('fx-orb', 0, 0, 1200, { '--c': col });
+    const view = battleView.getBoundingClientRect();
+    const arrive = () => {
+      orb.remove();
+      btFx('fx-burst', to.x, to.y, 600, { '--c': col });
+      btFx('fx-wash', 0, 0, 700, { '--c': col, '--x': ((to.x - view.left) / view.width * 100) + '%', '--y': ((to.y - view.top) / view.height * 100) + '%' });
+      if (kind === 'sweep' && enemyRow) btFx('fx-sweep', enemyRow.r.left, enemyRow.y, 700, { '--c': col, width: enemyRow.r.width + 'px' });
+      if (kind === 'bolt') btFx('fx-bolt', to.x, view.top, 420, { '--c': col, height: Math.max(0, to.y - view.top) + 'px' });
+      if (kind === 'rise' || kind === 'draw') {
+        const cards = kind === 'draw' ? [btGet(mine ? 'btHand' : 'btOppHand')] : [...battleView.querySelectorAll(mine ? '#btYouBoard .card' : '#btOppBoard .card')];
+        cards.forEach(cEl => { const r = cEl.getBoundingClientRect(); for (let i = 0; i < 5; i++) btFx('fx-rise', r.left + Math.random() * r.width, r.top + r.height * 0.7, 900, { '--c': col, '--d': (i * 70) + 'ms' }).textContent = kind === 'draw' ? '✦' : (def.spell === 'rain-shower' ? '＋' : '✦'); });
+      }
+      if (kind === 'whoosh') btFx('fx-whoosh', to.x, to.y, 600, { '--c': col });
+      if (btMotionOk() && (kind === 'bolt' || kind === 'sweep')) btShake(false);
+      setTimeout(res, 260);
+    };
+    const mid = { x: (from.x + to.x) / 2, y: Math.min(from.y, to.y) - 50 };
+    const a = orb.animate([
+      { transform: `translate(${from.x}px, ${from.y}px) scale(.6)` },
+      { transform: `translate(${mid.x}px, ${mid.y}px) scale(1.15)`, offset: 0.5 },
+      { transform: `translate(${to.x}px, ${to.y}px) scale(.9)` }
+    ], { duration: 420 * (prefs.fast ? 0.5 : 1), easing: 'ease-in-out', fill: 'forwards' });
+    a.onfinish = arrive; a.oncancel = arrive;
+    setTimeout(() => res(), 1500);
+  });
+}
+
 /* ---------------- animation ---------------- */
 function btFlush(G) { return G.events.splice(0); }
 
@@ -589,11 +685,15 @@ async function btAnimate(evs, token) {
       await btWait(230);
       if (e.target.kind === 'spirit') {
         const bar = btGet(e.who === 0 ? 'btOppSpirit' : 'btYouSpirit');
-        bar.classList.add('hit'); btFloater(bar, '-' + e.dmg, 'dmg'); btImpact(bar, 3); setTimeout(() => bar.classList.remove('hit'), 400);
+        btSpiritFlash(e.who === 0 ? 1 : 0, 'hit', 400); btFloater(bar, '-' + e.dmg, 'dmg'); btImpact(bar, 3);
+        btVignette(e.who === 0 ? 'gold' : 'red'); btShake(e.dmg >= 3);
         if (e.who === 0) { sfx('round'); buzz(HAP.round); } else { sfx('soft'); buzz(HAP.soft); }
       } else {
         const t = document.querySelector(`#battleView .card[data-uid="${e.target.uid}"]`);
-        if (t) { t.classList.add('hurt-flash'); btFloater(t, e.blocked ? '🫧 blocked' : '-' + e.dmg, e.blocked ? 'blk' : 'dmg'); if (!e.blocked) btImpact(t, 4); }
+        if (t) {
+          t.classList.add('hurt-flash'); btFloater(t, e.blocked ? '🛡️ blocked' : '-' + e.dmg, e.blocked ? 'blk' : 'dmg');
+          if (e.blocked) btShieldFx(t); else { btImpact(t, 4); btSlashFx(t); btShake(e.dmg >= 3); }
+        }
       }
       btRenderBars(); await btWait(340);
     } else if (e.type === 'spell') {
@@ -604,9 +704,12 @@ async function btAnimate(evs, token) {
       btSetMsg(`${e.who === 0 ? 'You cast' : battle.npc.name + ' casts'} ${def.icon} ${def.name}`);
       if (e.target) { const t = document.querySelector(`#battleView .card[data-uid="${e.target.uid}"]`); if (t) t.classList.add('spell-aim'); }
       if (e.who === 0) { sfx('rare'); buzz(HAP.play); } else sfx('flip');
-      await btWait(e.who === 0 ? 520 : 760);
+      await btWait(e.who === 0 ? 260 : 480);
+      await btSpellFx(def, e);                       // the spell's own light show: an orb flies to the target and bursts
+      await btWait(e.who === 0 ? 160 : 240);
     } else if (e.type === 'zap') {
       const t = document.querySelector(`#battleView .card[data-uid="${e.uid}"]`);
+      if (t) { if (e.blocked) btShieldFx(t); else btSlashFx(t, true); }
       if (t) { t.classList.add('hurt-flash'); btFloater(t, e.pierce ? '🌠' : e.blocked ? '🫧 blocked' : (e.tag === 'thorns' ? '🌵 -' : '✨ -') + e.dmg, e.blocked ? 'blk' : 'dmg'); if (!e.blocked) btImpact(t, 5); }
       sfx('tap'); await btWait(260);
     } else if (e.type === 'bounce') {
@@ -623,8 +726,8 @@ async function btAnimate(evs, token) {
       sfx('soft'); await btWait(520);
     } else if (e.type === 'spirit') {
       const bar = btGet(e.who === 0 ? 'btYouSpirit' : 'btOppSpirit');
-      if (e.echo || e.spell) { bar.classList.add('hit'); btFloater(bar, (e.spell ? '✨ -' : '🔔 -') + (-e.delta), 'dmg'); setTimeout(() => bar.classList.remove('hit'), 400); await btWait(300); }
-      else if (e.delta > 0) { bar.classList.add('heal'); btFloater(bar, '+' + e.delta, 'heal'); setTimeout(() => bar.classList.remove('heal'), 500); await btWait(240); }
+      if (e.echo || e.spell) { btSpiritFlash(e.who, 'hit', 400); btFloater(bar, (e.spell ? '✨ -' : '🔔 -') + (-e.delta), 'dmg'); btVignette(e.who === 0 ? 'red' : 'gold'); await btWait(300); }
+      else if (e.delta > 0) { btSpiritFlash(e.who, 'heal', 500); btFloater(bar, '+' + e.delta, 'heal'); await btWait(240); }
       btRenderBars();
     } else if (e.type === 'faint') {
       const el = document.querySelector(`#battleView .card[data-uid="${e.card.uid}"]`);
@@ -858,16 +961,18 @@ function btShowHelp() {
     <b>District bosses</b> each bend one rule: 🌳 Elder Yew heals 3 Spirit every turn, 🧱 Old Bramble's Guards are extra sturdy, 🌊 the Harbor Keeper's tide washes your strongest card back to hand every 4th turn, and 🌻 the Garden Sentinel's cheap cards all Bloom.<br><br>
     <b>Weather</b> can change a match: in a ⛈️ storm every 💨 Swift card has +1 power, and in ❄️ snow bosses are tougher but pay better.<br><br>
     ${Object.values(KW).map(k => `${k.icon} <b>${k.name}.</b> ${k.text}`).join('<br>')}<br><br>
-    <i>Drag a card onto the table to play it, or tap it to read it and tap it again to play it.</i>`;
+    <i>Drag a card onto the table to play it, or tap it to read it and tap it again to play it. To attack, tap a glowing card then a target (or the red Attack Spirit button), or drag it onto an enemy card or up past their cards.</i>`;
   ov.classList.remove('hidden');
 }
 
 btGet('btEnd').addEventListener('click', () => { if (!battle || battle.busy || battle.G.over || battle.G.active !== 0) return; ensureAudio(); btPlayerEnd(); });
-btGet('btOppBar').addEventListener('click', () => {
+function btAttackFace() {
   if (!battle || battle.busy || !battle.sel || battle.sel.kind !== 'attack') return;
   if (!BattleEngine.legalTargets(battle.G, 0, battle.sel.uid).some(t => t.kind === 'spirit')) { btToast('A Guard must be attacked first'); return; }
   const u = battle.sel.uid; battle.sel = null; btHideTip(); btDoAttack(u, { kind: 'spirit' });
-});
+}
+btGet('btOppBar').addEventListener('click', btAttackFace);
+btGet('btAtkFace').addEventListener('click', btAttackFace);
 btGet('btHelp').addEventListener('click', btShowHelp);
 btGet('btYield').addEventListener('click', btYield);
 btGet('btHelpClose').addEventListener('click', () => btGet('btHelpOverlay').classList.add('hidden'));
@@ -884,7 +989,7 @@ btGet('mulliganSwapBtn').addEventListener('click', () => {
 // afterwards the tapped element is detached from the page, and would wrongly look like a tap outside.
 document.addEventListener('click', e => {
   if (!battle || !inBattle || !battle.sel) return;
-  if (e.target.closest('#battleView .card') || e.target.closest('#btOppBar') || e.target.closest('#btTip') || e.target.closest('#btEnd')) return;
+  if (e.target.closest('#battleView .card') || e.target.closest('#btOppBar') || e.target.closest('#btAtkFace') || e.target.closest('#btTip') || e.target.closest('#btEnd')) return;
   battle.sel = null; btHideTip(); btRender();
 }, true);
 

@@ -19,6 +19,17 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-10-01',
+    version: '1.61.0',
+    title: "Battle fixes and effects",
+    changes: [
+      "Fixed cards in your row coming out bigger than the other row and the deck pile sitting on top of your last card. Every slot is now the same size and the piles have their own space.",
+      "Life is back as a wide numbered bar under each name (with the ring still around the portrait).",
+      "Hitting the opponent's Spirit is easier: when a card is ready, a big red Attack Spirit button appears. You can also drag a ready card up past their cards, or onto an enemy card, to attack.",
+      "New battle effects: a slash and a screen shake when a card is hit, a shield bubble when an attack is blocked, a red or gold edge flash when a Spirit is hit, and spells now fly across the table as a glowing orb with a burst, a lightning bolt, a sweep or rising sparkles depending on the spell.",
+    ],
+  },
+  {
+    date: '2026-10-01',
     version: '1.60.0',
     title: "A gentler sunny sky",
     changes: [
