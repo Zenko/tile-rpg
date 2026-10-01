@@ -2236,3 +2236,10 @@ html.calm #sceneView.sc-std, html.calm #sceneView.sc-std * { animation: none !im
 :root[data-theme="light"] .town-view[data-biome="orchard"] { --ground:#729b5c;--ground2:#6b9455;--ground3:#79a363;--tuft:#94bc7e;--path:#c4ae82;--path-edge:#a8946a;--path-dot:#d3c19a;--leaf1:#4d9a58;--leaf2:#62b06d;--leaf3:#86cc90;--pine1:#3c8060;--pine2:#4f9873;--water:#5a98b8;--water2:#86bcd4;--shore:#d2c598;--stone:#9c9b94;--stone2:#7f7e78;--stone3:#b4b3ab;--plank:#a78655;--plank2:#8a6c42;--tshadow:rgba(40,50,30,.28) }
 :root[data-theme="light"] .town-view[data-biome][data-season="winter"] { --ground3:#b9c9c4; --tuft:#c8d6d2; --leaf1:#98aeaa; --leaf2:#b9cdc9; --pine1:#5d8279; --pine2:#e7f0ee; }
 
+/* ===== Notices come and go, and the world-map button (v1.80.0) ===== */
+.town-info .ambient-line, .town-info .log { opacity: 0; transform: translateY(8px); transition: opacity .4s ease, transform .4s ease; }
+.town-info .ambient-line.shown, .town-info .log.shown { opacity: 1; transform: none; }
+.map-radar-btn { background: var(--glass); border: 1px solid color-mix(in srgb, var(--stone-edge) 80%, transparent); box-shadow: 0 4px 12px var(--shadow); color: var(--ink); }
+.map-radar-btn .map-icon { display: block; }
+:root[data-theme="light"] .map-radar-btn { border-color: #ddd6c5; box-shadow: 0 4px 12px rgba(75,74,70,.2); }
+

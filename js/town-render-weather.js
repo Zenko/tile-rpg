@@ -185,6 +185,23 @@ function updateAmbient() {
   wrap.classList.add('fading');
   setTimeout(() => { textEl.textContent = text; iconEl.textContent = icon || s.icon; wrap.classList.remove('fading'); }, 220);
 }
+/* Town notices come and go (v1.80.0). The ambient weather line and the town log used to sit on the map for good; now each
+   fades in when its text changes, stays long enough to read (longer for longer text) and fades away again. A
+   MutationObserver watches the text, so none of the many places that write townLog.textContent had to change. */
+function initTransientNotices() {
+  [document.getElementById('ambientLine'), document.getElementById('townLog')].forEach(el => {
+    if (!el) return;
+    let timer = null, last = '';
+    const show = () => {
+      const t = el.textContent.trim();
+      if (!t || t === last && el.classList.contains('shown')) return;
+      last = t; el.classList.add('shown'); clearTimeout(timer);
+      timer = setTimeout(() => el.classList.remove('shown'), Math.min(8000, 3200 + t.length * 45));
+    };
+    new MutationObserver(show).observe(el, { childList: true, characterData: true, subtree: true });
+    show();
+  });
+}
 function maybeRollWeather() {
   // Snow is winter-exclusive (see SEASONS' snow: 0 tilt elsewhere), but the season clock (real weeks) and the
   // weather clock (active-play minutes) run independently, so a snowy spell - or a pre-rolled forecast of one -

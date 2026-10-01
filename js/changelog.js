@@ -18,6 +18,15 @@ function gameVersionLabel() {
    the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
 const CHANGELOG = [
   {
+    version: '1.80.0',
+    date: '2026-10-01',
+    title: "Notices that come and go",
+    changes: [
+      "The weather line and the little notices at the bottom of the map now fade in when something happens and fade away again, instead of sitting on the screen for good.",
+      "The world map button has a new icon: a little floating island, to match the dream map."
+    ]
+  },
+  {
     version: '1.79.0',
     date: '2026-10-01',
     title: "Light mode, properly",

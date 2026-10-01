@@ -322,3 +322,5 @@ if (__mig && __mig.granted.length) setTimeout(() => toast(__mig.brandNew ? '🌱
 
 // Browsers require a touch before audio can start; unlock it on the first tap
 
+
+initTransientNotices();   // js/town-render-weather.js: the ambient line and town log fade in and out
