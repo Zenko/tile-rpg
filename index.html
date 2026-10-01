@@ -519,13 +519,13 @@
   </div>
 </div>
 
-<div class="overlay hidden" id="worldMapOverlay">
-  <div class="overlay-card wm-card">
-    <h2>World Map</h2>
-    <p class="wm-hint">Unlocked towns are shown; the rest stays hidden until you've earned enough wins.</p>
-    <div class="wm-grid" id="wmGrid"></div>
-    <button id="worldMapClose" class="btn">Close</button>
+<div class="overlay wm-screen hidden" id="worldMapOverlay" role="dialog" aria-modal="true" aria-labelledby="wmTitle">
+  <div class="wm-head">
+    <div><h2 id="wmTitle">World Map</h2><p class="wm-hint">Islands adrift in the dream. Tap one to see what's there.</p></div>
+    <button id="worldMapClose" class="wm-close" aria-label="Close the map">&times;</button>
   </div>
+  <div class="wm-stage" id="wmStage"></div>
+  <div class="wm-sheet" id="wmSheet"></div>
 </div>
 
 <div class="overlay hidden" id="weatherOverlay">

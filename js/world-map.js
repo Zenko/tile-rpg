@@ -29,38 +29,132 @@ function renderRadar() {
     grid.appendChild(tile);
   }
 }
-function renderWorldMap() {
-  const grid = document.getElementById('wmGrid');
-  if (!grid) return;
-  grid.innerHTML = '';
-  for (let r = 1; r <= 3; r++) for (let c = 1; c <= 3; c++) {
-    const key = Object.keys(WORLD_LAYOUT).find(k => WORLD_LAYOUT[k].row === r && WORLD_LAYOUT[k].col === c);
-    const tile = document.createElement('div');
-    tile.style.gridRow = r; tile.style.gridColumn = c;
-    if (!key) { tile.className = 'wm-tile empty'; grid.appendChild(tile); continue; }
-    const s = districtStatus(key);
-    tile.className = 'wm-tile' + (s.unlocked ? ' known' : ' locked') + (!s.unlocked ? '' : s.visited ? '' : ' undiscovered') + (s.current ? ' current' : '');
-    if (s.unlocked) {
-      tile.innerHTML = `
-        <span class="wm-icon">${s.visited ? '🏘️' : '❔'}</span>
-        <span class="wm-name">${s.visited ? s.def.name : '???'}</span>
-        <span class="wm-boss" title="${s.def.boss}">${s.bossDefeated ? '💀' : s.def.bossIcon}</span>
-        ${s.current ? '<span class="wm-you">📍</span>' : ''}
-      `;
-      tile.addEventListener('click', () => { travelToDistrict(key); closeWorldMap(); });
-    } else {
-      tile.innerHTML = `<span class="wm-lock">🔒</span><span class="wm-name">${s.def.name}</span><span class="wm-sub">${districtLockReason(key)}</span>`;
-    }
-    grid.appendChild(tile);
-  }
+/* ---------- the dream map (v1.71.0) ----------
+   Four islands drifting in the dream sky, joined by dotted light bridges, with a bottom sheet that tells you about the
+   one you've selected. Everything is coloured from the theme tokens, so it follows the dark/light switch by itself
+   (the sky, moon/sun and island tops are in css/style.css under "Dream map"). Island positions are in a 390x330
+   viewBox (WM_ISLES); the labels are HTML placed by the same numbers as percentages, so the map scales with the screen.
+   Details shown depend on how much you've discovered: a visited town lists its real buildings and neighbours, an
+   unlocked-but-unvisited one keeps those as a surprise, and a locked one shows what it takes to open it. */
+const WM_ISLES = {
+  garden: { x: 80,  y: 96,  w: 80,  lx: 80,  ly: 152 },
+  market: { x: 305, y: 88,  w: 88,  lx: 305, ly: 146 },
+  square: { x: 195, y: 130, w: 112, lx: 195, ly: 192 },
+  harbor: { x: 195, y: 228, w: 76,  lx: 195, ly: 274 }
+};
+const WM_ART = {
+  square: '<circle cx="195" cy="118" r="13" class="wm-art-leaf"/><rect x="192" y="124" width="6" height="12" fill="#5b4632"/>',
+  market: '<path d="M287 84h36v-9l-5-11h-26l-5 11z" fill="#b06a35"/><rect x="291" y="84" width="28" height="7" fill="#5b4632"/>',
+  harbor: '<rect x="193" y="216" width="3" height="20" fill="#d6c7a4"/><path d="M196 218l14 12h-14z" fill="#e9edf1"/>',
+  garden: '<circle cx="80" cy="92" r="8" class="wm-art-bloom"/><path d="M80 99v12" stroke="#3c7a5c" stroke-width="3"/>'
+};
+// Text and the few facts that aren't stored anywhere else. Buildings and neighbour names come from the real maps/save.
+const WM_INFO = {
+  square: { short: 'Square', blurb: 'The heart of town. Everything starts here, and every road leads back to it.', extras: ['Festival Cup fountain', 'Weather sign'] },
+  market: { short: 'Market', blurb: 'East of the Square. Stalls, a museum, and a lantern market that only opens after dark.', extras: ['Trading board', "Lumen's Lantern Market (night only)"] },
+  harbor: { short: 'Harbor', blurb: 'Salt air and slow water. The best fishing in town, and a keeper who bends the tide.', extras: ['Fishing spots (they shuffle every 10 minutes)'] },
+  garden: { short: 'Garden', blurb: 'A hush of flowers and hedges, with a glasshouse tucked in the middle.', extras: [] }
+};
+const WM_ORDER = ['square', 'market', 'harbor', 'garden'];
+let wmSel = 'square';
+const wmEsc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+function wmIslandSvg(key, st) {
+  const I = WM_ISLES[key], h = I.w * 0.5, cx = I.x, cy = I.y, w = I.w;
+  const body = `M${cx - w / 2} ${cy}q${w / 2} ${-h * 0.5} ${w} 0q${-w * 0.12} ${h * 0.9} ${-w * 0.4} ${h * 1.1}q${-w * 0.1} ${-h * 0.15} ${-w * 0.2} 0q${-w * 0.28} ${-h * 0.2} ${-w * 0.4} ${-h * 1.1}z`;
+  const cur = st.current ? `<ellipse cx="${cx}" cy="${cy + h * 0.35}" rx="${w * 0.64}" ry="${h * 0.55}" class="wm-glow"/>` : '';
+  const ring = wmSel === key ? `<ellipse cx="${cx}" cy="${cy + 2}" rx="${w * 0.62}" ry="${h * 0.34}" class="wm-ring"/>` : '';
+  const lock = st.unlocked ? '' : `<g transform="translate(${cx - 9} ${cy + 3})" class="wm-lock"><rect x="3" y="9" width="12" height="9" rx="2"/><path d="M6 9V6a3 3 0 0 1 6 0v3"/></g>`;
+  return `<g class="wm-isle${st.unlocked ? '' : ' locked'}${wmSel === key ? ' sel' : ''}" data-k="${key}" role="button" tabindex="0" aria-label="${wmEsc(st.def.name)}${st.current ? ', you are here' : st.unlocked ? '' : ', locked'}">
+    ${cur}<g class="wm-float"><path d="${body}" class="wm-body"/><ellipse cx="${cx}" cy="${cy}" rx="${w / 2}" ry="${h * 0.22}" class="wm-top wm-top-${key}"/>${WM_ART[key]}</g>${ring}${lock}
+    <ellipse cx="${cx}" cy="${cy + h * 0.3}" rx="${w * 0.7}" ry="${h * 0.9}" fill="transparent"/></g>`;
 }
-function openWorldMap() { renderWorldMap(); document.getElementById('worldMapOverlay').classList.remove('hidden'); sfx('tap'); }
+function wmCloud(x, y, s) { return `<g class="wm-cloud" transform="translate(${x} ${y}) scale(${s})"><ellipse rx="40" ry="10"/><ellipse cx="-16" cy="-8" rx="18" ry="11"/><ellipse cx="14" cy="-9" rx="20" ry="12"/></g>`; }
+function wmStars() {
+  let o = '', r = 7; const rnd = () => (r = (r * 9301 + 49297) % 233280) / 233280;   // fixed pattern, so the sky never shuffles
+  for (let i = 0; i < 46; i++) o += `<circle cx="${Math.round(rnd() * 380 + 5)}" cy="${Math.round(rnd() * 150 + 4)}" r="${(0.6 + rnd() * 0.8).toFixed(1)}" opacity="${(0.25 + rnd() * 0.55).toFixed(2)}"/>`;
+  return `<g class="wm-stars">${o}</g>`;
+}
+function wmStatusChip(st) {
+  if (st.current) return '<span class="wm-chip">📍 You are here</span>';
+  return st.unlocked ? '<span class="wm-chip ok">Open</span>' : '<span class="wm-chip">🔒 Locked</span>';
+}
+function wmPlaces(key, st) {
+  if (!st.visited) return '';
+  const set = [];
+  getMap(key).buildings.forEach(b => { const t = typeof INTERIORS !== 'undefined' && b.enter && INTERIORS[b.enter] && INTERIORS[b.enter].title; if (t && !set.includes(t)) set.push(t); });
+  WM_INFO[key].extras.forEach(t => { if (!set.includes(t)) set.push(t); });
+  return set.map(t => `<span class="wm-chip">${wmEsc(t)}</span>`).join('');
+}
+function wmMeter(label, have, need) {
+  return `<div class="wm-meter"><div class="wm-meter-top"><span>${label}</span><span>${Math.min(have, need)} / ${need}</span></div><div class="wm-track"><i style="width:${Math.min(100, Math.round(100 * have / need))}%"></i></div></div>`;
+}
+function wmRow(label, inner) { return `<div class="wm-row"><div class="wm-row-k">${label}</div><div class="wm-row-v">${inner}</div></div>`; }
+function renderWmSheet() {
+  const key = wmSel, st = districtStatus(key), def = st.def, info = WM_INFO[key], sheet = document.getElementById('wmSheet');
+  const pills = WM_ORDER.map(k => `<button class="wm-pill${k === key ? ' on' : ''}" data-k="${k}" aria-pressed="${k === key}">${WM_INFO[k].short}</button>`).join('');
+  const tw = BattleEngine.TWISTS[BOSS_TWIST[key]];
+  let rows = '';
+  if (st.visited) {
+    const data = state.districtData[key], names = ((data && data.npcs) || []).filter(n => !n.isBoss && !n.isRival).map(n => n.name);
+    rows += wmRow('PLACES', `<div class="wm-chips">${wmPlaces(key, st)}</div>`);
+    rows += wmRow('NEIGHBOURS', names.length ? wmEsc(names.join(', ')) : 'No one around right now');
+  } else if (st.unlocked) {
+    rows += wmRow('PLACES', 'Visit to discover the buildings and who lives here.');
+  }
+  rows += wmRow('BOSS', `<div class="wm-boss">${wmEsc(def.boss)}${st.bossDefeated ? ' <em>(beaten)</em>' : ''}</div>${tw ? `<div class="wm-sub">Twist: ${wmEsc(tw.text)}</div>` : ''}`);
+  let action;
+  if (!st.unlocked) {
+    const pr = ensureLevel();
+    rows += wmRow('TO OPEN', `<div class="wm-meters">${wmMeter('Wins', state.wins, def.unlockWins)}${wmMeter('Level', pr.level, def.unlockLevel || 1)}</div>`);
+    action = `<button class="wm-go" disabled>Opens at ${def.unlockWins} wins and level ${def.unlockLevel || 1}</button>`;
+  } else if (st.current) {
+    rows += wmRow('BOSS STATUS', st.bossDefeated ? 'Beaten.' : 'Not beaten yet.');
+    action = `<button class="wm-go" disabled>You are already here</button>`;
+  } else {
+    rows += wmRow('OPENED', `At ${def.unlockWins || 'no'} win${def.unlockWins === 1 ? '' : 's'} and level ${def.unlockLevel || 1}. ${st.bossDefeated ? 'Boss beaten.' : 'Boss not beaten yet.'}`);
+    action = `<button class="wm-go" data-go="${key}">Float to ${wmEsc(def.name)}</button>`;
+  }
+  sheet.innerHTML = `<div class="wm-grab"></div><div class="wm-pills">${pills}</div>
+    <div class="wm-title"><h3>${wmEsc(def.name)}</h3>${wmStatusChip(st)}</div>
+    <p class="wm-blurb">${wmEsc(info.blurb)}</p>${rows}<div class="wm-action">${action}</div>`;
+}
+function renderWorldMap() {
+  const stage = document.getElementById('wmStage');
+  if (!stage) return;
+  const sts = {}; WM_ORDER.forEach(k => sts[k] = districtStatus(k));
+  const cur = state.currentDistrict;
+  const labels = WM_ORDER.map(k => {
+    const I = WM_ISLES[k], st = sts[k], sub = st.current ? 'You are here' : st.unlocked ? 'Open' : `Level ${st.def.unlockLevel || 1}`;
+    return `<div class="wm-label" style="left:${(I.lx / 390 * 100).toFixed(2)}%;top:${(I.ly / 330 * 100).toFixed(2)}%"><b>${wmEsc(st.def.name)}</b><span>${sub}</span></div>`;
+  }).join('');
+  stage.innerHTML = `<svg viewBox="0 0 390 330" preserveAspectRatio="xMidYMid meet" aria-hidden="false">
+    <defs><linearGradient id="wmBridge" x1="0" x2="1"><stop offset="0" class="wm-b1"/><stop offset="1" class="wm-b2"/></linearGradient></defs>
+    ${wmStars()}<g class="wm-orb"><circle cx="332" cy="52" r="34" class="wm-orb-halo"/><circle cx="332" cy="52" r="24" class="wm-orb-disc"/><circle cx="342" cy="47" r="21" class="wm-orb-cut"/></g>
+    <path d="M195 132Q250 108 296 94" class="wm-bridge main"/><path d="M195 132Q130 112 84 100" class="wm-bridge"/><path d="M195 160Q199 200 195 224" class="wm-bridge"/>
+    ${wmCloud(50, 200, 1)}${wmCloud(340, 190, 1.2)}${wmCloud(95, 285, 1)}${wmCloud(320, 275, 1.3)}
+    ${['garden', 'market', 'square', 'harbor'].map(k => wmIslandSvg(k, sts[k])).join('')}
+    <circle cx="195" cy="98" r="14" class="wm-pin-halo"/><circle cx="195" cy="98" r="7" class="wm-pin"/></svg>${labels}`;
+  // the pin sits over whichever island you're standing on
+  const you = WM_ISLES[cur], pinY = you ? you.y - 32 : 98, pinX = you ? you.x : 195;
+  stage.querySelectorAll('.wm-pin, .wm-pin-halo').forEach(c => { c.setAttribute('cx', pinX); c.setAttribute('cy', pinY); });
+  renderWmSheet();
+}
+function wmSelect(key) { if (!WM_ISLES[key] || key === wmSel) return; wmSel = key; sfx('tap'); renderWorldMap(); }
+function openWorldMap() { wmSel = state.currentDistrict in WM_ISLES ? state.currentDistrict : 'square'; renderWorldMap(); document.getElementById('worldMapOverlay').classList.remove('hidden'); sfx('tap'); }
 function closeWorldMap() { document.getElementById('worldMapOverlay').classList.add('hidden'); }
 document.getElementById('mapRadarBtn').addEventListener('click', openWorldMap);
 document.getElementById('worldMapClose').addEventListener('click', closeWorldMap);
-// Tapping the dimmed backdrop closes it too, like the player menu/inventory panels already do - only
-// when the tap lands on the backdrop itself, not on the card sitting inside it.
-document.getElementById('worldMapOverlay').addEventListener('click', e => { if (e.target.id === 'worldMapOverlay') closeWorldMap(); });
+document.getElementById('worldMapOverlay').addEventListener('click', e => {
+  const isle = e.target.closest('.wm-isle'), pill = e.target.closest('.wm-pill'), go = e.target.closest('[data-go]');
+  if (go) { const k = go.dataset.go; closeWorldMap(); travelToDistrict(k); return; }
+  if (isle) wmSelect(isle.dataset.k); else if (pill) wmSelect(pill.dataset.k);
+});
+document.getElementById('worldMapOverlay').addEventListener('keydown', e => {
+  const isle = e.target.closest && e.target.closest('.wm-isle');
+  if (isle && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); wmSelect(isle.dataset.k); }
+  if (e.key === 'Escape') closeWorldMap();
+});
 
 /* Travel transition: a quick fade to a tinted "arriving at..." card, with the actual district swap happening while
    the screen is covered so the map never visibly pops. Input is blocked for the ~0.9s it lasts. `swap` runs once at

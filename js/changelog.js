@@ -18,6 +18,16 @@ function gameVersionLabel() {
    the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
 const CHANGELOG = [
   {
+    version: '1.71.0',
+    date: '2026-10-01',
+    title: "The dream map",
+    changes: [
+      "The world map is now a dream sky: four islands drifting on clouds, joined by glowing bridges. It follows your dark or light theme, with a moon at night and a sun by day.",
+      "Tap an island (or a name at the bottom) to read about it: what it is, its buildings, who lives there, its boss and the boss's twist. Places and neighbours stay a surprise until you've visited.",
+      "Locked islands show how many wins and levels you still need. Open ones have a Float to button that takes you there."
+    ]
+  },
+  {
     version: '1.70.0',
     date: '2026-10-01',
     title: "Smoother chats and bolder attacks",
