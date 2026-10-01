@@ -629,27 +629,72 @@ function noiseBurst(type, f0, f1, dur, vol, delay) {
   g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(vol, t0 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
   src.connect(filt); filt.connect(g); g.connect(sfxBus); src.start(t0, Math.random()); src.stop(t0 + dur + 0.05);
 }
+/* ---- softer voices for the sound effects (v1.68.0) ----
+   The old effects were bare sine and square beeps with a hard attack, which read as a machine beeping. These are shaped
+   like real things instead: a wooden tap, a water drop, a mallet note and a glass bell, all rounded off with a lowpass
+   and a smooth tail. A touch of random pitch on the frequent ones keeps repeats from sounding mechanical. */
+const wob = (amt = 0.04) => 1 + (Math.random() - 0.5) * 2 * amt;
+// A mallet note: a soft sine with quiet overtones, a short rounded attack and a long smooth tail.
+function pluck(freq, start, dur, vol) {
+  const ctx = ensureAudio(); if (!ctx) return;
+  const t0 = ctx.currentTime + start, g = ctx.createGain(), lp = ctx.createBiquadFilter();
+  lp.type = 'lowpass'; lp.frequency.value = Math.min(3600, freq * 4.5); lp.Q.value = 0.3;
+  g.gain.setValueAtTime(0.0001, t0); g.gain.linearRampToValueAtTime(vol, t0 + 0.014); g.gain.setTargetAtTime(0.0001, t0 + 0.014, dur / 4);
+  [[1, 1], [2, 0.26], [3, 0.07]].forEach(([m, a]) => {
+    const o = ctx.createOscillator(), og = ctx.createGain(); o.type = 'sine'; o.frequency.value = freq * m; og.gain.value = a;
+    o.connect(og); og.connect(g); o.start(t0); o.stop(t0 + dur + 0.2);
+  });
+  g.connect(lp); lp.connect(sfxBus);
+}
+// A glass bell: a sine with a few inharmonic partials that die away faster than the fundamental.
+function bell(freq, start, dur, vol) {
+  const ctx = ensureAudio(); if (!ctx) return;
+  const t0 = ctx.currentTime + start, lp = ctx.createBiquadFilter();
+  lp.type = 'lowpass'; lp.frequency.value = 5200; lp.connect(sfxBus);
+  [[1, 1, 1], [2.76, 0.2, 2], [5.4, 0.07, 3.4]].forEach(([m, a, k]) => {
+    const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.value = freq * m;
+    g.gain.setValueAtTime(0.0001, t0); g.gain.linearRampToValueAtTime(vol * a, t0 + 0.008); g.gain.setTargetAtTime(0.0001, t0 + 0.008, dur / (3 * k));
+    o.connect(g); g.connect(lp); o.start(t0); o.stop(t0 + dur + 0.2);
+  });
+}
+// A water drop: a sine that glides up quickly and fades.
+function bloop(f0, f1, dur, vol, start) {
+  const ctx = ensureAudio(); if (!ctx) return;
+  const t0 = ctx.currentTime + (start || 0), o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = 'sine'; o.frequency.setValueAtTime(f0, t0); o.frequency.exponentialRampToValueAtTime(f1, t0 + dur * 0.7);
+  g.gain.setValueAtTime(0.0001, t0); g.gain.linearRampToValueAtTime(vol, t0 + 0.01); g.gain.setTargetAtTime(0.0001, t0 + 0.012, dur / 3.5);
+  o.connect(g); g.connect(sfxBus); o.start(t0); o.stop(t0 + dur + 0.15);
+}
+// A wooden tap: a very short low thump with a breath of filtered noise on top.
+function wood(vol, f, start) {
+  const ctx = ensureAudio(); if (!ctx) return;
+  const t0 = ctx.currentTime + (start || 0), o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = 'sine'; o.frequency.setValueAtTime(f * 1.7, t0); o.frequency.exponentialRampToValueAtTime(f, t0 + 0.035);
+  g.gain.setValueAtTime(0.0001, t0); g.gain.linearRampToValueAtTime(vol, t0 + 0.004); g.gain.setTargetAtTime(0.0001, t0 + 0.006, 0.02);
+  o.connect(g); g.connect(sfxBus); o.start(t0); o.stop(t0 + 0.2);
+  noiseBurst('bandpass', 2200, 900, 0.045, vol * 0.5, start);
+}
 const SFX = {
-  splash: () => { noiseBurst('bandpass', 1800, 500, 0.35, 0.16); tone(220, 0.02, 0.12, 0.02); },
-  plop:   () => { tone(520, 0, 0.1, 0.05); tone(340, 0.05, 0.14, 0.04); noiseBurst('lowpass', 900, 300, 0.2, 0.05); },
+  splash: () => { noiseBurst('bandpass', 1800, 500, 0.35, 0.16); bloop(200, 120, 0.2, 0.03, 0.02); },
+  plop:   () => { bloop(300 * wob(), 560, 0.12, 0.05); bloop(220, 380, 0.14, 0.03, 0.06); },
   rustle: () => { noiseBurst('bandpass', 3200, 1800, 0.45, 0.07); noiseBurst('bandpass', 2600, 1400, 0.3, 0.05, 0.12); },
-  creak:  () => { tone(180, 0, 0.18, 0.025, 'sawtooth'); tone(150, 0.14, 0.2, 0.02, 'sawtooth'); },
-  click:  () => { tone(1200, 0, 0.04, 0.05, 'square'); tone(800, 0.05, 0.1, 0.03); },
-  wish:   () => { tone(880, 0, 0.12, 0.04); tone(1175, 0.08, 0.2, 0.04); noiseBurst('bandpass', 1500, 600, 0.3, 0.06, 0.12); },
-  step:   () => tone(392, 0, 0.12, 0.05),
-  tap:    () => tone(523, 0, 0.08, 0.04),
-  nav:    () => tone(440, 0, 0.09, 0.035),
-  play:   () => tone(330, 0, 0.14, 0.06),
-  flip:   () => { tone(494, 0, 0.1, 0.05); tone(659, 0.06, 0.12, 0.04); },
-  round:  () => { tone(523, 0, 0.14, 0.06); tone(659, 0.09, 0.18, 0.06); },
-  tie:    () => tone(392, 0, 0.22, 0.05),
-  soft:   () => { tone(330, 0, 0.16, 0.05); tone(262, 0.1, 0.22, 0.045); },
-  win:    () => { [523, 659, 784, 1047].forEach((f, i) => tone(f, i * 0.11, 0.3, 0.07)); },
-  found:  () => { tone(659, 0, 0.16, 0.06); tone(880, 0.1, 0.24, 0.06); },
-  gift:   () => { [392, 523, 659, 784, 988].forEach((f, i) => tone(f, i * 0.09, 0.26, 0.06)); },
-  rare:   () => { [523, 659, 784].forEach((f, i) => tone(f, i * 0.1, 0.35, 0.065, 'triangle')); },
-  mythic: () => { [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, i * 0.12, 0.5, 0.06, 'triangle')); },
-  claim:  () => { tone(587, 0, 0.14, 0.06); tone(880, 0.1, 0.24, 0.06); }
+  creak:  () => { pluck(150, 0, 0.3, 0.02); pluck(128, 0.14, 0.32, 0.016); },
+  click:  () => wood(0.05, 330 * wob()),
+  wish:   () => { bell(880, 0, 0.9, 0.035); bell(1175, 0.1, 1.1, 0.03); noiseBurst('bandpass', 1500, 600, 0.3, 0.04, 0.12); },
+  step:   () => wood(0.03, 190 * wob(0.08)),
+  tap:    () => wood(0.045, 300 * wob()),
+  nav:    () => bloop(330 * wob(0.03), 520, 0.1, 0.045),
+  play:   () => { wood(0.06, 170); pluck(262, 0.02, 0.22, 0.03); },
+  flip:   () => { noiseBurst('bandpass', 3000, 1500, 0.12, 0.035); pluck(494, 0.03, 0.2, 0.028); },
+  round:  () => { bell(523, 0, 0.5, 0.04); bell(659, 0.1, 0.6, 0.04); },
+  tie:    () => pluck(262, 0, 0.35, 0.04),
+  soft:   () => { pluck(330, 0, 0.3, 0.04); pluck(262, 0.1, 0.4, 0.035); },
+  win:    () => { [523, 659, 784, 1047].forEach((f, i) => bell(f, i * 0.12, 0.9, 0.05)); },
+  found:  () => { bell(659, 0, 0.6, 0.045); bell(880, 0.1, 0.8, 0.045); },
+  gift:   () => { [392, 523, 659, 784, 988].forEach((f, i) => bell(f, i * 0.1, 0.7, 0.045)); },
+  rare:   () => { [523, 659, 784].forEach((f, i) => bell(f, i * 0.11, 1.1, 0.05)); noiseBurst('bandpass', 5200, 3200, 0.5, 0.012, 0.3); },
+  mythic: () => { [523, 659, 784, 1047, 1319].forEach((f, i) => bell(f, i * 0.13, 1.4, 0.05)); noiseBurst('bandpass', 5600, 3000, 0.9, 0.016, 0.5); },
+  claim:  () => { bell(784, 0, 0.7, 0.05); bell(1175, 0.09, 0.95, 0.045); }
 };
 function sfx(name) { if (prefs.sound && SFX[name]) { try { SFX[name](); } catch (e) { /* ignore */ } } }
 

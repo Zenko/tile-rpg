@@ -18,6 +18,15 @@ function gameVersionLabel() {
    the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
 const CHANGELOG = [
   {
+    version: '1.68.0',
+    date: '2026-10-01',
+    title: "Softer sounds",
+    changes: [
+      "The beeping is gone. Sound effects are rebuilt to sound like real things: taps are a soft wooden tick, tab changes are a little water drop, and rewards, wins and finds ring like glass bells.",
+      "Taps and footsteps vary a little each time, so repeats do not sound mechanical. Volume is about the same as before.",
+    ],
+  },
+  {
     version: '1.67.0',
     date: '2026-10-01',
     title: "XP as a ring",
