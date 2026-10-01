@@ -68,7 +68,7 @@ const JOURNAL_SEGMENTS = {
   today: { btn: 'segToday', view: 'todayView' },
   eventlog: { btn: 'segEventLog', view: 'eventLogView' },
   battles: { btn: 'segBattles', view: 'battlesView' },
-  almanac: { btn: 'segAlmanac', view: 'almanacView' },
+  almanac: { btn: 'segJAlmanac', view: 'almanacView' },
   notes: { btn: 'segNotes', view: 'notesView' },
 };
 function renderJournal() {
