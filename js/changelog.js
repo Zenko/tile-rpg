@@ -18,6 +18,14 @@ function gameVersionLabel() {
    the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
 const CHANGELOG = [
   {
+    version: '1.67.0',
+    date: '2026-10-01',
+    title: "XP as a ring",
+    changes: [
+      "Your XP now shows as a ring around your avatar on the top bar, with your level on a small tag underneath. The level badge no longer covers your face.",
+    ],
+  },
+  {
     version: '1.66.0',
     date: '2026-10-01',
     title: "Smoother tabs, and no more fog",
