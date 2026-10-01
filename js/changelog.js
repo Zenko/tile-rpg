@@ -19,6 +19,18 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-10-01',
+    version: '1.62.0',
+    title: "A new way to fish",
+    changes: [
+      "Fishing is now a full-screen look at the pond: the bobber, ripples and line on the surface, and a fish you can watch below. Rain and fog show in the scene.",
+      "Pick a bait before you cast. Crumbs are free, and daisies, night bugs and fish from your pantry each attract different fish. A bait is only used up when a fish bites.",
+      "While you wait, a shadow swims toward the hook and shows how big the fish is. Sometimes there is a false nibble, so it pays to wait for the real bite.",
+      "Reeling is now a hold, not a tap race. Hold the button to reel and keep the marker in the green. When the fish runs, ease off in short pulls. The line never snaps, it just lets the fish take back line, so there is still no penalty.",
+      "Prefer something simpler? Turn on Easy reeling in Settings and holding keeps the line steady for you.",
+    ],
+  },
+  {
+    date: '2026-10-01',
     version: '1.61.0',
     title: "Battle fixes and effects",
     changes: [

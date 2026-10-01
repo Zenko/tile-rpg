@@ -163,7 +163,8 @@ const GUIDE = [
     { icon: '✦', name: 'Charms & mastery', where: 'Cards → My Cards', how: 'Charm cards for town perks; cards you play earn ★ mastery (★★★: +1 health in battle).' },
     { icon: '🤝', name: 'Trading board', where: 'The sign in Market Row', how: 'Three trades a day for spare cards.', lock: () => needs('market') },
     { icon: '✨', name: 'Foil cards', where: 'Any new card', how: 'Now and then a new card arrives as a shimmering foil. Your running total shows at the top of Cards → Index and in your cottage trophy case.' },
-    { icon: '🎣', name: 'Fishing & gardening', where: 'River banks · Town Square soil', how: 'Fish and crops fill the Fish page, your pantry and your pockets.' },
+    { icon: '🎣', name: 'Fishing', where: 'Tap water from a bank', how: 'Pick a bait, cast, and watch the shadow: its size hints at the fish. Tap when it bites, then hold to reel and keep the marker in the green. Easy reeling is in Settings.' },
+    { icon: '🌱', name: 'Gardening', where: 'Town Square soil', how: 'Crops fill your pantry and your pockets.' },
   ] },
 ];
 // Collapsed by default (keyed by item name) - with ~30 entries across 5 sections, showing every "how"
@@ -199,7 +200,7 @@ function applyComfortPrefs() {
   document.documentElement.classList.toggle('big-text', !!prefs.bigText);
   document.documentElement.classList.toggle('calm', !!prefs.calm);
 }
-[['fastToggle', 'fast'], ['bigTextToggle', 'bigText'], ['calmToggle', 'calm']].forEach(([id, key]) => {
+[['fastToggle', 'fast'], ['fishEasyToggle', 'fishEasy'], ['bigTextToggle', 'bigText'], ['calmToggle', 'calm']].forEach(([id, key]) => {
   document.getElementById(id).addEventListener('click', () => {
     prefs[key] = !prefs[key]; savePrefs(); applyComfortPrefs(); syncToggles(); sfx('tap');
     if (key === 'bigText' && !inBattle) renderTown();

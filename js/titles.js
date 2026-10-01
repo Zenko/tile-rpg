@@ -505,6 +505,7 @@ function syncToggles() {
   document.querySelectorAll('#themeSeg .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.themePick === prefs.theme));
   document.getElementById('ambientToggle').classList.toggle('on', prefs.ambient);
   document.getElementById('fastToggle').classList.toggle('on', !!prefs.fast);
+  document.getElementById('fishEasyToggle').classList.toggle('on', !!prefs.fishEasy);
   document.getElementById('bigTextToggle').classList.toggle('on', !!prefs.bigText);
   document.getElementById('calmToggle').classList.toggle('on', !!prefs.calm);
   document.getElementById('notifsToggle').classList.toggle('on', notifsEnabled());

@@ -146,6 +146,7 @@
 
             <div class="settings-group-label">Accessibility &amp; battles</div>
             <div class="settings-row"><span>⏩ Fast battles</span><button class="toggle" id="fastToggle" aria-label="Toggle fast battle animations"></button></div>
+            <div class="settings-row"><span>🎣 Easy reeling</span><button class="toggle" id="fishEasyToggle" aria-label="Toggle easy fishing reel"></button></div>
             <div class="settings-row"><span>🔠 Larger text</span><button class="toggle" id="bigTextToggle" aria-label="Toggle larger text"></button></div>
             <div class="settings-row"><span>🌙 Calm motion</span><button class="toggle" id="calmToggle" aria-label="Toggle reduced motion"></button></div>
 
@@ -481,14 +482,32 @@
 
 
 <div class="overlay hidden" id="fishOverlay">
-  <div class="overlay-card" id="fishCard">
-    <div class="fish-art" id="fishArt">🎣</div>
-    <h2 id="fishMsg">A quiet spot by the water.</h2>
-    <p id="fishSub">Cast your line and wait for a bite.</p>
-    <div class="fish-reel-bar hidden" id="fishReelBar"><div class="fish-reel-fill" id="fishReelFill"></div></div>
-    <div id="fishTally"></div>
-    <button class="btn" id="fishBtn">Cast line</button>
-    <button class="btn" id="fishClose">Leave the water</button>
+  <div class="fish-scene" id="fishScene" data-phase="idle">
+    <div class="fs-bank"></div><div class="fs-water"></div><div class="fs-shafts"></div><div class="fs-rain" id="fishRain"></div>
+    <svg class="fs-svg" viewBox="0 0 340 690" preserveAspectRatio="none" aria-hidden="true">
+      <path id="fishRod" d="M338 6 Q 262 16 170 176" stroke="#c9b48a" stroke-width="4" fill="none" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+      <path id="fishLine" d="" stroke="rgba(255,255,255,.8)" stroke-width="1.6" fill="none" vector-effect="non-scaling-stroke"/>
+    </svg>
+    <div class="fs-ring" id="fishRing1"></div><div class="fs-ring r2" id="fishRing2"></div>
+    <div class="fs-bobber" id="fishBobber"></div>
+    <div class="fs-fish" id="fishFish"></div>
+    <div class="fs-bang" id="fishBang">!</div>
+    <div class="fs-splash" id="fishSplash"></div>
+    <div class="fs-top"><span class="fs-loc" id="fishLoc"></span><span class="fs-wx" id="fishWx"></span><span class="fs-stamps" id="fishStamps"></span></div>
+    <div class="fs-depth hidden" id="fishDepth" aria-hidden="true"><span class="t0">0m</span><span class="t1">4m</span><div class="fillv" id="fishDepthFill"></div><span class="mk" id="fishDepthMk">🐟</span></div>
+    <div class="fs-panel">
+      <h2 id="fishMsg">A quiet spot by the water.</h2>
+      <p id="fishSub">Pick a bait, then cast.</p>
+      <div class="fs-baits" id="fishBaits"></div>
+      <div class="fs-tension hidden" id="fishTension">
+        <div class="lbl"><span>Slack</span><span>Perfect</span><span>Straining</span></div>
+        <div class="bar"><i class="mk" id="fishTensionMk"></i></div>
+      </div>
+      <div class="fs-result hidden" id="fishResult"></div>
+      <button class="btn" id="fishBtn">Cast</button>
+      <div id="fishTally"></div>
+      <button class="btn" id="fishClose">Leave the water</button>
+    </div>
   </div>
 </div>
 
