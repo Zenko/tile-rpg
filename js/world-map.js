@@ -161,6 +161,17 @@ const ACCESSORY_OPTIONS = [
   { icon: '🦋', label: 'Butterfly', cost: 25 },
   { icon: '🔥', label: 'Flame',     cost: 30 }
 ];
+// Table mats: the cloth on your side of the battle table (see .mat-* in css/style.css). Same Shop-and-equip flow
+// as the cosmetics above; ids are stored in state.character.unlockedMats / state.character.mat.
+const MAT_OPTIONS = [
+  { id: 'glass',   name: 'Sea glass',       cost: 0 },
+  { id: 'moss',    name: 'Moss felt',       cost: 15 },
+  { id: 'velvet',  name: 'Midnight velvet', cost: 20 },
+  { id: 'linen',   name: 'Sand linen',      cost: 20 },
+  { id: 'lacquer', name: 'Cherry lacquer',  cost: 28 },
+  { id: 'stars',   name: 'Starfield',       cost: 32 },
+  { id: 'aurora',  name: 'Aurora',          cost: 40 }
+];
 const COLOR_OPTIONS = [
   { color: '#a8d4cc', cost: 0 },
   { color: '#e3b7a0', cost: 15 },

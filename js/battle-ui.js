@@ -80,6 +80,7 @@ function startBattle(opponent) {
   // district-driven look, so the two sides read as clearly different - yours personalized, theirs neutral.
   battleView.style.setProperty('--side-accent', state.character.color || 'var(--water-glow)');
   btSetMsg(isBoss ? `${opponent.name} rises to meet you` : 'Your turn');
+  ensureCosmeticUnlocks(); btGet('btYouRow').className = 'trow mat-' + (state.character.mat || 'glass');   // the player's table mat
   btHideTip();
   btRender();
   if (isBoss) { sfx('rare'); buzz(HAP.win); }
@@ -89,7 +90,14 @@ function startBattle(opponent) {
   const swapBtn = btGet('mulliganSwapBtn'); swapBtn.disabled = false; swapBtn.textContent = 'Draw new hand';
   btRenderMulliganHand();
   renderSnackRow();
-  btGet('mulliganOverlay').classList.remove('hidden');
+  // Deal the opening hand slowly from the deck, then offer the keep-or-redraw choice.
+  const tk = battle.token; battle.busy = true;
+  btRender({ dealAll: true });
+  btDealOpening(tk).then(() => {
+    if (!btAlive(tk)) return;
+    battle.busy = false; btRender(); btRenderMulliganHand();
+    btGet('mulliganOverlay').classList.remove('hidden');
+  });
 }
 // Dishes that help in battle can be eaten on the keep-this-hand screen, one per match.
 function renderSnackRow() {
@@ -220,8 +228,71 @@ function btImpact(el, n) {
   }
 }
 
+/* ---------------- decks, card backs and dealing ----------------
+   Each side's draw pile is a stack of card backs on the table (taller = more cards left) and the opponent's hand is a
+   little fan of backs by their name, so you can see how many they hold. Your own backs wear your card sleeve. Cards
+   are dealt by flying a back from the pile to its place and then flipping the face up, slowly enough to watch. */
+function btBackEl(mine) {
+  const s = mine ? currentSleeve() : null, el = document.createElement('div');
+  el.className = 'cback' + (s && s.id ? ' sleeved sleeve-' + s.id : '');
+  if (s && s.id) el.innerHTML = `<span class="sleeve-fx"></span><span class="sleeve-mark">${s.icon}</span>`;
+  return el;
+}
+function btRenderPiles() {
+  const G = battle.G;
+  [['You', 0], ['Opp', 1]].forEach(([k, i]) => {
+    const pile = btGet('bt' + k + 'Pile'), n = G.p[i].deck.length, layers = n ? Math.min(6, Math.ceil(n / 3)) : 0;
+    pile.innerHTML = ''; pile.classList.toggle('empty', !n);
+    for (let l = 0; l < layers; l++) { const b = btBackEl(i === 0); b.style.transform = `translate(${-l * 1.3}px, ${-l * 1.7}px)`; pile.appendChild(b); }
+    if (n) { const c = document.createElement('span'); c.className = 'pile-n'; c.textContent = n; pile.appendChild(c); }
+  });
+}
+function btRenderOppHand() {
+  const box = btGet('btOppHand'), n = battle.G.p[1].hand.length;
+  box.innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    const b = btBackEl(false), off = i - (n - 1) / 2;
+    b.style.setProperty('--r', (off * 7).toFixed(1) + 'deg'); b.style.setProperty('--y', Math.round(off * off * 0.8) + 'px');
+    box.appendChild(b);
+  }
+}
+const btMotionOk = () => !document.documentElement.classList.contains('calm') && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+// Fly a card back from one element to another over ms milliseconds; resolves when it lands.
+function btFlyBack(fromEl, toEl, ms, mine) {
+  return new Promise(res => {
+    if (!fromEl || !toEl || !btMotionOk()) return res();
+    const a = fromEl.getBoundingClientRect(), b = toEl.getBoundingClientRect();
+    const tw = toEl.offsetWidth || b.width, th = toEl.offsetHeight || b.height, cx = b.left + b.width / 2, cy = b.top + b.height / 2;
+    const f = btBackEl(mine); f.classList.add('flying'); f.style.width = a.width + 'px'; f.style.height = a.height + 'px';
+    battleView.appendChild(f);
+    const anim = f.animate([
+      { transform: `translate(${a.left}px, ${a.top}px) scale(1)` },
+      { transform: `translate(${cx - tw / 2}px, ${cy - th / 2}px) scale(${tw / a.width}, ${th / a.height})` }
+    ], { duration: ms * (prefs.fast ? 0.45 : 1), easing: 'cubic-bezier(.3,.7,.3,1)', fill: 'forwards' });
+    const done = () => { f.remove(); res(); };
+    anim.onfinish = done; anim.oncancel = done;
+  });
+}
+// A drawn card: its back flies from your pile to its place in the hand, then it flips face up.
+async function btDealOne(uid, ms) {
+  const card = battleView.querySelector(`#btHand .card[data-uid="${uid}"]`);
+  if (!card) return;
+  const pileTop = btGet('btYouPile').querySelector('.cback:last-of-type') || btGet('btYouPile');
+  await btFlyBack(pileTop, card, ms, true);
+  card.classList.remove('deal-hide');
+  if (btMotionOk()) card.animate([{ transform: 'perspective(500px) rotateY(90deg)' }, { transform: 'perspective(500px) rotateY(0deg)' }], { duration: 260 * (prefs.fast ? 0.45 : 1), easing: 'ease-out' });
+}
+async function btDealOpening(token) {
+  await btWait(250);
+  for (const c of battle.G.p[0].hand.slice()) {
+    if (!btAlive(token)) return;
+    await btDealOne(c.uid, 420); await btWait(70);
+  }
+}
+
 function btRenderBars() {
   const G = battle.G;
+  btRenderPiles(); btRenderOppHand();
   [['You', 0], ['Opp', 1]].forEach(([k, i]) => {
     const p = G.p[i], pct = Math.max(0, p.spirit / p.maxSpirit * 100);
     const sp = btGet('bt' + k + 'Spirit');
@@ -282,7 +353,7 @@ function btAddPreviewBadge(el, target, attacker) {
   el.insertAdjacentHTML('beforeend', `<span class="badge prev">${txt}${risky ? ' ⚠' : ''}</span>`);
 }
 
-function btRenderHand(drawnUid) {
+function btRenderHand(drawnUid, dealAll) {
   const G = battle.G, me = G.p[0], box = btGet('btHand');
   box.innerHTML = '';
   const n = me.hand.length, step = n <= 4 ? 8 : n <= 6 ? 6 : 5;
@@ -292,7 +363,7 @@ function btRenderHand(drawnUid) {
     const off = i - (n - 1) / 2;
     w.style.setProperty('--rot', (off * step).toFixed(1) + 'deg'); w.style.setProperty('--dy', Math.round(off * off * 1.4) + 'px');
     const ok = !battle.busy && BattleEngine.canPlay(G, 0, c.uid).ok;
-    const el = btCardEl(c, (ok ? 'playable ' : 'unaffordable ') + (battle.sel && battle.sel.uid === c.uid ? 'selected ' : '') + (drawnUid === c.uid ? 'draw' : ''), true);
+    const el = btCardEl(c, (ok ? 'playable ' : 'unaffordable ') + (battle.sel && battle.sel.uid === c.uid ? 'selected ' : '') + ((drawnUid === c.uid || dealAll) && btMotionOk() ? 'deal-hide' : ''), true);
     el.addEventListener('click', () => btOnHandCard(c));
     el.addEventListener('pointerdown', e => btStartDrag(e, c));
     w.appendChild(el); box.appendChild(w);
@@ -323,7 +394,7 @@ function btCoach() {
   el.textContent = t;
 }
 
-function btRender(o) { o = o || {}; btRenderBars(); btSyncSnackBadge(); btRenderGems(); btRenderBoards(o.entering); btRenderHand(o.drawn); btCoach(); }
+function btRender(o) { o = o || {}; btRenderBars(); btSyncSnackBadge(); btRenderGems(); btRenderBoards(o.entering); btRenderHand(o.drawn, o.dealAll); btCoach(); }
 
 /* ---------------- card info sheet ---------------- */
 function btShowTip(c, hint) {
@@ -396,7 +467,7 @@ function btDragTarget() {
   if (!el) return null;
   if (d.kind === 'creature') {
     const slot = el.closest('#btYouBoard .slot'); if (slot) return { slot, index: [...slot.parentNode.children].indexOf(slot) };
-    return el.closest('#btYouBoard') ? { slot: null, index: null } : null;
+    return el.closest('#btYouRow') ? { slot: null, index: null } : null;
   }
   if (d.kind === 'spell') return el.closest('.table') ? { slot: null } : null;
   const card = el.closest('#btOppBoard .card'); return card ? { card } : null;
@@ -564,7 +635,12 @@ async function btAnimate(evs, token) {
       const el = document.querySelector(`#battleView .card[data-uid="${e.card.uid}"]`);
       if (el) btFloater(el, '🌸 +1', 'heal');
     } else if (e.type === 'draw' && e.who === 0) {
-      btRender({ drawn: e.card.uid }); await btWait(200);
+      btRender({ drawn: e.card.uid });
+      await btDealOne(e.card.uid, 520); await btWait(120);
+    } else if (e.type === 'draw' && e.who === 1) {
+      btRenderBars();
+      const hand = btGet('btOppHand'), back = hand.lastElementChild;
+      if (back && btMotionOk()) { back.classList.add('deal-hide'); await btFlyBack(btGet('btOppPile').querySelector('.cback:last-of-type') || btGet('btOppPile'), back, 380, false); back.classList.remove('deal-hide'); }
     } else if (e.type === 'burn' && e.who === 0) {
       btToast('Your hand is full, so a card was set aside');
     } else if (e.type === 'turn') {

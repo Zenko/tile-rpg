@@ -402,13 +402,13 @@ function renderCustomize() {
     <div class="wallet">
       <div>
         <div class="w-amt">🫧 ${peb}</div>
-        <div class="w-sub">Unlock emojis, accessories, and colors for good.</div>
+        <div class="w-sub">Unlock emojis, accessories, colors and table mats for good.</div>
       </div>
     </div>`;
 
   const custNote = document.createElement('div');
   custNote.className = 'shop-note';
-  custNote.textContent = 'Buying an emoji, accessory, or color unlocks it for good and equips it right away.';
+  custNote.textContent = 'Buying an emoji, accessory, color or table mat unlocks it for good and equips it right away.';
   box.appendChild(custNote);
 
   const emojiRow = document.createElement('div'); emojiRow.className = 'swatch-row shop-swatch-row';
@@ -420,6 +420,11 @@ function renderCustomize() {
   const colorRow = document.createElement('div'); colorRow.className = 'swatch-row shop-swatch-row';
   COLOR_OPTIONS.forEach(o => colorRow.appendChild(shopCosmeticSwatch('color', o.color, '', o.cost, ch.color === o.color, ch.unlockedColors.includes(o.color))));
   box.appendChild(colorRow);
+  const matLabel = document.createElement('div'); matLabel.className = 'shop-note'; matLabel.textContent = 'Table mats: the cloth on your side of the battle table.';
+  box.appendChild(matLabel);
+  const matRow = document.createElement('div'); matRow.className = 'swatch-row shop-swatch-row shop-mat-row';
+  MAT_OPTIONS.forEach(o => matRow.appendChild(shopCosmeticSwatch('mat', o.id, o.name, o.cost, ch.mat === o.id, ch.unlockedMats.includes(o.id))));
+  box.appendChild(matRow);
 }
 
 function haveDecoItem(item) { return decorationInventoryCount(item.id) > 0 || allDecorations().some(d => d.deco.id === item.id); }
@@ -545,8 +550,9 @@ function renderItems() {
 // price and buy-then-equip on tap (via buyCosmetic).
 function shopCosmeticSwatch(kind, value, label, cost, isEquipped, isUnlocked) {
   const el = document.createElement('div');
-  el.className = (kind === 'color' ? 'color-swatch' : 'emoji-swatch') + ' shop-swatch' + (isEquipped ? ' active' : '') + (isUnlocked ? '' : ' locked');
+  el.className = (kind === 'color' ? 'color-swatch' : kind === 'mat' ? 'mat-swatch mat-' + value : 'emoji-swatch') + ' shop-swatch' + (isEquipped ? ' active' : '') + (isUnlocked ? '' : ' locked');
   if (kind === 'color') el.style.background = value;
+  else if (kind === 'mat') { el.innerHTML = `<span>${label}</span>`; el.title = label; }
   else { el.textContent = value || '🚫'; if (label) el.title = label; }
   if (!isUnlocked) {
     const tag = document.createElement('span');
@@ -558,7 +564,7 @@ function shopCosmeticSwatch(kind, value, label, cost, isEquipped, isUnlocked) {
     ensureAudio();
     if (isUnlocked) {
       sfx('nav'); buzz(HAP.tap);
-      const field = kind === 'emoji' ? 'emoji' : kind === 'accessory' ? 'accessory' : 'color';
+      const field = kind === 'emoji' ? 'emoji' : kind === 'accessory' ? 'accessory' : kind === 'mat' ? 'mat' : 'color';
       state.character[field] = value;
       saveState(); updateHud(); renderTown(); renderCustomize();
     } else {

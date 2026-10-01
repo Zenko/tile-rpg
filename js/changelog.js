@@ -19,6 +19,16 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-10-01',
+    version: '1.59.0',
+    title: "Table mats and decks you can see",
+    changes: [
+      "Customize your side of the battle table with a table mat: Moss felt, Midnight velvet, Sand linen, Cherry lacquer, Starfield or Aurora. Buy them in the Card Shop (Customize), then pick one in Player → Customize.",
+      "Each side now has a visible draw pile of card backs on the table, and the opponent's hand is a fan of backs beside their name. Your own card backs wear your card sleeve.",
+      "Cards are dealt slowly from the deck: the opening hand, every draw you make and every draw your opponent makes. The back flies across the table and flips face up. Fast battles speeds it up, and Calm motion turns it off.",
+    ],
+  },
+  {
+    date: '2026-10-01',
     version: '1.58.0',
     title: "Battles on a tabletop",
     changes: [

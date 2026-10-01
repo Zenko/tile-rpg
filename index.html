@@ -92,6 +92,10 @@
             <div class="swatch-row" id="colorSwatches"></div>
           </div>
           <div class="customize-section">
+            <div class="customize-label">Table mat <small>(your side in battles)</small></div>
+            <div class="swatch-row mat-row" id="matSwatches"></div>
+          </div>
+          <div class="customize-section">
             <div class="customize-label">Companion</div>
             <div id="companionBox"></div>
           </div>
@@ -374,13 +378,14 @@
         <div class="side" id="btOppBar">
           <div class="spirit" id="btOppSpirit"><span class="bt-portrait" id="btOppPortrait">🙂</span><div class="fill"></div><div class="num"></div></div>
           <div class="nmv"><span class="who" id="btOppName">Neighbor</span><span class="deckcount" id="btOppDeck"></span></div>
+          <div class="ohand" id="btOppHand" aria-label="Opponent's hand"></div>
         </div>
         <div class="divider"><span class="msg" id="btMsg">Your turn</span><span class="bt-weather" id="btWeather"></span></div>
         <div class="field">
           <div class="table">
-            <div class="board" id="btOppBoard"></div>
+            <div class="trow" id="btOppRow"><div class="board" id="btOppBoard"></div><div class="pile" id="btOppPile"></div></div>
             <div class="seam"></div>
-            <div class="board" id="btYouBoard"></div>
+            <div class="trow mat-glass" id="btYouRow"><div class="board" id="btYouBoard"></div><div class="pile" id="btYouPile"></div></div>
           </div>
         </div>
         <div class="coach" id="btCoach"></div>

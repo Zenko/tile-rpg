@@ -1700,3 +1700,47 @@ html.calm *, html.calm *::before, html.calm *::after { animation-duration: 0.01m
 #battleView .slot.drop-hover { border-style: solid; border-color: var(--water); background: rgba(141,188,203,.3); box-shadow: 0 0 16px var(--water); animation: none; }
 #battleView .table.cast-zone { box-shadow: 0 30px 36px rgba(0,0,0,.4), 0 0 0 2px var(--accent), 0 0 26px color-mix(in srgb, var(--accent) 45%, transparent); }
 #battleView .card.drop-hover { box-shadow: 0 0 0 3px #fff, 0 0 20px rgba(255,240,180,.9); }
+
+/* ===== Table mats and card decks (v1.59.0) ===== */
+/* A mat is just a background + inset edge. The same .mat-* class dresses the player's row of the battle table
+   (#btYouRow) and the little preview swatches in Customize and the Shop. */
+.mat-glass   { background: linear-gradient(180deg, rgba(141,188,203,.05), rgba(141,188,203,.14)); box-shadow: inset 0 0 0 1px rgba(141,188,203,.28); }
+.mat-moss    { background: repeating-linear-gradient(45deg, rgba(255,255,255,.04) 0 2px, transparent 2px 4px), radial-gradient(circle at 30% 20%, #3f7350, #28472f 78%); box-shadow: inset 0 0 0 2px #1c3324, inset 0 0 22px rgba(0,0,0,.35); }
+.mat-velvet  { background: linear-gradient(115deg, transparent 38%, rgba(255,255,255,.08) 50%, transparent 62%), linear-gradient(180deg, #2c2c74, #181a4a); box-shadow: inset 0 0 0 2px #0f1030, inset 0 0 22px rgba(0,0,0,.4); }
+.mat-linen   { background: repeating-linear-gradient(0deg, rgba(120,100,60,.13) 0 1px, transparent 1px 4px), repeating-linear-gradient(90deg, rgba(120,100,60,.13) 0 1px, transparent 1px 4px), #d9ccb0; box-shadow: inset 0 0 0 2px #b7a785, inset 0 0 18px rgba(120,100,60,.25); }
+.mat-lacquer { background: linear-gradient(135deg, rgba(255,255,255,.16) 0, transparent 32%), linear-gradient(180deg, #86222f, #4b1119); box-shadow: inset 0 0 0 2px #d9b45a, inset 0 0 0 4px #4b1119, inset 0 0 18px rgba(0,0,0,.4); }
+.mat-stars   { background: radial-gradient(1.5px 1.5px at 14% 26%, #fff, transparent), radial-gradient(1px 1px at 38% 70%, #dfe7ff, transparent), radial-gradient(1.5px 1.5px at 62% 30%, #fff, transparent), radial-gradient(1px 1px at 84% 62%, #fff, transparent), radial-gradient(1px 1px at 50% 12%, #cfd8ff, transparent), radial-gradient(1.5px 1.5px at 92% 20%, #fff, transparent), linear-gradient(180deg, #0f1636, #1b2150); box-shadow: inset 0 0 0 2px #e8cb88, inset 0 0 18px rgba(0,0,0,.4); }
+.mat-aurora  { background: linear-gradient(120deg, rgba(60,200,150,.92), rgba(60,120,210,.92) 50%, rgba(150,80,200,.92)); box-shadow: inset 0 0 0 2px rgba(255,255,255,.35), inset 0 0 22px rgba(0,0,0,.3); }
+.mat-swatch { position: relative; width: 100%; height: 46px; border-radius: 12px; border: 2px solid transparent; cursor: pointer; display: flex; align-items: flex-end; justify-content: center; padding: 0 4px 3px; overflow: visible; }
+.mat-swatch > span:first-child { font-size: .58rem; font-weight: 700; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.8); line-height: 1.05; text-align: center; }
+.mat-swatch.mat-linen > span:first-child { color: #3a2e18; text-shadow: none; }
+.mat-swatch.mat-glass { background: linear-gradient(180deg, #3b6a7b, #29505e); }
+.mat-swatch.active { border-color: var(--water); box-shadow: 0 0 0 2px var(--water); }
+.mat-swatch.locked { opacity: .55; }
+.mat-swatch:active { transform: scale(.96); }
+.mat-row { grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); }
+.shop-mat-row { grid-template-columns: repeat(3, 1fr); }
+.shop-mat-row .mat-swatch { height: 56px; }
+.customize-label small { font-weight: 400; opacity: .7; }
+
+/* the battle table is now two rows (board + deck pile) on either side of the seam */
+#battleView .trow { display: flex; align-items: center; gap: 6px; padding: 3px 6px 3px 2px; border-radius: 14px; }
+#battleView .trow .board { flex: 1; min-width: 0; padding: 4px 0 4px 4px; }
+#battleView .pile { position: relative; flex: 0 0 48px; width: 48px; aspect-ratio: 3 / 4; margin-right: 6px; }
+#battleView .pile.empty { border: 1.5px dashed var(--stone-edge); border-radius: 9px; }
+#battleView .pile.empty::after { content: 'Empty'; position: absolute; inset: 0; display: grid; place-items: center; font-size: .56rem; color: var(--ink-soft); }
+#battleView .pile-n { position: absolute; right: -6px; bottom: -9px; z-index: 20; min-width: 24px; text-align: center; padding: 0 6px; font-size: .62rem; font-weight: 700; background: var(--bg-bottom); border: 1px solid var(--water); border-radius: 999px; color: var(--ink); font-variant-numeric: tabular-nums; }
+/* a card back: the default design, or the player's sleeve on their own deck and hand */
+.cback { position: absolute; inset: 0; border-radius: 9px; overflow: hidden; background: linear-gradient(135deg, #3f7f94, #24505f); border: 2px solid rgba(255,255,255,.4); box-shadow: 0 2px 5px rgba(0,0,0,.45), inset 0 0 0 3px rgba(0,0,0,.18); }
+.cback::before { content: ''; position: absolute; inset: 5px; border: 1px solid rgba(255,255,255,.38); border-radius: 6px; z-index: 1; }
+.cback::after { content: '✦'; position: absolute; inset: 0; display: grid; place-items: center; color: rgba(255,255,255,.75); font-size: 1.15rem; z-index: 1; }
+.cback.sleeved::after { content: none; }
+.cback .sleeve-fx { position: absolute; inset: 0; opacity: .6; z-index: 0; }
+.cback .sleeve-mark { position: absolute; inset: 0; display: grid; place-items: center; font-size: 1.2rem; z-index: 2; filter: drop-shadow(0 1px 1px rgba(0,0,0,.5)); }
+.cback.sleeved { border-color: var(--sleeve-edge, rgba(255,255,255,.5)); }
+#battleView .ohand { display: flex; align-items: center; margin-left: auto; padding-right: 8px; min-height: 40px; }
+#battleView .ohand .cback { position: relative; inset: auto; flex: none; width: 26px; height: 36px; margin-left: -14px; border-radius: 6px; transform: translateY(var(--y, 0px)) rotate(var(--r, 0deg)); transform-origin: 50% 120%; }
+#battleView .ohand .cback::before { inset: 3px; border-radius: 4px; } #battleView .ohand .cback::after { font-size: .7rem; }
+#battleView .ohand .cback:first-child { margin-left: 0; }
+.cback.flying { position: fixed; inset: auto; left: 0; top: 0; margin: 0; z-index: 70; pointer-events: none; transform-origin: 0 0; will-change: transform; }
+#battleView .card.deal-hide, #battleView .ohand .cback.deal-hide { visibility: hidden; }

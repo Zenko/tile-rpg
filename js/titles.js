@@ -58,6 +58,9 @@ function ensureCosmeticUnlocks() {
   if (!Array.isArray(ch.unlockedEmojis)) ch.unlockedEmojis = [EMOJI_OPTIONS[0].emoji];
   if (!Array.isArray(ch.unlockedAccessories)) ch.unlockedAccessories = [ACCESSORY_OPTIONS[0].icon];
   if (!Array.isArray(ch.unlockedColors)) ch.unlockedColors = [COLOR_OPTIONS[0].color];
+  if (!Array.isArray(ch.unlockedMats)) ch.unlockedMats = [MAT_OPTIONS[0].id];
+  if (!MAT_OPTIONS.some(m => m.id === ch.mat)) ch.mat = MAT_OPTIONS[0].id;
+  if (!ch.unlockedMats.includes(ch.mat)) ch.unlockedMats.push(ch.mat);
   // Grandfather in whatever this save already had picked, even if it predates today's five-item lists.
   if (ch.emoji && !ch.unlockedEmojis.includes(ch.emoji)) ch.unlockedEmojis.push(ch.emoji);
   if (ch.color && !ch.unlockedColors.includes(ch.color)) ch.unlockedColors.push(ch.color);
@@ -69,12 +72,13 @@ function buyCosmetic(kind, value, cost) {
   const ch = state.character, pr = state.progress;
   if (pr.pebbles < cost) { toast('Not enough Pebbles yet'); sfx('tie'); return false; }
   pr.pebbles -= cost;
-  const key = kind === 'emoji' ? 'unlockedEmojis' : kind === 'accessory' ? 'unlockedAccessories' : 'unlockedColors';
+  const key = kind === 'emoji' ? 'unlockedEmojis' : kind === 'accessory' ? 'unlockedAccessories' : kind === 'mat' ? 'unlockedMats' : 'unlockedColors';
   if (!ch[key].includes(value)) ch[key].push(value);
   if (kind === 'emoji') ch.emoji = value;
   else if (kind === 'accessory') ch.accessory = value;
+  else if (kind === 'mat') ch.mat = value;
   else ch.color = value;
-  const label = kind === 'emoji' ? `the ${value} look` : kind === 'accessory' ? `the ${value} accessory` : 'a new color';
+  const label = kind === 'emoji' ? `the ${value} look` : kind === 'accessory' ? `the ${value} accessory` : kind === 'mat' ? `the ${MAT_OPTIONS.find(m => m.id === value).name} table mat` : 'a new color';
   logEvent(kind === 'emoji' ? value : '✨', `Bought and equipped ${label} for 🫧 ${cost}.`);
   saveState();
   updateHud();
@@ -157,6 +161,18 @@ function renderCharacterPanel() {
     colorRow.appendChild(sw);
   });
   if (colorRow.children.length < COLOR_OPTIONS.length) colorRow.appendChild(moreInShopHint());
+
+  const matRow = document.getElementById('matSwatches');
+  matRow.innerHTML = '';
+  MAT_OPTIONS.filter(o => state.character.unlockedMats.includes(o.id)).forEach(o => {
+    const sw = document.createElement('div');
+    sw.className = 'mat-swatch mat-' + o.id + (state.character.mat === o.id ? ' active' : '');
+    sw.title = o.name; sw.setAttribute('role', 'button'); sw.setAttribute('aria-label', o.name + ' table mat');
+    sw.innerHTML = `<span>${o.name}</span>`;
+    sw.addEventListener('click', () => { state.character.mat = o.id; saveState(); sfx('nav'); buzz(HAP.tap); renderCharacterPanel(); });
+    matRow.appendChild(sw);
+  });
+  if (matRow.children.length < MAT_OPTIONS.length) matRow.appendChild(moreInShopHint());
 
   applyAvatarStyle(document.getElementById('avatarPreview'), state.character);
   document.getElementById('avatarPreviewEmoji').textContent = state.character.emoji;
