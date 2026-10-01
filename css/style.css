@@ -1,27 +1,27 @@
 /* Theme tokens. Two looks, switched by <html data-theme="dark|light"> (see applyTheme() in js/audio.js):
-   dark = "Sea glass, dark", light = "Sand and sea glass". The dark values are on bare :root, so they are also
+   dark = "Slate glass", light = "Sand and sea glass". The dark values are on bare :root, so they are also
    the fallback. The game world (town map, battles, building interiors) stays dark in both themes: the light
    theme re-declares the dark tokens on those containers, so the art keeps its night colours. */
 :root, :root[data-theme="light"] #battleView, :root[data-theme="light"] #sceneView, :root[data-theme="light"] .town-map-wrap {
   color-scheme: dark;
-  --bg-top: #1e2624;
-  --bg-bottom: #151b1a;
-  --stone: #262e2b;
-  --stone-edge: #37433f;
-  --water: #8fc4b8;
-  --water-glow: #a9d6cb;
-  --water-ink: #7cc0b2;          /* sea-glass as readable text */
-  --on-water: #17302b;           /* text on a sea-glass fill */
-  --rc-a: #5aa397;               /* deeper teal for common-rarity card faces and bars that carry white text */
-  --rc-b: #3f7f78;
-  --ink: #efe8d9;
-  --ink-soft: #b0ab9f;
+  --bg-top: #1b2128;
+  --bg-bottom: #12161b;
+  --stone: #232b34;
+  --stone-edge: #333d48;
+  --water: #8dbccb;
+  --water-glow: #a6cfdb;
+  --water-ink: #7fb8c8;          /* sea-glass as readable text */
+  --on-water: #0f2a35;           /* text on a sea-glass fill */
+  --rc-a: #5b9fb2;               /* deeper blue-teal for common-rarity card faces and bars that carry white text */
+  --rc-b: #3f7f94;
+  --ink: #e9edf1;
+  --ink-soft: #a6b1bb;
   --shadow: rgba(0, 0, 0, 0.35);
-  --overlay-bg: rgba(8, 12, 11, 0.6);
-  --board-bg: rgba(239, 232, 217, 0.06);
+  --overlay-bg: rgba(8, 11, 15, 0.6);
+  --board-bg: rgba(233, 237, 241, 0.06);
   --hl: #ffffff;                 /* base for faint highlights on chrome (white on dark, ink on light) */
   --track: rgba(0, 0, 0, 0.3);   /* empty part of a gauge */
-  --accent: #e6c77a;
+  --accent: #e8cb88;
   --on-accent: #3a2a08;
   --rare: #9a86c9;
   --epic: #6a96c2;
@@ -40,6 +40,8 @@
   --water-glow: #a6d3c9;
   --water-ink: #3f7f78;
   --on-water: #1f4540;
+  --rc-a: #5aa397;
+  --rc-b: #3f7f78;
   --ink: #4b4a46;
   --ink-soft: #6b6a64;
   --shadow: rgba(75, 74, 70, 0.2);

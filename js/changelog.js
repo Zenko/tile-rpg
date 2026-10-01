@@ -19,6 +19,14 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-10-01',
+    version: '1.57.0',
+    title: "Slate glass dark theme",
+    changes: [
+      "The dark theme is now blue-grey slate with soft blue-teal glass, with less green than before. The light theme is unchanged.",
+    ],
+  },
+  {
+    date: '2026-10-01',
     version: '1.56.0',
     title: "A new look, with light and dark themes",
     changes: [

@@ -11,7 +11,7 @@ prefs.sound = prefs.sound !== false; prefs.music = prefs.music !== false; prefs.
 /* Colour theme: prefs.theme is 'dark' (the default), 'light' or 'auto' (follows the device). The CSS keys off
    <html data-theme> - see the token block at the top of css/style.css. Applied here, before the first paint of
    anything else, so there is no flash of the wrong theme. */
-const THEME_META = { dark: '#151b1a', light: '#f3ece0' };
+const THEME_META = { dark: '#12161b', light: '#f3ece0' };
 const themeQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: light)') : null;
 function resolvedTheme() { return prefs.theme === 'light' ? 'light' : prefs.theme === 'auto' && themeQuery && themeQuery.matches ? 'light' : 'dark'; }
 function applyTheme() {
