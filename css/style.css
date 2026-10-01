@@ -1642,9 +1642,6 @@ body.in-fishing .toast.show { transform: translateX(-50%) translateY(0); }
 .ins-own { font-size: var(--fs-sm); color: var(--ink-soft); margin-bottom: var(--sp-3); }
 [data-inspect] { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
 
-/* battle damage preview */
-#battleView .card .badge.prev { bottom: -11px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: .62rem; font-weight: 700; background: var(--stone); color: var(--ink); border-radius: 999px; padding: 2px 6px; box-shadow: 0 1px 4px var(--shadow); z-index: 5; }
-
 /* HUD */
 .hud-stat[role="button"] { cursor: pointer; }
 .hud-clock { font-size: .66rem; opacity: .75; font-weight: 600; }
@@ -2013,3 +2010,20 @@ html.calm .bottom-nav::before, html.calm #bottomNav .tab-btn .t-icon { transitio
    content). Sheets use a plain dim instead, with a quicker fade, and the card itself slides up in one motion. */
 .overlay.sheet, .overlay.inspect-overlay { backdrop-filter: none; -webkit-backdrop-filter: none; transition: opacity .2s ease; }
 .overlay.sheet .overlay-card, .overlay.inspect-overlay .overlay-card { will-change: transform; }
+
+/* Dragging a ready card from the table to attack (v1.70.0). While it is held: a dashed aim line runs from the
+   attacker to the ghost (solid and bright once it is over something it may hit), the ghost glows red, enemy cards
+   that can't be hit dim, the one under the ghost gets a crosshair, and the Spirit says what a drop there does.
+   transform/opacity only, and no blur, per HANDOFF §9. */
+#battleView.attack-drag .aim-line { position: absolute; height: 0; border-top: 3px dashed rgba(255,170,150,.85); transform-origin: 0 50%; pointer-events: none; z-index: 59; filter: drop-shadow(0 0 4px rgba(201,111,111,.9)); }
+#battleView.attack-drag .aim-line::after { content: ''; position: absolute; right: -4px; top: -9px; border-left: 14px solid rgba(255,170,150,.95); border-top: 7.5px solid transparent; border-bottom: 7.5px solid transparent; }
+#battleView.attack-drag .aim-line.locked { border-top-style: solid; border-top-color: #fff; }
+#battleView.attack-drag .aim-line.locked::after { border-left-color: #fff; }
+#battleView .card.attack-ghost { box-shadow: 0 16px 30px rgba(0,0,0,.5), 0 0 0 3px var(--boss-glow), 0 0 22px rgba(201,111,111,.8); }
+#battleView.attack-drag #btOppBoard .card:not(.targetable) { opacity: .45; filter: saturate(.5); }
+#battleView.attack-drag #btOppBoard .card.drop-hover { transform: scale(1.08); box-shadow: 0 0 0 4px #fff, 0 0 26px rgba(255,120,100,.95); animation: none; opacity: 1; filter: none; }
+#battleView.attack-drag #btOppBoard .card.drop-hover::after { content: '⚔️'; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); font-size: 2rem; text-shadow: 0 2px 8px rgba(0,0,0,.7); pointer-events: none; z-index: 6; }
+#battleView.attack-drag #btOppBoard .card.atk-blocked { opacity: 1; filter: saturate(.3); box-shadow: 0 0 0 3px #888; }
+#battleView.attack-drag #btOppBoard .card.atk-blocked::after { content: '🛡️ Guard first'; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); white-space: nowrap; font-size: .62rem; font-weight: 700; background: var(--stone); color: var(--ink); border-radius: 999px; padding: 3px 7px; pointer-events: none; z-index: 6; }
+#battleView.attack-drag #btOppBar.target-glow::after { content: '⚔️ Drop here to hit their Spirit'; position: absolute; left: 50%; bottom: -10px; transform: translateX(-50%); white-space: nowrap; font-size: .62rem; font-weight: 700; background: var(--stone); color: var(--ink); border-radius: 999px; padding: 3px 8px; box-shadow: 0 1px 4px var(--shadow); pointer-events: none; z-index: 6; }
+#battleView.attack-drag #btOppBar.drop-hover::after { content: '⚔️ Release to attack!'; background: var(--boss-glow); color: #fff; }

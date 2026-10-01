@@ -20,8 +20,10 @@ const CHANGELOG = [
   {
     version: '1.70.0',
     date: '2026-10-01',
-    title: "Smoother chats",
+    title: "Smoother chats and bolder attacks",
     changes: [
+      "Battles no longer tell you how much damage an attack will do or whether it will KO. Work it out yourself.",
+      "Dragging a ready card from your table to attack is much clearer: an aim line follows your finger, cards you can't hit dim, the target under your card gets a crosshair, a Guard says it must be hit first, and the enemy Spirit shows when a drop there will attack it.",
       "Talking to a neighbour no longer makes the screen flash. The chat card now slides up over a plain dimmed town instead of a blurred one."
     ]
   },

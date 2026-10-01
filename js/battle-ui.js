@@ -337,7 +337,6 @@ function btRenderBoards(entering) {
         const cls = (entering === c.uid ? 'enter ' : '') + (mine && !canAct ? 'exhausted ' : '') + (mine && !c.ready ? 'sleep ' : '') +
                     (canAct ? 'can-act ' : '') + (sel && sel.uid === c.uid ? 'selected ' : '') + (!mine && tCards.has(c.uid) ? 'targetable' : '');
         const el = btCardEl(c, cls, mine);
-        if (!mine && tCards.has(c.uid) && sel && sel.kind === 'attack') btAddPreviewBadge(el, c, G.p[0].board.find(x => x.uid === sel.uid));
         el.addEventListener('click', () => btOnBoardCard(k === 'You' ? 'you' : 'opp', c));
         if (canAct) el.addEventListener('pointerdown', e => btStartDrag(e, c, 'board'));
         slot.appendChild(el);
@@ -347,16 +346,6 @@ function btRenderBoards(entering) {
   });
   btGet('btOppBar').classList.toggle('target-glow', tFace);
   btGet('btAtkFace').classList.toggle('hidden', !tFace);   // a big, obvious button for hitting the Spirit directly
-}
-
-// Damage preview on a targetable enemy card while an attacker is selected: 💥 = it would be knocked out, 🫧 = its
-// Shield soaks the hit, otherwise the health it would have left. ⚠ = the attacker takes a lethal thorns prick back.
-function btAddPreviewBadge(el, target, attacker) {
-  if (!attacker) return;
-  const pw = attacker.power + (attacker.kw.includes('bloom') ? 1 : 0);
-  const txt = target.shield ? '🫧 blocked' : pw >= target.hp ? '💥 KO' : `♥${target.hp - pw} left`;
-  const risky = target.kw.includes('thorns') && attacker.hp <= 1;
-  el.insertAdjacentHTML('beforeend', `<span class="badge prev">${txt}${risky ? ' ⚠' : ''}</span>`);
 }
 
 function btRenderHand(drawnUid, dealAll) {
@@ -465,6 +454,11 @@ function btDragBegin() {
     const legal = BattleEngine.legalTargets(battle.G, 0, c.uid), ids = new Set(legal.filter(t => t.kind === 'card').map(t => t.uid));
     battleView.querySelectorAll('#btOppBoard .card').forEach(x => { if (ids.has(+x.dataset.uid)) x.classList.add('targetable'); });
     if (legal.some(t => t.kind === 'spirit')) { btGet('btOppBar').classList.add('target-glow'); d.glow = true; }
+    // make the attack unmistakable: a dashed aim line from the attacker to the ghost, everything that can't be hit
+    // dims, and the Spirit says what a drop there does
+    battleView.classList.add('attack-drag'); g.classList.add('attack-ghost');
+    const line = document.createElement('div'); line.className = 'aim-line'; battleView.appendChild(line); d.line = line;
+    const bv = battleView.getBoundingClientRect(); d.ox = r.left + r.width / 2 - bv.left; d.oy = r.top + r.height / 2 - bv.top;
   } else battleView.querySelectorAll('#btOppBoard .card').forEach(x => x.classList.add('targetable'));
   sfx('tap'); buzz(HAP.tap);
 }
@@ -473,6 +467,10 @@ function btDragPlace(x, y) {
   d.ghost.style.transform = `translate(${x - d.w / 2}px, ${y - d.h * 0.95}px) scale(1.12)`;
   // what the player sees is what counts: test the ghost's centre, not the fingertip below it
   d.cx = x; d.cy = y - d.h * 0.95 + d.h / 2;
+  if (d.line) {
+    const bv = battleView.getBoundingClientRect(), dx = d.cx - bv.left - d.ox, dy = d.cy - bv.top - d.oy;
+    d.line.style.cssText = `left:${d.ox}px;top:${d.oy}px;width:${Math.hypot(dx, dy)}px;transform:rotate(${Math.atan2(dy, dx)}rad)`;
+  }
 }
 // Find what the ghost is over. The ghost itself ignores pointer events, so elementFromPoint sees through it.
 function btDragTarget() {
@@ -494,7 +492,9 @@ function btDragTarget() {
 }
 function btDragHover(t) {
   const d = btDrag;
-  battleView.querySelectorAll('.drop-hover').forEach(x => x.classList.remove('drop-hover'));
+  battleView.querySelectorAll('.drop-hover, .atk-blocked').forEach(x => x.classList.remove('drop-hover', 'atk-blocked'));
+  if (d.kind === 'attack' && t && t.card && t.ok === false) t.card.classList.add('atk-blocked');   // a Guard stands in the way
+  if (d.line) d.line.classList.toggle('locked', !!(t && t.ok));
   if (t && t.slot) t.slot.classList.add('drop-hover');
   if (t && t.card && (t.ok !== false)) t.card.classList.add('drop-hover');
   btGet('btOppBar').classList.toggle('drop-hover', !!(t && t.face && t.ok));
@@ -517,8 +517,10 @@ function btDragCleanup() {
   if (d && d.glow && !(battle && battle.sel && battle.sel.kind === 'attack')) btGet('btOppBar').classList.remove('target-glow');
   btGet('btOppBar').classList.remove('drop-hover');
   if (d && d.ghost) d.ghost.remove();
+  if (d && d.line) d.line.remove();
+  battleView.classList.remove('attack-drag');
   if (d && d.origin) d.origin.classList.remove('drag-origin');
-  battleView.querySelectorAll('.drop-zone, .drop-next, .drop-hover, .cast-zone').forEach(x => x.classList.remove('drop-zone', 'drop-next', 'drop-hover', 'cast-zone'));
+  battleView.querySelectorAll('.drop-zone, .drop-next, .drop-hover, .cast-zone, .atk-blocked').forEach(x => x.classList.remove('drop-zone', 'drop-next', 'drop-hover', 'cast-zone', 'atk-blocked'));
   battleView.querySelectorAll('#btOppBoard .card.targetable').forEach(x => { if (!battle || !battle.sel) x.classList.remove('targetable'); });
 }
 function btDragEnd(e) {
