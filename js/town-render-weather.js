@@ -691,8 +691,16 @@ function migrateMapV2() {
 /* ---------------- tap to walk ---------------- */
 function cancelWalk() { walkToken++; if (playerEl) playerEl.classList.remove('walking'); }
 
-function showProp(icon, title, desc) {
+// actions (optional): [{ label, run, danger }] - extra buttons under the text (used to edit a placed decoration).
+function showProp(icon, title, desc, actions) {
   sceneryIcon.textContent = icon; sceneryTitle.textContent = title; sceneryDesc.textContent = desc;
+  const box = document.getElementById('sceneryActions'); box.innerHTML = ''; box.classList.toggle('hidden', !(actions && actions.length));
+  (actions || []).forEach(a => {
+    const b = document.createElement('button'); b.className = 'btn scenery-act' + (a.danger ? ' danger' : ''); b.textContent = a.label;
+    b.addEventListener('click', () => { sceneryOverlay.classList.add('hidden'); a.run(); });
+    box.appendChild(b);
+  });
+  document.getElementById('sceneryContinue').textContent = actions && actions.length ? 'Done' : 'Continue';
   sceneryOverlay.classList.remove('hidden'); sfx('tap'); buzz(HAP.tap);
 }
 function tapRing(x, y) {
@@ -772,9 +780,9 @@ function interactWith(kind, t) {
     townLog.textContent = t.isBoss ? `${t.name} rises to meet you.${tw ? ' ' + BattleEngine.TWISTS[tw].icon + ' ' + BattleEngine.TWISTS[tw].text : ' This will be a tougher match.'}` : `${t.name} looks up, ready for a friendly match.`;
     sfx('tap'); buzz(HAP.tap); startBattle(t);
   } else if (kind === 'prop' && t.type === 'fountain') {
-    sfx('claim'); buzz(HAP.tap); openScene('cup');
+    sfx('claim'); buzz(HAP.tap); openSceneFx('cup');
   } else if (kind === 'prop' && t.type === 'sign' && state.currentDistrict === 'market') {
-    sfx('claim'); openScene('trades');
+    sfx('claim'); openSceneFx('trades');
   } else if (kind === 'prop' && t.type === 'sign') {
     showProp('🪧', t.title + ' · weather board', `${t.desc} ${forecastText()} Today: ${eventNow().icon} ${eventNow().name} - ${eventNow().text} ${moodLine()}`); showTipOnce('forecast');
   } else if (kind === 'prop') {
@@ -787,7 +795,7 @@ function interactWith(kind, t) {
     }
     if (!lifeProp(t)) showProp(PROP_ICON[t.type] || '✨', t.title, t.desc);
   } else if (kind === 'building') {
-    if (t.enter) { sfx('claim'); buzz(HAP.tap); openScene(t.enter); }
+    if (t.enter) { sfx('claim'); buzz(HAP.tap); openSceneFx(t.enter); }
     else showProp(PROP_ICON.door, 'Closed for now', t.locked || 'The door is shut.');
   } else if (kind === 'spirit') {
     bumpStat('spiritsMet', 1);
@@ -806,7 +814,11 @@ function interactWith(kind, t) {
     if (cropStage(t) === 2) harvestCrop(t); else showCrop(t);
   } else if (kind === 'decoration') {
     const def = DECORATION_ITEMS.find(x => x.id === t.id);
-    showProp(def ? def.icon : '❔', def ? def.name : 'A decoration', (def ? def.desc : 'Something you placed here.') + ' You set this down yourself.');
+    // tapping something you placed lets you edit it right here: move it, put it back in your decorations, or remove it
+    showProp(def ? def.icon : '❔', def ? def.name : 'A decoration', (def ? def.desc : 'Something you placed here.') + ' You set this down yourself.',
+      def ? [{ label: '🔀 Move it', run: () => startPlacingDecoration(def, t.uid) },
+             { label: '📦 Store it away', run: () => storeDecoration(t.uid) },
+             { label: '🗑️ Remove it', danger: true, run: () => deleteDecoration(t.uid) }] : null);
   } else if (kind === 'companion') {
     if (!state.companion) return;
     sfx('tap'); buzz(HAP.tap); showTipOnce('companionPlay'); startHideSeek();
@@ -848,7 +860,7 @@ function handleMapTap(tx, ty) {
   if (state.companion && state.companionPos && tx === state.companionPos.x && ty === state.companionPos.y) {
     walkThen(adjacentTo(state.companionPos), () => interactWith('companion')); return;
   }
-  if (lanternOpen() && tx === LANTERN_TILE.x && ty === LANTERN_TILE.y) { walkThen(adjacentTo(LANTERN_TILE), () => { sfx('claim'); openScene('lantern'); showTipOnce('lantern'); }); return; }
+  if (lanternOpen() && tx === LANTERN_TILE.x && ty === LANTERN_TILE.y) { walkThen(adjacentTo(LANTERN_TILE), () => { sfx('claim'); withDoorFade(() => { openScene('lantern'); showTipOnce('lantern'); }); }); return; }
   const spirit = (data.spirits || []).find(s => s.x === tx && s.y === ty);
   if (spirit) { walkThen(adjacentTo(spirit), () => interactWith('spirit', spirit)); return; }
   const crop = cropAt(data, tx, ty);

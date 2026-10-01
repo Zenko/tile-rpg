@@ -91,29 +91,33 @@ function charDrawMe(box) {
   grid.innerHTML = profileStatValues().map(s => `<div class="profile-stat"><span class="ps-icon">${s.icon}</span><span class="ps-value">${s.value}</span><span class="ps-label">${s.label}</span></div>`).join('');
   box.appendChild(grid);
   if (t) { const w = document.createElement('div'); w.className = 'panel-desc'; w.style.marginTop = '10px'; w.textContent = `Wearing the title ${t.name}. Change it in Look.`; box.appendChild(w); }
-  const look = document.createElement('button'); look.className = 'panel-action ch-look'; look.textContent = '🎨 Change how you look';
-  look.addEventListener('click', () => { sfx('nav'); buzz(HAP.tap); charSetView('look'); });
-  box.appendChild(look);
 }
-// Look: every way to customize your character in one place. Locked things show a Pebble price and are bought on the spot.
+// Look: everything you own, ready to wear. Nothing here is for sale - the Shop button walks you to the Card Shop,
+// which sells every look, so there is one place to buy things and one place to wear them.
 function charDrawLook(box) {
   ensureCosmeticUnlocks();
   const ch = state.character;
   const row = (cls, kids) => { const r = document.createElement('div'); r.className = 'swatch-row shop-swatch-row' + (cls ? ' ' + cls : ''); kids.forEach(k => r.appendChild(k)); return r; };
+  const lockedLeft = EMOJI_OPTIONS.filter(o => !ch.unlockedEmojis.includes(o.emoji)).length + ACCESSORY_OPTIONS.filter(o => !ch.unlockedAccessories.includes(o.icon)).length +
+    COLOR_OPTIONS.filter(o => !ch.unlockedColors.includes(o.color)).length + MAT_OPTIONS.filter(o => !ch.unlockedMats.includes(o.id)).length + STAGE_OPTIONS.filter(o => !ch.unlockedStages.includes(o.id)).length;
+  const shop = document.createElement('button'); shop.className = 'panel-action ch-shop';
+  shop.innerHTML = `🛍️ Shop for more looks<small>${lockedLeft ? `${lockedLeft} more to unlock at the Card Shop` : 'You have every look - nice!'}</small>`;
+  shop.addEventListener('click', goToCardShop);
+  box.appendChild(shop);
   charSection(box, 'Name');
   const inp = document.createElement('input'); inp.type = 'text'; inp.className = 'name-input'; inp.placeholder = 'Your name'; inp.maxLength = 16; inp.value = ch.name || ''; inp.id = 'chNameInput';
   inp.addEventListener('input', () => { state.character.name = inp.value.slice(0, 16); saveState(); updateHud(); });
   box.appendChild(inp);
   charSection(box, 'Avatar');
-  box.appendChild(row('', EMOJI_OPTIONS.map(o => shopCosmeticSwatch('emoji', o.emoji, '', o.cost, ch.emoji === o.emoji, ch.unlockedEmojis.includes(o.emoji)))));
+  box.appendChild(row('', EMOJI_OPTIONS.filter(o => ch.unlockedEmojis.includes(o.emoji)).map(o => shopCosmeticSwatch('emoji', o.emoji, '', o.cost, ch.emoji === o.emoji, true))));
   charSection(box, 'Accessory');
-  box.appendChild(row('', ACCESSORY_OPTIONS.map(o => shopCosmeticSwatch('accessory', o.icon, o.label, o.cost, ch.accessory === o.icon, ch.unlockedAccessories.includes(o.icon)))));
+  box.appendChild(row('', ACCESSORY_OPTIONS.filter(o => ch.unlockedAccessories.includes(o.icon)).map(o => shopCosmeticSwatch('accessory', o.icon, o.label, o.cost, ch.accessory === o.icon, true))));
   charSection(box, 'Colour');
-  box.appendChild(row('', COLOR_OPTIONS.map(o => shopCosmeticSwatch('color', o.color, '', o.cost, ch.color === o.color, ch.unlockedColors.includes(o.color)))));
+  box.appendChild(row('', COLOR_OPTIONS.filter(o => ch.unlockedColors.includes(o.color)).map(o => shopCosmeticSwatch('color', o.color, '', o.cost, ch.color === o.color, true))));
   charSection(box, 'Table mat · your side in battles');
-  box.appendChild(row('shop-mat-row', MAT_OPTIONS.map(o => shopCosmeticSwatch('mat', o.id, o.name, o.cost, ch.mat === o.id, ch.unlockedMats.includes(o.id)))));
+  box.appendChild(row('shop-mat-row', MAT_OPTIONS.filter(o => ch.unlockedMats.includes(o.id)).map(o => shopCosmeticSwatch('mat', o.id, o.name, o.cost, ch.mat === o.id, true))));
   charSection(box, 'Backdrop · behind you and your companion');
-  const bd = row('shop-mat-row', STAGE_OPTIONS.map(o => shopCosmeticSwatch('stage', o.id, o.name, o.cost, ch.stage === o.id, ch.unlockedStages.includes(o.id)))); bd.id = 'chBackdrops'; box.appendChild(bd);
+  const bd = row('shop-mat-row', STAGE_OPTIONS.filter(o => ch.unlockedStages.includes(o.id)).map(o => shopCosmeticSwatch('stage', o.id, o.name, o.cost, ch.stage === o.id, true))); bd.id = 'chBackdrops'; box.appendChild(bd);
   charSection(box, 'Title · shown under your name in town');
   const mine = unlockedTitles(), cur = currentTitle(), trow = document.createElement('div'); trow.className = 'title-row';
   trow.innerHTML = `<button class="title-chip${cur ? '' : ' active'}" data-title="">No title</button>` +

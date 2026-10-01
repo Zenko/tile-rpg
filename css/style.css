@@ -1205,18 +1205,8 @@ body.in-battle .screen { position: relative; overflow: hidden; padding-bottom: c
 body.in-scene .screen { position: relative; overflow: hidden; }
 #sceneView { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 10px; padding: 2px 2px 8px; overflow-y: auto; }
 #sceneView.hidden { display: none !important; }
-.sc-head { display: flex; align-items: center; gap: 10px; }
+.sc-head { display: flex; align-items: center; gap: 10px; padding: 4px 6px 0; }
 .sc-head b { font-size: 1.05rem; font-weight: 600; }
-.sc-back {
-  width: 36px; height: 36px; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--hl) 6%, transparent);
-  background: color-mix(in srgb, var(--hl) 7%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  color: var(--ink); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;
-  box-shadow: 0 2px 10px var(--shadow), inset 0 1px 0 color-mix(in srgb, var(--hl) 8%, transparent);
-  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s ease;
-  font-family: inherit;
-}
-.sc-back svg { width: 18px; height: 18px; }
-.sc-back:active { transform: scale(0.86); background: color-mix(in srgb, var(--hl) 15%, transparent); }
 .sc-stage { position: relative; height: 190px; border-radius: 20px; overflow: hidden; flex-shrink: 0; box-shadow: inset 0 2px 12px rgba(0,0,0,0.12); background: linear-gradient(var(--sc-wall) 0 60%, var(--sc-floor) 60% 100%); }
 .sc-stage.memory-stage { flex: 1 1 auto; height: auto; min-height: 320px; }
 #sceneView[data-theme="warm"] { --sc-wall: #5a4632; --sc-floor: #3e2f22; --sc-rug: #c96a52; --sc-win: #d8c27a; }
@@ -1902,7 +1892,7 @@ html.calm .fs-sw .in, html.calm .fs-fl, html.calm .fs-aim, html.calm .fs-sw.near
 .ch-body { display: flex; flex-direction: column; gap: 4px; }
 .ch-level { margin-bottom: 10px; }
 .ch-filter { display: flex; gap: 6px; flex-wrap: wrap; margin: 4px 0 8px; }
-.ch-look { margin-top: 16px; width: 100%; }
+.ch-shop { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 52px; } .ch-shop small { font-weight: 600; font-size: .72rem; opacity: .8; }
 .ach.wearable { font-family: inherit; color: inherit; cursor: pointer; }
 .ach.wearable:active { transform: scale(.96); }
 .ach.worn { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent); }
@@ -2071,3 +2061,34 @@ html.calm .bottom-nav::before, html.calm #bottomNav .tab-btn .t-icon { transitio
 }
 @keyframes wm-bob { 50% { transform: translateY(-3px); } }
 @keyframes wm-pulse { 50% { opacity: .08; } }
+
+/* ===== Smooth transitions (v1.72.0) =====
+   Everything here is opacity/transform only (HANDOFF §9: no layout properties, no blur on moving things), and is
+   switched off by html.calm and reduced-motion. */
+/* Overlays animate each time they open. The card used to run its pop-in only once, at page load, because an overlay
+   is hidden with opacity rather than display:none; no animation while hidden means it restarts when shown. */
+.overlay.hidden .overlay-card { animation: none; }
+/* Door fade: the cover between the town and a building (see withDoorFade in js/houses-and-cellar.js). */
+.door-fade { position: fixed; inset: 0; z-index: 90; background: var(--bg-bottom); opacity: 0; transition: opacity .28s ease; pointer-events: auto; }
+.door-fade.on { opacity: 1; transition-duration: .19s; }
+/* A building's inside settles in: the stage, the speech and each button rise in one after another. */
+@keyframes sc-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes sc-pop { from { opacity: 0; transform: scale(.6); } 60% { transform: scale(1.08); } to { opacity: 1; transform: none; } }
+#sceneView.scene-enter .sc-head { animation: sc-rise .3s both; }
+#sceneView.scene-enter .sc-stage { animation: sc-rise .38s .04s cubic-bezier(.2,.9,.3,1) both; }
+#sceneView.scene-enter .sc-who { animation: sc-pop .5s .18s cubic-bezier(.34,1.56,.64,1) both; }
+#sceneView.scene-enter .sc-bubble { animation: sc-rise .34s .12s both; }
+#sceneView.scene-enter .sc-actions > * { animation: sc-rise .34s calc(.16s + var(--n, 0) * .045s) both; }
+#sceneView.scene-enter .sc-actions > :nth-child(1) { --n: 0; } #sceneView.scene-enter .sc-actions > :nth-child(2) { --n: 1; } #sceneView.scene-enter .sc-actions > :nth-child(3) { --n: 2; }
+#sceneView.scene-enter .sc-actions > :nth-child(4) { --n: 3; } #sceneView.scene-enter .sc-actions > :nth-child(5) { --n: 4; } #sceneView.scene-enter .sc-actions > :nth-child(n+6) { --n: 5; }
+/* A neighbour's talk card: the portrait pops and the speech bubble fades up just after the sheet slides in. */
+#talkOverlay:not(.hidden) .talk-bubble { animation: sc-rise .3s .14s both; }
+#talkOverlay:not(.hidden) .talk-name { animation: sc-rise .26s .08s both; }
+/* Extra buttons on the little "look at it" card (editing a placed decoration). */
+.scenery-actions { display: flex; flex-direction: column; gap: 8px; margin: 4px 0 10px; }
+.scenery-act { min-height: 46px; width: 100%; }
+.scenery-act.danger { background: color-mix(in srgb, var(--boss-glow) 22%, transparent); color: var(--ink); }
+@media (prefers-reduced-motion: reduce) {
+  #sceneView.scene-enter *, #talkOverlay .talk-bubble, #talkOverlay .talk-name { animation: none !important; }
+  .door-fade { transition: none; }
+}

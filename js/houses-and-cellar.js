@@ -337,12 +337,45 @@ function deckAdvice() {
 
 /* ---------------- the scene screen ---------------- */
 const SCENE_TIPS = { bakery: 'bakery', house2: 'garden' };
+/* ---------- door fade ----------
+   Going into (or out of) a building covers the screen with a quick fade to the page colour, swaps the screens while
+   it's covered, then fades back, the same idea as the district travel card but shorter. While it runs, further taps
+   on the same trigger are ignored. With motion off (Calm mode / reduced motion) the swap just happens at once. */
+let doorFading = false;
+function withDoorFade(swap) {
+  if (doorFading) return;
+  if (!btMotionOk()) { swap(); return; }
+  doorFading = true;
+  const v = document.createElement('div'); v.className = 'door-fade'; document.body.appendChild(v);
+  requestAnimationFrame(() => v.classList.add('on'));
+  setTimeout(() => {
+    try { swap(); } finally {
+      v.classList.remove('on');
+      setTimeout(() => { v.remove(); doorFading = false; }, 280);
+    }
+  }, 190);
+}
+// Town taps use this: fade in. Code that opens a scene as part of something bigger (travel, the shop button) calls openScene directly.
+function openSceneFx(id) { withDoorFade(() => openScene(id)); }
+function sceneEnterFx() {
+  sceneView.classList.remove('scene-enter'); void sceneView.offsetWidth; sceneView.classList.add('scene-enter');
+  setTimeout(() => sceneView.classList.remove('scene-enter'), 900);
+}
+/* The Character > Look "Shop" button: walk the player to the Card Shop (Market Row) and open its Customize counter. Until
+   Market Row is open, the Shop tab does the same job. */
+function goToCardShop() {
+  if (inBattle || doorFading) return;
+  sfx('nav'); buzz(HAP.tap);
+  if (!districtUnlocked('market')) { switchTab('shop'); setShopView('customize'); toast("The Card Shop is in Market Row - until it opens, this is its shop window"); return; }
+  const enter = () => { if (state.currentDistrict !== 'market') travelToDistrictNow('market'); else switchTab('town'); openScene('card-shop'); sceneAction('customize'); };
+  if (state.currentDistrict !== 'market') withTravelTransition('market', enter); else withDoorFade(enter);
+}
 function openScene(id) {
   cancelWalk(); if (typeof noteVisit === 'function') noteVisit(id);
   if (SCENE_TIPS[id]) showTipOnce(SCENE_TIPS[id]);
   inScene = true; scene = { id, text: '' };
   townPanel.classList.add('hidden'); document.getElementById('bottomNav').style.display = 'none';
-  document.body.classList.add('in-scene'); sceneView.classList.remove('hidden');
+  document.body.classList.add('in-scene'); sceneView.classList.remove('hidden'); sceneEnterFx();
   if (id === 'cellar') {
     const st = cellarState();
     scene.text = st.resting ? 'The cellar is quiet. Whatever lives here is resting.'
@@ -584,7 +617,14 @@ function deleteLetter(id) {
 }
 
 function sceneBtn(id, label, disabled) { return `<button class="btn sc-btn" data-act="${id}" ${disabled ? 'disabled' : ''}>${label}</button>`; }
+// The top-left arrow is gone, so every scene state must offer its own way out. They all do today; this keeps it true.
+const SCENE_EXIT_ACTS = ['leave', 'back', 'mg-back', 'wings-back', 'exp-cancel'];
 function renderScene() {
+  renderSceneBody();
+  const acts = document.getElementById('scActions');
+  if (scene && acts && !SCENE_EXIT_ACTS.some(a => acts.querySelector(`[data-act="${a}"]`))) acts.insertAdjacentHTML('beforeend', sceneBtn('leave', 'Head back out'));
+}
+function renderSceneBody() {
   if (!scene) return;
   const stage = document.getElementById('scStage'), pips = document.getElementById('scPips'), acts = document.getElementById('scActions');
   document.getElementById('scText').textContent = scene.text;
@@ -672,7 +712,8 @@ function sceneAction(actId) {
   if (actId === 'leave') {
     // Past the Root Keeper's chest, walking away ends the run and lets the cellar rest (and reset) as it always did.
     if (scene.id === 'cellar') { const st = cellarState(); if (!st.resting && isDeepFloor(st.floor)) endCellarRun(st, 'climbed out'); }
-    sfx('nav'); buzz(HAP.tap); closeScene(); return;
+    if (doorFading) return;
+    sfx('nav'); buzz(HAP.tap); withDoorFade(closeScene); return;
   }
   if (scene.id === 'cellar') {
     if (actId !== 'descend') return;
@@ -745,7 +786,6 @@ function sceneAction(actId) {
   saveState(); renderScene();
 }
 document.getElementById('scActions').addEventListener('click', e => { const b = e.target.closest('[data-act]'); if (b && !b.disabled) sceneAction(b.dataset.act); });
-document.getElementById('scBack').addEventListener('click', () => sceneAction('leave'));
 setInterval(() => {
   if (!inScene || !scene) return;
   if (scene.id === 'cellar' && cellarState().resting) renderScene();

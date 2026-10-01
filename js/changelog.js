@@ -18,6 +18,18 @@ function gameVersionLabel() {
    the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
 const CHANGELOG = [
   {
+    version: '1.72.0',
+    date: '2026-10-01',
+    title: "Smoother, and easier to tidy",
+    changes: [
+      "Going into a building (or a sign, the fountain or the lantern market) now fades through instead of snapping, and the inside settles in piece by piece. Leaving fades back out.",
+      "Chats, signs and other pop-ups now animate in every time, not just the first.",
+      "Tap something you've placed in town to edit it on the spot: move it, store it back in your decorations, or remove it.",
+      "Character > Look now only shows things you own. A Shop button walks you to the Card Shop, where everything is for sale.",
+      "Removed the extra arrow at the top left inside buildings; use the buttons at the bottom to head back out. Also removed the duplicate 'Change how you look' button on the Me tab."
+    ]
+  },
+  {
     version: '1.71.0',
     date: '2026-10-01',
     title: "The dream map",
