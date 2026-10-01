@@ -1,8 +1,8 @@
 /* Theme tokens. Two looks, switched by <html data-theme="dark|light"> (see applyTheme() in js/audio.js):
    dark = "Slate glass", light = "Sand and sea glass". The dark values are on bare :root, so they are also
-   the fallback. The game world (town map, battles, building interiors) stays dark in both themes: the light
-   theme re-declares the dark tokens on those containers, so the art keeps its night colours. */
-:root, :root[data-theme="light"] #battleView, :root[data-theme="light"] .town-map-wrap, :root[data-theme="light"] #fishOverlay {
+   the fallback. The town map and the fishing scene keep their night colours in the light theme (it re-declares the dark
+   tokens on those containers); battles and building interiors follow the theme since v1.88.0 / v1.79.0. */
+:root, :root[data-theme="light"] .town-map-wrap, :root[data-theme="light"] #fishOverlay {
   color-scheme: dark;
   --bg-top: #1b2128;
   --bg-bottom: #12161b;
@@ -1680,7 +1680,7 @@ body.in-fishing .toast.show { transform: translateX(-50%) translateY(0); }
 /* The dark-scoped game-world containers must also reset the inherited text colour, which would otherwise
    still be the light theme's dark ink (custom properties re-resolve on the element, but `color` is inherited
    as an already-computed value). */
-:root[data-theme="light"] #battleView, :root[data-theme="light"] .town-map-wrap, :root[data-theme="light"] #fishOverlay { color: var(--ink); }
+:root[data-theme="light"] .town-map-wrap, :root[data-theme="light"] #fishOverlay { color: var(--ink); }
 
 /* ===== Tabletop battle layout (v1.58.0) =====
    The two boards sit on a tilted glass table (perspective on .field, rotateX on .table), Spirit is a ring around
@@ -2327,3 +2327,29 @@ html.calm .die.rolling { animation: none; }
 .unlock-row b { color: var(--accent); font-weight: 700; white-space: nowrap; }
 .unlock-row:last-child { border-bottom: none; }
 .ghost-lock { margin-left: auto; font-size: .72rem; color: var(--ink-soft); white-space: nowrap; }
+
+/* ---------- Battle: full-bleed, and it follows the theme (v1.88.0) ---------- */
+body.in-battle .board-wrap { padding: 0; }
+body.in-battle .screen { padding: 0; }
+#battleView { padding-top: env(safe-area-inset-top); }
+/* Info chips and the coach line sat on a fixed dark tint, unreadable on the light backdrop: they use the theme's surface now. */
+#battleView .bt-weather { background: color-mix(in srgb, var(--stone) 88%, transparent); color: var(--ink); }
+#battleView .coach:not(:empty) { width: fit-content; max-width: calc(100% - 24px); margin: 0 auto; padding: 2px 12px; border-radius: 999px; background: color-mix(in srgb, var(--stone) 78%, transparent); color: var(--ink-soft); }
+
+/* The versus card in the light theme: a light scrim and light plates instead of the fixed night colours (v1.88.0). */
+:root[data-theme="light"] .bt-intro { background: rgba(240,236,226,.72); }
+:root[data-theme="light"] .bt-intro-side { background: color-mix(in srgb, var(--stone) 96%, transparent); border-color: var(--stone-edge); box-shadow: 0 10px 26px rgba(75,74,70,.22); }
+:root[data-theme="light"] .bt-intro-av { background: radial-gradient(circle at 35% 30%, #fbf8ef, #e3ddcb); }
+:root[data-theme="light"] .bt-intro-name { color: var(--ink); }
+:root[data-theme="light"] .bt-intro-tag { color: var(--ink-soft); }
+:root[data-theme="light"] .bt-intro-vs { color: var(--accent); text-shadow: 0 2px 10px rgba(181,131,42,.35); }
+:root[data-theme="light"] .bt-intro.boss .bt-intro-vs { color: #a8504b; text-shadow: 0 2px 12px rgba(177,97,94,.4); }
+:root[data-theme="light"] .bt-intro-twist { background: color-mix(in srgb, #f3d9d6 92%, transparent); color: var(--ink); }
+:root[data-theme="light"] .bt-intro-twist b { color: #a8504b; }
+
+/* Fish you have not caught yet swim as silhouettes; landing one reveals its colours (v1.88.0). Static filters only. */
+.fs-sw.unknown .in, .fs-sw.unknown.large .in, .fs-sw.unknown.legend .in { filter: brightness(0) opacity(.5); }
+.fs-sw .in { transition: filter .6s ease; }
+.fs-fish.reveal { animation: fsReveal .9s ease-out both; }
+@keyframes fsReveal { 0% { filter: brightness(0) opacity(.7); transform: translate(-50%, -50%) scale(.9); } 60% { filter: none; transform: translate(-50%, -50%) scale(1.15); } 100% { filter: none; transform: translate(-50%, -50%) scale(1); } }
+html.calm .fs-fish.reveal { animation: none; }

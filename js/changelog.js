@@ -18,6 +18,16 @@ function gameVersionLabel() {
    the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
 const CHANGELOG = [
   {
+    version: '1.88.0',
+    date: '2026-10-01',
+    title: "A brighter battle, and a mystery in the water",
+    changes: [
+      "Battles now follow the light theme: the table, bars, the keep-this-hand card, the versus card, tips and chips all use the light colours and read clearly. The battle also fills the whole screen instead of sitting in a frame.",
+      "Fishing: fish you haven't caught yet swim as dark silhouettes. Land one and its colours are revealed (with a little pop for a new catch), and every other fish of that kind in the water turns colourful too.",
+      "The bait chips show ❓ for fish you haven't discovered yet."
+    ]
+  },
+  {
     version: '1.87.0',
     date: '2026-10-01',
     title: "A steadier economy",
