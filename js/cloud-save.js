@@ -145,8 +145,8 @@ function startGhostDuel(p) {
   const g = ghostDeckOf(p); if (!g) { toast("That deck can't be loaded"); return; }
   if (state.deck.length < DECK_SIZE) { toast(`Fill your ${DECK_SIZE}-card deck first`); return; }
   closePlayerMenu && closePlayerMenu();
-  startBattle({ id: 'ghost-' + p.id, name: `${p.name || 'A player'}'s ghost`, icon: '👻', deck: g.ids, profile: { level: 'smart', spirit: 20 },
-                isBoss: false, rewardCard: null, ghost: { uid: p.id, name: p.name || 'A player' } });
+  startBattle({ id: 'ghost-' + p.id, name: `${String(p.name || 'A player').slice(0, 16)}'s ghost`, icon: '👻', deck: g.ids, profile: { level: 'smart', spirit: 20 },
+                isBoss: false, rewardCard: null, ghost: { uid: p.id, name: String(p.name || 'A player').slice(0, 16) } });
 }
 function ghostWin() {
   const gs = ghostState(), id = battle.npc.ghost.uid;
@@ -182,8 +182,8 @@ async function fetchWhosPlaying() {
     ghostRows = rows;
     box.innerHTML = rows.length ? rows.map((p, i) => {
       const g = p.id !== (cloudUser && cloudUser.uid) ? ghostDeckOf(p) : null;
-      return `<div class="panel-item"><span class="panel-icon">${p.emoji || '🙂'}</span><span class="panel-text">
-        <div class="panel-name">${escapeHtml(p.name || 'A player')} · Lv ${p.level || 1}</div>
+      return `<div class="panel-item"><span class="panel-icon">${escapeHtml(String(p.emoji || '🙂').slice(0, 8))}</span><span class="panel-text">
+        <div class="panel-name">${escapeHtml(String(p.name || 'A player').slice(0, 16))} · Lv ${Math.max(1, Math.floor(Number(p.level)) || 1)}</div>
         <div class="panel-desc">${escapeHtml(p.district || '')}${p.district ? ' · ' : ''}${fmtLogTime(p.lastSeen)}</div></span>
         ${g ? (featureLocked('ghost') ? `<span class="ghost-lock" title="${featureLockText('ghost')}">👻 🔒 Lv ${FEATURE_LEVELS.ghost.level}</span>` : `<button class="btn btn-ghost ghost-btn" type="button" data-ghost="${i}" title="Duel a ghost of their deck">👻 ${g.fam ? g.fam.icon + ' ' : ''}Duel</button>`) : ''}</div>`;
     }).join('')
