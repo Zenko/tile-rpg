@@ -722,7 +722,21 @@ if ('serviceWorker' in navigator) {
     });
   });
 }
-document.getElementById('updateBannerBtn').addEventListener('click', () => location.reload());
+// The page never scrolls (body is overflow:hidden at 100dvh), but a focused button or the browser's own scroll
+// restoration can still leave the document offset after a reload, which on an Android home-screen app shows up as
+// the whole menu pushed down until the app is force-closed. Opt out of restoration and zero any offset on load,
+// on returning from the back/forward cache, and right before the update reload.
+function resetPageScroll() {
+  try { window.scrollTo(0, 0); document.documentElement.scrollTop = 0; document.body.scrollTop = 0; } catch (e) {}
+}
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+resetPageScroll();
+window.addEventListener('pageshow', resetPageScroll);
+document.getElementById('updateBannerBtn').addEventListener('click', e => {
+  e.currentTarget.blur();
+  resetPageScroll();
+  location.reload();
+});
 </script>
 </body>
 </html>

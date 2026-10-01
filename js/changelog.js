@@ -17,7 +17,9 @@ function gameVersionLabel() {
 function gameBuildLabel() { return RELEASES[0] ? `Beta ${RELEASES[0].n} (build ${BUILD})` : `build ${BUILD}`; }
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
-const PENDING_CHANGES = [];
+const PENDING_CHANGES = [
+  { t:'fixed', x: 'Tapping Refresh on the "new version" banner no longer leaves the main menu pushed down on Android home-screen installs.' },
+];
 
 const RELEASES = [
   {
