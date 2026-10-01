@@ -18,6 +18,17 @@ function gameVersionLabel() {
    the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
 const CHANGELOG = [
   {
+    version: '1.64.0',
+    date: '2026-10-01',
+    title: "The Character tab",
+    changes: [
+      "A new Character tab sits at the right of the bottom bar. You and your companion stand on a little stage, with your level and Pebbles on top.",
+      "Pick the backdrop behind you. Today's sky is free and follows the time of day and weather. Meadow, Harbor lights, Autumn grove, Starry night, Snowfall, Lantern night and Aurora hill cost Pebbles, in the tab or in the Shop's Customize page.",
+      "Me shows your level, stats and the title you wear. Bag shows your pantry, dishes, seeds, bug jar and decorations, and you can plant or place from it. Milestones shows every milestone, and tapping one with a title wears it. Companion shows who is with you, their perk, and the charms you carry.",
+      "Tap yourself or your companion on the stage for a little hop. The older player menu, Rewards and Shop screens work as before.",
+    ],
+  },
+  {
     version: '1.63.0',
     date: '2026-10-01',
     title: "A pond full of fish",

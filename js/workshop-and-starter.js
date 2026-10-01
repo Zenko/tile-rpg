@@ -402,7 +402,7 @@ function renderCustomize() {
     <div class="wallet">
       <div>
         <div class="w-amt">🫧 ${peb}</div>
-        <div class="w-sub">Unlock emojis, accessories, colors and table mats for good.</div>
+        <div class="w-sub">Unlock emojis, accessories, colors, table mats and backdrops for good.</div>
       </div>
     </div>`;
 
@@ -425,6 +425,11 @@ function renderCustomize() {
   const matRow = document.createElement('div'); matRow.className = 'swatch-row shop-swatch-row shop-mat-row';
   MAT_OPTIONS.forEach(o => matRow.appendChild(shopCosmeticSwatch('mat', o.id, o.name, o.cost, ch.mat === o.id, ch.unlockedMats.includes(o.id))));
   box.appendChild(matRow);
+  const stageLabel = document.createElement('div'); stageLabel.className = 'shop-note'; stageLabel.textContent = 'Backdrops: the scene behind you and your companion on the Character tab.';
+  box.appendChild(stageLabel);
+  const stageRow = document.createElement('div'); stageRow.className = 'swatch-row shop-swatch-row shop-mat-row';
+  STAGE_OPTIONS.forEach(o => stageRow.appendChild(shopCosmeticSwatch('stage', o.id, o.name, o.cost, ch.stage === o.id, ch.unlockedStages.includes(o.id))));
+  box.appendChild(stageRow);
 }
 
 function haveDecoItem(item) { return decorationInventoryCount(item.id) > 0 || allDecorations().some(d => d.deco.id === item.id); }
@@ -550,9 +555,10 @@ function renderItems() {
 // price and buy-then-equip on tap (via buyCosmetic).
 function shopCosmeticSwatch(kind, value, label, cost, isEquipped, isUnlocked) {
   const el = document.createElement('div');
-  el.className = (kind === 'color' ? 'color-swatch' : kind === 'mat' ? 'mat-swatch mat-' + value : 'emoji-swatch') + ' shop-swatch' + (isEquipped ? ' active' : '') + (isUnlocked ? '' : ' locked');
+  el.className = (kind === 'color' ? 'color-swatch' : kind === 'mat' ? 'mat-swatch mat-' + value : kind === 'stage' ? 'mat-swatch stage-swatch' : 'emoji-swatch') + ' shop-swatch' + (isEquipped ? ' active' : '') + (isUnlocked ? '' : ' locked');
   if (kind === 'color') el.style.background = value;
   else if (kind === 'mat') { el.innerHTML = `<span>${label}</span>`; el.title = label; }
+  else if (kind === 'stage') { el.style.background = stageGradient(stageDef(value)); el.innerHTML = `<span>${label}</span>`; el.title = label; }
   else { el.textContent = value || '🚫'; if (label) el.title = label; }
   if (!isUnlocked) {
     const tag = document.createElement('span');
@@ -564,9 +570,9 @@ function shopCosmeticSwatch(kind, value, label, cost, isEquipped, isUnlocked) {
     ensureAudio();
     if (isUnlocked) {
       sfx('nav'); buzz(HAP.tap);
-      const field = kind === 'emoji' ? 'emoji' : kind === 'accessory' ? 'accessory' : kind === 'mat' ? 'mat' : 'color';
+      const field = kind === 'emoji' ? 'emoji' : kind === 'accessory' ? 'accessory' : kind === 'mat' ? 'mat' : kind === 'stage' ? 'stage' : 'color';
       state.character[field] = value;
-      saveState(); updateHud(); renderTown(); renderCustomize();
+      saveState(); updateHud(); renderTown(); renderCustomize(); if (typeof renderCharacterTab === 'function') renderCharacterTab();
     } else {
       buyCosmetic(kind, value, cost);
     }

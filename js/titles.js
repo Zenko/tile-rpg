@@ -59,6 +59,9 @@ function ensureCosmeticUnlocks() {
   if (!Array.isArray(ch.unlockedAccessories)) ch.unlockedAccessories = [ACCESSORY_OPTIONS[0].icon];
   if (!Array.isArray(ch.unlockedColors)) ch.unlockedColors = [COLOR_OPTIONS[0].color];
   if (!Array.isArray(ch.unlockedMats)) ch.unlockedMats = [MAT_OPTIONS[0].id];
+  if (!Array.isArray(ch.unlockedStages)) ch.unlockedStages = [STAGE_OPTIONS[0].id];
+  if (!STAGE_OPTIONS.some(m => m.id === ch.stage)) ch.stage = STAGE_OPTIONS[0].id;
+  if (!ch.unlockedStages.includes(ch.stage)) ch.unlockedStages.push(ch.stage);
   if (!MAT_OPTIONS.some(m => m.id === ch.mat)) ch.mat = MAT_OPTIONS[0].id;
   if (!ch.unlockedMats.includes(ch.mat)) ch.unlockedMats.push(ch.mat);
   // Grandfather in whatever this save already had picked, even if it predates today's five-item lists.
@@ -72,20 +75,21 @@ function buyCosmetic(kind, value, cost) {
   const ch = state.character, pr = state.progress;
   if (pr.pebbles < cost) { toast('Not enough Pebbles yet'); sfx('tie'); return false; }
   pr.pebbles -= cost;
-  const key = kind === 'emoji' ? 'unlockedEmojis' : kind === 'accessory' ? 'unlockedAccessories' : kind === 'mat' ? 'unlockedMats' : 'unlockedColors';
+  const key = kind === 'emoji' ? 'unlockedEmojis' : kind === 'accessory' ? 'unlockedAccessories' : kind === 'mat' ? 'unlockedMats' : kind === 'stage' ? 'unlockedStages' : 'unlockedColors';
   if (!ch[key].includes(value)) ch[key].push(value);
   if (kind === 'emoji') ch.emoji = value;
   else if (kind === 'accessory') ch.accessory = value;
   else if (kind === 'mat') ch.mat = value;
+  else if (kind === 'stage') ch.stage = value;
   else ch.color = value;
-  const label = kind === 'emoji' ? `the ${value} look` : kind === 'accessory' ? `the ${value} accessory` : kind === 'mat' ? `the ${MAT_OPTIONS.find(m => m.id === value).name} table mat` : 'a new color';
+  const label = kind === 'emoji' ? `the ${value} look` : kind === 'accessory' ? `the ${value} accessory` : kind === 'mat' ? `the ${MAT_OPTIONS.find(m => m.id === value).name} table mat` : kind === 'stage' ? `the ${STAGE_OPTIONS.find(m => m.id === value).name} backdrop` : 'a new color';
   logEvent(kind === 'emoji' ? value : '✨', `Bought and equipped ${label} for 🫧 ${cost}.`);
   saveState();
   updateHud();
   bumpPill('pillPebbles');
   toast('✨ Unlocked, and equipped on your profile');
   sfx('claim'); buzz(HAP.found);
-  renderCustomize();
+  renderCustomize(); if (typeof renderCharacterTab === 'function') renderCharacterTab();
   return true;
 }
 
@@ -288,7 +292,7 @@ function invRow(icon, name, count, desc, actionLabel, onAction) {
   el.innerHTML = `<div class="quest-top">
       <span class="q-icon">${icon}</span>
       <span class="q-name">${name}<div class="panel-desc">${desc}</div></span>
-      <span class="q-count">×${count}</span>
+      <span class="q-count">${count === '' ? '' : '×' + count}</span>
     </div>` + (onAction ? `<div class="controls" style="margin-top:8px"><button class="panel-action active inv-use-btn">${actionLabel}</button></div>` : '');
   if (onAction) el.querySelector('.inv-use-btn').addEventListener('click', onAction);
   return el;
@@ -353,6 +357,8 @@ function updateHud() {
   if (deckSizeHudEl) deckSizeHudEl.textContent = `${state.deck.length}/${DECK_SIZE}`;
   pebbleCountEl.textContent = state.progress.pebbles;
   avatarChipEmoji.textContent = state.character.emoji;
+  const tabEmoji = document.getElementById('tabCharEmoji'); if (tabEmoji) tabEmoji.textContent = state.character.emoji;
+  if (typeof refreshCharacterTab === 'function') refreshCharacterTab();
   avatarChipName.textContent = state.character.name || 'You';
   applyAvatarStyle(document.querySelector('.hud-portrait'), state.character);
   const deckFull = state.deck.length >= DECK_SIZE;
@@ -382,6 +388,7 @@ function switchTab(key) {
   if (key === 'collection') setCardsView(almanacHasNew() ? 'almanac' : cardsView);
   if (key === 'shop') setShopView(shopSubView);
   if (key === 'quests') renderQuests();
+  if (key === 'character') { renderCharacterTab(); showTipOnce('character'); }
   if (key === 'town') renderTown();
   updateQuestBadge();
 }

@@ -172,6 +172,29 @@ const MAT_OPTIONS = [
   { id: 'stars',   name: 'Starfield',       cost: 32 },
   { id: 'aurora',  name: 'Aurora',          cost: 40 }
 ];
+// Backdrops for the Character tab's stage (you and your companion). 'live' follows the real sky and weather; the
+// rest are painted from the sky/ground colours and a few emoji scattered over them (see stageHtml() in js/character-tab.js).
+// Same Shop-and-equip flow as the mats: ids live in state.character.unlockedStages / state.character.stage.
+const STAGE_OPTIONS = [
+  { id: 'live',    name: "Today's sky",    cost: 0,  live: true },
+  { id: 'meadow',  name: 'Meadow',         cost: 12, sky: ['#9fd3ea', '#e6f3d8'], ground: '#86b873', deco: ['☁️', '☁️', '🌼', '🌷', '🦋'] },
+  { id: 'harbor',  name: 'Harbor lights',  cost: 18, sky: ['#f4b88f', '#8fa9c9'], ground: '#58798f', deco: ['⛵', '🌅', '🕊️', '⚓'] },
+  { id: 'autumn',  name: 'Autumn grove',   cost: 20, sky: ['#f2c58b', '#f7e4c2'], ground: '#b3733c', deco: ['🍂', '🍁', '🍂', '🌰', '🍁'] },
+  { id: 'night',   name: 'Starry night',   cost: 22, sky: ['#0f1b3a', '#33457a'], ground: '#25344a', deco: ['⭐', '✨', '🌙', '⭐', '✨'], dark: true },
+  { id: 'snow',    name: 'Snowfall',       cost: 24, sky: ['#b9cde0', '#eef4fa'], ground: '#e8eef5', deco: ['❄️', '❄️', '⛄', '❄️', '🌲'] },
+  { id: 'lantern', name: 'Lantern night',  cost: 30, sky: ['#2a1d3d', '#7a3f55'], ground: '#3b2634', deco: ['🏮', '🏮', '✨', '🏮', '🌙'], dark: true },
+  { id: 'aurora',  name: 'Aurora hill',    cost: 40, sky: ['#0b2a3a', '#2f8f7a'], ground: '#1d3a4a', deco: ['🌌', '✨', '⭐', '✨', '🌲'], dark: true },
+];
+const stageDef = id => STAGE_OPTIONS.find(s => s.id === id) || STAGE_OPTIONS[0];
+// The sky colours of a backdrop; 'live' reads the game clock so the stage turns dusky and dark with the town.
+function stageColors(def) {
+  if (!def.live) return { sky: def.sky, ground: def.ground, dark: !!def.dark };
+  // day sky blended toward night by how dim the town is, with a warm band while the light is changing
+  const sp = skyPhase(), n = Math.min(1, sp.dim * 1.8), warm = Math.max(0, 1 - Math.abs(sp.dim - 0.25) / 0.25) * 0.55;
+  const mix = (day, night) => hexMix(hexMix(day, night, n), '#f4b88f', warm);
+  return { sky: [mix('#8fcbe6', '#0f1b3a'), mix('#e6f3d8', '#33457a')], ground: hexMix(hexMix('#86b873', '#25344a', n), '#b3733c', warm * 0.4), dark: sp.dim > 0.35 };
+}
+const stageGradient = def => { const c = stageColors(def); return `linear-gradient(180deg, ${c.sky[0]}, ${c.sky[1]})`; };
 const COLOR_OPTIONS = [
   { color: '#a8d4cc', cost: 0 },
   { color: '#e3b7a0', cost: 15 },
