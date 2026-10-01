@@ -18,6 +18,16 @@ function gameVersionLabel() {
    the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
 const CHANGELOG = [
   {
+    version: '1.69.0',
+    date: '2026-10-01',
+    title: "Top is the app, the tab is you",
+    changes: [
+      "Tapping your avatar at the top now opens Settings and Social, the things about the game itself. A small gear on the avatar shows this.",
+      "Everything about your character is in the Character tab. A new Look page holds your name, avatar, accessory, colour, table mat, backdrop and title. Things you have not unlocked show their price and can be bought right there.",
+      "Me shows your level and stats. Bag, Milestones and Companion stay as they were. The Open your Bag button in Settings takes you straight to the Bag.",
+    ],
+  },
+  {
     version: '1.68.0',
     date: '2026-10-01',
     title: "Softer sounds",

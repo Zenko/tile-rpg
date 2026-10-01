@@ -42,17 +42,6 @@ const TITLES = [
 function titleFor(achId) { return TITLES.find(t => t.ach === achId) || null; }
 function unlockedTitles() { return TITLES.filter(t => state.progress.achievements.includes(t.ach)); }
 function currentTitle() { const t = titleFor(state.character.title); return t && state.progress.achievements.includes(t.ach) ? t : null; }
-function renderTitleSwatches() {
-  const row = document.getElementById('titleSwatches'), mine = unlockedTitles(), cur = currentTitle();
-  row.innerHTML = `<button class="title-chip${cur ? '' : ' active'}" data-title="">No title</button>` +
-    mine.map(t => `<button class="title-chip${cur && cur.ach === t.ach ? ' active' : ''}" data-title="${t.ach}">${escapeHtml(t.name)}</button>`).join('') +
-    (mine.length < TITLES.length ? `<span class="more-in-shop">${TITLES.length - mine.length} more to earn</span>` : '');
-  row.querySelectorAll('[data-title]').forEach(b => b.addEventListener('click', () => {
-    state.character.title = b.dataset.title; saveState(); sfx('nav'); buzz(HAP.tap);
-    renderTitleSwatches(); renderTown();
-  }));
-}
-
 function ensureCosmeticUnlocks() {
   const ch = state.character;
   if (!Array.isArray(ch.unlockedEmojis)) ch.unlockedEmojis = [EMOJI_OPTIONS[0].emoji];
@@ -108,84 +97,7 @@ function applyAvatarStyle(el, character) {
   el.dataset.accessory = character.accessory || '';
 }
 
-// Only cosmetics the player has unlocked (starter freebie + anything bought in the Shop) show up here -
-// the rest live in Shop > Customize until bought. See buyCosmetic() and renderCustomize().
-function renderCharacterPanel() {
-  document.getElementById('nameInput').value = state.character.name || '';
-  ensureCosmeticUnlocks();
-
-  const emojiRow = document.getElementById('emojiSwatches');
-  emojiRow.innerHTML = '';
-  EMOJI_OPTIONS.filter(o => state.character.unlockedEmojis.includes(o.emoji)).forEach(o => {
-    const sw = document.createElement('div');
-    sw.className = 'emoji-swatch' + (state.character.emoji === o.emoji ? ' active' : '');
-    sw.textContent = o.emoji;
-    sw.addEventListener('click', () => {
-      state.character.emoji = o.emoji;
-      saveState();
-      renderCharacterPanel();
-      updateHud();
-      renderTown();
-    });
-    emojiRow.appendChild(sw);
-  });
-  if (emojiRow.children.length < EMOJI_OPTIONS.length) emojiRow.appendChild(moreInShopHint());
-
-  const accessoryRow = document.getElementById('accessorySwatches');
-  accessoryRow.innerHTML = '';
-  ACCESSORY_OPTIONS.filter(o => state.character.unlockedAccessories.includes(o.icon)).forEach(o => {
-    const sw = document.createElement('div');
-    sw.className = 'emoji-swatch' + (state.character.accessory === o.icon ? ' active' : '');
-    sw.title = o.label;
-    sw.textContent = o.icon || '🚫';
-    sw.addEventListener('click', () => {
-      state.character.accessory = o.icon;
-      saveState();
-      renderCharacterPanel();
-      updateHud();
-      renderTown();
-    });
-    accessoryRow.appendChild(sw);
-  });
-  if (accessoryRow.children.length < ACCESSORY_OPTIONS.length) accessoryRow.appendChild(moreInShopHint());
-
-  const colorRow = document.getElementById('colorSwatches');
-  colorRow.innerHTML = '';
-  COLOR_OPTIONS.filter(o => state.character.unlockedColors.includes(o.color)).forEach(o => {
-    const sw = document.createElement('div');
-    sw.className = 'color-swatch' + (state.character.color === o.color ? ' active' : '');
-    sw.style.background = o.color;
-    sw.addEventListener('click', () => {
-      state.character.color = o.color;
-      saveState();
-      renderCharacterPanel();
-      updateHud();
-      renderTown();
-    });
-    colorRow.appendChild(sw);
-  });
-  if (colorRow.children.length < COLOR_OPTIONS.length) colorRow.appendChild(moreInShopHint());
-
-  const matRow = document.getElementById('matSwatches');
-  matRow.innerHTML = '';
-  MAT_OPTIONS.filter(o => state.character.unlockedMats.includes(o.id)).forEach(o => {
-    const sw = document.createElement('div');
-    sw.className = 'mat-swatch mat-' + o.id + (state.character.mat === o.id ? ' active' : '');
-    sw.title = o.name; sw.setAttribute('role', 'button'); sw.setAttribute('aria-label', o.name + ' table mat');
-    sw.innerHTML = `<span>${o.name}</span>`;
-    sw.addEventListener('click', () => { state.character.mat = o.id; saveState(); sfx('nav'); buzz(HAP.tap); renderCharacterPanel(); });
-    matRow.appendChild(sw);
-  });
-  if (matRow.children.length < MAT_OPTIONS.length) matRow.appendChild(moreInShopHint());
-
-  applyAvatarStyle(document.getElementById('avatarPreview'), state.character);
-  document.getElementById('avatarPreviewEmoji').textContent = state.character.emoji;
-  renderTitleSwatches();
-  renderCompanionBox();
-  renderProfileStats();
-  fetchWhosPlaying();
-}
-// A glanceable summary of progress in the player menu - the numbers already existed (testerInfo() in
+// A glanceable summary of progress for the Character tab's Me view - the numbers already existed (testerInfo() in
 // js/events-story-foils-guide.js assembles a similar set for bug-report emails), they just weren't shown
 // to the player anywhere as an actual screen.
 function profileStatValues() {
@@ -202,35 +114,14 @@ function profileStatValues() {
     { icon: '👣', label: 'Steps', value: t.steps || 0 },
   ];
 }
-function renderProfileStats() {
-  const box = document.getElementById('profileStatsGrid');
-  if (!box) return;
-  box.innerHTML = profileStatValues().map(s =>
-    `<div class="profile-stat"><span class="ps-icon">${s.icon}</span><span class="ps-value">${s.value}</span><span class="ps-label">${s.label}</span></div>`
-  ).join('');
-}
-function moreInShopHint() {
-  const hint = document.createElement('div');
-  hint.className = 'more-in-shop';
-  hint.textContent = 'More in Shop';
-  return hint;
-}
-
-document.getElementById('nameInput').addEventListener('input', (e) => {
-  state.character.name = e.target.value.slice(0, 16);
-  saveState();
-  updateHud();
-});
 
 // Customize/Profile/Social/Settings as tabs rather than an always-expanded stack (or the disclosure
 // toggles this replaced) - same .seg/.seg-btn idiom as Journal/Rewards/Shop. Kept in module state (not
 // saved) so reopening the menu returns to whichever tab was last open, like cardsView/shopSubView do.
-let pmView = 'customize';
+let pmView = 'settings';
 const PM_SEGMENTS = {
-  customize: { btn: 'segPmCustomize', view: 'pmCustomizeView' },
-  profile: { btn: 'segPmProfile', view: 'pmProfileView' },
-  social: { btn: 'segPmSocial', view: 'pmSocialView' },
   settings: { btn: 'segPmSettings', view: 'pmSettingsView' },
+  social: { btn: 'segPmSocial', view: 'pmSocialView' },
 };
 function switchPmSegment(key) {
   pmView = key;
@@ -243,8 +134,9 @@ Object.entries(PM_SEGMENTS).forEach(([key, s]) => {
   document.getElementById(s.btn).addEventListener('click', () => { sfx('nav'); buzz(HAP.tap); switchPmSegment(key); });
 });
 
+// The avatar opens the app-level sheet: Settings and Social. Everything about the character itself lives in the Character tab.
 function openPlayerMenu() {
-  renderCharacterPanel();
+  fetchWhosPlaying();
   syncToggles();
   switchPmSegment(pmView);
   document.getElementById('pmVersion').textContent = 'Tile RPG ' + gameVersionLabel();
@@ -323,7 +215,7 @@ function renderInventory() {
     list.appendChild(invRow(r.icon, escapeHtml(r.name), r.count, escapeHtml(r.desc), action && action.label, action && action.fn));
   });
 }
-document.getElementById('openInventoryBtn').addEventListener('click', openInventory);
+document.getElementById('openInventoryBtn').addEventListener('click', () => { closePlayerMenu(); sfx('nav'); buzz(HAP.tap); switchTab('character'); charSetView('bag'); });
 document.getElementById('inventoryClose').addEventListener('click', closeInventory);
 document.getElementById('inventoryBackdrop').addEventListener('click', closeInventory);
 document.querySelectorAll('#invSeg .seg-btn').forEach(b => b.addEventListener('click', () => switchInvTab(b.dataset.inv)));

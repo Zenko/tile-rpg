@@ -163,7 +163,7 @@ const GUIDE = [
     { icon: '✦', name: 'Charms & mastery', where: 'Cards → My Cards', how: 'Charm cards for town perks; cards you play earn ★ mastery (★★★: +1 health in battle).' },
     { icon: '🤝', name: 'Trading board', where: 'The sign in Market Row', how: 'Three trades a day for spare cards.', lock: () => needs('market') },
     { icon: '✨', name: 'Foil cards', where: 'Any new card', how: 'Now and then a new card arrives as a shimmering foil. Your running total shows at the top of Cards → Index and in your cottage trophy case.' },
-    { icon: '🧑', name: 'Character tab', where: 'Bottom bar, far right', how: 'See your level and stats, your bag, your milestones and your companion. Pick a backdrop for the scene behind you (some cost Pebbles), and tap a milestone with a title to wear it.' },
+    { icon: '🧑', name: 'Character tab', where: 'Bottom bar, far right', how: 'Everything about your character. Me shows level and stats, Look is where you change your name, avatar, colour, table mat, backdrop and title (some cost Pebbles), and then Bag, Milestones and Companion. Settings and Social are behind your avatar at the top.' },
     { icon: '🎣', name: 'Fishing', where: 'Tap water from a bank', how: 'Pick a bait, cast, and watch the shadow: its size hints at the fish. Tap when it bites, then hold to reel and keep the marker in the green. Easy reeling is in Settings.' },
     { icon: '🌱', name: 'Gardening', where: 'Town Square soil', how: 'Crops fill your pantry and your pockets.' },
   ] },

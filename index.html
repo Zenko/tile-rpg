@@ -23,6 +23,7 @@
     <div class="hud">
       <div class="hud-identity" id="avatarChip">
         <div class="hud-ring" id="hudRing">
+          <span class="hud-gear" aria-hidden="true">⚙️</span>
           <div class="hud-portrait"><span class="a-emoji" id="avatarChipEmoji">🧑</span></div>
           <span class="lvl-badge" id="hudLevelBadge">1</span>
         </div>
@@ -59,60 +60,15 @@
     </div>
 
     <div class="player-menu-backdrop hidden" id="playerMenuBackdrop"></div>
-    <div class="player-menu hidden" id="playerMenu" role="dialog" aria-label="Player menu">
+    <div class="player-menu hidden" id="playerMenu" role="dialog" aria-label="Settings">
       <div class="pm-head">
-        <span class="pm-title">Player</span>
+        <span class="pm-title">Settings</span>
         <button class="pm-close" id="playerMenuClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
       </div>
       <div class="pm-body">
-        <div class="avatar-preview" id="avatarPreview">
-          <span id="avatarPreviewEmoji">🧑</span>
-        </div>
-        <div class="level-summary">
-          <div class="level-row"><span class="level-badge-lg" id="pmLevelBadge">Lv 1</span><span class="level-xp-text" id="pmXpText">0 / 60 XP</span></div>
-          <div class="level-bar"><div class="level-bar-fill" id="pmXpFill"></div></div>
-        </div>
-        <input type="text" id="nameInput" class="name-input" placeholder="Your name" maxlength="16">
-
         <div class="seg" id="pmSeg">
-          <button class="seg-btn active" id="segPmCustomize">Customize</button>
-          <button class="seg-btn" id="segPmProfile">Profile</button>
+          <button class="seg-btn active" id="segPmSettings">Settings</button>
           <button class="seg-btn" id="segPmSocial">Social</button>
-          <button class="seg-btn" id="segPmSettings">Settings</button>
-        </div>
-
-        <div id="pmCustomizeView">
-          <div class="customize-section">
-            <div class="customize-label">Avatar</div>
-            <div class="swatch-row" id="emojiSwatches"></div>
-          </div>
-          <div class="customize-section">
-            <div class="customize-label">Accessory</div>
-            <div class="swatch-row" id="accessorySwatches"></div>
-          </div>
-          <div class="customize-section">
-            <div class="customize-label">Color</div>
-            <div class="swatch-row" id="colorSwatches"></div>
-          </div>
-          <div class="customize-section">
-            <div class="customize-label">Table mat <small>(your side in battles)</small></div>
-            <div class="swatch-row mat-row" id="matSwatches"></div>
-          </div>
-          <div class="customize-section">
-            <div class="customize-label">Companion</div>
-            <div id="companionBox"></div>
-          </div>
-          <div class="customize-section">
-            <div class="customize-label">Title <span class="title-sub">shown under your name in town · earned from Milestones</span></div>
-            <div class="title-row" id="titleSwatches"></div>
-          </div>
-        </div>
-
-        <div id="pmProfileView" class="hidden">
-          <div class="customize-section">
-            <div class="customize-label">Profile</div>
-            <div class="profile-stats-grid" id="profileStatsGrid"></div>
-          </div>
         </div>
 
         <div id="pmSocialView" class="hidden">
@@ -122,7 +78,7 @@
           </div>
         </div>
 
-        <div id="pmSettingsView" class="hidden">
+        <div id="pmSettingsView">
           <div class="customize-section">
             <div class="settings-group-label">Appearance</div>
             <div class="seg" id="themeSeg" role="group" aria-label="Colour theme">
@@ -164,7 +120,7 @@
           </div>
         </div>
 
-        <button id="openInventoryBtn" class="btn shop-cta-btn">🎒 View Inventory</button>
+        <button id="openInventoryBtn" class="btn shop-cta-btn">🎒 Open your Bag</button>
         <button id="visitShopBtn" class="btn shop-cta-btn">🛍️ Visit Shop For Items</button>
 
         <div class="controls" id="townControls">

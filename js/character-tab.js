@@ -6,13 +6,13 @@
    writes the storage each system already has (pantry, dishes, seeds, decorations, bug jar, achievements, companion),
    so the older screens (player menu, Rewards > Milestones, Shop > Customize) keep working unchanged.
    ============================================================ */
-const CHAR_VIEWS = [['me', 'Me'], ['bag', 'Bag'], ['milestones', 'Milestones'], ['pals', 'Companion']];
+const CHAR_VIEWS = [['me', 'Me'], ['look', 'Look'], ['bag', 'Bag'], ['milestones', 'Milestones'], ['pals', 'Companion']];
 let charView = 'me';        // not saved, like cardsView / shopSubView
 let charMilFilter = 'all';  // all | earned | locked
 const charPanel = () => document.getElementById('characterPanel');
 const charVisible = () => !charPanel().classList.contains('hidden');
 // The stage shrinks to a strip while you browse long lists, and fills out again for Me and Companion.
-const charCompact = () => charView === 'bag' || charView === 'milestones';
+const charCompact = () => charView === 'bag' || charView === 'milestones' || charView === 'look';
 
 const CHAR_DECO_SLOTS = [[8, 14, 1.7], [76, 9, 1.5], [40, 6, 1.2], [90, 40, 1.15], [3, 44, 1.15], [60, 26, 1]];
 function charStageDeco(def) {
@@ -33,6 +33,7 @@ function charBuild() {
 }
 function charSetView(v) {
   charView = v;
+  if (!document.getElementById('chStage')) return;   // the tab is not built yet: renderCharacterTab() will draw this view
   document.querySelectorAll('#chSeg .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.v === v));
   document.getElementById('chStage').classList.toggle('compact', charCompact());
   drawCharStage(); drawCharBody();
@@ -68,7 +69,7 @@ function drawCharStage() {
   const hop = id => { const el = document.getElementById(id); el.classList.remove('hop'); void el.offsetWidth; el.classList.add('hop'); sfx('tap'); buzz(HAP.tap); };
   document.getElementById('chMe').addEventListener('click', () => hop('chMe'));
   document.getElementById('chPal').addEventListener('click', () => { hop('chPal'); if (!comp) charSetView('pals'); else toast(`${comp.icon} ${comp.name} · ${COMPANION_PERKS[comp.perk].text}`); });
-  document.getElementById('chPaint').addEventListener('click', () => { sfx('nav'); buzz(HAP.tap); charSetView('me'); const b = document.getElementById('chBackdrops'); if (b) b.scrollIntoView({ behavior: charMotionOk() ? 'smooth' : 'auto', block: 'center' }); });
+  document.getElementById('chPaint').addEventListener('click', () => { sfx('nav'); buzz(HAP.tap); charSetView('look'); const b = document.getElementById('chBackdrops'); if (b) b.scrollIntoView({ behavior: charMotionOk() ? 'smooth' : 'auto', block: 'center' }); });
 }
 const charMotionOk = () => typeof btMotionOk !== 'function' || btMotionOk();
 
@@ -77,38 +78,49 @@ function drawCharBody() {
   const box = document.getElementById('chBody'); if (!box) return;
   document.querySelectorAll('#chSeg .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.v === charView));
   box.innerHTML = '';
-  ({ me: charDrawMe, bag: charDrawBag, milestones: charDrawMilestones, pals: charDrawPals })[charView](box);
+  ({ me: charDrawMe, look: charDrawLook, bag: charDrawBag, milestones: charDrawMilestones, pals: charDrawPals })[charView](box);
 }
 function charSection(box, title) { const h = document.createElement('div'); h.className = 'section-title'; h.textContent = title; box.appendChild(h); }
 
 function charDrawMe(box) {
-  const pr = ensureLevel(), need = xpToNext(pr.level), pct = Math.max(0, Math.min(100, pr.xp / need * 100));
+  const pr = ensureLevel(), need = xpToNext(pr.level), pct = Math.max(0, Math.min(100, pr.xp / need * 100)), t = currentTitle();
   const lv = document.createElement('div'); lv.className = 'ch-level';
   lv.innerHTML = `<div class="level-row"><span class="level-badge-lg">Lv ${pr.level}</span><span class="level-xp-text">${Math.floor(pr.xp)} / ${need} XP</span></div><div class="level-bar"><div class="level-bar-fill" style="width:${pct}%"></div></div>`;
   box.appendChild(lv);
   const grid = document.createElement('div'); grid.className = 'profile-stats-grid';
   grid.innerHTML = profileStatValues().map(s => `<div class="profile-stat"><span class="ps-icon">${s.icon}</span><span class="ps-value">${s.value}</span><span class="ps-label">${s.label}</span></div>`).join('');
   box.appendChild(grid);
-
-  charSection(box, 'Backdrop');
-  const note = document.createElement('div'); note.className = 'panel-desc'; note.textContent = 'The scene behind you and your companion. Tap one to wear it, or to buy it with Pebbles.';
-  box.appendChild(note);
-  const row = document.createElement('div'); row.className = 'swatch-row shop-swatch-row shop-mat-row'; row.id = 'chBackdrops'; row.style.marginTop = '8px';
+  if (t) { const w = document.createElement('div'); w.className = 'panel-desc'; w.style.marginTop = '10px'; w.textContent = `Wearing the title ${t.name}. Change it in Look.`; box.appendChild(w); }
+  const look = document.createElement('button'); look.className = 'panel-action ch-look'; look.textContent = '🎨 Change how you look';
+  look.addEventListener('click', () => { sfx('nav'); buzz(HAP.tap); charSetView('look'); });
+  box.appendChild(look);
+}
+// Look: every way to customize your character in one place. Locked things show a Pebble price and are bought on the spot.
+function charDrawLook(box) {
+  ensureCosmeticUnlocks();
   const ch = state.character;
-  STAGE_OPTIONS.forEach(o => row.appendChild(shopCosmeticSwatch('stage', o.id, o.name, o.cost, ch.stage === o.id, ch.unlockedStages.includes(o.id))));
-  box.appendChild(row);
-
-  charSection(box, 'Title');
+  const row = (cls, kids) => { const r = document.createElement('div'); r.className = 'swatch-row shop-swatch-row' + (cls ? ' ' + cls : ''); kids.forEach(k => r.appendChild(k)); return r; };
+  charSection(box, 'Name');
+  const inp = document.createElement('input'); inp.type = 'text'; inp.className = 'name-input'; inp.placeholder = 'Your name'; inp.maxLength = 16; inp.value = ch.name || ''; inp.id = 'chNameInput';
+  inp.addEventListener('input', () => { state.character.name = inp.value.slice(0, 16); saveState(); updateHud(); });
+  box.appendChild(inp);
+  charSection(box, 'Avatar');
+  box.appendChild(row('', EMOJI_OPTIONS.map(o => shopCosmeticSwatch('emoji', o.emoji, '', o.cost, ch.emoji === o.emoji, ch.unlockedEmojis.includes(o.emoji)))));
+  charSection(box, 'Accessory');
+  box.appendChild(row('', ACCESSORY_OPTIONS.map(o => shopCosmeticSwatch('accessory', o.icon, o.label, o.cost, ch.accessory === o.icon, ch.unlockedAccessories.includes(o.icon)))));
+  charSection(box, 'Colour');
+  box.appendChild(row('', COLOR_OPTIONS.map(o => shopCosmeticSwatch('color', o.color, '', o.cost, ch.color === o.color, ch.unlockedColors.includes(o.color)))));
+  charSection(box, 'Table mat · your side in battles');
+  box.appendChild(row('shop-mat-row', MAT_OPTIONS.map(o => shopCosmeticSwatch('mat', o.id, o.name, o.cost, ch.mat === o.id, ch.unlockedMats.includes(o.id)))));
+  charSection(box, 'Backdrop · behind you and your companion');
+  const bd = row('shop-mat-row', STAGE_OPTIONS.map(o => shopCosmeticSwatch('stage', o.id, o.name, o.cost, ch.stage === o.id, ch.unlockedStages.includes(o.id)))); bd.id = 'chBackdrops'; box.appendChild(bd);
+  charSection(box, 'Title · shown under your name in town');
   const mine = unlockedTitles(), cur = currentTitle(), trow = document.createElement('div'); trow.className = 'title-row';
   trow.innerHTML = `<button class="title-chip${cur ? '' : ' active'}" data-title="">No title</button>` +
     mine.map(t => `<button class="title-chip${cur && cur.ach === t.ach ? ' active' : ''}" data-title="${t.ach}">${escapeHtml(t.name)}</button>`).join('') +
     (mine.length < TITLES.length ? `<span class="more-in-shop">${TITLES.length - mine.length} more to earn in Milestones</span>` : '');
   trow.querySelectorAll('[data-title]').forEach(b => b.addEventListener('click', () => { charWearTitle(b.dataset.title); }));
   box.appendChild(trow);
-
-  const look = document.createElement('button'); look.className = 'panel-action ch-look'; look.textContent = '🎨 Change name, avatar, colour or table mat';
-  look.addEventListener('click', () => { sfx('nav'); buzz(HAP.tap); openPlayerMenu(); });
-  box.appendChild(look);
 }
 function charWearTitle(achId) {
   state.character.title = achId; saveState(); sfx('nav'); buzz(HAP.tap);
