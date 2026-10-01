@@ -4,6 +4,7 @@
 const townView = document.getElementById('townGrid');
 const VIEW_COLS = 7, STEP_MS = 140;
 let viewRows = 7;
+const CAM_PAD_TOP = 70, CAM_PAD_BOTTOM = 96;   // px of the map hidden behind the floating top pill and bottom dock
 let townWorld = null, townBuiltFor = null, tilePx = 48, playerEl = null, walkToken = 0;
 // Rebuilt every renderEntities() call (elements don't survive a rebuild), so the wander ticks in
 // js/neighbors-bosses.js can look an npc/boss/spirit's element up by id instead of re-querying the DOM
@@ -419,23 +420,24 @@ function buildSkyLayers() {
 
 /* ---------------- layout and camera ---------------- */
 function layoutTown() {
-  const vw = townView.parentElement ? townView.parentElement.clientWidth : 0;
-  if (!vw || townView.offsetParent === null) return false;
-  tilePx = Math.max(38, Math.floor(vw / VIEW_COLS));
-  // on tall phones show more of the village: use the room left under the map (tab bar, hint and log take about 170px)
-  const top = townView.getBoundingClientRect().top, nav = document.getElementById('bottomNav');
-  const room = window.innerHeight - top - ((nav && nav.offsetHeight) || 70) - 34;
-  viewRows = Math.max(6, Math.min(15, Math.floor(room / tilePx)));
+  // The map runs full bleed behind the floating top pill and bottom dock (v1.65.0), so it fills its whole wrapper.
+  const wrap = townView.parentElement, vw = wrap ? wrap.clientWidth : 0, vh = wrap ? wrap.clientHeight : 0;
+  if (!vw || !vh || townView.offsetParent === null) return false;
+  tilePx = Math.max(38, Math.ceil(vw / VIEW_COLS));
+  viewRows = Math.max(6, Math.ceil(vh / tilePx));
   townView.style.setProperty('--t', tilePx + 'px');
-  townView.style.width = (tilePx * VIEW_COLS) + 'px';
-  townView.style.height = (tilePx * viewRows) + 'px';
+  townView.style.width = vw + 'px';
+  townView.style.height = vh + 'px';
   return true;
 }
 function updateCamera(animate) {
   if (!townWorld) return;
-  const m = getMap(state.currentDistrict), vw = tilePx * VIEW_COLS, vh = tilePx * viewRows;
-  let cx = vw / 2 - (state.playerPos.x + 0.5) * tilePx, cy = vh / 2 - (state.playerPos.y + 0.5) * tilePx;
-  cx = Math.min(0, Math.max(vw - m.w * tilePx, cx)); cy = Math.min(0, Math.max(vh - m.h * tilePx, cy));
+  const m = getMap(state.currentDistrict), vw = townView.clientWidth || tilePx * VIEW_COLS, vh = townView.clientHeight || tilePx * viewRows;
+  // The floating pill and dock cover the top and bottom of the map: centre on the visible band between them, and let
+  // the map scroll a little past its edges so the first and last rows can be brought clear of them.
+  const padT = CAM_PAD_TOP, padB = CAM_PAD_BOTTOM;
+  let cx = vw / 2 - (state.playerPos.x + 0.5) * tilePx, cy = (padT + vh - padB) / 2 - (state.playerPos.y + 0.5) * tilePx;
+  cx = Math.min(0, Math.max(vw - m.w * tilePx, cx)); cy = Math.min(padT, Math.max(vh - m.h * tilePx - padB, cy));
   townWorld.style.transition = animate ? `transform ${STEP_MS}ms linear` : 'none';
   townWorld.style.transform = `translate(${cx}px, ${cy}px)`;
   updateNightHole(cx, cy, vw, vh);
@@ -574,6 +576,7 @@ function renderTown(justMoved) {
   syncRival();
   tickItems(data);
   districtNameEl.textContent = def.name;
+  const hudDistrictEl = document.getElementById('hudDistrict'); if (hudDistrictEl) hudDistrictEl.textContent = def.name;
   const sd = seasonDef();
   const ev = eventNow();
   seasonTagEl.textContent = ` · ${sd.icon} ${sd.name} · ${ev.icon} ${ev.name}`;

@@ -18,6 +18,18 @@ function gameVersionLabel() {
    the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
 const CHANGELOG = [
   {
+    version: '1.65.0',
+    date: '2026-10-01',
+    title: "A floating top bar, bottom dock and a full-screen town",
+    changes: [
+      "The town map now fills the whole screen. The top bar and the bottom tabs float over it as frosted glass.",
+      "The top pill shows your avatar, the district name with the time of day and weather, and your Pebbles. Tap the middle for the full weather card, which now includes the clock. Tap your avatar for the player menu.",
+      "The bottom tabs are a floating dock. Only the tab you are on shows its name, and the dots for new things still appear on the icons.",
+      "The map keeps you in the clear space between the pill and the dock, and lets you scroll a little past its edges so nothing important hides behind them.",
+      "The ambient line and the latest town message float above the dock. The map button moved to the top right.",
+    ],
+  },
+  {
     version: '1.64.0',
     date: '2026-10-01',
     title: "The Character tab",

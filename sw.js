@@ -1,7 +1,7 @@
 // Service worker: makes the game installable and fully playable offline.
 // Bump CACHE_VERSION on every publish (see HANDOFF §2's publish checklist) so returning players
 // pick up the new files instead of a stale cache - it does not need to match the game's own version.
-const CACHE_VERSION = 'v51';
+const CACHE_VERSION = 'v52';
 const CACHE_NAME = 'tile-rpg-' + CACHE_VERSION;
 
 // The precache list used to be a hand-maintained copy of every <script src> in index.html - easy to forget

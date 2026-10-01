@@ -1952,3 +1952,49 @@ html.calm .fs-sw .in, html.calm .fs-fl, html.calm .fs-aim, html.calm .fs-sw.near
 .stage-swatch > span { color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.7); font-size: .62rem; text-align: center; line-height: 1.1; }
 @media (prefers-reduced-motion: reduce) { .ch-d, .ch-pal-f { animation: none; } .ch-stage, .ch-actors, .ch-ground, .ch-top { transition: none; } }
 html.calm .ch-d, html.calm .ch-pal-f { animation: none; }
+
+/* ===== Floating glass top pill, full-bleed town map, floating dock (v1.65.0) ===== */
+:root { --hud-h: 72px; --dock-h: 74px; --glass: color-mix(in srgb, var(--stone) 78%, transparent); }
+.board-wrap { padding: 0; }
+.screen { position: relative; padding: var(--hud-h) 12px calc(var(--dock-h) + 14px + env(safe-area-inset-bottom)); }
+body.in-battle .screen { padding: 0 0 calc(6px + env(safe-area-inset-bottom)); }
+body.in-battle .board-wrap { padding: 8px 10px 0; }
+/* the top pill: avatar, district and sky in the middle, Pebbles on the right */
+.hud { position: absolute; left: 10px; right: 10px; top: 10px; margin: 0; z-index: 10; padding: 6px 10px 6px 8px; gap: 8px; border-radius: 999px;
+  background: var(--glass); border: 1px solid color-mix(in srgb, var(--stone-edge) 80%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 6px 18px var(--shadow); }
+.hud-identity { order: 0; } .hud-ambient { order: 1; } .hud-resources { order: 2; }
+.hud-id-text, .hud-spacer, .hud-clock, #pillCards, #pillWins { display: none; }
+.hud-ambient { flex: 1; max-width: none; min-width: 0; justify-content: center; padding: 0 4px; background: none; border: 0; box-shadow: none; }
+.hud-ambient-text { align-items: center; gap: 0; min-width: 0; }
+.hud-district { font-family: var(--f-display); font-weight: 500; font-size: 1.02rem; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; line-height: 1.15; }
+.hud-ambient-sub { display: flex; align-items: center; gap: 4px; min-width: 0; font-size: 0.66rem; color: var(--ink-soft); }
+.hud-ambient-sub .hud-ambient-icon { font-size: 0.8rem; }
+.hud-ambient-sub .amb-time, .hud-ambient-sub .amb-weather { max-width: 70px; font-size: 0.66rem; font-weight: 600; color: var(--ink-soft); }
+.hud-ambient-sub .amb-weather:not(:empty)::before { content: '· '; }
+#pillPebbles .hs-icon { width: 28px; height: 28px; font-size: 0.9rem; box-shadow: none; }
+#pillPebbles .hs-bar { height: 24px; margin-left: -12px; padding-left: 16px; }
+/* the town map fills the screen behind the pill and the dock */
+#townPanel { position: absolute; inset: 0; margin: 0; }
+#districtLabel { display: none !important; }
+.town-map-wrap { position: absolute; inset: 0; isolation: isolate; }
+.town-view { margin: 0; border-radius: 0; box-shadow: none; }
+.map-radar-btn { top: calc(var(--hud-h) + 10px); bottom: auto; right: 12px; }
+.town-info { position: absolute; left: 12px; right: 12px; bottom: calc(var(--dock-h) + 22px + env(safe-area-inset-bottom)); margin: 0; z-index: 8; display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none; }
+.ambient-line, .town-info .log { width: max-content; max-width: 100%; padding: 5px 12px; border-radius: 999px; background: var(--glass); border: 1px solid color-mix(in srgb, var(--stone-edge) 80%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); font-size: 0.72rem; box-shadow: 0 4px 12px var(--shadow); }
+.town-info .log { color: var(--ink); min-height: 0; margin: 0; }
+.town-info .log:empty { display: none; }
+#decorationHint, #hideseekHint { position: absolute; top: calc(var(--hud-h) + 8px); left: 12px; right: 64px; z-index: 12; }
+#decorationHint.hidden, #hideseekHint.hidden { display: none; }
+/* the dock: icons only, the current tab shows its name */
+.bottom-nav { position: absolute; left: 14px; right: 14px; bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 10; padding: 6px; gap: 2px; justify-content: space-between; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--stone-edge) 80%, transparent);
+  background: var(--glass); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 10px 26px var(--shadow); }
+#bottomNav .tab-btn { flex: none; width: 46px; height: 46px; padding: 0; flex-direction: row; justify-content: center; gap: 6px; border-radius: 999px; font-size: 0.78rem; transition: width 0.25s ease, background 0.2s ease, color 0.2s ease; }
+#bottomNav .tab-btn > span:not(.t-icon):not(.dot) { display: none; }
+#bottomNav .tab-btn .t-icon { font-size: 1.3rem; }
+#bottomNav .tab-btn.active { flex: 1; width: auto; padding: 0 14px; background: var(--water); color: var(--on-water); font-weight: 700; }
+#bottomNav .tab-btn.active > span:not(.t-icon):not(.dot) { display: inline; }
+#bottomNav .tab-btn.active .t-icon { transform: none; }
+#bottomNav .tab-btn .dot { top: 7px; right: 7px; border-color: transparent; }
+.toast { bottom: calc(env(safe-area-inset-bottom) + var(--dock-h) + 60px); }
+#sceneView { padding-top: calc(var(--hud-h) + 2px); }
+@media (prefers-reduced-motion: reduce) { #bottomNav .tab-btn { transition: none; } }

@@ -336,6 +336,7 @@ document.getElementById('pillSky').addEventListener('click', () => {
   const label = s.label.replace(/^the /i, ''), timeLabel = label.charAt(0).toUpperCase() + label.slice(1);
   document.getElementById('wxTitle').textContent = kind === 'clear' ? timeLabel : `${w.name} · ${timeLabel}`;
   const rows = [
+    { icon: '🕘', text: `${formatGameClock(s.dayPos)} · ${DISTRICTS[state.currentDistrict].name}` },
     { icon: w.icon || s.icon, text: (WEATHER_EFFECTS[kind] || {}).short || 'No special effect right now.' },
     { icon: sd.icon, text: `${sd.name} · ${seasonDaysLeft()} day${seasonDaysLeft() === 1 ? '' : 's'} left this season` },
     { icon: tev.icon, text: `${tev.name}: ${tev.text}` },
