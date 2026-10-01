@@ -2459,3 +2459,45 @@ html.calm .jsheet, html.calm .jscrim, html.calm .jundo { transition: none; }
 .profile-stat .ps-pin { position: absolute; top: 0; right: 0; width: 28px; height: 28px; border: 0; background: none; font-size: 0.7rem; cursor: pointer; opacity: 0.55; padding: 0; }
 .profile-stat.pinned .ps-pin { opacity: 1; }
 .ch-pins { display: flex; gap: 6px; margin-top: 4px; font-size: 0.68rem; font-weight: 600; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.5); }
+
+/* Cards (Beta 2): tile grid, detail sheet, deck tray, set cards */
+button.alm-card { border: 0; font: inherit; color: inherit; width: 100%; cursor: pointer; transition: transform 0.12s ease, opacity 0.15s; }
+button.alm-card:active { transform: scale(0.95); }
+.alm-card.tile.dim { opacity: 0.45; }
+.alm-card .ac-in { position: absolute; bottom: 4px; left: 0; right: 0; text-align: center; font-size: 0.5rem; font-weight: 700; color: #fff; background: rgba(0,0,0,0.32); padding: 1px 0; }
+.alm-card.tile { overflow: hidden; }
+.alm-card.tile.crafted { outline: 2px solid #e2b64c; outline-offset: -2px; }
+.card-row { width: 100%; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.card-row .cr-chevron { margin-left: auto; color: var(--ink-soft); font-size: 1.1rem; }
+.cards-empty { text-align: center; padding: 18px 0; }
+.cards-empty .panel-action { margin-top: 10px; }
+.cf-fams { margin-bottom: 7px; }
+.cardsheet { height: auto; max-height: 88%; }
+.cs-top { display: grid; grid-template-columns: 104px minmax(0, 1fr); gap: 14px; align-items: start; }
+.cs-top .ins-card { margin: 0; width: 104px; height: 140px; }
+.cs-info { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.cs-name { font-size: 1.15rem; font-weight: 700; }
+.cs-sub { font-size: 0.72rem; color: var(--ink-soft); }
+.cs-stats { font-size: 0.95rem; font-weight: 700; }
+.cs-abil { margin-top: 12px; font-size: 0.8rem; line-height: 1.55; }
+.cs-story { font-size: 0.76rem; line-height: 1.5; color: var(--ink-soft); font-style: italic; margin: 10px 0 0; }
+.cs-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.cs-actions .btn { flex: 1 1 calc(50% - 8px); min-width: 0; }
+.cs-actions .btn:disabled { opacity: 0.4; }
+.cs-primary { background: var(--accent); color: var(--on-accent); border-color: transparent; }
+.cs-on { border-color: var(--accent); }
+.dk-tray { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px 6px; margin: 0 0 10px; justify-items: center; }
+.dk-tray .dk-tslot { width: 100%; max-width: 54px; height: auto; aspect-ratio: 46 / 62; border: 0; padding: 0; cursor: pointer; color: inherit; font: inherit; }
+.dk-tray .dk-tslot.empty { background: var(--stone); border: 1.5px dashed var(--stone-edge); border-radius: 8px; box-shadow: none; cursor: default; }
+.dk-tray .dk-tslot:active:not(.empty) { transform: scale(0.94); }
+.dk-toolbar { flex-wrap: wrap; }
+.dk-tool-btn.active { background: var(--accent); color: var(--on-accent); }
+.set-card { background: var(--stone); border: 1px solid var(--stone-edge); border-radius: 14px; margin-bottom: 8px; overflow: hidden; }
+.set-card.done { border-color: var(--accent); }
+.set-head { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 12px; align-items: center; width: 100%; padding: 10px 12px; background: none; border: 0; font: inherit; color: var(--ink); text-align: left; cursor: pointer; }
+.set-ring { width: 40px; height: 40px; }
+.set-title b { display: block; font-size: 0.86rem; }
+.set-title span { font-size: 0.7rem; color: var(--ink-soft); }
+.set-chev { color: var(--ink-soft); font-size: 0.7rem; }
+.set-open { padding: 4px 12px 12px; }
+.set-note { padding: 0 12px 12px; font-size: 0.7rem; color: var(--ink-soft); }

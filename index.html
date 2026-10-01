@@ -263,36 +263,35 @@
         <div class="seg" id="cardsSeg">
           <button class="seg-btn active" id="segMine">My Cards</button>
           <button class="seg-btn" id="segDeck">Deck</button>
-          <button class="seg-btn" id="segAlmanac">Index</button>
-          <button class="seg-btn" id="segCraft">Craft</button>
-          <button class="seg-btn" id="segFish">Fish</button>
+          <button class="seg-btn" id="segAlmanac">Sets</button>
+          <button class="seg-btn" id="segCraft">Workshop</button>
         </div>
         <div class="alm-progress hidden" id="almProgress"></div>
         <div class="dk-toolbar" id="collFilterToolbar">
           <button class="dk-tool-btn active" id="collFilterToggle" aria-expanded="true">🔍 Filter</button>
+          <button class="dk-tool-btn" id="collViewToggle" aria-label="Switch between grid and list">☰ List</button>
         </div>
         <div class="card-filter" id="collFilter"></div>
         <div class="panel-list" id="collectionList"></div>
         <div class="alm-grid hidden" id="almanacGrid"></div>
         <div class="hidden" id="craftView"></div>
-        <div class="hidden" id="fishLogView"></div>
         <div id="deckPanel" class="hidden">
           <div class="dk-slots" id="deckSlots"></div>
+          <div class="dk-tray" id="deckTray"></div>
           <div class="deck-count" id="deckHeader"></div>
           <div class="dk-curve" id="deckCurve"></div>
           <div class="dk-kws" id="deckKws"></div>
           <div class="dk-tip hidden" id="deckTip"></div>
           <div class="dk-toolbar">
-            <button class="dk-tool-btn" id="deckOptionsToggle" aria-expanded="false">⚙️ Options</button>
+            <button class="dk-tool-btn" id="deckAuto">✨ Auto-fill</button>
+            <button class="dk-tool-btn" id="deckClear">Clear</button>
+            <button class="dk-tool-btn" id="deckInfoToggle" aria-pressed="false">ⓘ Info mode</button>
+            <button class="dk-tool-btn" id="deckOptionsToggle" aria-expanded="false">⚙️ More</button>
             <button class="dk-tool-btn" id="deckFilterToggle" aria-expanded="false">🔍 Filter</button>
           </div>
           <div class="dk-options hidden" id="deckOptions">
             <div class="dk-actions">
-              <button class="panel-action active" id="deckAuto">Auto-fill</button>
-              <button class="panel-action" id="deckClear">Clear</button>
               <button class="panel-action" id="deckHelp">How battles work</button>
-            </div>
-            <div class="dk-actions">
               <button class="panel-action" id="deckShare">📋 Share code</button>
               <button class="panel-action" id="deckLoad">📥 Load a code</button>
             </div>
@@ -413,6 +412,12 @@
 <div class="update-banner" id="updateBanner">
   <span>A new version is ready.</span>
   <button type="button" id="updateBannerBtn">Refresh</button>
+</div>
+
+<div class="jscrim" id="cardScrim"></div>
+<div class="jsheet cardsheet" id="cardSheet" role="dialog" aria-label="Card details">
+  <div class="jsheet-grab"></div>
+  <div class="jsheet-body" id="cardSheetBody"></div>
 </div>
 
 <div class="jscrim" id="journalScrim"></div>

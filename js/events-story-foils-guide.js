@@ -168,10 +168,10 @@ const GUIDE = [
   { section: 'Collecting', items: [
     { icon: '🛍️', name: 'Packs & decorations', where: 'Market Row → Card Shop', how: 'Spend Pebbles on packs, sleeves, cosmetics and decorations for any district. Until Market Row opens, tap your 🫧 Pebbles counter to browse.' },
     { icon: '🔨', name: 'Workshop', where: 'Cards → Craft', how: 'Refine two copies into a stronger card, or trade three up a rarity.' },
-    { icon: '🧩', name: 'Index & sets', where: 'Cards → Index', how: 'Every card in the game, and eight sets that give lasting bonuses when complete.' },
+    { icon: '🧩', name: 'Index & sets', where: 'Cards → Sets', how: 'Eight themed sets that give lasting bonuses when complete, and an Index of every card in the game.' },
     { icon: '✦', name: 'Charms & mastery', where: 'Cards → My Cards', how: 'Charm cards for town perks; cards you play earn ★ mastery (★★★: +1 health in battle).' },
     { icon: '🤝', name: 'Trading board', where: 'The sign in Market Row', how: 'Three trades a day for spare cards.', lock: () => needs('market') },
-    { icon: '✨', name: 'Foil cards', where: 'Any new card', how: 'Now and then a new card arrives as a shimmering foil. Your running total shows at the top of Cards → Index and in your cottage trophy case.' },
+    { icon: '✨', name: 'Foil cards', where: 'Any new card', how: 'Now and then a new card arrives as a shimmering foil. Your running total shows at the top of Cards → Sets and in your cottage trophy case.' },
     { icon: '🧑', name: 'Character tab', where: 'Bottom bar, far right', how: 'Everything about your character. Me shows level and stats, Look is where you change your name, avatar, colour, table mat, backdrop and title (some cost Pebbles), and then Bag, Milestones and Companion. Settings and Social are behind your avatar at the top.' },
     { icon: '🎣', name: 'Fishing', where: 'Tap water from a bank', how: 'Pick a bait, cast, and watch the shadow: its size hints at the fish. Tap when it bites, then hold to reel and keep the marker in the green. Easy reeling is in Settings.' },
     { icon: '🌱', name: 'Gardening', where: 'Town Square soil', how: 'Crops fill your pantry and your pockets.' },

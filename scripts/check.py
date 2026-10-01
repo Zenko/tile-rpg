@@ -9,6 +9,8 @@ Run from the repo root:  python3 scripts/check.py
 3. no top-level function / const / let / var name is declared in two script files
    (all files share one global scope, so the later file silently replaces the earlier)
 4. every <script src> in index.html exists
+6. every document.getElementById('literal') in js/ names an id that exists in index.html (or is built in JS), so a removed
+   element can't leave a listener that throws at load
 5. RELEASES (js/changelog.js) have unique ids and consecutive numbers, PENDING_CHANGES tags are valid
 Exit code 1 if anything fails.
 """
@@ -37,6 +39,16 @@ for name, where in defs.items():
 
 for src in re.findall(r'<script src="([^"]+)"', html):
     if not src.startswith('http') and not os.path.exists(src): fail(f'index.html references a missing file: {src}')
+
+ids = set(re.findall(r'\bid="([^"]+)"', html))
+allsrc = {f: open(f, encoding='utf-8').read() for f in files}
+GUARDED = {'companionBox', 'pmLevelBadge', 'pmXpText', 'pmXpFill', 'deckSizeHud', 'deckFillBar', 'pillDeck', 'tabShop', 'radarGridMini'}   # looked up defensively, long-standing
+for f, src in allsrc.items():
+    for m in re.finditer(r"getElementById\('([^']+)'\)", src):
+        k = m.group(1)
+        if k in ids or k in GUARDED: continue
+        if any(re.search(r'id=\\?["\']%s|\.id\s*=\s*["\']%s' % (re.escape(k), re.escape(k)), t) for t in allsrc.values()): continue
+        fail(f'{f} looks up #{k}, which is not in index.html')
 
 js = "const BUILD=1;" + open('js/changelog.js', encoding='utf-8').read() + ";console.log(JSON.stringify({r:RELEASES.map(r=>[r.id,r.n]),p:PENDING_CHANGES.map(c=>c.t)}))"
 r = subprocess.run(['node', '-e', js], capture_output=True, text=True)

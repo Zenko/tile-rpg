@@ -19,6 +19,9 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta ${RELEASES[0].n} (build $
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
   { t: 'better', x: 'Character tab: Me now holds your title chips, up to three pinned stats (shown on your stage) and what unlocks next. Bag is now Pantry, and Milestones live only in Rewards.' },
+  { t: 'new', x: 'Cards got a new look: My Cards is a grid of tiles with filters for family and rarity, and tapping one opens a detail sheet where you can add it to your deck, refine it, use it as a charm or release a spare.' },
+  { t: 'new', x: 'Deck builder: a 12-slot tray at the top shows your whole deck. Tap a card below to add it, tap one in the tray to remove it, and turn on Info mode to read cards without changing anything.' },
+  { t: 'better', x: 'Index is now Sets (tap a set to see its cards, with silhouettes for the ones you are missing), Craft is now Workshop, and the Fish log moved fully into the Journal Almanac.' },
 ];
 
 const RELEASES = [

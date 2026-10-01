@@ -110,13 +110,14 @@ function buyPack(packId, price) {
   return id;
 }
 
-let cardsView = 'mine';   // 'mine' | 'deck' | 'almanac' | 'craft' | 'fish'  (the Deck used to be its own bottom tab; it is now a segment of Cards)
+let cardsView = 'mine';   // 'mine' | 'deck' | 'almanac' (the Sets segment) | 'craft' (the Workshop)  (the Deck used to be its own bottom tab; it is now a segment of Cards)
 
 // Opens Cards on its Deck segment - the one place that used to be `switchTab('deck')`.
 function openDeck() { switchTab('collection'); setCardsView('deck'); }
 let viewTick = 0;   // bumped whenever a Cards or Shop view is chosen, so switchTab's deferred work never overrides an explicit choice
 function setCardsView(view) {
   viewTick++;
+  if (typeof closeCardSheet === 'function') closeCardSheet();
   cardsView = view;
   document.getElementById('segMine').classList.toggle('active', view === 'mine');
   document.getElementById('segAlmanac').classList.toggle('active', view === 'almanac');
@@ -129,57 +130,13 @@ function setCardsView(view) {
   document.getElementById('almProgress').classList.toggle('hidden', view !== 'almanac');
   document.getElementById('segCraft').classList.toggle('active', view === 'craft');
   document.getElementById('craftView').classList.toggle('hidden', view !== 'craft');
-  document.getElementById('segFish').classList.toggle('active', view === 'fish');
-  document.getElementById('fishLogView').classList.toggle('hidden', view !== 'fish');
-  if (view === 'almanac') renderAlmanac();
+    if (view === 'almanac') renderAlmanac();
   else if (view === 'craft') renderCraft();
-  else if (view === 'fish') renderFishLog();
   else if (view === 'deck') renderDeckPanel();
   else renderCollection();
 }
 
-// The fish log: every kind of fish, with a hint for the ones you haven't landed yet.
-function renderFishLog() {
-  const box = document.getElementById('fishLogView'), f = fishState();
-  const caught = FISH.filter(x => f.caught[x.id]).length, pct = Math.round(caught / FISH.length * 100);
-  const goalNote = caught >= FISH.length ? '🏷️ Master Angler earned - every fish in the log.'
-    : `Catch them all for the Master Angler title${f.caught['star-koi'] ? '' : '; a legendary catch alone earns Legend Catcher'}.`;
-  box.innerHTML = `<div class="alm-progress"><div class="ap-top"><span><b>${caught}</b> of ${FISH.length} fish caught · ${f.total || 0} landed in all</span><span>${pct}%</span></div>
-    <div class="q-bar"><div class="q-fill" style="width:${pct}%"></div></div></div>
-    <div class="shop-note" style="margin:0 4px 10px">Some fish only bite at night, in certain weather, or in Quiet Harbor. ${fishAvailableNote()}</div>
-    <div class="shop-note" style="margin:0 4px 10px">${goalNote}</div>`;
-  const row = document.createElement('div');
-  row.className = 'alm-row';
-  FISH.forEach(x => {
-    const n = f.caught[x.id] || 0, el = document.createElement('div');
-    if (n) {
-      el.className = 'alm-card fish-card ' + (x.legendary ? 'rarity-mythic' : 'rarity-common');
-      el.innerHTML = `<span class="ac-count">×${n}</span><span class="ac-icon">${x.icon}</span><span class="ac-name">${x.name}</span><span class="ac-power">🫧 ${x.pebbles}</span><span class="fish-hint-txt">${x.hint}</span>`;
-      el.classList.add('tappable');
-      el.addEventListener('click', () => showProp(x.icon, x.name, `${x.blurb} Caught ${n} time${n === 1 ? '' : 's'}. ${x.hint}.`));
-    } else {
-      el.className = 'alm-card unknown';
-      el.innerHTML = `<span class="ac-icon">${x.icon}</span><span class="ac-name">???</span><span class="ac-hint">${x.hint}</span>`;
-    }
-    row.appendChild(el);
-  });
-  box.appendChild(row);
-  // night critters share the page
-  const bs = bugState(), bugsCaught = BUGS.filter(b => bs.caught[b.id]).length;
-  const head = document.createElement('div');
-  head.className = 'alm-section';
-  head.innerHTML = `<span>🌙 Night critters</span><span>${bugsCaught}/${BUGS.length}</span>`;
-  box.appendChild(head);
-  const brow = document.createElement('div');
-  brow.className = 'alm-row';
-  BUGS.forEach(b => {
-    const n = bs.caught[b.id] || 0, el = document.createElement('div');
-    if (n) { el.className = 'alm-card fish-card ' + (b.legendary ? 'rarity-mythic' : 'rarity-ultra'); el.innerHTML = `<span class="ac-count">×${n}</span><span class="ac-icon">${b.icon}</span><span class="ac-name">${b.name}</span><span class="ac-power">🫧 ${b.pebbles}</span><span class="fish-hint-txt">${b.hint}</span>`; }
-    else { el.className = 'alm-card unknown'; el.innerHTML = `<span class="ac-icon">${b.icon}</span><span class="ac-name">???</span><span class="ac-hint">${b.hint}</span>`; }
-    brow.appendChild(el);
-  });
-  box.appendChild(brow);
-}
+// What is biting right now, for the fishing scene's idle line.
 function fishAvailableNote() {
   const now = FISH.filter(x => x.where || x.night || x.weather).filter(fishAvailable);
   return now.length ? `Biting right now: ${now.map(x => x.icon).join(' ')}` : '';
@@ -594,6 +551,7 @@ function shopCosmeticSwatch(kind, value, label, cost, isEquipped, isUnlocked) {
   return el;
 }
 
+let setOpenId = null, almGridOpen = false;   // Sets segment: which set is expanded, and whether the every-card Index is showing
 function renderAlmanac() {
   const counts = ownedCardCounts();
   const grid = document.getElementById('almanacGrid');
@@ -608,16 +566,27 @@ function renderAlmanac() {
 
   const sd = seasonDef();
   const own = baseOwnedSet();
-  const setsHtml = `<div class="sets-box"><div class="section-title" style="margin-top:6px">Sets <span class="title-sub">own every card in a set for a lasting bonus</span></div>${CARD_SETS.map(st => { const n = setProgress(st), done = n === st.cards.length;
-    return `<div class="set-row${done ? ' done' : ''}"><span class="set-name">${st.icon} ${st.name} <small>${n}/${st.cards.length}</small></span><span class="set-cards">${st.cards.map(id => `<span class="${own.has(id) ? 'have' : 'miss'}" title="${own.has(id) || disc.has(id) ? escapeHtml(cardDef(id).name) : '???'}">${cardArtHtml(cardDef(id))}</span>`).join('')}</span><span class="set-perk">${done ? '✓ ' : ''}${st.text}</span></div>`; }).join('')}</div>`;
+  const ring = (n, of) => { const C = 2 * Math.PI * 17; return `<svg class="set-ring" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="none" stroke="var(--stone-edge)" stroke-width="4"/><circle cx="20" cy="20" r="17" fill="none" stroke="${n === of ? 'var(--accent)' : 'var(--water)'}" stroke-width="4" stroke-linecap="round" stroke-dasharray="${(C * n / of).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 20 20)"/><text x="20" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="currentColor">${n}</text></svg>`; };
+  const setsHtml = `<div class="sets-box">${CARD_SETS.map(st => { const n = setProgress(st), done = n === st.cards.length, open = setOpenId === st.id;
+    return `<div class="set-card${done ? ' done' : ''}"><button type="button" class="set-head" data-set="${st.id}" aria-expanded="${open}">${ring(n, st.cards.length)}
+      <span class="set-title"><b>${st.icon} ${st.name}</b><span>${done ? '✅ Bonus active: ' : 'Bonus: '}${st.text}</span></span><span class="set-chev">${open ? '▲' : '▼'}</span></button>
+      ${open ? `<div class="alm-row set-open">${st.cards.map(id => { const d = cardDef(id);
+        return own.has(id) ? `<div class="alm-card rarity-${d.rarity}" data-inspect="${id}"><span class="ac-cost">${d.cost}</span><span class="ac-icon">${cardArtHtml(d)}</span><span class="ac-power">${cardStatsText(d)}</span><span class="ac-name">${d.name}</span></div>`
+          : `<div class="alm-card unknown"><span class="ac-icon">${cardArtHtml(d)}</span><span class="ac-name">${disc.has(id) ? d.name : '???'}</span><span class="ac-hint">${RARITY_LABEL[d.rarity]}</span></div>`; }).join('')}</div>${n < st.cards.length ? '<div class="set-note">Missing cards show as silhouettes. Find them in packs, on the ground or as prizes.</div>' : ''}` : ''}</div>`; }).join('')}</div>`;
   const foilTotal = Object.values(foils()).reduce((a, b) => a + b, 0);
+  const hasNew = almanacHasNew();
+  if (hasNew) almGridOpen = true;      // never hide the "New" tags behind a closed toggle
   document.getElementById('almProgress').innerHTML = setsHtml + `
     <div class="ap-top"><span><b>${found}</b> of ${total} discovered</span><span>${Math.round(found / total * 100)}%</span></div>
     <div class="q-bar"><div class="q-fill" style="width:${Math.round(found / total * 100)}%"></div></div>
     ${foilTotal ? `<div class="alm-season">✨ ${foilTotal} foil${foilTotal === 1 ? '' : 's'} in your collection - look for the shimmer on any card.</div>` : ''}
-    <div class="alm-season">${sd.icon} It's ${sd.name}: cards marked ${sd.icon} turn up more often for ${seasonDaysLeft()} more day${seasonDaysLeft() === 1 ? '' : 's'}.</div>`;
+    <div class="alm-season">${sd.icon} It's ${sd.name}: cards marked ${sd.icon} turn up more often for ${seasonDaysLeft()} more day${seasonDaysLeft() === 1 ? '' : 's'}.</div>
+    <button type="button" class="claim-more" id="almGridToggle">${almGridOpen ? 'Hide' : 'Show'} every card · ${found}/${total}</button>`;
+  document.querySelectorAll('#almProgress [data-set]').forEach(b => b.addEventListener('click', () => { setOpenId = setOpenId === b.dataset.set ? null : b.dataset.set; sfx('tap'); renderAlmanac(); }));
+  document.getElementById('almGridToggle').addEventListener('click', () => { almGridOpen = !almGridOpen; sfx('nav'); renderAlmanac(); });
 
   grid.innerHTML = '';
+  grid.classList.toggle('hidden', cardsView !== 'almanac' || !almGridOpen);
   [...RARITY_ORDER].reverse().forEach(rar => {
     const cards = CARD_POOL.filter(c => c.rarity === rar);
     const foundHere = cards.filter(c => disc.has(c.id)).length;

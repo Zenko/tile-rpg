@@ -342,7 +342,6 @@ document.getElementById('segMine').addEventListener('click', () => { sfx('nav');
 document.getElementById('segDeck').addEventListener('click', () => { sfx('nav'); buzz(HAP.tap); setCardsView('deck'); });
 document.getElementById('segAlmanac').addEventListener('click', () => { sfx('nav'); buzz(HAP.tap); setCardsView('almanac'); });
 document.getElementById('segCraft').addEventListener('click', () => { sfx('nav'); buzz(HAP.tap); setCardsView('craft'); });
-document.getElementById('segFish').addEventListener('click', () => { sfx('nav'); buzz(HAP.tap); setCardsView('fish'); });
 
 document.getElementById('segPacks').addEventListener('click', () => { sfx('nav'); buzz(HAP.tap); setShopView('packs'); });
 document.getElementById('segCustomize').addEventListener('click', () => { sfx('nav'); buzz(HAP.tap); setShopView('customize'); });
