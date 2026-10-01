@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta ${RELEASES[0].n} (build $
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'better', x: 'The tab bars on Cards, Rewards and Journal now sit a little lower, with breathing room under the top bar.' },
   { t:'fixed', x: 'Tapping Refresh on the "new version" banner no longer leaves the main menu pushed down on Android home-screen installs.' },
 ];
 

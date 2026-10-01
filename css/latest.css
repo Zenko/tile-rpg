@@ -501,3 +501,9 @@ button.alm-card:active { transform: scale(0.95); }
 .set-chev { color: var(--ink-soft); font-size: 0.7rem; }
 .set-open { padding: 4px 12px 12px; }
 .set-note { padding: 0 12px 12px; font-size: 0.7rem; color: var(--ink-soft); }
+
+/* Tab bars (Cards, Rewards, Journal) sat flush against the floating HUD pill: the pill's avatar badge makes it
+   slightly taller than --hud-h. Only the screens' top padding grows, so the town map, scenes and radar (which
+   use --hud-h directly) are untouched. Battles keep their own zero padding. */
+.screen { padding-top: calc(var(--hud-h) + 10px); }
+body.in-battle .screen { padding-top: 0; }
