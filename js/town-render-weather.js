@@ -487,7 +487,7 @@ function renderEntities(data) {
     const e = document.createElement('div'); e.className = 'ent ' + cls; e.dataset.x = x; e.dataset.y = y;
     e.style.setProperty('--x', x); e.style.setProperty('--y', y); e.style.zIndex = y * 2 + 1; e.innerHTML = html; townWorld.appendChild(e); return e;
   };
-  m.props.forEach(p => { const e = add('prop', p.x, p.y, svgUse(PROP_SPRITE[p.type], 'prop')); e.dataset.prop = p.id; });
+  m.props.forEach(p => { const e = add('prop', p.x, p.y, PROP_SPRITE[p.type] ? svgUse(PROP_SPRITE[p.type], 'prop') : `<span>${PROP_ICON[p.type] || '✨'}</span>`); e.dataset.prop = p.id; });
   (data.decorations || []).forEach(d => {
     const def = DECORATION_ITEMS.find(x => x.id === d.id);
     const e = add('decoration' + (def && def.night ? ' glowy' : ''), d.x, d.y, `<span>${def ? def.icon : '❔'}</span>`);
@@ -566,6 +566,7 @@ function renderEntities(data) {
     if (f.justArrived) { e.classList.add('npc-arrive'); f.justArrived = false; }
   });
   oldEntityEls.forEach((el, id) => { if (!liveFighterIds.has(id) && el.isConnected) el.remove(); });
+  lifeRenderEntities(data, add);   // js/town-life.js: birds, puddles, lamp glow, mood decorations
 }
 
 function renderTown(justMoved) {
@@ -719,7 +720,7 @@ function startWalk(path, done) {
     followPlayer(prevPos);
     positionPlayer(true); updateCamera(true);
     if (i % 2 === 1) { sfx('step'); buzz(HAP.step); }
-    bumpStat('steps', 1); noteStep(state.playerPos.x, state.playerPos.y);
+    bumpStat('steps', 1); noteStep(state.playerPos.x, state.playerPos.y); lifeStep(p.x, p.y);
     const exit = m.exits[p.x + ',' + p.y];
     if (exit) { walkToken++; playerEl.classList.remove('walking'); saveState(); pendingWalk = null; crossExit(exit); return; }
     const item = data.items.find(it => it.x === p.x && it.y === p.y && !it.collected);
@@ -775,7 +776,7 @@ function interactWith(kind, t) {
   } else if (kind === 'prop' && t.type === 'sign' && state.currentDistrict === 'market') {
     sfx('claim'); openScene('trades');
   } else if (kind === 'prop' && t.type === 'sign') {
-    showProp('🪧', t.title + ' · weather board', `${t.desc} ${forecastText()} Today: ${eventNow().icon} ${eventNow().name} - ${eventNow().text}`); showTipOnce('forecast');
+    showProp('🪧', t.title + ' · weather board', `${t.desc} ${forecastText()} Today: ${eventNow().icon} ${eventNow().name} - ${eventNow().text} ${moodLine()}`); showTipOnce('forecast');
   } else if (kind === 'prop') {
     const data = ensureDistrictData(state.currentDistrict);
     if (!data.propFinds) data.propFinds = {};
@@ -784,7 +785,7 @@ function interactWith(kind, t) {
       grantHiddenCard('A closer look pays off');
       return;
     }
-    showProp(PROP_ICON[t.type] || '✨', t.title, t.desc);
+    if (!lifeProp(t)) showProp(PROP_ICON[t.type] || '✨', t.title, t.desc);
   } else if (kind === 'building') {
     if (t.enter) { sfx('claim'); buzz(HAP.tap); openScene(t.enter); }
     else showProp(PROP_ICON.door, 'Closed for now', t.locked || 'The door is shut.');
@@ -861,6 +862,7 @@ function handleMapTap(tx, ty) {
   if (tryFishTap(m, tx, ty)) return;
   if (m.solid[ty][tx]) {
     const c = m.rows[ty][tx], list = c === '~' ? WATER_FLAVOR : TREE_FLAVOR;
+    if (lifeTapSolid(tx, ty, c)) return;   // js/town-life.js: shake a tree / skip a stone (falls back to the flavour text if it can't be reached)
     townLog.textContent = list[(tx * 7 + ty * 3) % list.length]; sfx('soft'); return;
   }
   if (tx === state.playerPos.x && ty === state.playerPos.y) return;

@@ -19,6 +19,17 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-10-01',
+    version: '1.55.0',
+    title: "A livelier town",
+    changes: [
+      "Props do things now: sit on benches, make a wish at the well, light lamps after dark. The Market has a crate to haggle at, the Harbor has nets to haul in and the Garden has a pump to water plants. The Square's far bench lets you busk for tips.",
+      "Shake trees for acorns and seeds, skip stones across the water, splash through puddles when it rains, and watch the birds scatter as you walk up. Villagers carry umbrellas in the rain.",
+      "Each district has a town mood that fills as you do all this. At 10, 25 and 50 it dresses up for good - balloons, flower pots, then lamps that glow all night.",
+      "New quests, weekly quests, achievements, a Town Guide entry and little sound effects for all of it. The Harbor and Garden now have a few benches, lamps and a prop each.",
+    ],
+  },
+  {
+    date: '2026-10-01',
     version: '1.54.0',
     title: "Softer rain and town ambience",
     changes: [

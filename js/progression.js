@@ -27,6 +27,7 @@ const TIPS = {
   forecast:   { icon: '🪧', title: 'The weather board', text: 'Signs show the forecast. Weather changes play: clear pays a little extra on daily tasks, cloudy doubles spirit XP, rain helps fishing and growing, fog turns up more finds, storms boost Swift cards, snow toughens bosses for richer prizes.' },
   events:     { icon: '📅', title: 'Daily town events', text: "One event runs each day, shown next to the district name - a Fishing Derby, Market Day, Harvest Fair and more, each bending the rules a little in your favor." },
   foils:      { icon: '✨', title: 'Foil cards', text: 'A shimmering foil is purely a collector\'s chase - the same card, just shinier. Your foil total shows at the top of Cards → Index and in your cottage trophy case.' },
+  townlife:   { icon: '🪑', title: 'Things to do around town', text: 'Props do things now: sit on benches, make a wish at wells, light lamps after dark, haggle, haul nets, water plants or busk for tips. Shake trees, skip stones, splash through puddles in the rain. Everything nudges the district\'s town mood - fill it up and the district dresses itself up for good.' },
   inventory:  { icon: '🎒', title: 'Your inventory', text: 'Everything you\'re carrying, in one place: pantry ingredients, cooked dishes, seeds and spare decorations. Tap Plant or Place to use one straight from the list.' },
 };
 function tipsSeen() { const p = state.progress; if (!p.tipsSeen || typeof p.tipsSeen !== 'object') p.tipsSeen = {}; return p.tipsSeen; }
@@ -117,6 +118,11 @@ const QUEST_POOL = [
   { id: 'foil1',    icon: '✨', name: 'Find a foil card',              goal: 1, stat: 'foilsFound',      reward: 'rare' },
   { id: 'rainyfish1', icon: '🌧️', name: 'Catch a fish while it rains', goal: 1, stat: 'rainyFish',       reward: 'rare' },
   { id: 'foggyfind1', icon: '🌫️', name: 'Find a card in the fog',      goal: 1, stat: 'foggyFinds',      reward: 'rare' },
+  { id: 'acts6',    icon: '🪑', name: 'Interact with 6 things around town', goal: 6,  stat: 'townActs',  reward: 'common' },
+  { id: 'acts15',   icon: '🌳', name: 'Interact with 15 things around town', goal: 15, stat: 'townActs', reward: 'rare' },
+  { id: 'game2',    icon: '🎸', name: 'Play 2 town activities',        goal: 2,  stat: 'townGames',       reward: 'rare' },
+  { id: 'puddle5',  icon: '🌧️', name: 'Splash through 5 puddles',      goal: 5,  stat: 'puddles',         reward: 'common' },
+  { id: 'skip5',    icon: '🪨', name: 'Skip 5 stones',                 goal: 5,  stat: 'stonesSkipped',   reward: 'common' },
   ...STEP_QUEST_TIERS
 ];
 
@@ -157,10 +163,18 @@ const WEEKLY_QUEST_POOL = [
   { id: 'w_exped5',   icon: '🧭', name: 'Bring home 5 expeditions',  goal: 5,  stat: 'expeditionsDone', reward: 'super' },
   { id: 'w_chal6',    icon: '🎯', name: 'Beat 6 deck challenges',    goal: 6,  stat: 'challengesWon',   reward: 'mythic' },
   { id: 'w_trade5',   icon: '🤝', name: 'Make 5 trades',             goal: 5,  stat: 'tradesDone',      reward: 'super' },
-  { id: 'w_foil3',    icon: '✨', name: 'Find 3 foil cards',         goal: 3,  stat: 'foilsFound',      reward: 'mythic' }
+  { id: 'w_foil3',    icon: '✨', name: 'Find 3 foil cards',         goal: 3,  stat: 'foilsFound',      reward: 'mythic' },
+  { id: 'w_acts60',   icon: '🏘️', name: 'Interact with 60 things around town', goal: 60, stat: 'townActs', reward: 'super' },
+  { id: 'w_games8',   icon: '🎸', name: 'Play 8 town activities',    goal: 8,  stat: 'townGames',       reward: 'super' }
 ];
 
 const ACHIEVEMENTS = [
+  { id: 'acts-25',     icon: '🪑', name: '25 town interactions', test: () => (state.progress.totals.townActs || 0) >= 25 },
+  { id: 'acts-100',    icon: '🏘️', name: '100 town interactions', test: () => (state.progress.totals.townActs || 0) >= 100 },
+  { id: 'games-5',     icon: '🎸', name: '5 town activities', test: () => (state.progress.totals.townGames || 0) >= 5 },
+  { id: 'puddles-10',  icon: '🌧️', name: '10 puddles splashed', test: () => (state.progress.totals.puddles || 0) >= 10 },
+  { id: 'mood-1',      icon: '🎈', name: 'A cheerful district', test: () => lifeTopMood() >= 1 },
+  { id: 'mood-3',      icon: '🎆', name: 'A festive district', test: () => lifeTopMood() >= 3 },
   { id: 'first-card',  icon: '🌱', name: 'First find',      test: () => state.progress.totals.cardsFound >= 1 },
   { id: 'first-win',   icon: '🏅', name: 'First win',       test: () => state.progress.totals.battlesWon >= 1 },
   { id: 'deck-ready',  icon: '🎴', name: 'Deck tuned',      test: () => state.progress.deckEdits >= 1 && state.deck.length >= DECK_SIZE },
@@ -502,6 +516,7 @@ const XP_PER_STAT = {
   breadBaked: 8, breadShared: 10, spellsCast: 3, seedsPlanted: 3, seedsFound: 5, cropsHarvested: 5, rivalWins: 60,
   minigamesPlayed: 5, minigameGolds: 10, talks: 1, foilsFound: 20,
   donations: 6, expeditionsDone: 25, tradesDone: 15, cardsGifted: 10, challengesWon: 40, setsCompleted: 60, masteryRanks: 15, charmsSet: 2,
+  townActs: 3, townGames: 8, puddles: 1, stonesSkipped: 1,
   dishesCooked: 10, dishesGiven: 10, snacksEaten: 2, puzzlesSolved: 40, cupRoundsWon: 30, cupTrophies: 100, bugsCaught: 8, lettersRead: 2,
 };
 function xpToNext(level) { return 60 + (level - 1) * 40; }   // a steady, gentle climb

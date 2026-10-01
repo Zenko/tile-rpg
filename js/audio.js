@@ -609,7 +609,21 @@ function syncAmbientAudio() {
 }
 
 
+// A short filtered-noise burst on the effects bus: splashes, rustling leaves, plops (see SFX below).
+function noiseBurst(type, f0, f1, dur, vol, delay) {
+  const ctx = ensureAudio(); if (!ctx) return;
+  const t0 = ctx.currentTime + (delay || 0), src = noiseSource(ctx), filt = ctx.createBiquadFilter(), g = ctx.createGain();
+  filt.type = type; filt.frequency.setValueAtTime(f0, t0); filt.frequency.exponentialRampToValueAtTime(f1, t0 + dur); filt.Q.value = 0.8;
+  g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(vol, t0 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  src.connect(filt); filt.connect(g); g.connect(sfxBus); src.start(t0, Math.random()); src.stop(t0 + dur + 0.05);
+}
 const SFX = {
+  splash: () => { noiseBurst('bandpass', 1800, 500, 0.35, 0.16); tone(220, 0.02, 0.12, 0.02); },
+  plop:   () => { tone(520, 0, 0.1, 0.05); tone(340, 0.05, 0.14, 0.04); noiseBurst('lowpass', 900, 300, 0.2, 0.05); },
+  rustle: () => { noiseBurst('bandpass', 3200, 1800, 0.45, 0.07); noiseBurst('bandpass', 2600, 1400, 0.3, 0.05, 0.12); },
+  creak:  () => { tone(180, 0, 0.18, 0.025, 'sawtooth'); tone(150, 0.14, 0.2, 0.02, 'sawtooth'); },
+  click:  () => { tone(1200, 0, 0.04, 0.05, 'square'); tone(800, 0.05, 0.1, 0.03); },
+  wish:   () => { tone(880, 0, 0.12, 0.04); tone(1175, 0.08, 0.2, 0.04); noiseBurst('bandpass', 1500, 600, 0.3, 0.06, 0.12); },
   step:   () => tone(392, 0, 0.12, 0.05),
   tap:    () => tone(523, 0, 0.08, 0.04),
   nav:    () => tone(440, 0, 0.09, 0.035),

@@ -123,6 +123,8 @@ const GUIDE = [
     { icon: '🌸', name: 'Seasons', where: 'Everywhere, one real week each', how: "Trees, music and weather change, and each season's cards turn up more often." },
     { icon: '📅', name: 'Daily events', where: 'Shown next to the district name', how: 'One a day - a Fishing Derby, Market Day, Harvest Fair and more.' },
     { icon: '🗝️', name: 'Hidden cards & chests', where: 'Grass, flowers and props everywhere', how: 'Walk through flowers, poke at props, and follow a golden glow to a chest.' },
+    { icon: '🪑', name: 'Things to do in town', where: 'Benches, wells, lamps, trees, water, puddles', how: 'Sit, wish, light lamps after dark, shake trees, skip stones, splash in the rain, scatter the birds. The Square, Market, Harbor and Garden each have an activity too: busking, haggling, hauling nets and watering plants.' },
+    { icon: '🎈', name: 'Town mood', where: 'Shown on signs and prop menus', how: 'Every interaction fills the district\'s mood. At 10, 25 and 50 it dresses up for good: balloons, flower pots, then lamps that glow all night.' },
     { icon: '✨', name: 'Night critters', where: 'Every district, after dark', how: 'Tap a glowing critter to catch it. Trade them at the Lantern Market.' },
     { icon: '👻', name: 'Companion spirits', where: 'Tap a wandering spirit', how: 'Invite one along; it follows you and lends a small perk. Tap it again any time to play Hide and Seek together.' },
     { icon: '🎒', name: 'Inventory', where: 'Tap your avatar → 🎒 View Inventory', how: 'Pantry ingredients, cooked dishes, seeds and spare decorations, all in one list - tap Plant or Place to use one right from there.' },
