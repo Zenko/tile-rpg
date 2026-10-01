@@ -19,6 +19,14 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-10-01',
+    version: '1.60.0',
+    title: "A gentler sunny sky",
+    changes: [
+      "Clear weather no longer sweeps a bright glare across the map. It now has a soft sun burst in the top corner that slowly breathes, and it fades away at night.",
+    ],
+  },
+  {
+    date: '2026-10-01',
     version: '1.59.0',
     title: "Table mats and decks you can see",
     changes: [

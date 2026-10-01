@@ -79,7 +79,7 @@ const WEATHER_KINDS = {
 };
 // TEMPORARY test switch: while set, only these kinds can roll (for chasing the screen-flash report). Set to null to
 // restore normal weather.
-const WEATHER_TEST_ONLY = ['rain', 'storm'];
+const WEATHER_TEST_ONLY = null;
 function rollWeather(isNight) {
   if (WEATHER_TEST_ONLY) return WEATHER_TEST_ONLY[Math.random() < 0.5 ? 0 : 1];
   const tilt = seasonDef().weather || {};
@@ -312,7 +312,7 @@ function applyWeather(instant) {
   // transitions/animations on every tick is unnecessary work this loop never needed to do.
   if (kind === lastAppliedWeather && !instant) return;
   lastAppliedWeather = kind;
-  // every kind now has its own gentle overlay: drifting sunbeams for clear, soft cloud-shadows for cloudy,
+  // every kind now has its own gentle overlay: a faint sun burst for clear, soft cloud-shadows for cloudy,
   // alongside the existing rain/storm/snow/fog effects - so the sky never just sits there doing nothing.
   weatherEl.className = 'town-weather on weather-' + kind;
   if (kind === 'snow' && !snowFlakes.length) buildSnowFlakes();
@@ -406,7 +406,7 @@ let skyEl = null, vignetteEl = null, weatherEl = null, snowFieldEl = null, light
 function buildSkyLayers() {
   skyEl = document.createElement('div'); skyEl.className = 'town-sky';
   weatherEl = document.createElement('div'); weatherEl.className = 'town-weather'; weatherEl.id = 'townWeather';
-  weatherEl.innerHTML = `<div class="fog-layer f1"></div><div class="fog-layer f2"></div><div class="fog-layer f3"></div><div class="rain-layer"></div><div class="lightning"></div><div class="snow-field" id="snowField"></div><div class="sun-rays"></div><div class="cloud-shadow c1"></div><div class="cloud-shadow c2"></div>`;
+  weatherEl.innerHTML = `<div class="fog-layer f1"></div><div class="fog-layer f2"></div><div class="fog-layer f3"></div><div class="rain-layer"></div><div class="lightning"></div><div class="snow-field" id="snowField"></div><div class="sun-burst"></div><div class="cloud-shadow c1"></div><div class="cloud-shadow c2"></div>`;
   vignetteEl = document.createElement('div'); vignetteEl.className = 'town-vignette';
   townView.appendChild(skyEl); townView.appendChild(weatherEl); townView.appendChild(vignetteEl);
   snowFieldEl = weatherEl.querySelector('#snowField');
