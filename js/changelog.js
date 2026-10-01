@@ -19,6 +19,16 @@ function gameVersionLabel() {
 const CHANGELOG = [
   {
     date: '2026-10-01',
+    version: '1.56.0',
+    title: "A new look, with light and dark themes",
+    changes: [
+      "The whole game has a softer new look: sea-glass buttons, rounded cards and a gentle serif for titles.",
+      "Choose Dark or Light, or let Auto follow your device, in Player → Settings → Appearance. Dark is still the default.",
+      "The town map, battles and building interiors stay dark in both themes, so the world keeps its night colours.",
+    ],
+  },
+  {
+    date: '2026-10-01',
     version: '1.55.0',
     title: "A livelier town",
     changes: [

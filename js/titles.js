@@ -481,12 +481,12 @@ const soundToggle = document.getElementById('soundToggle');
 const musicToggle = document.getElementById('musicToggle');
 const hapticToggle = document.getElementById('hapticToggle');
 
-document.documentElement.setAttribute('data-theme', 'dark');   // dark mode is the only mode now; kept as an attribute since #sceneView room themes and a few selectors still key off it
 
 function syncToggles() {
   soundToggle.classList.toggle('on', prefs.sound);
   musicToggle.classList.toggle('on', prefs.music);
   hapticToggle.classList.toggle('on', prefs.haptics);
+  document.querySelectorAll('#themeSeg .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.themePick === prefs.theme));
   document.getElementById('ambientToggle').classList.toggle('on', prefs.ambient);
   document.getElementById('fastToggle').classList.toggle('on', !!prefs.fast);
   document.getElementById('bigTextToggle').classList.toggle('on', !!prefs.bigText);
@@ -514,6 +514,9 @@ musicToggle.addEventListener('click', () => {
   if (prefs.music && !prefs.sound) toast('Turn Sound on to hear music');
 });
 
+document.querySelectorAll('#themeSeg .seg-btn').forEach(b => b.addEventListener('click', () => {
+  prefs.theme = b.dataset.themePick; savePrefs(); applyTheme(); syncToggles(); sfx('tap');
+}));
 document.getElementById('ambientToggle').addEventListener('click', () => {
   prefs.ambient = !prefs.ambient; savePrefs();
   if (prefs.ambient && prefs.sound && prefs.music) ensureAudio();

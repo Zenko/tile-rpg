@@ -1,13 +1,26 @@
 /* ============================================================
    PREFS, SOUND, HAPTICS, TOAST
    ============================================================ */
-let prefs = { sound: true, haptics: true, music: true, musicVol: 0.5, sfxVol: 0.7, notifs: false, sharePresence: true, presenceChosen: false, ambient: true };   // sound = master mute for everything; notifs default off (needs a permission grant); sharePresence defaults ON until the player toggles it (presenceChosen)
+let prefs = { sound: true, haptics: true, music: true, musicVol: 0.5, sfxVol: 0.7, notifs: false, sharePresence: true, presenceChosen: false, ambient: true, theme: 'dark' };   // sound = master mute for everything; notifs default off (needs a permission grant); sharePresence defaults ON until the player toggles it (presenceChosen)
 try { const pr = JSON.parse(localStorage.getItem(PREFS_KEY) || 'null'); if (pr) prefs = Object.assign(prefs, pr); } catch (e) { /* ignore */ }
 // An older save stored the old default (off) without the player ever choosing it, so treat that as "not chosen yet" and use the new default.
 if (!prefs.presenceChosen) prefs.sharePresence = true;
 // Repair anything a corrupted/edited save could hand us
 ['musicVol', 'sfxVol'].forEach(k => { const v = Number(prefs[k]); prefs[k] = (isFinite(v) ? Math.min(1, Math.max(0, v)) : 0.5); });
-prefs.sound = prefs.sound !== false; prefs.music = prefs.music !== false; prefs.haptics = prefs.haptics !== false; prefs.ambient = prefs.ambient !== false;   // ambient (town sounds) is on unless the player turned it off
+prefs.sound = prefs.sound !== false; prefs.music = prefs.music !== false; prefs.haptics = prefs.haptics !== false; prefs.ambient = prefs.ambient !== false; if (!['dark', 'light', 'auto'].includes(prefs.theme)) prefs.theme = 'dark';   // ambient (town sounds) is on unless the player turned it off
+/* Colour theme: prefs.theme is 'dark' (the default), 'light' or 'auto' (follows the device). The CSS keys off
+   <html data-theme> - see the token block at the top of css/style.css. Applied here, before the first paint of
+   anything else, so there is no flash of the wrong theme. */
+const THEME_META = { dark: '#151b1a', light: '#f3ece0' };
+const themeQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: light)') : null;
+function resolvedTheme() { return prefs.theme === 'light' ? 'light' : prefs.theme === 'auto' && themeQuery && themeQuery.matches ? 'light' : 'dark'; }
+function applyTheme() {
+  const th = resolvedTheme();
+  document.documentElement.setAttribute('data-theme', th);
+  const m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute('content', THEME_META[th]);
+}
+applyTheme();
+if (themeQuery && themeQuery.addEventListener) themeQuery.addEventListener('change', () => { if (prefs.theme === 'auto') applyTheme(); });
 function savePrefs() { try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch (e) { /* ignore */ } }
 
 /* ============================================================

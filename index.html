@@ -4,9 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Tile RPG: a calm card-collecting town</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@400;500&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#121715">
+<meta name="theme-color" content="#151b1a">
 <link rel="icon" href="assets/icon-192.png">
 <link rel="apple-touch-icon" href="assets/icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -114,6 +117,13 @@
 
         <div id="pmSettingsView" class="hidden">
           <div class="customize-section">
+            <div class="settings-group-label">Appearance</div>
+            <div class="seg" id="themeSeg" role="group" aria-label="Colour theme">
+              <button class="seg-btn" type="button" data-theme-pick="dark">🌙 Dark</button>
+              <button class="seg-btn" type="button" data-theme-pick="light">☀️ Light</button>
+              <button class="seg-btn" type="button" data-theme-pick="auto">Auto</button>
+            </div>
+
             <div class="settings-group-label">Audio</div>
             <div class="settings-row"><span>🔊 Sound</span><button class="toggle" id="soundToggle" aria-label="Toggle all sound"></button></div>
             <div class="settings-row"><span>🎵 Music</span><button class="toggle" id="musicToggle" aria-label="Toggle music"></button></div>
