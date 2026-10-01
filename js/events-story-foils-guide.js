@@ -118,6 +118,7 @@ function reconcileFoils() {
 const needs = (district) => districtUnlocked(district) ? '' : `Opens with ${DISTRICTS[district].name} (${districtLockReason(district).replace(/^Needs /, '')})`;
 const GUIDE = [
   { section: 'Around town', items: [
+    { icon: '📓', name: 'The Journal', where: 'Bottom bar → Journal', how: 'Today lists what is waiting for you with a Go button for each. The Log, Battles and Almanac keep your history and collections, and the ? button holds this Guide and What\'s new.' },
     { icon: '🗺️', name: 'Districts', where: 'Walk off the edge of a map, or tap the mini-map', how: 'Market Row, Quiet Harbor and Hollow Garden open as you win matches and level up.' },
     { icon: '🌦️', name: 'Weather & forecast', where: 'Any sign · the sky badge, top right', how: 'Tap the badge for the full picture: clear pays a little extra on daily tasks, cloudy doubles spirit XP, rain helps fishing and gardens, storms power Swift cards, snow toughens bosses but pays more.' },
     { icon: '🌸', name: 'Seasons', where: 'Everywhere, one real week each', how: "Trees, music and weather change, and each season's cards turn up more often." },
@@ -179,27 +180,41 @@ const GUIDE = [
 // Collapsed by default (keyed by item name) - with ~30 entries across 5 sections, showing every "how"
 // description at once was the same wall-of-text problem the Changelog had. Tapping a row expands just
 // its own details in place, same idiom as mail-item/cl-entry.
-let guideOpen = {};
+let guideOpen = {}, guideQuery = '';
+// Items added in the v1.81-1.89 releases wear a NEW tag until they have been opened once (state.progress.guideSeen).
+const GUIDE_NEW = ['Who goes first', 'Card families', 'New keywords', 'The world in battle', "Keeper's Knack", 'Draft Run', 'Ghost duels', 'Pebbles and soft limits'];
+function guideSeen() { const p = state.progress; if (!p.guideSeen || typeof p.guideSeen !== 'object') p.guideSeen = {}; return p.guideSeen; }
 function renderGuide() {
-  const box = document.getElementById('guideList'), ev = eventNow(), sd = seasonDef();
-  box.innerHTML = `<div class="guide-today"><b>Today:</b> ${ev.icon} ${ev.name} - ${ev.text}<br>${sd.icon} ${sd.name}, ${seasonDaysLeft()} day${seasonDaysLeft() === 1 ? '' : 's'} left · ${forecastText()}</div>` +
-    GUIDE.map(g => `<div class="section-title">${g.section}</div>` + g.items.map(it => {
+  const box = document.getElementById('guideList'), ev = eventNow(), sd = seasonDef(), q = guideQuery.trim().toLowerCase(), seen = guideSeen();
+  const match = it => !q || `${it.name} ${it.where} ${it.how}`.toLowerCase().includes(q);
+  let body = GUIDE.map(g => {
+    const items = g.items.filter(match);
+    if (!items.length) return '';
+    return `<div class="section-title">${g.section}</div>` + items.map(it => {
       const lock = it.lock ? it.lock() : '';
-      const open = !!guideOpen[it.name];
+      const open = !!guideOpen[it.name] || (!!q && items.length <= 3 && !lock);
+      const isNew = GUIDE_NEW.includes(it.name) && !seen[it.name], go = guideTarget(it.name);
       // A lock reason answers "why can't I do this yet" - show it right away rather than gating it
       // behind a tap; only the (usually longer) "how" text for unlocked items collapses.
       return `<div class="panel-item guide-item${lock ? ' locked' : ''}${open ? ' open' : ''}"${lock ? '' : ` data-toggle-guide="${escapeHtml(it.name)}"`}>
         <span class="panel-icon">${it.icon}</span><span class="panel-text">
-        <div class="panel-name">${it.name}</div><div class="panel-desc">📍 ${it.where}</div>
-        ${lock ? `<div class="guide-how">🔒 ${escapeHtml(lock)}</div>` : (open ? `<div class="guide-how">${it.how}</div>` : '')}</span>
+        <div class="panel-name">${it.name}${isNew ? '<span class="jnew">NEW</span>' : ''}</div><div class="panel-desc">📍 ${it.where}</div>
+        ${lock ? `<div class="guide-how">🔒 ${escapeHtml(lock)}</div>` : (open ? `<div class="guide-how">${it.how}${go ? `<div><button type="button" class="jgo" data-guide-go="${escapeHtml(it.name)}">Take me there →</button></div>` : ''}</div>` : '')}</span>
         ${lock ? '' : `<span class="guide-chevron">${open ? '▲' : '▼'}</span>`}</div>`;
-    }).join('')).join('');
-  box.querySelectorAll('[data-toggle-guide]').forEach(el => el.addEventListener('click', () => {
+    }).join('');
+  }).join('');
+  if (!body) body = `<div class="jempty">Nothing matches “${escapeHtml(guideQuery)}”.<button class="jgo" type="button" id="guideClear">Clear search</button></div>`;
+  box.innerHTML = `<div class="guide-today"><b>Today:</b> ${ev.icon} ${ev.name} - ${ev.text}<br>${sd.icon} ${sd.name}, ${seasonDaysLeft()} day${seasonDaysLeft() === 1 ? '' : 's'} left · ${forecastText()}</div>` + body;
+  box.querySelectorAll('[data-toggle-guide]').forEach(el => el.addEventListener('click', ev2 => {
+    if (ev2.target.closest('[data-guide-go]')) return;
     const name = el.dataset.toggleGuide;
     sfx('nav');
     guideOpen[name] = !guideOpen[name];
+    if (guideOpen[name] && GUIDE_NEW.includes(name)) { guideSeen()[name] = true; saveState(); }
     renderGuide();
   }));
+  box.querySelectorAll('[data-guide-go]').forEach(b => b.addEventListener('click', () => { sfx('tap'); closeJournalSheet(); journalGo(guideTarget(b.dataset.guideGo)); }));
+  const gc = document.getElementById('guideClear'); if (gc) gc.addEventListener('click', () => { guideQuery = ''; document.getElementById('guideSearch').value = ''; renderGuide(); });
 }
 
 /* ============================================================

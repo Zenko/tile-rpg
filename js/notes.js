@@ -10,35 +10,51 @@ function notePreview(n) {
   const t = (n.text || '').trim();
   return t ? t.slice(0, 80) : 'Empty note';
 }
+/* Notes list (v1.89.0): search, pinning, and swipe-to-delete with an Undo (no confirm box). A pinned note sorts first.
+   Swipe a note left (touch or mouse drag), or focus it and press Delete. */
+let notesQuery = '';
 function renderNotesList() {
-  const pr = ensureJournal();
-  const listEl = document.getElementById('notesList');
+  const pr = ensureJournal(), listEl = document.getElementById('notesList'), q = notesQuery.trim().toLowerCase();
   listEl.innerHTML = '';
-  const notes = [...pr.notesList].sort((a, b) => b.updatedAt - a.updatedAt);
-  if (!notes.length) {
-    listEl.innerHTML = '<div class="notes-empty">No notes yet - write one down or sketch something with New Note / New Drawing above.</div>';
-    return;
-  }
+  if (!pr.notesList.length) { listEl.innerHTML = '<div class="notes-empty">No notes yet - write one down or sketch something with New Note / New Drawing above.</div>'; return; }
+  const notes = [...pr.notesList].sort((a, b) => (b.pin ? 1 : 0) - (a.pin ? 1 : 0) || b.updatedAt - a.updatedAt)
+    .filter(n => !q || ((n.title || '') + ' ' + (n.text || '')).toLowerCase().includes(q));
+  if (!notes.length) { listEl.innerHTML = `<div class="jempty">No notes match “${escapeHtml(notesQuery)}”.<button class="jgo" type="button" id="notesClearQ">Clear search</button></div>`; document.getElementById('notesClearQ').addEventListener('click', () => { notesQuery = ''; document.getElementById('notesSearch').value = ''; renderNotesList(); }); return; }
+  const anyPinned = notes.some(n => n.pin), anyLoose = notes.some(n => !n.pin);
+  let lastPin = null;
   notes.forEach(n => {
+    if (anyPinned && anyLoose && !!n.pin !== lastPin) { const h = document.createElement('div'); h.className = 'jgroup-h'; h.textContent = n.pin ? 'Pinned' : 'Notes'; listEl.appendChild(h); }
+    lastPin = !!n.pin;
+    const wrap = document.createElement('div'); wrap.className = 'nwrap';
     const el = document.createElement('div');
-    el.className = 'panel-item note-item';
+    el.className = 'panel-item note-item'; el.tabIndex = 0; el.setAttribute('role', 'button');
     const icon = n.type === 'draw' ? '🖌️' : '✏️';
     const thumb = n.type === 'draw' && n.drawing ? `<img class="note-thumb" src="${n.drawing}" alt="">` : `<div class="panel-icon">${icon}</div>`;
-    const title = n.title.trim() ? escapeHtml(n.title.trim()) : (n.type === 'draw' ? 'Untitled drawing' : 'Untitled note');
-    el.innerHTML = `${thumb}<div class="panel-text"><div class="panel-name">${title}</div><div class="panel-desc">${escapeHtml(notePreview(n))} · ${fmtLogTime(n.updatedAt)}</div></div><button class="note-delete-btn" title="Delete note" aria-label="Delete note">🗑️</button>`;
-    el.addEventListener('click', () => { sfx('nav'); buzz(HAP.tap); openNoteEditor(n.id); });
-    el.querySelector('.note-delete-btn').addEventListener('click', (ev) => {
-      ev.stopPropagation();
-      sfx('nav'); buzz(HAP.tap);
-      if (!confirm('Delete this note? This can\'t be undone.')) return;
-      const pr2 = ensureJournal();
-      pr2.notesList = pr2.notesList.filter(x => x.id !== n.id);
-      saveState();
-      renderNotesList();
-    });
-    listEl.appendChild(el);
+    const title = (n.title || '').trim() ? escapeHtml(n.title.trim()) : (n.type === 'draw' ? 'Untitled drawing' : 'Untitled note');
+    el.innerHTML = `${thumb}<div class="panel-text"><div class="panel-name">${title}</div><div class="panel-desc">${escapeHtml(notePreview(n))} · ${fmtLogTime(n.updatedAt)}</div></div><button class="note-pin-btn" type="button" aria-pressed="${!!n.pin}" aria-label="${n.pin ? 'Unpin' : 'Pin'} this note" title="${n.pin ? 'Unpin' : 'Pin'}">📌</button>`;
+    wrap.innerHTML = '<div class="ndel" aria-hidden="true">Delete</div>'; wrap.appendChild(el);
+    el.addEventListener('click', ev => { if (ev.target.closest('.note-pin-btn') || el.dataset.swiped) return; sfx('nav'); buzz(HAP.tap); openNoteEditor(n.id); });
+    el.querySelector('.note-pin-btn').addEventListener('click', ev => { ev.stopPropagation(); sfx('tap'); buzz(HAP.tap); n.pin = !n.pin; saveState(); renderNotesList(); });
+    el.addEventListener('keydown', ev => { if (ev.key === 'Delete' || ev.key === 'Backspace') { ev.preventDefault(); deleteNoteWithUndo(n.id); } });
+    // swipe left to delete (pointer events: touch and mouse)
+    let sx = 0, dx = 0, on = false;
+    el.addEventListener('pointerdown', ev => { if (ev.target.closest('.note-pin-btn')) return; on = true; sx = ev.clientX; dx = 0; delete el.dataset.swiped; el.classList.add('drag'); el.setPointerCapture(ev.pointerId); });
+    el.addEventListener('pointermove', ev => { if (!on) return; dx = Math.min(0, ev.clientX - sx); if (dx < -6) el.dataset.swiped = '1'; el.style.transform = `translateX(${dx}px)`; });
+    const end = () => {
+      if (!on) return; on = false; el.classList.remove('drag');
+      if (dx < -90) deleteNoteWithUndo(n.id); else { el.style.transform = ''; setTimeout(() => delete el.dataset.swiped, 50); }
+    };
+    el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
+    listEl.appendChild(wrap);
   });
 }
+function deleteNoteWithUndo(id) {
+  const pr = ensureJournal(), at = pr.notesList.findIndex(x => x.id === id); if (at < 0) return;
+  const gone = pr.notesList.splice(at, 1)[0];
+  saveState(); sfx('nav'); buzz(HAP.tap); renderNotesList();
+  showUndoBar('Note deleted', () => { const p2 = ensureJournal(); p2.notesList.splice(Math.min(at, p2.notesList.length), 0, gone); saveState(); renderNotesList(); });
+}
+document.getElementById('notesSearch').addEventListener('input', e => { notesQuery = e.target.value; renderNotesList(); });
 
 function openNoteEditor(id) {
   const n = findNote(id);

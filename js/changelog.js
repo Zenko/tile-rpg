@@ -18,6 +18,19 @@ function gameVersionLabel() {
    the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
 const CHANGELOG = [
   {
+    version: '1.89.0',
+    date: '2026-10-01',
+    title: "A tidier Journal",
+    changes: [
+      "The Journal has a new Today page: your daily gift, quests, town tasks, minigame prizes, puzzle, challenges and this week's cup in one place, plus a \"Since you were away\" box for ready bread, returned expeditions, ripe crops and unread letters. Every line has a Go button.",
+      "The Log groups entries by day, has filter chips (Cards, Battles, Fishing, Town, Social), and every entry links to where it lives.",
+      "Battles has filters, a trend line of your last matches, tap-to-expand details with your recent record against that opponent, and a Rematch button. The coloured left edge on match cards is gone.",
+      "New Almanac: a sticker-book of fish, cards, recipes and night critters. Things you haven't found yet are silhouettes with a hint.",
+      "Notes: search, pin your favourites, and swipe a note left to delete it - with an Undo instead of a confirm box.",
+      "The Guide and What's new moved behind the ? button. The Guide has search, NEW tags and a 'Take me there' button; What's new shows the latest few with unread dots and keeps the rest under Earlier."
+    ]
+  },
+  {
     version: '1.88.0',
     date: '2026-10-01',
     title: "A brighter battle, and a mystery in the water",
@@ -939,47 +952,67 @@ const CHANGELOG = [
 // of "What's New"); everything older starts collapsed and expands in place on tap, same idiom as the
 // mailbox's mail-item/mail-body (see renderMailList in houses-and-cellar.js).
 let clOpen = null;
+/* ---- What's new (inside the Journal's ? sheet, v1.89.0) ----
+   The newest few entries are listed; the rest sit under "Earlier". Each version has its own unread dot (state.progress.clRead),
+   cleared by opening it or by "Mark all as read". Saves from before this change, and brand-new saves, start fully read. */
+const CL_RECENT = 6, CL_UNREAD_WINDOW = 12;
+let clEarlier = false;
+function clReadMap() {
+  const pr = state.progress;
+  if (!pr.clRead || typeof pr.clRead !== 'object') {
+    pr.clRead = {};
+    const seen = pr.lastSeenChangelog;                    // the old per-date marker, or nothing for a save that never used it
+    CHANGELOG.forEach(e => { if (!seen || e.date <= seen) pr.clRead[e.version] = true; });
+    saveState();
+  }
+  return pr.clRead;
+}
+function clUnreadCount() { const r = clReadMap(); return CHANGELOG.slice(0, CL_UNREAD_WINDOW).filter(e => !r[e.version]).length; }
 function renderChangelog() {
   if (!clOpen) { clOpen = {}; if (CHANGELOG[0]) clOpen[CHANGELOG[0].version] = true; }
-  const listEl = document.getElementById('changelogList');
-  listEl.innerHTML = '';
+  const read = clReadMap(), listEl = document.getElementById('changelogList');
   const versionLine = document.getElementById('clVersionLine');
   if (versionLine) versionLine.textContent = 'You\'re on ' + gameVersionLabel();
-  CHANGELOG.forEach(entry => {
-    const open = !!clOpen[entry.version];
-    const el = document.createElement('div');
-    el.className = 'cl-entry' + (open ? ' open' : '');
-    el.dataset.toggleCl = entry.version;
-    el.innerHTML = `<div class="cl-head">
+  const entry = e => {
+    const open = !!clOpen[e.version];
+    return `<div class="cl-entry${open ? ' open' : ''}" data-toggle-cl="${e.version}"><div class="cl-head">
         <span class="cl-dot"></span>
-        <span class="cl-v">v${entry.version}</span>
-        <span class="cl-title">${escapeHtml(entry.title)}</span>
-        <span class="cl-date">${fmtChangelogDate(entry.date)}</span>
+        <span class="cl-v">v${e.version}</span>
+        <span class="cl-title">${escapeHtml(e.title)}</span>
+        ${read[e.version] ? '' : '<i class="jdot" title="Unread"></i>'}
+        <span class="cl-date">${fmtChangelogDate(e.date)}</span>
         <span class="cl-chevron">${open ? '▲' : '▼'}</span>
       </div>
-      ${open ? `<ul class="cl-list">${entry.changes.map(c => `<li>${escapeHtml(c)}</li>`).join('')}</ul>` : ''}`;
-    listEl.appendChild(el);
-  });
+      ${open ? `<ul class="cl-list">${e.changes.map(c => `<li>${escapeHtml(c)}</li>`).join('')}</ul>` : ''}</div>`;
+  };
+  const recent = CHANGELOG.slice(0, CL_RECENT), older = CHANGELOG.slice(CL_RECENT), unread = clUnreadCount();
+  listEl.innerHTML = `<div class="jgroup-h">Recent<small>${unread ? unread + ' unread' : 'all read'}</small></div>` + recent.map(entry).join('') +
+    (older.length ? `<button type="button" class="jchip jearlier" id="clEarlierBtn" aria-expanded="${clEarlier}">${clEarlier ? 'Hide earlier updates' : `Earlier · ${older.length} updates`}</button>` : '') +
+    (clEarlier ? older.map(entry).join('') : '') +
+    (unread ? '<div class="jmarkall"><button type="button" class="jgo" id="clMarkAll">Mark all as read</button></div>' : '');
   listEl.querySelectorAll('[data-toggle-cl]').forEach(el => el.addEventListener('click', () => {
     const v = el.dataset.toggleCl;
     sfx('flip');
     clOpen[v] = !clOpen[v];
-    renderChangelog();
+    if (clOpen[v]) { clReadMap()[v] = true; saveState(); }
+    renderChangelog(); updateJournalBadge();
   }));
+  const eb = document.getElementById('clEarlierBtn'); if (eb) eb.addEventListener('click', () => { sfx('nav'); clEarlier = !clEarlier; renderChangelog(); });
+  const ma = document.getElementById('clMarkAll'); if (ma) ma.addEventListener('click', () => { markChangelogSeen(); sfx('claim'); renderChangelog(); });
 }
 function markChangelogSeen() {
-  const pr = state.progress;
-  const latest = CHANGELOG[0] && CHANGELOG[0].date;
-  if (latest && pr.lastSeenChangelog !== latest) { pr.lastSeenChangelog = latest; saveState(); }
-  updateJournalBadge();
+  const pr = state.progress, r = clReadMap();
+  CHANGELOG.forEach(e => { r[e.version] = true; });
+  if (CHANGELOG[0]) pr.lastSeenChangelog = CHANGELOG[0].date;
+  saveState(); updateJournalBadge();
 }
+// The dot on the Journal tab and the number on the ? button both mean "there are updates you have not read".
 function updateJournalBadge() {
-  const btn = document.getElementById('tabJournal');
-  const pr = state.progress;
-  const latest = CHANGELOG[0] && CHANGELOG[0].date;
-  const show = !!latest && pr.lastSeenChangelog !== latest;
+  const btn = document.getElementById('tabJournal'), n = clUnreadCount();
   let dot = btn.querySelector('.dot');
-  if (show && !dot) { dot = document.createElement('span'); dot.className = 'dot'; btn.appendChild(dot); }
-  if (!show && dot) dot.remove();
+  if (n && !dot) { dot = document.createElement('span'); dot.className = 'dot'; btn.appendChild(dot); }
+  if (!n && dot) dot.remove();
+  const b = document.getElementById('journalHelpBadge');
+  if (b) { b.textContent = n || ''; b.classList.toggle('hidden', !n); }
 }
 

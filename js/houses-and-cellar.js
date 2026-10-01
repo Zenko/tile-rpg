@@ -160,6 +160,7 @@ function cookDish(id) {
   if (!canCook(r)) { sfx('tie'); return `You need ${needsText(r)} for ${r.name}. ${pantryLine()}`; }
   Object.keys(r.needs).forEach(k => useIngredient(k, r.needs[k]));
   dishes()[id] = dishCount(id) + 1;
+  (state.progress.recipesMade || (state.progress.recipesMade = {}))[id] = true;      // the Almanac's Recipes page
   bumpStat('dishesCooked', 1);
   logEvent(r.icon, `Cooked ${r.name} with Maple.`);
   saveState(); sfx('claim'); buzz(HAP.found); toast(`${r.icon} ${r.name} is ready`);
