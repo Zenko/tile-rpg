@@ -28,10 +28,12 @@ function charBuild() {
       <div class="seg seg-scroll ch-seg" id="chSeg">${CHAR_VIEWS.map(([k, t]) => `<button class="seg-btn" data-v="${k}">${t}</button>`).join('')}</div>
       <div class="ch-body" id="chBody"></div>
     </div>`;
-  p.querySelectorAll('#chSeg .seg-btn').forEach(b => b.addEventListener('click', () => { sfx('nav'); buzz(HAP.tap); charSetView(b.dataset.v); }));
+  onAll(p, '#chSeg .seg-btn', b => { sfx('nav'); buzz(HAP.tap); charSetView(b.dataset.v); });
 }
 function charSetView(v) {
   charView = v;
+  if (v === 'bag') bumpStat('inventoryOpened', 1);   // the "Checked your bag" milestone
+  if (v === 'bag') bumpStat('inventoryOpened', 1);   // the "Checked your bag" milestone
   if (!document.getElementById('chStage')) return;   // the tab is not built yet: renderCharacterTab() will draw this view
   document.querySelectorAll('#chSeg .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.v === v));
   document.getElementById('chStage').classList.toggle('compact', charCompact());
@@ -102,13 +104,13 @@ function charDrawMe(box) {
   trow.innerHTML = `<button class="title-chip${cur ? '' : ' active'}" data-title="">No title</button>` +
     mine.map(t => `<button class="title-chip${cur && cur.ach === t.ach ? ' active' : ''}" data-title="${t.ach}">${escapeHtml(t.name)}</button>`).join('') +
     (mine.length < TITLES.length ? `<span class="more-in-shop">${TITLES.length - mine.length} more to earn in Rewards › Milestones</span>` : '');
-  trow.querySelectorAll('[data-title]').forEach(b => b.addEventListener('click', () => charWearTitle(b.dataset.title)));
+  onAll(trow, '[data-title]', b => charWearTitle(b.dataset.title));
   box.appendChild(trow);
   const pins = charPins();
   charSection(box, `Your highlights · pin up to ${CHAR_PIN_MAX}`);
   const grid = document.createElement('div'); grid.className = 'profile-stats-grid';
   grid.innerHTML = profileStatValues().map(s => `<div class="profile-stat${pins.includes(s.label) ? ' pinned' : ''}"><button class="ps-pin" data-pin="${s.label}" aria-pressed="${pins.includes(s.label)}" aria-label="${pins.includes(s.label) ? 'Unpin' : 'Pin'} ${s.label}">${pins.includes(s.label) ? '📌' : '📍'}</button><span class="ps-icon">${s.icon}</span><span class="ps-value">${s.value}</span><span class="ps-label">${s.label}</span></div>`).join('');
-  grid.querySelectorAll('[data-pin]').forEach(b => b.addEventListener('click', () => charTogglePin(b.dataset.pin)));
+  onAll(grid, '[data-pin]', b => charTogglePin(b.dataset.pin));
   box.appendChild(grid);
   const lvNow = pr.level, ahead = unlocksBetween(lvNow, lvNow + 30).slice(0, 4);
   if (ahead.length) {
@@ -154,7 +156,7 @@ function charDrawLook(box) {
   charSection(box, 'Border width');
   const wrow = document.createElement('div'); wrow.className = 'title-row bd-widths';
   wrow.innerHTML = BORDER_WIDTHS.map(w => `<button class="title-chip${ch.avBorderW === w.id ? ' active' : ''}" data-bw="${w.id}">${w.name}</button>`).join('');
-  wrow.querySelectorAll('[data-bw]').forEach(b => b.addEventListener('click', () => { sfx('nav'); buzz(HAP.tap); state.character.avBorderW = b.dataset.bw; saveState(); updateHud(); renderTown(); renderCharacterTab(); }));
+  onAll(wrow, '[data-bw]', b => { sfx('nav'); buzz(HAP.tap); state.character.avBorderW = b.dataset.bw; saveState(); updateHud(); renderTown(); renderCharacterTab(); });
   box.appendChild(wrow);
   charSection(box, 'Border colour' + (curB.fixed ? ' · this border keeps its own colours' : ''));
   const cw = document.createElement('div'); cw.className = 'swatch-row shop-swatch-row bd-colors';

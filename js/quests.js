@@ -510,7 +510,7 @@ function renderClaimCenter(kind) {
     + group('Ready', ready.length, ready) + group('In progress', 'closest first', prog)
     + (fresh.length ? `<button class="claim-more" data-nsopen="1">${claimOpen[kind] ? 'Hide' : 'Show'} not started · ${fresh.length}</button>${claimOpen[kind] ? fresh.map(row).join('') : ''}` : '')
     + group('Claimed', done.length, done);
-  box.querySelectorAll('[data-claim]').forEach(b => b.addEventListener('click', () => (weekly ? claimWeeklyQuest : claimQuest)(+b.dataset.claim)));
+  onAll(box, '[data-claim]', b => (weekly ? claimWeeklyQuest : claimQuest)(+b.dataset.claim));
   const all = box.querySelector('[data-claimall]'); if (all) all.addEventListener('click', () => claimAllQuests(kind));
   const ns = box.querySelector('[data-nsopen]'); if (ns) ns.addEventListener('click', () => { claimOpen[kind] = !claimOpen[kind]; sfx('tap'); renderClaimCenter(kind); });
 }

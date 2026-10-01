@@ -582,7 +582,7 @@ function renderAlmanac() {
     ${foilTotal ? `<div class="alm-season">✨ ${foilTotal} foil${foilTotal === 1 ? '' : 's'} in your collection - look for the shimmer on any card.</div>` : ''}
     <div class="alm-season">${sd.icon} It's ${sd.name}: cards marked ${sd.icon} turn up more often for ${seasonDaysLeft()} more day${seasonDaysLeft() === 1 ? '' : 's'}.</div>
     <button type="button" class="claim-more" id="almGridToggle">${almGridOpen ? 'Hide' : 'Show'} every card · ${found}/${total}</button>`;
-  document.querySelectorAll('#almProgress [data-set]').forEach(b => b.addEventListener('click', () => { setOpenId = setOpenId === b.dataset.set ? null : b.dataset.set; sfx('tap'); renderAlmanac(); }));
+  onAll(document, '#almProgress [data-set]', b => { setOpenId = setOpenId === b.dataset.set ? null : b.dataset.set; sfx('tap'); renderAlmanac(); });
   document.getElementById('almGridToggle').addEventListener('click', () => { almGridOpen = !almGridOpen; sfx('nav'); renderAlmanac(); });
 
   grid.innerHTML = '';

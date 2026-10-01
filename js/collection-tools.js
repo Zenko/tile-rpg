@@ -35,8 +35,8 @@ function renderFilterBar(boxId, rerender) {
       <div class="cf-chips">${FILTER_CHIPS.map(([k, l]) => `<button class="cf-chip" data-r="${k}">${l}</button>`).join('')}</div>`;
     box.querySelector('.cf-search').addEventListener('input', e => { cardFilter.q = e.target.value; rerender(); });
     box.querySelector('.cf-sort-btn').addEventListener('click', () => { sfx('tap'); openSortOverlay(rerender); });
-    box.querySelectorAll('.cf-chip[data-r]').forEach(b => b.addEventListener('click', () => { cardFilter.rarity = b.dataset.r; sfx('tap'); rerender(); }));
-    box.querySelectorAll('.cf-fam').forEach(b => b.addEventListener('click', () => { cardFilter.fam = b.dataset.f; sfx('tap'); rerender(); }));
+    onAll(box, '.cf-chip[data-r]', b => { cardFilter.rarity = b.dataset.r; sfx('tap'); rerender(); });
+    onAll(box, '.cf-fam', b => { cardFilter.fam = b.dataset.f; sfx('tap'); rerender(); });
   }
   const input = box.querySelector('.cf-search');
   if (input.value !== cardFilter.q) input.value = cardFilter.q;
@@ -210,7 +210,7 @@ function renderCharmBar() {
       return id ? `<button class="charm-slot on" data-uncharm="${i}"><span>${cardArtHtml(cardDef(id))}</span><small>${info ? info.text : 'no effect'}</small></button>` : '<div class="charm-slot"><span>✦</span><small>empty</small></div>';
     }).join('')}</div>`;
   collectionList.appendChild(bar);
-  bar.querySelectorAll('[data-uncharm]').forEach(b => b.addEventListener('click', () => { clearCharm(+b.dataset.uncharm); renderCollection(); }));
+  onAll(bar, '[data-uncharm]', b => { clearCharm(+b.dataset.uncharm); renderCollection(); });
 }
 function renderCollection() {
   collectionList.innerHTML = '';
@@ -258,7 +258,7 @@ function renderCollection() {
     });
   }
   renderCharmBar();
-  collectionList.querySelectorAll('[data-tile]').forEach(t => t.addEventListener('click', () => openCardSheet(t.dataset.tile)));
+  onAll(collectionList, '[data-tile]', t => openCardSheet(t.dataset.tile));
 }
 
 /* ---------------- deck slots: three saved decks, one of them active ----------------
@@ -308,7 +308,7 @@ function renderDeckSlots() {
     const n = (i === state.activeDeckSlot ? state.deck : s.cards || []).length;
     return `<button class="dk-slot${i === state.activeDeckSlot ? ' active' : ''}" data-slot="${i}"><span class="dk-slot-name">${escapeHtml(s.name)}</span><span class="dk-slot-n">${n}/${DECK_SIZE}</span></button>`;
   }).join('') + '<button class="dk-slot-edit" id="deckRename" title="Rename this deck" aria-label="Rename this deck">✏️</button>';
-  box.querySelectorAll('[data-slot]').forEach(b => b.addEventListener('click', () => switchDeckSlot(+b.dataset.slot)));
+  onAll(box, '[data-slot]', b => switchDeckSlot(+b.dataset.slot));
   document.getElementById('deckRename').addEventListener('click', renameDeckSlot);
 }
 

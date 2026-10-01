@@ -446,6 +446,144 @@ input { -webkit-user-select: text; user-select: text; }
 .pm-body::-webkit-scrollbar-track { background: transparent; }
 .pm-body::-webkit-scrollbar-thumb { background: var(--water); border-radius: 999px; }
 
+.hidden { display: none !important; }
+
+/* ===== Player menu: slides down from the avatar, closes via backdrop or the X ===== */
+.player-menu-backdrop {
+  position: fixed; inset: 0; background: var(--overlay-bg); z-index: 49; backdrop-filter: blur(3px);
+  opacity: 1; transition: opacity 0.28s ease;
+}
+.player-menu-backdrop.hidden { opacity: 0; pointer-events: none; display: block; }
+.player-menu {
+  position: fixed; inset: 0; z-index: 50; max-width: 460px; margin: 0 auto;
+  background: var(--bg-bottom, var(--stone)); box-shadow: 0 12px 34px rgba(0,0,0,0.4);
+  height: 100%; height: 100dvh; display: flex; flex-direction: column;
+  transform: translateY(0); opacity: 1; transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.28s ease;
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.player-menu.hidden { transform: translateY(-100%); opacity: 0; pointer-events: none; display: flex; }
+.pm-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 6px; flex-shrink: 0; }
+.pm-title { font-family: var(--f-display); font-weight: 500; font-size: 1.15rem; color: var(--ink); }
+.icon-btn {
+  width: 34px; height: 34px; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--hl) 6%, transparent);
+  background: color-mix(in srgb, var(--hl) 7%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  color: var(--ink); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;
+  box-shadow: 0 2px 10px var(--shadow), inset 0 1px 0 color-mix(in srgb, var(--hl) 8%, transparent);
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s ease;
+  font-family: inherit; flex-shrink: 0;
+}
+.icon-btn svg { width: 17px; height: 17px; pointer-events: none; }
+.icon-btn:active { transform: scale(0.86); background: color-mix(in srgb, var(--hl) 15%, transparent); }
+
+.pm-close {
+  width: 34px; height: 34px; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--hl) 6%, transparent);
+  background: color-mix(in srgb, var(--hl) 7%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  color: var(--ink); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;
+  box-shadow: 0 2px 10px var(--shadow), inset 0 1px 0 color-mix(in srgb, var(--hl) 8%, transparent);
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s ease;
+}
+.pm-close svg { width: 16px; height: 16px; }
+.pm-close:active { transform: scale(0.86); background: color-mix(in srgb, var(--hl) 15%, transparent); }
+.pm-body {
+  flex: 1; min-height: 0; overflow-y: auto; padding: 6px 20px calc(env(safe-area-inset-bottom, 0px) + 24px);
+  -webkit-overflow-scrolling: touch; scrollbar-width: thin; scrollbar-color: var(--water) transparent;
+}
+.pm-body::-webkit-scrollbar { width: 6px; }
+.pm-body::-webkit-scrollbar-track { background: transparent; }
+.pm-body::-webkit-scrollbar-thumb { background: var(--water); border-radius: 999px; }
+
+.hidden { display: none !important; }
+
+/* ===== Player menu: slides down from the avatar, closes via backdrop or the X ===== */
+.player-menu-backdrop {
+  position: fixed; inset: 0; background: var(--overlay-bg); z-index: 49; backdrop-filter: blur(3px);
+  opacity: 1; transition: opacity 0.28s ease;
+}
+.player-menu-backdrop.hidden { opacity: 0; pointer-events: none; display: block; }
+.player-menu {
+  position: fixed; inset: 0; z-index: 50; max-width: 460px; margin: 0 auto;
+  background: var(--bg-bottom, var(--stone)); box-shadow: 0 12px 34px rgba(0,0,0,0.4);
+  height: 100%; height: 100dvh; display: flex; flex-direction: column;
+  transform: translateY(0); opacity: 1; transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.28s ease;
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.player-menu.hidden { transform: translateY(-100%); opacity: 0; pointer-events: none; display: flex; }
+.pm-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 6px; flex-shrink: 0; }
+.pm-title { font-family: var(--f-display); font-weight: 500; font-size: 1.15rem; color: var(--ink); }
+.icon-btn {
+  width: 34px; height: 34px; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--hl) 6%, transparent);
+  background: color-mix(in srgb, var(--hl) 7%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  color: var(--ink); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;
+  box-shadow: 0 2px 10px var(--shadow), inset 0 1px 0 color-mix(in srgb, var(--hl) 8%, transparent);
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s ease;
+  font-family: inherit; flex-shrink: 0;
+}
+.icon-btn svg { width: 17px; height: 17px; pointer-events: none; }
+.icon-btn:active { transform: scale(0.86); background: color-mix(in srgb, var(--hl) 15%, transparent); }
+
+.pm-close {
+  width: 34px; height: 34px; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--hl) 6%, transparent);
+  background: color-mix(in srgb, var(--hl) 7%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  color: var(--ink); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;
+  box-shadow: 0 2px 10px var(--shadow), inset 0 1px 0 color-mix(in srgb, var(--hl) 8%, transparent);
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s ease;
+}
+.pm-close svg { width: 16px; height: 16px; }
+.pm-close:active { transform: scale(0.86); background: color-mix(in srgb, var(--hl) 15%, transparent); }
+.pm-body {
+  flex: 1; min-height: 0; overflow-y: auto; padding: 6px 20px calc(env(safe-area-inset-bottom, 0px) + 24px);
+  -webkit-overflow-scrolling: touch; scrollbar-width: thin; scrollbar-color: var(--water) transparent;
+}
+.pm-body::-webkit-scrollbar { width: 6px; }
+.pm-body::-webkit-scrollbar-track { background: transparent; }
+.pm-body::-webkit-scrollbar-thumb { background: var(--water); border-radius: 999px; }
+
+.hidden { display: none !important; }
+
+/* ===== Player menu: slides down from the avatar, closes via backdrop or the X ===== */
+.player-menu-backdrop {
+  position: fixed; inset: 0; background: var(--overlay-bg); z-index: 49; backdrop-filter: blur(3px);
+  opacity: 1; transition: opacity 0.28s ease;
+}
+.player-menu-backdrop.hidden { opacity: 0; pointer-events: none; display: block; }
+.player-menu {
+  position: fixed; inset: 0; z-index: 50; max-width: 460px; margin: 0 auto;
+  background: var(--bg-bottom, var(--stone)); box-shadow: 0 12px 34px rgba(0,0,0,0.4);
+  height: 100%; height: 100dvh; display: flex; flex-direction: column;
+  transform: translateY(0); opacity: 1; transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.28s ease;
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.player-menu.hidden { transform: translateY(-100%); opacity: 0; pointer-events: none; display: flex; }
+.pm-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 6px; flex-shrink: 0; }
+.pm-title { font-family: var(--f-display); font-weight: 500; font-size: 1.15rem; color: var(--ink); }
+.icon-btn {
+  width: 34px; height: 34px; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--hl) 6%, transparent);
+  background: color-mix(in srgb, var(--hl) 7%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  color: var(--ink); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;
+  box-shadow: 0 2px 10px var(--shadow), inset 0 1px 0 color-mix(in srgb, var(--hl) 8%, transparent);
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s ease;
+  font-family: inherit; flex-shrink: 0;
+}
+.icon-btn svg { width: 17px; height: 17px; pointer-events: none; }
+.icon-btn:active { transform: scale(0.86); background: color-mix(in srgb, var(--hl) 15%, transparent); }
+
+.pm-close {
+  width: 34px; height: 34px; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--hl) 6%, transparent);
+  background: color-mix(in srgb, var(--hl) 7%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  color: var(--ink); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;
+  box-shadow: 0 2px 10px var(--shadow), inset 0 1px 0 color-mix(in srgb, var(--hl) 8%, transparent);
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s ease;
+}
+.pm-close svg { width: 16px; height: 16px; }
+.pm-close:active { transform: scale(0.86); background: color-mix(in srgb, var(--hl) 15%, transparent); }
+.pm-body {
+  flex: 1; min-height: 0; overflow-y: auto; padding: 6px 20px calc(env(safe-area-inset-bottom, 0px) + 24px);
+  -webkit-overflow-scrolling: touch; scrollbar-width: thin; scrollbar-color: var(--water) transparent;
+}
+.pm-body::-webkit-scrollbar { width: 6px; }
+.pm-body::-webkit-scrollbar-track { background: transparent; }
+.pm-body::-webkit-scrollbar-thumb { background: var(--water); border-radius: 999px; }
+
 /* Inventory panel reuses .pm-head/.pm-title/.pm-close/.pm-body from the player menu above for a consistent
    look, but needs its own backdrop/panel stacking since it opens from inside that already-open menu - see
    HANDOFF §9's overlay-stacking gotcha (z-index must clear the player menu's 50/49, same as #cloudOverlay). */

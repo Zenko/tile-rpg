@@ -169,33 +169,7 @@ document.getElementById('avatarChip').addEventListener('click', () => { if (inBa
 document.getElementById('playerMenuClose').addEventListener('click', closePlayerMenu);
 document.getElementById('playerMenuBackdrop').addEventListener('click', closePlayerMenu);
 
-/* ---------------- inventory: one place to see and use everything you're carrying ----------------
-   Deliberately not a new item-tracking system of its own - it just reads the storage each subsystem
-   already owns (pantry(), dishes(), seedInv(), state.decorationInventory) and gives it a shared window,
-   per HANDOFF §6's "every system creates its own slice" rule. The only actions offered are the ones that
-   were only reachable by hunting down the right building before: planting a seed and placing a decoration
-   both reuse the exact flow those buildings already use (startPlanting/startPlacingDecoration), so there's
-   nothing new to keep in sync. Dishes and pantry ingredients stay informational here - they're already
-   used at the point of cooking/battle/gifting a neighbor, so a second "use" button here would just be a
-   confusing second path to the same effect. */
-let invTab = 'pantry';
-function openInventory() {
-  closePlayerMenu();
-  showTipOnce('inventory');
-  bumpStat('inventoryOpened', 1);
-  document.getElementById('inventoryBackdrop').classList.remove('hidden');
-  document.getElementById('inventoryPanel').classList.remove('hidden');
-  renderInventory();
-}
-function closeInventory() {
-  document.getElementById('inventoryBackdrop').classList.add('hidden');
-  document.getElementById('inventoryPanel').classList.add('hidden');
-}
-function switchInvTab(tab) {
-  invTab = tab;
-  document.querySelectorAll('#invSeg .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.inv === tab));
-  renderInventory();
-}
+/* ---------------- inventory rows: the Character tab's Pantry view (js/character-tab.js) builds its lists from these ---------------- */
 function invRow(icon, name, count, desc, actionLabel, onAction) {
   const el = document.createElement('div');
   el.className = 'quest inv-item';
@@ -207,36 +181,7 @@ function invRow(icon, name, count, desc, actionLabel, onAction) {
   if (onAction) el.querySelector('.inv-use-btn').addEventListener('click', onAction);
   return el;
 }
-function invEmpty(text) { return `<div class="panel-desc" style="padding:10px 4px">${text}</div>`; }
-function renderInventory() {
-  const list = document.getElementById('inventoryList');
-  list.innerHTML = '';
-  let rows = [];
-  if (invTab === 'pantry') {
-    rows = Object.keys(INGREDIENTS).filter(k => ingredientCount(k) > 0)
-      .map(k => ({ icon: INGREDIENTS[k].icon, name: INGREDIENTS[k].name, count: ingredientCount(k), desc: "Cooked into dishes at Maple's Bakery." }));
-    if (!rows.length) { list.innerHTML = invEmpty("Your pantry is empty - harvest crops, catch fish or bake bread to fill it."); return; }
-  } else if (invTab === 'dishes') {
-    rows = RECIPES.filter(r => dishCount(r.id) > 0).map(r => ({ icon: r.icon, name: r.name, count: dishCount(r.id), desc: r.desc }));
-    if (!rows.length) { list.innerHTML = invEmpty("No dishes cooked yet - Maple's Bakery turns your pantry into dishes."); return; }
-  } else if (invTab === 'seeds') {
-    rows = SEEDS.filter(s => seedCount(s.id) > 0).map(s => ({ icon: s.icon, name: s.name, count: seedCount(s.id), desc: s.desc, seed: s }));
-    if (!rows.length) { list.innerHTML = invEmpty('No seeds yet - buy some from Fern, or find them in the Hollow Garden.'); return; }
-  } else if (invTab === 'decor') {
-    rows = DECORATION_ITEMS.filter(d => decorationInventoryCount(d.id) > 0).map(d => ({ icon: d.icon, name: d.name, count: decorationInventoryCount(d.id), desc: d.desc, deco: d }));
-    if (!rows.length) { list.innerHTML = invEmpty("No spare decorations - the Shop's Items tab has more, or earn them from the museum wings."); return; }
-  }
-  rows.forEach(r => {
-    const action = r.seed ? { label: '🌱 Plant', fn: () => { closeInventory(); startPlanting(r.seed.id); } }
-      : r.deco ? { label: '📍 Place', fn: () => { closeInventory(); startPlacingDecoration(r.deco); } }
-      : null;
-    list.appendChild(invRow(r.icon, escapeHtml(r.name), r.count, escapeHtml(r.desc), action && action.label, action && action.fn));
-  });
-}
 document.getElementById('openInventoryBtn').addEventListener('click', () => { closePlayerMenu(); sfx('nav'); buzz(HAP.tap); switchTab('character'); charSetView('bag'); });
-document.getElementById('inventoryClose').addEventListener('click', closeInventory);
-document.getElementById('inventoryBackdrop').addEventListener('click', closeInventory);
-document.querySelectorAll('#invSeg .seg-btn').forEach(b => b.addEventListener('click', () => switchInvTab(b.dataset.inv)));
 // One clean overlay instead of a stack of toasts firing one after another - everything worth knowing about
 // right now (time, weather and its effect, season, today's event, and the forecast) at a glance together.
 document.getElementById('pillSky').addEventListener('click', () => {

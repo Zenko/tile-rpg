@@ -12,6 +12,13 @@
    against another file, so its position in the load order is not critical.
    ============================================================ */
 
+/* ---------- small DOM helper ---------- */
+// Run fn(element) when any element matching selector inside root is clicked. Screens redraw with innerHTML and then wire
+// their buttons again; this keeps that to one line instead of querySelectorAll(...).forEach(b => b.addEventListener(...)).
+function onAll(root, selector, fn, type) {
+  root.querySelectorAll(selector).forEach(el => el.addEventListener(type || 'click', e => fn(el, e)));
+}
+
 /* ---------- card inspect ---------- */
 function openCardInspect(id) {
   const def = cardDef(id); if (!def) return;

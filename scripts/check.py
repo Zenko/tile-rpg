@@ -62,5 +62,10 @@ else:
     bad = [t for t in d['p'] if t not in ('new', 'better', 'fixed')]
     if bad: fail('PENDING_CHANGES has invalid tags: ' + ', '.join(map(str, bad)))
 
+BIG = 1500   # a nudge, not a failure: past this a file is usually doing several jobs and wants splitting (see HANDOFF)
+for f in files + sorted(glob.glob('css/*.css')):
+    n = sum(1 for _ in open(f, encoding='utf-8'))
+    if n > BIG and f != 'js/changelog-archive.js': print(f'WARN  {f} has {n} lines; consider splitting it')
+
 print('all checks passed' if ok else 'checks FAILED')
 sys.exit(0 if ok else 1)

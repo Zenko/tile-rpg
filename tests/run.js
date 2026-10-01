@@ -24,7 +24,7 @@ const NOISE = /gstatic|googleapis|firebase|fonts|ERR_|Failed to load resource/;
     try {
       await page.goto('file://' + path.join(root, 'index.html')); await page.waitForTimeout(600);
       await page.evaluate(() => { Object.keys(TIPS).forEach(k => { tipsSeen()[k] = true; }); saveState(); });
-      await page.addStyleTag({ content: '.overlay{display:none!important}' });   // level-ups and reveals would intercept clicks
+      await page.evaluate(() => { const st = document.createElement('style'); st.id = 'testHideOverlays'; st.textContent = '.overlay{display:none!important}'; document.head.appendChild(st); });   // level-ups and reveals would intercept clicks; a test that drives an overlay removes #testHideOverlays
       await require(path.join(__dirname, f))(page, assert);
       if (errors.length) throw new Error('page errors:\n  ' + errors.join('\n  '));
       console.log(`ok    ${f} (${Date.now() - t0}ms)`);
