@@ -69,7 +69,8 @@ function startBattleNow(opponent, first) {
   // Plain neighbors and district bosses get a fresh deck each fight, scaled to how many wins you have (their stored deck
   // predates enhanced and unique foe cards). Every other kind of opponent brings its own deck.
   const plainFoe = !opponent.dungeon && !opponent.cup && !opponent.challenge && !opponent.signature && !opponent.isRival && !opponent.puzzle;
-  const oppDeck = plainFoe ? buildDeckForOpponent(DECK_SIZE, isBoss, null, opponent.name)
+  const oppFam = plainFoe ? districtFamily(state.currentDistrict) : null;      // a district's folk favour its family
+  const oppDeck = plainFoe ? buildDeckForOpponent(DECK_SIZE, isBoss, null, opponent.name, state.currentDistrict)
     : (Array.isArray(opponent.deck) && opponent.deck.length === DECK_SIZE) ? opponent.deck : buildDeckForOpponent(DECK_SIZE, isBoss);
   const twistKind = bossTwistFor(opponent);
   let G;
@@ -105,7 +106,7 @@ function startBattleNow(opponent, first) {
   battle = { npc: opponent, isBoss, first, G, profile, weather, sel: null, busy: false, ended: false, rewarded: false, yieldArmed: false, token: ++battleToken, startedAt: Date.now() };
   const chip = weather === 'storm' ? '⛈️ Swift +1 power' : weather === 'snow' ? (isBoss ? '❄️ Boss +2 Spirit · richer prize' : '❄️ Richer prize') : '';
   const tw = twistKind ? BattleEngine.TWISTS[twistKind] : null;
-  btGet('btWeather').textContent = opponent.puzzle ? '🧩 Ending your turn resets the board' : [tw ? `${tw.icon} ${tw.text}` : '', chip, plainFoe ? '✦ Seasoned deck: unique & enhanced cards' : ''].filter(Boolean).join(' · ');
+  btGet('btWeather').textContent = opponent.puzzle ? '🧩 Ending your turn resets the board' : [tw ? `${tw.icon} ${tw.text}` : '', chip, plainFoe ? (oppFam ? `${FAMILIES[oppFam].icon} ${FAMILIES[oppFam].name} deck · ` : '') + '✦ Seasoned deck: unique & enhanced cards' : ''].filter(Boolean).join(' · ');
   battle.puzzle = !!opponent.puzzle;
 
   townPanel.classList.add('hidden');
@@ -254,6 +255,7 @@ function btCardEl(c, cls, mine) {
   else if (!mine && def.crafted) el.classList.add('enhanced-card');
   if (c.kw.includes('guard')) { el.classList.add('guarding'); el.insertAdjacentHTML('beforeend', '<span class="badge grd">🛡️</span>'); }
   if (/(^| )sleep( |$)/.test(cls || '')) el.insertAdjacentHTML('beforeend', '<span class="badge zz">💤</span>');
+  if (c.lull) { el.classList.add('lulled'); el.insertAdjacentHTML('beforeend', '<span class="badge lul">😴</span>'); }
   return el;
 }
 
@@ -452,6 +454,7 @@ function btShowTip(c, hint) {
     ${c.kw.map(k => `<div class="kw">${KW[k].icon} <b>${KW[k].name}.</b> ${KW[k].text}</div>`).join('') || '<div class="kw" style="color:var(--ink-soft)">No keywords.</div>'}`;
   tip.innerHTML = `<div class="t-h"><span class="ic">${cardArtHtml(def)}</span><b>${def.name}</b><small>${RARITY_LABEL[def.rarity]} · costs ${c.cost}</small></div>
     ${body}
+    ${!c.spell && BattleEngine.familyOf(c.id) ? `<div class="kw">${FAMILIES[BattleEngine.familyOf(c.id)].icon} <b>${FAMILIES[BattleEngine.familyOf(c.id)].name} family.</b> Kin cards grow with their family.</div>` : ''}
     ${def.foe ? '<div class="kw">✦ <b>Unique.</b> Only opponents carry this card.</div>' : def.crafted ? '<div class="kw">＋ <b>Enhanced.</b> A sharpened version of an ordinary card.</div>' : ''}
     ${hint ? `<div class="hint">${hint}</div>` : ''}`;
   tip.classList.add('show'); battleView.classList.add('tip-open');
@@ -659,7 +662,7 @@ function btOnBoardCard(side, c) {
 /* ---------------- battle effects: attacked, defended and spells ----------------
    Everything here is a short-lived element (or a Web Animations API flight) appended to the battle view or a card;
    nothing touches the board's own transforms. They are skipped under Calm motion / reduced motion (btMotionOk). */
-const SPELL_FX = { 'spark': ['#ffd36b', 'bolt'], 'thunderclap': ['#bcd8ff', 'sweep'], 'moonlit-tide': ['#7fd0e8', 'sweep'], 'starfall': ['#ffe9a8', 'bolt'],
+const SPELL_FX = { 'chill': ['#bfe6ff', 'bolt'], 'overgrowth': ['#8de0a0', 'rise'], 'stone-skin': ['#d8c9a8', 'rise'], 'undertow': ['#7fd0e8', 'sweep'], 'quickstep': ['#ffe1a8', 'rise'], 'picnic': ['#ffd6a0', 'draw'], 'spark': ['#ffd36b', 'bolt'], 'thunderclap': ['#bcd8ff', 'sweep'], 'moonlit-tide': ['#7fd0e8', 'sweep'], 'starfall': ['#ffe9a8', 'bolt'],
   'rain-shower': ['#8de0a0', 'rise'], 'harvest': ['#c9b6ff', 'draw'], 'gust': ['#bfeaff', 'whoosh'], 'sunbeam': ['#ffd98a', 'rise'], 'second-wind': ['#c9f0ff', 'rise'] };
 function btCenter(el) { if (!el) return null; const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, r }; }
 function btFx(cls, x, y, ms, style) {
@@ -764,7 +767,7 @@ async function btAnimate(evs, token) {
     } else if (e.type === 'zap') {
       const t = document.querySelector(`#battleView .card[data-uid="${e.uid}"]`);
       if (t) { if (e.blocked) btShieldFx(t); else btSlashFx(t, true); }
-      if (t) { t.classList.add('hurt-flash'); btFloater(t, e.pierce ? '🌠' : e.blocked ? '🫧 blocked' : (e.tag === 'thorns' ? '🌵 -' : '✨ -') + e.dmg, e.blocked ? 'blk' : 'dmg'); if (!e.blocked) btImpact(t, 5); }
+      if (t) { t.classList.add('hurt-flash'); btFloater(t, e.pierce ? '🌠' : e.blocked ? '🫧 blocked' : (({ thorns: '🌵 -', sting: '🐝 -', chill: '❄️ -' })[e.tag] || '✨ -') + e.dmg, e.blocked ? 'blk' : 'dmg'); if (!e.blocked) btImpact(t, 5); }
       sfx('tap'); await btWait(260);
     } else if (e.type === 'bounce') {
       const t = document.querySelector(`#battleView .card[data-uid="${e.card.uid}"]`);
@@ -772,8 +775,24 @@ async function btAnimate(evs, token) {
       await btWait(420); btRender();
     } else if (e.type === 'buff' || e.type === 'mendcard' || e.type === 'readied') {
       const t = document.querySelector(`#battleView .card[data-uid="${e.uid}"]`);
-      if (t) btFloater(t, e.type === 'buff' ? (e.rally ? '📯 +1 ⚔' : '🌞 +1 ⚔') : e.type === 'mendcard' ? '+1 ♥' : '🌬️ ready', 'heal');
+      if (t) btFloater(t, e.type === 'buff' ? (e.skin ? '🧱 +2♥ +1⚔' : e.rally ? '📯 +1 ⚔' : '🌞 +1 ⚔') : e.type === 'mendcard' ? '+1 ♥' : '🌬️ ready', 'heal');
       await btWait(120);
+    } else if (e.type === 'summon') {
+      btRender({ entering: e.card.uid });
+      const t = document.querySelector(`#battleView .card[data-uid="${e.card.uid}"]`);
+      if (t) btFloater(t, '🌱 grows', 'heal');
+      if (e.who === 0) sfx('play'); else sfx('flip');
+      await btWait(340);
+    } else if (e.type === 'kin') {
+      btRender();
+      const t = document.querySelector(`#battleView .card[data-uid="${e.uid}"]`);
+      if (t) btFloater(t, `🤝 +${e.n}/+${e.n}`, 'heal');
+      await btWait(260);
+    } else if (e.type === 'lull') {
+      btRender();
+      const t = document.querySelector(`#battleView .card[data-uid="${e.uid}"]`);
+      if (t) btFloater(t, '😴 rests', 'blk');
+      sfx('soft'); await btWait(300);
     } else if (e.type === 'tide') {
       btSetMsg('🌊 The tide washes in!');
       battleView.classList.add('tide-wash'); setTimeout(() => battleView.classList.remove('tide-wash'), 900);

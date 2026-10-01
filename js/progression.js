@@ -824,11 +824,14 @@ function discoveredSet() {
   return set;
 }   // plain cards and crafted variants (e.g. 'sprout~p')
 function kwIcons(def) { return def.spell ? '✨' : def.kw.map(k => KW[k].icon).join(' '); }
-function kwLines(def) { return def.kw.map(k => `${KW[k].icon} <b>${KW[k].name}.</b> ${KW[k].text}`).join('<br>'); }
+function kwLines(def) {
+  const fam = def.spell ? null : FAMILIES[CARD_FAMILY[BattleEngine.baseIdOf(def.id)]];
+  return def.kw.map(k => `${KW[k].icon} <b>${KW[k].name}.</b> ${KW[k].text}`).concat(fam ? [`${fam.icon} <b>${fam.name} family.</b> Kin cards grow with their family.`] : []).join('<br>');
+}
 // Spells have no power/health, so every place that prints a card's stats or rules text goes through these.
 function spellText(def) { return def && def.spell ? BattleEngine.SPELLS[def.spell].text : ''; }
 function cardStatsText(def) { return def.spell ? '✨ Spell' : `⚔${def.power} ♥${def.grit}`; }
-function hasAbility(def) { return !!def.spell || def.kw.length > 0; }
+function hasAbility(def) { return !!def.spell || def.kw.length > 0 || !!CARD_FAMILY[BattleEngine.baseIdOf(def.id)]; }
 function cardAbilityHtml(def) { return def.spell ? `✨ <b>Spell.</b> ${spellText(def)}` : kwLines(def); }
 
 function loadState() {
@@ -1012,27 +1015,37 @@ const BASE_COMMONS = ['sprout','sprout','sprout','pebble','pebble','pebble','ree
        keyword), swapped in for some of the ordinary cards.
    Tuned by simulation against a normal player deck - see HANDOFF §5's Balance note. */
 const FOE_COUNT = [1, 1, 1, 2], FOE_ENHANCED = [2, 3, 3, 3], FOE_SKILL_CHANCE = [0, 0.2, 0.3, 0.4];
-const FOE_SKILLS = ['guard', 'swift', 'shield', 'mend', 'thorns', 'drain', 'rally', 'echo'];
+const FOE_SKILLS = ['guard', 'swift', 'shield', 'mend', 'thorns', 'drain', 'rally', 'echo', 'seed', 'sting', 'lull'];
 function foeTierFor(isBoss) {
   const w = state.wins;
   if (isBoss) return w < 5 ? 3 : 4;
   return w < 3 ? 1 : w < 8 ? 2 : 3;
 }
 function foeSeedHash(str) { let h = 7; str = String(str || ''); for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0; return h; }
-function buildDeckForOpponent(count, forBoss, tier, seed) {
+// The family a district's neighbors and boss favour (FAMILIES in js/data-and-engine.js), or null for an unknown district.
+function districtFamily(key) { return Object.keys(FAMILIES).find(f => FAMILIES[f].district === key) || null; }
+function familyCardId(fam, rarity) {
+  const all = CARD_POOL.filter(c => !c.spell && !c.exclusive && CARD_FAMILY[c.id] === fam);
+  const same = all.filter(c => c.rarity === rarity);
+  return seasonalPick(same.length ? same : all).id;
+}
+function buildDeckForOpponent(count, forBoss, tier, seed, district) {
   tier = Math.max(1, Math.min(4, tier || foeTierFor(forBoss)));
   const rarityFor = () => {
     const r = Math.random();
     if (tier <= 3) return rollRarity(false);
     return r < 0.35 ? 'super' : (Math.random() < 0.55 ? 'ultra' : 'rare');
   };
-  const pool = BASE_COMMONS.slice();
-  for (let i = 0; i < 14; i++) pool.push(randomCardId(rarityFor()));
+  // A district's folk lean on their family (Stone in Town Square, Wind in Market Row, Tide in the Harbor, Grove in the
+  // Garden): the everyday commons shrink to that family's, and about half the picks come from it.
+  const fam = districtFamily(district);
+  const pool = BASE_COMMONS.filter(id => !fam || !CARD_FAMILY[id] || CARD_FAMILY[id] === fam);
+  if (fam) for (let i = 0; i < 6; i++) pool.push(familyCardId(fam, Math.random() < 0.7 ? 'common' : 'rare'));
+  for (let i = 0; i < 14; i++) pool.push(fam && i % 2 === 0 ? familyCardId(fam, rarityFor()) : randomCardId(rarityFor()));
   const counts = {};
   pool.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
   return foeEnhanceDeck(BattleEngine.suggestDeck(counts), tier, seed);
 }
-// Swaps unique foe cards and enhanced "+" variants into an already-built deck (also used for the cellar's themed decks).
 function foeEnhanceDeck(deck, tier, seed, extra) {
   deck = deck.slice();
   extra = extra || {};

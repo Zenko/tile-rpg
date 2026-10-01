@@ -138,6 +138,8 @@ const GUIDE = [
     { icon: '📬', name: 'Letters', where: 'Your cottage mailbox (Town Square)', how: 'Neighbors write to you, sometimes with a gift.' },
   ] },
   { section: 'Card battles', items: [
+    { icon: '🌿', name: 'Card families', where: 'Card info · each district favours one', how: 'Cards belong to a family: 🪨 Stone (Town Square), 🪶 Wind (Market Row), 🌊 Tide (Quiet Harbor) or 🌿 Grove (Hollow Garden). Neighbors and bosses lean on their district\'s family, and 🤝 Kin cards grow when more of their family are on your board.' },
+    { icon: '🌰', name: 'New keywords', where: 'Card info', how: '🌰 Seed leaves a Seedling when it falls. 😴 Lull stops the enemy\'s strongest card attacking next turn. 🤝 Kin grows with its family. 🐝 Sting hits the weakest enemy card as it arrives.' },
     { icon: '🪙', name: 'Who goes first', where: 'Before every match · Settings → Accessibility & battles', how: 'Call the coin (Sun or Moon) or roll a die against your opponent. The winner plays first; whoever goes second draws an extra card and gets +1 energy on their first two turns. Pick Coin, Dice, Mix or Skip in Settings.' },
     { icon: '⚔️', name: 'Friendly matches', where: 'Tap a neighbor → Friendly match', how: 'Drag a card from your hand onto the table to play it (or tap it to read it, tap again to play). To attack, drag a ready card onto an enemy card or up past their cards, or tap it and use the Attack Spirit button. Win a card every time. Tap "How battles work" in Cards → Deck for the rules.' },
     { icon: '👹', name: 'District bosses', where: 'Each district, 30 minutes on, 30 off', how: 'Every boss bends one rule of the match, and pays super rare or better.' },

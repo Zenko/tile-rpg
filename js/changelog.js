@@ -18,6 +18,17 @@ function gameVersionLabel() {
    the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
 const CHANGELOG = [
   {
+    version: '1.82.0',
+    date: '2026-10-01',
+    title: "Families and four new keywords",
+    changes: [
+      "Cards now belong to families - Stone, Wind, Tide and Grove - one for each district. Neighbors and bosses lean on the family of the district you are in, so every town fights a little differently (the battle screen tells you which).",
+      "Four new keywords: 🌰 Seed (leaves a Seedling when it falls), 😴 Lull (the enemy's strongest card can't attack next turn), 🤝 Kin (grows with its family on your board) and 🐝 Sting (hits the weakest enemy card as it arrives).",
+      "28 new cards - 22 creatures across every rarity and 6 new spells: Chill, Overgrowth, Stone Skin, Undertow, Quickstep and Picnic.",
+      "Fixed: the opponent-only Ember Fox shared a name with your collectible Ember Fox and quietly replaced its stats in battle. It is now the Cinder Fox."
+    ]
+  },
+  {
     version: '1.81.0',
     date: '2026-10-01',
     title: "Who goes first?",

@@ -2275,3 +2275,7 @@ html.calm #sceneView.sc-std, html.calm #sceneView.sc-std * { animation: none !im
 .toss-result.win { color: var(--water-ink); }
 .toss-result.lose { color: var(--ink-soft); }
 html.calm .die.rolling { animation: none; }
+
+/* ---------- New battle keywords (v1.82.0) ---------- */
+#battleView .card .badge.lul { top:-7px; left:-4px; font-size:.85rem; }
+#battleView .card.lulled { opacity: .78; }

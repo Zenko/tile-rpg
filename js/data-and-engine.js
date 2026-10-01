@@ -207,6 +207,41 @@ const CARD_POOL = [
   { id: 'echo-cavern', name: 'Echo Cavern', icon: '🕳️', rarity: 'super', cost: 4, power: 6, grit: 6, kw: ['echo', 'guard'], exclusive: 'cellar' },
   { id: 'deep-wyrm', name: 'Deep Wyrm', icon: '🐉', rarity: 'mythic', cost: 5, power: 9, grit: 9, kw: ['bloom', 'guard'], exclusive: 'cellar' },
   { id: 'rooks-ace', name: "Rook's Ace", icon: '🎭', rarity: 'mythic', cost: 4, power: 7, grit: 6, kw: ['swift', 'echo'], exclusive: 'rival' },
+  // v1.82.0 - four families (CARD_FAMILY below), one per district, and the Seed / Lull / Kin / Sting keywords. Appended at the
+  // end on purpose: deck share codes store cards by their position in this list.
+  // Grove (Hollow Garden): Seed leaves a Seedling behind, Kin grows with its family.
+  { id: 'seedpod', name: 'Seedpod', icon: '🫘', rarity: 'common', cost: 1, power: 1, grit: 2, kw: ['seed'] },
+  { id: 'fern-sprite', name: 'Fern Sprite', icon: '🌿', rarity: 'common', cost: 2, power: 2, grit: 2, kw: ['seed'] },
+  { id: 'moss-hare', name: 'Moss Hare', icon: '🐇', rarity: 'rare', cost: 3, power: 3, grit: 3, kw: ['kin'] },
+  { id: 'dandelion', name: 'Dandelion', icon: '🏵️', rarity: 'rare', cost: 3, power: 2, grit: 3, kw: ['seed', 'bloom'] },
+  { id: 'oak-warden', name: 'Oak Warden', icon: '🌳', rarity: 'super', cost: 4, power: 4, grit: 6, kw: ['seed', 'guard'] },
+  { id: 'world-tree', name: 'World Tree', icon: '🎄', rarity: 'mythic', cost: 5, power: 6, grit: 9, kw: ['seed', 'kin'] },
+  // Stone (Town Square): steady bodies that dig the small things out.
+  { id: 'stone-hen', name: 'Stone Hen', icon: '🐔', rarity: 'common', cost: 2, power: 2, grit: 3, kw: ['kin'] },
+  { id: 'cliff-goat', name: 'Cliff Goat', icon: '🐐', rarity: 'rare', cost: 3, power: 2, grit: 5, kw: ['guard', 'kin'] },
+  { id: 'badger', name: 'Badger', icon: '🦡', rarity: 'rare', cost: 3, power: 3, grit: 4, kw: ['sting'] },
+  { id: 'quarry-bear', name: 'Quarry Bear', icon: '🐻', rarity: 'ultra', cost: 4, power: 4, grit: 6, kw: ['sting', 'guard'] },
+  { id: 'mossy-titan', name: 'Mossy Titan', icon: '🗻', rarity: 'mythic', cost: 5, power: 7, grit: 9, kw: ['guard', 'kin'] },
+  // Tide (Quiet Harbor): Lull holds the enemy's best card back for a turn.
+  { id: 'hermit-crab', name: 'Hermit Crab', icon: '🦀', rarity: 'common', cost: 2, power: 1, grit: 3, kw: ['lull'] },
+  { id: 'puffer', name: 'Puffer', icon: '🐡', rarity: 'common', cost: 2, power: 2, grit: 3, kw: ['thorns'] },
+  { id: 'harbor-seal', name: 'Harbor Seal', icon: '🦭', rarity: 'rare', cost: 3, power: 3, grit: 4, kw: ['lull'] },
+  { id: 'moon-jelly', name: 'Moon Jelly', icon: '🪼', rarity: 'ultra', cost: 3, power: 2, grit: 4, kw: ['lull', 'shield'] },
+  { id: 'tide-caller', name: 'Tide Caller', icon: '🐚', rarity: 'ultra', cost: 4, power: 4, grit: 5, kw: ['lull', 'mend'] },
+  { id: 'kraken', name: 'Kraken', icon: '🦑', rarity: 'mythic', cost: 5, power: 6, grit: 8, kw: ['lull', 'drain'] },
+  // Wind (Market Row): fast cards that sting on the way in.
+  { id: 'honeybee', name: 'Honeybee', icon: '🐝', rarity: 'common', cost: 2, power: 2, grit: 2, kw: ['sting'] },
+  { id: 'market-sparrow', name: 'Market Sparrow', icon: '🐦', rarity: 'rare', cost: 3, power: 3, grit: 2, kw: ['swift', 'sting'] },
+  { id: 'kite-runner', name: 'Kite Runner', icon: '🪁', rarity: 'ultra', cost: 3, power: 4, grit: 2, kw: ['swift', 'kin'] },
+  { id: 'storm-petrel', name: 'Storm Petrel', icon: '🐦‍⬛', rarity: 'super', cost: 4, power: 6, grit: 3, kw: ['swift', 'sting'] },
+  { id: 'thunder-roc', name: 'Thunder Roc', icon: '🦅', rarity: 'mythic', cost: 5, power: 8, grit: 6, kw: ['swift', 'sting'] },
+  // New spells (effects in BattleEngine.SPELLS)
+  { id: 'chill', name: 'Chill', icon: '❄️', rarity: 'common', cost: 1, power: 0, grit: 0, kw: [], spell: 'chill' },
+  { id: 'overgrowth', name: 'Overgrowth', icon: '🌱', rarity: 'rare', cost: 2, power: 0, grit: 0, kw: [], spell: 'overgrowth' },
+  { id: 'stone-skin', name: 'Stone Skin', icon: '🧱', rarity: 'rare', cost: 2, power: 0, grit: 0, kw: [], spell: 'stone-skin' },
+  { id: 'undertow', name: 'Undertow', icon: '🌀', rarity: 'rare', cost: 3, power: 0, grit: 0, kw: [], spell: 'undertow' },
+  { id: 'quickstep', name: 'Quickstep', icon: '👟', rarity: 'ultra', cost: 3, power: 0, grit: 0, kw: [], spell: 'quickstep' },
+  { id: 'picnic', name: 'Picnic', icon: '🧺', rarity: 'rare', cost: 2, power: 0, grit: 0, kw: [], spell: 'picnic' },
 ];
 /* Foe cards: unique cards that only opponents carry (neighbors, bosses, cellar floors). They are deliberately NOT in
    CARD_POOL - so they never show up in packs, the Index, deck codes or rewards - but defOf() knows them, so the battle
@@ -221,9 +256,32 @@ const FOE_CARDS = [
   { id: 'bell-ringer',    name: 'Bell Ringer',    icon: '🛎️', rarity: 'ultra',  cost: 3, power: 3, grit: 4, kw: ['echo', 'rally'],   foe: true, tier: 2 },
   { id: 'storm-heron',    name: 'Storm Heron',    icon: '🦅', rarity: 'super',  cost: 4, power: 5, grit: 4, kw: ['swift', 'drain'],  foe: true, tier: 3 },
   { id: 'iron-tortoise',  name: 'Iron Tortoise',  icon: '🐢', rarity: 'super',  cost: 4, power: 4, grit: 7, kw: ['guard', 'thorns'], foe: true, tier: 3 },
-  { id: 'ember-fox',      name: 'Ember Fox',      icon: '🦊', rarity: 'super',  cost: 4, power: 6, grit: 4, kw: ['swift', 'bloom'],  foe: true, tier: 3 },
+  { id: 'cinder-fox',      name: 'Cinder Fox',     icon: '🦊', rarity: 'super',  cost: 4, power: 6, grit: 4, kw: ['swift', 'bloom'],  foe: true, tier: 3 },
   { id: 'night-regent',   name: 'Night Regent',   icon: '🦉', rarity: 'mythic', cost: 5, power: 7, grit: 7, kw: ['guard', 'drain'],  foe: true, tier: 4 },
   { id: 'tide-leviathan', name: 'Tide Leviathan', icon: '🐋', rarity: 'mythic', cost: 5, power: 7, grit: 8, kw: ['shield', 'echo'],  foe: true, tier: 4 },
+];
+// Families (v1.82.0): each district leans on one. Kin cards grow with the other cards of their family on your board, and a
+// district's neighbors and boss build decks that favour their family (buildDeckForOpponent). Spells and unlisted cards have none.
+const FAMILIES = {
+  grove: { icon: '🌿', name: 'Grove', district: 'garden' },
+  stone: { icon: '🪨', name: 'Stone', district: 'square' },
+  tide:  { icon: '🌊', name: 'Tide',  district: 'harbor' },
+  wind:  { icon: '🪶', name: 'Wind',  district: 'market' }
+};
+const CARD_FAMILY = (() => {
+  const lists = {
+    grove: 'sprout reed moth lily blossom toadstool sakura-petal bamboo-grove autumn-maple cherry-blossom-storm acorn clover twig-bundle snail firefly dew-leaf thistle hollow-log foxglove hedgehog storm-lily garden-spirit moth-queen aurora-stag ancient-oak starfall-unicorn garden-titan ironroot-treant bramble rosebush cactus-keeper bramble-king glowworm harvest-lantern winter-hare seedpod fern-sprite moss-hare dandelion oak-warden world-tree',
+    stone: 'pebble flintstone geode boulder crystal-spire lantern moonstone mountain-heart rice-cake torii-gate stone-lantern quartz-cluster old-kettle copper-kettle-spirit jade-turtle obsidian-shard moss-golem glacier-spirit crystal-golem thundering-ram copper-stag-beetle echo-cavern deep-wyrm stone-hen cliff-goat badger quarry-bear mossy-titan',
+    tide: 'droplet bubble tide koi koi-ascending deep-current whirlpool lantern-fish copper-carp glass-float river-otter void-koi sunken-leviathan wishing-well heron paper-boat hermit-crab puffer harbor-seal moon-jelly tide-caller kraken',
+    wind: 'feather cloud dove gale origami-crane paper-fan paper-lantern folding-screen temple-bell moonlit-shrine crane-dance moon-viewing festival-drum windchime stray-kitten nightjar thunderhead twilight-crane paper-phoenix sky-whale phoenix-ember moon-dragon celestial-owl emberwing-phoenix wandering-comet silver-phoenix eclipse-panther lion-dancer morning-bugle dusk-bat village-banner pinewood-owl silver-fox ember-fox starlight northern-lights rooks-ace echoing-bell lucky-cat mist-wraith honeybee market-sparrow kite-runner storm-petrel thunder-roc'
+  };
+  const m = {};
+  Object.keys(lists).forEach(f => lists[f].split(' ').forEach(id => { m[id] = f; }));
+  return m;
+})();
+// Tokens that cards create mid-battle. Never in packs, pools, decks or the Index; BattleEngine.defOf still knows them.
+const TOKEN_CARDS = [
+  { id: 'seedling', name: 'Seedling', icon: '🌱', rarity: 'common', cost: 0, power: 1, grit: 2, kw: [], token: true }
 ];
 const EXCLUSIVE_HINT = { cellar: 'found deep in the cellar', rival: "a rival's final prize" };
 
@@ -271,7 +329,11 @@ const BattleEngine = (function () {
     echo:   { icon: '🔔', name: 'Echo',   text: 'When played, deals 2 damage to enemy Spirit.' },
     thorns: { icon: '🌵', name: 'Thorns', text: 'Deals 1 damage back to any card that attacks it.' },
     rally:  { icon: '📯', name: 'Rally',  text: 'When played, your other cards gain +1 power.' },
-    drain:  { icon: '🌀', name: 'Drain',  text: 'Each time it attacks, restore 2 Spirit.' }
+    drain:  { icon: '🌀', name: 'Drain',  text: 'Each time it attacks, restore 2 Spirit.' },
+    seed:   { icon: '🌰', name: 'Seed',   text: 'When it falls, a 1/2 Seedling grows in its place.' },
+    lull:   { icon: '😴', name: 'Lull',   text: "When played, the enemy's strongest card can't attack on its next turn." },
+    kin:    { icon: '🤝', name: 'Kin',    text: 'When played, gains +1/+1 for each other card of its family on your board.' },
+    sting:  { icon: '🐝', name: 'Sting',  text: 'When played, deals 1 damage to the enemy card with the least health.' }
   };
 
   /* ---------- Boss twists ----------
@@ -308,7 +370,13 @@ const BattleEngine = (function () {
     'thunderclap':  { value: 8,  text: 'Deal 1 damage to every enemy card and 2 to enemy Spirit.' },
     'second-wind':  { needs: 'own', value: 7, text: 'Your cards on the board can attack again this turn.' },
     'moonlit-tide': { value: 11, text: 'Deal 3 damage to every enemy card.' },
-    'starfall':     { target: 'enemy', value: 14, text: 'Defeat an enemy card outright (even through Shield), then deal 3 damage to enemy Spirit.' }
+    'starfall':     { target: 'enemy', value: 14, text: 'Defeat an enemy card outright (even through Shield), then deal 3 damage to enemy Spirit.' },
+    'chill':        { target: 'enemy', value: 5, text: "Deal 1 damage to an enemy card. It can't attack on its next turn." },
+    'overgrowth':   { needs: 'room', value: 6, text: 'Grow two 1/2 Seedlings on your board (as many as fit).' },
+    'stone-skin':   { needs: 'guard', value: 7, text: 'Your Guard cards gain +2 health and +1 power.' },
+    'undertow':     { value: 7, text: "Return every enemy card that costs 2 or less to its owner's hand." },
+    'quickstep':    { needs: 'own', value: 7, text: 'Your cards that just arrived can attack right away.' },
+    'picnic':       { value: 8, text: 'Restore 5 Spirit and draw a card.' }
   };
 
   /* ---------- Card definitions, including crafted variants ----------
@@ -320,7 +388,7 @@ const BattleEngine = (function () {
   const MAX_KEYWORDS = 2;
   function baseIdOf(id) { const i = String(id).indexOf('~'); return i < 0 ? id : id.slice(0, i); }
   function defOf(id) {
-    if (!DEFS) DEFS = new Map(CARD_POOL.concat(FOE_CARDS).map(c => [c.id, c]));
+    if (!DEFS) DEFS = new Map(CARD_POOL.concat(FOE_CARDS, TOKEN_CARDS).map(c => [c.id, c]));
     let d = DEFS.get(id);
     if (d) return d;
     if (typeof id !== 'string') return undefined;
@@ -348,7 +416,7 @@ const BattleEngine = (function () {
     if (mods && mods.addKw && !kw.includes(mods.addKw) && d.cost <= (mods.addKwMaxCost || 99)) kw.push(mods.addKw);
     const grit = d.grit + (mods && mods.guardHp && kw.includes('guard') ? mods.guardHp : 0);
     return { uid, id, cost: d.cost, power: d.power + (swift && mods && mods.swiftBonus ? mods.swiftBonus : 0), grit, hp: grit, kw,
-             shield: kw.includes('shield'), ready: swift, attacks: 0 };
+             shield: kw.includes('shield'), ready: swift, attacks: 0, lull: 0 };
   }
 
   function shuffled(a, rng) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
@@ -367,6 +435,7 @@ const BattleEngine = (function () {
     const mk = (deck, i) => shuffled(deck, rng).map(id => makeCard(id, uid++, modsFor(G, i)));
     const sp = opts.spirit || [RULES.spirit, RULES.spirit];
     G.p = [0, 1].map(i => ({ idx: i, spirit: sp[i], maxSpirit: sp[i], deck: mk(i === 0 ? deckA : deckB, i), hand: [], board: [], turns: 0, energy: 0, maxEnergy: 0 }));
+    G.uid = uid;                                   // later cards (Seedlings) keep numbering from here
     G.p.forEach((pl, i) => { const n = RULES.hand + (i !== first ? 1 : 0); for (let k = 0; k < n; k++) draw(G, pl, true); });
     // opts.startSpirit: begin below full (the Festival Cup carries your Spirit from one round to the next)
     (opts.startSpirit || []).forEach((v, i) => { if (typeof v === 'number') G.p[i].spirit = Math.max(1, Math.min(v, G.p[i].maxSpirit)); });
@@ -418,6 +487,8 @@ const BattleEngine = (function () {
       const fx = SPELLS[c.spell];
       if (fx.target === 'enemy' && !G.p[1 - who].board.length) return { ok: false, why: 'No enemy card to aim at' };
       if (fx.needs === 'own' && !me.board.length) return { ok: false, why: 'You need a card on the board first' };
+      if (fx.needs === 'room' && me.board.length >= RULES.board) return { ok: false, why: 'Your board is full' };
+      if (fx.needs === 'guard' && !me.board.some(x => x.kw.includes('guard'))) return { ok: false, why: 'You need a Guard card on the board' };
       return { ok: true };
     }
     if (me.board.length >= RULES.board) return { ok: false, why: 'Your board is full' };
@@ -435,6 +506,15 @@ const BattleEngine = (function () {
     emit(G, 'play', { who, card: c });
     if (c.kw.includes('echo')) { op.spirit -= RULES.echo; emit(G, 'spirit', { who: 1 - who, delta: -RULES.echo, source: c, echo: true }); }
     if (c.kw.includes('rally')) me.board.forEach(x => { if (x !== c) { x.power++; emit(G, 'buff', { who, uid: x.uid, amt: 1, rally: true }); } });
+    if (c.kw.includes('kin')) {
+      const fam = familyOf(c.id), n = fam ? me.board.filter(x => x !== c && familyOf(x.id) === fam).length : 0;
+      if (n) { c.power += n; c.grit += n; c.hp += n; emit(G, 'kin', { who, uid: c.uid, n }); }
+    }
+    if (c.kw.includes('sting') && op.board.length) {
+      const t = op.board.slice().sort((a, b) => a.hp - b.hp)[0];
+      zap(G, 1 - who, t, 1, false, 'sting');
+    }
+    if (c.kw.includes('lull') && op.board.length) lullCard(G, 1 - who, op.board.slice().sort((a, b) => b.power - a.power || b.hp - a.hp)[0]);
     checkEnd(G);
     return { ok: true };
   }
@@ -448,8 +528,26 @@ const BattleEngine = (function () {
     else if (t.shield) { t.shield = false; blocked = true; }
     else t.hp -= dmg;
     emit(G, 'zap', { who: side, uid: t.uid, dmg: pierce ? 0 : dmg, blocked, pierce: !!pierce, tag: tag || null });
-    if (t.hp <= 0 && pl.board.includes(t)) { pl.board.splice(pl.board.indexOf(t), 1); emit(G, 'faint', { who: side, card: t }); }
+    if (t.hp <= 0 && pl.board.includes(t)) fall(G, side, t);
   }
+  // A card leaves the board for good. Seed cards leave a Seedling behind (if there is room).
+  function fall(G, side, t) {
+    const pl = G.p[side];
+    if (pl.board.includes(t)) pl.board.splice(pl.board.indexOf(t), 1);
+    emit(G, 'faint', { who: side, card: t });
+    if (t.kw.includes('seed')) summon(G, side, 'seedling');
+  }
+  function summon(G, side, id) {
+    const pl = G.p[side];
+    if (pl.board.length >= RULES.board) return null;
+    const c = makeCard(id, G.uid = (G.uid || 1000) + 1, modsFor(G, side));
+    pl.board.push(c);
+    emit(G, 'summon', { who: side, card: c });
+    return c;
+  }
+  function familyOf(id) { return CARD_FAMILY[baseIdOf(id)] || null; }
+  // Lull: the card can't attack until its owner's next turn is over.
+  function lullCard(G, side, t) { if (!t) return; t.lull = 1; emit(G, 'lull', { who: side, uid: t.uid }); }
   function spellDamageSpirit(G, side, n, card) { G.p[side].spirit -= n; emit(G, 'spirit', { who: side, delta: -n, source: card, spell: true }); }
 
   function castSpell(G, who, c, target) {
@@ -484,6 +582,22 @@ const BattleEngine = (function () {
       case 'second-wind': me.board.forEach(x => { x.ready = true; x.attacks = 0; emit(G, 'readied', { who, uid: x.uid }); }); break;
       case 'moonlit-tide': op.board.slice().forEach(x => zap(G, 1 - who, x, 3)); break;
       case 'starfall': zap(G, 1 - who, t, 0, true); spellDamageSpirit(G, 1 - who, 3, c); break;
+      case 'chill': zap(G, 1 - who, t, 1, false, 'chill'); if (op.board.includes(t)) lullCard(G, 1 - who, t); break;
+      case 'overgrowth': summon(G, who, 'seedling'); summon(G, who, 'seedling'); break;
+      case 'stone-skin': me.board.forEach(x => { if (x.kw.includes('guard')) { x.grit += 2; x.hp += 2; x.power += 1; emit(G, 'buff', { who, uid: x.uid, amt: 2, skin: true }); } }); break;
+      case 'undertow': op.board.slice().forEach(x => {
+        if (x.cost > 2) return;
+        op.board.splice(op.board.indexOf(x), 1);
+        const back = makeCard(x.id, x.uid, modsFor(G, 1 - who));
+        emit(G, 'bounce', { who: 1 - who, card: x });
+        if (op.hand.length >= RULES.handMax) op.deck.unshift(back); else op.hand.push(back);
+      }); break;
+      case 'quickstep': me.board.forEach(x => { if (!x.ready) { x.ready = true; emit(G, 'readied', { who, uid: x.uid }); } }); break;
+      case 'picnic': {
+        const heal = Math.min(5, me.maxSpirit - me.spirit);
+        if (heal > 0) { me.spirit += heal; emit(G, 'spirit', { who, delta: heal, source: c }); }
+        draw(G, me); break;
+      }
     }
     checkEnd(G);
     return { ok: true };
@@ -507,6 +621,15 @@ const BattleEngine = (function () {
       case 'second-wind': return { score: me.board.filter(x => x.attacks > 0).length * 1.8 };
       case 'moonlit-tide': { const s = killable(3).reduce((n, x) => n + valueOf(x), 0) / 3 + op.board.length * 0.5; return { score: op.board.length ? s : 0 }; }
       case 'starfall': { const t = bestBy(op.board); return { score: t ? 2 + valueOf(t) / 4 : 0, target: t }; }
+      case 'chill': {
+        const k = bestBy(killable(1)); if (k) return { score: 2 + valueOf(k) / 3, target: k };
+        const t = bestBy(op.board.filter(x => x.power >= 3 && !x.shield)); return { score: t ? 1.6 + t.power / 5 : 0, target: t };
+      }
+      case 'overgrowth': { const room = RULES.board - me.board.length; return { score: room >= 2 ? 2.8 : room === 1 ? 1.2 : 0 }; }
+      case 'stone-skin': return { score: me.board.filter(x => x.kw.includes('guard')).length * 1.7 };
+      case 'undertow': { const n = op.board.filter(x => x.cost <= 2).length; return { score: n >= 2 ? n * 1.4 : n ? 0.8 : 0 }; }
+      case 'quickstep': { const n = me.board.filter(x => !x.ready && !x.lull).length; return { score: n * 1.7 }; }
+      case 'picnic': { const heal = Math.min(5, me.maxSpirit - me.spirit); return { score: heal >= 3 ? 1.2 + heal * 0.7 : me.deck.length && me.hand.length <= 2 ? 1.5 : 0 }; }
     }
     return { score: 0 };
   }
@@ -517,7 +640,7 @@ const BattleEngine = (function () {
   function legalTargets(G, who, attackerUid) {
     const me = G.p[who], op = G.p[1 - who];
     const a = me.board.find(c => c.uid === attackerUid);
-    if (!a || !a.ready || a.attacks > 0 || G.over || G.active !== who) return [];
+    if (!a || !a.ready || a.lull || a.attacks > 0 || G.over || G.active !== who) return [];
     const g = guards(op);
     if (g.length) return g.map(c => ({ kind: 'card', uid: c.uid }));
     return op.board.map(c => ({ kind: 'card', uid: c.uid })).concat([{ kind: 'spirit' }]);
@@ -529,6 +652,7 @@ const BattleEngine = (function () {
     const a = me.board.find(c => c.uid === attackerUid);
     if (!a) return { ok: false, why: 'No such card' };
     if (!a.ready) return { ok: false, why: 'Just arrived' };
+    if (a.lull) return { ok: false, why: 'Lulled: it rests this turn' };
     if (a.attacks > 0) return { ok: false, why: 'Already attacked' };
     const legal = legalTargets(G, who, attackerUid);
     if (!legal.some(t => t.kind === target.kind && (t.kind === 'spirit' || t.uid === target.uid)))
@@ -546,7 +670,7 @@ const BattleEngine = (function () {
       let dmg = a.power, blocked = false;
       if (t.shield) { t.shield = false; dmg = 0; blocked = true; } else t.hp -= dmg;
       emit(G, 'attack', { who, attacker: a, target: { kind: 'card', uid: t.uid }, dmg, blocked });
-      if (t.hp <= 0) { op.board.splice(op.board.indexOf(t), 1); emit(G, 'faint', { who: 1 - who, card: t }); }
+      if (t.hp <= 0) fall(G, 1 - who, t);
       if (t.kw.includes('thorns') && me.board.includes(a)) zap(G, who, a, 1, false, 'thorns');         // thorns prick back, even as they fall
     }
     if (a.kw.includes('drain') && me.spirit < me.maxSpirit) {
@@ -563,7 +687,7 @@ const BattleEngine = (function () {
     if (G.twist && G.twist.kind === 'roots' && G.twist.side === who && me.spirit < me.maxSpirit) {
       const heal = Math.min(3, me.maxSpirit - me.spirit); me.spirit += heal; emit(G, 'spirit', { who, delta: heal, twist: true });
     }
-    me.board.forEach(c => { c.attacks = 0; });
+    me.board.forEach(c => { c.attacks = 0; c.lull = 0; });
     G.active = 1 - who; G.turn++;
     checkEnd(G);
     if (!G.over) startTurn(G);
@@ -600,7 +724,7 @@ const BattleEngine = (function () {
   /* ---------- Opponent AI ----------
      aiNextAction() decides ONE action and applies nothing, so the UI can animate each step as it happens.
      level: 'gentle' (often plays at random and forgets to attack sensibly), 'normal', 'smart'. */
-  function valueOf(c) { return c.power + c.hp * 0.8 + (c.kw.length ? 2 : 0); }
+  function valueOf(c) { return c.power + c.hp * 0.8 + (c.kw.length ? 2 : 0) + (c.lull ? -1 : 0); }
   const RANDOMNESS = { gentle: 0.55, normal: 0.25, smart: 0 };
 
   function aiNextAction(G, who, level) {
@@ -689,7 +813,7 @@ const BattleEngine = (function () {
     return deck;
   }
 
-  return { RULES, KEYWORDS, SPELLS, TWISTS, MAX_KEYWORDS, defOf, baseIdOf, variantId, suggestDeck, makeCard, newGame, startTurn, canPlay, playCard, spellNeedsTarget, legalTargets, attack, endTurn, forfeit, boost, mulligan, aiNextAction, applyAction, aiTurn, guards, valueOf };
+  return { RULES, KEYWORDS, SPELLS, TWISTS, MAX_KEYWORDS, defOf, baseIdOf, variantId, suggestDeck, makeCard, familyOf, newGame, startTurn, canPlay, playCard, spellNeedsTarget, legalTargets, attack, endTurn, forfeit, boost, mulligan, aiNextAction, applyAction, aiTurn, guards, valueOf };
 })();
 /* END BATTLE ENGINE */
 
