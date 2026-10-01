@@ -1,22 +1,55 @@
-/* ---------------- game version ----------------
-   Each CHANGELOG entry carries its own version, so the version and its build date never have to be kept
-   in sync by hand - the current version is just the newest CHANGELOG entry's version. Every entry bumps
-   the minor number (x.Y.0); major bumps (X.0.0) are done by hand when an entry's version is written. */
+/* ---------------- releases: "Version 1 Beta" ----------------
+   Players read about BETA UPDATES (Beta 1, Beta 2, ...). A Beta update bundles everything since the previous one into one
+   note with three short sections (new / better / fixed). It is cut on purpose - when the owner asks, or a batch is worth
+   announcing - not on every publish. Between releases, finished player-facing changes are logged as bullets in
+   PENDING_CHANGES (below; nobody sees it in-game). To cut a release: write the polished note at the TOP of RELEASES from
+   those bullets (n = previous n + 1, today's date), then empty PENDING_CHANGES. The Journal dot / ? badge fire only for a
+   new release. js/build.js holds BUILD, bumped on every publish, which is what the service worker and bug reports use.
+   The 90 per-change notes from before the Beta live on as CHANGELOG_ARCHIVE, shown collapsed under "Before Beta". */
 function fmtChangelogDate(d) {
   return new Date(d + 'T00:00:00').toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
 }
 function gameVersionLabel() {
-  const latest = CHANGELOG[0];
-  return (latest ? `v${latest.version} · ${fmtChangelogDate(latest.date)}` : '');
+  const latest = RELEASES[0];
+  return latest ? `Beta ${latest.n} · ${fmtChangelogDate(latest.date)}` : '';
 }
+// For bug reports and the Settings menu: the Beta update plus the exact build.
+function gameBuildLabel() { return RELEASES[0] ? `Beta ${RELEASES[0].n} (build ${BUILD})` : `build ${BUILD}`; }
 
-/* ---------------- journal: "What's New" changelog ----------------
-   A developer-maintained list of notable player-facing changes, newest first. Add a new entry here
-   whenever a change is worth telling the player about; the Journal tab shows a dot until they've opened
-   the What's New segment at least once since the newest entry's date.
-   Each entry also carries the version it shipped in - every entry bumps the minor number (x.Y.0) from
-   the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
-const CHANGELOG = [
+// Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
+const PENDING_CHANGES = [
+];
+
+const RELEASES = [
+  {
+    id: 'beta-1', n: 1, date: '2026-10-01', title: 'Welcome to the Beta',
+    intro: 'Tile RPG is now Version 1 Beta. Updates are bundled, so you get one note every so often instead of one for every small change. Here is everything from the first big round of playtest improvements.',
+    new: [
+      'Who goes first: every match starts with a coin call or a dice roll-off. The loser goes second and gets an extra card and +1 energy early.',
+      'Card families (Stone, Wind, Tide, Grove, one per district) and four new keywords: Seed, Lull, Kin and Sting. Plus 28 new cards, and neighbors and bosses now build decks around their district\'s family.',
+      'The world joins the fight: weather, night and each district\'s home turf now change how matches play, for both sides.',
+      'Keeper\'s Knack: a free once-per-match power you pick before the match. Six of them, unlocked as you level up.',
+      'Draft Runs at the fountain (level 5): build a deck from offers of three, then win four matches in a row.',
+      'Ghost duels (level 8): play a match against a ghost of another tester\'s deck from Who\'s Playing.',
+      'A new Journal: Today (your daily checklist with Go buttons and a "Since you were away" box), an Almanac of fish, cards, recipes and night critters, a Log grouped by day with filters, and Battles with a trend line, filters and Rematch.',
+      'Fish you have not caught yet swim as silhouettes. Land one and its colours are revealed.',
+      'Premium things to save for: five decorations, four shimmering avatar rings and three new backdrops.'
+    ],
+    better: [
+      'Battles now follow the light theme and fill the whole screen.',
+      'A steadier economy: fishing, crops, the Festival Cup and Draft Runs pay full Pebbles up to a daily amount, then less. Packs from Brook upward and some seeds cost a bit more. A Pebble ledger in Settings shows where yours came from.',
+      'New features unlock with your level, with a notice when they do, and a "Coming up" list on the Character tab.',
+      'Notes: search, pin favourites, and swipe to delete with an Undo.',
+      'The Guide and What\'s new moved behind the ? button. The Guide has search, NEW tags and a "Take me there" button.',
+      'Match cards no longer have a coloured left edge.'
+    ],
+    fixed: [
+      'The opponent-only Ember Fox clashed with your collectible Ember Fox and quietly replaced its stats in battle. It is now the Cinder Fox.'
+    ]
+  }
+];
+
+const CHANGELOG_ARCHIVE = [
   {
     version: '1.89.0',
     date: '2026-10-01',
@@ -952,58 +985,59 @@ const CHANGELOG = [
 // of "What's New"); everything older starts collapsed and expands in place on tap, same idiom as the
 // mailbox's mail-item/mail-body (see renderMailList in houses-and-cellar.js).
 let clOpen = null;
-/* ---- What's new (inside the Journal's ? sheet, v1.89.0) ----
-   The newest few entries are listed; the rest sit under "Earlier". Each version has its own unread dot (state.progress.clRead),
-   cleared by opening it or by "Mark all as read". Saves from before this change, and brand-new saves, start fully read. */
-const CL_RECENT = 6, CL_UNREAD_WINDOW = 12;
-let clEarlier = false;
+/* ---- What's new (inside the Journal's ? sheet) ----
+   The newest Beta updates are listed (open the latest to read it); older ones fold under "Earlier Beta updates", and the old
+   per-change notes sit in one collapsed "Before Beta" entry. Each release has an unread dot (state.progress.clRead, keyed by
+   release id), cleared by opening it or by "Mark all as read". A save that never opened Updates starts fully read. */
+const CL_SHOWN = 3;
+let clEarlier = false, clHistory = false;
 function clReadMap() {
   const pr = state.progress;
   if (!pr.clRead || typeof pr.clRead !== 'object') {
     pr.clRead = {};
-    const seen = pr.lastSeenChangelog;                    // the old per-date marker, or nothing for a save that never used it
-    CHANGELOG.forEach(e => { if (!seen || e.date <= seen) pr.clRead[e.version] = true; });
+    if (!pr.lastSeenChangelog) RELEASES.forEach(r => { pr.clRead[r.id] = true; });
     saveState();
   }
   return pr.clRead;
 }
-function clUnreadCount() { const r = clReadMap(); return CHANGELOG.slice(0, CL_UNREAD_WINDOW).filter(e => !r[e.version]).length; }
+function clUnreadCount() { const r = clReadMap(); return RELEASES.filter(e => !r[e.id]).length; }
 function renderChangelog() {
-  if (!clOpen) { clOpen = {}; if (CHANGELOG[0]) clOpen[CHANGELOG[0].version] = true; }
-  const read = clReadMap(), listEl = document.getElementById('changelogList');
+  if (!clOpen) { clOpen = {}; if (RELEASES[0]) clOpen[RELEASES[0].id] = true; }
+  const read = clReadMap(), listEl = document.getElementById('changelogList'), unread = clUnreadCount();
   const versionLine = document.getElementById('clVersionLine');
   if (versionLine) versionLine.textContent = 'You\'re on ' + gameVersionLabel();
-  const entry = e => {
-    const open = !!clOpen[e.version];
-    return `<div class="cl-entry${open ? ' open' : ''}" data-toggle-cl="${e.version}"><div class="cl-head">
-        <span class="cl-dot"></span>
-        <span class="cl-v">v${e.version}</span>
-        <span class="cl-title">${escapeHtml(e.title)}</span>
-        ${read[e.version] ? '' : '<i class="jdot" title="Unread"></i>'}
-        <span class="cl-date">${fmtChangelogDate(e.date)}</span>
-        <span class="cl-chevron">${open ? '▲' : '▼'}</span>
-      </div>
-      ${open ? `<ul class="cl-list">${e.changes.map(c => `<li>${escapeHtml(c)}</li>`).join('')}</ul>` : ''}</div>`;
+  const sec = (label, list) => list && list.length ? `<div class="cl-sec">${label}</div><ul class="cl-list">${list.map(c => `<li>${escapeHtml(c)}</li>`).join('')}</ul>` : '';
+  const release = r => {
+    const open = !!clOpen[r.id];
+    return `<div class="cl-entry${open ? ' open' : ''}" data-toggle-cl="${r.id}"><div class="cl-head">
+        <span class="cl-dot"></span><span class="cl-v">Beta ${r.n}</span><span class="cl-title">${escapeHtml(r.title)}</span>
+        ${read[r.id] ? '' : '<i class="jdot" title="Unread"></i>'}<span class="cl-date">${fmtChangelogDate(r.date)}</span><span class="cl-chevron">${open ? '▲' : '▼'}</span></div>
+      ${open ? `<div class="cl-body">${r.intro ? `<p class="cl-intro">${escapeHtml(r.intro)}</p>` : ''}${sec('✨ New', r.new)}${sec('🌿 Better', r.better)}${sec('🔧 Fixed', r.fixed)}</div>` : ''}</div>`;
   };
-  const recent = CHANGELOG.slice(0, CL_RECENT), older = CHANGELOG.slice(CL_RECENT), unread = clUnreadCount();
-  listEl.innerHTML = `<div class="jgroup-h">Recent<small>${unread ? unread + ' unread' : 'all read'}</small></div>` + recent.map(entry).join('') +
-    (older.length ? `<button type="button" class="jchip jearlier" id="clEarlierBtn" aria-expanded="${clEarlier}">${clEarlier ? 'Hide earlier updates' : `Earlier · ${older.length} updates`}</button>` : '') +
-    (clEarlier ? older.map(entry).join('') : '') +
+  const old = e => {
+    const open = !!clOpen['v' + e.version];
+    return `<div class="cl-entry${open ? ' open' : ''}" data-toggle-cl="v${e.version}"><div class="cl-head"><span class="cl-dot"></span><span class="cl-v">v${e.version}</span><span class="cl-title">${escapeHtml(e.title)}</span><span class="cl-date">${fmtChangelogDate(e.date)}</span><span class="cl-chevron">${open ? '▲' : '▼'}</span></div>${open ? `<ul class="cl-list">${e.changes.map(c => `<li>${escapeHtml(c)}</li>`).join('')}</ul>` : ''}</div>`;
+  };
+  const shown = RELEASES.slice(0, CL_SHOWN), earlier = RELEASES.slice(CL_SHOWN);
+  listEl.innerHTML = `<div class="jgroup-h">Beta updates<small>${unread ? unread + ' unread' : 'all read'}</small></div>` + shown.map(release).join('') +
+    (earlier.length ? `<button type="button" class="jchip jearlier" id="clEarlierBtn" aria-expanded="${clEarlier}">${clEarlier ? 'Hide earlier Beta updates' : `Earlier Beta updates · ${earlier.length}`}</button>${clEarlier ? earlier.map(release).join('') : ''}` : '') +
+    (CHANGELOG_ARCHIVE.length ? `<button type="button" class="jchip jearlier" id="clHistoryBtn" aria-expanded="${clHistory}">${clHistory ? 'Hide history' : `Before Beta · ${CHANGELOG_ARCHIVE.length} earlier notes`}</button>${clHistory ? CHANGELOG_ARCHIVE.map(old).join('') : ''}` : '') +
     (unread ? '<div class="jmarkall"><button type="button" class="jgo" id="clMarkAll">Mark all as read</button></div>' : '');
   listEl.querySelectorAll('[data-toggle-cl]').forEach(el => el.addEventListener('click', () => {
     const v = el.dataset.toggleCl;
     sfx('flip');
     clOpen[v] = !clOpen[v];
-    if (clOpen[v]) { clReadMap()[v] = true; saveState(); }
+    if (clOpen[v] && !v.startsWith('v')) { clReadMap()[v] = true; saveState(); }
     renderChangelog(); updateJournalBadge();
   }));
   const eb = document.getElementById('clEarlierBtn'); if (eb) eb.addEventListener('click', () => { sfx('nav'); clEarlier = !clEarlier; renderChangelog(); });
+  const hb = document.getElementById('clHistoryBtn'); if (hb) hb.addEventListener('click', () => { sfx('nav'); clHistory = !clHistory; renderChangelog(); });
   const ma = document.getElementById('clMarkAll'); if (ma) ma.addEventListener('click', () => { markChangelogSeen(); sfx('claim'); renderChangelog(); });
 }
 function markChangelogSeen() {
   const pr = state.progress, r = clReadMap();
-  CHANGELOG.forEach(e => { r[e.version] = true; });
-  if (CHANGELOG[0]) pr.lastSeenChangelog = CHANGELOG[0].date;
+  RELEASES.forEach(e => { r[e.id] = true; });
+  if (RELEASES[0]) pr.lastSeenChangelog = RELEASES[0].date;
   saveState(); updateJournalBadge();
 }
 // The dot on the Journal tab and the number on the ? button both mean "there are updates you have not read".

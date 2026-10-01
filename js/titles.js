@@ -157,7 +157,7 @@ function openPlayerMenu() {
   fetchWhosPlaying();
   syncToggles();
   switchPmSegment(pmView);
-  document.getElementById('pmVersion').textContent = 'Tile RPG ' + gameVersionLabel();
+  document.getElementById('pmVersion').textContent = 'Tile RPG ' + gameVersionLabel() + ' · build ' + BUILD;
   document.getElementById('playerMenuBackdrop').classList.remove('hidden');
   document.getElementById('playerMenu').classList.remove('hidden');
 }

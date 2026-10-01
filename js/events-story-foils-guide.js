@@ -286,7 +286,7 @@ function testerInfo() {
   const pr = ensureLevel(), w = WEATHER_KINDS[weatherNow()];
   const ua = navigator.userAgent.replace(/\s*\(KHTML, like Gecko\)/, '').slice(0, 160);
   const recent = (state.progress.eventLog || []).slice(0, 4).map(e => `  - ${String(e.text).replace(/<[^>]+>/g, '')}`).join('\n');
-  return [`— Tile RPG ${gameVersionLabel()}`,
+  return [`— Tile RPG ${gameBuildLabel()} · ${fmtChangelogDate(RELEASES[0].date)}`,
     `Level ${pr.level} · ${state.wins} wins · ${state.ownedCards.length} cards · in ${DISTRICTS[state.currentDistrict].name}`,
     `${w ? w.name : ''} · ${seasonDef().name} · ${eventNow().name} · ${inBattle ? 'in a battle' : inScene && scene ? 'inside ' + scene.id : 'in town'}`,
     `Screen ${window.innerWidth}×${window.innerHeight} · touch ${'ontouchstart' in window ? 'yes' : 'no'}`,
@@ -303,7 +303,7 @@ function testerData() {
     emoji: (state.character && state.character.emoji) || '',
     level: pr.level, wins: state.wins || 0, cards: state.ownedCards.length,
     district: DISTRICTS[state.currentDistrict] ? DISTRICTS[state.currentDistrict].name : '',
-    version: gameVersionLabel(), screen: `${window.innerWidth}x${window.innerHeight}`,
+    version: gameBuildLabel(), screen: `${window.innerWidth}x${window.innerHeight}`,
     econ: (() => { const r = econReport(); return { hours: r.hours, earned: r.earned, spent: r.spent, earn: Object.fromEntries(r.earn.slice(0, 8).map(x => [x.src, x.total])), spend: Object.fromEntries(r.spend.slice(0, 8).map(x => [x.src, x.total])) }; })(),
   };
 }
