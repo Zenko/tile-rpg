@@ -17,14 +17,26 @@ function gameVersionLabel() {
 function gameBuildLabel() { return RELEASES[0] ? `Beta ${RELEASES[0].n} (build ${BUILD})` : `build ${BUILD}`; }
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
-const PENDING_CHANGES = [
-  { t: 'better', x: 'Character tab: Me now holds your title chips, up to three pinned stats (shown on your stage) and what unlocks next. Bag is now Pantry, and Milestones live only in Rewards.' },
-  { t: 'new', x: 'Cards got a new look: My Cards is a grid of tiles with filters for family and rarity, and tapping one opens a detail sheet where you can add it to your deck, refine it, use it as a charm or release a spare.' },
-  { t: 'new', x: 'Deck builder: a 12-slot tray at the top shows your whole deck. Tap a card below to add it, tap one in the tray to remove it, and turn on Info mode to read cards without changing anything.' },
-  { t: 'better', x: 'Index is now Sets (tap a set to see its cards, with silhouettes for the ones you are missing), Craft is now Workshop, and the Fish log moved fully into the Journal Almanac.' },
-];
+const PENDING_CHANGES = [];
 
 const RELEASES = [
+  {
+    id: 'beta-2', n: 2, date: '2026-10-01', title: 'Cards, Rewards and Character, redone',
+    intro: 'Three tabs got a proper tidy-up, based on your feedback on the Journal.',
+    new: [
+      'Cards: My Cards is now a grid of tiles with family and rarity filters. Tap a card to open its sheet, where you can add it to your deck, refine it, use it as a charm or release a spare.',
+      'Deck builder: a 12-slot tray at the top shows your whole deck. Tap a card below to add it, tap one in the tray to remove it, and turn on Info mode to read cards without changing anything.',
+      'Rewards: Dailies and Weekly now open with a Claim all button, then Ready, In progress (closest first), a collapsed Not started group, and Claimed at the bottom.',
+      'Character: pin up to three stats and they show on your stage under your name.'
+    ],
+    better: [
+      'Character tab: Me now holds your title chips and what unlocks next. Bag is now Pantry, and Milestones live only in Rewards.',
+      'Index is now Sets: tap a set to see its cards, with silhouettes for the ones you are missing. Craft is now Workshop, and the Fish log lives in the Journal Almanac.'
+    ],
+    fixed: [
+      'Other players\' emoji and levels in Who\'s Playing can no longer inject anything odd, and a damaged save can\'t carry markup in your name.'
+    ]
+  },
   {
     id: 'beta-1', n: 1, date: '2026-10-01', title: 'Welcome to the Beta',
     intro: 'Tile RPG is now Version 1 Beta. Updates are bundled, so you get one note every so often instead of one for every small change. Here is everything from the first big round of playtest improvements.',
