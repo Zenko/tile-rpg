@@ -373,16 +373,12 @@ function updateHud() {
   maybeFlushCardLog();
 }
 
-function switchTab(key) {
-  if (inBattle) return;
-  if (placingDecoration && key !== 'town') cancelPlacingDecoration(true);
-  if (HIDESEEK.active && key !== 'town') cancelHideSeek(true);
-  Object.entries(tabs).forEach(([k, t]) => {
-    const active = k === key;
-    t.btn.classList.toggle('active', active);
-    t.panel.classList.toggle('hidden', !active);
-  });
-  document.getElementById('screen').scrollTop = 0;
+/* Switching tabs: the dock's pill slides (a transform), the new panel fades and slides in (opacity and transform), and
+   the heavy rendering waits two frames so the first frames of the animation are never blocked by it. Both animations
+   run on the compositor, so they stay smooth even while the page is busy building a long list. */
+const TAB_ORDER = ['town', 'journal', 'collection', 'quests', 'character'];
+let currentTab = 'town';
+function renderTabContent(key) {
   if (key === 'journal') renderJournal();
   // A dot on the Cards tab always means "new Index entries" - jump straight to the Index instead of
   // whatever segment was last open, so tapping the badge actually shows what's new.
@@ -391,6 +387,36 @@ function switchTab(key) {
   if (key === 'quests') renderQuests();
   if (key === 'character') { renderCharacterTab(); showTipOnce('character'); }
   if (key === 'town') renderTown();
+}
+function switchTab(key) {
+  if (inBattle) return;
+  if (placingDecoration && key !== 'town') cancelPlacingDecoration(true);
+  if (HIDESEEK.active && key !== 'town') cancelHideSeek(true);
+  const prev = currentTab, smooth = prev !== key && btMotionOk();
+  currentTab = key;
+  Object.entries(tabs).forEach(([k, t]) => {
+    const active = k === key;
+    t.btn.classList.toggle('active', active);
+    // The town stays laid out while another tab is open (just invisible), so coming back is a fade, not a re-layout.
+    if (t.panel === townPanel) { townPanel.classList.toggle('tab-away', !active); if (active) townPanel.classList.remove('hidden'); else if (inScene) townPanel.classList.add('hidden'); }
+    else t.panel.classList.toggle('hidden', !active);
+  });
+  const nav = document.getElementById('bottomNav'), idx = TAB_ORDER.indexOf(key);
+  if (nav && idx >= 0) nav.style.setProperty('--i', idx);
+  document.getElementById('screen').scrollTop = 0;
+  if (smooth) {
+    const panel = tabs[key].panel, dir = Math.sign(idx - TAB_ORDER.indexOf(prev));
+    const cls = key === 'town' || !dir || idx < 0 ? 'tab-in' : dir > 0 ? 'tab-in-r' : 'tab-in-l';
+    panel.classList.remove('tab-in', 'tab-in-r', 'tab-in-l'); void panel.offsetWidth; panel.classList.add(cls);
+    setTimeout(() => panel.classList.remove(cls), 360);
+    const tick = viewTick;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      if (currentTab !== key) return;
+      // someone who called switchTab and then chose a Cards/Shop view themselves keeps their choice
+      if ((key === 'collection' || key === 'shop') && viewTick !== tick) return;
+      renderTabContent(key); updateQuestBadge();
+    }));
+  } else { renderTabContent(key); }
   updateQuestBadge();
 }
 
@@ -494,7 +520,7 @@ setInterval(() => {
   if (!inBattle) { checkMail(); checkExpeditions(); checkStory(); }
   const rivalMoved = syncRival();
   const cropsGrew = tickCrops();
-  if (!inBattle && !inScene && !townPanel.classList.contains('hidden')) {
+  if (!inBattle && !inScene && !townPanel.classList.contains('hidden') && !townPanel.classList.contains('tab-away')) {
     const sig = townSignature();
     if (sig !== lastTownSig || rivalMoved || (cropsGrew && state.currentDistrict === 'square')) { lastTownSig = sig; renderTown(); }
   }

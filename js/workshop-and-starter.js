@@ -114,7 +114,9 @@ let cardsView = 'mine';   // 'mine' | 'deck' | 'almanac' | 'craft' | 'fish'  (th
 
 // Opens Cards on its Deck segment - the one place that used to be `switchTab('deck')`.
 function openDeck() { switchTab('collection'); setCardsView('deck'); }
+let viewTick = 0;   // bumped whenever a Cards or Shop view is chosen, so switchTab's deferred work never overrides an explicit choice
 function setCardsView(view) {
+  viewTick++;
   cardsView = view;
   document.getElementById('segMine').classList.toggle('active', view === 'mine');
   document.getElementById('segAlmanac').classList.toggle('active', view === 'almanac');
@@ -194,6 +196,7 @@ const ITEM_CATS = [
 ];
 
 function setShopView(view) {
+  viewTick++;
   shopSubView = view;
   document.getElementById('segPacks').classList.toggle('active', view === 'packs');
   document.getElementById('segCustomize').classList.toggle('active', view === 'customize');

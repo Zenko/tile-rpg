@@ -157,7 +157,6 @@ const TALK_WEATHER = {
   cloudy: ['A bit grey, but I don\'t mind. It keeps the glare off the cards.', 'Cloudy days are for slow walks and warm drinks.'],
   rain:   ['Listen to that rain on the roofs. I do love the sound.', 'Puddles everywhere! Mind your step.'],
   storm:  ['Quite the storm! Everything feels a little faster in this weather.', 'Thunder always makes my cards tingle. Stay dry, friend.'],
-  fog:    ['I can barely see the fountain. It\'s peaceful, in a strange way.', 'Fog again. Things look softer when you can\'t see them clearly.'],
   snow:   ['Snow! Everything is so quiet under it.', 'Winter suits this town. Come and find me by the warm windows later.']
 };
 const TALK_GOSSIP = [

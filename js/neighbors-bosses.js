@@ -143,7 +143,7 @@ function moveFighter(f, to) {
     if (span && to.dx) span.style.transform = `scaleX(${to.dx < 0 ? -1 : 1})`;
   }
 }
-const wanderPaused = () => inBattle || inScene || document.hidden || townPanel.classList.contains('hidden') ||
+const wanderPaused = () => inBattle || inScene || document.hidden || townPanel.classList.contains('hidden') || townPanel.classList.contains('tab-away') ||
   !!document.querySelector('.overlay:not(.hidden)');
 
 /* Fighters are on their own clocks so the village never moves in lockstep. */
@@ -216,7 +216,7 @@ function checkBossCycle() {
   if (phase === bossCycleState.lastPhase) return;
   bossCycleState.lastPhase = phase;
   const data = ensureDistrictData(state.currentDistrict);
-  const inTown = !townPanel.classList.contains('hidden') && !inBattle && !inScene;
+  const inTown = !townPanel.classList.contains('hidden') && !townPanel.classList.contains('tab-away') && !inBattle && !inScene;
   if (phase === 'hidden') {
     if (data.boss && !data.boss.defeated) {
       const el = fighterEl(data.boss);

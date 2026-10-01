@@ -1106,21 +1106,6 @@ body.in-battle .screen { position: relative; overflow: hidden; padding-bottom: c
    small px offset, now applied via translateX instead of the layout-triggering margin-left. */
 @keyframes snow-fall { from { transform: translate(0, 0); } to { transform: translate(var(--drift, 20px), var(--fall, 500px)); } }
 
-/* Fog used to be one thin gradient band wiped sideways across the whole view, which read as a flat haze rather
-   than weather. It's now a handful of soft, oversized, round-edged patches (the same radial-gradient-with-falloff
-   technique .cloud-shadow below uses for its softness, never filter: blur() - see HANDOFF §9 on why an animated
-   blur is a real GPU-compositing cost on a real phone even though it's invisible in desktop testing) layered at
-   different sizes/positions/speeds, closer to drifting cloud banks than a wall of mist. */
-.town-weather .fog-layer { position: absolute; width: 85%; height: 70%; border-radius: 50%; opacity: 0;
-  background: radial-gradient(ellipse at center, rgba(248,250,252,0.9), rgba(242,246,248,0.55) 48%, transparent 76%);
-  animation: fog-drift 46s linear infinite; transition: opacity 2.6s ease; }
-.town-weather.weather-fog .fog-layer { opacity: 0.85; }
-.town-weather .fog-layer.f1 { top: -22%; left: -20%; }
-.town-weather .fog-layer.f2 { top: 4%; left: 40%; width: 70%; height: 58%; animation-duration: 58s; animation-direction: reverse; }
-.town-weather.weather-fog .fog-layer.f2 { opacity: 0.6; }
-.town-weather .fog-layer.f3 { top: 34%; left: -12%; width: 60%; height: 52%; animation-duration: 64s; }
-.town-weather.weather-fog .fog-layer.f3 { opacity: 0.5; }
-@keyframes fog-drift { from { transform: translateX(-16%); } to { transform: translateX(16%); } }
 /* Clear and cloudy used to be the only two weather kinds with no overlay at all - a faint sun burst in the top corner
    for clear, soft shadow-clouds for cloudy. The clear effect used to be a wide bright band sweeping across the whole
    map, which read as a screen flash (v1.60.0 replaced it). The burst is small, soft and stays put: it only breathes
@@ -1459,7 +1444,6 @@ html.calm *, html.calm *::before, html.calm *::after { animation-duration: 0.01m
 .fs-shafts { left: 0; right: 0; top: 26.6%; bottom: 0; background: repeating-linear-gradient(100deg, rgba(255,255,255,.05) 0 16px, transparent 16px 54px); -webkit-mask-image: linear-gradient(#000, transparent 85%); mask-image: linear-gradient(#000, transparent 85%); pointer-events: none; }
 .fs-rain { left: 0; right: 0; top: 0; bottom: 0; pointer-events: none; opacity: 0; background: repeating-linear-gradient(105deg, rgba(200,225,240,.0) 0 14px, rgba(200,225,240,.10) 14px 15px); transition: opacity 1s; }
 .fish-scene[data-wx="rain"] .fs-rain, .fish-scene[data-wx="storm"] .fs-rain { opacity: 1; }
-.fish-scene[data-wx="fog"]::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(210,220,225,.25), rgba(210,220,225,.1) 60%, transparent); pointer-events: none; }
 .fs-svg { left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; }
 .fs-ring { left: 50%; top: 26.6%; width: 74px; height: 20px; margin: -8px 0 0 -37px; border: 2px solid rgba(255,255,255,.7); border-radius: 50%; z-index: 3; opacity: 0; pointer-events: none; }
 .fish-scene[data-phase="wait"] .fs-ring, .fish-scene[data-phase="bite"] .fs-ring, .fish-scene[data-phase="reeling"] .fs-ring { animation: fsRipple 1.7s ease-out infinite; }
@@ -1985,16 +1969,25 @@ body.in-battle .board-wrap { padding: 8px 10px 0; }
 .town-info .log:empty { display: none; }
 #decorationHint, #hideseekHint { position: absolute; top: calc(var(--hud-h) + 8px); left: 12px; right: 64px; z-index: 12; }
 #decorationHint.hidden, #hideseekHint.hidden { display: none; }
-/* the dock: icons only, the current tab shows its name */
-.bottom-nav { position: absolute; left: 14px; right: 14px; bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 10; padding: 6px; gap: 2px; justify-content: space-between; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--stone-edge) 80%, transparent);
-  background: var(--glass); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 10px 26px var(--shadow); }
-#bottomNav .tab-btn { flex: none; width: 46px; height: 46px; padding: 0; flex-direction: row; justify-content: center; gap: 6px; border-radius: 999px; font-size: 0.78rem; transition: width 0.25s ease, background 0.2s ease, color 0.2s ease; }
-#bottomNav .tab-btn > span:not(.t-icon):not(.dot) { display: none; }
-#bottomNav .tab-btn .t-icon { font-size: 1.3rem; }
-#bottomNav .tab-btn.active { flex: 1; width: auto; padding: 0 14px; background: var(--water); color: var(--on-water); font-weight: 700; }
-#bottomNav .tab-btn.active > span:not(.t-icon):not(.dot) { display: inline; }
-#bottomNav .tab-btn.active .t-icon { transform: none; }
-#bottomNav .tab-btn .dot { top: 7px; right: 7px; border-color: transparent; }
+/* the dock: five equal slots with a pill that slides under the current tab. The slide is a transform and the
+   icon lift is a transform too, so tab switches stay smooth even when the page is busy (v1.66.0) */
+.bottom-nav { --i: 0; position: absolute; left: 14px; right: 14px; bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 10; padding: 6px; gap: 0; border-radius: 30px; border: 1px solid color-mix(in srgb, var(--stone-edge) 80%, transparent);
+  background: var(--glass); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 10px 26px var(--shadow); contain: layout; }
+.bottom-nav::before { content: ''; position: absolute; left: 6px; top: 6px; bottom: 6px; width: calc((100% - 12px) / 5); border-radius: 24px; background: var(--water);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--water) 45%, transparent); transform: translate3d(calc(var(--i) * 100%), 0, 0); transition: transform 0.42s cubic-bezier(0.3, 1.35, 0.45, 1); will-change: transform; }
+#bottomNav .tab-btn { position: relative; z-index: 1; flex: 1 1 0; min-width: 0; height: 52px; padding: 0; gap: 1px; justify-content: center; border-radius: 24px; background: none; font-size: 0.62rem; font-weight: 700; color: var(--ink-soft); transition: color 0.25s ease; -webkit-tap-highlight-color: transparent; }
+#bottomNav .tab-btn .t-icon { font-size: 1.3rem; line-height: 1.1; filter: none; transition: transform 0.35s cubic-bezier(0.3, 1.5, 0.5, 1), opacity 0.25s ease; opacity: 0.75; }
+#bottomNav .tab-btn.active { color: var(--on-water); background: none; font-weight: 800; }
+#bottomNav .tab-btn.active .t-icon { transform: translate3d(0, -1px, 0) scale(1.14); opacity: 1; }
+#bottomNav .tab-btn:active .t-icon { transform: scale(0.88); }
+#bottomNav .tab-btn .dot { top: 6px; right: auto; left: calc(50% + 9px); border-color: transparent; }
+#bottomNav .tab-btn.active .dot { background: var(--on-water); }
+#townPanel.tab-away { opacity: 0; pointer-events: none; }   /* not visibility: that is inherited, so flipping it restyles every tile */
+/* a panel arriving: fade and a short slide in the direction of travel, never touching layout */
+.tab-in, .tab-in-l, .tab-in-r { animation: tabIn 0.3s cubic-bezier(0.22, 0.8, 0.3, 1) 0.04s both; will-change: opacity, transform; }
+.tab-in-r { --tx: 16px; } .tab-in-l { --tx: -16px; }
+@keyframes tabIn { from { opacity: 0; transform: translate3d(var(--tx, 0px), 6px, 0); } to { opacity: 1; transform: none; } }
 .toast { bottom: calc(env(safe-area-inset-bottom) + var(--dock-h) + 60px); }
 #sceneView { padding-top: calc(var(--hud-h) + 2px); }
-@media (prefers-reduced-motion: reduce) { #bottomNav .tab-btn { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .bottom-nav::before, #bottomNav .tab-btn, #bottomNav .tab-btn .t-icon { transition: none; } .tab-in, .tab-in-l, .tab-in-r { animation: none; } }
+html.calm .bottom-nav::before, html.calm #bottomNav .tab-btn .t-icon { transition: none; }

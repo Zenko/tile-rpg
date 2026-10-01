@@ -224,7 +224,6 @@ const WEATHER_MUSIC_PROFILE = {
   cloudy: { filter: 1350, wet: 0.55, tempoMin: 10, tempoMax: 16 },
   rain:   { filter: 1050, wet: 0.68, tempoMin: 11, tempoMax: 18 },
   storm:  { filter: 820,  wet: 0.78, tempoMin: 13, tempoMax: 20 },
-  fog:    { filter: 900,  wet: 0.8,  tempoMin: 12, tempoMax: 19 },
   snow:   { filter: 1150, wet: 0.75, tempoMin: 12, tempoMax: 19 },
 };
 // Each district leans the same in-key chords a different way, so the town has a musical identity without ever
@@ -431,7 +430,7 @@ function buildWeatherBed(ctx, kind) {
   let targetGain = 0.07;
   // Rain is a soft pink-noise body (lowpassed so there's no hiss) under a very faint high "patter" layer.
   if (rainy) { filter.type = 'lowpass'; filter.frequency.value = kind === 'storm' ? 1500 : 1200; filter.Q.value = 0.3; targetGain = kind === 'storm' ? 0.07 : 0.05; }
-  else if (kind === 'fog' || kind === 'cloudy') { filter.type = 'lowpass'; filter.frequency.value = 500; filter.Q.value = 0.3; targetGain = 0.025; }
+  else if (kind === 'cloudy') { filter.type = 'lowpass'; filter.frequency.value = 500; filter.Q.value = 0.3; targetGain = 0.025; }
   else { filter.type = 'lowpass'; filter.frequency.value = 300; targetGain = 0.02; }
   let patter = null;
   if (rainy) {
@@ -521,7 +520,7 @@ function syncWeatherAudio() {
   syncAmbientAudio();   // the district ambience shares this re-check so it follows battles, scenes and district changes
   const want = prefs.sound && prefs.music && !document.hidden && userHasTouched && !inBattle && !inScene;
   // Snow stays deliberately silent (real snowfall is famously hushed); clear has no bed either
-  const audible = kind => kind === 'rain' || kind === 'storm' || kind === 'fog' || kind === 'cloudy';
+  const audible = kind => kind === 'rain' || kind === 'storm' || kind === 'cloudy';
   const kind = state.weather.current || 'clear';
   if (!want || !audible(kind)) { if (WEATHER_AUDIO.running) stopWeatherAudio(); return; }
   if (WEATHER_AUDIO.running !== kind) startWeatherAudio(kind);

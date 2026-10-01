@@ -24,7 +24,7 @@ const TIPS = {
   trades:      { icon: '🤝', title: 'The trading board', text: 'Three new offers every morning: swap a spare for a card you have never had, bundle three spares for a rarer card, or sell one to a collector for three times its release value.' },
   challenges:  { icon: '🎯', title: 'Deck challenges', text: 'Three rules a day, like "only commons" or "no two cards the same". Win with a deck that follows the rule for a card prize. Keep a deck slot for challenges so switching is quick.' },
   minigames:  { icon: '🎲', title: 'Mini-games', text: 'Every house has a little game. Earn a bronze, silver or gold medal; the first three medals in each game every day pay Pebbles, and gold can turn up a card. Play as much as you like after that.' },
-  forecast:   { icon: '🪧', title: 'The weather board', text: 'Signs show the forecast. Weather changes play: clear pays a little extra on daily tasks, cloudy doubles spirit XP, rain helps fishing and growing, fog turns up more finds, storms boost Swift cards, snow toughens bosses for richer prizes.' },
+  forecast:   { icon: '🪧', title: 'The weather board', text: 'Signs show the forecast. Weather changes play: clear pays a little extra on daily tasks, cloudy doubles spirit XP, rain helps fishing and growing, storms boost Swift cards, snow toughens bosses for richer prizes.' },
   events:     { icon: '📅', title: 'Daily town events', text: "One event runs each day, shown next to the district name - a Fishing Derby, Market Day, Harvest Fair and more, each bending the rules a little in your favor." },
   foils:      { icon: '✨', title: 'Foil cards', text: 'A shimmering foil is purely a collector\'s chase - the same card, just shinier. Your foil total shows at the top of Cards → Index and in your cottage trophy case.' },
   townlife:   { icon: '🪑', title: 'Things to do around town', text: 'Props do things now: sit on benches, make a wish at wells, light lamps after dark, haggle, haul nets, water plants or busk for tips. Shake trees, skip stones, splash through puddles in the rain. Everything nudges the district\'s town mood - fill it up and the district dresses itself up for good.' },
@@ -119,7 +119,7 @@ const QUEST_POOL = [
   { id: 'minigold', icon: '🥇', name: 'Win a gold medal in a mini-game', goal: 1, stat: 'minigameGolds', reward: 'rare' },
   { id: 'foil1',    icon: '✨', name: 'Find a foil card',              goal: 1, stat: 'foilsFound',      reward: 'rare' },
   { id: 'rainyfish1', icon: '🌧️', name: 'Catch a fish while it rains', goal: 1, stat: 'rainyFish',       reward: 'rare' },
-  { id: 'foggyfind1', icon: '🌫️', name: 'Find a card in the fog',      goal: 1, stat: 'foggyFinds',      reward: 'rare' },
+  { id: 'foggyfind1', icon: '🌧️', name: 'Find a card in the rain',     goal: 1, stat: 'foggyFinds',      reward: 'rare' },
   { id: 'acts6',    icon: '🪑', name: 'Interact with 6 things around town', goal: 6,  stat: 'townActs',  reward: 'common' },
   { id: 'acts15',   icon: '🌳', name: 'Interact with 15 things around town', goal: 15, stat: 'townActs', reward: 'rare' },
   { id: 'game2',    icon: '🎸', name: 'Play 2 town activities',        goal: 2,  stat: 'townGames',       reward: 'rare' },
@@ -854,6 +854,8 @@ function loadState() {
     // Older saves may have a weather.changesAt scheduled against the wrapping sky clock (the bug that could
     // freeze weather forever); resetting elapsed/changesAt here forces an immediate, correct reroll.
     if (typeof state.weather.elapsed !== 'number') { state.weather.elapsed = 0; state.weather.changesAt = 0; }
+    if (state.weather.current === 'fog') state.weather.current = 'cloudy';   // fog was removed
+    if (state.weather.next === 'fog') state.weather.next = null;
     if (!state.decorationInventory || typeof state.decorationInventory !== 'object') state.decorationInventory = {};
     // Character: old saves may have a `hat` field, and border/borderStyle from before cosmetics moved to
     // the simpler emoji+accessory+color system - drop all three, they're unused now.

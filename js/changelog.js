@@ -18,6 +18,18 @@ function gameVersionLabel() {
    the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
 const CHANGELOG = [
   {
+    version: '1.66.0',
+    date: '2026-10-01',
+    title: "Smoother tabs, and no more fog",
+    changes: [
+      "Switching tabs is much smoother. The highlight slides under the tab you pick with a little bounce, and the new screen fades in from the direction you are heading.",
+      "The heavy work of building a long list now waits until the first frames of that motion are on screen, so taps no longer stall, and the town stays ready in the background so returning to it is instant.",
+      "The dock shows every tab name again, with the current one highlighted.",
+      "Fog is gone. If it was foggy when you last played, it is cloudy now. The Ghost Koi now drifts up under cloudy skies instead, and the quest to find a card in the fog now asks for one in the rain.",
+      "Calm motion and reduced motion turn the sliding and fading off.",
+    ],
+  },
+  {
     version: '1.65.0',
     date: '2026-10-01',
     title: "A floating top bar, bottom dock and a full-screen town",

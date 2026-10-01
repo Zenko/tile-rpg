@@ -75,7 +75,6 @@ const WEATHER_KINDS = {
   cloudy: { icon: '☁️', name: 'Cloudy', weight: () => 3 },
   rain:   { icon: '🌧️', name: 'Rain', weight: (n) => n ? 2 : 2.4 },
   storm:  { icon: '⛈️', name: 'Storm', weight: (n) => n ? 1.1 : 0.8 },
-  fog:    { icon: '🌫️', name: 'Fog', weight: (n) => n ? 1.6 : 1 },
   snow:   { icon: '❄️', name: 'Snow', weight: () => 0.9 }
 };
 // TEMPORARY test switch: while set, only these kinds can roll (for chasing the screen-flash report). Set to null to
@@ -94,7 +93,7 @@ function rollWeather(isNight) {
 }
 const WEATHER_LOG = {
   clear: 'The sky clears up.', cloudy: 'Clouds roll in overhead.', rain: 'Rain starts to fall.',
-  storm: 'A storm rolls in. Thunder rumbles somewhere over the rooftops.', fog: 'A soft fog settles over the town.', snow: 'Snow begins to drift down.'
+  storm: 'A storm rolls in. Thunder rumbles somewhere over the rooftops.', snow: 'Snow begins to drift down.'
 };
 // What each kind of weather actually changes. `short` goes on the battle chip and in toasts; the numbers are read
 // by the systems they touch (fishing, finds, chests, spirits, battles, rewards) through weatherIs()/WEATHER_EFFECTS.
@@ -103,7 +102,6 @@ const WEATHER_EFFECTS = {
   cloudy: { short: 'Spirits give double XP' },
   rain:   { short: 'Fish bite sooner, rare fish more often', biteSpeed: 0.6, rareFish: 2.5 },
   storm:  { short: '💨 Swift cards +1 power in battle', swiftBonus: 1 },
-  fog:    { short: 'Hidden cards & chests turn up more', findMult: 2, chestMult: 2.5 },
   snow:   { short: 'Bosses +2 Spirit, richer rewards', bossSpirit: 2, richerRewards: true },
 };
 /* ---------------- seasons: one real week each, spring -> summer -> autumn -> winter ----------------
@@ -117,7 +115,7 @@ const SEASONS = {
     cards: ['sprout', 'blossom', 'sakura-petal', 'cherry-blossom-storm', 'clover', 'lily', 'foxglove', 'moth', 'dove', 'garden-spirit', 'rain-shower', 'starfall-unicorn'] },
   summer: { icon: '☀️', name: 'Summer', weather: { clear: 1.4, storm: 1.4, snow: 0 },
     cards: ['firefly', 'reed', 'feather', 'gale', 'thunderhead', 'storm-lily', 'lucky-cat', 'festival-drum', 'koi', 'paper-fan', 'sunbeam', 'phoenix-ember'] },
-  autumn: { icon: '🍂', name: 'Autumn', weather: { fog: 1.8, cloudy: 1.3, snow: 0 },
+  autumn: { icon: '🍂', name: 'Autumn', weather: { cloudy: 1.6, rain: 1.2, snow: 0 },
     cards: ['acorn', 'autumn-maple', 'dew-leaf', 'harvest-lantern', 'hollow-log', 'twig-bundle', 'pinewood-owl', 'moth-queen', 'hedgehog', 'copper-carp', 'harvest', 'ironroot-treant'] },
   winter: { icon: '❄️', name: 'Winter', weather: { snow: 3.5, clear: 0.8 },
     cards: ['winter-hare', 'glacier-spirit', 'crystal-spire', 'quartz-cluster', 'moonstone', 'snail', 'geode', 'northern-lights', 'moonlit-shrine', 'stone-lantern', 'moonlit-tide', 'celestial-owl'] },
@@ -139,7 +137,7 @@ function noteSeasonChange() {
   if (!first) { toast(`${s.icon} ${s.name} has come to town`); logEvent(s.icon, `${s.name} arrived. Its cards turn up more often for the next week.`); }
 }
 
-function weatherNow() { return (state.weather && state.weather.current) || 'clear'; }
+function weatherNow() { const c = (state.weather && state.weather.current) || 'clear'; return c === 'fog' ? 'cloudy' : c; }   // fog was removed: old saves read it as cloudy
 function weatherIs(kind) { return weatherNow() === kind; }
 function weatherFx() { return WEATHER_EFFECTS[weatherNow()] || {}; }
 // "Now X, then Y in about N minutes" - minutes of active play, since the weather clock pauses while the game is closed.
@@ -169,7 +167,6 @@ const WEATHER_AMBIENT = {
   cloudy: ['Clouds drift lazily overhead.', 'The light has gone soft and grey.'],
   rain: ['Rain patters steadily on rooftops.', 'Puddles gather along the path.', 'The air smells like wet stone.'],
   storm: ['Thunder rumbles somewhere beyond the rooftops.', 'Wind rattles the shutters.'],
-  fog: ['Fog blurs the edges of the town.', 'Shapes loom soft and unclear in the mist.'],
   snow: ['Snow gathers quietly on the rooftops.', 'Footprints trail behind you in the fresh snow.'],
 };
 let ambientState = { key: '', at: 0, el: null };
@@ -216,7 +213,7 @@ function maybeRollWeather() {
   }
 }
 
-const WEATHER_DIM = { clear: 0, cloudy: 0.08, rain: 0.06, storm: 0.14, fog: 0.05, snow: 0.03 };
+const WEATHER_DIM = { clear: 0, cloudy: 0.08, rain: 0.06, storm: 0.14, snow: 0.03 };
 function applySky(instant) {
   if (!skyEl) return;
   const s = skyPhase();
@@ -314,7 +311,7 @@ function applyWeather(instant) {
   if (kind === lastAppliedWeather && !instant) return;
   lastAppliedWeather = kind;
   // every kind now has its own gentle overlay: a faint sun burst for clear, soft cloud-shadows for cloudy,
-  // alongside the existing rain/storm/snow/fog effects - so the sky never just sits there doing nothing.
+  // alongside the existing rain/storm/snow effects - so the sky never just sits there doing nothing.
   weatherEl.className = 'town-weather on weather-' + kind;
   if (kind === 'snow' && !snowFlakes.length) buildSnowFlakes();
   if ((kind === 'rain' || kind === 'storm') && !rainBuilt) buildRainDrops(kind === 'storm');
@@ -407,7 +404,7 @@ let skyEl = null, vignetteEl = null, weatherEl = null, snowFieldEl = null, light
 function buildSkyLayers() {
   skyEl = document.createElement('div'); skyEl.className = 'town-sky';
   weatherEl = document.createElement('div'); weatherEl.className = 'town-weather'; weatherEl.id = 'townWeather';
-  weatherEl.innerHTML = `<div class="fog-layer f1"></div><div class="fog-layer f2"></div><div class="fog-layer f3"></div><div class="rain-layer"></div><div class="lightning"></div><div class="snow-field" id="snowField"></div><div class="sun-burst"></div><div class="cloud-shadow c1"></div><div class="cloud-shadow c2"></div>`;
+  weatherEl.innerHTML = `<div class="rain-layer"></div><div class="lightning"></div><div class="snow-field" id="snowField"></div><div class="sun-burst"></div><div class="cloud-shadow c1"></div><div class="cloud-shadow c2"></div>`;
   vignetteEl = document.createElement('div'); vignetteEl.className = 'town-vignette';
   townView.appendChild(skyEl); townView.appendChild(weatherEl); townView.appendChild(vignetteEl);
   snowFieldEl = weatherEl.querySelector('#snowField');
@@ -823,7 +820,7 @@ function grantHiddenCard(label) {
   state.ownedCards.push(cardId);
   saveState(); updateHud();
   bumpPill('pillCards'); bumpStat('cardsFound', 1);
-  if (weatherIs('fog')) bumpStat('foggyFinds', 1);
+  if (weatherIs('rain')) bumpStat('foggyFinds', 1);   // stat id kept from the old fog quest, which now asks for a find in the rain
   if (isNewCard) toast('📖 New entry in your Index');
   sfx('claim'); buzz(HAP.tap);
   showCardReveal(cardId, label, false, null, XP_PER_STAT.cardsFound);
