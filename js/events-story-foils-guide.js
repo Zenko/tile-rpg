@@ -138,6 +138,7 @@ const GUIDE = [
     { icon: '📬', name: 'Letters', where: 'Your cottage mailbox (Town Square)', how: 'Neighbors write to you, sometimes with a gift.' },
   ] },
   { section: 'Card battles', items: [
+    { icon: '👻', name: 'Ghost duels', where: "Player menu → Social → Who's Playing → Duel", how: "Other testers' current decks can be played against as ghosts - the game plays their 12 cards for them. Beat a ghost for a few Pebbles (once per ghost a day). Your own deck is shared the same way; turn it off with 'Let testers duel my deck' in Settings." },
     { icon: '🎴', name: 'Draft Run', where: 'The fountain in Town Square → Draft Run', how: 'Build a brand-new 12-card deck by picking 1 card from each of 12 offers of three (from every card in the game, not just yours), then win four matches in a row. Your collection\'s perks stay home so everyone drafts equally. Pebbles for every round (first 3 runs a day pay full) and a super-or-better card for the first clear each day.' },
     { icon: '✨', name: "Keeper's Knack", where: 'Keep-this-hand screen · Character → Me', how: 'A free, once-per-match power you pick before the match: Forage (draw 2), Soothe (heal), Sow (Seedlings), Spark Storm, Bulwark (Shields) and Tidal Hush. New ones unlock as you level up. Tap the glowing round button by your bar, then Use it.' },
     { icon: '🌦️', name: 'The world in battle', where: 'The line under the battle bar', how: 'Matches feel the world around them, for both sides: ☀️ clear skies give Bloom +1 power, ☁️ cloud gives Shield +1 health, 🌧️ rain makes Mend heal +1, ⛈️ storms give Swift +1 power, 🌙 night makes Echo hit +1, and every district is home turf for its family (+1 health). Bring the right family to the right town.' },
@@ -245,6 +246,13 @@ document.getElementById('presenceToggle').addEventListener('click', () => {
   if (prefs.sharePresence) { pushPresence(); toast("👋 Sharing that you're playing"); }
   else removePresence();
   fetchWhosPlaying();
+});
+// Ghost duels: your current deck rides along with your presence entry (on by default, with Share that I'm playing).
+document.getElementById('shareDeckToggle').addEventListener('click', () => {
+  sfx('tap');
+  prefs.shareDeck = prefs.shareDeck === false; savePrefs(); syncToggles();
+  if (prefs.sharePresence) pushPresence();
+  toast(prefs.shareDeck === false ? '👻 Your deck is private' : prefs.sharePresence ? '👻 Testers can duel your deck' : '👻 Turn on Share that I\'m playing so testers can find you');
 });
 
 /* ============================================================

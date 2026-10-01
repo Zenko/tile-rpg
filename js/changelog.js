@@ -18,6 +18,17 @@ function gameVersionLabel() {
    the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
 const CHANGELOG = [
   {
+    version: '1.86.0',
+    date: '2026-10-01',
+    title: "Ghost duels",
+    changes: [
+      "Who's Playing now has a 👻 Duel button next to testers who share their deck: play a match against a ghost of their current 12 cards. They are never notified and nothing of theirs changes.",
+      "Win for a few Pebbles (once per ghost per day, five a day) - ghost wins don't count toward district wins.",
+      "Your own deck is shared the same way. Switch it off any time with 'Let testers duel my deck' in Settings → Notifications & privacy.",
+      "New milestone: beat 5 ghosts."
+    ]
+  },
+  {
     version: '1.85.0',
     date: '2026-10-01',
     title: "Draft Runs",

@@ -173,6 +173,7 @@ const WEEKLY_QUEST_POOL = [
 ];
 
 const ACHIEVEMENTS = [
+  { id: 'ghost-5',    icon: '👻', name: 'Beat 5 ghosts of other testers\' decks', test: () => (state.progress.totals.ghostWins || 0) >= 5 },
   { id: 'draft-1',    icon: '🎴', name: 'Cleared a Draft Run', test: () => (state.progress.totals.draftClears || 0) >= 1 },
   { id: 'draft-5',    icon: '🃏', name: 'Cleared 5 Draft Runs', test: () => (state.progress.totals.draftClears || 0) >= 5 },
   { id: 'knack-10',   icon: '✨', name: 'Used your Knack 10 times', test: () => (state.progress.totals.knacksUsed || 0) >= 10 },
@@ -524,7 +525,7 @@ const XP_PER_STAT = {
   breadBaked: 8, breadShared: 10, spellsCast: 3, seedsPlanted: 3, seedsFound: 5, cropsHarvested: 5, rivalWins: 60,
   minigamesPlayed: 5, minigameGolds: 10, talks: 1, foilsFound: 20,
   donations: 6, expeditionsDone: 25, tradesDone: 15, cardsGifted: 10, challengesWon: 40, setsCompleted: 60, masteryRanks: 15, charmsSet: 2,
-  tossWins: 2, knacksUsed: 3, draftWins: 20, draftClears: 60, townActs: 3, townGames: 8, puddles: 1, stonesSkipped: 1,
+  tossWins: 2, knacksUsed: 3, draftWins: 20, draftClears: 60, ghostWins: 6, townActs: 3, townGames: 8, puddles: 1, stonesSkipped: 1,
   dishesCooked: 10, dishesGiven: 10, snacksEaten: 2, puzzlesSolved: 40, cupRoundsWon: 30, cupTrophies: 100, bugsCaught: 8, lettersRead: 2,
 };
 // Keeper's Knack (BattleEngine.KNACKS): unlocked by Keeper level, one is picked for each match.

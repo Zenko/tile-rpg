@@ -292,6 +292,10 @@ const RARITY_ORDER = ['common', 'rare', 'ultra', 'super', 'mythic'];
 // `def.icon` directly, so art can be dropped in card-by-card with the emoji staying as a fallback for
 // every card that doesn't have one yet. The <img> is sized in em so it drops into any of the existing
 // font-size-driven icon containers (see .card-art-img in style.css) without per-call-site CSS.
+// The simple way to switch art on: drop `<id>.png` into assets/cards/ and add the id to this list (nothing else to edit).
+// Every listed card gets `art: 'assets/cards/<id>.png'`; cards not listed keep their emoji. See assets/cards/README.md.
+const CARD_ART = [];
+CARD_POOL.concat(FOE_CARDS, TOKEN_CARDS).forEach(c => { if (CARD_ART.includes(c.id) && !c.art) c.art = 'assets/cards/' + c.id + '.png'; });
 function cardArtHtml(def, cls) {
   return def.art
     ? `<img class="card-art-img${cls ? ' ' + cls : ''}" src="${def.art}" alt="${escapeHtml(def.name)}">`

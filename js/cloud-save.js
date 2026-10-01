@@ -87,6 +87,7 @@ function pushPresence() {
     level: ensureLevel().level,
     district: (DISTRICTS[state.currentDistrict] && DISTRICTS[state.currentDistrict].name) || '',
     lastSeen: Date.now(),
+    deck: ghostDeckCode(),
   }).catch(() => { /* offline - this is just a nice-to-have glance, not core save data */ });
 }
 // Removes you from the list right away when you opt out, rather than lingering until PRESENCE_STALE_MS.
@@ -112,6 +113,62 @@ async function pushFeedback(kind, text, info, player) {
     return true;
   } catch (e) { return false; }
 }
+/* ============================================================
+   GHOST DUELS (v1.86.0): your current deck rides along with your presence entry (as a deck code, the same TRPG1 string the
+   Deck screen shares), so another tester can fight a "ghost" of it - the AI piloting your 12 cards - from Who's Playing.
+   No new Firestore rule: it is one more field on the `players/{uid}` document that everyone signed in can already read.
+   Nothing is written about the duel itself, so nobody is notified and nothing of yours changes. Wins pay a few Pebbles
+   (once per ghost per day, five a day) and count for their own stat, never for district wins.
+   ============================================================ */
+let ghostRows = [];
+function ghostDeckCode() {
+  if (prefs.shareDeck === false) return null;
+  const ids = (state.deck || []).filter(id => !!cardDef(id));
+  return ids.length === DECK_SIZE ? deckCode(ids) : null;
+}
+// A shared deck as a list of 12 valid card ids, plus its main family for the label - or null when it can't be used.
+function ghostDeckOf(p) {
+  if (!p || typeof p.deck !== 'string') return null;
+  const ids = parseDeckCode(p.deck);
+  if (!ids || ids.length !== DECK_SIZE) return null;
+  const tally = {}; ids.forEach(id => { const f = CARD_FAMILY[BattleEngine.baseIdOf(id)]; if (f) tally[f] = (tally[f] || 0) + 1; });
+  const top = Object.keys(tally).sort((a, b) => tally[b] - tally[a])[0];
+  return { ids, fam: top && tally[top] >= 4 ? FAMILIES[top] : null };
+}
+function ghostState() {
+  const p = state.progress, t = todayKey();
+  if (!p.ghost || p.ghost.day !== t) p.ghost = { day: t, beaten: {}, paid: 0 };
+  return p.ghost;
+}
+function startGhostDuel(p) {
+  const g = ghostDeckOf(p); if (!g) { toast("That deck can't be loaded"); return; }
+  if (state.deck.length < DECK_SIZE) { toast(`Fill your ${DECK_SIZE}-card deck first`); return; }
+  closePlayerMenu && closePlayerMenu();
+  startBattle({ id: 'ghost-' + p.id, name: `${p.name || 'A player'}'s ghost`, icon: '👻', deck: g.ids, profile: { level: 'smart', spirit: 20 },
+                isBoss: false, rewardCard: null, ghost: { uid: p.id, name: p.name || 'A player' } });
+}
+function ghostWin() {
+  const gs = ghostState(), id = battle.npc.ghost.uid;
+  battle.rewarded = true;
+  bumpStat('ghostWins', 1);
+  let extra = 'A fine duel.';
+  if (!gs.beaten[id] && gs.paid < 5) { gs.beaten[id] = true; gs.paid++; addPebbles(8); extra = '<b>+8 🫧</b> for beating this ghost today.'; }
+  saveState();
+  const icon = btGet('battleEndIcon'); icon.textContent = '👻'; icon.className = 'big-icon reveal-icon';
+  battleEndTitle.textContent = `You beat ${battle.npc.ghost.name}'s ghost!`;
+  battleEndStats.innerHTML = extra;
+  btGet('battleRetryBtn').classList.remove('hidden');
+  sparkleBurst(btGet('battleSparkles'), ['👻', '✨'], 10);
+  sfx('win'); buzz(HAP.win);
+}
+function ghostLoss() {
+  const icon = btGet('battleEndIcon'); icon.textContent = '👻'; icon.className = 'big-icon';
+  btGet('battleSparkles').innerHTML = '';
+  battleEndTitle.textContent = `${battle.npc.ghost.name}'s ghost wins this one.`;
+  battleEndStats.textContent = 'Their deck is waiting for a rematch whenever you like.';
+  btGet('battleRetryBtn').classList.remove('hidden');
+  sfx('soft');
+}
 async function fetchWhosPlaying() {
   const box = document.getElementById('whosPlayingList');
   if (!box) return;
@@ -120,11 +177,17 @@ async function fetchWhosPlaying() {
   try {
     const snap = await cloudDb.collection(PRESENCE_COLLECTION).orderBy('lastSeen', 'desc').limit(20).get();
     const now = Date.now();
-    const rows = snap.docs.map(d => d.data()).filter(p => now - (p.lastSeen || 0) < PRESENCE_STALE_MS);
-    box.innerHTML = rows.length ? rows.map(p => `<div class="panel-item"><span class="panel-icon">${p.emoji || '🙂'}</span><span class="panel-text">
+    const rows = snap.docs.map(d => Object.assign({ id: d.id }, d.data())).filter(p => now - (p.lastSeen || 0) < PRESENCE_STALE_MS);
+    ghostRows = rows;
+    box.innerHTML = rows.length ? rows.map((p, i) => {
+      const g = p.id !== (cloudUser && cloudUser.uid) ? ghostDeckOf(p) : null;
+      return `<div class="panel-item"><span class="panel-icon">${p.emoji || '🙂'}</span><span class="panel-text">
         <div class="panel-name">${escapeHtml(p.name || 'A player')} · Lv ${p.level || 1}</div>
-        <div class="panel-desc">${escapeHtml(p.district || '')}${p.district ? ' · ' : ''}${fmtLogTime(p.lastSeen)}</div></span></div>`).join('')
+        <div class="panel-desc">${escapeHtml(p.district || '')}${p.district ? ' · ' : ''}${fmtLogTime(p.lastSeen)}</div></span>
+        ${g ? `<button class="btn btn-ghost ghost-btn" type="button" data-ghost="${i}" title="Duel a ghost of their deck">👻 ${g.fam ? g.fam.icon + ' ' : ''}Duel</button>` : ''}</div>`;
+    }).join('')
       : '<div class="panel-desc">Nobody sharing yet - turn it on in Settings and be the first!</div>';
+    box.querySelectorAll('[data-ghost]').forEach(b => b.addEventListener('click', () => startGhostDuel(ghostRows[+b.dataset.ghost])));
   } catch (e) { box.innerHTML = "<div class=\"panel-desc\">Couldn't load right now.</div>"; }
 }
 
