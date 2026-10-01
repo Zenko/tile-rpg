@@ -349,6 +349,49 @@ const BattleEngine = (function () {
     tide:  { icon: '🌊', text: 'Every 4th turn, the tide washes your strongest card back to your hand.' },
     bloom: { icon: '🌻', text: 'Its 1-cost cards all have Bloom.' }
   };
+  /* ---------- Keeper's Knack (v1.84.0) ----------
+     One free, once-per-match ability the player picks before the match (the keep-this-hand screen), unlocked by level. It
+     is usable from its own turn number (`from`), takes no energy, and none of them need aiming, so one tap does it. Neighbors don't
+     have one: it is the player's edge. `level` is the Keeper level that unlocks it (progression.js reads it). */
+  const KNACKS = {
+    forage:     { icon: '🧺', name: 'Forage',      level: 1,  from: 2, text: 'Draw 2 cards.' },
+    soothe:     { icon: '🌿', name: 'Soothe',      level: 3,  from: 2, text: 'Restore 6 Spirit and heal each of your cards by 2.' },
+    sow:        { icon: '🌱', name: 'Sow',         level: 5,  from: 2, text: 'Grow two 1/2 Seedlings on your board (as many as fit).' },
+    sparkstorm: { icon: '⚡', name: 'Spark Storm', level: 8,  from: 2, text: 'Deal 1 damage to every enemy card and 1 to enemy Spirit.' },
+    bulwark:    { icon: '🛡️', name: 'Bulwark',     level: 11, from: 2, text: 'Every card on your board gains a Shield.' },
+    tidal:      { icon: '🌊', name: 'Tidal Hush',  level: 15, from: 2, text: "The enemy's two strongest cards can't attack on their next turn." }
+  };
+  function knackReady(G, who) {
+    const pl = G.p[who];
+    if (!pl.knack || !KNACKS[pl.knack]) return { ok: false, why: 'No Knack chosen' };
+    if (G.over || G.active !== who) return { ok: false, why: 'Not your turn' };
+    if (pl.knackUsed) return { ok: false, why: 'Already used this match' };
+    if (pl.turns < KNACKS[pl.knack].from) return { ok: false, why: `Ready on your turn ${KNACKS[pl.knack].from}` };
+    return { ok: true };
+  }
+  function setKnack(G, who, id) { const pl = G.p[who]; if (!pl.knackUsed) pl.knack = KNACKS[id] ? id : null; }
+  function useKnack(G, who) {
+    const chk = knackReady(G, who); if (!chk.ok) return chk;
+    const me = G.p[who], op = G.p[1 - who];
+    me.knackUsed = true;
+    emit(G, 'knack', { who, id: me.knack });
+    switch (me.knack) {
+      case 'forage': draw(G, me); draw(G, me); break;
+      case 'soothe': {
+        const heal = Math.min(6, me.maxSpirit - me.spirit);
+        if (heal > 0) { me.spirit += heal; emit(G, 'spirit', { who, delta: heal }); }
+        me.board.forEach(x => { if (x.hp < x.grit) { const a = Math.min(2, x.grit - x.hp); x.hp += a; emit(G, 'mendcard', { who, uid: x.uid, amt: a }); } });
+        break;
+      }
+      case 'sow': summon(G, who, 'seedling'); summon(G, who, 'seedling'); break;
+      case 'sparkstorm': op.board.slice().forEach(x => zap(G, 1 - who, x, 1, false, 'knack')); spellDamageSpirit(G, 1 - who, 1, null); break;
+      case 'bulwark': me.board.forEach(x => { if (!x.shield) { x.shield = true; emit(G, 'shieldup', { who, uid: x.uid }); } }); break;
+      case 'tidal': op.board.slice().sort((x, y) => y.power - x.power || y.hp - x.hp).slice(0, 2).forEach(x => lullCard(G, 1 - who, x)); break;
+    }
+    checkEnd(G);
+    return { ok: true };
+  }
+
   function modsFor(G, side) {
     const m = Object.assign({}, G.mods || {});
     if (G.twist && G.twist.kind === 'bloom' && G.twist.side === side) { m.addKw = 'bloom'; m.addKwMaxCost = 1; }
@@ -428,6 +471,7 @@ const BattleEngine = (function () {
                    swiftBonus (+power to Swift), bloomStart (+power to Bloom), shieldHp (+health to Shield), mendBonus (Mend restores
                    more), echoBonus (Echo hits harder) and famHp { family, hp } (a district's "home turf": its family is tougher).
      opts.twist  = { side, kind } - a district boss's rule twist (see TWISTS).
+     opts.knack  = [idForPlayer0, idForPlayer1] - Keeper's Knack choices (see KNACKS); only the player uses one.
      opts.first  = 0 or 1 - who takes the first turn (the coin/dice toss). The other seat is "second" and gets the catch-up
                    bonus: +1 card and +1 energy on its first turns. Old puzzle snapshots have no G.first, so it reads as 0. */
   function newGame(deckA, deckB, rng, opts) {
@@ -440,6 +484,7 @@ const BattleEngine = (function () {
     const sp = opts.spirit || [RULES.spirit, RULES.spirit];
     G.p = [0, 1].map(i => ({ idx: i, spirit: sp[i], maxSpirit: sp[i], deck: mk(i === 0 ? deckA : deckB, i), hand: [], board: [], turns: 0, energy: 0, maxEnergy: 0 }));
     G.uid = uid;                                   // later cards (Seedlings) keep numbering from here
+    (opts.knack || []).forEach((id, i) => { if (id && KNACKS[id]) G.p[i].knack = id; });
     G.p.forEach((pl, i) => { const n = RULES.hand + (i !== first ? 1 : 0); for (let k = 0; k < n; k++) draw(G, pl, true); });
     // opts.startSpirit: begin below full (the Festival Cup carries your Spirit from one round to the next)
     (opts.startSpirit || []).forEach((v, i) => { if (typeof v === 'number') G.p[i].spirit = Math.max(1, Math.min(v, G.p[i].maxSpirit)); });
@@ -817,7 +862,7 @@ const BattleEngine = (function () {
     return deck;
   }
 
-  return { RULES, KEYWORDS, SPELLS, TWISTS, MAX_KEYWORDS, defOf, baseIdOf, variantId, suggestDeck, makeCard, familyOf, newGame, startTurn, canPlay, playCard, spellNeedsTarget, legalTargets, attack, endTurn, forfeit, boost, mulligan, aiNextAction, applyAction, aiTurn, guards, valueOf };
+  return { RULES, KEYWORDS, SPELLS, TWISTS, KNACKS, knackReady, setKnack, useKnack, MAX_KEYWORDS, defOf, baseIdOf, variantId, suggestDeck, makeCard, familyOf, newGame, startTurn, canPlay, playCard, spellNeedsTarget, legalTargets, attack, endTurn, forfeit, boost, mulligan, aiNextAction, applyAction, aiTurn, guards, valueOf };
 })();
 /* END BATTLE ENGINE */
 

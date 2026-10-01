@@ -106,7 +106,7 @@ function startBattleNow(opponent, first) {
   }
   else {
     G = BattleEngine.newGame(state.deck.slice(), oppDeck.slice(), Math.random, { spirit: [BattleEngine.RULES.spirit, profile.spirit], mods: world.mods,
-      twist: twistKind ? { side: 1, kind: twistKind } : null, startSpirit: opponent.startSpirit ? [opponent.startSpirit, null] : null, first });
+      twist: twistKind ? { side: 1, kind: twistKind } : null, startSpirit: opponent.startSpirit ? [opponent.startSpirit, null] : null, first, knack: [currentKnackId(), null] });
     BattleEngine.startTurn(G);
   }
   if (companionSpirit) BattleEngine.boost(G, 0, { spirit: 2 });      // a Guard-type companion stands with you
@@ -149,7 +149,7 @@ function startBattleNow(opponent, first) {
   if (battle.pendingHelp) { state.progress.seenBattleHelp = true; saveState(); }
   const swapBtn = btGet('mulliganSwapBtn'); swapBtn.disabled = false; swapBtn.textContent = 'Draw new hand';
   btRenderMulliganHand();
-  renderSnackRow();
+  renderSnackRow(); btRenderKnackRow();
   // Deal the opening hand slowly from the deck, then offer the keep-or-redraw choice.
   const tk = battle.token; battle.busy = true;
   btRender({ dealAll: true });
@@ -206,6 +206,65 @@ function btRenderMulliganHand() {
     w.appendChild(btCardEl(c, '', true));
     box.appendChild(w);
   });
+}
+
+/* ---------- Keeper's Knack (v1.84.0) ----------
+   Your once-per-match ability (BattleEngine.KNACKS). Pick it on the keep-this-hand screen (or in Character -> Me); during the
+   match a round button by your bar opens a small sheet with what it does and a "Use" button. It needs no aiming. */
+function knackChipsHtml(selectedId, inBattle) {
+  return Object.entries(BattleEngine.KNACKS).map(([id, k]) => {
+    const open = knackUnlocked(id);
+    return `<button type="button" class="knack-chip${id === selectedId ? ' on' : ''}${open ? '' : ' locked'}" data-knack="${id}"${open ? '' : ' aria-disabled="true"'} title="${k.name}: ${k.text}">${open ? k.icon : '🔒'} ${k.name}${open ? '' : ` <small>Lv ${k.level}</small>`}</button>`;
+  }).join('');
+}
+function knackPickerWire(box, onPick) {
+  box.querySelectorAll('[data-knack]').forEach(b => b.addEventListener('click', () => {
+    const id = b.dataset.knack, k = BattleEngine.KNACKS[id];
+    if (!knackUnlocked(id)) { toast(`${k.name} unlocks at Keeper level ${k.level}`); return; }
+    chooseKnack(id); sfx('tap'); onPick(id);
+  }));
+}
+function btRenderKnackRow() {
+  const row = btGet('knackRow'); if (!row || !battle) return;
+  if (battle.puzzle) { row.classList.add('hidden'); return; }
+  row.classList.remove('hidden');
+  const cur = battle.G.p[0].knack, k = BattleEngine.KNACKS[cur];
+  row.innerHTML = `<div class="knack-label">✨ Your Knack - once per match</div><div class="knack-chips">${knackChipsHtml(cur)}</div><div class="knack-desc">${k ? `${k.icon} <b>${k.name}.</b> ${k.text} <i>From your turn ${k.from}.</i>` : ''}</div>`;
+  knackPickerWire(row, id => { BattleEngine.setKnack(battle.G, 0, id); btRenderKnackRow(); btRenderKnack(); });
+}
+function btRenderKnack() {
+  const b = btGet('btKnack'); if (!b || !battle) return;
+  const G = battle.G, pl = G.p[0], k = BattleEngine.KNACKS[pl.knack];
+  b.classList.toggle('hidden', !k || !!battle.puzzle);
+  if (!k) return;
+  const chk = BattleEngine.knackReady(G, 0);
+  b.textContent = k.icon;
+  b.classList.toggle('ready', chk.ok && !battle.busy);
+  b.classList.toggle('used', !!pl.knackUsed);
+  b.setAttribute('aria-label', `${k.name}: ${pl.knackUsed ? 'used' : chk.ok ? 'ready' : chk.why}`);
+}
+function btShowKnackTip() {
+  if (!battle || battle.G.over) return;
+  const G = battle.G, pl = G.p[0], k = BattleEngine.KNACKS[pl.knack]; if (!k) return;
+  const chk = BattleEngine.knackReady(G, 0), ok = chk.ok && !battle.busy;
+  const tip = btGet('btTip');
+  tip.innerHTML = `<div class="t-h"><span class="ic">${k.icon}</span><b>${k.name}</b><small>Your Knack · once per match</small></div>
+    <div class="kw">${k.text}</div>
+    ${pl.knackUsed ? '<div class="kw" style="color:var(--ink-soft)">Already used this match.</div>' : ok ? '<button class="btn knack-use" id="btKnackUse" type="button">Use it now</button>' : `<div class="hint">${chk.why}.</div>`}`;
+  tip.classList.add('show', 'interactive'); battleView.classList.add('tip-open'); btPlaceTip();     // unlike a card sheet this one has a button, so it takes taps
+  const use = btGet('btKnackUse'); if (use) use.addEventListener('click', btDoKnack);
+}
+async function btDoKnack() {
+  if (!battle || battle.busy || battle.G.over) return;
+  const token = battle.token; btHideTip(); battle.sel = null;
+  const r = BattleEngine.useKnack(battle.G, 0);
+  if (!r.ok) { btToast(r.why); return; }
+  battle.busy = true; bumpStat('knacksUsed', 1); saveState();
+  await btAnimate(btFlush(battle.G), token);
+  if (!btAlive(token)) return;
+  battle.busy = false;
+  if (battle.G.over) return btFinish();
+  btRender();
 }
 
 function btCloseMulligan() {
@@ -459,7 +518,7 @@ function btCoach() {
   el.textContent = t;
 }
 
-function btRender(o) { o = o || {}; btRenderBars(); btSyncSnackBadge(); btRenderGems(); btRenderBoards(o.entering); btRenderHand(o.drawn, o.dealAll); btCoach(); }
+function btRender(o) { o = o || {}; btRenderKnack(); btRenderBars(); btSyncSnackBadge(); btRenderGems(); btRenderBoards(o.entering); btRenderHand(o.drawn, o.dealAll); btCoach(); }
 
 /* ---------------- card info sheet ---------------- */
 function btShowTip(c, hint) {
@@ -481,7 +540,7 @@ function btPlaceTip() {
   const view = battleView.getBoundingClientRect(), bar = btGet('btYouBar').getBoundingClientRect();
   btGet('btTip').style.bottom = Math.max(0, view.bottom - bar.top + 6) + 'px';
 }
-function btHideTip() { btGet('btTip').classList.remove('show'); battleView.classList.remove('tip-open'); }
+function btHideTip() { btGet('btTip').classList.remove('show', 'interactive'); battleView.classList.remove('tip-open'); }
 
 /* ---------------- drag a card from your hand onto the table ----------------
    Pointer events, so it works the same with a finger or a mouse. A press that moves less than DRAG_MIN px is still a
@@ -791,7 +850,7 @@ async function btAnimate(evs, token) {
       await btWait(420); btRender();
     } else if (e.type === 'buff' || e.type === 'mendcard' || e.type === 'readied') {
       const t = document.querySelector(`#battleView .card[data-uid="${e.uid}"]`);
-      if (t) btFloater(t, e.type === 'buff' ? (e.skin ? '🧱 +2♥ +1⚔' : e.rally ? '📯 +1 ⚔' : '🌞 +1 ⚔') : e.type === 'mendcard' ? '+1 ♥' : '🌬️ ready', 'heal');
+      if (t) btFloater(t, e.type === 'buff' ? (e.skin ? '🧱 +2♥ +1⚔' : e.rally ? '📯 +1 ⚔' : '🌞 +1 ⚔') : e.type === 'mendcard' ? `+${e.amt || 1} ♥` : '🌬️ ready', 'heal');
       await btWait(120);
     } else if (e.type === 'summon') {
       btRender({ entering: e.card.uid });
@@ -809,6 +868,16 @@ async function btAnimate(evs, token) {
       const t = document.querySelector(`#battleView .card[data-uid="${e.uid}"]`);
       if (t) btFloater(t, '😴 rests', 'blk');
       sfx('soft'); await btWait(300);
+    } else if (e.type === 'knack') {
+      const k = BattleEngine.KNACKS[e.id];
+      btRender(); btSpellFlash({ icon: k.icon, name: k.name, rarity: 'rare' });
+      btSetMsg(`You use ${k.icon} ${k.name}`);
+      sfx('rare'); buzz(HAP.play); await btWait(560);
+    } else if (e.type === 'shieldup') {
+      btRender();
+      const t = document.querySelector(`#battleView .card[data-uid="${e.uid}"]`);
+      if (t) { btShieldFx(t); btFloater(t, '🫧 shield', 'heal'); }
+      await btWait(160);
     } else if (e.type === 'tide') {
       btSetMsg('🌊 The tide washes in!');
       battleView.classList.add('tide-wash'); setTimeout(() => battleView.classList.remove('tide-wash'), 900);
@@ -1076,7 +1145,9 @@ function btShowHelp() {
     <b>Friendly neighbors</b> start with less Spirit than you.<br><br>
     <b>✨ Spells</b> are cast from your hand for an instant effect and never take a board slot. Some are aimed: cast it, then tap an enemy card. Guard does not stop a spell.<br><br>
     <b>District bosses</b> each bend one rule: 🌳 Elder Yew heals 3 Spirit every turn, 🧱 Old Bramble's Guards are extra sturdy, 🌊 the Harbor Keeper's tide washes your strongest card back to hand every 4th turn, and 🌻 the Garden Sentinel's cheap cards all Bloom.<br><br>
-    <b>Weather</b> can change a match: in a ⛈️ storm every 💨 Swift card has +1 power, and in ❄️ snow bosses are tougher but pay better.<br><br>
+    <b>The world joins in</b> (for both sides): ☀️ clear Bloom +1 power, ☁️ cloud Shield +1 health, 🌧️ rain Mend heals +1, ⛈️ storm Swift +1 power, 🌙 night Echo +1, and each district is home turf for its card family (+1 health). In ❄️ snow bosses are tougher but pay better.<br><br>
+    <b>✨ Your Knack</b> is a free once-per-match power you pick on the keep-this-hand screen. Tap its round button by your bar when it glows.<br><br>
+    <b>Who goes first</b> comes from a coin call or dice roll before the match. Going second means an extra card and +1 energy on your first two turns.<br><br>
     ${Object.values(KW).map(k => `${k.icon} <b>${k.name}.</b> ${k.text}`).join('<br>')}<br><br>
     <i>Drag a card onto the table to play it, or tap it to read it and tap it again to play it. To attack, tap a glowing card then a target (or the red Attack Spirit button), or drag it onto an enemy card or up past their cards.</i>`;
   ov.classList.remove('hidden');
@@ -1092,6 +1163,7 @@ btGet('btOppBar').addEventListener('click', btAttackFace);
 btGet('btAtkFace').addEventListener('click', btAttackFace);
 btGet('btHelp').addEventListener('click', btShowHelp);
 btGet('btYield').addEventListener('click', btYield);
+btGet('btKnack').addEventListener('click', () => { ensureAudio(); if (btGet('btTip').classList.contains('interactive')) btHideTip(); else btShowKnackTip(); });
 btGet('btHelpClose').addEventListener('click', () => { btGet('btHelpOverlay').classList.add('hidden'); btOpponentOpens(); });
 btGet('mulliganKeepBtn').addEventListener('click', () => { ensureAudio(); btCloseMulligan(); });
 btGet('mulliganSwapBtn').addEventListener('click', () => {
@@ -1105,6 +1177,7 @@ btGet('mulliganSwapBtn').addEventListener('click', () => {
 // Tap outside to deselect. This runs in the CAPTURE phase, before the tapped card's own handler re-renders the board:
 // afterwards the tapped element is detached from the page, and would wrongly look like a tap outside.
 document.addEventListener('click', e => {
+  if (battle && inBattle && btGet('btTip').classList.contains('interactive') && !e.target.closest('#btTip') && !e.target.closest('#btKnack')) btHideTip();   // tap away from the Knack sheet
   if (!battle || !inBattle || !battle.sel) return;
   if (e.target.closest('#battleView .card') || e.target.closest('#btOppBar') || e.target.closest('#btAtkFace') || e.target.closest('#btTip') || e.target.closest('#btEnd')) return;
   battle.sel = null; btHideTip(); btRender();

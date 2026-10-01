@@ -66,6 +66,7 @@ for (let s = 500; s <= 10000; s += 500) {
 }
 
 const QUEST_POOL = [
+  { id: 'knack1',   icon: '✨', name: "Use your Keeper's Knack in a match", goal: 1, stat: 'knacksUsed', reward: 'common' },
   { id: 'find2',    icon: '🍂', name: 'Find 2 cards on the ground',   goal: 2,  stat: 'cardsFound',      reward: 'common' },
   { id: 'find3',    icon: '🃏', name: 'Find 3 cards on the ground',   goal: 3,  stat: 'cardsFound',      reward: 'rare' },
   { id: 'find5',    icon: '✨', name: 'Find 5 cards on the ground',   goal: 5,  stat: 'cardsFound',      reward: 'ultra' },
@@ -171,6 +172,7 @@ const WEEKLY_QUEST_POOL = [
 ];
 
 const ACHIEVEMENTS = [
+  { id: 'knack-10',   icon: '✨', name: 'Used your Knack 10 times', test: () => (state.progress.totals.knacksUsed || 0) >= 10 },
   { id: 'toss-10',    icon: '🪙', name: 'Won the first-turn toss 10 times', test: () => (state.progress.totals.tossWins || 0) >= 10 },
   { id: 'acts-25',     icon: '🪑', name: '25 town interactions', test: () => (state.progress.totals.townActs || 0) >= 25 },
   { id: 'acts-100',    icon: '🏘️', name: '100 town interactions', test: () => (state.progress.totals.townActs || 0) >= 100 },
@@ -519,9 +521,13 @@ const XP_PER_STAT = {
   breadBaked: 8, breadShared: 10, spellsCast: 3, seedsPlanted: 3, seedsFound: 5, cropsHarvested: 5, rivalWins: 60,
   minigamesPlayed: 5, minigameGolds: 10, talks: 1, foilsFound: 20,
   donations: 6, expeditionsDone: 25, tradesDone: 15, cardsGifted: 10, challengesWon: 40, setsCompleted: 60, masteryRanks: 15, charmsSet: 2,
-  tossWins: 2, townActs: 3, townGames: 8, puddles: 1, stonesSkipped: 1,
+  tossWins: 2, knacksUsed: 3, townActs: 3, townGames: 8, puddles: 1, stonesSkipped: 1,
   dishesCooked: 10, dishesGiven: 10, snacksEaten: 2, puzzlesSolved: 40, cupRoundsWon: 30, cupTrophies: 100, bugsCaught: 8, lettersRead: 2,
 };
+// Keeper's Knack (BattleEngine.KNACKS): unlocked by Keeper level, one is picked for each match.
+function knackUnlocked(id) { const k = BattleEngine.KNACKS[id]; return !!k && ensureLevel().level >= k.level; }
+function currentKnackId() { const id = state.progress.knack; return id && knackUnlocked(id) ? id : 'forage'; }
+function chooseKnack(id) { if (!knackUnlocked(id)) return false; state.progress.knack = id; saveState(); return true; }
 function xpToNext(level) { return 60 + (level - 1) * 40; }   // a steady, gentle climb
 function ensureLevel() {
   const pr = state.progress;

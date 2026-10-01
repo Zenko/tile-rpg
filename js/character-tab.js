@@ -91,6 +91,14 @@ function charDrawMe(box) {
   grid.innerHTML = profileStatValues().map(s => `<div class="profile-stat"><span class="ps-icon">${s.icon}</span><span class="ps-value">${s.value}</span><span class="ps-label">${s.label}</span></div>`).join('');
   box.appendChild(grid);
   if (t) { const w = document.createElement('div'); w.className = 'panel-desc'; w.style.marginTop = '10px'; w.textContent = `Wearing the title ${t.name}. Change it in Look.`; box.appendChild(w); }
+  charSection(box, "Keeper's Knack");
+  const kb = document.createElement('div'); kb.className = 'knack-row ch-knack';
+  const drawK = () => {
+    const cur = currentKnackId(), k = BattleEngine.KNACKS[cur];
+    kb.innerHTML = `<div class="knack-chips">${knackChipsHtml(cur)}</div><div class="knack-desc">${k.icon} <b>${k.name}.</b> ${k.text} <i>Once per match, from your turn ${k.from}.</i></div>`;
+    knackPickerWire(kb, drawK);
+  };
+  drawK(); box.appendChild(kb);
 }
 // Look: everything you own, ready to wear. Nothing here is for sale - the Shop button walks you to the Card Shop,
 // which sells every look, so there is one place to buy things and one place to wear them.

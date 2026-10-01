@@ -18,6 +18,16 @@ function gameVersionLabel() {
    the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
 const CHANGELOG = [
   {
+    version: '1.84.0',
+    date: '2026-10-01',
+    title: "The Keeper's Knack",
+    changes: [
+      "A new once-per-match power that is yours alone. Pick a Knack on the keep-this-hand screen (or in Character → Me); during the match, tap the glowing round button by your bar and use it - no aiming, no energy.",
+      "Six Knacks unlock as you level up: Forage (draw 2), Soothe (restore 6 Spirit and heal your cards), Sow (two Seedlings), Spark Storm (1 damage to every enemy card and their Spirit), Bulwark (a Shield on every card of yours) and Tidal Hush (the enemy's two strongest cards can't attack).",
+      "New milestone and daily quest for using your Knack."
+    ]
+  },
+  {
     version: '1.83.0',
     date: '2026-10-01',
     title: "The world joins the fight",
