@@ -18,6 +18,15 @@ function gameVersionLabel() {
    the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
 const CHANGELOG = [
   {
+    version: '1.73.0',
+    date: '2026-10-01',
+    title: "A proper entrance for battles",
+    changes: [
+      "Battles now fade in with a versus card: you on one side, your opponent on the other. Bosses also announce their twist before the first card is dealt. Tap the card to skip it.",
+      "Calm mode and reduced motion skip it and go straight in, as before."
+    ]
+  },
+  {
     version: '1.72.0',
     date: '2026-10-01',
     title: "Smoother, and easier to tidy",

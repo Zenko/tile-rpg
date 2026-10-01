@@ -8,7 +8,44 @@ const btToast = m => toast(m, true);
 const btGet = id => document.getElementById(id);
 const btAlive = token => battle && battle.token === token && !battle.ended;
 
+/* ---------- battle intro (v1.73.0) ----------
+   startBattle() is now a thin wrapper: it fades out of the town (the same door fade as buildings), sets the battle up
+   exactly as before (startBattleNow), then plays a "versus" card - you against them, with a boss's twist spelled out.
+   The opening deal waits for the card (battle.introP, read in btDealOpening), and a tap skips it. With Calm mode on, or
+   when the deck is too short (the old early-return with its message), it goes straight in as it always did. */
 function startBattle(opponent) {
+  const deckOk = state.deck.filter(id => !!cardDef(id)).length >= DECK_SIZE;
+  if (opponent.puzzle || !deckOk || doorFading || !btMotionOk()) { startBattleNow(opponent); return; }
+  withDoorFade(() => { startBattleNow(opponent); if (inBattle && battle) battle.introP = btIntro(opponent, battle.isBoss); });
+}
+function btIntro(opponent, isBoss) {
+  return new Promise(resolve => {
+    const tw = bossTwistFor(opponent), t = tw ? BattleEngine.TWISTS[tw] : null;
+    const tag = isBoss ? '👑 District boss' : opponent.cup ? '🏆 Festival Cup' : opponent.dungeon ? '🕯️ Cellar' : opponent.isRival ? '⚡ Rival' : '⚔️ Friendly match';
+    const el = document.createElement('div'); el.className = 'bt-intro' + (isBoss ? ' boss' : '');
+    el.innerHTML = `<div class="bt-intro-side opp"><span class="bt-intro-av"></span><div><div class="bt-intro-name"></div><div class="bt-intro-tag">${tag}</div></div></div>
+      <div class="bt-intro-vs">VS</div>
+      <div class="bt-intro-side you"><span class="bt-intro-av you-av"></span><div><div class="bt-intro-name you-name"></div><div class="bt-intro-tag">Your turn is coming</div></div></div>
+      ${t ? `<div class="bt-intro-twist"><b>${t.icon} Boss twist</b><span></span></div>` : ''}`;
+    el.querySelector('.opp .bt-intro-av').textContent = opponentPortrait(opponent);
+    el.querySelector('.opp .bt-intro-name').textContent = opponent.name;
+    const me = el.querySelector('.you-av'); applyAvatarStyle(me, state.character); me.textContent = state.character.emoji;
+    el.querySelector('.you-name').textContent = state.character.name || 'You';
+    if (t) el.querySelector('.bt-intro-twist span').textContent = t.text;
+    battleView.appendChild(el);
+    let done = false;
+    const finish = () => {
+      if (done) return; done = true; clearTimeout(timer);
+      el.classList.add('out');
+      setTimeout(() => { el.remove(); resolve(); }, 300);
+    };
+    const timer = setTimeout(finish, isBoss ? 2100 : 1500);
+    el.addEventListener('pointerdown', finish);
+    if (!isBoss) sfx('tap');   // a boss already got its sting in startBattleNow
+    buzz(HAP.tap);
+  });
+}
+function startBattleNow(opponent) {
   // Never let a damaged card id reach the engine: drop anything that is not a real card first.
   const cleaned = state.deck.filter(id => !!cardDef(id));
   if (cleaned.length !== state.deck.length) { state.deck = cleaned; saveState(); }
@@ -284,6 +321,8 @@ async function btDealOne(uid, ms) {
 }
 async function btDealOpening(token) {
   await btWait(250);
+  if (battle && battle.introP) await battle.introP;      // the versus card plays first
+  if (!btAlive(token)) return;
   for (const c of battle.G.p[0].hand.slice()) {
     if (!btAlive(token)) return;
     await btDealOne(c.uid, 420); await btWait(70);

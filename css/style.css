@@ -2092,3 +2092,27 @@ html.calm .bottom-nav::before, html.calm #bottomNav .tab-btn .t-icon { transitio
   #sceneView.scene-enter *, #talkOverlay .talk-bubble, #talkOverlay .talk-name { animation: none !important; }
   .door-fade { transition: none; }
 }
+
+/* ===== Battle intro: the versus card (v1.73.0) =====
+   Two plates slide in from opposite sides, VS pops between them, a boss's twist drops in below, then it all fades.
+   Transform/opacity only; never built in Calm mode (see btIntro in js/battle-ui.js). */
+.bt-intro { position: absolute; inset: 0; z-index: 40; display: flex; flex-direction: column; align-items: stretch; justify-content: center; gap: 14px; padding: 0 18px; background: rgba(8,11,15,.66); animation: bt-intro-bg .22s ease both; touch-action: manipulation; }
+.bt-intro.out { animation: bt-intro-out .3s ease forwards; pointer-events: none; }
+.bt-intro-side { display: flex; align-items: center; gap: 14px; padding: 12px 18px 12px 12px; border-radius: 22px; max-width: 86%; background: color-mix(in srgb, #232b34 92%, transparent); border: 1px solid rgba(255,255,255,.16); text-align: left; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
+.bt-intro-side.opp { align-self: flex-start; border-color: color-mix(in srgb, var(--boss-glow) 70%, transparent); animation: bt-in-l .46s cubic-bezier(.2,.9,.3,1) .04s both; }
+.bt-intro-side.you { align-self: flex-end; flex-direction: row-reverse; text-align: right; padding: 12px 12px 12px 18px; border-color: color-mix(in srgb, var(--water) 70%, transparent); animation: bt-in-r .46s cubic-bezier(.2,.9,.3,1) .14s both; }
+.bt-intro-av { flex-shrink: 0; width: 68px; height: 68px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; background: radial-gradient(circle at 35% 30%, #3a4552, #2a323d); box-shadow: 0 0 0 3px color-mix(in srgb, var(--boss-glow) 80%, transparent); }
+.bt-intro-av.you-av { box-shadow: 0 0 0 3px color-mix(in srgb, var(--water) 80%, transparent); }
+.bt-intro-name { font-family: var(--f-display); font-size: 1.35rem; line-height: 1.15; color: #e9edf1; }
+.bt-intro-tag { margin-top: 3px; font-size: .74rem; font-weight: 700; color: #a6b1bb; }
+.bt-intro-vs { align-self: center; font: 800 2.4rem var(--f-ui); letter-spacing: .08em; color: #e8cb88; text-shadow: 0 2px 14px rgba(232,203,136,.55); animation: bt-vs .5s cubic-bezier(.34,1.56,.64,1) .34s both; }
+.bt-intro.boss .bt-intro-vs { color: #e0a8a3; text-shadow: 0 2px 16px rgba(177,97,94,.7); }
+.bt-intro-twist { align-self: center; max-width: 92%; margin-top: 4px; padding: 10px 16px; border-radius: 16px; text-align: center; background: color-mix(in srgb, #3a2c2b 90%, transparent); border: 1px solid color-mix(in srgb, var(--boss-glow) 60%, transparent); color: #e9edf1; font-size: .8rem; line-height: 1.4; animation: sc-rise .4s .7s both; }
+.bt-intro-twist b { display: block; margin-bottom: 2px; font-size: .74rem; letter-spacing: .06em; color: #e0a8a3; }
+@keyframes bt-intro-bg { from { opacity: 0; } to { opacity: 1; } }
+@keyframes bt-intro-out { to { opacity: 0; } }
+@keyframes bt-in-l { from { opacity: 0; transform: translateX(-110%); } to { opacity: 1; transform: none; } }
+@keyframes bt-in-r { from { opacity: 0; transform: translateX(110%); } to { opacity: 1; transform: none; } }
+@keyframes bt-vs { from { opacity: 0; transform: scale(.3); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .bt-intro, .bt-intro * { animation: none !important; } }
+
