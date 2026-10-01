@@ -18,6 +18,17 @@ function gameVersionLabel() {
    the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
 const CHANGELOG = [
   {
+    version: '1.81.0',
+    date: '2026-10-01',
+    title: "Who goes first?",
+    changes: [
+      "Every match now starts with a toss: call the coin (Sun or Moon) or roll a die against your opponent. The winner takes the first turn.",
+      "If you lose the toss you go second, which comes with a head start: one extra card and +1 energy on your first two turns.",
+      "Prefer to skip the ceremony? Settings → Accessibility & battles lets you pick Coin, Dice, Mix or Skip.",
+      "New milestone: win the toss 10 times."
+    ]
+  },
+  {
     version: '1.80.0',
     date: '2026-10-01',
     title: "Notices that come and go",

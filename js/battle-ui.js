@@ -1,6 +1,6 @@
 /* ============================================================
    TURN-BASED BATTLE: the rules live in BattleEngine; this part draws them and routes taps.
-   You are always seat 0 (you go first); the neighbor is seat 1.
+   You are always seat 0; the neighbor is seat 1. Who takes the first turn comes from the toss (js/battle-toss.js).
    ============================================================ */
 let battleToken = 0;
 const btWait = ms => new Promise(r => setTimeout(r, prefs.fast ? ms * 0.45 : ms));   // "Fast battles" trims every pause
@@ -15,17 +15,22 @@ const btAlive = token => battle && battle.token === token && !battle.ended;
    when the deck is too short (the old early-return with its message), it goes straight in as it always did. */
 function startBattle(opponent) {
   const deckOk = state.deck.filter(id => !!cardDef(id)).length >= DECK_SIZE;
-  if (opponent.puzzle || !deckOk || doorFading || !btMotionOk()) { startBattleNow(opponent); return; }
-  withDoorFade(() => { startBattleNow(opponent); if (inBattle && battle) battle.introP = btIntro(opponent, battle.isBoss); });
+  if (opponent.puzzle || !deckOk) { startBattleNow(opponent, 0); return; }
+  if (tossBusy) return;                                    // a double tap while the toss is up
+  // Who goes first is decided before anything is dealt (js/battle-toss.js): the toss, then the fade and the versus card.
+  btTossFirst(opponent).then(first => {
+    if (doorFading || !btMotionOk()) { startBattleNow(opponent, first); return; }
+    withDoorFade(() => { startBattleNow(opponent, first); if (inBattle && battle) battle.introP = btIntro(opponent, battle.isBoss, first); });
+  });
 }
-function btIntro(opponent, isBoss) {
+function btIntro(opponent, isBoss, first) {
   return new Promise(resolve => {
     const tw = bossTwistFor(opponent), t = tw ? BattleEngine.TWISTS[tw] : null;
     const tag = isBoss ? '👑 District boss' : opponent.cup ? '🏆 Festival Cup' : opponent.dungeon ? '🕯️ Cellar' : opponent.isRival ? '⚡ Rival' : '⚔️ Friendly match';
     const el = document.createElement('div'); el.className = 'bt-intro' + (isBoss ? ' boss' : '');
     el.innerHTML = `<div class="bt-intro-side opp"><span class="bt-intro-av"></span><div><div class="bt-intro-name"></div><div class="bt-intro-tag">${tag}</div></div></div>
       <div class="bt-intro-vs">VS</div>
-      <div class="bt-intro-side you"><span class="bt-intro-av you-av"></span><div><div class="bt-intro-name you-name"></div><div class="bt-intro-tag">Your turn is coming</div></div></div>
+      <div class="bt-intro-side you"><span class="bt-intro-av you-av"></span><div><div class="bt-intro-name you-name"></div><div class="bt-intro-tag">${first === 1 ? '🎁 You go second · +1 card' : '🥇 You go first'}</div></div></div>
       ${t ? `<div class="bt-intro-twist"><b>${t.icon} Boss twist</b><span></span></div>` : ''}`;
     el.querySelector('.opp .bt-intro-av').textContent = opponentPortrait(opponent);
     el.querySelector('.opp .bt-intro-name').textContent = opponent.name;
@@ -45,7 +50,8 @@ function btIntro(opponent, isBoss) {
     buzz(HAP.tap);
   });
 }
-function startBattleNow(opponent) {
+function startBattleNow(opponent, first) {
+  first = first === 1 ? 1 : 0;                              // 0 = you take the first turn (the toss, js/battle-toss.js)
   // Never let a damaged card id reach the engine: drop anything that is not a real card first.
   const cleaned = state.deck.filter(id => !!cardDef(id));
   if (cleaned.length !== state.deck.length) { state.deck = cleaned; saveState(); }
@@ -83,7 +89,7 @@ function startBattleNow(opponent) {
   }
   else {
     G = BattleEngine.newGame(state.deck.slice(), oppDeck.slice(), Math.random, { spirit: [BattleEngine.RULES.spirit, profile.spirit], mods: { swiftBonus: fx.swiftBonus || 0 },
-      twist: twistKind ? { side: 1, kind: twistKind } : null, startSpirit: opponent.startSpirit ? [opponent.startSpirit, null] : null });
+      twist: twistKind ? { side: 1, kind: twistKind } : null, startSpirit: opponent.startSpirit ? [opponent.startSpirit, null] : null, first });
     BattleEngine.startTurn(G);
   }
   if (companionSpirit) BattleEngine.boost(G, 0, { spirit: 2 });      // a Guard-type companion stands with you
@@ -96,7 +102,7 @@ function startBattleNow(opponent) {
   G.events.length = 0;
 
   inBattle = true;
-  battle = { npc: opponent, isBoss, G, profile, weather, sel: null, busy: false, ended: false, rewarded: false, yieldArmed: false, token: ++battleToken, startedAt: Date.now() };
+  battle = { npc: opponent, isBoss, first, G, profile, weather, sel: null, busy: false, ended: false, rewarded: false, yieldArmed: false, token: ++battleToken, startedAt: Date.now() };
   const chip = weather === 'storm' ? '⛈️ Swift +1 power' : weather === 'snow' ? (isBoss ? '❄️ Boss +2 Spirit · richer prize' : '❄️ Richer prize') : '';
   const tw = twistKind ? BattleEngine.TWISTS[twistKind] : null;
   btGet('btWeather').textContent = opponent.puzzle ? '🧩 Ending your turn resets the board' : [tw ? `${tw.icon} ${tw.text}` : '', chip, plainFoe ? '✦ Seasoned deck: unique & enhanced cards' : ''].filter(Boolean).join(' · ');
@@ -116,7 +122,7 @@ function startBattleNow(opponent) {
   // Your half of the screen carries your avatar's color; the opponent's half always stays the plain,
   // district-driven look, so the two sides read as clearly different - yours personalized, theirs neutral.
   battleView.style.setProperty('--side-accent', state.character.color || 'var(--water-glow)');
-  btSetMsg(isBoss ? `${opponent.name} rises to meet you` : 'Your turn');
+  btSetMsg(first === 1 ? `${opponent.name} goes first` : isBoss ? `${opponent.name} rises to meet you` : 'Your turn');
   ensureCosmeticUnlocks(); btGet('btYouRow').className = 'trow mat-' + (state.character.mat || 'glass');   // the player's table mat
   btHideTip();
   btRender();
@@ -187,7 +193,14 @@ function btRenderMulliganHand() {
 
 function btCloseMulligan() {
   btGet('mulliganOverlay').classList.add('hidden');
-  if (battle && battle.pendingHelp) { battle.pendingHelp = false; btShowHelp(); }
+  if (battle && battle.pendingHelp) { battle.pendingHelp = false; btShowHelp(); return; }   // btHelpClose carries on from there
+  btOpponentOpens();
+}
+// When the toss gave the neighbor the first turn, they play it as soon as you have kept (or redrawn) your hand.
+function btOpponentOpens() {
+  if (!battle || battle.ended || battle.first !== 1 || battle.openingDone || battle.G.active !== 1) return;
+  battle.openingDone = true;
+  btOpponentRound(battle.token);
 }
 
 // Colors the battle backdrop from the current district's own biome palette (read straight off the live town
@@ -852,6 +865,12 @@ async function btPlayerEnd() {
   BattleEngine.endTurn(G, 0);
   await btAnimate(btFlush(G), token); if (!btAlive(token)) return;
   if (G.over) return btFinish();
+  return btOpponentRound(token);
+}
+// Their whole turn, then the table is yours again. Used after you end yours, and for their opening turn when they won the toss.
+async function btOpponentRound(token) {
+  const G = battle.G;
+  battle.busy = true; battle.sel = null; btHideTip(); btRender();
   await btOpponentTurn(token); if (!btAlive(token)) return;
   if (G.over) return btFinish();
   await btWait(200); if (!btAlive(token)) return;
@@ -1038,7 +1057,7 @@ btGet('btOppBar').addEventListener('click', btAttackFace);
 btGet('btAtkFace').addEventListener('click', btAttackFace);
 btGet('btHelp').addEventListener('click', btShowHelp);
 btGet('btYield').addEventListener('click', btYield);
-btGet('btHelpClose').addEventListener('click', () => btGet('btHelpOverlay').classList.add('hidden'));
+btGet('btHelpClose').addEventListener('click', () => { btGet('btHelpOverlay').classList.add('hidden'); btOpponentOpens(); });
 btGet('mulliganKeepBtn').addEventListener('click', () => { ensureAudio(); btCloseMulligan(); });
 btGet('mulliganSwapBtn').addEventListener('click', () => {
   ensureAudio();

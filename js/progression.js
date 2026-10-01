@@ -171,6 +171,7 @@ const WEEKLY_QUEST_POOL = [
 ];
 
 const ACHIEVEMENTS = [
+  { id: 'toss-10',    icon: '🪙', name: 'Won the first-turn toss 10 times', test: () => (state.progress.totals.tossWins || 0) >= 10 },
   { id: 'acts-25',     icon: '🪑', name: '25 town interactions', test: () => (state.progress.totals.townActs || 0) >= 25 },
   { id: 'acts-100',    icon: '🏘️', name: '100 town interactions', test: () => (state.progress.totals.townActs || 0) >= 100 },
   { id: 'games-5',     icon: '🎸', name: '5 town activities', test: () => (state.progress.totals.townGames || 0) >= 5 },
@@ -518,7 +519,7 @@ const XP_PER_STAT = {
   breadBaked: 8, breadShared: 10, spellsCast: 3, seedsPlanted: 3, seedsFound: 5, cropsHarvested: 5, rivalWins: 60,
   minigamesPlayed: 5, minigameGolds: 10, talks: 1, foilsFound: 20,
   donations: 6, expeditionsDone: 25, tradesDone: 15, cardsGifted: 10, challengesWon: 40, setsCompleted: 60, masteryRanks: 15, charmsSet: 2,
-  townActs: 3, townGames: 8, puddles: 1, stonesSkipped: 1,
+  tossWins: 2, townActs: 3, townGames: 8, puddles: 1, stonesSkipped: 1,
   dishesCooked: 10, dishesGiven: 10, snacksEaten: 2, puzzlesSolved: 40, cupRoundsWon: 30, cupTrophies: 100, bugsCaught: 8, lettersRead: 2,
 };
 function xpToNext(level) { return 60 + (level - 1) * 40; }   // a steady, gentle climb

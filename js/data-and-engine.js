@@ -355,16 +355,19 @@ const BattleEngine = (function () {
 
   /* opts.spirit = [spiritForPlayer0, spiritForPlayer1] lets friendly opponents start with less Spirit.
      opts.mods   = { swiftBonus } - weather effects that change every card of a kind, on both sides.
-     opts.twist  = { side, kind } - a district boss's rule twist (see TWISTS). */
+     opts.twist  = { side, kind } - a district boss's rule twist (see TWISTS).
+     opts.first  = 0 or 1 - who takes the first turn (the coin/dice toss). The other seat is "second" and gets the catch-up
+                   bonus: +1 card and +1 energy on its first turns. Old puzzle snapshots have no G.first, so it reads as 0. */
   function newGame(deckA, deckB, rng, opts) {
     rng = rng || Math.random; opts = opts || {};
     let uid = 1;
     const mods = opts.mods || {};
-    const G = { rng, turn: 0, active: 0, over: false, winner: null, why: null, events: [], aiMemo: null, mods, twist: opts.twist || null, p: [] };
+    const first = opts.first === 1 ? 1 : 0;
+    const G = { rng, turn: 0, first, active: first, over: false, winner: null, why: null, events: [], aiMemo: null, mods, twist: opts.twist || null, p: [] };
     const mk = (deck, i) => shuffled(deck, rng).map(id => makeCard(id, uid++, modsFor(G, i)));
     const sp = opts.spirit || [RULES.spirit, RULES.spirit];
     G.p = [0, 1].map(i => ({ idx: i, spirit: sp[i], maxSpirit: sp[i], deck: mk(i === 0 ? deckA : deckB, i), hand: [], board: [], turns: 0, energy: 0, maxEnergy: 0 }));
-    G.p.forEach((pl, i) => { const n = RULES.hand + (i === 1 ? 1 : 0); for (let k = 0; k < n; k++) draw(G, pl, true); });
+    G.p.forEach((pl, i) => { const n = RULES.hand + (i !== first ? 1 : 0); for (let k = 0; k < n; k++) draw(G, pl, true); });
     // opts.startSpirit: begin below full (the Festival Cup carries your Spirit from one round to the next)
     (opts.startSpirit || []).forEach((v, i) => { if (typeof v === 'number') G.p[i].spirit = Math.max(1, Math.min(v, G.p[i].maxSpirit)); });
     return G;
@@ -383,7 +386,7 @@ const BattleEngine = (function () {
   function startTurn(G) {
     const me = G.p[G.active];
     me.turns++;
-    const bonus = (G.active === 1 && me.turns <= RULES.secondBonusTurns) ? RULES.secondBonus : 0;
+    const bonus = (G.active !== (G.first || 0) && me.turns <= RULES.secondBonusTurns) ? RULES.secondBonus : 0;
     me.maxEnergy = Math.min(me.turns + bonus, RULES.ecap);
     me.energy = me.maxEnergy;
     draw(G, me);

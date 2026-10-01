@@ -104,6 +104,13 @@
             <div class="settings-row"><span>📳 Haptics</span><button class="toggle" id="hapticToggle" aria-label="Toggle haptics"></button></div>
 
             <div class="settings-group-label">Accessibility &amp; battles</div>
+            <div class="settings-row"><span>🪙 Who goes first</span></div>
+            <div class="seg" id="tossSeg" role="group" aria-label="How the first turn is decided">
+              <button class="seg-btn" type="button" data-toss-pick="mix">Mix</button>
+              <button class="seg-btn" type="button" data-toss-pick="coin">🪙 Coin</button>
+              <button class="seg-btn" type="button" data-toss-pick="dice">🎲 Dice</button>
+              <button class="seg-btn" type="button" data-toss-pick="skip">Skip</button>
+            </div>
             <div class="settings-row"><span>⏩ Fast battles</span><button class="toggle" id="fastToggle" aria-label="Toggle fast battle animations"></button></div>
             <div class="settings-row"><span>🎣 Easy reeling</span><button class="toggle" id="fishEasyToggle" aria-label="Toggle easy fishing reel"></button></div>
             <div class="settings-row"><span>🔠 Larger text</span><button class="toggle" id="bigTextToggle" aria-label="Toggle larger text"></button></div>
@@ -398,6 +405,21 @@
   <button type="button" id="updateBannerBtn">Refresh</button>
 </div>
 
+<div class="overlay hidden" id="tossOverlay" role="dialog" aria-labelledby="tossTitle">
+  <div class="overlay-card toss-card">
+    <div class="toss-vs">
+      <div class="toss-side"><span class="toss-av" id="tossYouAv"></span><span class="toss-nm" id="tossYouName"></span></div>
+      <span class="toss-vs-t">vs</span>
+      <div class="toss-side"><span class="toss-av" id="tossOppAv"></span><span class="toss-nm" id="tossOppName"></span></div>
+    </div>
+    <h2 id="tossTitle">Who goes first?</h2>
+    <p id="tossSub"></p>
+    <div class="toss-stage" id="tossStage"></div>
+    <div class="controls toss-btns" id="tossBtns"></div>
+    <p class="toss-result" id="tossResult" aria-live="polite"></p>
+  </div>
+</div>
+
 <div class="overlay hidden" id="pickupOverlay">
   <div class="overlay-card" id="pickupCard">
     <div class="sparkles" id="pickupSparkles"></div>
@@ -612,6 +634,7 @@
 <script src="js/afterdark-companion-cards.js"></script>
 <script src="js/gardening.js"></script>
 <script src="js/battle-ui.js"></script>
+<script src="js/battle-toss.js"></script>
 <script src="js/shop-economy.js"></script>
 <script src="js/workshop-and-starter.js"></script>
 <script src="js/collection-tools.js"></script>
