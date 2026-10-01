@@ -423,38 +423,55 @@ function claimDailyGift() {
   checkAchievements();
 }
 
-function claimQuest(index) {
+// batch=true skips the reveal and redraw so "Claim all" can do one reveal at the end; both return the card id.
+function claimQuest(index, batch) {
   const q = state.progress.quests[index];
-  if (!q || q.claimed) return;
+  if (!q || q.claimed) return null;
   const def = questDef(q.id);
-  if (questProgress(q) < def.goal) return;
+  if (questProgress(q) < def.goal) return null;
   q.claimed = true;
   const id = randomCardId(def.reward);
   state.ownedCards.push(id);
   noteCardsFound(1);
   logQuestHistory('daily', def, id);
+  logEvent('🎯', `Completed quest: ${def.name} · ${RARITY_LABEL[cardDef(id).rarity]} reward.`);
+  if (batch) return id;
   saveState();
   updateHud();
-  logEvent('🎯', `Completed quest: ${def.name} · ${RARITY_LABEL[cardDef(id).rarity]} reward.`);
   showCardReveal(id, 'Quest complete', true);
   renderQuests();
   checkAchievements();
+  return id;
 }
 
-function claimWeeklyQuest(index) {
+function claimWeeklyQuest(index, batch) {
   const q = state.progress.weeklyQuests[index];
-  if (!q || q.claimed) return;
+  if (!q || q.claimed) return null;
   const def = weeklyQuestDef(q.id);
-  if (weeklyQuestProgress(q) < def.goal) return;
+  if (weeklyQuestProgress(q) < def.goal) return null;
   q.claimed = true;
   const id = randomCardId(def.reward);
   state.ownedCards.push(id);
   noteCardsFound(1);
   logQuestHistory('weekly', def, id);
+  logEvent('🏵️', `Completed weekly quest: ${def.name} · ${RARITY_LABEL[cardDef(id).rarity]} reward.`);
+  if (batch) return id;
   saveState();
   updateHud();
-  logEvent('🏵️', `Completed weekly quest: ${def.name} · ${RARITY_LABEL[cardDef(id).rarity]} reward.`);
   showCardReveal(id, 'Weekly quest complete', true);
+  renderQuests();
+  checkAchievements();
+  return id;
+}
+
+// Claim every finished quest in one go (v Beta 2): one reveal for the best card, a note for the rest.
+function claimAllQuests(kind) {
+  const weekly = kind === 'weekly', list = weekly ? state.progress.weeklyQuests : state.progress.quests, ids = [];
+  list.forEach((q, i) => { const id = weekly ? claimWeeklyQuest(i, true) : claimQuest(i, true); if (id) ids.push(id); });
+  if (!ids.length) return;
+  saveState(); updateHud();
+  const best = ids.slice().sort((a, b) => RARITY_ORDER.indexOf(cardDef(b).rarity) - RARITY_ORDER.indexOf(cardDef(a).rarity))[0];
+  showCardReveal(best, ids.length > 1 ? `${ids.length} quests claimed` : (weekly ? 'Weekly quest complete' : 'Quest complete'), true, ids.length > 1 ? `Best of ${ids.length} new cards. The rest are in your collection.` : '');
   renderQuests();
   checkAchievements();
 }
@@ -654,6 +671,38 @@ function showLevelUp(level, pebbles, bonusCardId) {
   };
 }
 
+// The claim center (Dailies and Weekly share it): a hero with Claim all, then Ready / In progress (closest
+// first) / a collapsed "not started" group / Claimed. claimQuest()/claimWeeklyQuest() index into the
+// unsorted state array, so each row carries its original index.
+const claimOpen = { daily: false, weekly: false };
+function renderClaimCenter(kind) {
+  const weekly = kind === 'weekly', pr = state.progress;
+  const box = document.getElementById(weekly ? 'weeklyClaim' : 'dailyClaim');
+  const defOf = weekly ? weeklyQuestDef : questDef, progOf = weekly ? weeklyQuestProgress : questProgress;
+  const rows = (weekly ? pr.weeklyQuests : pr.quests).map((q, i) => {
+    const def = defOf(q.id), prog = progOf(q);
+    return { q, i, def, prog, st: q.claimed ? 'done' : prog >= def.goal ? 'ready' : prog > 0 ? 'prog' : 'new' };
+  });
+  const by = st => rows.filter(r => r.st === st);
+  const ready = by('ready'), prog = by('prog').sort((a, b) => b.prog / b.def.goal - a.prog / a.def.goal), fresh = by('new'), done = by('done');
+  const row = r => `<div class="quest ${r.st === 'ready' ? 'done' : ''}">
+      <div class="quest-top"><span class="q-icon">${r.def.icon}</span><span class="q-name">${r.def.name}</span>
+      ${r.st === 'done' ? '<span class="q-count">✓ claimed</span>' : r.st === 'ready' ? `<button class="panel-action active q-claim" data-claim="${r.i}">Claim</button>` : `<span class="q-count">${r.prog}/${r.def.goal}</span>`}</div>
+      ${r.st === 'done' ? '' : `<div class="q-bar"><div class="q-fill" style="width:${Math.round(r.prog / r.def.goal * 100)}%"></div></div>`}</div>`;
+  const group = (title, note, list) => list.length ? `<div class="section-title">${title}${note ? ` <span class="q-kind">${note}</span>` : ''}</div>${list.map(row).join('')}` : '';
+  const total = rows.length;
+  box.innerHTML = `<div class="claim-hero ${ready.length ? 'ready' : ''}">
+      <div><b>${ready.length ? `${ready.length} ready to claim` : 'Nothing to claim right now'}</b>
+      <span>${done.length} of ${total} claimed ${weekly ? 'this week' : 'today'}</span></div>
+      ${ready.length ? '<button class="panel-action active" data-claimall="1">Claim all</button>' : `<span class="claim-tick">${done.length === total && total ? '✅' : '🎯'}</span>`}</div>`
+    + group('Ready', ready.length, ready) + group('In progress', 'closest first', prog)
+    + (fresh.length ? `<button class="claim-more" data-nsopen="1">${claimOpen[kind] ? 'Hide' : 'Show'} not started · ${fresh.length}</button>${claimOpen[kind] ? fresh.map(row).join('') : ''}` : '')
+    + group('Claimed', done.length, done);
+  box.querySelectorAll('[data-claim]').forEach(b => b.addEventListener('click', () => (weekly ? claimWeeklyQuest : claimQuest)(+b.dataset.claim)));
+  const all = box.querySelector('[data-claimall]'); if (all) all.addEventListener('click', () => claimAllQuests(kind));
+  const ns = box.querySelector('[data-nsopen]'); if (ns) ns.addEventListener('click', () => { claimOpen[kind] = !claimOpen[kind]; sfx('tap'); renderClaimCenter(kind); });
+}
+
 function renderQuests() {
   ensureQuests();
   ensureWeeklyQuests();
@@ -672,54 +721,8 @@ function renderQuests() {
     </div>`;
   if (ready) document.getElementById('giftCard').addEventListener('click', claimDailyGift);
 
-  // Ready-to-claim quests sort to the top in both lists (then in-progress, then already-claimed last), so
-  // there's no need to scroll past other quests to find the Claim button - claimQuest()/claimWeeklyQuest()
-  // still index into the *unsorted* state array, so the original index travels along with each quest here.
-  const claimRank = (q, done) => q.claimed ? 2 : done ? 0 : 1;
-
-  const list = document.getElementById('questList');
-  list.innerHTML = '';
-  pr.quests.map((q, i) => ({ q, i, def: questDef(q.id), prog: questProgress(q) }))
-    .sort((a, b) => claimRank(a.q, a.prog >= a.def.goal) - claimRank(b.q, b.prog >= b.def.goal))
-    .forEach(({ q, i, def, prog }) => {
-    const done = prog >= def.goal;
-    const el = document.createElement('div');
-    el.className = 'quest' + (done ? ' done' : '');
-    el.innerHTML = `
-      <div class="quest-top">
-        <span class="q-icon">${def.icon}</span>
-        <span class="q-name">${def.name}</span>
-        ${q.claimed ? '<span class="q-count">✓ claimed</span>'
-          : done ? '<button class="panel-action active q-claim">Claim</button>'
-          : `<span class="q-count">${prog}/${def.goal}</span>`}
-      </div>
-      <div class="q-bar"><div class="q-fill" style="width:${Math.round(prog / def.goal * 100)}%"></div></div>`;
-    const btn = el.querySelector('.q-claim');
-    if (btn) btn.addEventListener('click', () => claimQuest(i));
-    list.appendChild(el);
-  });
-
-  const wlist = document.getElementById('weeklyQuestList');
-  wlist.innerHTML = '';
-  pr.weeklyQuests.map((q, i) => ({ q, i, def: weeklyQuestDef(q.id), prog: weeklyQuestProgress(q) }))
-    .sort((a, b) => claimRank(a.q, a.prog >= a.def.goal) - claimRank(b.q, b.prog >= b.def.goal))
-    .forEach(({ q, i, def, prog }) => {
-    const done = prog >= def.goal;
-    const el = document.createElement('div');
-    el.className = 'quest' + (done ? ' done' : '');
-    el.innerHTML = `
-      <div class="quest-top">
-        <span class="q-icon">${def.icon}</span>
-        <span class="q-name">${def.name}</span>
-        ${q.claimed ? '<span class="q-count">✓ claimed</span>'
-          : done ? '<button class="panel-action active q-claim">Claim</button>'
-          : `<span class="q-count">${prog}/${def.goal}</span>`}
-      </div>
-      <div class="q-bar"><div class="q-fill" style="width:${Math.round(prog / def.goal * 100)}%"></div></div>`;
-    const btn = el.querySelector('.q-claim');
-    if (btn) btn.addEventListener('click', () => claimWeeklyQuest(i));
-    wlist.appendChild(el);
-  });
+  renderClaimCenter('daily');
+  renderClaimCenter('weekly');
 
   const grid = document.getElementById('achGrid');
   grid.innerHTML = '';
