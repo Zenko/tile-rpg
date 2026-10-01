@@ -18,6 +18,18 @@ function gameVersionLabel() {
    the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
 const CHANGELOG = [
   {
+    version: '1.63.0',
+    date: '2026-10-01',
+    title: "A pond full of fish",
+    changes: [
+      "Cast again works after a catch. The button takes you back to aiming, and your last spot is remembered, so it is one tap to cast again.",
+      "You can see several fish swimming in the water now. Tap the water to choose where to cast, and the fish closest to your spot swims over to the hook. Nothing close? One wanders in from the edge, but it takes longer.",
+      "Your bait floats on the water like the fish do. Pick daisies and daisies bob around the pond. Fish that like your bait will come from further away.",
+      "New animations: the rod whips and the float arcs out when you cast, the hook shakes when you set it, a caught fish leaps into your bucket with a spray of water, and a fish that gets away dashes off in a puff while the float bounces.",
+      "Calm mode and reduced motion keep the fish still and skip the splashes.",
+    ],
+  },
+  {
     date: '2026-10-01',
     version: '1.62.0',
     title: "A new way to fish",

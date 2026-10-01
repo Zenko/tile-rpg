@@ -45,13 +45,14 @@ const fishState = () => {
 };
 // Rain makes the scarcer fish (anything that isn't the everyday Minnow/Perch) bite more often.
 function fishWeight(f) { return f.weight * (f.weight < 20 && !f.legendary ? (weatherFx().rareFish || 1) * (eventIs('fishing-derby') ? 2 : 1) : 1); }
-function pickFish() {
+// `quiet` is for filling the water with swimmers: no legendary guarantee, and the Starlight Koi is seen even more rarely.
+function pickFish(quiet) {
   const pool = FISH.filter(fishAvailable);
   // A very long dry spell on the legendary Starlight Koi (whose catch weight is tiny by design) guarantees
   // the next hook is one, rather than leaving it a lottery ticket most players never actually see.
   const koi = fishDef('star-koi');
-  if ((fishState().sinceLegendary || 0) >= FISH_LEGEND_PITY && koi && fishAvailable(koi)) return koi;
-  const bait = currentBait(), w = f => fishWeight(f) * (bait.likes.includes(f.id) ? bait.mult : 1);   // the chosen bait makes its favourites bite more
+  if (!quiet && (fishState().sinceLegendary || 0) >= FISH_LEGEND_PITY && koi && fishAvailable(koi)) return koi;
+  const bait = currentBait(), w = f => fishWeight(f) * (bait.likes.includes(f.id) ? bait.mult : 1) * (quiet && f.legendary ? 0.25 : 1);   // the chosen bait makes its favourites bite more
   const total = pool.reduce((s, f) => s + w(f), 0); let r = Math.random() * total;
   for (const f of pool) { r -= w(f); if (r <= 0) return f; }
   return pool[0] || FISH[0];
@@ -92,12 +93,21 @@ const FISH_BEHAVIOR = { minnow: [[.8, 1.4], [.4, .7]], carp: [[2, 3], [1.2, 1.8]
 const fishBehavior = f => FISH_BEHAVIOR[f.id] || [[1.4, 2.4], [.7, 1.1]];
 const randIn = ([a, b]) => a + Math.random() * (b - a);
 
-/* ---------- the fishing scene ---------- */
-let fishing = null;   // { phase: 'idle'|'wait'|'bite'|'reeling', timers, spot, fish, bait, dist, tension, holding, ... }
+/* ---------- the fishing scene ----------
+   You see a handful of fish swimming about and your chosen bait floating on the water. Tap the water to aim, cast, and
+   the fish nearest your spot (liked baits draw from further away) swims over to the hook. Phases: idle (aiming), cast
+   (the line is flying), wait, bite, reeling, landing / away (the catch or escape animation), then result (Cast again). */
+let fishing = null;   // { phase, spot, swimmers, aim, hook, sw (the fish on the line), band, asp, bucket, timers, ... }
 const fe = id => document.getElementById(id);
-const FISH_HOOK = { x: 59.4, y: 59.8 };                       // where the hook hangs, as % of the scene (also dist = 30)
-const fishPosAt = d => ({ x: 66 - 22 * d / 100, y: 70 - 34 * d / 100 });   // the fish rises toward the bank as you reel it in
-function fishClear() { if (fishing) { clearTimeout(fishing.t1); clearTimeout(fishing.t2); clearTimeout(fishing.t3); cancelAnimationFrame(fishing.raf); } }
+const FISH_BANK = { x: 50, y: 27 };    // where the line leaves the bank, as % of the scene
+const FISH_POP = 6;                    // how many fish you can see swimming at once
+const FISH_REACH = 30;                 // how far (in % of the scene's width) a fish will come from to your bait
+const fishMotionOk = () => typeof btMotionOk !== 'function' || btMotionOk();
+const fishMs = n => fishMotionOk() ? n : 0;
+const fishRnd = (a, b) => a + Math.random() * (b - a);
+// the fish rises from where the hook landed toward the bank as you reel it in (dist 30 = at the hook, 100 = at the bank)
+const fishPosAt = d => { const h = fishing.hook; return { x: Math.max(5, Math.min(95, FISH_BANK.x + (h.x - FISH_BANK.x) * (100 - d) / 70)), y: Math.max(30, Math.min(95, FISH_BANK.y + (h.y - FISH_BANK.y) * (100 - d) / 70)) }; };
+function fishClear() { if (fishing) { ['t1', 't2', 't3'].forEach(k => clearTimeout(fishing[k])); cancelAnimationFrame(fishing.raf); cancelAnimationFrame(fishing.fl); } }
 function fishPhase(ph) { if (fishing) fishing.phase = ph; fe('fishScene').dataset.phase = ph; }
 function fishTallyText() {
   const f = fishState(), left = Math.max(0, FISH_DAILY_REWARDED - f.rewarded);
@@ -114,6 +124,88 @@ function fishPlaceFish(x, y, cls, ms) {
   const el = fe('fishFish'); el.style.setProperty('--mv', (ms || 0) + 's'); el.style.left = x + '%'; el.style.top = y + '%';
   if (cls != null) el.className = 'fs-fish ' + cls;
 }
+function fishBobberAt(x, y) {   // the float and its ripples follow the end of the line
+  const b = fe('fishBobber'); b.style.left = x + '%'; b.style.top = `calc(${y}% - 12px)`;
+  ['fishRing1', 'fishRing2'].forEach(id => { const r = fe(id); r.style.left = x + '%'; r.style.top = y + '%'; });
+}
+/* small screen effects: drops, puffs, a flash, a shake. All skipped in calm / reduced-motion. */
+function fishFx(cls, x, y, text) {
+  const el = document.createElement('i'); el.className = cls; el.style.left = x + '%'; el.style.top = y + '%'; if (text) el.textContent = text;
+  fe('fishScene').appendChild(el); setTimeout(() => el.remove(), 1000); return el;
+}
+function fishDrops(x, y, n, gold) {
+  if (!fishMotionOk()) return;
+  for (let i = 0; i < n; i++) { const a = Math.PI * fishRnd(1.1, 1.9), r = fishRnd(22, 60), el = fishFx('fs-drop' + (gold ? ' gold' : ''), x, y); el.style.setProperty('--dx', Math.cos(a) * r * 1.2 + 'px'); el.style.setProperty('--dy', Math.sin(a) * r + 'px'); }
+}
+function fishFlash(x, y, gold) { if (!fishMotionOk()) return; const el = fishFx('fs-flash' + (gold ? ' gold' : ''), 0, 0); el.style.left = el.style.top = '0'; el.style.setProperty('--x', x + '%'); el.style.setProperty('--y', y + '%'); }
+function fishShake() { if (!fishMotionOk()) return; const sc = fe('fishScene'); sc.classList.remove('shake'); void sc.offsetWidth; sc.classList.add('shake'); setTimeout(() => sc.classList.remove('shake'), 340); }
+function fishSplashAt(x, y, drops) {
+  const s = fe('fishSplash'); s.style.left = x + '%'; s.style.top = `calc(${y}% - 28px)`;
+  s.classList.remove('on'); void s.offsetWidth; s.classList.add('on'); fishDrops(x, y, drops || 6);
+}
+/* the fish you can see */
+function fishBand() {   // the part of the water that isn't hidden behind the panel
+  const sc = fe('fishScene').getBoundingClientRect(), pn = document.querySelector('#fishScene .fs-panel').getBoundingClientRect();
+  const hi = sc.height ? (pn.top - sc.top) / sc.height * 100 - 6 : 58;
+  return { lo: 34, hi: Math.max(46, Math.min(80, hi)) };
+}
+function fishMakeSwimmer(fish, x, y, fade) {
+  const el = document.createElement('div'), inn = document.createElement('span');
+  el.className = 'fs-sw ' + fishSizeOf(fish) + (fish.legendary ? ' legend' : '') + (fade && fishMotionOk() ? ' fadein' : '');
+  el.style.left = x + '%'; el.style.top = y + '%'; inn.className = 'in'; inn.textContent = fish.icon;
+  inn.style.setProperty('--sw', fishRnd(30, 70) + 'px'); inn.style.setProperty('--dur', fishRnd(12, 22) + 's'); inn.style.setProperty('--dl', -fishRnd(0, 12) + 's');
+  el.appendChild(inn); fe('fishSwim').appendChild(el);
+  if (fade) requestAnimationFrame(() => requestAnimationFrame(() => el.classList.remove('fadein')));
+  return { fish, el, x, y };
+}
+function fishFill() {
+  const b = fishing.band;
+  while (fishing.swimmers.length < FISH_POP) fishing.swimmers.push(fishMakeSwimmer(pickFish(true), fishRnd(12, 88), fishRnd(b.lo + 2, b.hi), true));
+}
+function fishWander() {   // the fish drift to new spots now and then
+  if (!fishing) return;
+  const b = fishing.band;
+  if (fishMotionOk()) fishing.swimmers.forEach(s => {
+    if (Math.random() < 0.5) { s.x = Math.max(8, Math.min(92, s.x + fishRnd(-14, 14))); s.y = Math.max(b.lo, Math.min(b.hi, s.y + fishRnd(-8, 8))); s.el.style.setProperty('--mv', '4s'); s.el.style.left = s.x + '%'; s.el.style.top = s.y + '%'; }
+  });
+  if (fishing.phase === 'idle') fishAimUpdate();
+  fishing.tw = setTimeout(fishWander, 4500);
+}
+function fishRenderFloat() {   // whatever bait you picked bobs on the water like the fish do
+  const box = fe('fishSwim'), b = currentBait(), band = fishing.band;
+  box.querySelectorAll('.fs-fl').forEach(e => e.remove());
+  for (let i = 0; i < 7; i++) {
+    const el = document.createElement('span'); el.className = 'fs-fl'; el.textContent = b.icon;
+    el.style.left = fishRnd(8, 92) + '%'; el.style.top = fishRnd(band.lo, band.hi + 2) + '%';
+    el.style.setProperty('--dur', fishRnd(4, 8) + 's'); el.style.setProperty('--dl', -fishRnd(0, 6) + 's'); el.style.setProperty('--fx', fishRnd(-18, 18) + 'px');
+    box.appendChild(el);
+  }
+}
+/* aiming: the fish nearest the marker (counting the bait's favourites as closer) is the one that will come */
+function fishNearest(ax, ay) {
+  const bait = currentBait(); let best = null;
+  fishing.swimmers.forEach(s => {
+    const d = Math.hypot(s.x - ax, (s.y - ay) * fishing.asp), score = d / (bait.likes.includes(s.fish.id) ? Math.sqrt(bait.mult) : 1);
+    if (!best || score < best.score) best = { s, d, score };
+  });
+  return best && best.score <= FISH_REACH ? best : null;
+}
+function fishAimUpdate() {
+  if (!fishing) return;
+  fishing.swimmers.forEach(s => s.el.classList.remove('near'));
+  const aim = fishing.aim, aimEl = fe('fishAim'), btn = fe('fishBtn');
+  if (!aim) { aimEl.classList.add('hidden'); btn.disabled = true; btn.textContent = 'Tap the water to aim'; return; }
+  aimEl.classList.remove('hidden'); aimEl.style.left = aim.x + '%'; aimEl.style.top = aim.y + '%';
+  const n = fishNearest(aim.x, aim.y); if (n) n.s.el.classList.add('near');
+  btn.disabled = false; btn.textContent = 'Cast';
+  fe('fishSub').textContent = n ? `A ${FISH_SIZE_WORD[fishSizeOf(n.s.fish)]} fish is close to that spot.` : 'Nothing close yet. Fish wander over now and then.';
+}
+fe('fishScene').addEventListener('pointerdown', e => {
+  if (!fishing || fishing.phase !== 'idle' || e.target.closest('.fs-panel, .fs-top, .fs-bucket')) return;
+  const r = fe('fishScene').getBoundingClientRect(), x = (e.clientX - r.left) / r.width * 100, y = (e.clientY - r.top) / r.height * 100;
+  if (y < 30) return;   // that's the bank
+  fishing.aim = { x: Math.max(6, Math.min(94, x)), y: Math.min(fishing.band.hi + 4, y) }; sfx('tap'); fishAimUpdate();
+});
 function fishRenderBaits() {
   const box = fe('fishBaits'), sel = currentBait().id;
   box.innerHTML = '';
@@ -122,7 +214,7 @@ function fishRenderBaits() {
     el.className = 'fs-bait' + (b.id === sel ? ' sel' : '') + (n <= 0 ? ' out' : '');
     el.setAttribute('aria-label', `${b.name} bait${n === Infinity ? '' : ', ' + n + ' left'}`);
     el.innerHTML = `<b>${b.icon}</b><span>${b.name}${n === Infinity ? '' : ' ×' + n}</span><em>${baitWorks(b) ? b.likes.map(id => fishDef(id).icon).join('') : 'not now'}</em>`;
-    el.addEventListener('click', () => { if (n <= 0 || !fishing || fishing.phase !== 'idle') return; fishState().bait = b.id; saveState(); sfx('tap'); fishRenderBaits(); });
+    el.addEventListener('click', () => { if (n <= 0 || !fishing || fishing.phase !== 'idle') return; fishState().bait = b.id; saveState(); sfx('tap'); fishRenderBaits(); fishRenderFloat(); fishAimUpdate(); });
     box.appendChild(el);
   });
 }
@@ -130,66 +222,124 @@ function fishUi(msg, sub, btn, btnCls) {
   fe('fishMsg').textContent = msg; fe('fishSub').textContent = sub;
   const b = fe('fishBtn'); b.textContent = btn; b.className = 'btn' + (btnCls ? ' ' + btnCls : ''); b.disabled = false;
 }
-function fishIdleUi(msg, sub) {
+function fishIdleUi(msg, sub) {   // back to aiming; the last aim spot is kept so Cast again is one tap
   fishPhase('idle');
   fishUi(msg, sub, 'Cast', '');
-  fe('fishBaits').classList.remove('hidden'); fe('fishTension').classList.add('hidden'); fe('fishDepth').classList.add('hidden');
+  fe('fishBaits').classList.remove('hidden'); fe('fishTension').classList.add('hidden'); fe('fishDepth').classList.add('hidden'); fe('fishResult').classList.add('hidden');
   fe('fishBang').style.opacity = ''; fe('fishScene').classList.remove('nibble');
   fe('fishTally').textContent = fishTallyText(); fishRenderStamps(); fishRenderBaits();
-  fishPlaceFish(50, 50, ''); fishSetLine(null);
+  fishPlaceFish(50, 50, ''); fishSetLine(null); fe('fishHook').classList.add('hidden'); fishBobberAt(FISH_BANK.x, 26.6);
+  fishAimUpdate();
 }
 function openFishing(spot) {
-  fishing = { phase: 'idle', spot };
+  fishing = { phase: 'idle', spot, swimmers: [], aim: null, bucket: 0 };
   const sc = fe('fishScene');
   sc.dataset.wx = weatherNow();
   fe('fishLoc').textContent = DISTRICTS[state.currentDistrict].name;
   fe('fishWx').textContent = (WEATHER_KINDS[weatherNow()].icon || '☀️') + ' ' + WEATHER_KINDS[weatherNow()].name;
-  fe('fishResult').classList.add('hidden');
+  fe('fishOverlay').classList.remove('hidden'); document.body.classList.add('in-fishing');
+  fe('fishSwim').innerHTML = ''; fe('fishBucketN').textContent = '0';
+  const r = sc.getBoundingClientRect(); fishing.asp = r.height / Math.max(1, r.width); fishing.band = fishBand();
+  fishFill(); fishRenderFloat();
   const rainNote = weatherIs('rain') ? '🌧️ The rain has the fish biting. ' : '';
-  fishIdleUi('A quiet spot by the water.', rainNote + (fishAvailableNote() || 'Pick a bait, then cast.'));
-  fe('fishOverlay').classList.remove('hidden'); document.body.classList.add('in-fishing'); sfx('tap');
-  showTipOnce('fishing');
+  fishIdleUi('A quiet spot by the water.', rainNote + (fishAvailableNote() || 'Tap the water to choose where to cast.'));
+  fishing.tw = setTimeout(fishWander, 3000);
+  sfx('tap'); showTipOnce('fishing');
 }
-function closeFishing() { fishClear(); if (fishing) { fishing.phase = 'closed'; } fishing = null; fe('fishOverlay').classList.add('hidden'); document.body.classList.remove('in-fishing'); }
+function closeFishing() { fishClear(); if (fishing) { clearTimeout(fishing.tw); fishing.phase = 'closed'; } fishing = null; fe('fishOverlay').classList.add('hidden'); document.body.classList.remove('in-fishing'); fe('fishSwim').innerHTML = ''; }
+/* casting: the float arcs out from the bank to your spot, the rod whips, the bait splashes down */
 function fishCast() {
-  if (!fishing || fishing.phase !== 'idle') return;
-  const bait = currentBait();
-  fishing.bait = bait; fishing.fish = pickFish(); fishing.size = fishSizeOf(fishing.fish);
-  fishPhase('wait');
-  fe('fishBaits').classList.add('hidden'); fe('fishResult').classList.add('hidden');
-  fishUi(`${bait.icon} ${bait.name} on the hook`, `A ${FISH_SIZE_WORD[fishing.size]} shadow drifts closer…`, 'Reel in', 'wait'); sfx('soft');
-  fishSetLine(FISH_HOOK.x, FISH_HOOK.y, 0);
-  const wait = (FISH_WAIT_MS[0] + Math.random() * (FISH_WAIT_MS[1] - FISH_WAIT_MS[0])) * (weatherFx().biteSpeed || 1) * (hasPerk('fish') ? 0.7 : 1) * (1 - Math.min(0.5, cardBonus('fish')));   // rain, a fishy companion, charms: bites come sooner
-  // the shadow swims in from the left and arrives at the hook exactly when it bites
-  fishPlaceFish(6, 66, 'shadow ' + fishing.size, 0); fe('fishFish').textContent = fishing.fish.icon; void fe('fishFish').offsetWidth;
-  fishPlaceFish(FISH_HOOK.x, FISH_HOOK.y, null, wait / 1000);
+  if (!fishing || fishing.phase !== 'idle' || !fishing.aim) return;
+  const bait = currentBait(), aim = fishing.aim, n = fishNearest(aim.x, aim.y);
+  let s;
+  if (n) { s = n.s; fishing.swimmers.splice(fishing.swimmers.indexOf(s), 1); }
+  else { s = fishMakeSwimmer(pickFish(true), Math.random() < 0.5 ? 4 : 96, aim.y + fishRnd(-6, 6), false); }   // nothing close: one wanders in from the edge
+  const koi = fishDef('star-koi');   // a very long dry spell guarantees the legendary is the one that comes
+  if ((fishState().sinceLegendary || 0) >= FISH_LEGEND_PITY && koi && fishAvailable(koi) && !s.fish.legendary) { s.fish = koi; s.el.className = 'fs-sw large legend'; s.el.firstChild.textContent = koi.icon; }
+  s.el.classList.remove('near');
+  Object.assign(fishing, { bait, fish: s.fish, size: fishSizeOf(s.fish), sw: s, hook: { x: aim.x, y: aim.y }, dist0: n ? n.d : 60 });
+  fishPhase('cast');
+  fe('fishBaits').classList.add('hidden'); fe('fishResult').classList.add('hidden'); fe('fishAim').classList.add('hidden');
+  fishing.swimmers.forEach(x => x.el.classList.remove('near'));
+  fishUi(`${bait.icon} ${bait.name} on the hook`, 'Casting…', 'Reel in', 'wait'); fe('fishBtn').disabled = true; sfx('soft');
+  fishFlight(FISH_BANK, fishing.hook, fishMs(560), fishLanded);
+}
+function fishFlight(from, to, ms, done) {
+  const t0 = performance.now();
+  const bendAt = k => k < 0.2 ? -26 * k / 0.2 : k < 0.4 ? -26 + 60 * (k - 0.2) / 0.2 : 34 * (1 - (k - 0.4) / 0.6);
+  if (!ms) { fishBobberAt(to.x, to.y); fishSetLine(to.x, to.y, 0); return done(); }
+  const step = t => {
+    if (!fishing || fishing.phase !== 'cast') return;
+    const k = Math.min(1, (t - t0) / ms), e = 1 - (1 - k) * (1 - k);
+    const x = from.x + (to.x - from.x) * e, y = from.y + (to.y - from.y) * e - Math.sin(Math.PI * k) * 14;
+    fishBobberAt(x, y); fishSetLine(x, y, bendAt(k));
+    if (k < 1) fishing.fl = requestAnimationFrame(step); else { fishSetLine(to.x, to.y, 0); done(); }
+  };
+  fishing.fl = requestAnimationFrame(step);
+}
+function fishLanded() {
+  if (!fishing || fishing.phase !== 'cast') return;
+  const h = fishing.hook, bait = fishing.bait, sw = fishing.sw;
+  fishPhase('wait'); fe('fishBtn').disabled = false;
+  fishBobberAt(h.x, h.y); fishSetLine(h.x, h.y, 0);
+  const hk = fe('fishHook'); hk.textContent = bait.icon; hk.style.left = h.x + '%'; hk.style.top = (h.y + 3) + '%'; hk.classList.remove('hidden');
+  fishSplashAt(h.x, h.y, 6);
+  fishUi(`${bait.icon} ${bait.name} on the hook`, `A ${FISH_SIZE_WORD[fishing.size]} shadow drifts closer…`, 'Reel in', 'wait');
+  // the nearer the fish was, the sooner it arrives; rain, a fishy companion and charms help too
+  const near = Math.min(1, fishing.dist0 / 40);
+  const wait = (FISH_WAIT_MS[0] + Math.random() * (FISH_WAIT_MS[1] - FISH_WAIT_MS[0])) * (0.55 + 0.7 * near) * (weatherFx().biteSpeed || 1) * (hasPerk('fish') ? 0.7 : 1) * (1 - Math.min(0.5, cardBonus('fish')));
+  sw.el.firstChild.style.animation = 'none';
+  sw.el.style.setProperty('--mv', fishMs(wait / 1000) + 's'); sw.el.style.left = h.x + '%'; sw.el.style.top = h.y + '%';
   // sometimes a false nibble comes first: the float twitches, but it is not a bite yet
-  if (wait > 2200 && Math.random() < 0.4) fishing.t3 = setTimeout(() => {
+  if (wait > 2000 && Math.random() < 0.4) fishing.t3 = setTimeout(() => {
     if (!fishing || fishing.phase !== 'wait') return;
     fe('fishScene').classList.add('nibble'); fe('fishSub').textContent = 'Just a nibble… not yet.'; sfx('soft');
     setTimeout(() => { const sc = fe('fishScene'); if (sc) sc.classList.remove('nibble'); if (fishing && fishing.phase === 'wait') fe('fishSub').textContent = `A ${FISH_SIZE_WORD[fishing.size]} shadow circles the bait…`; }, 600);
   }, wait * 0.55);
   fishing.t1 = setTimeout(() => {
     if (!fishing || fishing.phase !== 'wait') return;
-    const f = fishing.fish;
     fishing.bait.take(); fishRenderBaits(); saveState();                       // the bait is used up when something bites it
     fishPhase('bite'); fe('fishScene').classList.remove('nibble');
-    fe('fishFish').className = 'fs-fish shown ' + fishing.size;
-    fe('fishSplash').classList.remove('on'); void fe('fishSplash').offsetWidth; fe('fishSplash').classList.add('on');
+    sw.el.remove(); hk.classList.add('hidden');
+    fe('fishFish').textContent = fishing.fish.icon; fishPlaceFish(h.x, h.y, 'shown ' + fishing.size, 0);
+    fishSplashAt(h.x, h.y, 5);
     fishUi('Bite!', 'Tap now to set the hook.', 'Hook it!', 'bite'); sfx('found'); buzz(HAP.tap);
-    fishing.t2 = setTimeout(() => { if (fishing && fishing.phase === 'bite') fishMiss('It got away. Not to worry.'); }, FISH_BITE_MS);
+    fishing.t2 = setTimeout(() => { if (fishing && fishing.phase === 'bite') fishEscape('It got away. Not to worry.'); }, FISH_BITE_MS);
   }, wait);
 }
-function fishMiss(text) {
+/* the fish gets away: it dashes off with a puff and a splash, the float bounces, the line goes slack */
+function fishEscape(text) {
   fishClear(); if (!fishing) return;
-  fishIdleUi(text, 'Cast again whenever you like.');
-  fishPlaceFish(50, 70, ''); fe('fishBtn').textContent = 'Cast again';
+  const was = fishing.phase, h = fishing.hook, sw = fishing.sw, b = fishing.band;
+  fishPhase('away');
+  ['fishTension', 'fishDepth'].forEach(id => fe(id).classList.add('hidden'));
+  fe('fishScene').classList.remove('nibble'); fe('fishBang').style.opacity = ''; fe('fishHook').classList.add('hidden'); fe('fishSplash').classList.remove('on');
+  fishUi(text, 'Cast again whenever you like.', 'Cast again'); fe('fishBtn').disabled = true;
+  let px = h.x, py = h.y;
+  if (was === 'reeling') { const p = fishPosAt(Math.max(0, Math.min(100, fishing.dist))); px = p.x; py = p.y; }
+  const tx = Math.max(4, Math.min(96, px + (Math.random() < 0.5 ? -1 : 1) * fishRnd(28, 45))), ty = Math.min(b.hi + 2, py + fishRnd(3, 10));
+  if (was === 'wait') { const el = sw.el; el.style.setProperty('--mv', fishMs(0.5) + 's'); el.style.left = tx + '%'; el.style.top = ty + '%'; el.style.opacity = 0; setTimeout(() => el.remove(), 700); }
+  else { fishPlaceFish(tx, ty, 'shown run ' + fishing.size, fishMs(0.35)); setTimeout(() => { fe('fishFish').className = 'fs-fish ' + fishing.size; }, fishMs(350)); }
+  if (fishMotionOk()) {
+    fishFx('fs-puff', px, py, '💨'); fishDrops(px, py, 8); fishSplashAt(px, py, 0);
+    fe('fishBobber').animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-22px)' }, { transform: 'translateY(0)' }], { duration: 450, easing: 'ease-out' });
+    if (was === 'reeling') fishShake();
+  }
+  fishSetLine(px, py, -10); sfx('soft'); buzz(HAP.soft);
+  setTimeout(() => {
+    if (!fishing || fishing.phase !== 'away') return;
+    fishSetLine(null); fishPlaceFish(50, 50, ''); fishFill(); fishSettle();
+  }, fishMs(800));
+}
+function fishSettle() {   // the animation is over: Cast again goes back to aiming
+  fishPhase('result'); fe('fishBtn').disabled = false; fe('fishBtn').textContent = 'Cast again'; fe('fishTally').textContent = fishTallyText(); fishRenderStamps();
 }
 function fishPress() {
   if (!fishing) return;
   if (fishing.phase === 'idle') return fishCast();
-  if (fishing.phase === 'wait') return fishMiss('Too soon. The fish slipped off.');
+  if (fishing.phase === 'wait') return fishEscape('Too soon. The fish slipped off.');
   if (fishing.phase === 'bite') return fishHook();
+  if (fishing.phase === 'result') return fishIdleUi('Where to next?', 'Tap the water to choose a spot, then cast.');
 }
 
 /* ---------- the reel: hold to reel, keep the line in the green ----------
@@ -205,8 +355,8 @@ function fishHook() {
   const [tired] = fishBehavior(fishing.fish); fishing.fUntil = performance.now() + randIn(tired) * 1000;
   fe('fishTension').classList.remove('hidden'); fe('fishDepth').classList.remove('hidden');
   fe('fishDepthMk').textContent = fishing.fish.icon;
-  fishUi('Hooked!', 'Hold the button to reel.', 'Hold to reel', 'reeling'); fe('fishSplash').classList.remove('on');
-  sfx('found'); buzz(HAP.tap);
+  fishUi('Hooked!', 'Hold the button to reel.', 'Hold to reel', 'reeling'); fe('fishSplash').classList.remove('on'); fe('fishHook').classList.add('hidden');
+  sfx('found'); buzz(HAP.tap); if (fishMotionOk()) { fishShake(); fishDrops(fishing.hook.x, fishing.hook.y, 6); }
   fishing.raf = requestAnimationFrame(fishReelTick);
 }
 function fishReelTick(t) {
@@ -235,7 +385,7 @@ function fishReelTick(t) {
   fe('fishTension').classList.toggle('strain', zone === 'strain');
   fe('fishDepthFill').style.height = Math.max(4, d) + '%'; fe('fishDepthMk').parentNode.style.setProperty('--d', d);
   fe('fishDepthMk').style.bottom = `calc(${Math.max(4, d)}% - 4px)`;
-  fishPlaceFish(p.x, p.y, 'shown ' + fishing.size + (run ? ' run' : ''), 0.12);
+  fishPlaceFish(p.x, p.y, 'shown ' + fishing.size + (run ? ' run' : ''), 0.12); fishBobberAt(p.x, p.y);
   fishSetLine(p.x, p.y, Math.min(34, T * 0.4));
   fe('fishBtn').classList.toggle('holding', hold);
   const status = zone === 'strain' ? 'strain' : run ? 'run' : zone === 'slack' ? 'slack' : 'ok';
@@ -245,11 +395,15 @@ function fishReelTick(t) {
     fe('fishSub').textContent = status === 'strain' ? 'Let go for a moment.' : status === 'run' ? 'Ease off, tap in short pulls.' : status === 'slack' ? 'Hold to take up the line.' : 'Keep the marker in the green.';
     if (status === 'strain') buzz(HAP.soft);
   }
-  if (fishing.dist <= 0) { fishing.dist = 0; fishMiss('It fought free and got away!'); return; }
+  if (fishing.dist <= 0) { fishing.dist = 0; fishEscape('It fought free and got away!'); return; }
   if (fishing.dist >= 100) { fishLand(f); return; }
   fishing.raf = requestAnimationFrame(fishReelTick);
 }
 function fishHold(on) { if (fishing && fishing.phase === 'reeling') { fishing.holding = on; if (!on) fe('fishBtn').classList.remove('holding'); } }
+function fishBucketPos() {   // where the bucket sits, as % of the scene
+  const r = fe('fishScene').getBoundingClientRect(), b = fe('fishBucket').getBoundingClientRect();
+  return { x: (b.left + b.width / 2 - r.left) / r.width * 100, y: (b.top + b.height / 2 - r.top) / r.height * 100 };
+}
 function fishLand(fish) {
   fishClear();
   const f = fishState();
@@ -278,12 +432,28 @@ function fishLand(fish) {
     }
   } else { line = `${fish.blurb} You let it go.`; }
   saveState(); updateHud();
-  fishIdleUi(cardId ? 'A card!' : (firstOfKind ? `New catch: ${fish.name}!` : isBig ? `A big ${fish.name}!` : `You caught a ${fish.name}!`), line);
-  fishPhase('caught'); fe('fishBtn').textContent = 'Cast again'; fe('fishBaits').classList.add('hidden');
-  // the fish leaps out of the water above the bank line
-  const el = fe('fishFish'); el.className = 'fs-fish shown leap ' + fishing.size; el.textContent = cardId ? '🃏' : fish.icon; fishPlaceFish(50, 14, null, 0.5);
-  fe('fishSplash').classList.remove('on'); void fe('fishSplash').offsetWidth; fe('fishSplash').classList.add('on');
-  fishSetLine(50, 20, 0);
+  const title = cardId ? 'A card!' : (firstOfKind ? `New catch: ${fish.name}!` : isBig ? `A big ${fish.name}!` : `You caught a ${fish.name}!`);
+  fishPhase('landing'); ['fishTension', 'fishDepth', 'fishBaits'].forEach(id => fe(id).classList.add('hidden'));
+  fishUi(title, line, 'Cast again'); fe('fishBtn').disabled = true; fe('fishTally').textContent = fishTallyText(); fishRenderStamps();
+  // the fish leaps from the bank into the bucket, with a spray of drops and a flash (gold for something special)
+  const gold = !!(fish.legendary || isBig || cardId), bp = fishBucketPos(), el = fe('fishFish'), sz = fishing.size, ic = cardId ? '🃏' : fish.icon;
+  el.textContent = ic; fishPlaceFish(FISH_BANK.x, FISH_BANK.y + 2, 'shown ' + sz, 0); fishSetLine(FISH_BANK.x, FISH_BANK.y + 2, 0);
+  fishSplashAt(FISH_BANK.x, FISH_BANK.y + 2, 10); fishFlash(FISH_BANK.x, FISH_BANK.y + 6, gold); fishDrops(FISH_BANK.x, FISH_BANK.y + 2, gold ? 10 : 5, gold);
+  const t = n => fishMs(n);
+  if (fishMotionOk()) {
+    setTimeout(() => { if (fishing && fishing.phase === 'landing') fishPlaceFish(30, 9, 'shown ' + sz, 0.32); }, 40);
+    setTimeout(() => { if (fishing && fishing.phase === 'landing') fishPlaceFish(bp.x, bp.y, 'shown ' + sz, 0.28); }, 380);
+  }
+  setTimeout(() => {
+    if (!fishing || fishing.phase !== 'landing') return;
+    el.className = 'fs-fish ' + sz; fishSetLine(null);
+    fishing.bucket++; fe('fishBucketN').textContent = fishing.bucket;
+    const bk = fe('fishBucket'); bk.classList.remove('bump'); void bk.offsetWidth; bk.classList.add('bump'); fishDrops(bp.x, bp.y + 2, 5, gold);
+  }, t(680));
+  setTimeout(() => {
+    if (!fishing || fishing.phase !== 'landing') return;
+    fishPlaceFish(50, 50, ''); fishFill(); fishSettle();
+  }, t(1000));
   const chips = [];
   if (gotPeb) chips.push(`<span class="fs-chip gold">+${gotPeb} Pebble${gotPeb > 1 ? 's' : ''}${eventIs('fishing-derby') ? ' (derby!)' : ''}</span>`);
   if (firstOfKind) chips.push(`<span class="fs-chip ok">New · Log ${FISH.filter(x => f.caught[x.id]).length}/${FISH.length}</span>`);
@@ -292,7 +462,7 @@ function fishLand(fish) {
   sfx(cardId || fish.legendary ? 'rare' : 'claim'); buzz(fish.legendary ? HAP.big : HAP.win);
   if (fish.legendary) toast(`🌟 A legendary catch: ${fish.name}!`);
   if (firstOfKind) toast(`📖 Fish log: ${fish.name}`);
-  if (cardId) { const isNew = !discoveredSet().has(BattleEngine.baseIdOf(cardId)); if (isNew) toast('📖 New entry in your Index'); setTimeout(() => { if (fishing) showCardReveal(cardId, 'Fished up', false); }, 350); }
+  if (cardId) { const isNew = !discoveredSet().has(BattleEngine.baseIdOf(cardId)); if (isNew) toast('📖 New entry in your Index'); setTimeout(() => { if (fishing) showCardReveal(cardId, 'Fished up', false); }, fishMs(1050) || 350); }
 }
 // The main button: a tap casts, waits and sets the hook, and a hold reels.
 const fishBtnEl = fe('fishBtn');
