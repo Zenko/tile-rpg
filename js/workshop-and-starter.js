@@ -70,7 +70,7 @@ function releaseCard(id) {
   if (idx < 0) return false;
   state.ownedCards.splice(idx, 1);
   const gain = RELEASE_VALUE[cardDef(id).rarity];
-  state.progress.pebbles += gain;
+  state.progress.pebbles += gain; econNote(gain, 'release');
   state.progress.released += 1;
   saveState();
   updateHud();
@@ -94,7 +94,7 @@ function buyPack(packId, price) {
   if (!pack) return false;
   const cost = typeof price === 'number' ? price : packPrice(pack);
   if (state.progress.pebbles < cost) return false;   // guard: can't go negative
-  state.progress.pebbles -= cost;
+  spendPebbles(cost, 'packs');
   const id = randomCardId(rollPackRarity(pack), pack.only);
   const isNew = !state.ownedCards.includes(id);
   state.ownedCards.push(id);
@@ -528,8 +528,8 @@ function renderItems() {
   const shopItems = DECORATION_ITEMS.filter(item => !item.museum && (itemsCat === 'all' || item.cat === itemsCat));
   const night = isNightNow();
   shopItems.forEach(item => {
-    const lockedToNight = item.night && !night;
-    const can = peb >= item.cost && !lockedToNight;
+    const lockedToNight = item.night && !night, lockedLevel = item.level && ensureLevel().level < item.level;
+    const can = peb >= item.cost && !lockedToNight && !lockedLevel;
     const el = document.createElement('div');
     el.className = 'pack' + (can ? '' : ' cant');
     el.innerHTML = `
@@ -537,9 +537,10 @@ function renderItems() {
       <div class="pk-body">
         <div class="pk-name">${item.name}</div>
         <div class="pk-desc">${item.desc}</div>
+        ${lockedLevel ? `<div class="pk-floor">🔒 Unlocks at level ${item.level}</div>` : ''}
         ${item.night ? `<div class="pk-floor">🌙 ${lockedToNight ? 'Only sold after dark - come back at night' : 'Night decoration'}</div>` : ''}
       </div>
-      <button class="btn" ${can ? '' : 'disabled'}>🫧 ${item.cost}</button>`;
+      <button class="btn" ${can ? '' : 'disabled'}>${lockedLevel ? '🔒' : '🫧'} ${item.cost}</button>`;
     el.querySelector('.btn').addEventListener('click', () => { ensureAudio(); buyDecoration(item); });
     box.appendChild(el);
   });

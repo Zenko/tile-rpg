@@ -528,6 +528,69 @@ const XP_PER_STAT = {
   tossWins: 2, knacksUsed: 3, draftWins: 20, draftClears: 60, ghostWins: 6, townActs: 3, townGames: 8, puddles: 1, stonesSkipped: 1,
   dishesCooked: 10, dishesGiven: 10, snacksEaten: 2, puzzlesSolved: 40, cupRoundsWon: 30, cupTrophies: 100, bugsCaught: 8, lettersRead: 2,
 };
+/* ============================================================
+   PEBBLE LEDGER (v1.87.0)
+   Every Pebble earned or spent is tagged with where it came from (addPebbles(n, 'fishing'), spendPebbles(n, 'packs')) and
+   counted in state.progress.econ, together with active play time, so "is the economy too generous?" can be answered with
+   numbers instead of feel. Nothing here changes any amount. The report is in Settings -> Pebble ledger, is attached to
+   feedback/bug reports (testerInfo), and `econReport()` can be called from the console. Add a tag whenever a new
+   source or sink is added; an untagged one lands in 'other'.
+   ============================================================ */
+function econState() {
+  const p = state.progress;
+  if (!p.econ || typeof p.econ !== 'object') p.econ = { since: Date.now(), activeMs: 0, earn: {}, spend: {}, day: null, dayEarn: {}, daySpend: {} };
+  const e = p.econ, t = todayKey();
+  if (e.day !== t) { e.day = t; e.dayEarn = {}; e.daySpend = {}; }
+  return e;
+}
+function econNote(n, src) {
+  if (!n || !state || !state.progress) return;
+  const e = econState(), k = src || 'other', a = Math.abs(n), side = n > 0 ? 'earn' : 'spend';
+  e[side][k] = (e[side][k] || 0) + a;
+  e[side === 'earn' ? 'dayEarn' : 'daySpend'][k] = (e[side === 'earn' ? 'dayEarn' : 'daySpend'][k] || 0) + a;
+}
+function spendPebbles(n, src) { state.progress.pebbles -= n; econNote(-n, src); }
+// Active play time: only counted while the page is visible.
+setInterval(() => { if (typeof state !== 'undefined' && state && state.progress && !document.hidden) econState().activeMs += 5000; }, 5000);
+function econReport() {
+  const e = econState(), hours = Math.max(e.activeMs / 3600000, 1 / 60);
+  const rows = m => Object.entries(m).map(([src, total]) => ({ src, total, perHour: total / hours })).sort((a, b) => b.total - a.total);
+  const earn = rows(e.earn), spend = rows(e.spend), tE = earn.reduce((s, r) => s + r.total, 0), tS = spend.reduce((s, r) => s + r.total, 0);
+  return { hours: +hours.toFixed(2), earned: tE, spent: tS, earnedPerHour: Math.round(tE / hours), spentPerHour: Math.round(tS / hours), earn, spend, today: { earn: e.dayEarn, spend: e.daySpend } };
+}
+function econSummaryText() {
+  const r = econReport(); if (!r.earned && !r.spent) return '';
+  const top = list => list.slice(0, 4).map(x => `${x.src} ${x.total}`).join(', ');
+  return `Pebbles over ${r.hours}h: earned ${r.earned} (${r.earnedPerHour}/h) [${top(r.earn)}] · spent ${r.spent} [${top(r.spend)}]`;
+}
+// Soft daily limits (v1.87.0): the more of one activity's Pebbles you have already earned today, the less the next ones pay.
+// Full pay up to `softCap` Pebbles a day, half up to double that, a quarter beyond. It is read straight from the ledger, so it
+// follows the same tags as addPebbles(n, src), and it resets with the day. It keeps a repeatable activity (fishing, the cup,
+// drafts, crops) from being the answer to everything, without ever stopping it or touching its other rewards.
+function econTaper(src, n, softCap) {
+  const e = econState(), done = e.dayEarn[src] || 0;
+  const out = done < softCap ? n : done < softCap * 2 ? Math.round(n / 2) : Math.round(n / 4);
+  if (out < n) {
+    if (!e.dayTaper) e.dayTaper = {};
+    if (!e.dayTaper[src]) { e.dayTaper[src] = true; setTimeout(() => toast(`🫧 You've earned plenty from ${src} today - it pays a little less now`), 900); }
+  }
+  return Math.max(n > 0 ? 1 : 0, out);
+}
+// Features that unlock with the Keeper's level (v1.87.0). Districts and Knacks carry their own levels
+// (DISTRICTS[x].unlockLevel, BattleEngine.KNACKS[x].level); upcomingUnlocks() merges all three for the Character tab.
+const FEATURE_LEVELS = {
+  draft: { level: 5, icon: '🎴', name: 'Draft Run' },
+  ghost: { level: 8, icon: '👻', name: 'Ghost duels' }
+};
+function featureLocked(id) { return ensureLevel().level < FEATURE_LEVELS[id].level; }
+function featureLockText(id) { const f = FEATURE_LEVELS[id]; return `${f.icon} ${f.name} unlocks at level ${f.level}`; }
+function unlocksBetween(from, to) {
+  const out = [];
+  Object.values(FEATURE_LEVELS).forEach(f => { if (f.level > from && f.level <= to) out.push({ level: f.level, icon: f.icon, text: f.name }); });
+  Object.values(BattleEngine.KNACKS).forEach(k => { if (k.level > from && k.level <= to) out.push({ level: k.level, icon: k.icon, text: `Knack: ${k.name}` }); });
+  Object.values(DISTRICTS).forEach(d => { if (d.unlockLevel > from && d.unlockLevel <= to && d.unlockWins > 0) out.push({ level: d.unlockLevel, icon: '🗺️', text: d.name }); });
+  return out.sort((a, b) => a.level - b.level);
+}
 // Keeper's Knack (BattleEngine.KNACKS): unlocked by Keeper level, one is picked for each match.
 function knackUnlocked(id) { const k = BattleEngine.KNACKS[id]; return !!k && ensureLevel().level >= k.level; }
 function currentKnackId() { const id = state.progress.knack; return id && knackUnlocked(id) ? id : 'forage'; }
@@ -546,7 +609,7 @@ function addXP(amount) {
   if (eventIs('double-xp')) amount *= 2;
   const pr = ensureLevel();
   pr.xp += amount;
-  let levelsGained = 0, bonusLevel = null;
+  let levelsGained = 0, bonusLevel = null; const levelBefore = pr.level;
   while (pr.xp >= xpToNext(pr.level)) {
     pr.xp -= xpToNext(pr.level);
     pr.level++;
@@ -555,10 +618,12 @@ function addXP(amount) {
   }
   if (levelsGained > 0) {
     const pebbleGain = levelsGained * 5;
-    addPebbles(pebbleGain);
+    addPebbles(pebbleGain, 'levelup');
     let bonusCardId = null;
     if (bonusLevel) { bonusCardId = randomCardId('rare'); state.ownedCards.push(bonusCardId); noteCardsFound(1); }
     showLevelUp(pr.level, pebbleGain, bonusCardId);
+    const fresh = unlocksBetween(levelBefore, pr.level);       // "🔓" notices for whatever this level opened up
+    if (fresh.length) setTimeout(() => toast('🔓 Unlocked: ' + fresh.map(u => `${u.icon} ${u.text}`).join(' · ')), 2200);
   }
   updateLevelHud();
 }

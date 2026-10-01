@@ -5,9 +5,9 @@
    Card seeds grow a card instead of (well, as well as) Pebbles.
    ============================================================ */
 const SEEDS = [
-  { id: 'daisy',     name: 'Daisy',     icon: '🌼', cost: 4,  growMin: 5,  pebbles: 7,  xp: 10, desc: 'Quick and cheerful.' },
-  { id: 'pumpkin',   name: 'Pumpkin',   icon: '🎃', cost: 10, growMin: 15, pebbles: 18, xp: 20, desc: 'Slow, but it pays.' },
-  { id: 'sunflower', name: 'Sunflower', icon: '🌻', cost: 16, growMin: 25, pebbles: 6,  xp: 25, card: 'rare',  desc: 'A card seed: grows a rare card or better.' },
+  { id: 'daisy',     name: 'Daisy',     icon: '🌼', cost: 5,  growMin: 5,  pebbles: 7,  xp: 10, desc: 'Quick and cheerful.' },
+  { id: 'pumpkin',   name: 'Pumpkin',   icon: '🎃', cost: 12, growMin: 15, pebbles: 18, xp: 20, desc: 'Slow, but it pays.' },
+  { id: 'sunflower', name: 'Sunflower', icon: '🌻', cost: 22, growMin: 25, pebbles: 6,  xp: 25, card: 'rare',  desc: 'A card seed: grows a rare card or better.' },
   { id: 'moonbean',  name: 'Moonbean',  icon: '🌙', cost: 0,  growMin: 40, pebbles: 8,  xp: 40, card: 'ultra', found: true, desc: 'Only found in the Hollow Garden. Grows an ultra rare card or better.' },
 ];
 const PLOT_MAX = 8;
@@ -54,7 +54,7 @@ function seedAction(act) {
   if (!s) return '';
   if (verb === 'buy') {
     if (state.progress.pebbles < s.cost) { sfx('tie'); return `Fern smiles kindly. "Those are 🫧 ${s.cost} a packet."`; }
-    state.progress.pebbles -= s.cost; seedInv()[id] = seedCount(id) + 1;
+    spendPebbles(s.cost, 'seeds'); seedInv()[id] = seedCount(id) + 1;
     saveState(); updateHud(); bumpPill('pillPebbles'); sfx('claim');
     return `${s.icon} One ${s.name} seed, wrapped in paper. ${s.desc}`;
   }
@@ -84,7 +84,7 @@ function cropCardRarity(floor) {
 function harvestCrop(c) {
   const data = ensureDistrictData('square'), s = seedDef(c.seed);
   data.crops = data.crops.filter(x => x.uid !== c.uid);
-  addPebbles(s.pebbles + (hasPerk('harvest') ? 2 : 0) + cardBonus('harvestPebbles') + (eventIs('harvest-fair') ? 3 : 0));
+  addPebbles(econTaper('crops', s.pebbles + (hasPerk('harvest') ? 2 : 0) + cardBonus('harvestPebbles') + (eventIs('harvest-fair') ? 3 : 0), 200), 'crops');
   addXP(s.xp);
   addIngredient(CROP_INGREDIENT[c.seed], 1);                 // every harvest also stocks the pantry
   bumpStat('cropsHarvested', 1);

@@ -193,7 +193,7 @@ function memoryFinish() {
     st.rewarded++;
     pebbles = efficient ? 3 : 2;
     if (Math.random() < (efficient ? 0.12 : 0.05)) { cardId = randomCardId(memoryRollRarity()); state.ownedCards.push(cardId); bumpStat('cardsFound', 1); bumpPill('pillCards'); }
-    else addPebbles(pebbles);
+    else addPebbles(pebbles, 'memory');
   }
   saveState(); updateHud();
   scene.text = !rewarded ? `${memory.pairs} pairs in ${memory.flips} flips. Olwen nods approvingly, though today's reward is spent.`
@@ -307,7 +307,7 @@ function awardMinigameResult(id, score) {
     if (ms.rewarded < MINI_DAILY_REWARDED) {
       ms.rewarded++;
       const peb = (def.pebbles ? def.pebbles(score) : TIER_PEBBLES[tier]) + cardBonus('miniPebbles');
-      if (peb) addPebbles(peb);
+      if (peb) addPebbles(peb, 'minigames');
       if (tier === 'gold' && Math.random() < MINI_GOLD_CARD_ODDS) { cardId = randomCardId(memoryRollRarity()); state.ownedCards.push(cardId); bumpStat('cardsFound', 1); bumpPill('pillCards'); }
       rewardText = `+${peb} 🫧${cardId ? ' and a card!' : ''}`;
     } else rewardText = "Today's prizes are used up, but it still counts toward your best.";
@@ -655,7 +655,7 @@ function openChest(data) {
   const xp = 80;
   state.ownedCards.push(cardId);
   noteCardsFound(1);
-  addPebbles(pebbles);
+  addPebbles(pebbles, 'puzzle');
   addXP(xp);
   bumpPill('pillCards');
   bumpStat('chestsOpened', 1);

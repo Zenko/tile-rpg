@@ -63,7 +63,7 @@ function claimStory() {
   const s = storyState(), st = storyStep(), wasOnboarding = s.step < STORY_ARC_LEN;
   if (!st || !st.done(state.progress)) return;
   s.step++;
-  if (st.pebbles) { addPebbles(st.pebbles); toast(`📜 Step done! +${st.pebbles} 🫧`); }
+  if (st.pebbles) { addPebbles(st.pebbles, 'story'); toast(`📜 Step done! +${st.pebbles} 🫧`); }
   if (st.card) { const cid = randomCardId(st.card); state.ownedCards.push(cid); bumpStat('cardsFound', 1);
     setTimeout(() => showCardReveal(cid, wasOnboarding ? 'Welcome to town!' : 'A town that knows you', true, wasOnboarding ? 'Wren says: "You belong here now."' : 'Wren says: "Look at you - practically a local."'), 300); }
   logEvent(st.icon, `${storyArcLabel(s.step - 1)}: ${st.goal}.`);
@@ -153,6 +153,7 @@ const GUIDE = [
     { icon: '🧩', name: 'Daily puzzle', where: 'The Reading Nook', how: 'A fixed board to win in one turn. New every day.' },
   ] },
   { section: 'Houses & shops', items: [
+    { icon: '🫧', name: 'Pebbles and soft limits', where: 'Settings → Pebble ledger', how: 'Fishing, crops, the Festival Cup and Draft Runs pay full Pebbles up to a daily amount, then less, then less again - it resets every morning. The Pebble ledger in Settings shows where yours came from. Bigger purchases (premium rings, backdrops and decorations) open up as you level.' },
     { icon: '🏠', name: 'Your cottage', where: 'Town Square, beside the Reading Nook', how: 'Mailbox, shelves, framed cards, trophies, and the Tidy Up game.' },
     { icon: '🍞', name: "Maple's Bakery", where: 'Town Square, bottom left', how: 'Bake bread, cook dishes from your pantry, and play Cake Toppings.' },
     { icon: '🌱', name: "Fern's Cottage", where: 'Town Square, the blue house', how: 'Seeds for your garden, and Weed the Beds.' },
@@ -247,6 +248,14 @@ document.getElementById('presenceToggle').addEventListener('click', () => {
   else removePresence();
   fetchWhosPlaying();
 });
+// Pebble ledger (js/progression.js): where Pebbles come from and go, for tuning the economy.
+document.getElementById('econToggle').addEventListener('click', () => {
+  const panel = document.getElementById('econPanel'), open = panel.classList.toggle('hidden') === false;
+  document.getElementById('econToggle').textContent = open ? 'Hide' : 'Show'; sfx('tap');
+  if (!open) return;
+  const r = econReport(), fmt = l => l.slice(0, 8).map(x => `${x.src}: ${x.total} (${Math.round(x.perHour)}/h)`).join('\n') || '-';
+  panel.textContent = `Over ${r.hours}h of play\nEarned ${r.earned} (${r.earnedPerHour}/h) · Spent ${r.spent} (${r.spentPerHour}/h)\n\nEARNED\n${fmt(r.earn)}\n\nSPENT\n${fmt(r.spend)}`;
+});
 // Ghost duels: your current deck rides along with your presence entry (on by default, with Share that I'm playing).
 document.getElementById('shareDeckToggle').addEventListener('click', () => {
   sfx('tap');
@@ -267,6 +276,7 @@ function testerInfo() {
     `${w ? w.name : ''} · ${seasonDef().name} · ${eventNow().name} · ${inBattle ? 'in a battle' : inScene && scene ? 'inside ' + scene.id : 'in town'}`,
     `Screen ${window.innerWidth}×${window.innerHeight} · touch ${'ontouchstart' in window ? 'yes' : 'no'}`,
     `Device: ${ua}`,
+    econSummaryText() ? `Economy: ${econSummaryText()}` : '',
     recent ? `Recent:\n${recent}` : ''].filter(Boolean).join('\n');
 }
 // The same facts as testerInfo(), as structured fields, so a feedback document in Firestore can be
@@ -279,6 +289,7 @@ function testerData() {
     level: pr.level, wins: state.wins || 0, cards: state.ownedCards.length,
     district: DISTRICTS[state.currentDistrict] ? DISTRICTS[state.currentDistrict].name : '',
     version: gameVersionLabel(), screen: `${window.innerWidth}x${window.innerHeight}`,
+    econ: (() => { const r = econReport(); return { hours: r.hours, earned: r.earned, spent: r.spent, earn: Object.fromEntries(r.earn.slice(0, 8).map(x => [x.src, x.total])), spend: Object.fromEntries(r.spend.slice(0, 8).map(x => [x.src, x.total])) }; })(),
   };
 }
 // A real overlay (like #cloudOverlay - see js/cloud-save.js) instead of prompt(), so a longer bug report or

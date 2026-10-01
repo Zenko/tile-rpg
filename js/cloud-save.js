@@ -141,6 +141,7 @@ function ghostState() {
   return p.ghost;
 }
 function startGhostDuel(p) {
+  if (featureLocked('ghost')) { toast(featureLockText('ghost')); return; }
   const g = ghostDeckOf(p); if (!g) { toast("That deck can't be loaded"); return; }
   if (state.deck.length < DECK_SIZE) { toast(`Fill your ${DECK_SIZE}-card deck first`); return; }
   closePlayerMenu && closePlayerMenu();
@@ -152,7 +153,7 @@ function ghostWin() {
   battle.rewarded = true;
   bumpStat('ghostWins', 1);
   let extra = 'A fine duel.';
-  if (!gs.beaten[id] && gs.paid < 5) { gs.beaten[id] = true; gs.paid++; addPebbles(8); extra = '<b>+8 🫧</b> for beating this ghost today.'; }
+  if (!gs.beaten[id] && gs.paid < 5) { gs.beaten[id] = true; gs.paid++; addPebbles(8, 'ghost'); extra = '<b>+8 🫧</b> for beating this ghost today.'; }
   saveState();
   const icon = btGet('battleEndIcon'); icon.textContent = '👻'; icon.className = 'big-icon reveal-icon';
   battleEndTitle.textContent = `You beat ${battle.npc.ghost.name}'s ghost!`;
@@ -184,7 +185,7 @@ async function fetchWhosPlaying() {
       return `<div class="panel-item"><span class="panel-icon">${p.emoji || '🙂'}</span><span class="panel-text">
         <div class="panel-name">${escapeHtml(p.name || 'A player')} · Lv ${p.level || 1}</div>
         <div class="panel-desc">${escapeHtml(p.district || '')}${p.district ? ' · ' : ''}${fmtLogTime(p.lastSeen)}</div></span>
-        ${g ? `<button class="btn btn-ghost ghost-btn" type="button" data-ghost="${i}" title="Duel a ghost of their deck">👻 ${g.fam ? g.fam.icon + ' ' : ''}Duel</button>` : ''}</div>`;
+        ${g ? (featureLocked('ghost') ? `<span class="ghost-lock" title="${featureLockText('ghost')}">👻 🔒 Lv ${FEATURE_LEVELS.ghost.level}</span>` : `<button class="btn btn-ghost ghost-btn" type="button" data-ghost="${i}" title="Duel a ghost of their deck">👻 ${g.fam ? g.fam.icon + ' ' : ''}Duel</button>`) : ''}</div>`;
     }).join('')
       : '<div class="panel-desc">Nobody sharing yet - turn it on in Settings and be the first!</div>';
     box.querySelectorAll('[data-ghost]').forEach(b => b.addEventListener('click', () => startGhostDuel(ghostRows[+b.dataset.ghost])));

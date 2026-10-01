@@ -1166,8 +1166,9 @@ function handleDecorationTap(tx, ty) {
   if ((!shopPanel.classList.contains('hidden') && shopSubView === 'items') || shopModeActive('items')) renderItems();
 }
 function buyDecoration(item) {
+  if (item.level && ensureLevel().level < item.level) { toast(`Unlocks at level ${item.level}`); sfx('tie'); return; }
   if (state.progress.pebbles < item.cost) { toast('Not enough Pebbles yet'); sfx('tie'); return; }
-  state.progress.pebbles -= item.cost;
+  spendPebbles(item.cost, 'decorations');
   state.decorationInventory[item.id] = decorationInventoryCount(item.id) + 1;
   saveState(); updateHud(); bumpPill('pillPebbles');
   logEvent(item.icon, `Bought a ${item.name} for the town.`);

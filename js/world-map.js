@@ -286,7 +286,12 @@ const BORDER_OPTIONS = [
   { id: 'candy',   name: 'Candy stripe', cost: 20, grad: c => `repeating-conic-gradient(${c} 0 15deg, #fff 15deg 30deg)` },
   { id: 'sunset',  name: 'Sunset fade', cost: 24, grad: c => `linear-gradient(135deg, ${c}, color-mix(in srgb, ${c} 35%, #ff8fb1))` },
   { id: 'rainbow', name: 'Rainbow',    cost: 30, fixed: true, grad: () => 'conic-gradient(#e86a6a, #f0c05a, #7fbf8a, #6fc3d6, #7a8fe0, #c27ad6, #e86a6a)' },
-  { id: 'gold',    name: 'Gilded',     cost: 36, fixed: true, glow: true, grad: () => 'conic-gradient(#f6e3a1, #c9962d, #fff0b8, #a87420, #f6e3a1)' }
+  { id: 'gold',    name: 'Gilded',     cost: 36, fixed: true, glow: true, grad: () => 'conic-gradient(#f6e3a1, #c9962d, #fff0b8, #a87420, #f6e3a1)' },
+  // Premium rings (v1.87.0): the high-end Pebble sinks
+  { id: 'prism',   name: 'Prism',      cost: 90,  fixed: true, grad: () => 'conic-gradient(from 30deg, #ffd1dc, #ffe9b8, #d1f5d3, #c4e7ff, #e0d1ff, #ffd1dc)' },
+  { id: 'ember',   name: 'Ember',      cost: 120, fixed: true, glow: true, grad: () => 'conic-gradient(#ff9a3c, #e8443a, #ffd36b, #e8443a, #ff9a3c)' },
+  { id: 'galaxy',  name: 'Galaxy',     cost: 170, fixed: true, glow: true, grad: () => 'conic-gradient(#2b1f5c, #7a4fd6, #3fb6e8, #7a4fd6, #2b1f5c)' },
+  { id: 'crown',   name: 'Crown',      cost: 240, fixed: true, glow: true, grad: () => 'conic-gradient(#fff3b0, #f0b429, #fff3b0, #c98a12, #fff3b0)' }
 ];
 const borderDef = id => BORDER_OPTIONS.find(b => b.id === id) || BORDER_OPTIONS[0];
 // Free colours for the ring (the first is the old default, sea glass). A custom colour can be picked too.
@@ -303,6 +308,9 @@ const STAGE_OPTIONS = [
   { id: 'snow',    name: 'Snowfall',       cost: 24, sky: ['#b9cde0', '#eef4fa'], ground: '#e8eef5', deco: ['❄️', '❄️', '⛄', '❄️', '🌲'] },
   { id: 'lantern', name: 'Lantern night',  cost: 30, sky: ['#2a1d3d', '#7a3f55'], ground: '#3b2634', deco: ['🏮', '🏮', '✨', '🏮', '🌙'], dark: true },
   { id: 'aurora',  name: 'Aurora hill',    cost: 40, sky: ['#0b2a3a', '#2f8f7a'], ground: '#1d3a4a', deco: ['🌌', '✨', '⭐', '✨', '🌲'], dark: true },
+  { id: 'sakura',  name: 'Sakura grove',   cost: 100, sky: ['#f7d6e0', '#fdf0e6'], ground: '#a7c98a', deco: ['🌸', '🌸', '🏮', '🦋', '🌸'] },
+  { id: 'nightfall', name: 'Nightfall',    cost: 140, sky: ['#141a36', '#3b4a7a'], ground: '#222c4a', deco: ['🌙', '⭐', '✨', '🦉', '⭐'], dark: true },
+  { id: 'summit',  name: 'Misty summit',   cost: 190, sky: ['#cfdbe8', '#f4f7fa'], ground: '#8a9aa8', deco: ['⛰️', '☁️', '🦅', '☁️', '❄️'] },
 ];
 const stageDef = id => STAGE_OPTIONS.find(s => s.id === id) || STAGE_OPTIONS[0];
 // The sky colours of a backdrop; 'live' reads the game clock so the stage turns dusky and dark with the town.

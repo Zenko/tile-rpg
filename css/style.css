@@ -2321,3 +2321,9 @@ html.calm .die.rolling { animation: none; }
 
 /* ---------- Ghost duels (v1.86.0) ---------- */
 .ghost-btn { flex-shrink: 0; width: auto; min-height: 40px; padding: 6px 12px; font-size: .74rem; margin-left: auto; }
+
+/* ---------- Unlock levels (v1.87.0) ---------- */
+.unlock-row { display: flex; justify-content: space-between; gap: 10px; padding: 7px 2px; border-bottom: 1px solid var(--stone-edge); font-size: .82rem; color: var(--ink); }
+.unlock-row b { color: var(--accent); font-weight: 700; white-space: nowrap; }
+.unlock-row:last-child { border-bottom: none; }
+.ghost-lock { margin-left: auto; font-size: .72rem; color: var(--ink-soft); white-space: nowrap; }

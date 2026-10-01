@@ -91,6 +91,13 @@ function charDrawMe(box) {
   grid.innerHTML = profileStatValues().map(s => `<div class="profile-stat"><span class="ps-icon">${s.icon}</span><span class="ps-value">${s.value}</span><span class="ps-label">${s.label}</span></div>`).join('');
   box.appendChild(grid);
   if (t) { const w = document.createElement('div'); w.className = 'panel-desc'; w.style.marginTop = '10px'; w.textContent = `Wearing the title ${t.name}. Change it in Look.`; box.appendChild(w); }
+  const lvNow = pr.level, ahead = unlocksBetween(lvNow, lvNow + 30).slice(0, 4);
+  if (ahead.length) {
+    charSection(box, 'Coming up');
+    const up = document.createElement('div'); up.className = 'panel-desc';
+    up.innerHTML = ahead.map(u => `<div class="unlock-row"><span>${u.icon} ${u.text}</span><b>Lv ${u.level}</b></div>`).join('');
+    box.appendChild(up);
+  }
   charSection(box, "Keeper's Knack");
   const kb = document.createElement('div'); kb.className = 'knack-row ch-knack';
   const drawK = () => {

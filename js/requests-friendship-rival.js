@@ -263,7 +263,7 @@ function completeRequest(f) {
   addFriendship(f, FRIEND_POINTS.favour, 'favour');
   let rewardCard = null;
   if (r.reward) { rewardCard = randomCardId(rollRewardRarity(false)); state.ownedCards.push(rewardCard); bumpStat('cardsFound', 1); bumpPill('pillCards'); }
-  else addPebbles(r.pebbles);
+  else addPebbles(r.pebbles, 'favours');
   logEvent('🎁', `Finished a favour for ${f.name}${rewardCard ? '' : ` for 🫧 ${r.pebbles} Pebbles`}.`);
   saveState(); updateHud(); renderTalk(); sfx('claim'); buzz(HAP.win);
   toast(rewardCard ? '🎁 A card, as thanks' : `🫧 +${r.pebbles} Pebbles`);
@@ -294,7 +294,7 @@ function giveDish(f) {
   if (!r || !canGiveDish(f)) return;
   dishes()[r.id] = dishCount(r.id) - 1;
   giftsToday().to[neighborKey(f)] = true;
-  addPebbles(2);
+  addPebbles(2, 'gifts');
   bumpStat('dishesGiven', 1);
   addFriendship(f, r.gift, 'dish');
   f._thanks = `${r.icon} ${r.name}? For me? This is the nicest thing anyone has done all week! (+2 🫧)`;
@@ -306,7 +306,7 @@ function shareBread(f) {
   if (!canShareBread(f)) return;
   state.progress.bread = breadCount() - 1;
   giftsToday().to[neighborKey(f)] = true;
-  addPebbles(3);
+  addPebbles(3, 'gifts');
   bumpStat('breadShared', 1);
   addFriendship(f, FRIEND_POINTS.bread, 'bread');
   f._thanks = BREAD_THANKS[Math.floor(Math.random() * BREAD_THANKS.length)] + ' (+3 🫧)';
@@ -435,7 +435,7 @@ function signatureWin() {
     const r = rollRewardRarity(false);
     cardId = randomCardId(RARITY_ORDER.indexOf(r) < 2 ? 'ultra' : r);
     state.ownedCards.push(cardId); noteCardsFound(1); bumpPill('pillCards');
-  } else { pebbles = 6; addPebbles(pebbles); }
+  } else { pebbles = 6; addPebbles(pebbles, 'rival'); }
   if (fr) { fr.sigWins = (fr.sigWins || 0) + 1; fr.points += FRIEND_POINTS.signature; }
   saveState();
   const icon = btGet('battleEndIcon'), endCard = btGet('battleEndCard');
@@ -556,7 +556,7 @@ function rivalWin() {
   bumpStat('battlesWon', 1); bumpStat('rivalWins', 1);
   let cardId;
   if (!done && rv.chapter === RIVAL.chapters - 1) cardId = 'rooks-ace';
-  else if (done) { cardId = randomCardId(rollRewardRarity(false)); addPebbles(10); }
+  else if (done) { cardId = randomCardId(rollRewardRarity(false)); addPebbles(10, 'rival'); }
   else { const floor = rivalPrizeRarity(rv.chapter + 1), r = rollRewardRarity(false); cardId = randomCardId(RARITY_ORDER.indexOf(r) < RARITY_ORDER.indexOf(floor) ? floor : r); }
   const isNew = !discoveredSet().has(BattleEngine.baseIdOf(cardId));
   state.ownedCards.push(cardId); noteCardsFound(1); bumpPill('pillCards');

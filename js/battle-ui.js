@@ -995,7 +995,7 @@ function btFinish() {
   if (battle.spellsCast) bumpStat('spellsCast', battle.spellsCast);
   if (!battle.puzzle && !battle.neutral) settleMastery(won && !yielded);
   const winPeb = won && !yielded && !battle.puzzle && !battle.neutral ? cardBonus('winPebbles') : 0;
-  if (winPeb) { addPebbles(winPeb); setTimeout(() => toast(`🌵 Thorn charms: +${winPeb} 🫧`), 1200); }
+  if (winPeb) { addPebbles(winPeb, 'charms'); setTimeout(() => toast(`🌵 Thorn charms: +${winPeb} 🫧`), 1200); }
   btRender();
   setTimeout(() => btShowResult(won, yielded), won ? 500 : 300);
 }

@@ -111,7 +111,7 @@ function ovenAction() {
   if (Date.now() - ov.startedAt < (ov.ms || BAKE_MS)) return 'Not yet. It smells wonderful, though.';
   ov.startedAt = null;
   bumpStat('breadBaked', 1);
-  if (breadCount() >= BREAD_MAX) { addPebbles(4); toast('🫧 +4 Pebbles'); saveState(); return 'Your basket is already full, so Maple buys this loaf back for 4 Pebbles.'; }
+  if (breadCount() >= BREAD_MAX) { addPebbles(4, 'bread'); toast('🫧 +4 Pebbles'); saveState(); return 'Your basket is already full, so Maple buys this loaf back for 4 Pebbles.'; }
   state.progress.bread = breadCount() + 1; saveState();
   toast('🍞 +1 loaf'); sfx('claim'); buzz(HAP.found);
   logEvent('🍞', 'Baked a loaf of bread at the bakery.');
@@ -205,7 +205,7 @@ function spiceDealAction() {
   if (state.progress.pebbles < d.price) { sfx('tie'); return `Saffron taps the sign. "🫧 ${d.price}, friend. Come back when your pockets jingle."`; }
   buildingState('stall-spice').dealDay = todayKey();
   if (d.kind === 'pack') { buyPack(d.pack, d.price); return 'Saffron wraps the pack in brown paper. "A bargain, and you know it."'; }
-  state.progress.pebbles -= d.price;
+  spendPebbles(d.price, 'spice-deal');
   const isNew = !discoveredSet().has(d.card);
   state.ownedCards.push(d.card); noteCardsFound(1);
   logEvent('🌶️', `Bought ${cardDef(d.card).name} from Saffron's deal for 🫧 ${d.price}.`);
@@ -241,7 +241,7 @@ function sleeveAction(id) {
   if (!s) return '';
   if (!ch.unlockedSleeves.includes(s.id)) {
     if (state.progress.pebbles < s.cost) { sfx('tie'); return `"That one's 🫧 ${s.cost}," says ${scene && INTERIORS[scene.id] ? INTERIORS[scene.id].name : 'Tock'}, polishing it anyway.`; }
-    state.progress.pebbles -= s.cost; ch.unlockedSleeves.push(s.id);
+    spendPebbles(s.cost, 'sleeves'); ch.unlockedSleeves.push(s.id);
     logEvent('🎴', `Bought the ${s.name} card sleeve for 🫧 ${s.cost}.`);
     bumpPill('pillPebbles'); sfx('claim'); buzz(HAP.found);
   } else sfx('tap');
@@ -598,7 +598,7 @@ function claimLetter(id) {
   if (!l || !l.gift || l.claimed) return;
   const g = l.gift;
   l.claimed = true; l.read = true;
-  if (g.kind === 'pebbles') addPebbles(g.n);
+  if (g.kind === 'pebbles') addPebbles(g.n, 'letters');
   else if (g.kind === 'seed') seedInv()[g.id] = seedCount(g.id) + 1;
   else if (g.kind === 'ingredient') addIngredient(g.id, g.n);
   else if (g.kind === 'bread') state.progress.bread = Math.min(BREAD_MAX, breadCount() + 1);
@@ -725,7 +725,8 @@ function renderSceneBody() {
     else acts.innerHTML = it.actions.map(a => { const v = a.view ? a.view(a) : null; return sceneBtn(a.id, v ? v.label : a.label, v && v.disabled); }).join('') + sceneBtn('leave', 'Head back out');
   }
 }
-function addPebbles(n) { state.progress.pebbles += n; saveState(); updateHud(); bumpPill('pillPebbles'); }
+// `src` names where the Pebbles came from (or went), for the economy ledger (econNote, js/progression.js).
+function addPebbles(n, src) { state.progress.pebbles += n; econNote(n, src); saveState(); updateHud(); bumpPill('pillPebbles'); }
 function sceneAction(actId) {
   if (!scene) return;
   if (actId === 'leave') {
@@ -793,7 +794,7 @@ function sceneAction(actId) {
     if (st[a.id] === todayKey()) { scene.text = a.already; }
     else { st[a.id] = todayKey(); scene.text = a.done;
       const pebbles = a.pebbles + (weatherFx().dailyBonus || 0);
-      addPebbles(pebbles); toast(`🫧 +${pebbles} Pebbles`); sfx('claim'); }
+      addPebbles(pebbles, 'daily-tasks'); toast(`🫧 +${pebbles} Pebbles`); sfx('claim'); }
   } else if (a.kind === 'memory') {
     memoryNewGame(); scene.text = `Match all ${memory.pairs} pairs. Olwen watches with quiet interest.`; sfx('tap'); renderScene(); renderMemoryGrid(); return;
   } else if (a.kind === 'advice') {
@@ -845,7 +846,7 @@ function cupDeck(round) { return round === 0 ? buildDeckForOpponent(DECK_SIZE, f
 function cupButtons() {
   const cs = cupState();
   const chal = sceneBtn('chal', `🎯 Deck challenges · ${challengeState().list.filter(c => c.won).length}/3 beaten today`);
-  const dr = draftState(), draft = sceneBtn('draft', dr.active ? `🎴 Draft Run · in progress` : `🎴 Draft Run · build a deck, win four`);
+  const dr = draftState(), draft = sceneBtn('draft', dr.active ? `🎴 Draft Run · in progress` : featureLocked('draft') ? `🎴 Draft Run · 🔒 level ${FEATURE_LEVELS.draft.level}` : `🎴 Draft Run · build a deck, win four`);
   if (!cs.active) return sceneBtn('cup-enter', cs.trophy ? `🏆 Enter again (for Pebbles)` : `🏆 Enter the ${cupName()}`) + draft + chal + sceneBtn('leave', 'Head back out');
   const r = CUP_ROUNDS[cs.round], foe = cs.foes[cs.round];
   return sceneBtn('cup-play', `${r.icon} ${r.title}: ${foe.icon} ${foe.name} · you have ♥${cs.spirit}`) +
@@ -879,8 +880,8 @@ function cupWin() {
   state.wins++; bumpStat('battlesWon', 1); bumpStat('cupRoundsWon', 1);
   cs.spirit = Math.max(1, battle.G.p[0].spirit);
   cs.best = Math.max(cs.best || 0, round + 1);
-  const cupPeb = r.pebbles * (eventIs('festival-day') ? 2 : 1);
-  addPebbles(cupPeb);
+  const cupPeb = econTaper('cup', r.pebbles * (eventIs('festival-day') ? 2 : 1), 60);
+  addPebbles(cupPeb, 'cup');
   const icon = btGet('battleEndIcon'), endCard = btGet('battleEndCard');
   icon.className = 'big-icon reveal-icon';
   let extra = '';
@@ -933,7 +934,7 @@ function dungeonWin() {
   const newBest = st.floor > (state.progress.cellarBest || 0);
   st.best = Math.max(st.best || 0, st.floor);
   state.progress.cellarBest = Math.max(state.progress.cellarBest || 0, st.floor);
-  addPebbles(f.pebbles);
+  addPebbles(f.pebbles, 'cellar');
   bumpStat('battlesWon', 1);
   let cardId = null, heading = '';
   if (f.final) { cardId = randomCardId(rollRewardRarity(false)); heading = 'From the old chest'; }

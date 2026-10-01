@@ -12,13 +12,12 @@
    ============================================================ */
 const DRAFT_PICKS = 12;
 const DRAFT_ROUNDS = [
-  { title: 'Round one',   icon: '🥉', level: 'gentle', spirit: 14, tier: 1, pebbles: 6 },
-  { title: 'Round two',   icon: '🥈', level: 'normal', spirit: 16, tier: 2, pebbles: 10 },
-  { title: 'Round three', icon: '🥇', level: 'normal', spirit: 18, tier: 2, pebbles: 16 },
-  { title: 'The Final',   icon: '🏆', level: 'smart',  spirit: 20, tier: 3, pebbles: 30 }
+  { title: 'Round one',   icon: '🥉', level: 'gentle', spirit: 14, tier: 1, pebbles: 4 },
+  { title: 'Round two',   icon: '🥈', level: 'normal', spirit: 16, tier: 2, pebbles: 6 },
+  { title: 'Round three', icon: '🥇', level: 'normal', spirit: 18, tier: 2, pebbles: 10 },
+  { title: 'The Final',   icon: '🏆', level: 'smart',  spirit: 20, tier: 3, pebbles: 20 }
 ];
 const DRAFT_RARITY_W = { common: 50, rare: 28, ultra: 14, super: 6, mythic: 2 };
-const DRAFT_FULL_RUNS_PER_DAY = 3;
 const DRAFT_FOE_WINS = 3;      // opponents' card quality is set as if you had this many wins, whoever you are
 
 function draftState() {
@@ -54,19 +53,20 @@ function draftFoes() {
   const a = shuffledArr(all);
   return [{ name: a[0].name, icon: a[0].icon }, { name: a[1].name, icon: a[1].icon }, { name: a[2].name, icon: a[2].icon }, { name: 'The Draft Master', icon: '🎴' }];
 }
-function draftPebbles(base) { return Math.round(base * (draftState().runsToday <= DRAFT_FULL_RUNS_PER_DAY ? 1 : 0.5)) * (typeof eventIs === 'function' && eventIs('festival-day') ? 2 : 1); }
+// Pebbles taper off after about a run's worth a day (econTaper, js/progression.js), so a second and third run mostly pay in cards and fun.
+function draftPebbles(base) { return econTaper('draft', base * (typeof eventIs === 'function' && eventIs('festival-day') ? 2 : 1), 40); }
 
 function draftIntro() {
   const d = draftState();
   if (d.active && d.stage === 'pick') return `Your draft is in progress: ${d.picks.length} of ${DRAFT_PICKS} cards chosen. Pick one card from each offer to build a deck from scratch.`;
   if (d.active) return `Your deck is ready. ${DRAFT_ROUNDS[d.round].title}: ${d.foes[d.round].icon} ${d.foes[d.round].name} is waiting. A loss ends the run.`;
-  return `The Draft Run: build a fresh deck by picking 1 card from each of ${DRAFT_PICKS} offers of three - from every card in the game, not just yours - then win four matches in a row. Your collection's perks stay home, so everyone drafts on equal terms. ${d.runsToday >= DRAFT_FULL_RUNS_PER_DAY ? 'Runs after your first three today pay half.' : `${DRAFT_FULL_RUNS_PER_DAY - d.runsToday} full-pay runs left today.`}${d.best ? ` Best so far: ${d.best} round${d.best === 1 ? '' : 's'}.` : ''}`;
+  return `The Draft Run: build a fresh deck by picking 1 card from each of ${DRAFT_PICKS} offers of three - from every card in the game, not just yours - then win four matches in a row. Your collection's perks stay home, so everyone drafts on equal terms. Pebble prizes shrink once you have earned plenty from drafts in a day.${d.best ? ` Best so far: ${d.best} round${d.best === 1 ? '' : 's'}.` : ''}`;
 }
 
 function draftButtons() {
   const d = draftState();
   const back = sceneBtn('draft-back', '← Back to the fountain');
-  if (!d.active) return sceneBtn('draft-start', '🎴 Start a Draft Run') + back;
+  if (!d.active) return sceneBtn('draft-start', featureLocked('draft') ? `🔒 ${featureLockText('draft')}` : '🎴 Start a Draft Run', featureLocked('draft')) + back;
   if (d.stage === 'pick') return sceneBtn('draft-pick', `🎴 Keep drafting · ${d.picks.length}/${DRAFT_PICKS} picked`) + sceneBtn('draft-quit', 'Abandon this run') + back;
   const r = DRAFT_ROUNDS[d.round], foe = d.foes[d.round];
   return sceneBtn('draft-play', `${r.icon} ${r.title} · ${foe.icon} ${foe.name}`) + sceneBtn('draft-deck', '🃏 Look at my draft deck') + sceneBtn('draft-quit', 'Abandon this run') + back;
@@ -76,6 +76,7 @@ function draftAction(act) {
   if (act === 'draft') { scene.mode = 'draft'; scene.text = draftIntro(); sfx('tap'); renderScene(); return; }
   if (act === 'draft-back') { scene.mode = null; scene.text = cupIntro(); sfx('nav'); renderScene(); return; }
   if (act === 'draft-start') {
+    if (featureLocked('draft')) { toast(featureLockText('draft')); return; }
     d.active = true; d.stage = 'pick'; d.picks = []; d.round = 0; d.foes = draftFoes(); d.offer = draftRollOffer([]); d.runsToday++;
     saveState(); sfx('claim'); scene.text = draftIntro(); renderScene(); draftOpen(); return;
   }
@@ -141,7 +142,7 @@ function draftWin() {
   battle.rewarded = true;
   bumpStat('draftWins', 1);
   d.best = Math.max(d.best || 0, round + 1);
-  const peb = draftPebbles(r.pebbles); addPebbles(peb);
+  const peb = draftPebbles(r.pebbles); addPebbles(peb, 'draft');
   const icon = btGet('battleEndIcon'), endCard = btGet('battleEndCard');
   icon.className = 'big-icon reveal-icon';
   let extra = '';
@@ -162,7 +163,7 @@ function draftWin() {
       endCard.classList.add('glow-' + def.rarity);
       extra = `A prize for the first clear today:<br><b>${cardArtHtml(def)} ${def.name}</b> <span class="rarity-tag rt-${def.rarity}" style="margin:4px 0 0">${RARITY_LABEL[def.rarity]}</span>`;
       logEvent('🎴', `Cleared a Draft Run and won ${def.name}.`);
-    } else { addPebbles(20); extra = 'Another clean run today: +20 🫧 bonus.'; }
+    } else { const bonus = econTaper('draft', 12, 40); addPebbles(bonus, 'draft'); extra = `Another clean run today: +${bonus} 🫧 bonus.`; }
   }
   saveState();
   battleEndStats.innerHTML = `<b>+${peb} 🫧</b> ${extra}`;

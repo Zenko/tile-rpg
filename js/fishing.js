@@ -426,8 +426,8 @@ function fishLand(fish) {
       state.ownedCards.push(cardId); bumpStat('cardsFound', 1); bumpPill('pillCards');
       line = 'Something heavier than a fish. A card, tied up in the weeds!';
     } else {
-      gotPeb = Math.round(fish.pebbles * (eventIs('fishing-derby') ? 2 : 1) * (isBig ? 1.5 : 1));
-      addPebbles(gotPeb);
+      gotPeb = econTaper('fishing', Math.round(fish.pebbles * (eventIs('fishing-derby') ? 2 : 1) * (isBig ? 1.5 : 1)), 120);
+      addPebbles(gotPeb, 'fishing');
       line = `${isBig ? "It's a big one! " : ''}${fish.blurb}`;
     }
   } else { line = `${fish.blurb} You let it go.`; }

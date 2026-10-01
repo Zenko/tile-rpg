@@ -18,6 +18,18 @@ function gameVersionLabel() {
    the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
 const CHANGELOG = [
   {
+    version: '1.87.0',
+    date: '2026-10-01',
+    title: "A steadier economy",
+    changes: [
+      "New: soft daily limits. Fishing, crops, the Festival Cup and Draft Runs pay full Pebbles up to a daily amount, then half, then a quarter. It resets every morning and never stops you playing.",
+      "Draft Runs pay less per round, and unlock at level 5. Ghost duels unlock at level 8. New unlocks show a 🔓 notice when you level up, and the Character tab has a Coming up list.",
+      "Card packs from Brook upward and a few seeds cost a bit more. Draft pay-outs and the big packs are now meant as goals to save for.",
+      "New premium things to save for: five decorations (Moon Gate up to the Golden Keeper, unlocking from level 6), four shimmering avatar rings and three new Character backdrops.",
+      "Settings has a Pebble ledger showing what you have earned and spent, and where from. Feedback you send includes a short summary of it, which helps tune the game."
+    ]
+  },
+  {
     version: '1.86.0',
     date: '2026-10-01',
     title: "Ghost duels",

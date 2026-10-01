@@ -68,7 +68,7 @@ function buyCosmetic(kind, value, cost) {
   ensureCosmeticUnlocks();
   const ch = state.character, pr = state.progress;
   if (pr.pebbles < cost) { toast('Not enough Pebbles yet'); sfx('tie'); return false; }
-  pr.pebbles -= cost;
+  spendPebbles(cost, 'cosmetics');
   const key = kind === 'emoji' ? 'unlockedEmojis' : kind === 'accessory' ? 'unlockedAccessories' : kind === 'mat' ? 'unlockedMats' : kind === 'stage' ? 'unlockedStages' : kind === 'border' ? 'unlockedAvBorders' : 'unlockedColors';
   if (!ch[key].includes(value)) ch[key].push(value);
   if (kind === 'emoji') ch.emoji = value;

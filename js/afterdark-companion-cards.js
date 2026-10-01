@@ -54,7 +54,7 @@ function catchBug(b) {
 function buyNightPack() {
   if (!isNightNow()) return 'Lumen yawns. "The night packs are packed away until dark."';
   if (state.progress.pebbles < NIGHT_PACK_COST) { sfx('tie'); return `Lumen blinks slowly. "🫧 ${NIGHT_PACK_COST}, night friend."`; }
-  state.progress.pebbles -= NIGHT_PACK_COST;
+  spendPebbles(NIGHT_PACK_COST, 'night-pack');
   const r = Math.random(), rar = r < 0.03 ? 'mythic' : r < 0.15 ? 'super' : r < 0.45 ? 'ultra' : 'rare';
   let pool = NIGHT_CARDS.map(cardDef).filter(d => d && d.rarity === rar);
   if (!pool.length) pool = NIGHT_CARDS.map(cardDef).filter(Boolean);
@@ -69,7 +69,7 @@ function buyNightPack() {
 function sellJar() {
   const v = jarValue();
   if (!v) return 'Your jar is empty. Critters glow in the grass at night - tap one to catch it.';
-  bugState().jar = {}; addPebbles(v); saveState(); sfx('claim');
+  bugState().jar = {}; addPebbles(v, 'bugs'); saveState(); sfx('claim');
   return `Lumen releases your critters into the lantern light, one by one, and counts out 🫧 ${v}.`;
 }
 
@@ -201,7 +201,7 @@ function checkSets() {
   CARD_SETS.forEach(s => {
     if (p.setsDone[s.id] || !setComplete(s)) return;
     p.setsDone[s.id] = true;
-    addPebbles(20); bumpStat('setsCompleted', 1);
+    addPebbles(20, 'sets'); bumpStat('setsCompleted', 1);
     toast(`${s.icon} Set complete: ${s.name}! ${s.text} · +20 🫧`);
     logEvent(s.icon, `Completed the ${s.name} set. Bonus: ${s.text.toLowerCase()}.`);
   });
@@ -257,11 +257,11 @@ function donateCard(id) {
   const w = MUSEUM_WINGS.find(x => x.cards.includes(id)), d = cardDef(id), ms = museumState();
   state.ownedCards.splice(state.ownedCards.indexOf(id), 1);
   ms.donated[id] = Date.now();
-  addPebbles(2); addXP(8); bumpStat('donations', 1);
+  addPebbles(2, 'museum'); addXP(8); bumpStat('donations', 1);
   let text = `${d.icon} ${d.name} takes its place in the ${w.name}. The curator beams. (+2 🫧)`;
   if (w && !ms.wings[w.id] && wingProgress(w) === w.cards.length) {
     ms.wings[w.id] = Date.now();
-    addPebbles(WING_PEBBLES);
+    addPebbles(WING_PEBBLES, 'museum');
     state.decorationInventory[w.deco] = decorationInventoryCount(w.deco) + 1;
     const deco = DECORATION_ITEMS.find(x => x.id === w.deco);
     toast(`${w.icon} The ${w.name} is complete!`); logEvent(w.icon, `Completed the museum's ${w.name}.`);
@@ -346,7 +346,7 @@ function collectExpedition(i) {
   const e = expedDef(t.id), loot = rollExpedLoot(e, t.cards), s = partyStats(t.cards);
   es.active.splice(i, 1);
   t.cards.forEach(id => { state.ownedCards.push(id); addMastery(BattleEngine.baseIdOf(id), 2); });   // everyone comes home, a little wiser
-  addPebbles(loot.pebbles);
+  addPebbles(loot.pebbles, 'expeditions');
   addXP(Math.round(e.mins / 2 * (1 + 0.5 * s.mend)));
   loot.items.forEach(it => { if (it.kind === 'seed') seedInv()[it.id] = seedCount(it.id) + it.n; else addIngredient(it.id, it.n); });
   if (loot.card) { state.ownedCards.push(loot.card); bumpStat('cardsFound', 1); bumpPill('pillCards'); }
@@ -449,7 +449,7 @@ function doTrade(i) {
   o.done = true;
   bumpStat('tradesDone', 1);
   addFriendship({ id: 'npc-market-trade', name: o.name }, 1, 'trade');
-  if (o.kind === 'buyer') { addPebbles(o.pebbles); sfx('claim'); }
+  if (o.kind === 'buyer') { addPebbles(o.pebbles, 'trades'); sfx('claim'); }
   else {
     const isNew = !discoveredSet().has(o.give);
     state.ownedCards.push(o.give); bumpStat('cardsFound', 1); bumpPill('pillCards');
@@ -514,7 +514,7 @@ function challengeWin() {
     endCard.classList.add('glow-' + def.rarity);
     battleEndStats.innerHTML = `A win on today's rules earns<br><b>${cardArtHtml(def)} ${def.name}</b> <span class="rarity-tag rt-${def.rarity}" style="margin:4px 0 0">${RARITY_LABEL[def.rarity]}</span>`;
     logEvent('🎯', `Beat today's "${r.text}" challenge.`);
-  } else { addPebbles(4); battleEndStats.innerHTML = 'Beaten again - <b>+4 🫧</b>. The card prize comes once a day.'; }
+  } else { addPebbles(4, 'signature'); battleEndStats.innerHTML = 'Beaten again - <b>+4 🫧</b>. The card prize comes once a day.'; }
   saveState();
   btGet('battleRetryBtn').classList.add('hidden');
   sparkleBurst(btGet('battleSparkles'), ['🎯', '✨'], 12); sfx('win'); buzz(HAP.win); bumpPill('pillWins');
