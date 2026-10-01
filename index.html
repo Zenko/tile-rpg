@@ -426,6 +426,7 @@
     <div class="sparkles" id="battleSparkles"></div>
     <div class="big-icon" id="battleEndIcon">🌿</div>
     <h2 id="battleEndTitle">The match settles.</h2>
+    <div class="end-stats hidden" id="battleEndGrid"></div>
     <p id="battleEndStats"></p>
     <div class="controls">
       <button id="battleRetryBtn" class="btn btn-ghost">Try Again</button>
@@ -527,6 +528,22 @@
   </div>
   <div class="wm-stage" id="wmStage"></div>
   <div class="wm-sheet" id="wmSheet"></div>
+</div>
+
+<div class="overlay hidden" id="colorOverlay">
+  <div class="overlay-card clr-card" role="dialog" aria-modal="true" aria-labelledby="clrTitle">
+    <h2 id="clrTitle">Pick a colour</h2>
+    <p class="clr-sub">For your avatar's border. Slide until it looks right.</p>
+    <div class="clr-preview"><span class="avatar-preview" id="clrPreview"></span></div>
+    <label class="clr-row"><span>Colour</span><input type="range" id="clrH" min="0" max="360" step="1"></label>
+    <label class="clr-row"><span>Richness</span><input type="range" id="clrS" min="0" max="100" step="1"></label>
+    <label class="clr-row"><span>Brightness</span><input type="range" id="clrL" min="5" max="95" step="1"></label>
+    <label class="clr-row clr-hex"><span>Hex</span><input type="text" id="clrHex" maxlength="7" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="text"></label>
+    <div class="controls">
+      <button id="clrCancel" class="btn btn-ghost">Cancel</button>
+      <button id="clrSet" class="btn">Use this colour</button>
+    </div>
+  </div>
 </div>
 
 <div class="overlay hidden" id="weatherOverlay">

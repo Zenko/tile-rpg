@@ -879,8 +879,9 @@ function btShowResult(won, yielded) {
   const G = battle.G, npc = battle.npc;
   const ownedBefore = state.ownedCards.length, firstShow = !battle.recorded;   // cards added below are this match's prizes
   const icon = btGet('battleEndIcon'), endCard = btGet('battleEndCard');
-  endCard.className = 'overlay-card';
+  endCard.className = 'overlay-card end-card';
   const turns = Math.ceil(G.turn / 2) + 1;
+  btGet('battleEndGrid').classList.add('hidden');
 
   if (won && !battle.rewarded && npc.puzzle) {
     puzzleWin();
@@ -919,7 +920,7 @@ function btShowResult(won, yielded) {
     icon.className = 'big-icon reveal-icon';
     if (tier >= 1) endCard.classList.add('glow-' + rewardDef.rarity);
     battleEndTitle.textContent = battle.isBoss ? `${npc.name} yields.` : `${npc.name} offers a card.`;
-    battleEndStats.innerHTML = `You won with <b>${Math.max(0, G.p[0].spirit)}</b> Spirit left after ${turns} turns and received<br><b>${cardArtHtml(rewardDef)} ${rewardDef.name}</b> <span class="rarity-tag rt-${rewardDef.rarity}" style="margin:4px 0 0">${RARITY_LABEL[rewardDef.rarity]}</span>`;
+    battleEndStats.innerHTML = `<span class="end-prize-k">Prize</span><br><b>${cardArtHtml(rewardDef)} ${rewardDef.name}</b> <span class="rarity-tag rt-${rewardDef.rarity}" style="margin:4px 0 0">${RARITY_LABEL[rewardDef.rarity]}</span>`;
     btGet('battleRetryBtn').classList.add('hidden');
     sparkleBurst(btGet('battleSparkles'), ['✨', '🌟', '🌿'], battle.isBoss ? 20 : 10);
     sfx(battle.isBoss || tier >= 3 ? 'mythic' : 'win'); buzz(HAP.win);
@@ -951,9 +952,22 @@ function btShowResult(won, yielded) {
     btGet('battleRetryBtn').classList.remove('hidden');
     sfx('soft');
   }
+  btRenderEndStats(G, won, yielded, turns, npc);
   if (firstShow && !npc.puzzle) { battle.recorded = true; recordBattle(won, yielded, state.ownedCards.slice(ownedBefore)); }
   updateHud();
   battleEndOverlay.classList.remove('hidden');
+}
+
+// The stats half of the results window: a grid of what happened this match, shown above whatever the prize or summary
+// text says, so there is one window with both. Hidden for puzzles (nothing to count) and for stepping away.
+function btRenderEndStats(G, won, yielded, turns, npc) {
+  const box = btGet('battleEndGrid');
+  if (npc.puzzle || yielded) { box.classList.add('hidden'); return; }
+  const st = battle.stats || { played: 0, dealt: 0, taken: 0, ko: 0 }, me = G.p[0];
+  const tiles = [['⏱️', turns, 'Turns'], ['❤️', `${Math.max(0, me.spirit)}/${me.maxSpirit}`, 'Your Spirit'], ['🃏', st.played, 'Cards played'],
+                 ['⚔️', st.dealt, 'Damage dealt'], ['💥', st.ko, 'Foes cleared'], ['🛡️', st.taken, 'Damage taken']];
+  box.innerHTML = tiles.map(([ic, v, l], i) => `<div class="end-stat" style="--n:${i}"><span class="es-ic">${ic}</span><b>${v}</b><span class="es-l">${l}</span></div>`).join('');
+  box.classList.remove('hidden');
 }
 
 function closeBattle(retry) {

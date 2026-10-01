@@ -131,10 +131,9 @@ function charDrawLook(box) {
     b.addEventListener('click', () => { sfx('nav'); buzz(HAP.tap); pick(i === 0 ? null : c); });
     cw.appendChild(b);
   });
-  const custom = document.createElement('label'); custom.className = 'color-swatch shop-swatch bd-color bd-custom'; custom.title = 'Pick any colour';
-  custom.innerHTML = '<span aria-hidden="true">+</span><input type="color" aria-label="Pick a custom border colour">';
-  const ci = custom.querySelector('input'); ci.value = /^#[0-9a-f]{6}$/i.test(ch.avBorderColor || '') ? ch.avBorderColor : BORDER_COLORS[0];
-  ci.addEventListener('change', () => { sfx('nav'); buzz(HAP.tap); pick(ci.value.toLowerCase()); });
+  const custom = document.createElement('button'); custom.type = 'button'; custom.className = 'color-swatch shop-swatch bd-color bd-custom'; custom.title = 'Pick any colour'; custom.setAttribute('aria-label', 'Pick a custom border colour');
+  custom.innerHTML = '<span aria-hidden="true">+</span>';
+  custom.addEventListener('click', () => { sfx('nav'); buzz(HAP.tap); openColorPicker(ch.avBorderColor || BORDER_COLORS[0], pick); });
   cw.appendChild(custom); box.appendChild(cw);
   charSection(box, 'Table mat · your side in battles');
   box.appendChild(row('shop-mat-row', MAT_OPTIONS.filter(o => ch.unlockedMats.includes(o.id)).map(o => shopCosmeticSwatch('mat', o.id, o.name, o.cost, ch.mat === o.id, true))));
@@ -227,3 +226,56 @@ function renderCharacterTab() {
 }
 // updateHud() calls this on every change: only the stage needs refreshing (name, level, title, pebbles, backdrop).
 function refreshCharacterTab() { if (charVisible() && document.getElementById('chStage')) drawCharStage(); }
+
+/* ---------- colour picker popup (v1.76.0) ----------
+   Replaces the phone's own colour dialog with one in the game's popup style: three sliders (colour, richness, brightness),
+   a hex box, and a live preview of your avatar wearing the colour. onSet gets a lowercase #rrggbb. */
+function hslToHex(h, s, l) {
+  s /= 100; l /= 100;
+  const k = n => (n + h / 30) % 12, a = s * Math.min(l, 1 - l), f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+  return '#' + [f(0), f(8), f(4)].map(x => Math.round(x * 255).toString(16).padStart(2, '0')).join('');
+}
+function hexToHsl(hex) {
+  const r = parseInt(hex.slice(1, 3), 16) / 255, g = parseInt(hex.slice(3, 5), 16) / 255, b = parseInt(hex.slice(5, 7), 16) / 255;
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn;
+  let h = 0, s = 0;
+  if (d) {
+    s = d / (1 - Math.abs(2 * l - 1));
+    h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+    h = Math.round(h * 60); if (h < 0) h += 360;
+  }
+  return { h, s: Math.round(s * 100), l: Math.round(l * 100) };
+}
+let clrOnSet = null;
+function openColorPicker(startHex, onSet) {
+  const hex0 = /^#[0-9a-f]{6}$/i.test(startHex || '') ? startHex : BORDER_COLORS[0], hsl = hexToHsl(hex0);
+  clrOnSet = onSet;
+  document.getElementById('clrH').value = hsl.h; document.getElementById('clrS').value = hsl.s; document.getElementById('clrL').value = Math.min(95, Math.max(5, hsl.l));
+  clrSync('sliders');
+  document.getElementById('colorOverlay').classList.remove('hidden');
+}
+function closeColorPicker() { document.getElementById('colorOverlay').classList.add('hidden'); clrOnSet = null; }
+// from: 'sliders' redraws the hex box; 'hex' (typing) leaves it alone so the caret doesn't jump
+function clrSync(from) {
+  const h = +document.getElementById('clrH').value, s = +document.getElementById('clrS').value, l = +document.getElementById('clrL').value, hex = hslToHex(h, s, l);
+  const card = document.querySelector('#colorOverlay .clr-card');
+  card.style.setProperty('--clr-h', h); card.style.setProperty('--clr-s', s + '%'); card.style.setProperty('--clr-hex', hex);
+  if (from !== 'hex') document.getElementById('clrHex').value = hex;
+  const pv = document.getElementById('clrPreview'), ch = state.character;
+  applyAvatarStyle(pv, { color: ch.color, accessory: ch.accessory, avBorder: ch.avBorder, avBorderW: ch.avBorderW, avBorderColor: hex });
+  pv.textContent = ch.emoji;
+}
+['clrH', 'clrS', 'clrL'].forEach(id => document.getElementById(id).addEventListener('input', () => clrSync('sliders')));
+document.getElementById('clrHex').addEventListener('input', e => {
+  const v = e.target.value.trim().toLowerCase(), full = v.startsWith('#') ? v : '#' + v;
+  if (!/^#[0-9a-f]{6}$/.test(full)) return;
+  const hsl = hexToHsl(full);
+  document.getElementById('clrH').value = hsl.h; document.getElementById('clrS').value = hsl.s; document.getElementById('clrL').value = Math.min(95, Math.max(5, hsl.l));
+  clrSync('hex');
+});
+document.getElementById('clrCancel').addEventListener('click', closeColorPicker);
+document.getElementById('clrSet').addEventListener('click', () => {
+  const hex = document.getElementById('clrPreview') && getComputedStyle(document.querySelector('#colorOverlay .clr-card')).getPropertyValue('--clr-hex').trim();
+  const fn = clrOnSet; closeColorPicker(); if (fn && /^#[0-9a-f]{6}$/i.test(hex)) fn(hex.toLowerCase());
+});
+document.getElementById('colorOverlay').addEventListener('click', e => { if (e.target.id === 'colorOverlay') closeColorPicker(); });

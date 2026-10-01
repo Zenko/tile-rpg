@@ -18,6 +18,15 @@ function gameVersionLabel() {
    the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
 const CHANGELOG = [
   {
+    version: '1.76.0',
+    date: '2026-10-01',
+    title: "One results window",
+    changes: [
+      "After a battle, one window now shows everything: how it went (turns, your Spirit, cards played, damage dealt and taken, foes cleared), your prize, and the Continue button. Then the screen fades back to town.",
+      "The custom border colour picker is now a game-style popup with sliders, a hex box and a live preview of your avatar, instead of the phone's own colour dialog."
+    ]
+  },
+  {
     version: '1.75.0',
     date: '2026-10-01',
     title: "Border widths and a proper battle ending",

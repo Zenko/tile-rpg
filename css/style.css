@@ -2124,8 +2124,38 @@ html.calm .bottom-nav::before, html.calm #bottomNav .tab-btn .t-icon { transitio
 .bd-color.active { border-color: var(--ink); box-shadow: 0 0 0 2px var(--stone); }
 .bd-custom { position: relative; display: inline-flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 800; color: var(--ink-soft); background: conic-gradient(#e86a6a, #f0c05a, #7fbf8a, #6fc3d6, #7a8fe0, #c27ad6, #e86a6a) !important; overflow: hidden; }
 .bd-custom span { position: relative; z-index: 1; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
-.bd-custom input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
 .bd-colors { flex-wrap: wrap; gap: 8px; }
 .bt-intro-av.you-av { box-shadow: none; box-sizing: border-box; border: var(--av-border-w, 5px) var(--av-border-style, solid) var(--av-border-color, var(--water)); }
 .bt-intro-av.you-av.av-glow { box-shadow: 0 0 12px 2px var(--av-glow-color, var(--water)); }
+
+/* ===== Results window: stats + prize + buttons in one card (v1.76.0) ===== */
+.end-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 4px 0 12px; }
+.end-stat { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 9px 4px 8px; border-radius: 14px; background: color-mix(in srgb, var(--hl) 7%, transparent); border: 1px solid var(--stone-edge); animation: sc-rise .32s calc(.12s + var(--n, 0) * .05s) both; }
+.end-stat .es-ic { font-size: 1rem; line-height: 1; }
+.end-stat b { font-size: 1.15rem; font-weight: 800; color: var(--ink); line-height: 1.2; }
+.end-stat .es-l { font-size: .62rem; font-weight: 700; color: var(--ink-soft); text-align: center; line-height: 1.15; }
+.end-card #battleEndStats { margin: 0 0 14px; }
+.end-prize-k { display: inline-block; margin-bottom: 4px; font-size: .64rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
+.end-card .big-icon { margin-bottom: 0; }
+
+/* ===== Colour picker popup (v1.76.0) ===== */
+.clr-card { width: min(330px, 90vw); }
+.clr-sub { margin: -4px 0 10px; font-size: .8rem; }
+.clr-preview { display: flex; justify-content: center; margin: 0 0 8px; }
+.clr-preview .avatar-preview { margin: 0; width: 76px; height: 76px; font-size: 2.2rem; }
+.clr-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; text-align: left; font-size: .8rem; font-weight: 700; color: var(--ink-soft); }
+.clr-row > span { width: 78px; flex-shrink: 0; }
+.clr-row input[type=range] { flex: 1; min-width: 0; height: 28px; margin: 0; background: transparent; -webkit-appearance: none; appearance: none; }
+.clr-row input[type=range]::-webkit-slider-runnable-track { height: 12px; border-radius: 6px; border: 1px solid var(--stone-edge); }
+.clr-row input[type=range]::-moz-range-track { height: 12px; border-radius: 6px; border: 1px solid var(--stone-edge); }
+#clrH::-webkit-slider-runnable-track { background: linear-gradient(90deg, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00); }
+#clrH::-moz-range-track { background: linear-gradient(90deg, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00); }
+#clrS::-webkit-slider-runnable-track { background: linear-gradient(90deg, hsl(var(--clr-h) 0% 50%), hsl(var(--clr-h) 100% 50%)); }
+#clrS::-moz-range-track { background: linear-gradient(90deg, hsl(var(--clr-h) 0% 50%), hsl(var(--clr-h) 100% 50%)); }
+#clrL::-webkit-slider-runnable-track { background: linear-gradient(90deg, #000, hsl(var(--clr-h) var(--clr-s) 50%), #fff); }
+#clrL::-moz-range-track { background: linear-gradient(90deg, #000, hsl(var(--clr-h) var(--clr-s) 50%), #fff); }
+.clr-row input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 26px; height: 26px; margin-top: -8px; border-radius: 50%; background: var(--stone); border: 3px solid var(--ink); box-shadow: 0 2px 6px var(--shadow); }
+.clr-row input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: var(--stone); border: 3px solid var(--ink); box-shadow: 0 2px 6px var(--shadow); }
+.clr-hex input { flex: 1; min-width: 0; height: 40px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--stone-edge); background: color-mix(in srgb, var(--hl) 6%, transparent); color: var(--ink); font: 700 .95rem var(--f-ui); letter-spacing: .04em; }
+.clr-card .controls { margin-top: 14px; }
 

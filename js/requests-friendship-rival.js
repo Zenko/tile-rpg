@@ -329,6 +329,12 @@ function dropRequestsFor(f) {
 /* Which keywords did the player actually play this battle? Recorded from the engine's own play events,
    so it does not depend on the animation running to the end. */
 function notePlayerPlay(ev) {
+  if (battle) {                                         // numbers for the results window (see btRenderEndStats)
+    const st = battle.stats || (battle.stats = { played: 0, dealt: 0, taken: 0, ko: 0 });
+    if ((ev.type === 'play' || ev.type === 'spell') && ev.who === 0) st.played++;
+    else if (ev.type === 'attack' && !ev.blocked) { if (ev.who === 0) st.dealt += ev.dmg || 0; else st.taken += ev.dmg || 0; }
+    else if (ev.type === 'faint' && ev.who === 1) st.ko++;
+  }
   if (battle && (ev.type === 'spell' || ev.type === 'play') && ev.who === 0 && ev.card) {            // mastery: every card you put down counts
     if (!battle.mastery) battle.mastery = {};
     const b = BattleEngine.baseIdOf(ev.card.id); battle.mastery[b] = (battle.mastery[b] || 0) + 1;
