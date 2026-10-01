@@ -18,6 +18,15 @@ function gameVersionLabel() {
    the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
 const CHANGELOG = [
   {
+    version: '1.78.0',
+    date: '2026-10-01',
+    title: "Smoother town",
+    changes: [
+      "Fixed screen tearing and flicker in town, both while walking and while standing still. The day/night sky was repainting the whole map every few seconds, and the frosted-glass bars were re-blurring the moving map every frame. Both are gone.",
+      "The top bar, bottom dock, pop-up scrims and menus now use a plain translucent look instead of a blur; characters' glows are cheaper to draw too."
+    ]
+  },
+  {
     version: '1.77.0',
     date: '2026-10-01',
     title: "Shop fronts",

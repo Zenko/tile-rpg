@@ -1059,9 +1059,12 @@ body.in-battle .screen { position: relative; overflow: hidden; padding-bottom: c
 .town-world { position: absolute; left: 0; top: 0; will-change: transform; }
 
 /* ===== day/night + weather overlays ===== */
-.town-sky { position: absolute; inset: 0; z-index: 5; pointer-events: none; background: var(--sky-color, transparent); opacity: var(--sky-opacity, 0); transition: background 3s linear, opacity 3s linear;
-  mix-blend-mode: multiply; -webkit-mask-image: var(--night-hole, none); mask-image: var(--night-hole, none); }
-.town-sky::after { content: ''; position: absolute; inset: 0; background: var(--sky-tint, transparent); opacity: var(--sky-tint-opacity, 0); mix-blend-mode: soft-light; transition: background 3s linear, opacity 3s linear; }
+.town-sky { position: absolute; inset: 0; z-index: 5; pointer-events: none; background: var(--sky-color, transparent); opacity: var(--sky-opacity, 0); transition: opacity 3s linear;
+  -webkit-mask-image: var(--night-hole, none); mask-image: var(--night-hole, none); }
+/* v1.78.0: no mix-blend-mode here (multiply / soft-light make the browser re-composite the whole map every frame) and no
+   transition on the colour itself (repainted the full overlay for 3s after every tick); only opacity fades. The tint
+   is a plain overlay, so its opacity is scaled down to read about as softly as soft-light did. */
+.town-sky::after { content: ''; position: absolute; inset: 0; background: var(--sky-tint, transparent); opacity: calc(var(--sky-tint-opacity, 0) * .55); transition: opacity 3s linear; }
 .town-vignette { position: absolute; inset: 0; z-index: 6; pointer-events: none; opacity: var(--vig-opacity, 0); transition: opacity 3s linear;
   background: radial-gradient(ellipse at center, transparent 45%, rgba(4,8,14,0.75) 100%);
   -webkit-mask-image: var(--night-hole, none); mask-image: var(--night-hole, none); }
@@ -1119,7 +1122,7 @@ body.in-battle .screen { position: relative; overflow: hidden; padding-bottom: c
 .town-tile .spr { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
 .town-tile .spr.tree { inset: auto; left: -10%; top: -20%; width: 120%; height: 120%; }
 .fish-hint { position: absolute; left: 14%; top: 38%; font-size: calc(var(--t) * 0.32); opacity: 0.6; pointer-events: none;
-  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.35)); animation: fish-drift var(--fdur, 4s) ease-in-out infinite; animation-delay: var(--fdelay, 0s); }
+  text-shadow: 0 1px 1px rgba(0,0,0,0.35); animation: fish-drift var(--fdur, 4s) ease-in-out infinite; animation-delay: var(--fdelay, 0s); }
 @keyframes fish-drift {
   0% { transform: translateX(0) scaleX(1); opacity: 0.35; }
   8% { opacity: 0.65; }
@@ -1140,8 +1143,8 @@ body.in-battle .screen { position: relative; overflow: hidden; padding-bottom: c
 }
 .ent.npc::before, .ent.boss::before, .ent.item::before { content: ''; position: absolute; bottom: 12%; width: 56%; height: 14%; border-radius: 50%; background: var(--tshadow); }
 .ent.npc > span, .ent.boss > span { animation: idle 2.6s ease-in-out infinite; }
-.ent.boss > span { font-size: calc(var(--t) * 0.68); filter: drop-shadow(0 0 6px var(--boss-glow)); animation: boss-aura 1.8s ease-in-out infinite, idle 2.6s ease-in-out infinite; }
-@keyframes boss-aura { 50% { filter: drop-shadow(0 0 12px var(--boss-glow)); } }
+.ent.boss > span { font-size: calc(var(--t) * 0.68); text-shadow: 0 0 6px var(--boss-glow); animation: boss-aura 1.8s ease-in-out infinite, idle 2.6s ease-in-out infinite; }
+@keyframes boss-aura { 50% { opacity: .86; } }   /* was a filter animation, which repainted every frame (v1.78.0) */
 /* the 30-min appear/disappear cycle: a dramatic pop-in, and a shrink-and-fade on the way out */
 .ent.boss.boss-appear-cycle > span { animation: boss-cycle-appear 0.7s cubic-bezier(0.34, 1.56, 0.64, 1), boss-aura 1.8s ease-in-out 0.7s infinite, idle 2.6s ease-in-out 0.7s infinite; }
 @keyframes boss-cycle-appear {
@@ -1154,10 +1157,10 @@ body.in-battle .screen { position: relative; overflow: hidden; padding-bottom: c
   0% { transform: scale(1); opacity: 1; filter: drop-shadow(0 0 6px var(--boss-glow)); }
   100% { transform: scale(0.15) translateY(-16%); opacity: 0; filter: drop-shadow(0 0 24px var(--boss-glow)); }
 }
-.ent.item > span { animation: bob 1.8s ease-in-out infinite; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.25)); }
+.ent.item > span { animation: bob 1.8s ease-in-out infinite; text-shadow: 0 2px 3px rgba(0,0,0,0.25); }
 .ent.item.despawning { animation: fade-out 0.9s ease forwards; }
 .ent.spirit { transition: left 500ms ease-in-out, top 500ms ease-in-out; }
-.ent.spirit > span { font-size: calc(var(--t) * 0.46); opacity: 0.82; animation: spirit-drift 3.2s ease-in-out infinite; filter: drop-shadow(0 0 5px rgba(255,255,255,0.4)); }
+.ent.spirit > span { font-size: calc(var(--t) * 0.46); opacity: 0.82; animation: spirit-drift 3.2s ease-in-out infinite; text-shadow: 0 0 5px rgba(255,255,255,0.4); }
 @keyframes spirit-drift { 0%, 100% { transform: translateY(0) scale(1); opacity: 0.7; } 50% { transform: translateY(-5px) scale(1.06); opacity: 0.95; } }
 /* No filter: blur() here - the radial-gradient's own falloff gives the soft edge, same reasoning as the
    cloud-shadow effect (see HANDOFF-HISTORY.md's animation postmortem): blur on a continuously-animated
@@ -1165,15 +1168,15 @@ body.in-battle .screen { position: relative; overflow: hidden; padding-bottom: c
 .chest-glow-core { position: absolute; left: 50%; top: 55%; width: 150%; height: 150%; transform: translate(-50%, -50%) scale(0.9); z-index: -1;
   border-radius: 50%; background: radial-gradient(circle, rgba(255,214,120,0.55) 0%, rgba(255,190,80,0.2) 55%, transparent 78%);
   animation: chest-pulse 2.2s ease-in-out infinite; }
-.chest-icon { animation: bob 1.8s ease-in-out infinite; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3)); }
+.chest-icon { animation: bob 1.8s ease-in-out infinite; text-shadow: 0 2px 3px rgba(0,0,0,0.3); }
 @keyframes chest-pulse { 0%, 100% { opacity: 0.45; transform: translate(-50%, -50%) scale(0.85); } 50% { opacity: 0.95; transform: translate(-50%, -50%) scale(1.2); } }
 .ent.npc-arrive > span { animation: npc-arrive 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), idle 2.6s ease-in-out 0.8s infinite; }
-.ent.npc.rival > span { filter: drop-shadow(0 0 6px rgba(255,210,110,0.9)); }
+.ent.npc.rival > span { text-shadow: 0 0 6px rgba(255,210,110,0.9); }
 .ent.npc.rival::after { content: ''; position: absolute; inset: 10%; border-radius: 50%; border: 2px dashed rgba(255,210,110,0.7); animation: rival-spin 6s linear infinite; pointer-events: none; }
 @keyframes rival-spin { to { transform: rotate(360deg); } }
-.ent.crop > span { font-size: calc(var(--t) * 0.5); filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3)); }
+.ent.crop > span { font-size: calc(var(--t) * 0.5); text-shadow: 0 2px 2px rgba(0,0,0,0.3); }
 .ent.crop::before { content: ''; position: absolute; left: 14%; right: 14%; bottom: 14%; height: 30%; border-radius: 40%; background: #4a3a26; box-shadow: inset 0 2px 0 rgba(0,0,0,0.25); }
-.ent.crop.ready > span { animation: bob 1.8s ease-in-out infinite; filter: drop-shadow(0 0 6px rgba(255,230,140,0.95)); }
+.ent.crop.ready > span { animation: bob 1.8s ease-in-out infinite; text-shadow: 0 0 6px rgba(255,230,140,0.95); }
 .ent.crop .crop-bar { position: absolute; left: 20%; right: 20%; bottom: 6%; height: 4px; border-radius: 3px; background: rgba(0,0,0,0.35); overflow: hidden; z-index: 2; }
 .ent.crop .crop-bar i { display: block; height: 100%; background: #9fd67a; }
 #pickupOverlay, #levelUpOverlay { z-index: 22; }
@@ -1181,7 +1184,7 @@ body.in-battle .screen { position: relative; overflow: hidden; padding-bottom: c
 .tip-card p { color: var(--ink) !important; line-height: 1.5; }
 .ent.prop { }
 .ent.decoration::before { content: ''; position: absolute; bottom: 12%; width: 56%; height: 14%; border-radius: 50%; background: var(--tshadow); }
-.ent.decoration > span { filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3)); }
+.ent.decoration > span { text-shadow: 0 2px 3px rgba(0,0,0,0.3); }
 .ent .spr.prop { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .ent.player { }
 .ent.player::before { content: ''; position: absolute; bottom: 8%; width: 60%; height: 15%; border-radius: 50%; background: var(--tshadow); }
@@ -1192,7 +1195,7 @@ body.in-battle .screen { position: relative; overflow: hidden; padding-bottom: c
 .pl-glow {
   position: absolute; left: 50%; top: 48%; width: 440%; height: 440%; transform: translate(-50%, -50%) scale(1); border-radius: 50%;
   background: radial-gradient(circle, rgba(255,205,120,0.48) 0%, rgba(255,200,110,0.22) 38%, transparent 78%);
-  opacity: 0; pointer-events: none; z-index: 0; transition: opacity 0.6s ease; mix-blend-mode: screen; filter: blur(3px);
+  opacity: 0; pointer-events: none; z-index: 0; transition: opacity 0.6s ease;
 }
 .town-view.is-night .ent.player .pl-glow { opacity: 1; }
 .town-view.is-night .ent.player.walking .pl-glow { opacity: 1; animation: pl-glow-pulse 0.9s ease-in-out infinite; }
@@ -1215,7 +1218,7 @@ body.in-scene .screen { position: relative; overflow: hidden; }
 .sc-stage::before { content: ''; position: absolute; left: 12%; top: 16%; width: 58px; height: 64px; border-radius: 30px 30px 6px 6px; background: var(--sc-win); box-shadow: 0 0 0 5px rgba(255,255,255,0.35), inset 0 -3px 0 rgba(0,0,0,0.06); }
 .sc-stage::after { content: ''; position: absolute; right: 10%; top: 26%; width: 92px; height: 12px; border-radius: 4px; background: rgba(0,0,0,0.16); box-shadow: 0 30px 0 rgba(0,0,0,0.16); }
 .sc-rug { position: absolute; left: 50%; bottom: 9%; width: 62%; height: 22%; transform: translateX(-50%); border-radius: 50%; background: var(--sc-rug); opacity: 0.85; box-shadow: inset 0 0 0 4px rgba(255,255,255,0.28); }
-.sc-who { position: absolute; left: 50%; bottom: 14%; transform: translateX(-50%); font-size: 4.1rem; line-height: 1; filter: drop-shadow(0 6px 4px rgba(0,0,0,0.25)); animation: idle 2.8s ease-in-out infinite; }
+.sc-who { position: absolute; left: 50%; bottom: 14%; transform: translateX(-50%); font-size: 4.1rem; line-height: 1; text-shadow: 0 6px 4px rgba(0,0,0,0.25); animation: idle 2.8s ease-in-out infinite; }
 .sc-pips { display: flex; justify-content: center; gap: 8px; min-height: 12px; }
 .sc-pips .pip { width: 12px; height: 12px; border-radius: 50%; background: var(--stone-edge); }
 .sc-pips .pip.now { background: var(--water-glow); box-shadow: 0 0 0 3px rgba(255,255,255,0.4); }
@@ -1227,14 +1230,14 @@ body.in-scene .screen { position: relative; overflow: hidden; }
 .home-shelf .hs-shelf { display: flex; gap: 4px; justify-content: center; align-items: flex-end; min-height: 26px; padding: 0 6px 2px; border-bottom: 5px solid #7a5a3a; font-size: 1.15rem; line-height: 1; }
 .home-shelf .hs-shelf small { font-size: 0.55rem; color: rgba(255,255,255,0.45); font-style: italic; }
 .ent.companion { transition: left 180ms ease-out, top 180ms ease-out; }
-.ent.companion > span { font-size: calc(var(--t) * 0.42); animation: spirit-drift 2.6s ease-in-out infinite; filter: drop-shadow(0 0 6px rgba(190,230,255,0.9)); }
-.ent.bug > span { font-size: calc(var(--t) * 0.38); animation: bug-hover 2.4s ease-in-out infinite; filter: drop-shadow(0 0 6px rgba(255,240,150,0.95)); }
-.ent.bug.legendary > span { font-size: calc(var(--t) * 0.5); filter: drop-shadow(0 0 10px rgba(255,220,120,1)); }
+.ent.companion > span { font-size: calc(var(--t) * 0.42); animation: spirit-drift 2.6s ease-in-out infinite; text-shadow: 0 0 6px rgba(190,230,255,0.9); }
+.ent.bug > span { font-size: calc(var(--t) * 0.38); animation: bug-hover 2.4s ease-in-out infinite; text-shadow: 0 0 6px rgba(255,240,150,0.95); }
+.ent.bug.legendary > span { font-size: calc(var(--t) * 0.5); text-shadow: 0 0 10px rgba(255,220,120,1); }
 @keyframes bug-hover { 0%,100% { transform: translate(0,0); } 25% { transform: translate(4px,-5px); } 50% { transform: translate(-2px,-8px); } 75% { transform: translate(-5px,-3px); } }
-.ent.vendor > span { font-size: calc(var(--t) * 0.55); filter: drop-shadow(0 0 10px rgba(255,190,90,0.95)); animation: idle 2.6s ease-in-out infinite; }
+.ent.vendor > span { font-size: calc(var(--t) * 0.55); text-shadow: 0 0 10px rgba(255,190,90,0.95); animation: idle 2.6s ease-in-out infinite; }
 .ent.vendor::before { content: '🏮'; position: absolute; top: -14%; right: 4%; font-size: calc(var(--t) * 0.3); animation: bob 2s ease-in-out infinite; }
-.town-view.is-night .ent.decoration.glowy > span { filter: drop-shadow(0 0 8px rgba(255,225,140,1)); }
-.ent.mail-flag > span { font-size: calc(var(--t) * 0.45); animation: bob 1.4s ease-in-out infinite; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5)); }
+.town-view.is-night .ent.decoration.glowy > span { text-shadow: 0 0 8px rgba(255,225,140,1); }
+.ent.mail-flag > span { font-size: calc(var(--t) * 0.45); animation: bob 1.4s ease-in-out infinite; text-shadow: 0 2px 3px rgba(0,0,0,0.5); }
 .sc-btn small { opacity: 0.75; font-size: 0.72em; }
 /* ---------- house mini-games ---------- */
 .sc-stage.mini-stage { flex: 1 1 auto; height: auto; min-height: 330px; padding: 10px; background: var(--stone); }
@@ -1908,7 +1911,7 @@ html.calm .fs-sw .in, html.calm .fs-fl, html.calm .fs-aim, html.calm .fs-sw.near
 html.calm .ch-d, html.calm .ch-pal-f { animation: none; }
 
 /* ===== Floating glass top pill, full-bleed town map, floating dock (v1.65.0) ===== */
-:root { --hud-h: 72px; --dock-h: 74px; --glass: color-mix(in srgb, var(--stone) 78%, transparent); }
+:root { --hud-h: 72px; --dock-h: 74px; --glass: color-mix(in srgb, var(--stone) 90%, transparent); }
 .board-wrap { padding: 0; }
 .screen { position: relative; padding: var(--hud-h) 12px calc(var(--dock-h) + 14px + env(safe-area-inset-bottom)); }
 body.in-battle .screen { padding: 0 0 calc(6px + env(safe-area-inset-bottom)); }
@@ -2206,4 +2209,11 @@ html.calm .bottom-nav::before, html.calm #bottomNav .tab-btn .t-icon { transitio
 #sceneView.scene-leaving.sc-std .sc-bubble, #sceneView.scene-leaving.sc-std .sc-head { animation: sc-fade-out .2s ease-in both; }
 @media (prefers-reduced-motion: reduce) { #sceneView.sc-std, #sceneView.sc-std * { animation: none !important; } }
 html.calm #sceneView.sc-std, html.calm #sceneView.sc-std * { animation: none !important; }
+
+/* ===== Smoothness (v1.78.0) =====
+   backdrop-filter re-blurs whatever is behind it every frame. Over the town map (always animating: water, neighbours,
+   weather, the day/night tint) that tore and flickered on phones, so the glass pills (top bar, dock, ambient line, radar
+   button, menus) and every overlay scrim now use a plain translucent fill instead. */
+*, *::before, *::after { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+.map-radar-btn { background: rgba(18,22,18,0.72); }
 

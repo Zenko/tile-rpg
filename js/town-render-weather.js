@@ -213,6 +213,7 @@ function maybeRollWeather() {
   }
 }
 
+let skyHoleActive = false, lastCam = null;   // is any night darkening showing (so the player-light mask needs updating at all)?
 const WEATHER_DIM = { clear: 0, cloudy: 0.08, rain: 0.06, storm: 0.14, snow: 0.03 };
 function applySky(instant) {
   if (!skyEl) return;
@@ -220,11 +221,17 @@ function applySky(instant) {
   const extraDim = WEATHER_DIM[state.weather.current] || 0;
   // Overcast weather borrows the night's cool grey-blue even at midday, so cloudy/rainy noon still reads dimmer
   const color = extraDim > 0 ? hexMix(s.color === '#000000' ? '#3a4048' : s.color, '#3a4048', Math.min(1, extraDim * 2)) : s.color;
-  skyEl.style.setProperty('--sky-color', color);
-  skyEl.style.setProperty('--sky-opacity', Math.min(0.6, s.dim + extraDim).toFixed(2));
-  skyEl.style.setProperty('--sky-tint', s.tint);
-  skyEl.style.setProperty('--sky-tint-opacity', s.tintA.toFixed(2));
-  if (vignetteEl) vignetteEl.style.setProperty('--vig-opacity', s.vig.toFixed(2));
+  // Only write a value when it changed: this runs every town tick, and re-setting an unchanged custom property still
+  // restarts the layer's transition and repaints the whole map overlay (a source of tearing on phones, v1.78.0).
+  const setSky = (el, name, v) => { if (el && el.style.getPropertyValue(name) !== v) el.style.setProperty(name, v); };
+  const skyOp = Math.min(0.6, s.dim + extraDim).toFixed(2), vig = s.vig.toFixed(2);
+  setSky(skyEl, '--sky-color', color);
+  setSky(skyEl, '--sky-opacity', skyOp);
+  setSky(skyEl, '--sky-tint', s.tint);
+  setSky(skyEl, '--sky-tint-opacity', s.tintA.toFixed(2));
+  setSky(vignetteEl, '--vig-opacity', vig);
+  const wasActive = skyHoleActive; skyHoleActive = +skyOp > 0.02 || +vig > 0.02;
+  if (skyHoleActive && !wasActive && lastCam) updateNightHole(lastCam.cx, lastCam.cy, lastCam.vw, lastCam.vh);
   if (instant) { skyEl.style.transition = 'none'; if (vignetteEl) vignetteEl.style.transition = 'none';
     requestAnimationFrame(() => { if (skyEl) skyEl.style.transition = ''; if (vignetteEl) vignetteEl.style.transition = ''; }); }
   townView.classList.toggle('is-night', s.isNight);
@@ -437,13 +444,14 @@ function updateCamera(animate) {
   cx = Math.min(0, Math.max(vw - m.w * tilePx, cx)); cy = Math.min(padT, Math.max(vh - m.h * tilePx - padB, cy));
   townWorld.style.transition = animate ? `transform ${STEP_MS}ms linear` : 'none';
   townWorld.style.transform = `translate(${cx}px, ${cy}px)`;
+  lastCam = { cx, cy, vw, vh };
   updateNightHole(cx, cy, vw, vh);
 }
 // Cuts a soft hole in the night-darkening (.town-sky) and vignette layers exactly where the player stands,
 // so the player reads as genuinely lit rather than merely brightened underneath a dark overlay - a CSS filter
 // on the player alone can't out-brighten a layer painted on top of it, so the darkness has to skip that spot instead.
 function updateNightHole(cx, cy, vw, vh) {
-  if (!skyEl && !vignetteEl) return;
+  if ((!skyEl && !vignetteEl) || !skyHoleActive) return;   // by day nothing is dimmed, so there is nothing to cut a hole in
   const px = (state.playerPos.x + 0.5) * tilePx + cx, py = (state.playerPos.y + 0.5) * tilePx + cy;
   const xPct = vw ? (px / vw) * 100 : 50, yPct = vh ? (py / vh) * 100 : 50;
   const holeR = tilePx * 3.6;
