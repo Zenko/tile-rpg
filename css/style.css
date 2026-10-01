@@ -1871,7 +1871,7 @@ html.calm .fs-sw .in, html.calm .fs-fl, html.calm .fs-aim, html.calm .fs-sw.near
 .ch-stage.compact .ch-ground { transform: translateY(26px); }
 .ch-top { position: absolute; left: 14px; right: 14px; top: 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; z-index: 3; transition: opacity .25s ease; }
 .ch-stage.compact .ch-top { opacity: 0; pointer-events: none; }
-.ch-id { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.ch-id { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; min-width: 0; }
 .ch-name { font-family: var(--f-display); font-weight: 500; font-size: 1.2rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ch-chip, .ch-peb { font-size: .7rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: rgba(15,24,30,.5); color: #fff; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); white-space: nowrap; }
 .ch-actors { position: absolute; left: 0; right: 0; bottom: 30px; display: flex; justify-content: center; align-items: flex-end; gap: 26px; z-index: 2; transition: transform .35s ease, bottom .35s ease; }
@@ -2452,3 +2452,10 @@ html.calm .jsheet, html.calm .jscrim, html.calm .jundo { transition: none; }
 .claim-hero .claim-tick { font-size: 1.5rem; }
 .claim-more { display: block; width: 100%; margin: 12px 0 8px; padding: 9px 12px; font: inherit; font-size: 0.78rem; font-weight: 600; color: var(--ink-soft); background: transparent; border: 1px dashed var(--stone-edge); border-radius: 12px; cursor: pointer; }
 .claim-more:active { transform: scale(0.98); }
+
+/* Character: pinned stats */
+.profile-stat { position: relative; }
+.profile-stat.pinned { border-color: var(--accent); }
+.profile-stat .ps-pin { position: absolute; top: 0; right: 0; width: 28px; height: 28px; border: 0; background: none; font-size: 0.7rem; cursor: pointer; opacity: 0.55; padding: 0; }
+.profile-stat.pinned .ps-pin { opacity: 1; }
+.ch-pins { display: flex; gap: 6px; margin-top: 4px; font-size: 0.68rem; font-weight: 600; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.5); }

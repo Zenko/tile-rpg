@@ -2,17 +2,16 @@
    CHARACTER TAB (v1.64.0)
    The fifth bottom tab. Up top, a small stage with you and your companion standing in front of a backdrop the player
    picks (STAGE_OPTIONS in js/world-map.js, bought and equipped like the table mats). Below it, four views:
-   Me (level, stats, title, backdrop), Bag, Milestones and Companion. Nothing here owns data of its own - it reads and
+   Me (level, title, pinned stats, what unlocks next, Knack), Look, Pantry and Companion. Milestones live only in Rewards. Nothing here owns data of its own - it reads and
    writes the storage each system already has (pantry, dishes, seeds, decorations, bug jar, achievements, companion),
    so the older screens (player menu, Rewards > Milestones, Shop > Customize) keep working unchanged.
    ============================================================ */
-const CHAR_VIEWS = [['me', 'Me'], ['look', 'Look'], ['bag', 'Bag'], ['milestones', 'Milestones'], ['pals', 'Companion']];
+const CHAR_VIEWS = [['me', 'Me'], ['look', 'Look'], ['bag', 'Pantry'], ['pals', 'Companion']];   // 'bag' is the Pantry (key kept for old links)
 let charView = 'me';        // not saved, like cardsView / shopSubView
-let charMilFilter = 'all';  // all | earned | locked
 const charPanel = () => document.getElementById('characterPanel');
 const charVisible = () => !charPanel().classList.contains('hidden');
 // The stage shrinks to a strip while you browse long lists, and fills out again for Me and Companion.
-const charCompact = () => charView === 'bag' || charView === 'milestones' || charView === 'look';
+const charCompact = () => charView === 'bag' || charView === 'look';
 
 const CHAR_DECO_SLOTS = [[8, 14, 1.7], [76, 9, 1.5], [40, 6, 1.2], [90, 40, 1.15], [3, 44, 1.15], [60, 26, 1]];
 function charStageDeco(def) {
@@ -53,7 +52,7 @@ function drawCharStage() {
     <div class="ch-deco" aria-hidden="true">${deco}</div>
     <div class="ch-ground"></div>
     <div class="ch-top">
-      <div class="ch-id"><b class="ch-name">${escapeHtml(ch.name || 'You')}</b>${t ? `<span class="ch-chip">${escapeHtml(t.name)}</span>` : ''}</div>
+      <div class="ch-id"><b class="ch-name">${escapeHtml(ch.name || 'You')}</b>${t ? `<span class="ch-chip">${escapeHtml(t.name)}</span>` : ''}${charPins().length ? `<span class="ch-pins">${profileStatValues().filter(v => charPins().includes(v.label)).map(v => `<span>${v.icon} ${v.value}</span>`).join('')}</span>` : ''}</div>
       <span class="ch-peb">🫧 ${state.progress.pebbles}</span>
     </div>
     <div class="ch-actors">
@@ -78,19 +77,39 @@ function drawCharBody() {
   const box = document.getElementById('chBody'); if (!box) return;
   document.querySelectorAll('#chSeg .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.v === charView));
   box.innerHTML = '';
-  ({ me: charDrawMe, look: charDrawLook, bag: charDrawBag, milestones: charDrawMilestones, pals: charDrawPals })[charView](box);
+  ({ me: charDrawMe, look: charDrawLook, bag: charDrawBag, pals: charDrawPals })[charView](box);
 }
 function charSection(box, title) { const h = document.createElement('div'); h.className = 'section-title'; h.textContent = title; box.appendChild(h); }
 
+// Up to three stats the player pins; they ride on the stage under the name. Unset means the default three.
+const CHAR_PIN_MAX = 3, CHAR_PIN_DEFAULT = ['Wins', 'Cards', 'Milestones'];
+const charPins = () => (Array.isArray(state.character.pinStats) ? state.character.pinStats : CHAR_PIN_DEFAULT);
+function charTogglePin(label) {
+  const cur = charPins().slice(), i = cur.indexOf(label);
+  if (i >= 0) cur.splice(i, 1);
+  else if (cur.length >= CHAR_PIN_MAX) { toast(`You can pin ${CHAR_PIN_MAX}. Unpin one first.`); return; }
+  else cur.push(label);
+  state.character.pinStats = cur; saveState(); sfx('tap'); buzz(HAP.tap);
+  drawCharStage(); drawCharBody();
+}
 function charDrawMe(box) {
-  const pr = ensureLevel(), need = xpToNext(pr.level), pct = Math.max(0, Math.min(100, pr.xp / need * 100)), t = currentTitle();
+  const pr = ensureLevel(), need = xpToNext(pr.level), pct = Math.max(0, Math.min(100, pr.xp / need * 100)), cur = currentTitle();
   const lv = document.createElement('div'); lv.className = 'ch-level';
   lv.innerHTML = `<div class="level-row"><span class="level-badge-lg">Lv ${pr.level}</span><span class="level-xp-text">${Math.floor(pr.xp)} / ${need} XP</span></div><div class="level-bar"><div class="level-bar-fill" style="width:${pct}%"></div></div>`;
   box.appendChild(lv);
+  charSection(box, 'Title · shown under your name');
+  const mine = unlockedTitles(), trow = document.createElement('div'); trow.className = 'title-row';
+  trow.innerHTML = `<button class="title-chip${cur ? '' : ' active'}" data-title="">No title</button>` +
+    mine.map(t => `<button class="title-chip${cur && cur.ach === t.ach ? ' active' : ''}" data-title="${t.ach}">${escapeHtml(t.name)}</button>`).join('') +
+    (mine.length < TITLES.length ? `<span class="more-in-shop">${TITLES.length - mine.length} more to earn in Rewards › Milestones</span>` : '');
+  trow.querySelectorAll('[data-title]').forEach(b => b.addEventListener('click', () => charWearTitle(b.dataset.title)));
+  box.appendChild(trow);
+  const pins = charPins();
+  charSection(box, `Your highlights · pin up to ${CHAR_PIN_MAX}`);
   const grid = document.createElement('div'); grid.className = 'profile-stats-grid';
-  grid.innerHTML = profileStatValues().map(s => `<div class="profile-stat"><span class="ps-icon">${s.icon}</span><span class="ps-value">${s.value}</span><span class="ps-label">${s.label}</span></div>`).join('');
+  grid.innerHTML = profileStatValues().map(s => `<div class="profile-stat${pins.includes(s.label) ? ' pinned' : ''}"><button class="ps-pin" data-pin="${s.label}" aria-pressed="${pins.includes(s.label)}" aria-label="${pins.includes(s.label) ? 'Unpin' : 'Pin'} ${s.label}">${pins.includes(s.label) ? '📌' : '📍'}</button><span class="ps-icon">${s.icon}</span><span class="ps-value">${s.value}</span><span class="ps-label">${s.label}</span></div>`).join('');
+  grid.querySelectorAll('[data-pin]').forEach(b => b.addEventListener('click', () => charTogglePin(b.dataset.pin)));
   box.appendChild(grid);
-  if (t) { const w = document.createElement('div'); w.className = 'panel-desc'; w.style.marginTop = '10px'; w.textContent = `Wearing the title ${t.name}. Change it in Look.`; box.appendChild(w); }
   const lvNow = pr.level, ahead = unlocksBetween(lvNow, lvNow + 30).slice(0, 4);
   if (ahead.length) {
     charSection(box, 'Coming up');
@@ -154,13 +173,6 @@ function charDrawLook(box) {
   box.appendChild(row('shop-mat-row', MAT_OPTIONS.filter(o => ch.unlockedMats.includes(o.id)).map(o => shopCosmeticSwatch('mat', o.id, o.name, o.cost, ch.mat === o.id, true))));
   charSection(box, 'Backdrop · behind you and your companion');
   const bd = row('shop-mat-row', STAGE_OPTIONS.filter(o => ch.unlockedStages.includes(o.id)).map(o => shopCosmeticSwatch('stage', o.id, o.name, o.cost, ch.stage === o.id, true))); bd.id = 'chBackdrops'; box.appendChild(bd);
-  charSection(box, 'Title · shown under your name in town');
-  const mine = unlockedTitles(), cur = currentTitle(), trow = document.createElement('div'); trow.className = 'title-row';
-  trow.innerHTML = `<button class="title-chip${cur ? '' : ' active'}" data-title="">No title</button>` +
-    mine.map(t => `<button class="title-chip${cur && cur.ach === t.ach ? ' active' : ''}" data-title="${t.ach}">${escapeHtml(t.name)}</button>`).join('') +
-    (mine.length < TITLES.length ? `<span class="more-in-shop">${TITLES.length - mine.length} more to earn in Milestones</span>` : '');
-  trow.querySelectorAll('[data-title]').forEach(b => b.addEventListener('click', () => { charWearTitle(b.dataset.title); }));
-  box.appendChild(trow);
 }
 function charWearTitle(achId) {
   state.character.title = achId; saveState(); sfx('nav'); buzz(HAP.tap);
@@ -177,35 +189,7 @@ function charDrawBag(box) {
   const jar = bugState().jar;
   add('Bug jar', Object.keys(jar).filter(id => jar[id] > 0 && bugDef(id)).map(id => invRow(bugDef(id).icon, escapeHtml(bugDef(id).name), jar[id], 'Caught at night. Also works as fishing bait.')));
   add('Decorations', DECORATION_ITEMS.filter(d => decorationInventoryCount(d.id) > 0).map(d => invRow(d.icon, escapeHtml(d.name), decorationInventoryCount(d.id), escapeHtml(d.desc), '📍 Place', goTown(() => startPlacingDecoration(d)))));
-  if (!any) { const e = document.createElement('div'); e.className = 'panel-desc'; e.style.padding = '10px 4px'; e.textContent = 'Your bag is empty. Harvest crops, catch fish or bugs, bake bread, and what you gather shows up here.'; box.appendChild(e); }
-}
-
-function charDrawMilestones(box) {
-  const pr = state.progress, done = ACHIEVEMENTS.filter(a => pr.achievements.includes(a.id)).length;
-  const head = document.createElement('div'); head.className = 'ch-level';
-  head.innerHTML = `<div class="level-row"><span class="level-badge-lg">${done} / ${ACHIEVEMENTS.length}</span><span class="level-xp-text">milestones reached</span></div><div class="level-bar"><div class="level-bar-fill" style="width:${Math.round(done / ACHIEVEMENTS.length * 100)}%"></div></div>`;
-  box.appendChild(head);
-  const f = document.createElement('div'); f.className = 'ch-filter';
-  f.innerHTML = [['all', 'All'], ['earned', 'Earned'], ['locked', 'Still to find']].map(([k, t]) => `<button class="title-chip${charMilFilter === k ? ' active' : ''}" data-f="${k}">${t}</button>`).join('');
-  f.querySelectorAll('[data-f]').forEach(b => b.addEventListener('click', () => { charMilFilter = b.dataset.f; sfx('nav'); drawCharBody(); }));
-  box.appendChild(f);
-  const hint = document.createElement('div'); hint.className = 'panel-desc'; hint.textContent = 'Tap a milestone that has a 🏷️ title to wear it under your name.';
-  box.appendChild(hint);
-  const grid = document.createElement('div'); grid.className = 'ach-grid'; grid.style.marginTop = '8px';
-  const cur = currentTitle();
-  ACHIEVEMENTS.forEach(a => {
-    const unlocked = pr.achievements.includes(a.id);
-    if (charMilFilter === 'earned' && !unlocked) return;
-    if (charMilFilter === 'locked' && unlocked) return;
-    const t = titleFor(a.id), worn = !!(t && cur && cur.ach === a.id);
-    const el = document.createElement(t && unlocked ? 'button' : 'div');
-    el.className = 'ach' + (unlocked ? '' : ' locked') + (worn ? ' worn' : '') + (t && unlocked ? ' wearable' : '');
-    el.innerHTML = `<span class="a-ico">${unlocked ? a.icon : '🔒'}</span><span class="a-name">${a.name}</span>${t ? `<span class="a-title">${worn ? '✓ Worn · ' : '🏷️ '}${escapeHtml(t.name)}</span>` : ''}`;
-    if (t && unlocked) el.addEventListener('click', () => charWearTitle(worn ? '' : a.id));
-    grid.appendChild(el);
-  });
-  if (!grid.children.length) { const e = document.createElement('div'); e.className = 'panel-desc'; e.textContent = 'Nothing here yet. Keep wandering.'; grid.appendChild(e); grid.style.display = 'block'; }
-  box.appendChild(grid);
+  if (!any) { const e = document.createElement('div'); e.className = 'panel-desc'; e.style.padding = '10px 4px'; e.textContent = 'Your pantry is empty. Harvest crops, catch fish or bugs, bake bread, and what you gather shows up here.'; box.appendChild(e); }
 }
 
 function charDrawPals(box) {

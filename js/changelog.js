@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta ${RELEASES[0].n} (build $
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'better', x: 'Character tab: Me now holds your title chips, up to three pinned stats (shown on your stage) and what unlocks next. Bag is now Pantry, and Milestones live only in Rewards.' },
 ];
 
 const RELEASES = [
