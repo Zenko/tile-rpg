@@ -130,8 +130,8 @@ function jumpAlmanac(tab) {
   if (typeof currentTab !== 'undefined' && currentTab !== 'journal') switchTab('journal');
   switchJournalSegment('almanac');
 }
-function renderAlmanac() {
-  jChips(document.getElementById('almanacTabs'), ALM_TABS.map(([v, l]) => { const s = almanacSet(v); return [v, `${l} ${s.filter(x => x.found).length}/${s.length}`]; }), almTab, v => { almTab = v; almSel = ''; renderAlmanac(); });
+function renderJournalAlmanac() {
+  jChips(document.getElementById('almanacTabs'), ALM_TABS.map(([v, l]) => { const s = almanacSet(v); return [v, `${l} ${s.filter(x => x.found).length}/${s.length}`]; }), almTab, v => { almTab = v; almSel = ''; renderJournalAlmanac(); });
   const set = almanacSet(almTab), found = set.filter(x => x.found).length, body = document.getElementById('almanacBody');
   let html = `<div class="jprog"><div class="jsoft jprog-h"><span>${found} of ${set.length} discovered</span><span>${Math.round(found / set.length * 100)}%</span></div>${jBar(found, set.length)}</div>`;
   if (almTab === 'cards') html += `<div class="jchips" id="almFams" role="group" aria-label="Family"></div>`;
@@ -146,8 +146,8 @@ function renderAlmanac() {
     html += '</div>';
   }
   body.innerHTML = html;
-  if (almTab === 'cards') jChips(document.getElementById('almFams'), ALM_FAMS, almFam, v => { almFam = v; renderAlmanac(); });
-  body.querySelectorAll('.jtile').forEach(t => t.addEventListener('click', () => { sfx('flip'); const k = almTab + t.dataset.i; almSel = almSel === k ? '' : k; renderAlmanac(); }));
+  if (almTab === 'cards') jChips(document.getElementById('almFams'), ALM_FAMS, almFam, v => { almFam = v; renderJournalAlmanac(); });
+  body.querySelectorAll('.jtile').forEach(t => t.addEventListener('click', () => { sfx('flip'); const k = almTab + t.dataset.i; almSel = almSel === k ? '' : k; renderJournalAlmanac(); }));
 }
 
 /* ---------- the ? sheet: Guide and What's new ---------- */

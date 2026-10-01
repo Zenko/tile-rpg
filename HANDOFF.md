@@ -190,6 +190,8 @@ Each file below still has the same banner comments (the `====` blocks) it had wh
 
 ## 8. Testing (how every change so far was checked)
 
+**First, always:** `python3 scripts/check.py` - syntax of every file, no duplicate element ids, no top-level name declared in two files (all scripts share one global scope: the later file silently replaces the earlier one, which once emptied the Cards Index when a Journal function reused `renderAlmanac`), every `<script src>` exists.
+
 Every change was checked with **Playwright** driving the real page in headless Chromium: open the file, run scripted play, and fail on any `pageerror` or console error. A Chromium build is cached at `~/Library/Caches/ms-playwright`. Install the library in a scratch folder with `npm i playwright`, not in this repo. A minimal runner:
 
 ```js

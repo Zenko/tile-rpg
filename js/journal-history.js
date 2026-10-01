@@ -76,7 +76,7 @@ function renderJournal() {
   if (jSeg === 'today') renderToday();
   else if (jSeg === 'eventlog') renderLog();
   else if (jSeg === 'battles') renderBattleLog();
-  else if (jSeg === 'almanac') renderAlmanac();
+  else if (jSeg === 'almanac') renderJournalAlmanac();
   else if (jSeg === 'notes') renderNotesList();
   updateJournalBadge();
 }
