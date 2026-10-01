@@ -1,0 +1,28 @@
+// Cards tab: grid, detail sheet, deck tray, Info mode, Sets and the Workshop jump.
+module.exports = async (page, assert) => {
+  await page.evaluate(() => { CARD_POOL.slice(0, 40).forEach(c => state.ownedCards.push(c.id, c.id)); state.deck = []; saveState(); switchTab('collection'); });
+  await page.waitForTimeout(300);
+  assert.strictEqual(await page.evaluate(() => [...document.querySelectorAll('#cardsSeg .seg-btn')].map(b => b.textContent).join()), 'My Cards,Deck,Sets,Workshop');
+  assert.ok(await page.locator('.card-grid [data-tile]').count() > 10, 'grid has no tiles');
+  await page.locator('.card-grid [data-tile]').nth(3).click(); await page.waitForTimeout(350);
+  assert.ok(await page.evaluate(() => document.getElementById('cardSheet').classList.contains('show')), 'sheet did not open');
+  await page.click('[data-cs="add"]');
+  assert.strictEqual(await page.evaluate(() => state.deck.length), 1);
+  await page.click('#cardScrim', { position: { x: 5, y: 5 } }); await page.waitForTimeout(350);
+  await page.click('#collViewToggle');
+  assert.ok(await page.locator('.card-row[data-tile]').count() > 10, 'list view empty');
+  await page.click('#segDeck'); await page.click('#deckAuto');
+  assert.strictEqual(await page.evaluate(() => state.deck.length), 12);
+  assert.strictEqual(await page.locator('#deckTray [data-tray]').count(), 12);
+  await page.locator('#deckTray [data-tray]').first().click();
+  assert.strictEqual(await page.evaluate(() => state.deck.length), 11);
+  await page.click('#deckInfoToggle'); await page.locator('#deckList [data-tile]').first().click(); await page.waitForTimeout(350);
+  assert.strictEqual(await page.evaluate(() => state.deck.length), 11, 'Info mode must not edit the deck');
+  assert.ok(await page.evaluate(() => document.getElementById('cardSheet').classList.contains('show')));
+  await page.click('#cardScrim', { position: { x: 5, y: 5 } }); await page.waitForTimeout(350);
+  await page.click('#segAlmanac'); await page.click('[data-set="garden"]');
+  assert.ok(await page.locator('.set-open .alm-card').count() >= 4, 'set did not expand');
+  await page.click('#segMine'); await page.locator('.card-row[data-tile], .card-grid [data-tile]').nth(2).click(); await page.waitForTimeout(300);
+  await page.click('[data-cs="craft"]'); await page.waitForTimeout(250);
+  assert.ok(await page.evaluate(() => !document.getElementById('craftView').classList.contains('hidden') && !!refineOpenId), 'did not land in the Workshop');
+};

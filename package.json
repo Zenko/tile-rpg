@@ -1,0 +1,11 @@
+{
+  "name": "tile-rpg",
+  "private": true,
+  "description": "No build step: the game is plain files. This only lists the dev tools used by the checks.",
+  "scripts": {
+    "check": "python3 scripts/check.py",
+    "test": "node tests/run.js",
+    "verify": "python3 scripts/check.py && node tests/run.js"
+  },
+  "devDependencies": { "playwright": "^1.48.0" }
+}

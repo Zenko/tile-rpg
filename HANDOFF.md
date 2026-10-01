@@ -192,7 +192,9 @@ Each file below still has the same banner comments (the `====` blocks) it had wh
 
 ## 8. Testing (how every change so far was checked)
 
-**First, always:** `python3 scripts/check.py` - syntax of every file, no duplicate element ids, no `getElementById('x')` for an id that is not in index.html, valid `RELEASES`/`PENDING_CHANGES`, no top-level name declared in two files (all scripts share one global scope: the later file silently replaces the earlier one, which once emptied the Cards Index when a Journal function reused `renderAlmanac`), every `<script src>` exists.
+**First, always:** `python3 scripts/check.py` (and `node tests/run.js`, see below) - syntax of every file, no duplicate element ids, no `getElementById('x')` for an id that is not in index.html, valid `RELEASES`/`PENDING_CHANGES`, no top-level name declared in two files (all scripts share one global scope: the later file silently replaces the earlier one, which once emptied the Cards Index when a Journal function reused `renderAlmanac`), every `<script src>` exists.
+
+**Tests (`tests/`).** `node tests/run.js [filter]` runs every `tests/*.test.js` in headless Chromium (Playwright; `npm i -D playwright` once). Each test is `async (page, assert)`, gets a fresh game with first-time tips off and overlays hidden, and fails on any page or console error. Covered: boot and tabs, the battle engine (60 AI games), Cards, Rewards, Character, Journal. Add a `<area>.test.js` with each new screen. `.github/workflows/check.yml` runs `scripts/check.py` and these tests on every push, so a red check on GitHub means something broke before or after Pages published.
 
 Every change was checked with **Playwright** driving the real page in headless Chromium: open the file, run scripted play, and fail on any `pageerror` or console error. A Chromium build is cached at `~/Library/Caches/ms-playwright`. Install the library in a scratch folder with `npm i playwright`, not in this repo. A minimal runner:
 
