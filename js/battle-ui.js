@@ -14,7 +14,7 @@ const btAlive = token => battle && battle.token === token && !battle.ended;
    The opening deal waits for the card (battle.introP, read in btDealOpening), and a tap skips it. With Calm mode on, or
    when the deck is too short (the old early-return with its message), it goes straight in as it always did. */
 function startBattle(opponent) {
-  const deckOk = state.deck.filter(id => !!cardDef(id)).length >= DECK_SIZE;
+  const deckOk = (opponent.playerDeck || state.deck).filter(id => !!cardDef(id)).length >= DECK_SIZE;
   if (opponent.puzzle || !deckOk) { startBattleNow(opponent, 0); return; }
   if (tossBusy) return;                                    // a double tap while the toss is up
   // Who goes first is decided before anything is dealt (js/battle-toss.js): the toss, then the fade and the versus card.
@@ -26,7 +26,7 @@ function startBattle(opponent) {
 function btIntro(opponent, isBoss, first) {
   return new Promise(resolve => {
     const tw = bossTwistFor(opponent), t = tw ? BattleEngine.TWISTS[tw] : null;
-    const tag = isBoss ? '👑 District boss' : opponent.cup ? '🏆 Festival Cup' : opponent.dungeon ? '🕯️ Cellar' : opponent.isRival ? '⚡ Rival' : '⚔️ Friendly match';
+    const tag = isBoss ? '👑 District boss' : opponent.cup ? '🏆 Festival Cup' : opponent.draft ? '🎴 Draft Run' : opponent.dungeon ? '🕯️ Cellar' : opponent.isRival ? '⚡ Rival' : '⚔️ Friendly match';
     const el = document.createElement('div'); el.className = 'bt-intro' + (isBoss ? ' boss' : '');
     el.innerHTML = `<div class="bt-intro-side opp"><span class="bt-intro-av"></span><div><div class="bt-intro-name"></div><div class="bt-intro-tag">${tag}</div></div></div>
       <div class="bt-intro-vs">VS</div>
@@ -69,9 +69,11 @@ function battleWorld(opponent, weather) {
 function startBattleNow(opponent, first) {
   first = first === 1 ? 1 : 0;                              // 0 = you take the first turn (the toss, js/battle-toss.js)
   // Never let a damaged card id reach the engine: drop anything that is not a real card first.
-  const cleaned = state.deck.filter(id => !!cardDef(id));
-  if (cleaned.length !== state.deck.length) { state.deck = cleaned; saveState(); }
-  if (!opponent.puzzle && state.deck.length < DECK_SIZE) {
+  // A Draft Run brings its own 12 cards (opponent.playerDeck) and none of your collection's extras: no mastery, charms, snacks or companion.
+  const neutral = !!opponent.playerDeck, myDeck = neutral ? opponent.playerDeck.filter(id => !!cardDef(id)) : state.deck;
+  const cleaned = myDeck.filter(id => !!cardDef(id));
+  if (!neutral && cleaned.length !== state.deck.length) { state.deck = cleaned; saveState(); }
+  if (!opponent.puzzle && myDeck.length < DECK_SIZE) {
     townLog.textContent = `You need a full ${DECK_SIZE}-card deck before battling. Open Cards → Deck.`;
     toast(`Fill your ${DECK_SIZE}-card deck first`);
     return;
@@ -81,10 +83,10 @@ function startBattleNow(opponent, first) {
   const profile = Object.assign({}, opponent.profile || opponentProfile(isBoss));
   const weather = weatherNow(), fx = weatherFx();
   if (isBoss && fx.bossSpirit) profile.spirit += fx.bossSpirit;
-  const companionSpirit = hasPerk('spirit') && !opponent.puzzle;
+  const companionSpirit = hasPerk('spirit') && !opponent.puzzle && !neutral;
   // Plain neighbors and district bosses get a fresh deck each fight, scaled to how many wins you have (their stored deck
   // predates enhanced and unique foe cards). Every other kind of opponent brings its own deck.
-  const plainFoe = !opponent.dungeon && !opponent.cup && !opponent.challenge && !opponent.signature && !opponent.isRival && !opponent.puzzle;
+  const plainFoe = !opponent.dungeon && !opponent.cup && !opponent.draft && !opponent.challenge && !opponent.signature && !opponent.isRival && !opponent.puzzle;
   const oppDeck = plainFoe ? buildDeckForOpponent(DECK_SIZE, isBoss, null, opponent.name, state.currentDistrict)   // a district's folk favour its family
     : (Array.isArray(opponent.deck) && opponent.deck.length === DECK_SIZE) ? opponent.deck : buildDeckForOpponent(DECK_SIZE, isBoss);
   const twistKind = bossTwistFor(opponent);
@@ -105,12 +107,12 @@ function startBattleNow(opponent, first) {
     }
   }
   else {
-    G = BattleEngine.newGame(state.deck.slice(), oppDeck.slice(), Math.random, { spirit: [BattleEngine.RULES.spirit, profile.spirit], mods: world.mods,
+    G = BattleEngine.newGame(myDeck.slice(), oppDeck.slice(), Math.random, { spirit: [BattleEngine.RULES.spirit, profile.spirit], mods: world.mods,
       twist: twistKind ? { side: 1, kind: twistKind } : null, startSpirit: opponent.startSpirit ? [opponent.startSpirit, null] : null, first, knack: [currentKnackId(), null] });
     BattleEngine.startTurn(G);
   }
   if (companionSpirit) BattleEngine.boost(G, 0, { spirit: 2 });      // a Guard-type companion stands with you
-  if (!opponent.puzzle) {
+  if (!opponent.puzzle && !neutral) {
     const sp = cardBonus('startSpirit'), dr = cardBonus('startDraw');     // charms and completed sets
     if (sp || dr) BattleEngine.boost(G, 0, { spirit: sp, draw: dr });
     // ★★★ mastered cards arrive a little tougher
@@ -119,7 +121,7 @@ function startBattleNow(opponent, first) {
   G.events.length = 0;
 
   inBattle = true;
-  battle = { npc: opponent, isBoss, first, G, profile, weather, sel: null, busy: false, ended: false, rewarded: false, yieldArmed: false, token: ++battleToken, startedAt: Date.now() };
+  battle = { npc: opponent, isBoss, first, neutral, G, profile, weather, sel: null, busy: false, ended: false, rewarded: false, yieldArmed: false, token: ++battleToken, startedAt: Date.now() };
   const chip = [weather === 'snow' ? (isBoss ? '❄️ Boss +2 Spirit · richer prize' : '❄️ Richer prize') : '', ...world.chips].filter(Boolean).join(' · ');
   const tw = twistKind ? BattleEngine.TWISTS[twistKind] : null;
   btGet('btWeather').textContent = opponent.puzzle ? '🧩 Ending your turn resets the board' : [tw ? `${tw.icon} ${tw.text}` : '', chip, plainFoe ? '✦ Seasoned deck' : ''].filter(Boolean).join(' · ');
@@ -161,7 +163,7 @@ function startBattleNow(opponent, first) {
 }
 // Dishes that help in battle can be eaten on the keep-this-hand screen, one per match.
 function renderSnackRow() {
-  const row = btGet('snackRow'), list = battle.snack ? [] : snackDishes();
+  const row = btGet('snackRow'), list = battle.snack || battle.neutral ? [] : snackDishes();
   row.classList.toggle('hidden', !list.length && !battle.snack);
   if (battle.snack) { const r = recipeDef(battle.snack); const fx = r.desc.replace(/^Eat before a match: /, ''); row.innerHTML = `<span class="snack-done">${r.icon} You ate the ${r.name}: ${fx.charAt(0).toLowerCase() + fx.slice(1)}</span>`; return; }
   row.innerHTML = '<span class="snack-label">🍽️ Snack first?</span>' + list.map(r =>
@@ -320,7 +322,7 @@ function btCardEl(c, cls, mine) {
     <div class="kws">${c.kw.map(k => `<span>${KW[k].icon}</span>`).join('')}</div>
     <div class="stats"><span class="pw">⚔${c.power}</span><span class="hp ${c.hp < c.grit ? 'hurt' : ''}">♥${c.hp}</span></div>`;
   const sleeve = mine ? currentSleeve() : null;
-  const mr = mine ? masteryRank(c.id) : 0;
+  const mr = mine && !(battle && battle.neutral) ? masteryRank(c.id) : 0;
   if (mine && hasFoil(c.id)) el.classList.add('foil');
   if (mr) { el.classList.add('mastered', 'mastery-' + mr); el.insertAdjacentHTML('beforeend', `<span class="mastery-stars">${'★'.repeat(mr)}</span>`); }
   if (sleeve && sleeve.id) { el.classList.add('sleeved', 'sleeve-' + sleeve.id); el.insertAdjacentHTML('afterbegin', `<span class="sleeve-fx"></span><span class="sleeve-mark">${sleeve.icon}</span>`); }
@@ -989,10 +991,10 @@ function btFinish() {
   if (!battle || battle.ended) return;
   battle.ended = true; battle.busy = false;
   const G = battle.G, won = G.winner === 0, yielded = G.why === 'yield';
-  if (won && !yielded && !battle.dungeon) noteBattleResult(true, battle.playedKw || []);
+  if (won && !yielded && !battle.dungeon && !battle.neutral) noteBattleResult(true, battle.playedKw || []);
   if (battle.spellsCast) bumpStat('spellsCast', battle.spellsCast);
-  if (!battle.puzzle) settleMastery(won && !yielded);
-  const winPeb = won && !yielded && !battle.puzzle ? cardBonus('winPebbles') : 0;
+  if (!battle.puzzle && !battle.neutral) settleMastery(won && !yielded);
+  const winPeb = won && !yielded && !battle.puzzle && !battle.neutral ? cardBonus('winPebbles') : 0;
   if (winPeb) { addPebbles(winPeb); setTimeout(() => toast(`🌵 Thorn charms: +${winPeb} 🫧`), 1200); }
   btRender();
   setTimeout(() => btShowResult(won, yielded), won ? 500 : 300);
@@ -1017,6 +1019,11 @@ function btShowResult(won, yielded) {
     sfx('soft');
   } else if (won && !battle.rewarded && npc.challenge) {
     challengeWin();
+  } else if (won && !battle.rewarded && npc.draft) {
+    draftWin();
+  } else if (!won && npc.draft && !battle.rewarded) {
+    battle.rewarded = true;
+    draftLoss();
   } else if (won && !battle.rewarded && npc.cup) {
     cupWin();
   } else if (!won && npc.cup && !battle.rewarded) {
@@ -1095,7 +1102,7 @@ function btRenderEndStats(G, won, yielded, turns, npc) {
 
 function closeBattle(retry) {
   if (battle && battle.closing) return;                 // a second tap on Continue while the fade is running
-  const fromDungeon = !!(battle && battle.npc && battle.npc.dungeon), fromPuzzle = !!(battle && battle.npc && battle.npc.puzzle), fromCup = !!(battle && battle.npc && battle.npc.cup),
+  const fromDungeon = !!(battle && battle.npc && battle.npc.dungeon), fromPuzzle = !!(battle && battle.npc && battle.npc.puzzle), fromCup = !!(battle && battle.npc && battle.npc.cup), fromDraft = !!(battle && battle.npc && battle.npc.draft),
         fromChallenge = !!(battle && battle.npc && battle.npc.challenge);
   if (battle) { battle.ended = true; battleToken++; }
   if (retry && battle) { battleEndOverlay.classList.add('hidden'); btGet('mulliganOverlay').classList.add('hidden'); startBattle(battle.npc); return; }
@@ -1118,6 +1125,7 @@ function closeBattle(retry) {
     if (fromDungeon) openScene('cellar');
     else if (fromPuzzle) openScene('nook');
     else if (fromCup) openScene('cup');
+    else if (fromDraft) { openScene('cup'); scene.mode = 'draft'; scene.text = draftIntro(); renderScene(); }
     else if (fromChallenge) { openScene('cup'); scene.mode = 'chal'; scene.text = 'The challenge board, again.'; renderScene(); }
   };
   if (doorFading) leave(); else withDoorFade(leave, 430, 560);

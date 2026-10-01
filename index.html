@@ -407,6 +407,21 @@
   <button type="button" id="updateBannerBtn">Refresh</button>
 </div>
 
+<div class="overlay hidden" id="draftOverlay" role="dialog" aria-labelledby="draftTitle">
+  <div class="overlay-card draft-wrap">
+    <div style="font-size:1.8rem;line-height:1.1">🎴</div>
+    <h2 id="draftTitle">Pick a card</h2>
+    <p id="draftSub"></p>
+    <div class="draft-offer" id="draftOffer"></div>
+    <div class="draft-info" id="draftInfo"></div>
+    <div class="draft-picked" id="draftPicked" aria-label="Cards drafted so far"></div>
+    <div class="controls">
+      <button class="btn btn-ghost" id="draftCloseBtn" type="button">Pause</button>
+      <button class="btn" id="draftTake" type="button" disabled>Take it</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay hidden" id="tossOverlay" role="dialog" aria-labelledby="tossTitle">
   <div class="overlay-card toss-card">
     <div class="toss-vs">
@@ -637,6 +652,7 @@
 <script src="js/gardening.js"></script>
 <script src="js/battle-ui.js"></script>
 <script src="js/battle-toss.js"></script>
+<script src="js/draft-run.js"></script>
 <script src="js/shop-economy.js"></script>
 <script src="js/workshop-and-starter.js"></script>
 <script src="js/collection-tools.js"></script>

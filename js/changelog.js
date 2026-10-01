@@ -18,6 +18,17 @@ function gameVersionLabel() {
    the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
 const CHANGELOG = [
   {
+    version: '1.85.0',
+    date: '2026-10-01',
+    title: "Draft Runs",
+    changes: [
+      "New at the fountain in Town Square: the Draft Run. Build a brand-new 12-card deck by taking 1 card from each of 12 offers of three - drawn from every card in the game, not just your collection - then win four matches in a row.",
+      "Everyone drafts on equal terms: your collection's perks (mastery, charms, snacks, companion) stay home. Your Keeper's Knack still comes along.",
+      "Earn Pebbles for every round you win (the first three runs each day pay in full), and a super rare or better card for your first clear of the day.",
+      "New milestones for clearing Draft Runs, and a daily quest to win matches in one."
+    ]
+  },
+  {
     version: '1.84.0',
     date: '2026-10-01',
     title: "The Keeper's Knack",
