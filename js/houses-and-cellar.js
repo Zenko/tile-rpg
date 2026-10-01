@@ -376,7 +376,7 @@ function goToCardShop() {
 function openScene(id) {
   cancelWalk(); if (typeof noteVisit === 'function') noteVisit(id);
   if (SCENE_TIPS[id]) showTipOnce(SCENE_TIPS[id]);
-  inScene = true; scene = { id, text: '' };
+  inScene = true; scene = { id, text: '' }; sceneView.classList.remove('scene-leaving');
   townPanel.classList.add('hidden'); document.getElementById('bottomNav').style.display = 'none';
   document.body.classList.add('in-scene'); sceneView.classList.remove('hidden'); sceneEnterFx();
   if (id === 'cellar') {
@@ -410,7 +410,7 @@ function closeScene() {
   mountShopView(null);
   miniStop();
   inScene = false; scene = null; if (typeof memory !== 'undefined') { memory = null; memoryLeaveStage(); }
-  sceneView.classList.add('hidden');
+  sceneView.classList.add('hidden'); sceneView.classList.remove('scene-leaving', 'scene-enter', 'sc-std');
   townPanel.classList.remove('hidden'); document.getElementById('bottomNav').style.display = '';
   document.body.classList.remove('in-scene');
   townLog.textContent = 'You step back outside.';
@@ -619,11 +619,21 @@ function deleteLetter(id) {
   renderScene();
 }
 
-function sceneBtn(id, label, disabled) { return `<button class="btn sc-btn" data-act="${id}" ${disabled ? 'disabled' : ''}>${label}</button>`; }
+// A label like "Play: Catch the Grain · 3 prizes left today" is split at the first " · " so the storefront layout can show the
+// status as a small chip on the right (labels with markup are left alone). Other layouts show it inline, see .sb-meta in the CSS.
+function sceneBtn(id, label, disabled) {
+  let inner = label;
+  const i = typeof label === 'string' && !label.includes('<') ? label.indexOf(' · ') : -1;
+  if (i > 0) inner = `<span class="sb-main">${label.slice(0, i)}</span><span class="sb-meta">${label.slice(i + 3)}</span>`;
+  return `<button class="btn sc-btn" data-act="${id}" ${disabled ? 'disabled' : ''}>${inner}</button>`;
+}
 // The top-left arrow is gone, so every scene state must offer its own way out. They all do today; this keeps it true.
 const SCENE_EXIT_ACTS = ['leave', 'back', 'mg-back', 'wings-back', 'exp-cancel'];
 function renderScene() {
   renderSceneBody();
+  // The storefront layout (v1.77.0) is for the ordinary "talk to the owner" screens; mini-games, the memory game and the
+  // Card Shop counter keep the compact layout because they fill the stage with their own content.
+  sceneView.classList.toggle('sc-std', !!scene && !['memory-mode', 'mini-mode', 'shop-mode'].some(c => sceneView.classList.contains(c)));
   const acts = document.getElementById('scActions');
   if (scene && acts && !SCENE_EXIT_ACTS.some(a => acts.querySelector(`[data-act="${a}"]`))) acts.insertAdjacentHTML('beforeend', sceneBtn('leave', 'Head back out'));
 }
@@ -715,8 +725,14 @@ function sceneAction(actId) {
   if (actId === 'leave') {
     // Past the Root Keeper's chest, walking away ends the run and lets the cellar rest (and reset) as it always did.
     if (scene.id === 'cellar') { const st = cellarState(); if (!st.resting && isDeepFloor(st.floor)) endCellarRun(st, 'climbed out'); }
-    if (doorFading) return;
-    sfx('nav'); buzz(HAP.tap); withDoorFade(closeScene); return;
+    if (doorFading || scene.leaving) return;
+    sfx('nav'); buzz(HAP.tap);
+    // The sheet drops away and the speech fades first, then the usual fade to the street (v1.77.0)
+    if (btMotionOk() && sceneView.classList.contains('sc-std')) {
+      scene.leaving = true; sceneView.classList.remove('scene-enter'); sceneView.classList.add('scene-leaving');
+      setTimeout(() => withDoorFade(closeScene, 170, 260), 230);
+    } else withDoorFade(closeScene);
+    return;
   }
   if (scene.id === 'cellar') {
     if (actId !== 'descend') return;

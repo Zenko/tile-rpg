@@ -2159,3 +2159,51 @@ html.calm .bottom-nav::before, html.calm #bottomNav .tab-btn .t-icon { transitio
 .clr-hex input { flex: 1; min-width: 0; height: 40px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--stone-edge); background: color-mix(in srgb, var(--hl) 6%, transparent); color: var(--ink); font: 700 .95rem var(--f-ui); letter-spacing: .04em; }
 .clr-card .controls { margin-top: 14px; }
 
+/* ===== Storefront building screens (v1.77.0) =====
+   Ordinary building screens (.sc-std, set in renderScene) become a shop front: the interior fills the top with a
+   counter, the owner behind it, a shop sign on the counter and their speech in a bubble above; the choices sit in a
+   rounded sheet that rises from the bottom, with "head back out" as a quiet button at its foot. The stage runs under the
+   floating top bar. Mini-games, the memory game and the Card Shop counter (.mini-mode/.memory-mode/.shop-mode) are not
+   .sc-std and keep their compact layout. Everything that moves is transform/opacity. */
+#sceneView[data-theme="warm"] { --sc-counter: #6b4f33; } #sceneView[data-theme="cool"] { --sc-counter: #4a5570; } #sceneView[data-theme="dark"] { --sc-counter: #332f3a; }
+#sceneView.sc-std { --sc-stage-h: clamp(320px, 48vh, 460px); padding: 0; gap: 0; overflow: hidden; }
+#sceneView.sc-std .sc-stage { height: var(--sc-stage-h); border-radius: 0; flex: none; box-shadow: inset 0 80px 60px -40px rgba(0,0,0,.4); }
+#sceneView.sc-std .sc-rug { left: 0; right: 0; bottom: 0; width: auto; height: 26%; transform: none; border-radius: 0; background: var(--sc-counter, #6b4f33); opacity: 1; box-shadow: 0 -6px 0 rgba(255,255,255,.14), inset 0 8px 14px rgba(0,0,0,.18); z-index: 2; }
+#sceneView.sc-std .sc-who { bottom: 22%; font-size: 6rem; z-index: 1; }
+#sceneView.sc-std .sc-head { position: absolute; left: 0; right: 0; top: calc(var(--sc-stage-h) * .74 + 12px); justify-content: center; padding: 0; z-index: 3; pointer-events: none; }
+#sceneView.sc-std .sc-head b { padding: 5px 18px; border-radius: 14px; background: #46362a; color: #e8d9bd; font-family: var(--f-display); font-weight: 500; font-size: 1rem; box-shadow: 0 3px 10px rgba(0,0,0,.35); }
+#sceneView.sc-std .sc-pips:empty { display: none; }
+#sceneView.sc-std .sc-bubble { position: absolute; left: 22px; right: 22px; top: calc(var(--hud-h, 70px) + 24px); z-index: 4; margin: 0; text-align: center; background: color-mix(in srgb, var(--stone) 94%, transparent); box-shadow: 0 6px 18px rgba(0,0,0,.3); max-height: calc(var(--sc-stage-h) - var(--hud-h, 70px) - 90px); overflow-y: auto; }
+#sceneView.sc-std .sc-bubble::after { content: ''; position: absolute; left: 50%; bottom: -8px; width: 16px; height: 16px; margin-left: -8px; transform: rotate(45deg); background: color-mix(in srgb, var(--stone) 94%, transparent); border-right: 1px solid var(--stone-edge); border-bottom: 1px solid var(--stone-edge); }
+#sceneView.sc-std .sc-bubble:empty { display: none; }
+#sceneView.sc-std .sc-actions { position: relative; z-index: 5; flex: 1 1 auto; min-height: 0; overflow-y: auto; margin-top: -24px; gap: 10px; padding: 14px 16px calc(24px + env(safe-area-inset-bottom, 0px)); background: var(--stone); border-top: 1px solid var(--stone-edge); border-radius: 28px 28px 0 0; box-shadow: 0 -10px 30px rgba(0,0,0,.35); }
+#sceneView.sc-std .sc-actions::before { content: ''; flex: none; align-self: center; width: 40px; height: 4px; border-radius: 2px; background: var(--stone-edge); margin: 0 0 4px; }
+#sceneView.sc-std .sc-btn { display: flex; align-items: center; justify-content: flex-start; gap: 10px; min-height: 60px; padding: 0 16px; border-radius: 18px; text-align: left; font-weight: 800; background: color-mix(in srgb, var(--hl) 6%, transparent); border: 1px solid var(--stone-edge); color: var(--ink); box-shadow: none; flex: none; }
+#sceneView.sc-std .sc-btn .sb-main { flex: 1 1 auto; min-width: 0; }
+#sceneView.sc-std .sc-btn .sb-meta { flex: none; padding: 4px 10px; border-radius: 999px; font-size: .72rem; font-weight: 800; background: color-mix(in srgb, var(--hl) 10%, transparent); }
+.sb-meta::before { content: ' · '; }
+#sceneView.sc-std .sb-meta::before { content: none; }
+/* the mini-game doorway is the call to action */
+#sceneView.sc-std .sc-btn[data-act^="mg-"]:not([data-act="mg-back"]):not([data-act="mg-again"]) { min-height: 68px; background: var(--water); color: var(--on-water); border-color: transparent; }
+#sceneView.sc-std .sc-btn[data-act^="mg-"]:not([data-act="mg-back"]):not([data-act="mg-again"]) .sb-meta { background: color-mix(in srgb, var(--on-water) 14%, transparent); }
+/* the way out is a quiet button at the foot of the sheet */
+#sceneView.sc-std .sc-btn[data-act="leave"] { justify-content: center; min-height: 48px; margin-top: 4px; background: none; border-color: transparent; color: var(--ink-soft); font-weight: 700; }
+#sceneView.sc-std .sc-btn:disabled { opacity: .5; }
+/* entering: the stage settles, the sign drops, the speech pops, the sheet rises, the choices follow */
+@keyframes sc-stage-in { from { opacity: 0; transform: scale(1.05); } to { opacity: 1; transform: none; } }
+@keyframes sc-sign-in { from { opacity: 0; transform: translateY(-18px) rotate(-2deg); } to { opacity: 1; transform: none; } }
+@keyframes sc-bubble-in { from { opacity: 0; transform: translateY(12px) scale(.92); } to { opacity: 1; transform: none; } }
+@keyframes sc-sheet-up { from { transform: translateY(105%); } to { transform: none; } }
+@keyframes sc-sheet-down { to { transform: translateY(105%); } }
+@keyframes sc-fade-out { to { opacity: 0; transform: translateY(-8px); } }
+#sceneView.scene-enter.sc-std .sc-stage { animation: sc-stage-in .5s cubic-bezier(.2,.9,.3,1) both; }
+#sceneView.scene-enter.sc-std .sc-head { animation: sc-sign-in .42s .3s cubic-bezier(.34,1.4,.64,1) both; }
+#sceneView.scene-enter.sc-std .sc-bubble { animation: sc-bubble-in .38s .42s cubic-bezier(.34,1.4,.64,1) both; }
+#sceneView.scene-enter.sc-std .sc-actions { animation: sc-sheet-up .48s .12s cubic-bezier(.2,.9,.25,1) both; }
+#sceneView.scene-enter.sc-std .sc-actions > .sc-btn { animation: sc-rise .34s calc(.34s + var(--n, 0) * .05s) both; }
+/* leaving: the sheet drops away and the speech and sign fade, then the page fade takes over (sceneAction 'leave') */
+#sceneView.scene-leaving.sc-std .sc-actions { animation: sc-sheet-down .24s ease-in both; }
+#sceneView.scene-leaving.sc-std .sc-bubble, #sceneView.scene-leaving.sc-std .sc-head { animation: sc-fade-out .2s ease-in both; }
+@media (prefers-reduced-motion: reduce) { #sceneView.sc-std, #sceneView.sc-std * { animation: none !important; } }
+html.calm #sceneView.sc-std, html.calm #sceneView.sc-std * { animation: none !important; }
+

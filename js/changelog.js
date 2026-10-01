@@ -18,6 +18,16 @@ function gameVersionLabel() {
    the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
 const CHANGELOG = [
   {
+    version: '1.77.0',
+    date: '2026-10-01',
+    title: "Shop fronts",
+    changes: [
+      "Building screens now look like a shop front: the inside fills the top of the screen, the owner stands behind the counter with a sign and a speech bubble, and your choices sit in a sheet at the bottom. The main game on offer is highlighted, and 'Head back out' is a quiet button at the foot.",
+      "Going in and out is animated: the sign drops, the speech pops up and the sheet rises. Leaving drops the sheet away before the fade back to the street.",
+      "Mini-games, the memory game and the Card Shop counter keep their roomier layout."
+    ]
+  },
+  {
     version: '1.76.0',
     date: '2026-10-01',
     title: "One results window",
