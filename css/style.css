@@ -2279,3 +2279,6 @@ html.calm .die.rolling { animation: none; }
 /* ---------- New battle keywords (v1.82.0) ---------- */
 #battleView .card .badge.lul { top:-7px; left:-4px; font-size:.85rem; }
 #battleView .card.lulled { opacity: .78; }
+
+/* The weather / world line can now carry several effects at once (v1.83.0), so it wraps instead of clipping. */
+#battleView .bt-weather { white-space: normal; border-radius: 12px; line-height: 1.3; text-align: center; min-width: 0; flex: 0 1 auto; max-width: 100%; }

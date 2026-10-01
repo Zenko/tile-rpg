@@ -414,15 +414,19 @@ const BattleEngine = (function () {
     if (d.spell) return { uid, id, cost: d.cost, spell: d.spell, power: 0, grit: 0, hp: 0, kw: [], shield: false, ready: false, attacks: 0 };
     const swift = d.kw.includes('swift'), kw = d.kw.slice();
     if (mods && mods.addKw && !kw.includes(mods.addKw) && d.cost <= (mods.addKwMaxCost || 99)) kw.push(mods.addKw);
-    const grit = d.grit + (mods && mods.guardHp && kw.includes('guard') ? mods.guardHp : 0);
-    return { uid, id, cost: d.cost, power: d.power + (swift && mods && mods.swiftBonus ? mods.swiftBonus : 0), grit, hp: grit, kw,
+    mods = mods || {};
+    const fam = mods.famHp ? CARD_FAMILY[baseIdOf(id)] === mods.famHp.family : false;
+    const grit = d.grit + (mods.guardHp && kw.includes('guard') ? mods.guardHp : 0) + (mods.shieldHp && kw.includes('shield') ? mods.shieldHp : 0) + (fam ? mods.famHp.hp : 0);
+    return { uid, id, cost: d.cost, power: d.power + (swift && mods.swiftBonus ? mods.swiftBonus : 0) + (mods.bloomStart && kw.includes('bloom') ? mods.bloomStart : 0), grit, hp: grit, kw,
              shield: kw.includes('shield'), ready: swift, attacks: 0, lull: 0 };
   }
 
   function shuffled(a, rng) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
   /* opts.spirit = [spiritForPlayer0, spiritForPlayer1] lets friendly opponents start with less Spirit.
-     opts.mods   = { swiftBonus } - weather effects that change every card of a kind, on both sides.
+     opts.mods   = the world's effect on a match, the same for both sides (battleWorld() in js/battle-ui.js builds it):
+                   swiftBonus (+power to Swift), bloomStart (+power to Bloom), shieldHp (+health to Shield), mendBonus (Mend restores
+                   more), echoBonus (Echo hits harder) and famHp { family, hp } (a district's "home turf": its family is tougher).
      opts.twist  = { side, kind } - a district boss's rule twist (see TWISTS).
      opts.first  = 0 or 1 - who takes the first turn (the coin/dice toss). The other seat is "second" and gets the catch-up
                    bonus: +1 card and +1 energy on its first turns. Old puzzle snapshots have no G.first, so it reads as 0. */
@@ -504,7 +508,7 @@ const BattleEngine = (function () {
     me.hand.splice(me.hand.indexOf(c), 1);
     me.energy -= c.cost; me.board.push(c);
     emit(G, 'play', { who, card: c });
-    if (c.kw.includes('echo')) { op.spirit -= RULES.echo; emit(G, 'spirit', { who: 1 - who, delta: -RULES.echo, source: c, echo: true }); }
+    if (c.kw.includes('echo')) { const dmg = RULES.echo + ((G.mods && G.mods.echoBonus) || 0); op.spirit -= dmg; emit(G, 'spirit', { who: 1 - who, delta: -dmg, source: c, echo: true }); }
     if (c.kw.includes('rally')) me.board.forEach(x => { if (x !== c) { x.power++; emit(G, 'buff', { who, uid: x.uid, amt: 1, rally: true }); } });
     if (c.kw.includes('kin')) {
       const fam = familyOf(c.id), n = fam ? me.board.filter(x => x !== c && familyOf(x.id) === fam).length : 0;
@@ -683,7 +687,7 @@ const BattleEngine = (function () {
   function endTurn(G, who) {
     if (G.over || G.active !== who) return { ok: false };
     const me = G.p[who];
-    me.board.forEach(c => { if (c.kw.includes('mend') && me.spirit < me.maxSpirit) { me.spirit = Math.min(me.maxSpirit, me.spirit + RULES.mend); emit(G, 'spirit', { who, delta: RULES.mend, source: c }); } });
+    me.board.forEach(c => { if (c.kw.includes('mend') && me.spirit < me.maxSpirit) { const heal = RULES.mend + ((G.mods && G.mods.mendBonus) || 0); me.spirit = Math.min(me.maxSpirit, me.spirit + heal); emit(G, 'spirit', { who, delta: heal, source: c }); } });
     if (G.twist && G.twist.kind === 'roots' && G.twist.side === who && me.spirit < me.maxSpirit) {
       const heal = Math.min(3, me.maxSpirit - me.spirit); me.spirit += heal; emit(G, 'spirit', { who, delta: heal, twist: true });
     }

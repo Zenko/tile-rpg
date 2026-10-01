@@ -50,6 +50,22 @@ function btIntro(opponent, isBoss, first) {
     buzz(HAP.tap);
   });
 }
+/* ---------- the world in the match (v1.83.0) ----------
+   Three layers change how a match plays, the same for both sides: the weather (WEATHER_EFFECTS), night (Echo hits +1) and the
+   district's "home turf" (its family has +1 health - Stone in Town Square, Wind in Market Row, Tide in the Harbor, Grove in the
+   Garden). Returns the engine's `mods` and the short chips the battle screen shows. The cellar and puzzles are shut away from
+   all of it. */
+function battleWorld(opponent, weather) {
+  const mods = {}, chips = [];
+  if (opponent.puzzle || opponent.dungeon) return { mods, chips };
+  const fx = WEATHER_EFFECTS[weather] || {};
+  ['swiftBonus', 'bloomStart', 'shieldHp', 'mendBonus'].forEach(k => { if (fx[k]) mods[k] = fx[k]; });
+  if (fx.battle) chips.push(fx.battle);
+  if (skyPhase().isNight) { mods.echoBonus = 1; chips.push('🌙 Night: Echo hits +1'); }
+  const fam = districtFamily(state.currentDistrict);
+  if (fam) { mods.famHp = { family: fam, hp: 1 }; chips.push(`${FAMILIES[fam].icon} ${FAMILIES[fam].name} home turf +1♥`); }
+  return { mods, chips };
+}
 function startBattleNow(opponent, first) {
   first = first === 1 ? 1 : 0;                              // 0 = you take the first turn (the toss, js/battle-toss.js)
   // Never let a damaged card id reach the engine: drop anything that is not a real card first.
@@ -69,10 +85,10 @@ function startBattleNow(opponent, first) {
   // Plain neighbors and district bosses get a fresh deck each fight, scaled to how many wins you have (their stored deck
   // predates enhanced and unique foe cards). Every other kind of opponent brings its own deck.
   const plainFoe = !opponent.dungeon && !opponent.cup && !opponent.challenge && !opponent.signature && !opponent.isRival && !opponent.puzzle;
-  const oppFam = plainFoe ? districtFamily(state.currentDistrict) : null;      // a district's folk favour its family
-  const oppDeck = plainFoe ? buildDeckForOpponent(DECK_SIZE, isBoss, null, opponent.name, state.currentDistrict)
+  const oppDeck = plainFoe ? buildDeckForOpponent(DECK_SIZE, isBoss, null, opponent.name, state.currentDistrict)   // a district's folk favour its family
     : (Array.isArray(opponent.deck) && opponent.deck.length === DECK_SIZE) ? opponent.deck : buildDeckForOpponent(DECK_SIZE, isBoss);
   const twistKind = bossTwistFor(opponent);
+  const world = battleWorld(opponent, weather);
   let G;
   if (opponent.puzzle) {
     // A fixed board, already mid-turn. Unlike every other JSON.parse in the codebase this one had no
@@ -89,7 +105,7 @@ function startBattleNow(opponent, first) {
     }
   }
   else {
-    G = BattleEngine.newGame(state.deck.slice(), oppDeck.slice(), Math.random, { spirit: [BattleEngine.RULES.spirit, profile.spirit], mods: { swiftBonus: fx.swiftBonus || 0 },
+    G = BattleEngine.newGame(state.deck.slice(), oppDeck.slice(), Math.random, { spirit: [BattleEngine.RULES.spirit, profile.spirit], mods: world.mods,
       twist: twistKind ? { side: 1, kind: twistKind } : null, startSpirit: opponent.startSpirit ? [opponent.startSpirit, null] : null, first });
     BattleEngine.startTurn(G);
   }
@@ -104,9 +120,9 @@ function startBattleNow(opponent, first) {
 
   inBattle = true;
   battle = { npc: opponent, isBoss, first, G, profile, weather, sel: null, busy: false, ended: false, rewarded: false, yieldArmed: false, token: ++battleToken, startedAt: Date.now() };
-  const chip = weather === 'storm' ? '⛈️ Swift +1 power' : weather === 'snow' ? (isBoss ? '❄️ Boss +2 Spirit · richer prize' : '❄️ Richer prize') : '';
+  const chip = [weather === 'snow' ? (isBoss ? '❄️ Boss +2 Spirit · richer prize' : '❄️ Richer prize') : '', ...world.chips].filter(Boolean).join(' · ');
   const tw = twistKind ? BattleEngine.TWISTS[twistKind] : null;
-  btGet('btWeather').textContent = opponent.puzzle ? '🧩 Ending your turn resets the board' : [tw ? `${tw.icon} ${tw.text}` : '', chip, plainFoe ? (oppFam ? `${FAMILIES[oppFam].icon} ${FAMILIES[oppFam].name} deck · ` : '') + '✦ Seasoned deck: unique & enhanced cards' : ''].filter(Boolean).join(' · ');
+  btGet('btWeather').textContent = opponent.puzzle ? '🧩 Ending your turn resets the board' : [tw ? `${tw.icon} ${tw.text}` : '', chip, plainFoe ? '✦ Seasoned deck' : ''].filter(Boolean).join(' · ');
   battle.puzzle = !!opponent.puzzle;
 
   townPanel.classList.add('hidden');

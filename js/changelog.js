@@ -18,6 +18,17 @@ function gameVersionLabel() {
    the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
 const CHANGELOG = [
   {
+    version: '1.83.0',
+    date: '2026-10-01',
+    title: "The world joins the fight",
+    changes: [
+      "Weather now changes how a match plays, for both sides: clear skies give Bloom cards +1 power, cloud gives Shield cards +1 health, rain makes Mend heal +1 (storms still give Swift +1 power).",
+      "At night, Echo hits for +1.",
+      "Every district is home turf for its family: Stone in Town Square, Wind in Market Row, Tide in the Harbor and Grove in the Garden get +1 health there. Build your deck for where you are fighting.",
+      "The line under the battle bar lists everything in play, and the sky badge's weather forecast mentions each weather's battle effect."
+    ]
+  },
+  {
     version: '1.82.0',
     date: '2026-10-01',
     title: "Families and four new keywords",

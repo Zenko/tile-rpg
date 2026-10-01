@@ -98,10 +98,11 @@ const WEATHER_LOG = {
 // What each kind of weather actually changes. `short` goes on the battle chip and in toasts; the numbers are read
 // by the systems they touch (fishing, finds, chests, spirits, battles, rewards) through weatherIs()/WEATHER_EFFECTS.
 const WEATHER_EFFECTS = {
-  clear:  { short: 'Daily tasks pay a little extra', dailyBonus: 1 },
-  cloudy: { short: 'Spirits give double XP' },
-  rain:   { short: 'Fish bite sooner, rare fish more often', biteSpeed: 0.6, rareFish: 2.5 },
-  storm:  { short: '💨 Swift cards +1 power in battle', swiftBonus: 1 },
+  // `battle` is the weather's effect on a card match (BattleEngine mods, same for both sides; see battleWorld() in js/battle-ui.js).
+  clear:  { short: 'Daily tasks pay a little extra · 🌸 Bloom cards +1 power in battle', dailyBonus: 1, bloomStart: 1, battle: '☀️ Bloom +1 power' },
+  cloudy: { short: 'Spirits give double XP · 🫧 Shield cards +1 health in battle', shieldHp: 1, battle: '☁️ Shield +1 health' },
+  rain:   { short: 'Fish bite sooner, rare fish more often · 🌿 Mend heals +1 in battle', biteSpeed: 0.6, rareFish: 2.5, mendBonus: 1, battle: '🌧️ Mend heals +1' },
+  storm:  { short: '💨 Swift cards +1 power in battle', swiftBonus: 1, battle: '⛈️ Swift +1 power' },
   snow:   { short: 'Bosses +2 Spirit, richer rewards', bossSpirit: 2, richerRewards: true },
 };
 /* ---------------- seasons: one real week each, spring -> summer -> autumn -> winter ----------------
