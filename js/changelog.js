@@ -18,6 +18,14 @@ function gameVersionLabel() {
    the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
 const CHANGELOG = [
   {
+    version: '1.70.0',
+    date: '2026-10-01',
+    title: "Smoother chats",
+    changes: [
+      "Talking to a neighbour no longer makes the screen flash. The chat card now slides up over a plain dimmed town instead of a blurred one."
+    ]
+  },
+  {
     version: '1.69.0',
     date: '2026-10-01',
     title: "Top is the app, the tab is you",

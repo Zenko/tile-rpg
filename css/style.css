@@ -2006,3 +2006,10 @@ html.calm .bottom-nav::before, html.calm #bottomNav .tab-btn .t-icon { transitio
 .hud-gear { position: absolute; top: -5px; right: -7px; z-index: 2; width: 17px; height: 17px; border-radius: 50%; display: grid; place-items: center; font-size: 0.55rem; line-height: 1;
   background: var(--stone); border: 1px solid var(--stone-edge); box-shadow: 0 1px 3px var(--shadow); pointer-events: none; }
 .name-input { width: 100%; }
+
+/* Smooth neighbour chat (v1.70.0): the talk card and card inspector are sheets over a live, animating town.
+   A full-screen backdrop-filter blur there forced the browser to re-blur the whole map every frame while the
+   overlay faded in, which showed as a brief flash/glitch on phones (HANDOFF §9: avoid blur over animated
+   content). Sheets use a plain dim instead, with a quicker fade, and the card itself slides up in one motion. */
+.overlay.sheet, .overlay.inspect-overlay { backdrop-filter: none; -webkit-backdrop-filter: none; transition: opacity .2s ease; }
+.overlay.sheet .overlay-card, .overlay.inspect-overlay .overlay-card { will-change: transform; }
