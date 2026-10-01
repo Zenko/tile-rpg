@@ -1,13 +1,13 @@
 /* ============================================================
    PREFS, SOUND, HAPTICS, TOAST
    ============================================================ */
-let prefs = { sound: true, haptics: true, music: true, musicVol: 0.5, sfxVol: 0.7, notifs: false, sharePresence: true, presenceChosen: false };   // sound = master mute for everything; notifs default off (needs a permission grant); sharePresence defaults ON until the player toggles it (presenceChosen)
+let prefs = { sound: true, haptics: true, music: true, musicVol: 0.5, sfxVol: 0.7, notifs: false, sharePresence: true, presenceChosen: false, ambient: true };   // sound = master mute for everything; notifs default off (needs a permission grant); sharePresence defaults ON until the player toggles it (presenceChosen)
 try { const pr = JSON.parse(localStorage.getItem(PREFS_KEY) || 'null'); if (pr) prefs = Object.assign(prefs, pr); } catch (e) { /* ignore */ }
 // An older save stored the old default (off) without the player ever choosing it, so treat that as "not chosen yet" and use the new default.
 if (!prefs.presenceChosen) prefs.sharePresence = true;
 // Repair anything a corrupted/edited save could hand us
 ['musicVol', 'sfxVol'].forEach(k => { const v = Number(prefs[k]); prefs[k] = (isFinite(v) ? Math.min(1, Math.max(0, v)) : 0.5); });
-prefs.sound = prefs.sound !== false; prefs.music = prefs.music !== false; prefs.haptics = prefs.haptics !== false;
+prefs.sound = prefs.sound !== false; prefs.music = prefs.music !== false; prefs.haptics = prefs.haptics !== false; prefs.ambient = prefs.ambient !== false;   // ambient (town sounds) is on unless the player turned it off
 function savePrefs() { try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch (e) { /* ignore */ } }
 
 /* ============================================================
@@ -387,19 +387,47 @@ function noiseSource(ctx) {
   return src;
 }
 
+// Pink noise (-3dB/octave, Paul Kellet's filter) sounds like real rain; the flat white noise the rain bed used
+// before is what made it hiss harshly.
+let pinkBuffer = null;
+function pinkSource(ctx) {
+  if (!pinkBuffer || pinkBuffer.sampleRate !== ctx.sampleRate) {
+    const len = ctx.sampleRate * 4, buf = ctx.createBuffer(1, len, ctx.sampleRate), d = buf.getChannelData(0);
+    let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+    for (let i = 0; i < len; i++) {
+      const w = Math.random() * 2 - 1;
+      b0 = 0.99886 * b0 + w * 0.0555179; b1 = 0.99332 * b1 + w * 0.0750759; b2 = 0.96900 * b2 + w * 0.1538520;
+      b3 = 0.86650 * b3 + w * 0.3104856; b4 = 0.55000 * b4 + w * 0.5329522; b5 = -0.7616 * b5 - w * 0.0168980;
+      d[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362) * 0.11; b6 = w * 0.115926;
+    }
+    pinkBuffer = buf;
+  }
+  const src = ctx.createBufferSource(); src.buffer = pinkBuffer; src.loop = true;
+  return src;
+}
+
 const WEATHER_AUDIO = { running: null, nodes: null, thunderTimer: null, gen: 0 };
 
 function buildWeatherBed(ctx, kind) {
   const out = ctx.createGain(); out.gain.value = 0.0001;
-  const src = noiseSource(ctx);
+  const rainy = kind === 'rain' || kind === 'storm';
+  const src = rainy ? pinkSource(ctx) : noiseSource(ctx);
   const filter = ctx.createBiquadFilter();
   // Kept well under the music's own gain - these are meant to sit under the chords as a faint
   // texture, not compete with them (a shared bus, so turning music down turns this down too).
   let targetGain = 0.07;
-  if (kind === 'rain') { filter.type = 'bandpass'; filter.frequency.value = 3200; filter.Q.value = 0.5; targetGain = 0.065; }
-  else if (kind === 'storm') { filter.type = 'bandpass'; filter.frequency.value = 2600; filter.Q.value = 0.45; targetGain = 0.09; }
+  // Rain is a soft pink-noise body (lowpassed so there's no hiss) under a very faint high "patter" layer.
+  if (rainy) { filter.type = 'lowpass'; filter.frequency.value = kind === 'storm' ? 1500 : 1200; filter.Q.value = 0.3; targetGain = kind === 'storm' ? 0.07 : 0.05; }
   else if (kind === 'fog' || kind === 'cloudy') { filter.type = 'lowpass'; filter.frequency.value = 500; filter.Q.value = 0.3; targetGain = 0.025; }
   else { filter.type = 'lowpass'; filter.frequency.value = 300; targetGain = 0.02; }
+  let patter = null;
+  if (rainy) {
+    patter = pinkSource(ctx);
+    const pf = ctx.createBiquadFilter(); pf.type = 'bandpass'; pf.frequency.value = 3600; pf.Q.value = 0.8;
+    const pg = ctx.createGain(); pg.gain.value = 0.009;
+    patter.connect(pf); pf.connect(pg); pg.connect(out);
+    patter.start(0, Math.random() * 3);
+  }
   // A slow gain wobble so the noise bed breathes instead of sitting perfectly flat
   const wobble = ctx.createOscillator(); wobble.type = 'sine'; wobble.frequency.value = 0.07 + Math.random() * 0.05;
   const wobbleDepth = ctx.createGain(); wobbleDepth.gain.value = targetGain * 0.18;
@@ -410,7 +438,7 @@ function buildWeatherBed(ctx, kind) {
   if (kind === 'storm') {
     rumble = noiseSource(ctx); rumbleFilter = ctx.createBiquadFilter();
     rumbleFilter.type = 'lowpass'; rumbleFilter.frequency.value = 90; rumbleFilter.Q.value = 0.7;
-    const rumbleGain = ctx.createGain(); rumbleGain.gain.value = 0.06;
+    const rumbleGain = ctx.createGain(); rumbleGain.gain.value = 0.05;
     rumble.connect(rumbleFilter); rumbleFilter.connect(rumbleGain); rumbleGain.connect(out);
     rumble.start();
   }
@@ -418,7 +446,7 @@ function buildWeatherBed(ctx, kind) {
   src.connect(filter); filter.connect(wobbleBase); wobbleBase.connect(out);
   out.connect(musicBus);
   src.start();
-  return { out, src, filter, wobble, wobbleBase, rumble, rumbleFilter };
+  return { out, src, filter, wobble, wobbleBase, rumble, rumbleFilter, patter };
 }
 
 function thunderCrack() {
@@ -471,18 +499,113 @@ function stopWeatherAudio(fast) {
     nodes.out.gain.setValueAtTime(Math.max(nodes.out.gain.value, 0.0001), t);
     nodes.out.gain.linearRampToValueAtTime(0.0001, t + fade);
     setTimeout(() => {
-      try { nodes.src.stop(); nodes.wobble.stop(); if (nodes.rumble) nodes.rumble.stop(); } catch (e) { /* already stopped */ }
+      try { nodes.src.stop(); nodes.wobble.stop(); if (nodes.rumble) nodes.rumble.stop(); if (nodes.patter) nodes.patter.stop(); } catch (e) { /* already stopped */ }
     }, (fade + 0.2) * 1000);
   } catch (e) { /* ignore */ }
 }
 // Single place that decides which weather ambience (if any) should be playing
 function syncWeatherAudio() {
+  syncAmbientAudio();   // the district ambience shares this re-check so it follows battles, scenes and district changes
   const want = prefs.sound && prefs.music && !document.hidden && userHasTouched && !inBattle && !inScene;
   // Snow stays deliberately silent (real snowfall is famously hushed); clear has no bed either
   const audible = kind => kind === 'rain' || kind === 'storm' || kind === 'fog' || kind === 'cloudy';
   const kind = state.weather.current || 'clear';
   if (!want || !audible(kind)) { if (WEATHER_AUDIO.running) stopWeatherAudio(); return; }
   if (WEATHER_AUDIO.running !== kind) startWeatherAudio(kind);
+}
+
+/* ============================================================
+   TOWN AMBIENCE: a quiet synthesised bed per district (wind and birdsong in the square, a crowd murmur in the
+   market, waves and gulls at the harbor, leaves and crickets in the garden). Own toggle (prefs.ambient, on by
+   default) but still rides the music bus/Sound master, so the Music slider scales it too. Silent in battles
+   and scenes, and the little one-shot sounds (birds, gulls, chimes) pause during rain so it doesn't clash.
+   ============================================================ */
+const AMBIENT_AUDIO = { running: null, nodes: null, timer: null, gen: 0 };
+const AMBIENT_BEDS = {
+  // [noise filter type, freq, Q, gain, swell rate Hz, swell depth 0-1]
+  meadow: ['lowpass', 520, 0.3, 0.03, 0.08, 0.5],
+  bazaar: ['bandpass', 420, 0.8, 0.028, 0.15, 0.3],
+  harbor: ['lowpass', 650, 0.4, 0.05, 0.11, 0.8],
+  orchard: ['bandpass', 2200, 0.5, 0.012, 0.09, 0.5]
+};
+function ambientChirp(ctx, o) {
+  const t0 = ctx.currentTime + 0.05, g = ctx.createGain(), osc = ctx.createOscillator();
+  osc.type = 'sine';
+  const f = o.f, n = o.notes || 1, gap = o.gap || 0.12;
+  for (let i = 0; i < n; i++) {
+    const t = t0 + i * gap;
+    osc.frequency.setValueAtTime(f * (1 + Math.random() * 0.15), t);
+    osc.frequency.exponentialRampToValueAtTime(f * o.slide, t + o.dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(o.vol, t + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t + o.dur);
+  }
+  osc.connect(g); g.connect(musicBus);
+  osc.start(t0); osc.stop(t0 + n * gap + o.dur + 0.1);
+}
+function ambientOneShot(kind) {
+  const ctx = audioCtx; if (!ctx || !musicBus) return;
+  const night = skyPhase().isNight;
+  if (kind === 'meadow' && !night) ambientChirp(ctx, { f: 3000, slide: 1.25, dur: 0.09, vol: 0.012, notes: 2 + Math.floor(Math.random() * 3), gap: 0.13 });
+  else if (kind === 'harbor') ambientChirp(ctx, { f: 1500, slide: 0.6, dur: 0.5, vol: 0.01, notes: 2, gap: 0.45 });
+  else if (kind === 'bazaar') ambientChirp(ctx, { f: 1800 + Math.random() * 900, slide: 1, dur: 0.9, vol: 0.006 });   // a faraway chime
+  else if (kind === 'orchard') {
+    // night: a brief cricket trill (fast amplitude flutter); day: a single soft bird
+    if (night) {
+      const t0 = ctx.currentTime + 0.05, osc = ctx.createOscillator(), g = ctx.createGain(), lfo = ctx.createOscillator(), lg = ctx.createGain();
+      osc.type = 'sine'; osc.frequency.value = 4300; lfo.frequency.value = 22; lg.gain.value = 0.004; g.gain.value = 0.004;
+      lfo.connect(lg); lg.connect(g.gain); osc.connect(g); g.connect(musicBus);
+      g.gain.setValueAtTime(0.0001, t0); g.gain.linearRampToValueAtTime(0.004, t0 + 0.2); g.gain.linearRampToValueAtTime(0.0001, t0 + 1.6);
+      osc.start(t0); lfo.start(t0); osc.stop(t0 + 1.7); lfo.stop(t0 + 1.7);
+    } else ambientChirp(ctx, { f: 2600, slide: 1.4, dur: 0.12, vol: 0.01, notes: 2, gap: 0.2 });
+  }
+}
+function scheduleAmbientOneShot() {
+  clearTimeout(AMBIENT_AUDIO.timer);
+  const gen = AMBIENT_AUDIO.gen;
+  AMBIENT_AUDIO.timer = setTimeout(() => {
+    if (AMBIENT_AUDIO.gen !== gen || !AMBIENT_AUDIO.running) return;
+    const w = state.weather.current;
+    if (w !== 'rain' && w !== 'storm') ambientOneShot(AMBIENT_AUDIO.running);
+    scheduleAmbientOneShot();
+  }, (5 + Math.random() * 10) * 1000);
+}
+function startAmbientAudio(biome) {
+  const ctx = ensureAudio(); if (!ctx) return;
+  stopAmbientAudio(true);
+  const cfg = AMBIENT_BEDS[biome] || AMBIENT_BEDS.meadow;
+  AMBIENT_AUDIO.gen++;
+  const out = ctx.createGain(), src = noiseSource(ctx), filter = ctx.createBiquadFilter();
+  filter.type = cfg[0]; filter.frequency.value = cfg[1]; filter.Q.value = cfg[2];
+  // slow swell (waves, wind gusts, crowd ebb): an LFO on the bed's own gain
+  const bed = ctx.createGain(); bed.gain.value = cfg[3] * (1 - cfg[5] / 2);
+  const lfo = ctx.createOscillator(), lfoDepth = ctx.createGain();
+  lfo.type = 'sine'; lfo.frequency.value = cfg[4] + Math.random() * 0.03; lfoDepth.gain.value = cfg[3] * cfg[5] / 2;
+  lfo.connect(lfoDepth); lfoDepth.connect(bed.gain);
+  src.connect(filter); filter.connect(bed); bed.connect(out); out.connect(musicBus);
+  src.start(0, Math.random() * 1.5); lfo.start();
+  const t = ctx.currentTime;
+  out.gain.setValueAtTime(0.0001, t); out.gain.linearRampToValueAtTime(1, t + 3);
+  AMBIENT_AUDIO.nodes = { out, src, lfo }; AMBIENT_AUDIO.running = biome;
+  scheduleAmbientOneShot();
+}
+function stopAmbientAudio(fast) {
+  clearTimeout(AMBIENT_AUDIO.timer);
+  AMBIENT_AUDIO.gen++;
+  const nodes = AMBIENT_AUDIO.nodes;
+  AMBIENT_AUDIO.running = null; AMBIENT_AUDIO.nodes = null;
+  if (!nodes || !audioCtx) return;
+  const t = audioCtx.currentTime, fade = fast ? 0.5 : 2;
+  try {
+    nodes.out.gain.cancelScheduledValues(t);
+    nodes.out.gain.setValueAtTime(Math.max(nodes.out.gain.value, 0.0001), t);
+    nodes.out.gain.linearRampToValueAtTime(0.0001, t + fade);
+    setTimeout(() => { try { nodes.src.stop(); nodes.lfo.stop(); } catch (e) { /* already stopped */ } }, (fade + 0.2) * 1000);
+  } catch (e) { /* ignore */ }
+}
+function syncAmbientAudio() {
+  const want = prefs.sound && prefs.music && prefs.ambient && !document.hidden && userHasTouched && !inBattle && !inScene;
+  if (!want) { if (AMBIENT_AUDIO.running) stopAmbientAudio(); return; }
+  const biome = BIOME_OF[state.currentDistrict] || 'meadow';
+  if (AMBIENT_AUDIO.running !== biome) startAmbientAudio(biome);
 }
 
 

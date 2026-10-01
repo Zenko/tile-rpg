@@ -487,6 +487,7 @@ function syncToggles() {
   soundToggle.classList.toggle('on', prefs.sound);
   musicToggle.classList.toggle('on', prefs.music);
   hapticToggle.classList.toggle('on', prefs.haptics);
+  document.getElementById('ambientToggle').classList.toggle('on', prefs.ambient);
   document.getElementById('fastToggle').classList.toggle('on', !!prefs.fast);
   document.getElementById('bigTextToggle').classList.toggle('on', !!prefs.bigText);
   document.getElementById('calmToggle').classList.toggle('on', !!prefs.calm);
@@ -511,6 +512,13 @@ musicToggle.addEventListener('click', () => {
   if (prefs.music && prefs.sound) ensureAudio();
   syncToggles(); syncMusic();
   if (prefs.music && !prefs.sound) toast('Turn Sound on to hear music');
+});
+
+document.getElementById('ambientToggle').addEventListener('click', () => {
+  prefs.ambient = !prefs.ambient; savePrefs();
+  if (prefs.ambient && prefs.sound && prefs.music) ensureAudio();
+  syncToggles(); syncAmbientAudio();
+  if (prefs.ambient && !(prefs.sound && prefs.music)) toast('Turn Sound and Music on to hear ambience');
 });
 
 function bindVolume(id, key, onChange) {

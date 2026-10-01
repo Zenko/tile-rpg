@@ -18,6 +18,16 @@ function gameVersionLabel() {
    the previous entry. Major version bumps (X.0.0) are done by hand, never automatically. */
 const CHANGELOG = [
   {
+    date: '2026-10-01',
+    version: '1.54.0',
+    title: "Softer rain and town ambience",
+    changes: [
+      "Rain and storm sound much softer and more natural now - a gentle patter instead of a harsh hiss.",
+      "Each town has its own ambient sound: wind and birdsong in the Square, a market murmur, waves and gulls at the Harbor, rustling leaves (and crickets at night) in the Garden.",
+      "New \"Town ambience\" switch in Settings → Audio. It's on by default.",
+    ],
+  },
+  {
     date: '2026-09-30',
     version: '1.53.0',
     title: "Card Shop screens scroll properly",
