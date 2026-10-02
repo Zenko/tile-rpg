@@ -6,7 +6,7 @@
    writes the storage each system already has (pantry, dishes, seeds, decorations, bug jar, achievements, companion),
    so the older screens (player menu, Rewards > Milestones, Shop > Customize) keep working unchanged.
    ============================================================ */
-const CHAR_VIEWS = [['me', 'Me'], ['look', 'Look'], ['bag', 'Pantry'], ['pals', 'Companion']];   // 'bag' is the Pantry (key kept for old links)
+const CHAR_VIEWS = [['me', 'Me'], ['path', 'Path'], ['look', 'Look'], ['bag', 'Pantry'], ['pals', 'Companion']];   // 'bag' is the Pantry (key kept for old links)
 let charView = 'me';        // not saved, like cardsView / shopSubView
 const charPanel = () => document.getElementById('characterPanel');
 const charVisible = () => !charPanel().classList.contains('hidden');
@@ -79,7 +79,7 @@ function drawCharBody() {
   const box = document.getElementById('chBody'); if (!box) return;
   document.querySelectorAll('#chSeg .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.v === charView));
   box.innerHTML = '';
-  ({ me: charDrawMe, look: charDrawLook, bag: charDrawBag, pals: charDrawPals })[charView](box);
+  ({ me: charDrawMe, path: charDrawPath, look: charDrawLook, bag: charDrawBag, pals: charDrawPals })[charView](box);
 }
 function charSection(box, title) { const h = document.createElement('div'); h.className = 'section-title'; h.textContent = title; box.appendChild(h); }
 

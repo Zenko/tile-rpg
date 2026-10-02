@@ -468,6 +468,7 @@ function updateQuestBadge() {
 function bumpStat(stat, n) {
   state.progress.totals[stat] = (state.progress.totals[stat] || 0) + (n || 1);
   if (stat === 'cardsFound') noteCardsFound(n || 1);
+  if (typeof companionBond === 'function') companionBond(stat, n || 1);   // js/skills-gear.js
   // Toast when a quest first completes, so progress feels alive
   state.progress.quests.forEach(q => {
     const def = questDef(q.id);

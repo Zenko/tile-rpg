@@ -642,3 +642,25 @@ body.in-battle .screen { padding-top: 0; }
 .sl-status.worn { background: var(--water); color: var(--on-water); }
 .sl-status.price { color: var(--ink); }
 .sl-status.short { color: var(--ink-soft); opacity: .8; }
+
+/* ===== Path: skills, gear, companion bond (build 99) ===== */
+.pt-head { padding: 14px 16px; margin-bottom: 4px; border-radius: 18px; border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--stone-edge)); background: var(--stone); text-align: left; }
+.pt-head b { font-family: var(--f-display); font-size: 1.7rem; color: var(--accent); }
+.pt-head span { font-weight: 700; }
+.pt-head small { display: block; margin-top: 4px; font-size: .78rem; line-height: 1.45; color: var(--ink-soft); }
+.pt-list { display: flex; flex-direction: column; gap: 10px; }
+.pt-card { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 18px; border: 1px solid var(--stone-edge); background: var(--stone); text-align: left; }
+.pt-ico { flex: none; width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; font-size: 1.5rem; background: color-mix(in srgb, var(--hl) 7%, transparent); }
+.pt-body { flex: 1; min-width: 0; }
+.pt-name { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; font-size: 1rem; font-weight: 800; }
+.pt-rank { font-size: .72rem; font-weight: 700; color: var(--ink-soft); }
+.pt-pips { display: flex; gap: 4px; margin: 6px 0; }
+.pt-pip { width: 18px; height: 6px; border-radius: 3px; background: var(--track); }
+.pt-pip.on { background: var(--water); }
+.pt-text { font-size: .82rem; line-height: 1.45; }
+.pt-text small { display: block; margin-top: 2px; font-size: .74rem; color: var(--ink-soft); }
+.pt-add, .pt-buy { flex: none; min-width: 48px; min-height: 48px; padding: 0 12px; border-radius: 16px; border: 0; background: var(--water); color: var(--on-water); font: inherit; font-size: 1.3rem; font-weight: 800; cursor: pointer; }
+.pt-buy { font-size: .8rem; min-width: 84px; }
+.pt-add:disabled, .pt-buy:disabled { background: color-mix(in srgb, var(--hl) 8%, transparent); color: var(--ink-soft); cursor: default; }
+.pt-done { flex: none; font-size: .78rem; font-weight: 800; color: var(--ink-soft); padding: 0 8px; }
+.pt-reset { margin: 10px auto 0; display: block; }

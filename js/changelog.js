@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta ${RELEASES[0].n} (build $
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'new', x: 'Character → Path: a skill point every level for Angler, Gardener, Duelist and Wanderer, plus rod, watering can and lantern upgrades you buy with Pebbles. Companions now grow a bond as you win and fish, and their perk gets stronger.' },
   { t:'fixed', x: 'The bottom menu no longer slides off the screen after tapping Refresh on the update banner (Android home-screen installs): the app now measures the visible screen height itself.' },
   { t:'new', x: "Tock's Tinker Stall now has a bait counter: daisies, fresh fish and an angler's mix for Pebbles. Card sleeves are sold only at Zeph's Card Shop." },
   { t:'better', x: 'Card sleeves are a grid of big card-back previews with clear Wearing, Wear and price labels, matching the other building screens.' },

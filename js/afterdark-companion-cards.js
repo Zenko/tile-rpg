@@ -212,6 +212,7 @@ function cardBonus(kind) {
   let v = 0;
   activeCharms().forEach(id => { const i = charmInfo(id); if (i && i.kind === kind) v += i.val; });
   CARD_SETS.forEach(s => { if (s.kind === kind && setComplete(s)) v += s.val; });
+  if (typeof skillBonus === 'function') v += skillBonus(kind);   // skill ranks, gear and companion bond (js/skills-gear.js)
   return v;
 }
 

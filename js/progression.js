@@ -4,6 +4,7 @@
    its turn rather than stacking on top.
    ============================================================ */
 const TIPS = {
+  path:       { icon: '🧭', title: 'Your path', text: 'Every level gives you a skill point. Spend them on Angler, Gardener, Duelist or Wanderer, and upgrade your rod, watering can and lantern with Pebbles. You can reset your points for free any time.' },
   bakery:     { icon: '🍞', title: 'The bakery', text: 'Put a loaf in the oven - it bakes in real time. Share bread with neighbors (one gift each per day) to grow your friendship, or cook with it.' },
   cook:       { icon: '🍳', title: 'Cooking', text: 'Harvests and fish land in your pantry. Cook them into dishes: give one as a gift (worth more than bread), eat it on the keep-this-hand screen for a head start, or bring one to a neighbor who asked.' },
   garden:     { icon: '🌱', title: 'Gardening', text: 'Buy seeds here, then tap a glowing patch of Town Square to plant. Crops grow in real time (faster in the rain). Card seeds grow a card.' },
