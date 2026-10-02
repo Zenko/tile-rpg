@@ -480,6 +480,54 @@ const BattleEngine = (function () {
     return { ok: true };
   }
 
+  /* ---------- Fate Spread (build 112) ----------
+     Before a match the player can lay three cards from their deck as a tarot spread (saved with the deck slot):
+       Past    - always in your opening hand (it is put back if a mulligan shuffles it away)
+       Present - enters play with a Shield
+       Future  - held back, and joins your hand at the start of your 4th turn
+     All one family is Harmony (+2 Spirit); three different families is Contrast (draw 1 extra card at the start).
+     Balanced by paired simulation (400-500 games, SPREAD_RULES holds the knobs): the spread adds roughly +4 to +6 win points. A
+     one-cost discount on the Present card was tried first and was worth +7 to +13 on its own, far too much, so it became a Shield.
+     The same three cards can be listed in any order; spells count as having no family. Pure engine, opts.spread = [ids|null, ids|null].
+     Cards are matched by id; a spread that names a card the deck does not hold is quietly ignored. */
+  const SPREAD_RULES = { presentDiscount: 0, presentMinCost: 0, presentShield: 1, harmonySpirit: 2, contrastDraw: 1, futureTurn: 4 };
+  function spreadBonus(ids) {
+    const fams = ids.map(id => CARD_FAMILY[baseIdOf(id)] || null);
+    if (fams.some(f => !f)) return { harmony: false, contrast: false };
+    const n = new Set(fams).size;
+    return { harmony: n === 1, contrast: n === 3 };
+  }
+  function layoutSpread(G, who, ids) {
+    const pl = G.p[who]; if (!ids || ids.length !== 3) return false;
+    const pool = pl.deck.concat(pl.hand), pick = [];
+    for (const id of ids) { const c = pool.find(x => x.id === id && !pick.includes(x)); if (!c) return false; pick.push(c); }
+    const [past, present, future] = pick;
+    past.spread = 'past'; present.spread = 'present'; future.spread = 'future';
+    present.cost = Math.max(SPREAD_RULES.presentMinCost, present.cost - SPREAD_RULES.presentDiscount);
+    if (SPREAD_RULES.presentShield && !present.spell) present.shield = true;
+    pl.spread = { ids: ids.slice(), past, present, future };
+    // Future leaves the deck/hand until your 4th turn (a replacement is drawn if it was in the opening hand)
+    const hi = pl.hand.indexOf(future); if (hi >= 0) { pl.hand.splice(hi, 1); draw(G, pl, true); }
+    const di = pl.deck.indexOf(future); if (di >= 0) pl.deck.splice(di, 1);
+    pl.future = future;
+    keepPast(G, pl);
+    const b = spreadBonus(ids);
+    if (b.harmony) { pl.spirit += SPREAD_RULES.harmonySpirit; pl.maxSpirit += SPREAD_RULES.harmonySpirit; }
+    for (let i = 0; i < (b.contrast ? SPREAD_RULES.contrastDraw : 0); i++) draw(G, pl, true);
+    return true;
+  }
+  // The Past card belongs in the opening hand: if it is still in the deck, it swaps with a card that is not part of the spread.
+  function keepPast(G, pl) {
+    if (!pl.spread) return;
+    const past = pl.spread.past;
+    if (pl.hand.includes(past)) return;
+    const di = pl.deck.indexOf(past); if (di < 0) return;
+    const out = pl.hand.slice().reverse().find(c => !c.spread);
+    if (!out) return;
+    pl.deck.splice(di, 1); pl.hand.splice(pl.hand.indexOf(out), 1, past);
+    pl.deck.splice(Math.floor(G.rng() * (pl.deck.length + 1)), 0, out);
+  }
+
   function modsFor(G, side) {
     const m = Object.assign({}, G.mods || {});
     if (G.twist && G.twist.kind === 'bloom' && G.twist.side === side) { m.addKw = 'bloom'; m.addKwMaxCost = 1; }
@@ -575,6 +623,7 @@ const BattleEngine = (function () {
     (opts.knack || []).forEach((id, i) => { if (id && KNACKS[id]) G.p[i].knack = id; });
     (opts.fate || []).forEach((id, i) => { if (id && FATES[id]) G.p[i].fate = id; });
     G.p.forEach((pl, i) => { const n = RULES.hand + (i !== first ? 1 : 0); for (let k = 0; k < n; k++) draw(G, pl, true); });
+    (opts.spread || []).forEach((ids, i) => { if (ids) layoutSpread(G, i, ids); });
     // opts.startSpirit: begin below full (the Festival Cup carries your Spirit from one round to the next)
     (opts.startSpirit || []).forEach((v, i) => { if (typeof v === 'number') G.p[i].spirit = Math.max(1, Math.min(v, G.p[i].maxSpirit)); });
     return G;
@@ -597,6 +646,8 @@ const BattleEngine = (function () {
     me.maxEnergy = Math.min(me.turns + bonus, RULES.ecap);
     me.energy = me.maxEnergy;
     draw(G, me);
+    // the Future card of a Fate Spread arrives on your 4th turn (or the first turn after that your hand has room)
+    if (me.future && me.turns >= SPREAD_RULES.futureTurn && me.hand.length < RULES.handMax) { const f = me.future; me.future = null; me.hand.push(f); emit(G, 'draw', { who: G.active, card: f, future: true }); }
     me.board.forEach(c => { c.ready = true; });
     emit(G, 'turn', { who: G.active, energy: me.energy });
     if (G.twist && G.twist.kind === 'tide' && G.twist.side === G.active && me.turns % 4 === 0) tide(G);
@@ -857,6 +908,7 @@ const BattleEngine = (function () {
     pl.deck = shuffled(pl.deck.concat(pl.hand), G.rng);
     pl.hand = [];
     for (let i = 0; i < n; i++) draw(G, pl, true);
+    keepPast(G, pl);                      // a Fate Spread's Past card stays in the opening hand
   }
 
   /* ---------- Opponent AI ----------
@@ -951,7 +1003,7 @@ const BattleEngine = (function () {
     return deck;
   }
 
-  return { RULES, KEYWORDS, SPELLS, TWISTS, KNACKS, knackReady, setKnack, useKnack, FATES, fateReady, setFate, useFate, MAX_KEYWORDS, defOf, baseIdOf, variantId, suggestDeck, makeCard, familyOf, newGame, startTurn, canPlay, playCard, spellNeedsTarget, legalTargets, attack, endTurn, forfeit, boost, mulligan, aiNextAction, applyAction, aiTurn, guards, valueOf };
+  return { RULES, KEYWORDS, SPELLS, TWISTS, KNACKS, knackReady, setKnack, useKnack, FATES, fateReady, setFate, useFate, spreadBonus, layoutSpread, SPREAD_RULES, MAX_KEYWORDS, defOf, baseIdOf, variantId, suggestDeck, makeCard, familyOf, newGame, startTurn, canPlay, playCard, spellNeedsTarget, legalTargets, attack, endTurn, forfeit, boost, mulligan, aiNextAction, applyAction, aiTurn, guards, valueOf };
 })();
 /* END BATTLE ENGINE */
 

@@ -4,6 +4,7 @@
    its turn rather than stacking on top.
    ============================================================ */
 const TIPS = {
+  spread:     { icon: '🃏', title: 'Fate Spread', text: 'On the Deck screen, lay three cards as Past, Present and Future. Past is always in your opening hand, Present enters with a Shield, and Future arrives on your 4th turn. Three cards of one family give Harmony (+2 Spirit); three different families give Contrast (+1 card).' },
   fate:       { icon: '🔮', title: 'Fate', text: 'Attune a Major Arcana (Calm corner → Tarot → The Arcana) and you can take its power into a match. Pick it on the keep-this-hand screen; a purple round button by your bar glows when it is ready. Each one works once per match, from its own turn, and most cost a little.' },
   fortune:    { icon: '🔮', title: "Madame Soot's tent", text: 'On Market Row from dusk until dawn. Soot gives your daily tarot reading, swaps one card once a day, tells you the story of your deck, and sells Arcana packs.' },
   tarot:      { icon: '🔮', title: 'Tarot', text: 'Once a day, draw three Arcana. Turn them all over and the middle card gives the day a fortune. The 22 Major Arcana are real cards from the game: own the card and you own the Arcana, and you can attune three for a small permanent perk.' },
@@ -121,7 +122,8 @@ function econTaper(src, n, softCap) {
 // (DISTRICTS[x].unlockLevel, BattleEngine.KNACKS[x].level); upcomingUnlocks() merges all three for the Character tab.
 const FEATURE_LEVELS = {
   draft: { level: 5, icon: '🎴', name: 'Draft Run' },
-  ghost: { level: 8, icon: '👻', name: 'Ghost duels' }
+  ghost: { level: 8, icon: '👻', name: 'Ghost duels' },
+  spread: { level: 6, icon: '🃏', name: 'Fate Spread' }
 };
 function featureLocked(id) { return ensureLevel().level < FEATURE_LEVELS[id].level; }
 function featureLockText(id) { const f = FEATURE_LEVELS[id]; return `${f.icon} ${f.name} unlocks at level ${f.level}`; }

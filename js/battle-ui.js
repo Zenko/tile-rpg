@@ -108,7 +108,7 @@ function startBattleNow(opponent, first) {
   }
   else {
     G = BattleEngine.newGame(myDeck.slice(), oppDeck.slice(), Math.random, { spirit: [BattleEngine.RULES.spirit, profile.spirit], mods: world.mods,
-      twist: twistKind ? { side: 1, kind: twistKind } : null, startSpirit: opponent.startSpirit ? [opponent.startSpirit, null] : null, first, knack: [currentKnackId(), null], fate: [neutral ? null : currentFateId(), null] });
+      twist: twistKind ? { side: 1, kind: twistKind } : null, startSpirit: opponent.startSpirit ? [opponent.startSpirit, null] : null, first, knack: [currentKnackId(), null], fate: [neutral ? null : currentFateId(), null], spread: [neutral ? null : currentSpread(), null] });
     BattleEngine.startTurn(G);
   }
   if (companionSpirit) BattleEngine.boost(G, 0, { spirit: 2 });      // a Guard-type companion stands with you
@@ -151,7 +151,7 @@ function startBattleNow(opponent, first) {
   if (battle.pendingHelp) { state.progress.seenBattleHelp = true; saveState(); }
   const swapBtn = btGet('mulliganSwapBtn'); swapBtn.disabled = false; swapBtn.textContent = 'Draw new hand';
   btRenderMulliganHand();
-  renderSnackRow(); btRenderKnackRow(); btRenderFateRow();
+  renderSnackRow(); btRenderKnackRow(); btRenderFateRow(); btRenderSpreadRow();
   // Deal the opening hand slowly from the deck, then offer the keep-or-redraw choice.
   const tk = battle.token; battle.busy = true;
   btRender({ dealAll: true });
@@ -538,7 +538,7 @@ function btRenderHand(drawnUid, dealAll) {
     const off = i - (n - 1) / 2;
     w.style.setProperty('--rot', (off * step).toFixed(1) + 'deg'); w.style.setProperty('--dy', Math.round(off * off * 1.4) + 'px');
     const ok = !battle.busy && BattleEngine.canPlay(G, 0, c.uid).ok;
-    const el = btCardEl(c, (ok ? 'playable ' : 'unaffordable ') + (battle.sel && battle.sel.uid === c.uid ? 'selected ' : '') + ((drawnUid === c.uid || dealAll) && btMotionOk() ? 'deal-hide' : ''), true);
+    const el = btCardEl(c, (ok ? 'playable ' : 'unaffordable ') + (c.spread ? 'spread-' + c.spread + ' ' : '') + (battle.sel && battle.sel.uid === c.uid ? 'selected ' : '') + ((drawnUid === c.uid || dealAll) && btMotionOk() ? 'deal-hide' : ''), true);
     el.addEventListener('click', () => btOnHandCard(c));
     el.addEventListener('pointerdown', e => btStartDrag(e, c));
     w.appendChild(el); box.appendChild(w);
@@ -955,6 +955,7 @@ async function btAnimate(evs, token) {
       if (el) btFloater(el, '🌸 +1', 'heal');
     } else if (e.type === 'draw' && e.who === 0) {
       btRender({ drawn: e.card.uid });
+      if (e.future) btToast(`🌅 Your Future card arrives: ${cardDef(e.card.id).name}`);
       await btDealOne(e.card.uid, 520); await btWait(120);
     } else if (e.type === 'draw' && e.who === 1) {
       btRenderBars();

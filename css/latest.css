@@ -909,3 +909,20 @@ html.calm .cl-cell.rat, html.cozy .cl-cell.rat { animation: none; }
 #battleView .bt-fate.ready { border-color: #c28cf0; box-shadow: 0 0 0 2px color-mix(in srgb, #c28cf0 55%, transparent), 0 0 14px color-mix(in srgb, #c28cf0 50%, transparent); }
 .fate-row { margin-top: -4px; }
 .fate-row .knack-chip.on { background: #c28cf0; color: #25103a; }
+
+/* ===== Fate Spread (build 112) ===== */
+.sp-card-wrap { margin: 4px 0 12px; padding: 14px 16px; border-radius: 18px; border: 1px solid var(--stone-edge); background: var(--stone); text-align: left; display: flex; flex-direction: column; gap: 10px; }
+.sp-head { display: flex; flex-direction: column; gap: 2px; } .sp-head b { font-size: 1rem; } .sp-head small { font-size: .78rem; color: var(--ink-soft); }
+.sp-slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.sp-slot { min-width: 0; padding: 8px 6px 10px; border-radius: 14px; border: 1.5px dashed var(--stone-edge); background: transparent; color: var(--ink); font: inherit; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+.sp-slot.filled { border-style: solid; border-color: #e6c06a; background: color-mix(in srgb, #e6c06a 8%, var(--stone)); } .sp-slot.off { opacity: .5; }
+.sp-pos { font-size: .66rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); } .sp-card { display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 58px; justify-content: center; }
+.sp-ico { font-size: 1.6rem; line-height: 1; } .sp-card b { font-size: .74rem; line-height: 1.2; } .sp-slot small { font-size: .62rem; line-height: 1.3; color: var(--ink-soft); }
+.sp-bonus { padding: 8px 12px; border-radius: 12px; background: color-mix(in srgb, #e6c06a 12%, var(--stone)); border: 1px solid color-mix(in srgb, #e6c06a 45%, var(--stone-edge)); font-size: .8rem; font-weight: 800; }
+.sp-hint, .sp-note { font-size: .78rem; line-height: 1.45; color: var(--ink-soft); } .sp-note { color: #e0a58f; }
+.sp-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.sp-pick { position: relative; min-width: 0; min-height: 62px; padding: 6px 2px; border-radius: 12px; border: 1px solid var(--stone-edge); background: var(--bg-top); color: var(--ink); font: inherit; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+.sp-pick span { font-size: 1.3rem; line-height: 1; } .sp-pick small { font-size: .56rem; line-height: 1.2; text-align: center; color: var(--ink-soft); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sp-pick.used { border-color: #e6c06a; box-shadow: 0 0 10px rgba(230, 192, 106, .35); } .sp-pick i { position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; border-radius: 50%; background: #e6c06a; color: #2b1d05; font-style: normal; font-size: .7rem; font-weight: 800; display: grid; place-items: center; }
+.sp-line { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; } .sp-line span { padding: 4px 10px; border-radius: 999px; background: var(--board-bg); border: 1px solid var(--stone-edge); font-size: .74rem; } .sp-line small { display: block; font-size: .56rem; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); }
+#battleView .hcard .spread-past::after, #battleView .hcard .spread-present::after, #battleView .hcard .spread-future::after { content: '🃏'; position: absolute; top: -8px; left: 50%; transform: translateX(-50%); font-size: .8rem; filter: drop-shadow(0 0 4px rgba(230, 192, 106, .9)); pointer-events: none; z-index: 3; }

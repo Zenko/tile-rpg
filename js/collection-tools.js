@@ -363,6 +363,7 @@ function renderDeckPanel() {
     b.textContent = deckInfoMode ? (short ? 'ⓘ On' : 'ⓘ Info mode: on') : (short ? 'ⓘ Info' : 'ⓘ Info mode');
   });
   if (typeof renderDeckInsights === 'function') renderDeckInsights();
+  if (typeof renderDeckSpread === 'function') renderDeckSpread();
   setDeckSubView(deckView, true);
   // A full deck with almost nothing cheap has little to play in the first turns, and simulation showed those decks lose a lot.
   const cheap = state.deck.filter(id => cardDef(id).cost <= 2).length, tipEl = document.getElementById('deckTip');
