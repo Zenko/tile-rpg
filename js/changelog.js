@@ -18,6 +18,9 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta ${RELEASES[0].n} (build $
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'new', x: 'A monthly ladder (Pebble, Stone, Moss, Gem, Star) earned from ghost duels, deck challenges, the Cup, bosses and Draft Runs. You never lose points, and each rank pays Pebbles. Find it in Social.' },
+  { t:'new', x: 'Deck archetypes: six cards of one family make a themed deck, and eight give +1 Spirit at the start of matches. Cards → Deck → Your deck also has a Test your deck button that plays practice matches and shows your win rate.' },
+  { t:'new', x: 'Deck challenges at the fountain now include family formats (Only Grove, Stone, Tide or Wind cards) and a two-family format.' },
   { t:'new', x: 'Character → Path: a skill point every level for Angler, Gardener, Duelist and Wanderer, plus rod, watering can and lantern upgrades you buy with Pebbles. Companions now grow a bond as you win and fish, and their perk gets stronger.' },
   { t:'fixed', x: 'The bottom menu no longer slides off the screen after tapping Refresh on the update banner (Android home-screen installs): the app now measures the visible screen height itself.' },
   { t:'new', x: "Tock's Tinker Stall now has a bait counter: daisies, fresh fish and an angler's mix for Pebbles. Card sleeves are sold only at Zeph's Card Shop." },

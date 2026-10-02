@@ -56,6 +56,7 @@ function skillBonus(kind) {
   GEAR.forEach(g => { const t = gearTier(g.id); if (t) g.perks(t).forEach(p => { if (p.kind === kind) v += p.val; }); });
   const c = state.companion, bp = c && BOND_PERK[c.perk], bl = bondLevel(c);
   if (bp && bp[0] === kind && bl >= 2) v += bp[bl - 1];   // bond 2 adds bp[1], bond 3 adds bp[2]
+  if (kind === 'startSpirit' && typeof archetypeBonus === 'function') v += archetypeBonus();   // 8+ cards of one family (js/ladder-practice.js)
   return v;
 }
 

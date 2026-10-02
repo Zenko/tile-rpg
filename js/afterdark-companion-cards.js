@@ -476,6 +476,12 @@ const CHALLENGE_RULES = [
   { id: 'big',      icon: '⛰️', text: 'At least 4 cards costing 4 or more', test: ds => ds.filter(d => d.cost >= 4).length >= 4 },
   { id: 'keywords', icon: '🧩', text: 'Every card has a keyword or is a spell', test: ds => ds.every(d => d.spell || d.kw.length) },
   { id: 'rareplus', icon: '💎', text: 'Only rare cards or better',         test: ds => ds.every(d => d.rarity !== 'common') },
+  // Family formats (build 100): spells have no family, so they are allowed in every one.
+  { id: 'fam-grove', icon: '🌿', text: 'Only Grove cards (and spells)',    test: ds => ds.every(d => d.spell || CARD_FAMILY[BattleEngine.baseIdOf(d.id)] === 'grove') },
+  { id: 'fam-stone', icon: '🪨', text: 'Only Stone cards (and spells)',    test: ds => ds.every(d => d.spell || CARD_FAMILY[BattleEngine.baseIdOf(d.id)] === 'stone') },
+  { id: 'fam-tide',  icon: '🌊', text: 'Only Tide cards (and spells)',     test: ds => ds.every(d => d.spell || CARD_FAMILY[BattleEngine.baseIdOf(d.id)] === 'tide') },
+  { id: 'fam-wind',  icon: '🪶', text: 'Only Wind cards (and spells)',     test: ds => ds.every(d => d.spell || CARD_FAMILY[BattleEngine.baseIdOf(d.id)] === 'wind') },
+  { id: 'two-fam',   icon: '🎭', text: 'Cards from at most two families',  test: ds => new Set(ds.filter(d => !d.spell).map(d => CARD_FAMILY[BattleEngine.baseIdOf(d.id)] || 'none')).size <= 2 },
 ];
 function challengeState() {
   const p = state.progress;

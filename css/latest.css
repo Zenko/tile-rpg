@@ -664,3 +664,26 @@ body.in-battle .screen { padding-top: 0; }
 .pt-add:disabled, .pt-buy:disabled { background: color-mix(in srgb, var(--hl) 8%, transparent); color: var(--ink-soft); cursor: default; }
 .pt-done { flex: none; font-size: .78rem; font-weight: 800; color: var(--ink-soft); padding: 0 8px; }
 .pt-reset { margin: 10px auto 0; display: block; }
+
+/* ===== Ladder, archetypes and deck practice (build 100) ===== */
+.di-card { margin: 4px 0 12px; padding: 14px 16px; border-radius: 18px; border: 1px solid var(--stone-edge); background: var(--stone); text-align: left; display: flex; flex-direction: column; gap: 10px; }
+.di-arch b { display: block; font-size: 1rem; }
+.di-arch span { display: block; margin-top: 2px; font-size: .8rem; line-height: 1.4; color: var(--ink-soft); }
+.di-arch em { font-style: normal; font-weight: 800; color: var(--accent); }
+.di-test { align-self: stretch; min-height: 46px; }
+.di-test:disabled { opacity: .55; }
+.di-bars { display: flex; flex-direction: column; gap: 8px; }
+.di-bars.stale { opacity: .55; }
+.di-row { display: grid; grid-template-columns: 74px 1fr 44px; align-items: center; gap: 10px; font-size: .82rem; font-weight: 700; }
+.di-bar { display: block; height: 10px; border-radius: 6px; background: var(--track); overflow: hidden; }
+.di-bar b { display: block; height: 100%; background: var(--water); border-radius: 6px; transition: width .4s ease; }
+.di-row em { font-style: normal; text-align: right; font-variant-numeric: tabular-nums; }
+.di-note { font-size: .72rem; line-height: 1.4; color: var(--ink-soft); }
+.lr-card { display: flex; align-items: center; gap: 14px; padding: 14px 16px; margin-bottom: 12px; border-radius: 18px; border: 1px solid color-mix(in srgb, var(--accent) 50%, var(--stone-edge)); background: var(--stone); text-align: left; }
+.lr-badge { flex: none; width: 56px; height: 56px; border-radius: 18px; display: grid; place-items: center; font-size: 2rem; background: color-mix(in srgb, var(--accent) 14%, transparent); }
+.lr-body { flex: 1; min-width: 0; }
+.lr-name { display: flex; align-items: baseline; gap: 10px; font-size: 1.05rem; font-weight: 800; }
+.lr-name span { font-size: .76rem; font-weight: 700; color: var(--ink-soft); }
+.lr-bar { height: 8px; border-radius: 5px; background: var(--track); margin: 7px 0; overflow: hidden; }
+.lr-bar i { display: block; height: 100%; background: var(--accent); border-radius: 5px; }
+.lr-body small { display: block; font-size: .74rem; line-height: 1.4; color: var(--ink-soft); }

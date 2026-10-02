@@ -183,6 +183,7 @@ async function fetchWhosPlaying() {
   const box = document.getElementById('whosPlayingList');
   if (!box) return;
   renderSocialYou();
+  if (typeof renderLadderCard === 'function') renderLadderCard();
   const note = (icon, title, text) => `<div class="so-empty"><span>${icon}</span><b>${title}</b><small>${text}</small></div>`;
   if (!cloudAvailable() || !cloudReady) { box.innerHTML = note('📡', 'Not connected right now', 'Testers show up here when you are online.'); return; }
   box.innerHTML = note('⏳', 'Loading…', '');
