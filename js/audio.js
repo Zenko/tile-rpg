@@ -694,7 +694,15 @@ const SFX = {
   gift:   () => { [392, 523, 659, 784, 988].forEach((f, i) => bell(f, i * 0.1, 0.7, 0.045)); },
   rare:   () => { [523, 659, 784].forEach((f, i) => bell(f, i * 0.11, 1.1, 0.05)); noiseBurst('bandpass', 5200, 3200, 0.5, 0.012, 0.3); },
   mythic: () => { [523, 659, 784, 1047, 1319].forEach((f, i) => bell(f, i * 0.13, 1.4, 0.05)); noiseBurst('bandpass', 5600, 3000, 0.9, 0.016, 0.5); },
-  claim:  () => { bell(784, 0, 0.7, 0.05); bell(1175, 0.09, 0.95, 0.045); }
+  claim:  () => { bell(784, 0, 0.7, 0.05); bell(1175, 0.09, 0.95, 0.045); },
+  // Battle and progression sounds (build 102): a thump for a hit, a clink for a block, a rising chime for healing, a swoosh for a spell,
+  // a short fanfare for ranking up and a two-note chime for a skill point. All built from the same small helpers as the rest.
+  hit:    () => { wood(0.085, 120 * wob(0.05)); noiseBurst('bandpass', 1800, 900, 0.09, 0.055); },
+  block:  () => { bell(1400, 0, 0.3, 0.035); wood(0.04, 260); },
+  heal:   () => { bell(660, 0, 0.5, 0.028); bell(880, 0.08, 0.6, 0.028); },
+  spell:  () => { noiseBurst('bandpass', 2400, 5200, 0.28, 0.05); bell(988, 0.06, 0.8, 0.04); },
+  skill:  () => { bell(587, 0, 0.6, 0.045); bell(880, 0.1, 0.9, 0.045); },
+  rankup: () => { [392, 523, 659, 784, 1047, 1319].forEach((f, i) => bell(f, i * 0.09, 1.2, 0.05)); noiseBurst('bandpass', 5600, 3000, 0.8, 0.014, 0.45); }
 };
 function sfx(name) { if (prefs.sound && SFX[name]) { try { SFX[name](); } catch (e) { /* ignore */ } } }
 

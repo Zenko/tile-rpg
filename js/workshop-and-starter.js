@@ -576,7 +576,7 @@ function renderAlmanac() {
   const foilTotal = Object.values(foils()).reduce((a, b) => a + b, 0);
   const hasNew = almanacHasNew();
   if (hasNew) almGridOpen = true;      // never hide the "New" tags behind a closed toggle
-  document.getElementById('almProgress').innerHTML = setsHtml + `
+  document.getElementById('almProgress').innerHTML = (typeof binderHtml === 'function' ? binderHtml() : '') + setsHtml + `
     <div class="ap-top"><span><b>${found}</b> of ${total} discovered</span><span>${Math.round(found / total * 100)}%</span></div>
     <div class="q-bar"><div class="q-fill" style="width:${Math.round(found / total * 100)}%"></div></div>
     ${foilTotal ? `<div class="alm-season">✨ ${foilTotal} foil${foilTotal === 1 ? '' : 's'} in your collection - look for the shimmer on any card.</div>` : ''}

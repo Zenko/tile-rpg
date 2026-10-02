@@ -18,6 +18,11 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta ${RELEASES[0].n} (build $
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'new', x: 'Three rare days now turn up about one day in twelve: Starfall (hidden cards twice as easy to spot, more foils), Friendship Fair (hearts count double) and Tournament Day (+3 Pebbles for every match you win).' },
+  { t:'new', x: 'Beating a district boss leaves that district calm for the rest of the day: hidden cards and chests turn up more often there.' },
+  { t:'new', x: 'The Sets tab has a Binder: nine pages (one per rarity and one per family) that pay Pebbles the first time you fill them.' },
+  { t:'better', x: 'New battle and progress sounds: a thump for a hit, a clink for a block, a chime for healing, a swoosh for a spell, and a fanfare when you rank up.' },
+  { t:'new', x: 'Settings has a Share anonymous play stats switch (counts only, no name) that helps tune the game.' },
   { t:'new', x: 'A small Next goal pill under the top bar in town points at the most useful thing to do (unspent skill points, bread or crops ready, then today\'s tasks). Tap it to go there.' },
   { t:'better', x: 'Opening a card pack is more of a moment: the card arrives face-down with a glow that hints at its rarity, and you tap it to flip it. New cards get a NEW tag.' },
   { t:'new', x: 'A monthly ladder (Pebble, Stone, Moss, Gem, Star) earned from ghost duels, deck challenges, the Cup, bosses and Draft Runs. You never lose points, and each rank pays Pebbles. Find it in Social.' },

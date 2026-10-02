@@ -64,6 +64,14 @@ Tile RPG is a calm, mobile-first card-collecting town game. You walk around a ti
     ```
     Add this alongside the existing `saves`/`players` rules. Until it's added, `pushFeedback()` fails silently and `sendFeedback()` falls back to the old `mailto:` link, so a message is never actually lost - just worth adding this rule promptly so testers' reports land where they're meant to. Same "sandbox network blocked" caveat as above: the graceful-failure/mailto-fallback path is what's actually been exercised, not a live Firestore write.
 
+  - **Playtest stats need a fourth Firestore rule the owner still has to paste in (build 102)** - `pushStats()` in `js/cloud-save.js` writes one anonymous summary per tester (no name; counters, skill/gear/ladder numbers, deck family mix, Pebble ledger totals) to `stats/{uid}`, read only from the Firebase console. On by default, switch in Settings (`prefs.shareStats`). Same sandbox caveat as above: only the graceful-failure path has been exercised.
+    ```
+    match /stats/{uid} {
+      allow write: if request.auth != null && request.auth.uid == uid;
+      allow read: if false;
+    }
+    ```
+
 ## 2. Hosting and publishing
 
 | | |

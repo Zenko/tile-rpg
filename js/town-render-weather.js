@@ -181,7 +181,8 @@ function updateAmbient() {
   if (key === ambientState.key && now - ambientState.at < 90000) return;
   ambientState = { key, at: now };
   let pool = WEATHER_AMBIENT[weather], icon = WEATHER_KINDS[weather] && WEATHER_KINDS[weather].icon;
-  if (!pool) { const d = DISTRICT_AMBIENT[dist] || DISTRICT_AMBIENT.square; pool = s.isNight ? d.night : d.day; icon = s.icon; }
+  if (districtCalm(dist) && Math.random() < 0.5) { pool = ['The boss is gone and the whole district feels lighter.', 'Everyone seems a little more relaxed today.', 'A calm settles over the lanes.']; icon = '🕊️'; }
+  else if (!pool) { const d = DISTRICT_AMBIENT[dist] || DISTRICT_AMBIENT.square; pool = s.isNight ? d.night : d.day; icon = s.icon; }
   const text = pool[Math.floor(Math.random() * pool.length)];
   wrap.classList.add('fading');
   setTimeout(() => { textEl.textContent = text; iconEl.textContent = icon || s.icon; wrap.classList.remove('fading'); }, 220);
@@ -767,7 +768,7 @@ function startWalk(path, done) {
       const tk = p.x + ',' + p.y;
       maybeFindSeed(data, tk);                        // a seed never interrupts the walk, it just goes in your pocket
       if (!data.foundTiles[tk]) {
-        const chance = (tileChar === ',' ? 0.025 : 0.008) * (weatherFx().findMult || 1) * (hasPerk('finds') ? 1.5 : 1) * (1 + cardBonus('finds'));   // fog, a sharp-eyed companion and charms find more
+        const chance = (tileChar === ',' ? 0.025 : 0.008) * (weatherFx().findMult || 1) * (hasPerk('finds') ? 1.5 : 1) * (1 + cardBonus('finds')) * (eventIs('starfall') ? 2 : 1) * (districtCalm() ? 1.5 : 1);   // fog, a sharp-eyed companion and charms find more
         if (Math.random() < chance) {
           data.foundTiles[tk] = true;
           walkToken++; playerEl.classList.remove('walking'); saveState();

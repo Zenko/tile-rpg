@@ -709,3 +709,16 @@ html.calm .reveal-card-frame.pk-flip.pk-down .reveal-card { animation: none; }
 .goal-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .goal-arrow { flex: none; color: var(--ink-soft); font-size: 1.1rem; }
 .goal-chip:active { transform: scale(.97); }
+
+/* ===== Binder (build 102): rarity and family pages on the Sets tab ===== */
+.bn-card { text-align: left; padding: 14px 16px; margin-bottom: 14px; border-radius: 18px; border: 1px solid var(--stone-edge); background: var(--stone); }
+.bn-title { font-family: var(--f-display); font-size: 1.2rem; font-weight: 600; }
+.bn-sub { font-size: .78rem; color: var(--ink-soft); margin-bottom: 6px; }
+.bn-group { margin: 10px 0 4px; font-size: .68rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
+.bn-row { display: grid; grid-template-columns: 26px 70px 1fr 46px; align-items: center; gap: 8px; padding: 5px 0; font-size: .84rem; font-weight: 700; }
+.bn-bar { display: block; height: 8px; border-radius: 5px; background: var(--track); overflow: hidden; }
+.bn-bar b { display: block; height: 100%; background: var(--water); border-radius: 5px; }
+.bn-row.full .bn-bar b { background: var(--accent); }
+.bn-row em { font-style: normal; text-align: right; font-size: .76rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.bn-row.full em { color: var(--accent); }
+.bn-foot { display: flex; justify-content: space-between; gap: 8px; margin-top: 10px; padding-top: 8px; border-top: 1px solid color-mix(in srgb, var(--stone-edge) 65%, transparent); font-size: .76rem; color: var(--ink-soft); }

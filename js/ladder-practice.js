@@ -42,7 +42,7 @@ function ladderGain(n, why) {
   if (after > before) {
     const r = LADDER_RANKS[after];
     if (after > (L.paid || 0)) { addPebbles((after - (L.paid || 0)) * LADDER_RANK_PEBBLES, 'ladder'); L.paid = after; }
-    toast(`${r.icon} Ranked up: ${r.name}! +🫧 ${after * LADDER_RANK_PEBBLES}`); logEvent(r.icon, `Reached ${r.name} rank${why ? ' (' + why + ')' : ''}.`); sfx('claim'); buzz(HAP.win);
+    toast(`${r.icon} Ranked up: ${r.name}! +🫧 ${after * LADDER_RANK_PEBBLES}`); logEvent(r.icon, `Reached ${r.name} rank${why ? ' (' + why + ')' : ''}.`); sfx('rankup'); buzz(HAP.win);
   }
   saveState();
 }

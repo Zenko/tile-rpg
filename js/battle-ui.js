@@ -826,7 +826,7 @@ async function btAnimate(evs, token) {
         const t = document.querySelector(`#battleView .card[data-uid="${e.target.uid}"]`);
         if (t) {
           t.classList.add('hurt-flash'); btFloater(t, e.blocked ? '🛡️ blocked' : '-' + e.dmg, e.blocked ? 'blk' : 'dmg');
-          if (e.blocked) btShieldFx(t); else { btImpact(t, 4); btSlashFx(t); btShake(e.dmg >= 3); }
+          if (e.blocked) { btShieldFx(t); sfx('block'); } else { btImpact(t, 4); btSlashFx(t); btShake(e.dmg >= 3); sfx('hit'); buzz(HAP.tap); }
         }
       }
       btRenderBars(); await btWait(340);
@@ -839,6 +839,7 @@ async function btAnimate(evs, token) {
       if (e.target) { const t = document.querySelector(`#battleView .card[data-uid="${e.target.uid}"]`); if (t) t.classList.add('spell-aim'); }
       if (e.who === 0) { sfx('rare'); buzz(HAP.play); } else sfx('flip');
       await btWait(e.who === 0 ? 260 : 480);
+      sfx('spell');
       await btSpellFx(def, e);                       // the spell's own light show: an orb flies to the target and bursts
       await btWait(e.who === 0 ? 160 : 240);
     } else if (e.type === 'zap') {
@@ -852,6 +853,7 @@ async function btAnimate(evs, token) {
       await btWait(420); btRender();
     } else if (e.type === 'buff' || e.type === 'mendcard' || e.type === 'readied') {
       const t = document.querySelector(`#battleView .card[data-uid="${e.uid}"]`);
+      if (t && e.type === 'mendcard') sfx('heal');
       if (t) btFloater(t, e.type === 'buff' ? (e.skin ? '🧱 +2♥ +1⚔' : e.rally ? '📯 +1 ⚔' : '🌞 +1 ⚔') : e.type === 'mendcard' ? `+${e.amt || 1} ♥` : '🌬️ ready', 'heal');
       await btWait(120);
     } else if (e.type === 'summon') {
@@ -878,7 +880,7 @@ async function btAnimate(evs, token) {
     } else if (e.type === 'shieldup') {
       btRender();
       const t = document.querySelector(`#battleView .card[data-uid="${e.uid}"]`);
-      if (t) { btShieldFx(t); btFloater(t, '🫧 shield', 'heal'); }
+      if (t) { btShieldFx(t); btFloater(t, '🫧 shield', 'heal'); sfx('block'); }
       await btWait(160);
     } else if (e.type === 'tide') {
       btSetMsg('🌊 The tide washes in!');
@@ -994,8 +996,8 @@ function btFinish() {
   if (won && !yielded && !battle.dungeon && !battle.neutral) noteBattleResult(true, battle.playedKw || []);
   if (battle.spellsCast) bumpStat('spellsCast', battle.spellsCast);
   if (!battle.puzzle && !battle.neutral) settleMastery(won && !yielded);
-  const winPeb = won && !yielded && !battle.puzzle && !battle.neutral ? cardBonus('winPebbles') : 0;
-  if (winPeb) { addPebbles(winPeb, 'charms'); setTimeout(() => toast(`🌵 Thorn charms: +${winPeb} 🫧`), 1200); }
+  const winPeb = won && !yielded && !battle.puzzle && !battle.neutral ? cardBonus('winPebbles') + (eventIs('tourney') ? 3 : 0) : 0;
+  if (winPeb) { addPebbles(winPeb, 'charms'); setTimeout(() => toast(`🏅 Win bonus: +${winPeb} 🫧`), 1200); }
   btRender();
   setTimeout(() => btShowResult(won, yielded), won ? 500 : 300);
 }
@@ -1061,7 +1063,7 @@ function btShowResult(won, yielded) {
     sfx(battle.isBoss || tier >= 3 ? 'mythic' : 'win'); buzz(HAP.win);
     bumpPill('pillWins'); bumpPill('pillCards');
     bumpStat('battlesWon', 1);
-    if (battle.isBoss) bumpStat('bossesWon', 1);
+    if (battle.isBoss) { bumpStat('bossesWon', 1); markDistrictCalm(state.currentDistrict); }
     logEvent(battle.isBoss ? '👑' : '⚔️', battle.isBoss ? `Defeated ${npc.name}, boss of ${DISTRICTS[state.currentDistrict].name}.` : `Won a friendly match against ${npc.name}.`);
     if (isNew) setTimeout(() => toast('📖 New entry in your Index'), 900);
   } else if (!won && npc.dungeon && npc.dungeon.deep && !battle.rewarded) {

@@ -63,7 +63,7 @@ function skillBonus(kind) {
 function buySkill(id) {
   const b = SKILL_BRANCHES.find(x => x.id === id);
   if (!b || skillRank(id) >= SKILL_MAX_RANK || skillPointsLeft() < 1) { sfx('tie'); return false; }
-  skillState()[id] = skillRank(id) + 1; saveState(); sfx('claim'); buzz(HAP.found);
+  skillState()[id] = skillRank(id) + 1; saveState(); sfx('skill'); buzz(HAP.found);
   toast(`${b.icon} ${b.name} rank ${skillRank(id)}: ${b.text(skillRank(id))}`);
   logEvent(b.icon, `${b.name} reached rank ${skillRank(id)}.`);
   return true;

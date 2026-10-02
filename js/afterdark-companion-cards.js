@@ -197,6 +197,7 @@ function setProgress(s) { const own = baseOwnedSet(); return s.cards.filter(id =
 function setComplete(s) { return setProgress(s) === s.cards.length; }
 // A set's one-time completion prize, checked whenever cards change hands.
 function checkSets() {
+  if (typeof checkBinder === 'function') checkBinder();   // js/binder.js
   const p = state.progress; if (!p.setsDone || typeof p.setsDone !== 'object') p.setsDone = {};
   CARD_SETS.forEach(s => {
     if (p.setsDone[s.id] || !setComplete(s)) return;

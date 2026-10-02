@@ -13,8 +13,26 @@ const TOWN_EVENTS = [
   { id: 'cellar-night',  icon: '🕯️', name: 'Cellar Night',  text: 'Deep cellar floors pay double Pebbles.' },
   { id: 'baking-day',    icon: '🥐', name: 'Baking Day',    text: 'Bread bakes twice as fast.' },
   { id: 'festival-day',  icon: '🎉', name: 'Festival Day',  text: 'Festival Cup rounds pay double Pebbles.' },
+  // Rare events (build 102): a quarter of the weight of the others, so about one day in a dozen is something special.
+  { id: 'starfall',      icon: '☄️', name: 'Starfall',      text: 'Hidden cards are twice as easy to spot, and new cards are three times as likely to be foils.', rare: true },
+  { id: 'friendship-fair', icon: '💞', name: 'Friendship Fair', text: 'Every heart you earn with a neighbor counts double.', rare: true },
+  { id: 'tourney',       icon: '🏅', name: 'Tournament Day', text: 'Every match you win pays +3 Pebbles.', rare: true },
 ];
-function eventNow() { return TOWN_EVENTS[Math.floor(seeded('event-' + todayKey())() * TOWN_EVENTS.length)]; }
+const EVENT_WEIGHT = e => e.rare ? 0.25 : 1;
+function eventNow() {
+  const total = TOWN_EVENTS.reduce((n, e) => n + EVENT_WEIGHT(e), 0);
+  let r = seeded('event-' + todayKey())() * total;
+  for (const e of TOWN_EVENTS) { r -= EVENT_WEIGHT(e); if (r < 0) return e; }
+  return TOWN_EVENTS[0];
+}
+/* Calm districts (build 102): beating a district's boss leaves that district calm for the rest of the real day - hidden
+   cards and chests turn up half again as often there, and its ambient line says so. It is the town reacting to what you did. */
+function districtCalm(d) { const c = state.progress.calm; return !!(c && c[d || state.currentDistrict] === todayKey()); }
+function markDistrictCalm(d) {
+  const p = state.progress; if (!p.calm || typeof p.calm !== 'object') p.calm = {};
+  p.calm[d] = todayKey(); saveState();
+  setTimeout(() => toast(`🕊️ ${DISTRICTS[d].name} is calm today: hidden cards and chests turn up more often.`), 1800);
+}
 function eventIs(id) { return eventNow().id === id; }
 function noteTodayEvent() {
   const pr = state.progress, ev = eventNow();
@@ -101,7 +119,7 @@ function reconcileFoils() {
   const p = state.progress, counts = ownedCardCounts(), f = foils();
   if (!p.foilSnap) { p.foilSnap = counts; return; }
   const found = [];
-  Object.keys(counts).forEach(id => { for (let i = 0; i < counts[id] - (p.foilSnap[id] || 0); i++) if (Math.random() < FOIL_ODDS) { f[id] = (f[id] || 0) + 1; found.push(id); } });
+  Object.keys(counts).forEach(id => { for (let i = 0; i < counts[id] - (p.foilSnap[id] || 0); i++) if (Math.random() < FOIL_ODDS * (eventIs('starfall') ? 3 : 1)) { f[id] = (f[id] || 0) + 1; found.push(id); } });
   Object.keys(f).forEach(id => { f[id] = Math.min(f[id], counts[id] || 0); if (!f[id]) delete f[id]; });   // a foil you gave away is gone
   p.foilSnap = counts;
   if (found.length) {
@@ -122,7 +140,7 @@ const GUIDE = [
     { icon: '🗺️', name: 'Districts', where: 'Walk off the edge of a map, or tap the mini-map', how: 'Market Row, Quiet Harbor and Hollow Garden open as you win matches and level up.' },
     { icon: '🌦️', name: 'Weather & forecast', where: 'Any sign · the sky badge, top right', how: 'Tap the badge for the full picture: clear pays a little extra on daily tasks, cloudy doubles spirit XP, rain helps fishing and gardens, storms power Swift cards, snow toughens bosses but pays more.' },
     { icon: '🌸', name: 'Seasons', where: 'Everywhere, one real week each', how: "Trees, music and weather change, and each season's cards turn up more often." },
-    { icon: '📅', name: 'Daily events', where: 'Shown next to the district name', how: 'One a day - a Fishing Derby, Market Day, Harvest Fair and more.' },
+    { icon: '📅', name: 'Daily events', where: 'Shown next to the district name', how: 'One a day - a Fishing Derby, Market Day, Harvest Fair and more. About one day in twelve is a rare one: Starfall, Friendship Fair or Tournament Day. After you beat a district boss, that district stays calm for the day and hides more cards and chests.' },
     { icon: '🗝️', name: 'Hidden cards & chests', where: 'Grass, flowers and props everywhere', how: 'Walk through flowers, poke at props, and follow a golden glow to a chest.' },
     { icon: '🧶', name: 'Table mats', where: 'Card Shop → Customize, then Player → Customize', how: 'The cloth on your side of the battle table. Buy one with Pebbles, then pick it in your Customize tab.' },
     { icon: '🎨', name: 'Themes', where: 'Tap your avatar → Settings → Appearance', how: 'Dark (sea glass), Light (sand and sea glass) or Auto, which follows your device. The map, battles and interiors stay dark either way.' },
@@ -291,6 +309,11 @@ document.getElementById('econToggle').addEventListener('click', () => {
   if (!open) return;
   const r = econReport(), fmt = l => l.slice(0, 8).map(x => `${x.src}: ${x.total} (${Math.round(x.perHour)}/h)`).join('\n') || '-';
   panel.textContent = `Over ${r.hours}h of play\nEarned ${r.earned} (${r.earnedPerHour}/h) · Spent ${r.spent} (${r.spentPerHour}/h)\n\nEARNED\n${fmt(r.earn)}\n\nSPENT\n${fmt(r.spend)}`;
+});
+document.getElementById('statsToggle').addEventListener('click', () => {
+  sfx('tap'); prefs.shareStats = prefs.shareStats === false; savePrefs(); syncToggles();
+  if (prefs.shareStats !== false) pushStats();
+  toast(prefs.shareStats === false ? '📈 Play stats are private' : '📈 Sharing anonymous play stats');
 });
 // Ghost duels: your current deck rides along with your presence entry (on by default, with Share that I'm playing).
 document.getElementById('shareDeckToggle').addEventListener('click', () => {

@@ -64,6 +64,27 @@ function cloudPush() {
   state.cloudSavedAt = Date.now();
   ref.set({ json: JSON.stringify(state), savedAt: state.cloudSavedAt }).catch(() => { /* offline - Firestore queues this and retries automatically */ });
   pushPresence();   // piggybacks on the same debounce - see WHO'S PLAYING below, no extra write-quota pressure
+  pushStats();      // same debounce again
+}
+
+/* ============================================================
+   PLAYTEST STATS (build 102): one anonymous summary document per tester at stats/{uid}, so the owner can see from the Firebase
+   console which features get used and how the economy and balance feel. No name, no avatar, no free text: the build, level,
+   play time, wins, every counter in state.progress.totals, skill ranks, gear tiers, ladder points, the deck's family mix and
+   the Pebble ledger totals. On by default with a switch in Settings (prefs.shareStats === false turns it off). Needs the
+   write-only rule in HANDOFF §1a; until that is pasted in, this fails silently like every other unreachable-Firestore case.
+   ============================================================ */
+function statsSharingOn() { return prefs.shareStats !== false; }
+function statsSummary() {
+  const p = state.progress, fam = {};
+  (state.deck || []).forEach(id => { const f = CARD_FAMILY[BattleEngine.baseIdOf(id)] || 'none'; fam[f] = (fam[f] || 0) + 1; });
+  let econ = null; try { const r = econReport(); econ = { hours: r.hours, earned: r.earned, spent: r.spent, earn: Object.fromEntries(r.earn.map(x => [x.src, x.total])), spend: Object.fromEntries(r.spend.map(x => [x.src, x.total])) }; } catch (e) { /* no ledger yet */ }
+  return { build: typeof BUILD === 'number' ? BUILD : 0, at: Date.now(), level: (p.level || 1), wins: state.wins || 0, cards: (state.ownedCards || []).length, totals: Object.assign({}, p.totals || {}),
+    skills: Object.assign({}, p.skills || {}), gear: Object.assign({}, p.gear || {}), ladder: (p.ladder && p.ladder.pts) || 0, deckFamilies: fam, binderPages: Object.keys(p.binderDone || {}).length, econ };
+}
+function pushStats() {
+  if (!statsSharingOn() || !cloudReady || !cloudDb || !cloudUser) return;
+  try { cloudDb.collection('stats').doc(cloudUser.uid).set(statsSummary()).catch(() => {}); } catch (e) { /* summary failed: not worth surfacing */ }
 }
 
 /* ============================================================

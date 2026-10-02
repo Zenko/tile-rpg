@@ -373,6 +373,7 @@ function addFriendship(f, pts, why) {
   const k = neighborKey(f), fs = friendsState();
   const fr = fs[k] || (fs[k] = { name: f.name, district: k.split(':')[0], points: 0, icon: opponentPortrait(f), sigDay: null, sigWins: 0, gift: false });
   const before = heartsFor(fr.points);
+  if (eventIs('friendship-fair')) pts *= 2;
   fr.points += pts; fr.icon = opponentPortrait(f);
   const after = heartsFor(fr.points);
   if (after > before) {

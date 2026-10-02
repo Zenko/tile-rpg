@@ -640,7 +640,7 @@ function tickChest(data) {
   const now = Date.now();
   if (data.chest) return false;
   if (data.chestCooldownUntil && now < data.chestCooldownUntil) return false;
-  if (Math.random() >= CHEST_SPAWN_CHANCE * (weatherFx().chestMult || 1) * (hasPerk('chest') ? 1.5 : 1) * (1 + cardBonus('chest'))) return false;
+  if (Math.random() >= CHEST_SPAWN_CHANCE * (weatherFx().chestMult || 1) * (hasPerk('chest') ? 1.5 : 1) * (1 + cardBonus('chest')) * (districtCalm() ? 1.5 : 1)) return false;
   const spot = findFreeTile(data);
   data.chest = { x: spot.x, y: spot.y, spawnedAt: now };
   return true;
