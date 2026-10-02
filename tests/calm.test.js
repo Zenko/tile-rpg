@@ -2,12 +2,12 @@
 module.exports = async (page, assert) => {
   await page.evaluate(() => { state.progress.calm = undefined; openCalm(); });
   assert.ok(await page.locator('#calmOverlay').isVisible(), 'hub opens');
-  assert.strictEqual(await page.locator('#calmBody [data-calm]').count(), 7);
+  assert.strictEqual(await page.locator('#calmBody [data-calm]').count(), 8);
   // night so every activity is available
   await page.evaluate(() => { state.sky.elapsedMs = 0; });
   const night = await page.evaluate(() => { for (let t = 0; t < DAY_LEN_MS; t += DAY_LEN_MS / 48) { state.sky.elapsedMs = t; if (skyPhase().isNight) return true; } return false; });
   assert.ok(night, 'found a night time');
-  for (const act of ['breathe', 'sand', 'lanterns', 'chimes', 'stars', 'tea', 'bonsai']) {
+  for (const act of ['breathe', 'sand', 'lanterns', 'chimes', 'stars', 'tea', 'bonsai', 'tarot']) {
     await page.evaluate(a => { calmCur = a; calmRender(); }, act);
     assert.ok(await page.locator('#calmBody').innerHTML().then(h => h.length > 40), act + ' rendered');
   }
