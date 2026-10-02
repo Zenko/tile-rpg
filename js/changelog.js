@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta ${RELEASES[0].n} (build $
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'new', x: 'Look around the town: drag the map with your finger (or mouse) to see the rest of the district. A target button appears to bring the camera back to your character, and walking somewhere does too. A drag never sends your character walking.' },
   { t:'better', x: 'Card pictures and the icons across menus, lists and the dock get a faint drop shadow so they lift off their background.' },
   { t:'better', x: 'Redesigned screens: the weather board shows Now / Next / Today / Town mood as clear rows, the mailbox groups letters into "Waiting for you" and "Earlier" with avatar tiles and note-paper letters, building speech is a compact bubble, and the cellar floor sits in one framed dark room with the hearts and lantern on a single row.' },
   { t:'better', x: 'Weed the Beds has lighter soil in the light theme.' },

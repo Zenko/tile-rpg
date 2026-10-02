@@ -468,6 +468,16 @@ function layoutTown() {
   townView.style.height = vh + 'px';
   return true;
 }
+/* ---------------- look around: drag the map ----------------
+   The camera follows the player by default. Touch and drag the map (or click and drag) and it detaches and stays where you put it, so you can see
+   the rest of the district; the Center button, or starting any walk, brings it back to your character. A drag never counts as a tap, so it cannot
+   send the player walking. `camFree` is the dragged position; updateCamera() uses it in place of the follow position while it is set. */
+let camFree = null, camDrag = null, camSuppressClick = 0, camMomentum = 0;
+function camRelease() { camFree = null; if (camMomentum) { cancelAnimationFrame(camMomentum); camMomentum = 0; } const b = document.getElementById('camRecenter'); if (b) b.classList.add('hidden'); }
+function camBounds() {
+  const m = getMap(state.currentDistrict), vw = townView.clientWidth || tilePx * VIEW_COLS, vh = townView.clientHeight || tilePx * viewRows;
+  return { vw, vh, minX: Math.min(0, vw - m.w * tilePx), maxX: 0, minY: Math.min(CAM_PAD_TOP, vh - m.h * tilePx - CAM_PAD_BOTTOM), maxY: CAM_PAD_TOP };
+}
 function updateCamera(animate) {
   if (!townWorld) return;
   const m = getMap(state.currentDistrict), vw = townView.clientWidth || tilePx * VIEW_COLS, vh = townView.clientHeight || tilePx * viewRows;
@@ -476,6 +486,8 @@ function updateCamera(animate) {
   const padT = CAM_PAD_TOP, padB = CAM_PAD_BOTTOM;
   let cx = vw / 2 - (state.playerPos.x + 0.5) * tilePx, cy = (padT + vh - padB) / 2 - (state.playerPos.y + 0.5) * tilePx;
   cx = Math.min(0, Math.max(vw - m.w * tilePx, cx)); cy = Math.min(padT, Math.max(vh - m.h * tilePx - padB, cy));
+  if (camFree && (camFree.district !== state.currentDistrict || inScene || inBattle)) camRelease();   // a dragged camera only lives in the district and view it was dragged in
+  if (camFree) { const b = camBounds(); cx = Math.min(b.maxX, Math.max(b.minX, camFree.cx)); cy = Math.min(b.maxY, Math.max(b.minY, camFree.cy)); animate = false; }
   townWorld.style.transition = animate ? `transform ${STEP_MS}ms linear` : 'none';
   townWorld.style.transform = `translate(${cx}px, ${cy}px)`;
   lastCam = { cx, cy, vw, vh };
@@ -755,6 +767,7 @@ function tapRing(x, y) {
 }
 function startWalk(path, done) {
   const token = ++walkToken;
+  if (path && path.length) camRelease();   // walking somewhere: the camera follows the player again
   path = path.slice();
   if (!path.length) { pendingWalk = null; done && done(); return; }   // already there: the walk is finished, so it can never be resumed later
   let i = 0;
@@ -1220,8 +1233,53 @@ function deleteDecoration(uid) {
 }
 
 townView.addEventListener('click', e => {
-  if (!townWorld) return;
+  if (!townWorld || Date.now() < camSuppressClick) return;   // the end of a drag is not a tap
   const r = townWorld.getBoundingClientRect();
   handleMapTap(Math.floor((e.clientX - r.left) / tilePx), Math.floor((e.clientY - r.top) / tilePx));
 });
 
+/* ---- drag handling (pointer events cover finger and mouse; touch-action:none on the map is in css/latest.css) ---- */
+function camCurrent() { const mt = new DOMMatrix(getComputedStyle(townWorld).transform); return { cx: mt.m41, cy: mt.m42 }; }
+function camPan(cx, cy) {
+  const b = camBounds(); cx = Math.min(b.maxX, Math.max(b.minX, cx)); cy = Math.min(b.maxY, Math.max(b.minY, cy));
+  camFree = { cx, cy, district: state.currentDistrict };
+  townWorld.style.transition = 'none'; townWorld.style.transform = `translate(${cx}px, ${cy}px)`;
+  lastCam = { cx, cy, vw: b.vw, vh: b.vh }; updateNightHole(cx, cy, b.vw, b.vh);
+  document.getElementById('camRecenter').classList.remove('hidden');
+  return { cx, cy, atX: cx <= b.minX || cx >= b.maxX, atY: cy <= b.minY || cy >= b.maxY };
+}
+townView.addEventListener('pointerdown', e => {
+  if (!townWorld || !e.isPrimary || e.button > 0 || inBattle || inScene || document.body.classList.contains('calm-sit')) return;
+  if (camMomentum) { cancelAnimationFrame(camMomentum); camMomentum = 0; }
+  const c = camCurrent(); camDrag = { id: e.pointerId, x0: e.clientX, y0: e.clientY, cx0: c.cx, cy0: c.cy, moved: false, lx: e.clientX, ly: e.clientY, lt: performance.now(), vx: 0, vy: 0 };
+});
+townView.addEventListener('pointermove', e => {
+  const d = camDrag; if (!d || e.pointerId !== d.id) return;
+  const dx = e.clientX - d.x0, dy = e.clientY - d.y0;
+  if (!d.moved) {
+    if (Math.hypot(dx, dy) < 9) return;           // a tap wobbles a few pixels; only a real drag detaches the camera
+    d.moved = true; try { townView.setPointerCapture(d.id); } catch (er) { /* ignore */ }
+    townView.classList.add('panning');
+  }
+  const now = performance.now(), dt = Math.max(1, now - d.lt);
+  d.vx = 0.8 * d.vx + 0.2 * ((e.clientX - d.lx) / dt); d.vy = 0.8 * d.vy + 0.2 * ((e.clientY - d.ly) / dt); d.lx = e.clientX; d.ly = e.clientY; d.lt = now;
+  camPan(d.cx0 + dx, d.cy0 + dy);
+});
+function camEnd(e) {
+  const d = camDrag; if (!d || e.pointerId !== d.id) return; camDrag = null; townView.classList.remove('panning');
+  try { townView.releasePointerCapture(d.id); } catch (er) { /* ignore */ }
+  if (!d.moved) return;
+  camSuppressClick = Date.now() + 80; showTipOnce('lookaround');
+  // a little momentum, like flicking a map; skipped for Calm mode / reduced motion and when the finger rested before lifting
+  if (!(btMotionOk && btMotionOk()) || performance.now() - d.lt > 90) return;
+  let vx = d.vx * 16, vy = d.vy * 16;     // px per frame
+  const run = () => {
+    camMomentum = 0; vx *= 0.93; vy *= 0.93;
+    if (Math.hypot(vx, vy) < 0.4 || !camFree) return;
+    const r = camPan(camFree.cx + vx, camFree.cy + vy); if (r.atX) vx = 0; if (r.atY) vy = 0;
+    camMomentum = requestAnimationFrame(run);
+  };
+  camMomentum = requestAnimationFrame(run);
+}
+townView.addEventListener('pointerup', camEnd); townView.addEventListener('pointercancel', camEnd);
+document.getElementById('camRecenter').addEventListener('click', () => { sfx('nav'); buzz(HAP.tap); camRelease(); updateCamera(true); });

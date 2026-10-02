@@ -421,6 +421,7 @@ function goToCardShop() {
   if (state.currentDistrict !== 'market') withTravelTransition('market', enter); else withDoorFade(enter);
 }
 function openScene(id) {
+  if (typeof camRelease === 'function') camRelease();   // a dragged town camera is for the street, not for what is inside / the match
   cancelWalk(); if (typeof noteVisit === 'function') noteVisit(id);
   if (SCENE_TIPS[id]) showTipOnce(SCENE_TIPS[id]);
   inScene = true; scene = { id, text: '' }; sceneView.classList.remove('scene-leaving');

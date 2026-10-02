@@ -68,6 +68,7 @@ function battleWorld(opponent, weather) {
   return { mods, chips };
 }
 function startBattleNow(opponent, first) {
+  if (typeof camRelease === 'function') camRelease();   // a dragged town camera is for the street, not for what is inside / the match
   first = first === 1 ? 1 : 0;                              // 0 = you take the first turn (the toss, js/battle-toss.js)
   // Never let a damaged card id reach the engine: drop anything that is not a real card first.
   // A Draft Run brings its own 12 cards (opponent.playerDeck) and none of your collection's extras: no mastery, charms, snacks or companion.

@@ -138,6 +138,7 @@ const needs = (district) => districtUnlocked(district) ? '' : `Opens with ${DIST
 const GUIDE = [
   { section: 'Around town', items: [
     { icon: '📓', name: 'The Journal', where: 'Bottom bar → Journal', how: 'Today lists what is waiting for you with a Go button for each. The Log, Battles and Almanac keep your history and collections, and the ? button holds this Guide and What\'s new.' },
+    { icon: '🖐️', name: 'Looking around', where: 'Town map', how: 'Drag the map with your finger to look at the rest of the district; a quick flick glides on. Tap the target button on the right to bring the camera back to you. Dragging never sends your character walking, and walking somewhere brings the camera back by itself.' },
     { icon: '🗺️', name: 'Districts', where: 'Walk off the edge of a map, or tap the mini-map', how: 'Market Row, Quiet Harbor and Hollow Garden open as you win matches and level up.' },
     { icon: '🌦️', name: 'Weather & forecast', where: 'Any sign · the sky badge, top right', how: 'Tap the badge for the full picture: clear pays a little extra on daily tasks, cloudy doubles spirit XP, rain helps fishing and gardens, storms power Swift cards, snow toughens bosses but pays more.' },
     { icon: '🌸', name: 'Seasons', where: 'Everywhere, one real week each', how: "Trees, music and weather change, and each season's cards turn up more often." },
