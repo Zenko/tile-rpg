@@ -62,6 +62,7 @@ function battleWorld(opponent, weather) {
   ['swiftBonus', 'bloomStart', 'shieldHp', 'mendBonus'].forEach(k => { if (fx[k]) mods[k] = fx[k]; });
   if (fx.battle) chips.push(fx.battle);
   if (skyPhase().isNight) { mods.echoBonus = 1; chips.push('🌙 Night: Echo hits +1'); }
+  if (typeof applyWeeklyRule === 'function' && !opponent.playerDeck) applyWeeklyRule(mods, chips);
   const fam = districtFamily(state.currentDistrict);
   if (fam) { mods.famHp = { family: fam, hp: 1 }; chips.push(`${FAMILIES[fam].icon} ${FAMILIES[fam].name} home turf +1♥`); }
   return { mods, chips };

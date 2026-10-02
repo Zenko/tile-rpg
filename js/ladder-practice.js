@@ -55,6 +55,7 @@ function renderLadderCard() {
   el.innerHTML = `<span class="lr-badge">${r.icon}</span><div class="lr-body"><div class="lr-name">${r.name} rank<span>${L.pts} pts</span></div>
     <div class="lr-bar"><i style="width:${pct}%"></i></div>
     <small>${nx ? `${nx.at - L.pts} to ${nx.name}` : 'Top rank this season'} · season ends in ${left} day${left === 1 ? '' : 's'}</small>
+    ${typeof weeklyRule === 'function' ? `<small>📅 ${weeklyRule().icon} ${weeklyRule().name}: ${weeklyRule().text} in every match this week.</small>` : ''}
     <small>Earn points from ghost duels, deck challenges, the Cup, bosses and Draft Runs. You never lose points.</small></div>`;
 }
 
