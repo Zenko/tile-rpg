@@ -534,3 +534,37 @@ body.in-battle .screen { padding-top: 0; }
 /* Workshop: the trade-up tray and its button stick while the card list scrolls. They had no background, so the rows
    showed straight through them. Now a solid panel that sits below the floating top bar. */
 .cr-dock { top: 6px; margin: 0 0 10px; padding: 12px 12px 12px; background: var(--stone); border: 1px solid var(--stone-edge); border-radius: 22px; box-shadow: 0 8px 22px var(--shadow); }
+
+/* ===== Town Guide redesign (build 93) =====
+   Roomier than the old compact rows: a pinned search + section chips bar, a Today card split into labelled rows, and
+   cards with an icon tile, a larger name, a "where" line and the details on tap. */
+.gd-bar { position: sticky; top: -8px; z-index: 4; margin: -8px -14px 14px; padding: 10px 14px 10px; background: var(--bg-top); border-bottom: 1px solid color-mix(in srgb, var(--stone-edge) 60%, transparent); }
+.gd-bar .jsearch { margin-bottom: 10px; min-height: 46px; font-size: .95rem; }
+.gd-chips { display: flex; gap: 8px; overflow-x: auto; margin: 0 -14px; padding: 0 14px 2px; scrollbar-width: none; }
+.gd-chips::-webkit-scrollbar { display: none; }
+.gd-chip { flex: none; min-height: 40px; padding: 8px 16px; border-radius: 999px; border: 1px solid var(--stone-edge); background: var(--stone); color: var(--ink-soft); font: inherit; font-size: .82rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.gd-chip.active { background: var(--water); border-color: var(--water); color: var(--on-water); }
+.gd-today { background: var(--stone); border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--stone-edge)); border-radius: 20px; padding: 16px 16px 6px; margin-bottom: 22px; }
+.gd-today-label { font-size: .7rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+.gd-row { display: flex; gap: 14px; align-items: flex-start; padding: 10px 0; border-top: 1px solid color-mix(in srgb, var(--stone-edge) 70%, transparent); }
+.gd-today-label + .gd-row { border-top: 0; padding-top: 2px; }
+.gd-row-ico { font-size: 1.5rem; width: 32px; text-align: center; flex: none; line-height: 1.2; }
+.gd-row b { display: block; font-size: .95rem; margin-bottom: 2px; }
+.gd-row span:not(.gd-row-ico) { display: block; font-size: .84rem; line-height: 1.5; color: var(--ink-soft); }
+.gd-section { display: flex; flex-direction: column; gap: 10px; margin-bottom: 26px; }
+.gd-section-title { display: flex; align-items: baseline; gap: 8px; font-family: var(--f-display); font-size: 1.25rem; font-weight: 600; padding: 0 2px 2px; }
+.gd-section-title span { font-family: var(--f-ui); font-size: .76rem; font-weight: 700; color: var(--ink-soft); }
+.gd-card { background: var(--stone); border: 1px solid var(--stone-edge); border-radius: 18px; padding: 14px; cursor: pointer; transition: background-color .15s ease; }
+.gd-card:focus-visible { outline: 2px solid var(--water); outline-offset: 2px; }
+.gd-card.open { background: color-mix(in srgb, var(--water) 7%, var(--stone)); border-color: color-mix(in srgb, var(--water) 40%, var(--stone-edge)); }
+.gd-card.locked { opacity: .65; cursor: default; }
+.gd-head { display: flex; align-items: center; gap: 14px; }
+.gd-icon { flex: none; width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; font-size: 1.6rem; background: color-mix(in srgb, var(--hl) 7%, transparent); border: 1px solid color-mix(in srgb, var(--stone-edge) 70%, transparent); }
+.gd-title { flex: 1; min-width: 0; }
+.gd-name { font-size: 1.02rem; font-weight: 700; line-height: 1.3; }
+.gd-where { margin-top: 3px; font-size: .8rem; line-height: 1.4; color: var(--ink-soft); }
+.gd-chev { flex: none; width: 28px; text-align: center; color: var(--ink-soft); font-size: 1.1rem; font-weight: 800; }
+.gd-how { margin-top: 12px; padding-top: 12px; border-top: 1px solid color-mix(in srgb, var(--stone-edge) 70%, transparent); font-size: .9rem; line-height: 1.65; color: var(--ink); animation: pop-in .2s ease; }
+.gd-lock { color: var(--ink-soft); font-size: .84rem; }
+.gd-go { margin-top: 12px; }
+.gd-go .jgo { min-height: 44px; padding: 8px 18px; font-size: .84rem; }

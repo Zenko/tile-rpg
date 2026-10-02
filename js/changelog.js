@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta ${RELEASES[0].n} (build $
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'better', x: 'The Town Guide has a roomier layout: a Today card with separate rows, section chips under the search box, and larger cards for each entry.' },
   { t:'better', x: 'The Deck tab is split in two: Your deck (a bigger tray, cost chart and keywords) and Add cards (your deck as a pinned strip above your collection).' },
   { t:'fixed', x: 'The Workshop trade-up tray now has a solid background when it sticks to the top, so cards no longer show through it.' },
   { t:'better', x: 'The tab bars on Cards, Rewards and Journal now sit a little lower, with breathing room under the top bar.' },

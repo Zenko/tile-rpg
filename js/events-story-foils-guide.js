@@ -180,39 +180,58 @@ const GUIDE = [
 // Collapsed by default (keyed by item name) - with ~30 entries across 5 sections, showing every "how"
 // description at once was the same wall-of-text problem the Changelog had. Tapping a row expands just
 // its own details in place, same idiom as mail-item/cl-entry.
-let guideOpen = {}, guideQuery = '';
+let guideOpen = {}, guideQuery = '', guideSection = 'all';   // guideSection: 'all' or a GUIDE section name
 // Items added in the v1.81-1.89 releases wear a NEW tag until they have been opened once (state.progress.guideSeen).
 const GUIDE_NEW = ['Who goes first', 'Card families', 'New keywords', 'The world in battle', "Keeper's Knack", 'Draft Run', 'Ghost duels', 'Pebbles and soft limits'];
 function guideSeen() { const p = state.progress; if (!p.guideSeen || typeof p.guideSeen !== 'object') p.guideSeen = {}; return p.guideSeen; }
+// Redesign (build 93): roomier cards (icon tile, name, a "where" chip, details on tap), a Today card split into
+// labelled rows instead of one paragraph, and section chips pinned under the search box. Searching ignores the chip
+// so a match is never hidden by a filter you forgot about.
 function renderGuide() {
   const box = document.getElementById('guideList'), ev = eventNow(), sd = seasonDef(), q = guideQuery.trim().toLowerCase(), seen = guideSeen();
   const match = it => !q || `${it.name} ${it.where} ${it.how}`.toLowerCase().includes(q);
+  const chips = document.getElementById('guideChips'), keep = chips.scrollLeft;
+  chips.innerHTML = [['all', 'All']].concat(GUIDE.map(g => [g.section, g.section])).map(([id, label]) =>
+    `<button type="button" class="gd-chip${!q && guideSection === id ? ' active' : ''}" role="tab" data-gsec="${escapeHtml(id)}">${escapeHtml(label)}</button>`).join('');
+  chips.scrollLeft = keep;
+  onAll(chips, '[data-gsec]', b => { sfx('nav'); guideSection = b.dataset.gsec; renderGuide(); });
   let body = GUIDE.map(g => {
+    if (!q && guideSection !== 'all' && guideSection !== g.section) return '';
     const items = g.items.filter(match);
     if (!items.length) return '';
-    return `<div class="section-title">${g.section}</div>` + items.map(it => {
+    return `<div class="gd-section"><div class="gd-section-title">${g.section}<span>${items.length}</span></div>` + items.map(it => {
       const lock = it.lock ? it.lock() : '';
       const open = !!guideOpen[it.name] || (!!q && items.length <= 3 && !lock);
       const isNew = GUIDE_NEW.includes(it.name) && !seen[it.name], go = guideTarget(it.name);
       // A lock reason answers "why can't I do this yet" - show it right away rather than gating it
       // behind a tap; only the (usually longer) "how" text for unlocked items collapses.
-      return `<div class="panel-item guide-item${lock ? ' locked' : ''}${open ? ' open' : ''}"${lock ? '' : ` data-toggle-guide="${escapeHtml(it.name)}"`}>
-        <span class="panel-icon">${it.icon}</span><span class="panel-text">
-        <div class="panel-name">${it.name}${isNew ? '<span class="jnew">NEW</span>' : ''}</div><div class="panel-desc">📍 ${it.where}</div>
-        ${lock ? `<div class="guide-how">🔒 ${escapeHtml(lock)}</div>` : (open ? `<div class="guide-how">${it.how}${go ? `<div><button type="button" class="jgo" data-guide-go="${escapeHtml(it.name)}">Take me there →</button></div>` : ''}</div>` : '')}</span>
-        ${lock ? '' : `<span class="guide-chevron">${open ? '▲' : '▼'}</span>`}</div>`;
-    }).join('');
+      return `<div class="gd-card${lock ? ' locked' : ''}${open ? ' open' : ''}"${lock ? '' : ` data-toggle-guide="${escapeHtml(it.name)}" role="button" tabindex="0" aria-expanded="${open}"`}>
+        <div class="gd-head"><span class="gd-icon">${it.icon}</span>
+          <div class="gd-title"><div class="gd-name">${it.name}${isNew ? '<span class="jnew">NEW</span>' : ''}</div><div class="gd-where">📍 ${it.where}</div></div>
+          ${lock ? '' : `<span class="gd-chev" aria-hidden="true">${open ? '⌃' : '⌄'}</span>`}</div>
+        ${lock ? `<div class="gd-how gd-lock">🔒 ${escapeHtml(lock)}</div>` : (open ? `<div class="gd-how">${it.how}${go ? `<div class="gd-go"><button type="button" class="jgo" data-guide-go="${escapeHtml(it.name)}">Take me there →</button></div>` : ''}</div>` : '')}</div>`;
+    }).join('') + '</div>';
   }).join('');
   if (!body) body = `<div class="jempty">Nothing matches “${escapeHtml(guideQuery)}”.<button class="jgo" type="button" id="guideClear">Clear search</button></div>`;
-  box.innerHTML = `<div class="guide-today"><b>Today:</b> ${ev.icon} ${ev.name} - ${ev.text}<br>${sd.icon} ${sd.name}, ${seasonDaysLeft()} day${seasonDaysLeft() === 1 ? '' : 's'} left · ${forecastText()}</div>` + body;
-  box.querySelectorAll('[data-toggle-guide]').forEach(el => el.addEventListener('click', ev2 => {
-    if (ev2.target.closest('[data-guide-go]')) return;
-    const name = el.dataset.toggleGuide;
-    sfx('nav');
-    guideOpen[name] = !guideOpen[name];
-    if (guideOpen[name] && GUIDE_NEW.includes(name)) { guideSeen()[name] = true; saveState(); }
-    renderGuide();
-  }));
+  const left = seasonDaysLeft();
+  box.innerHTML = `<div class="gd-today">
+      <div class="gd-today-label">Today</div>
+      <div class="gd-row"><span class="gd-row-ico">${ev.icon}</span><div><b>${ev.name}</b><span>${ev.text}</span></div></div>
+      <div class="gd-row"><span class="gd-row-ico">${sd.icon}</span><div><b>${sd.name}</b><span>${left} day${left === 1 ? '' : 's'} left</span></div></div>
+      <div class="gd-row"><span class="gd-row-ico">🌦️</span><div><b>${weatherBrief()}</b><span>Tap the sky badge for what each weather does</span></div></div>
+    </div>` + body;
+  box.querySelectorAll('[data-toggle-guide]').forEach(el => {
+    const toggle = ev2 => {
+      if (ev2.target.closest('[data-guide-go]')) return;
+      const name = el.dataset.toggleGuide;
+      sfx('nav');
+      guideOpen[name] = !guideOpen[name];
+      if (guideOpen[name] && GUIDE_NEW.includes(name)) { guideSeen()[name] = true; saveState(); }
+      renderGuide();
+    };
+    el.addEventListener('click', toggle);
+    el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(e); } });
+  });
   box.querySelectorAll('[data-guide-go]').forEach(b => b.addEventListener('click', () => { sfx('tap'); closeJournalSheet(); journalGo(guideTarget(b.dataset.guideGo)); }));
   const gc = document.getElementById('guideClear'); if (gc) gc.addEventListener('click', () => { guideQuery = ''; document.getElementById('guideSearch').value = ''; renderGuide(); });
 }
