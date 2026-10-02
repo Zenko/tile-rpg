@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en" class="sg-html">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tile RPG Style Guide</title>
+<!-- Living style guide. It loads the game's own stylesheets, sprites and card data, so colours, components and the card
+     catalogue below are the real thing and cannot drift from the game. Open it from the repo root (or the live site) next to index.html.
+     Only the "documented values" tables (hex codes, sizes) are typed by hand; update them if css/base.css tokens change. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;1,400&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/screens.css">
+<link rel="stylesheet" href="css/battle-town.css">
+<link rel="stylesheet" href="css/buildings.css">
+<link rel="stylesheet" href="css/battle-v2.css">
+<link rel="stylesheet" href="css/latest.css">
+<style>
+/* ---- guide chrome only (.sg-*). Everything inside the demo areas uses the game's own classes. ---- */
+html.sg-html { height: auto; }
+body.sg { display: block; height: auto; overflow: visible; overflow-x: hidden; -webkit-user-select: text; user-select: text; padding: 0; text-align: left; font-size: 16px; line-height: 1.55; }
+body.sg *::selection { background: color-mix(in srgb, var(--water) 45%, transparent); }
+.sg-wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px 80px; }
+.sg-top { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg-top) 92%, transparent); border-bottom: 1px solid var(--stone-edge); }
+.sg-top-in { max-width: 1080px; margin: 0 auto; padding: 10px 20px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.sg-brand { font-family: var(--f-display); font-size: 1.15rem; font-weight: 500; margin-right: auto; white-space: nowrap; }
+.sg-nav { display: flex; gap: 4px; flex-wrap: wrap; }
+.sg-nav a { color: var(--ink-soft); text-decoration: none; font-size: .78rem; font-weight: 700; padding: 6px 10px; border-radius: 999px; }
+.sg-nav a:hover { background: var(--board-bg); color: var(--ink); }
+.sg-theme { display: inline-flex; background: var(--stone); border: 1px solid var(--stone-edge); border-radius: 999px; padding: 3px; }
+.sg-theme button { border: 0; background: none; font: inherit; font-size: .78rem; font-weight: 700; color: var(--ink-soft); padding: 6px 14px; border-radius: 999px; cursor: pointer; }
+.sg-theme button.on { background: var(--water); color: var(--on-water); }
+.sg-hero { padding: 54px 0 26px; }
+.sg-hero h1 { font-family: var(--f-display); font-weight: 500; font-size: clamp(2rem, 6vw, 3.2rem); line-height: 1.1; margin: 0 0 10px; }
+.sg-hero p { max-width: 720px; color: var(--ink-soft); font-size: 1.02rem; margin: 0 0 8px; }
+.sg-sec { padding-top: 56px; scroll-margin-top: 70px; }
+.sg-sec > h2 { font-family: var(--f-display); font-weight: 500; font-size: 1.9rem; margin: 0 0 4px; }
+.sg-sec > .sg-lead { color: var(--ink-soft); max-width: 760px; margin: 0 0 22px; }
+.sg-sec h3 { font-size: .74rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); margin: 30px 0 10px; }
+.sg-card { background: var(--stone); border: 1px solid var(--stone-edge); border-radius: 18px; padding: 18px; }
+.sg-grid { display: grid; gap: 14px; }
+.sg-g2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.sg-g3 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.sg-note { font-size: .84rem; color: var(--ink-soft); margin: 8px 0 0; }
+.sg-note b { color: var(--ink); }
+code, .sg-code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .82em; background: var(--board-bg); padding: 1px 6px; border-radius: 6px; }
+table.sg-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
+.sg-t th { text-align: left; font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); font-weight: 800; padding: 8px 10px; border-bottom: 1px solid var(--stone-edge); }
+.sg-t td { padding: 9px 10px; border-bottom: 1px solid color-mix(in srgb, var(--stone-edge) 60%, transparent); vertical-align: middle; }
+.sg-tw { overflow-x: auto; }
+/* swatches */
+.sg-sw { display: flex; gap: 12px; align-items: center; }
+.sg-chip { flex: none; width: 44px; height: 44px; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--ink) 18%, transparent); }
+.sg-sw b { display: block; font-size: .86rem; } .sg-sw small { display: block; color: var(--ink-soft); font-size: .72rem; line-height: 1.3; }
+.sg-hex { font-family: ui-monospace, Menlo, monospace; font-size: .72rem; color: var(--ink-soft); }
+.sg-pal { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 8px; }
+.sg-pal div { border-radius: 10px; padding: 26px 8px 6px; font-size: .62rem; font-family: ui-monospace, Menlo, monospace; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.6); border: 1px solid rgba(128,128,128,.25); }
+.sg-rar { height: 74px; border-radius: 14px; color: #fff; padding: 10px 12px; font-weight: 800; display: flex; flex-direction: column; justify-content: flex-end; font-size: .84rem; }
+.sg-rar small { font-weight: 600; opacity: .9; font-size: .66rem; font-family: ui-monospace, Menlo, monospace; }
+/* phone frames */
+.sg-phone { width: 100%; max-width: 400px; margin: 0 auto; border-radius: 26px; padding: 18px 14px; background: linear-gradient(180deg, var(--bg-top), var(--bg-bottom)); border: 1px solid var(--stone-edge); display: flex; flex-direction: column; gap: 12px; text-align: center; }
+.sg-demo { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: center; }
+.sg-row-label { font-size: .7rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); text-align: left; margin: 4px 0 -4px; }
+.sg-shots { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 26px; }
+.sg-shot figure { margin: 0; } .sg-shot img { width: 100%; display: block; border-radius: 18px; border: 1px solid var(--stone-edge); box-shadow: 0 8px 24px var(--shadow); }
+.sg-shot figcaption { font-size: .8rem; color: var(--ink-soft); margin-top: 8px; } .sg-shot figcaption b { color: var(--ink); display: block; font-size: .86rem; }
+.sg-checker { background: conic-gradient(#8883 25%, #0000 0 50%, #8883 0 75%, #0000 0) 0 0 / 16px 16px; }
+/* card anatomy */
+.sg-anat { position: relative; width: 211px; margin: 0 auto; }
+.sg-anat .reveal-card { width: 211px; padding: 14px 12px 12px; }
+.sg-anat .reveal-card .icon { font-size: 4rem; margin-top: 12px; } .sg-anat .reveal-card .nm { font-size: 1.05rem; } .sg-anat .reveal-card .stats { font-size: 1.5rem; }
+.sg-pin { position: absolute; width: 22px; height: 22px; border-radius: 50%; background: #ff5f57; color: #fff; font-size: .72rem; font-weight: 800; display: grid; place-items: center; border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,.4); z-index: 5; }
+.sg-cat { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 12px; }
+.sg-cat .alm-card { width: 100%; }
+.sg-cat-item { text-align: center; } .sg-cat-item code { display: block; font-size: .62rem; margin-top: 6px; word-break: break-all; cursor: copy; }
+.sg-filter { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 14px; }
+.sg-filter input { font: inherit; font-size: .86rem; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--stone-edge); background: var(--stone); color: var(--ink); min-width: 190px; }
+.sg-fb { font: inherit; font-size: .74rem; font-weight: 700; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--stone-edge); background: var(--stone); color: var(--ink-soft); cursor: pointer; }
+.sg-fb.on { background: var(--water); color: var(--on-water); border-color: transparent; }
+.sg-do, .sg-dont { border-radius: 16px; padding: 14px 16px; font-size: .88rem; } .sg-do { background: color-mix(in srgb, var(--win-glow) 16%, var(--stone)); border: 1px solid color-mix(in srgb, var(--win-glow) 45%, var(--stone-edge)); } .sg-dont { background: color-mix(in srgb, var(--boss-glow) 12%, var(--stone)); border: 1px solid color-mix(in srgb, var(--boss-glow) 40%, var(--stone-edge)); }
+.sg-do h4, .sg-dont h4 { margin: 0 0 6px; font-size: .74rem; letter-spacing: .1em; text-transform: uppercase; } .sg-do ul, .sg-dont ul { margin: 0; padding-left: 18px; } .sg-do li, .sg-dont li { margin: 3px 0; }
+.sg-sprite { display: block; } .sg-spr { text-align: center; font-size: .66rem; color: var(--ink-soft); } .sg-spr .box { border-radius: 12px; margin: 0 auto 4px; display: grid; place-items: center; background: var(--ground, #2c3a2c); }
+.sg-type-row { display: grid; grid-template-columns: 150px 1fr; gap: 14px; align-items: baseline; padding: 12px 0; border-bottom: 1px solid color-mix(in srgb, var(--stone-edge) 60%, transparent); }
+.sg-type-row .meta { font-size: .72rem; color: var(--ink-soft); line-height: 1.4; } .sg-type-row .meta b { color: var(--ink); display: block; font-size: .8rem; }
+@media (max-width: 560px) { .sg-type-row { grid-template-columns: 1fr; gap: 4px; } .sg-sec > h2 { font-size: 1.55rem; } }
+#battleView.sg-bv { position: relative; inset: auto; display: block; overflow: visible; padding: 0; }   /* the battle card styles are scoped to #battleView, which the game positions full-screen */
+#reveals, #tiles, #battle, #states { padding: 10px 6px 4px; gap: 18px; }
+/* a static toast / overlay card for the demos */
+.sg-static { position: static !important; transform: none !important; opacity: 1 !important; animation: none !important; }
+</style>
+</head>
+<body class="sg">
+<script src="assets/sprites.js"></script>
+
+<header class="sg-top"><div class="sg-top-in">
+  <div class="sg-brand">Tile RPG Style Guide</div>
+  <nav class="sg-nav" aria-label="Sections">
+    <a href="#principles">Principles</a><a href="#colour">Colour</a><a href="#type">Type</a><a href="#shape">Shape</a><a href="#ui">UI</a><a href="#icons">Icons</a><a href="#cards">Cards</a><a href="#world">World</a><a href="#screens">Screens</a><a href="#motion">Motion</a><a href="#assets">Assets</a>
+  </nav>
+  <div class="sg-theme" role="group" aria-label="Preview theme"><button id="sgDark" class="on" type="button">Dark</button><button id="sgLight" type="button">Light</button></div>
+</div></header>
+
+<main class="sg-wrap">
+<section class="sg-hero">
+  <h1>A calm, cozy town you can pick up in a minute.</h1>
+  <p>This is the visual reference for making new art, cards and screens for Tile RPG. Everything on this page is rendered with the game's own stylesheets, sprites and card data, so it matches the game exactly. Flip between <b>Dark</b> and <b>Light</b> at the top: every asset must work in both.</p>
+  <p class="sg-note">Jump to: <b>Colour</b> for hex codes, <b>Cards</b> for the template and the full catalogue of file names, <b>Assets</b> for sizes and delivery.</p>
+</section>
+
+<!-- ============ PRINCIPLES ============ -->
+<section class="sg-sec" id="principles">
+  <h2>Principles</h2>
+  <p class="sg-lead">The game is a quiet, soft, rounded world. These rules explain most design decisions.</p>
+  <div class="sg-grid sg-g3">
+    <div class="sg-card"><b>Calm over loud</b><p class="sg-note">Soft sea-glass teal, warm sand and muted gold. Nothing flashes or screams. Effects are slow and small. Danger is a dusty red, never neon.</p></div>
+    <div class="sg-card"><b>Rounded everything</b><p class="sg-note">Pills for buttons and chips, 12 to 22 px corners on panels and cards, a 28 px sheet. No hard corners and no thin sharp strokes.</p></div>
+    <div class="sg-card"><b>Mobile first</b><p class="sg-note">Designed on a 400 x 860 phone. Tap targets are at least 44 px. Art is seen small: a card icon is 26 to 42 px on screen, so silhouettes beat detail.</p></div>
+    <div class="sg-card"><b>Two themes, one art set</b><p class="sg-note">Dark is "Slate glass", light is "Sand and sea glass". Art sits on coloured card gradients and both backgrounds, so avoid pure white or pure black fringes.</p></div>
+    <div class="sg-card"><b>Tokens, not hex</b><p class="sg-note">In code every colour is a CSS variable. New UI never hard-codes a colour; art is the one place to bring your own palette, guided by the swatches below.</p></div>
+    <div class="sg-card"><b>Friendly and legible</b><p class="sg-note">Plain words, big numbers, one clear action per screen. Serif display type for titles, round sans for everything else.</p></div>
+  </div>
+</section>
+
+<!-- ============ COLOUR ============ -->
+<section class="sg-sec" id="colour">
+  <h2>Colour</h2>
+  <p class="sg-lead">The swatches below are live: they change with the Dark/Light switch. The hex columns are the documented values from <code>css/base.css</code>.</p>
+  <h3>Core tokens</h3>
+  <div class="sg-card sg-tw"><table class="sg-t" id="tokTable"><thead><tr><th></th><th>Token</th><th>Role</th><th>Dark</th><th>Light</th></tr></thead><tbody></tbody></table></div>
+  <h3>Rarity colours</h3>
+  <p class="sg-note" style="margin:-4px 0 12px">Every card face is a 135 degree gradient from a light to a deeper tone. Art is drawn on top of these, so test it against all five.</p>
+  <div class="sg-grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))" id="rarRow"></div>
+  <h3>Status and special colours</h3>
+  <div class="sg-grid sg-g3" id="statusRow"></div>
+  <h3>Town palettes, per district</h3>
+  <p class="sg-note" style="margin:-4px 0 12px">Each district (biome) re-colours the same town sprites using CSS variables. The map has a deep palette in Dark and a lighter mid-tone one in Light. Values shown are read live from the stylesheet.</p>
+  <div id="biomes" class="sg-grid"></div>
+</section>
+
+<!-- ============ TYPE ============ -->
+<section class="sg-sec" id="type">
+  <h2>Typography</h2>
+  <p class="sg-lead">Two families: <b>Newsreader</b> (a soft serif) for titles and names of places, and <b>Nunito</b> (a round sans) for all UI text. Both come from Google Fonts with system fallbacks.</p>
+  <div class="sg-card">
+    <div class="sg-type-row"><div class="meta"><b>Display / title</b>Newsreader 500<br>1.4 to 1.9 rem</div><div style="font-family:var(--f-display);font-weight:500;font-size:1.9rem;line-height:1.15">Welcome to the quiet commons</div></div>
+    <div class="sg-type-row"><div class="meta"><b>Sign / place name</b>Newsreader 500<br>1 rem, on a brown plate</div><div class="sc-head" style="display:block"><b style="font-family:var(--f-display);font-weight:500;font-size:1rem;padding:5px 18px;border-radius:14px;background:#6b4f33;color:#f4e8d0;display:inline-block">Maple's Bakery</b></div></div>
+    <div class="sg-type-row"><div class="meta"><b>Quote / flavour</b>Newsreader 400 italic<br>.95 rem</div><div style="font-family:var(--f-display);font-style:italic;color:var(--ink-soft);font-size:.95rem">"Friendly matches only. Please feed the ducks."</div></div>
+    <div class="sg-type-row"><div class="meta"><b>Body</b>Nunito 400 to 600<br>.88 to .9 rem, line 1.5</div><div style="font-size:.9rem;line-height:1.5;max-width:520px">Find a quiet spot by the water, pick a bait and tap where you would like to cast.</div></div>
+    <div class="sg-type-row"><div class="meta"><b>Button</b>Nunito 700<br>.85 rem</div><div style="font-weight:700;font-size:.85rem">Cast again</div></div>
+    <div class="sg-type-row"><div class="meta"><b>Row title</b>Nunito 700<br>.92 rem</div><div style="font-weight:700;font-size:.92rem">A note from a friend</div></div>
+    <div class="sg-type-row"><div class="meta"><b>Caption</b>Nunito 600<br>.68 to .78 rem, ink-soft</div><div style="font-size:.72rem;color:var(--ink-soft)">from Hazel, 12:24 PM</div></div>
+    <div class="sg-type-row"><div class="meta"><b>Overline / label</b>Nunito 800<br>.62 to .7 rem, caps, +.08em</div><div style="font-size:.66rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-soft)">Waiting for you</div></div>
+    <div class="sg-type-row"><div class="meta"><b>Card name</b>Nunito 600<br>.66 rem, white on card</div><div><span class="rarity-common" style="color:#fff;font-size:.66rem;padding:6px 14px;border-radius:8px;display:inline-block">Toadstool</span></div></div>
+    <div class="sg-type-row"><div class="meta"><b>Card stats</b>Nunito 800<br>.95 rem, white</div><div><span class="rarity-rare" style="color:#fff;font-weight:800;font-size:.95rem;padding:6px 14px;border-radius:8px;display:inline-block">⚔3 &nbsp; ♥2</span></div></div>
+  </div>
+  <p class="sg-note">Rules: sentence case, no all-caps except overlines. Numbers use the same font (Nunito's numerals are tabular enough for stats). Never go below .6 rem. Text on a card face is always white with a faint shadow.</p>
+</section>
+
+<!-- ============ SHAPE ============ -->
+<section class="sg-sec" id="shape">
+  <h2>Shape, space and depth</h2>
+  <div class="sg-grid sg-g2">
+    <div class="sg-card"><h3 style="margin-top:0">Corner radii</h3>
+      <div class="sg-demo" style="justify-content:flex-start;gap:16px" id="radii"></div></div>
+    <div class="sg-card"><h3 style="margin-top:0">Shadows</h3>
+      <div class="sg-demo" style="justify-content:flex-start;gap:18px">
+        <div style="width:96px;height:64px;border-radius:14px;background:var(--stone);box-shadow:0 2px 8px var(--shadow);display:grid;place-items:center;font-size:.7rem">card / pill</div>
+        <div style="width:96px;height:64px;border-radius:999px;background:var(--water);color:var(--on-water);box-shadow:0 4px 14px var(--shadow);display:grid;place-items:center;font-size:.7rem;font-weight:700">button</div>
+        <div style="width:96px;height:64px;border-radius:20px;background:var(--stone);box-shadow:0 10px 40px rgba(0,0,0,.2);display:grid;place-items:center;font-size:.7rem">dialog</div>
+      </div></div>
+  </div>
+  <h3>Spacing and sizes</h3>
+  <div class="sg-card sg-tw"><table class="sg-t"><thead><tr><th>Thing</th><th>Value</th></tr></thead><tbody>
+    <tr><td>Phone frame the game is designed in</td><td>400 x 860 px; the app column maxes out at 460 px</td></tr>
+    <tr><td>Spacing steps</td><td>4, 6, 8, 10, 12, 16, 24 px</td></tr>
+    <tr><td>Screen padding</td><td>12 px sides; top clears the floating bar (72 px), bottom clears the dock (74 px) plus the safe area</td></tr>
+    <tr><td>Minimum tap target</td><td>44 px tall (buttons 44 to 64 px)</td></tr>
+    <tr><td>Floating chrome</td><td>Top bar and bottom dock are glass pills: translucent <code>--stone</code>, 1 px <code>--stone-edge</code>, soft shadow. No blur (it is switched off for performance)</td></tr>
+    <tr><td>Town tile</td><td>48 px square on the map; sprites are drawn on 64 x 64 (props, trees) or 128 x 128 (buildings) grids</td></tr>
+    <tr><td>Borders</td><td>1 px <code>--stone-edge</code> for resting; 2 px accent or family colour for selected or special</td></tr>
+  </tbody></table></div>
+</section>
+
+<!-- ============ UI ============ -->
+<section class="sg-sec" id="ui">
+  <h2>UI elements</h2>
+  <p class="sg-lead">Live components built with the game's real classes. Switch themes to check both.</p>
+  <div class="sg-grid sg-g2">
+    <div class="sg-phone">
+      <div class="sg-row-label">Buttons</div>
+      <div class="sg-demo"><button class="btn" type="button">Cast</button><button class="btn btn-ghost" type="button">Leave the water</button><button class="btn" type="button" disabled>Disabled</button></div>
+      <div class="sg-demo"><button class="btn mg-big" type="button" style="background:var(--accent);color:var(--on-accent)">Take the gift</button></div>
+      <div class="sg-row-label">Segmented control and toggle</div>
+      <div class="seg" style="width:100%"><button class="seg-btn active" type="button">Dark</button><button class="seg-btn" type="button">Light</button><button class="seg-btn" type="button">Auto</button></div>
+      <div class="sg-demo"><span style="font-size:.85rem">Sound</span><button class="toggle on" type="button" aria-label="on"></button><span style="font-size:.85rem">Music</span><button class="toggle" type="button" aria-label="off"></button></div>
+      <div class="sg-row-label">Tags and chips</div>
+      <div class="sg-demo"><span class="rarity-tag rarity-common">common</span><span class="rarity-tag rarity-rare">rare</span><span class="rarity-tag rarity-ultra">ultra rare</span><span class="rarity-tag rarity-super">super</span><span class="rarity-tag rarity-mythic">mythic</span><span class="rarity-tag rt-new">New</span></div>
+      <div class="cl-chips" style="justify-content:center"><span class="chip">🔦 Lantern</span><span class="chip gold">🗝️ Key</span></div>
+      <div class="sg-row-label">Resources, progress, hearts</div>
+      <div class="sg-demo"><div class="hud-stat"><span class="hs-icon">🫧</span><span class="hs-bar"><span class="hs-fill hs-fill-pebbles"></span><span class="hs-val">237</span></span></div><div class="hud-stat"><span class="hs-icon">🃏</span><span class="hs-bar"><span class="hs-fill hs-fill-cards"></span><span class="hs-val">64</span></span></div></div>
+      <div class="mg-timer"><i style="width:62%"></i></div>
+      <div class="cl-hearts" style="justify-content:center"><span class="cl-heart on">♥</span><span class="cl-heart on">♥</span><span class="cl-heart">♥</span></div>
+    </div>
+    <div class="sg-phone">
+      <div class="sg-row-label">List rows</div>
+      <div class="panel-list" style="text-align:left">
+        <div class="panel-item"><span class="panel-icon">🎣</span><span class="panel-text"><div class="panel-name">Catch five fish</div><div class="panel-desc">3 of 5 · 20 Pebbles</div></span></div>
+        <div class="panel-item mail-item unread"><span class="mail-ava">🐰<i class="mail-dot"></i></span><span class="panel-text"><div class="panel-name">A note from a friend</div><div class="panel-desc">from Hazel · 12:24 PM</div></span><span class="mail-gift">🎁 Gift</span><span class="mail-chevron">▼</span></div>
+      </div>
+      <div class="sg-row-label">Toast</div>
+      <div class="sg-demo"><div class="toast show sg-static">🌱 A seed floats up!</div></div>
+      <div class="sg-row-label">Speech bubble</div>
+      <div class="sg-demo"><div class="sc-bubble" style="max-width:300px;min-height:0;text-align:center">Floor 4. It is dark. Walk with your lantern and find a door.</div></div>
+      <div class="sg-row-label">Weather board rows</div>
+      <div class="wb-rows" style="text-align:left">
+        <div class="wb-row"><span class="wb-ico">☀️</span><div class="wb-txt"><small>Now</small><b>Clear skies</b><span>Daily tasks pay a little extra</span></div><em class="wb-tag">~9 min more</em></div>
+        <div class="wb-row wb-mood"><span class="wb-ico">🎈</span><div class="wb-txt"><small>Town mood</small><b>Cheerful</b><div class="wb-bar"><i style="width:72%"></i></div></div><em class="wb-tag">18/25</em></div>
+      </div>
+    </div>
+  </div>
+  <h3>Dialog and sheet</h3>
+  <div class="sg-grid sg-g2">
+    <div class="sg-phone" style="background:var(--overlay-bg)"><div class="overlay-card sg-static" style="margin:0 auto"><div style="font-size:2.2rem">🪧</div><h2>Welcome sign</h2><p>A centred dialog: icon, serif title, one short line, one primary button. 320 px max, 20 px corners.</p><button class="btn" type="button">Continue</button></div></div>
+    <div class="sg-phone" style="background:var(--overlay-bg);justify-content:flex-end;min-height:300px;padding-bottom:0"><div class="overlay-card sg-static" style="width:100%;max-width:none;border-radius:22px 22px 0 0;margin:0"><div style="width:40px;height:4px;border-radius:2px;background:var(--stone-edge);margin:0 auto 12px"></div><h2>Bottom sheet</h2><p>Used for details and long lists. Rises from the bottom, 22 px top corners, a grab handle.</p></div></div>
+  </div>
+  <h3>Navigation</h3>
+  <p class="sg-note">The top bar (avatar, district and sky, Pebbles) and the bottom dock (Town, Journal, Cards, Rewards, Character) are floating glass pills. They are shown in context in the <a href="#screens" style="color:var(--water-ink)">Screens</a> section: the active tab sits on a sliding sea-glass pill and its icon lifts 1 px and grows 14%.</p>
+</section>
+
+<!-- ============ ICONS ============ -->
+<section class="sg-sec" id="icons">
+  <h2>Icons</h2>
+  <p class="sg-lead">The game currently uses three icon systems. New art can replace any of them slot by slot.</p>
+  <h3>1. Emoji (cards, tabs, keywords, UI)</h3>
+  <div class="sg-card"><p class="sg-note" style="margin-top:0">Every card, tab, keyword, weather and button icon is an emoji today. Where a card has art, the picture replaces the emoji at the same size (<code>1em</code>). Keyword icons come from the engine and are shown live:</p>
+    <div class="sg-grid" style="grid-template-columns:repeat(auto-fill,minmax(210px,1fr));margin-top:12px" id="kwGrid"></div></div>
+  <h3>2. Town sprites (SVG symbols in <code>assets/sprites.js</code>)</h3>
+  <div class="sg-card"><p class="sg-note" style="margin-top:0">24 hand-drawn SVG symbols. To restyle, keep each <code>id</code> and viewBox. Props, trees and ground pieces are <b>64 x 64</b>; buildings are <b>128 x 128</b> (the bakery is 192 x 128). The tile on the map is 48 px, so these are drawn at 0.75x.</p>
+    <div class="town-view" data-biome="meadow" style="margin:14px 0 0;border-radius:16px;padding:16px;display:flex;flex-wrap:wrap;gap:14px;background:var(--ground)" id="spriteGrid"></div></div>
+  <h3>3. App icon</h3>
+  <div class="sg-card"><p class="sg-note" style="margin-top:0">Currently a placeholder (a card emoji on a green square) at <code>assets/icon-180.png</code>, <code>icon-192.png</code>, <code>icon-512.png</code> and a 32 px favicon. Replace these four files with the final logo; nothing else changes.</p>
+    <div class="sg-demo" style="justify-content:flex-start;margin-top:10px"><img src="assets/icon-192.png" width="96" height="96" alt="" style="border-radius:22px"><img src="assets/icon-192.png" width="48" height="48" alt="" style="border-radius:11px"><img src="assets/icon-32.png" width="32" height="32" alt=""></div></div>
+  <h3>Icon rules for new art</h3>
+  <div class="sg-grid sg-g2"><div class="sg-do"><h4>Do</h4><ul><li>Bold, simple silhouettes with soft rounded edges</li><li>2 or 3 tones plus a highlight; gentle gradients are fine</li><li>Keep the subject in the central 80% of the canvas</li><li>Check at 32 px and on both themes</li></ul></div><div class="sg-dont"><h4>Don't</h4><ul><li>Thin outlines, tiny details or text inside icons</li><li>Pure white or pure black edges that vanish on one theme</li><li>Neon or high-saturation colours</li><li>A baked-in card frame, border or rarity colour</li></ul></div></div>
+</section>
+
+<!-- ============ CARDS ============ -->
+<section class="sg-sec" id="cards">
+  <h2>Cards</h2>
+  <p class="sg-lead">A card is a rarity-coloured face the game draws for you, with your art in the middle. You only supply the picture. Below: the anatomy, how art looks at every size it appears, the rarities, and the complete catalogue with the exact file name for each card.</p>
+  <div class="sg-grid sg-g2">
+    <div class="sg-card"><h3 style="margin-top:0">Anatomy</h3>
+      <div class="sg-anat" id="anat"></div>
+      <table class="sg-t" style="margin-top:16px"><tbody>
+        <tr><td><b>1</b></td><td>Cost: a round badge hanging off the top-left corner (22 px, <code>--ink</code> fill)</td></tr>
+        <tr><td><b>2</b></td><td>Art: your picture, centred. Drawn at <code>1em</code> inside the icon area</td></tr>
+        <tr><td><b>3</b></td><td>Name: .66 rem, one line, white, centred</td></tr>
+        <tr><td><b>4</b></td><td>Keyword icons: up to three small emoji icons</td></tr>
+        <tr><td><b>5</b></td><td>Stats: power (sword) left, health (heart) right. Spells show "Spell" instead</td></tr>
+      </tbody></table></div>
+    <div class="sg-card"><h3 style="margin-top:0">The art canvas</h3>
+      <div class="sg-checker" style="border-radius:14px;padding:10px;max-width:340px;margin:0 auto"><img src="assets/cards/template.svg" alt="Card art template with safe area" style="width:100%;display:block"></div>
+      <p class="sg-note"><b>512 x 512 px</b>, PNG, transparent background, no frame. The teal square is the safe area (410 x 410): keep the subject inside it. The dotted circle is the zone for round subjects. Download the template: <a href="assets/cards/template.svg" download style="color:var(--water-ink)">template.svg</a> (import into Figma, delete the guides group before export).</p></div>
+  </div>
+  <h3>How art is seen: size ladder</h3>
+  <p class="sg-note" style="margin:-4px 0 12px">The stand-in creature below is a plain SVG, shown at the sizes your art appears in the game, on every rarity. If it still reads at the smallest size, it is good.</p>
+  <div class="sg-card sg-tw"><table class="sg-t" id="ladder"><thead><tr><th>Where</th><th>Size</th><th>common</th><th>rare</th><th>ultra</th><th>super</th><th>mythic</th></tr></thead><tbody></tbody></table></div>
+  <h3>Card faces</h3>
+  <div class="sg-grid sg-g2">
+    <div class="sg-card"><div class="sg-row-label">Collection tile (My Cards, packs, Index)</div><div class="sg-demo" id="tiles" style="margin-top:10px"></div></div>
+    <div class="sg-card"><div class="sg-row-label">Battle card (board and hand)</div><div id="battleView" class="sg-bv"><div class="sg-demo" id="battle" style="margin-top:10px"></div></div></div>
+    <div class="sg-card"><div class="sg-row-label">Reveal / inspect card (large)</div><div class="sg-demo" id="reveals" style="margin-top:10px"></div></div>
+    <div class="sg-card"><div class="sg-row-label">States</div><div class="sg-demo" id="states" style="margin-top:10px"></div><p class="sg-note">Foil adds a soft shimmer, crafted adds a gold outline, opponent-only cards a gold ring. These are drawn by the game around your art.</p></div>
+  </div>
+  <h3>Rules</h3>
+  <div class="sg-grid sg-g2"><div class="sg-do"><h4>Do</h4><ul><li>One clear subject, facing left or forward</li><li>Soft shapes that match the emoji's friendliness</li><li>Spells feel like an effect (a swirl, a glow), not a creature</li><li>Family cues through colour and motif: Grove leaves, Stone rock, Tide water, Wind feathers</li></ul></div><div class="sg-dont"><h4>Don't</h4><ul><li>Backgrounds, frames, cost or stat numbers in the art</li><li>Content outside the safe area</li><li>Fine detail that disappears at 32 px</li><li>Files over about 60 KB</li></ul></div></div>
+  <h3>Catalogue and file names</h3>
+  <p class="sg-note" style="margin:-4px 0 12px">Every card in the game with the file name its art must have (click a name to copy it). The same list, with tick boxes, is <a href="assets/cards/ART-LIST.md" style="color:var(--water-ink)">ART-LIST.md</a>. After the story retheme this list will be regenerated from the new names.</p>
+  <div class="sg-filter" id="filters"></div>
+  <div class="sg-cat" id="catalogue"></div>
+  <p class="sg-note" id="catCount"></p>
+</section>
+
+<!-- ============ WORLD ============ -->
+<section class="sg-sec" id="world">
+  <h2>World and scenes</h2>
+  <p class="sg-lead">Four districts, each with a biome palette, music chord set and boss. Interiors have a stage, a sign, a speech bubble and an action sheet.</p>
+  <div class="sg-card sg-tw"><table class="sg-t"><thead><tr><th>District</th><th>Biome</th><th>Family</th><th>Boss</th><th>Mood</th></tr></thead><tbody id="districts"></tbody></table></div>
+  <h3>Town time and weather</h3>
+  <div class="sg-card"><p class="sg-note" style="margin:0">The town re-tints through the day (dawn, midday, dusk, night) and by season (foliage colours) and weather (clear, cloudy, rain, storm, snow, with particle overlays). Art for the map should be drawn in the neutral "midday" look; the game tints it. Building interiors use four themes: <b>warm</b> (wood), <b>cool</b> (blue), <b>dark</b> (cellar) and the cellar's own torch-lit stage, each with wall, floor, rug and counter colours that lighten in the light theme.</p></div>
+</section>
+
+<!-- ============ SCREENS ============ -->
+<section class="sg-sec" id="screens">
+  <h2>Reference screens</h2>
+  <p class="sg-lead">Real screenshots of the current game, dark on the left and light on the right of each pair, for context when designing new assets. (Captured at 400 x 860.)</p>
+  <div class="sg-shots" id="shots"></div>
+</section>
+
+<!-- ============ MOTION ============ -->
+<section class="sg-sec" id="motion">
+  <h2>Motion and sound</h2>
+  <div class="sg-grid sg-g2">
+    <div class="sg-card"><h3 style="margin-top:0">Motion</h3>
+      <table class="sg-t"><tbody>
+        <tr><td>Dialog pop-in</td><td>.4 s, <code>cubic-bezier(.34, 1.56, .64, 1)</code> (a gentle overshoot)</td></tr>
+        <tr><td>Tab change</td><td>.3 s, <code>cubic-bezier(.22, .8, .3, 1)</code>, slides 16 px</td></tr>
+        <tr><td>Press</td><td>scale to .94 to .96</td></tr>
+        <tr><td>Sheets</td><td>rise .48 s; leave .24 s</td></tr>
+        <tr><td>Rule</td><td>Only opacity and transform move. Everything is switched off by Calm mode and by the device's reduced-motion setting</td></tr>
+      </tbody></table>
+      <div class="sg-demo" style="margin-top:14px"><button class="btn" type="button" id="popDemo">Replay pop-in</button><div id="popBox" style="width:70px;height:70px;border-radius:20px;background:var(--water)"></div></div></div>
+    <div class="sg-card"><h3 style="margin-top:0">Sound</h3>
+      <p class="sg-note" style="margin-top:0">All sounds are generated live from sine waves, never recorded: soft wooden taps, glass bells, water drops and gentle noise. Volumes are low and ring-outs short; the everyday chime is one quiet note. The music is a slow evolving pad in a pentatonic-friendly key, with a different chord family per season and a different voicing per district. If you commission audio, match this: warm, round, unobtrusive, no sharp attacks.</p></div>
+  </div>
+</section>
+
+<!-- ============ ASSETS ============ -->
+<section class="sg-sec" id="assets">
+  <h2>Asset specs and delivery</h2>
+  <div class="sg-card sg-tw"><table class="sg-t"><thead><tr><th>Asset</th><th>Format</th><th>Size</th><th>File name</th><th>Where it goes</th></tr></thead><tbody>
+    <tr><td>Card art</td><td>PNG, transparent</td><td>512 x 512, under 60 KB</td><td><code>&lt;card-id&gt;.png</code></td><td><code>assets/cards/</code>, then add the id to <code>CARD_ART</code></td></tr>
+    <tr><td>Town sprite (prop, tree, ground)</td><td>SVG symbol</td><td>viewBox 64 x 64</td><td>same <code>id</code> (e.g. <code>s-oak</code>)</td><td><code>assets/sprites.js</code></td></tr>
+    <tr><td>Building</td><td>SVG symbol</td><td>viewBox 128 x 128 (bakery 192 x 128)</td><td>same <code>id</code> (e.g. <code>b-cottage</code>)</td><td><code>assets/sprites.js</code></td></tr>
+    <tr><td>Character portrait (new slot)</td><td>PNG or SVG, transparent</td><td>512 x 512 proposed</td><td><code>&lt;character-id&gt;.png</code></td><td>to be added with the retheme</td></tr>
+    <tr><td>App icon</td><td>PNG</td><td>180, 192, 512 and 32 px</td><td><code>icon-180.png</code> etc.</td><td><code>assets/</code></td></tr>
+  </tbody></table></div>
+  <h3>Figma checklist</h3>
+  <div class="sg-card"><ol style="margin:0;padding-left:20px"><li>One 512 x 512 frame per card, named with the card id from the catalogue above.</li><li>Draw inside the safe area; keep a transparent background.</li><li>Preview on the five rarity gradients and on dark and light backgrounds; check 32 px.</li><li>Export PNG at 1x, optimise if over 60 KB.</li><li>Send or commit the files; the id is added to the art list, the checklist updates, and it is published.</li></ol></div>
+</section>
+</main>
+
+<script>
+window.escapeHtml = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+</script>
+<script src="js/data-and-engine.js"></script>
+<script>
+(function () {
+  var $ = function (s, r) { return (r || document).querySelector(s); }, $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var root = document.documentElement;
+
+  /* ---- theme switch (the game's own <html data-theme>) ---- */
+  function setTheme(t) { root.setAttribute('data-theme', t); $('#sgDark').classList.toggle('on', t === 'dark'); $('#sgLight').classList.toggle('on', t === 'light'); try { localStorage.setItem('sg-theme', t); } catch (e) {} updateLive(); }
+  $('#sgDark').onclick = function () { setTheme('dark'); }; $('#sgLight').onclick = function () { setTheme('light'); };
+
+  /* ---- colour tables ---- */
+  var TOK = [
+    ['bg-top', 'Page background, top of gradient', '#1b2128', '#f3ece0'], ['bg-bottom', 'Page background, bottom', '#12161b', '#e4eee9'],
+    ['stone', 'Surfaces: cards, panels, sheets, pills', '#232b34', '#fbf7ef'], ['stone-edge', 'Borders and dividers', '#333d48', '#ddd6c5'],
+    ['water', 'Primary action fill (buttons, active tab, selected)', '#8dbccb', '#8fc4b8'], ['water-glow', 'Pressed / hover version of water', '#a6cfdb', '#a6d3c9'],
+    ['water-ink', 'Sea-glass used as text', '#7fb8c8', '#3f7f78'], ['on-water', 'Text on a water fill', '#0f2a35', '#1f4540'],
+    ['ink', 'Main text', '#e9edf1', '#4b4a46'], ['ink-soft', 'Secondary text, captions', '#a6b1bb', '#6b6a64'],
+    ['accent', 'Gold highlight: rewards, selection, level badge', '#e8cb88', '#b5832a'], ['on-accent', 'Text on an accent fill', '#3a2a08', '#ffffff'],
+    ['rc-a', 'Common card gradient, light end', '#5b9fb2', '#5aa397'], ['rc-b', 'Common card gradient, deep end', '#3f7f94', '#3f7f78'],
+    ['rare', 'Rare purple', '#9a86c9', '#9a86c9'], ['epic', 'Ultra rare blue', '#6a96c2', '#6a96c2'], ['mythic', 'Mythic rose', '#c27a9c', '#c27a9c'],
+    ['win-glow', 'Success, win, correct', '#6a9f7c', '#6a9f7c'], ['lose-glow', 'Setback, wrong', '#b17a63', '#b17a63'], ['boss-glow', 'Danger, bosses, targeting', '#b1615e', '#b1615e']
+  ];
+  var tb = $('#tokTable tbody');
+  tb.innerHTML = TOK.map(function (t) { return '<tr><td style="width:56px"><div class="sg-chip" style="background:var(--' + t[0] + ')"></div></td><td><code>--' + t[0] + '</code></td><td>' + t[1] + '</td><td class="sg-hex">' + t[2] + '</td><td class="sg-hex">' + t[3] + '</td></tr>'; }).join('') +
+    '<tr><td><div class="sg-chip" style="background:var(--track)"></div></td><td><code>--track</code></td><td>Empty part of a bar or gauge</td><td class="sg-hex">black 30%</td><td class="sg-hex">ink 14%</td></tr>' +
+    '<tr><td><div class="sg-chip" style="background:var(--board-bg)"></div></td><td><code>--board-bg</code></td><td>Faint tint for inset areas and hovers</td><td class="sg-hex">ink 6%</td><td class="sg-hex">ink 5%</td></tr>' +
+    '<tr><td><div class="sg-chip" style="background:var(--shadow)"></div></td><td><code>--shadow</code></td><td>Drop shadows</td><td class="sg-hex">black 35%</td><td class="sg-hex">ink 20%</td></tr>';
+
+  var RAR = [['common', 'Common', 'var(--rc-a) to var(--rc-b)'], ['rare', 'Rare', '#c9bce8 to #9a86c9'], ['ultra', 'Ultra rare', '#a8cbe8 to #6a96c2'], ['super', 'Super ultra rare', '#f0cf94 to var(--accent)'], ['mythic', 'Mythic', '#eaa8c4 to #c27a9c, soft pink glow']];
+  $('#rarRow').innerHTML = RAR.map(function (r) { return '<div class="sg-rar rarity-' + r[0] + '">' + r[1] + '<small>' + r[2] + '</small></div>'; }).join('');
+  $('#statusRow').innerHTML = [['Heart (life)', '#e0776a', 'Full hearts in the cellar and battles'], ['Foe gold', '#d9a441', 'Ring and star on opponent-only cards'], ['Crafted gold', '#e2b64c', 'Outline on refined cards'], ['Water glow', '#8fbccb', 'Selection ring around a chosen card'], ['Coin / Pebble teal', '#4f8f86', 'Pebble bar fill'], ['Card amber', '#d9a066', 'Cards counter fill']].map(function (s) { return '<div class="sg-card sg-sw"><div class="sg-chip" style="background:' + s[1] + '"></div><div><b>' + s[0] + '</b><small>' + s[2] + '</small><span class="sg-hex">' + s[1] + '</span></div></div>'; }).join('');
+
+  /* ---- biome palettes, read live from the stylesheet ---- */
+  var VARS = ['ground', 'ground2', 'tuft', 'path', 'path-edge', 'leaf1', 'leaf2', 'leaf3', 'pine1', 'pine2', 'trunk', 'water', 'water2', 'shore', 'wall', 'roof', 'door', 'window', 'stone', 'flower1', 'flower2'];
+  var BIOMES = [['meadow', 'Town Square'], ['bazaar', 'Market Row'], ['harbor', 'Quiet Harbor'], ['orchard', 'Hollow Garden']];
+  $('#biomes').innerHTML = BIOMES.map(function (b) { return '<div class="sg-card"><b>' + b[1] + '</b> <span class="sg-hex">data-biome="' + b[0] + '"</span><div class="town-view" data-biome="' + b[0] + '" style="margin:10px 0 0;border-radius:0;overflow:visible;background:none;--t:auto"><div class="sg-pal" data-b="' + b[0] + '"></div></div></div>'; }).join('');
+  function rgbHex(c) { var m = c.match(/\d+/g); if (!m) return c; return '#' + m.slice(0, 3).map(function (n) { return ('0' + (+n).toString(16)).slice(-2); }).join(''); }
+  function updateLive() {
+    $$('.sg-pal').forEach(function (pal) {
+      var host = pal.parentNode, cs = getComputedStyle(host), out = '';
+      VARS.forEach(function (v) { var val = cs.getPropertyValue('--' + v).trim(); if (!val) return; out += '<div style="background:' + val + '">' + v + '<br>' + (val.charAt(0) === '#' ? val : rgbHex(val)) + '</div>'; });
+      pal.innerHTML = out;
+    });
+    var r = $('#radii'); if (r && !r.dataset.done) { r.dataset.done = 1; r.innerHTML = [[8, 'mini card'], [12, 'row, battle card'], [16, 'tile, panel'], [20, 'dialog'], [28, 'sheet top'], [999, 'pill / button']].map(function (x) { return '<div style="text-align:center;font-size:.64rem;color:var(--ink-soft)"><div style="width:62px;height:62px;background:var(--water);border-radius:' + x[0] + 'px;margin:0 auto 4px"></div>' + (x[0] === 999 ? 'full' : x[0] + ' px') + '<br>' + x[1] + '</div>'; }).join(''); }
+  }
+
+  /* ---- keyword legend ---- */
+  $('#kwGrid').innerHTML = Object.keys(KW).map(function (k) { return '<div class="sg-sw"><div class="sg-chip" style="display:grid;place-items:center;font-size:1.5rem;background:var(--board-bg)">' + KW[k].icon + '</div><div><b>' + KW[k].name + '</b><small>' + KW[k].text + '</small></div></div>'; }).join('');
+
+  /* ---- sprites ---- */
+  var SPR = $$('symbol').map(function (s) { return [s.id, s.getAttribute('viewBox')]; });
+  $('#spriteGrid').innerHTML = SPR.map(function (s) { var vb = s[1].split(' '), w = +vb[2], big = w > 64, px = big ? (w > 128 ? 144 : 96) : 64, h = big ? 96 : 64; return '<div class="sg-spr" style="color:#fff"><div class="box" style="width:' + px + 'px;height:' + h + 'px;background:rgba(0,0,0,.12)"><svg width="' + px + '" height="' + h + '" viewBox="' + s[1] + '" aria-hidden="true"><use href="#' + s[0] + '"/></svg></div><code>' + s[0] + '</code><br>' + vb[2] + '×' + vb[3] + '</div>'; }).join('');
+
+  /* ---- districts ---- */
+  var FAM = {}; Object.keys(FAMILIES).forEach(function (f) { FAM[FAMILIES[f].district] = FAMILIES[f]; });
+  var BI = { square: 'meadow', market: 'bazaar', harbor: 'harbor', garden: 'orchard' };
+  $('#districts').innerHTML = Object.keys(DISTRICTS).map(function (k) { var d = DISTRICTS[k], f = FAM[k]; return '<tr><td><b>' + d.name + '</b></td><td><code>' + BI[k] + '</code></td><td>' + (f ? f.icon + ' ' + f.name : '') + '</td><td>' + d.bossIcon + ' ' + d.boss + '</td><td>unlocks at level ' + d.unlockLevel + ', ' + d.unlockWins + ' win' + (d.unlockWins === 1 ? '' : 's') + '</td></tr>'; }).join('');
+
+  /* ---- cards ---- */
+  var POOL = CARD_POOL.slice(), FOES = (typeof FOE_CARDS !== 'undefined' ? FOE_CARDS : []), TOKS = (typeof TOKEN_CARDS !== 'undefined' ? TOKEN_CARDS : []);
+  function faceStats(d) { return d.spell ? '✨ Spell' : '⚔' + d.power + ' ♥' + d.grit; }
+  function tile(d, extra) {
+    return '<span class="alm-card tile rarity-' + (d.rarity || 'rare') + (extra || '') + '" style="width:104px"><span class="ac-cost">' + d.cost + '</span><span class="ac-icon">' + cardArtHtml(d) + '</span><span class="ac-power">' + faceStats(d) + '</span><span class="ac-name">' + d.name + '</span>' + (d.kw && d.kw.length ? '<span class="ac-kw">' + d.kw.map(function (k) { return KW[k].icon; }).join(' ') + '</span>' : '') + '</span>';
+  }
+  function pick(r, spell) { return POOL.filter(function (c) { return c.rarity === r && !!c.spell === !!spell; })[0] || POOL[0]; }
+  var samples = ['common', 'rare', 'ultra', 'super', 'mythic'].map(function (r) { return pick(r, false); });
+  $('#tiles').innerHTML = samples.map(function (d) { return tile(d); }).join('');
+  $('#battle').innerHTML = samples.slice(0, 4).map(function (d) { return '<div style="width:84px;height:112px"><div class="card rarity-' + d.rarity + '">' + cardFaceHtml(d) + '</div></div>'; }).join('') + '<div style="width:84px;height:112px"><div class="card rarity-common">' + cardFaceHtml(pick('common', true)) + '</div></div>';
+  var big = [samples[0], pick('rare', true), samples[4]];
+  $('#reveals').innerHTML = big.map(function (d) { return '<div class="reveal-card rarity-' + d.rarity + (d.spell ? ' spell' : '') + '">' + cardFaceHtml(d) + '</div>'; }).join('');
+  $('#states').innerHTML = tile(samples[1], ' foil') + tile(samples[2], ' crafted') + (FOES[0] ? '<span style="position:relative;display:inline-block"><span class="card foe-card" style="display:block;border-radius:14px;overflow:visible">' + tile(FOES[0]) + '</span></span>' : '') + tile(samples[0], ' dim');
+  /* anatomy */
+  $('#anat').innerHTML = '<div class="reveal-card rarity-rare">' + cardFaceHtml(samples[1]) + '</div>' + [[1, '-30px', '3%'], [2, 'calc(100% + 8px)', '25%'], [3, 'calc(100% + 8px)', '58%'], [4, 'calc(100% + 8px)', '74%'], [5, 'calc(100% + 8px)', '90%']].map(function (p) { return '<span class="sg-pin" style="left:' + p[1] + ';top:' + p[2] + '">' + p[0] + '</span>'; }).join('');
+  /* size ladder with a stand-in creature */
+  var ART = '<svg viewBox="0 0 512 512" width="100%" height="100%" aria-hidden="true"><ellipse cx="256" cy="300" rx="150" ry="132" fill="#f6e3b4"/><ellipse cx="256" cy="330" rx="104" ry="80" fill="#fff5da"/><circle cx="206" cy="270" r="20" fill="#3a2a1c"/><circle cx="306" cy="270" r="20" fill="#3a2a1c"/><circle cx="212" cy="263" r="7" fill="#fff"/><circle cx="312" cy="263" r="7" fill="#fff"/><path d="M226 322q30 24 60 0" stroke="#3a2a1c" stroke-width="12" fill="none" stroke-linecap="round"/><path d="M256 168q-8-60 52-82 8 62-52 82z" fill="#6fae7c"/><path d="M256 168q-60-4-84-60 62-10 84 60z" fill="#4f8f64"/></svg>';
+  var SZ = [['List / battle (small)', 26], ['Battle (large phone)', 37], ['Collection tile', 30], ['Reveal / pack card', 42], ['Inspect sheet', 80]];
+  $('#ladder tbody').innerHTML = SZ.map(function (z) { return '<tr><td>' + z[0] + '</td><td class="sg-hex">' + z[1] + ' px</td>' + ['common', 'rare', 'ultra', 'super', 'mythic'].map(function (r) { return '<td><div class="rarity-' + r + '" style="display:inline-block;padding:6px;border-radius:12px"><div style="width:' + z[1] + 'px;height:' + z[1] + 'px">' + ART + '</div></div></td>'; }).join('') + '</tr>'; }).join('');
+
+  /* catalogue */
+  var ITEMS = POOL.map(function (c) { return { d: c, cat: c.spell ? 'spell' : 'creature', fam: (typeof CARD_FAMILY !== 'undefined' && CARD_FAMILY[c.id]) || '' }; })
+    .concat(FOES.map(function (c) { return { d: c, cat: 'opponent', fam: '' }; })).concat(TOKS.map(function (c) { return { d: c, cat: 'token', fam: '' }; }));
+  var F = { rarity: 'all', q: '' };
+  var FILT = [['all', 'All'], ['common', 'Common'], ['rare', 'Rare'], ['ultra', 'Ultra'], ['super', 'Super'], ['mythic', 'Mythic'], ['spell', 'Spells'], ['opponent', 'Opponent-only'], ['token', 'Tokens']];
+  $('#filters').innerHTML = FILT.map(function (f) { return '<button type="button" class="sg-fb' + (f[0] === 'all' ? ' on' : '') + '" data-f="' + f[0] + '">' + f[1] + '</button>'; }).join('') + '<input type="search" id="q" placeholder="Search name or id" aria-label="Search cards">';
+  function drawCat() {
+    var list = ITEMS.filter(function (it) {
+      var d = it.d, ok = F.rarity === 'all' || (F.rarity === 'spell' ? it.cat === 'spell' : F.rarity === 'opponent' ? it.cat === 'opponent' : F.rarity === 'token' ? it.cat === 'token' : (d.rarity === F.rarity && it.cat !== 'opponent' && it.cat !== 'token'));
+      return ok && (!F.q || (d.name + ' ' + d.id).toLowerCase().indexOf(F.q) >= 0);
+    });
+    $('#catalogue').innerHTML = list.map(function (it) { var d = it.d; return '<div class="sg-cat-item">' + tile(d) + '<code data-copy="' + d.id + '.png" title="Click to copy">' + d.id + '.png</code>' + (it.fam ? '<small class="sg-note">' + (FAMILIES[it.fam] ? FAMILIES[it.fam].name : it.fam) + '</small>' : '') + '</div>'; }).join('');
+    $('#catCount').textContent = list.length + ' of ' + ITEMS.length + ' cards shown.';
+  }
+  $('#filters').addEventListener('click', function (e) { var b = e.target.closest('[data-f]'); if (!b) return; F.rarity = b.dataset.f; $$('.sg-fb').forEach(function (x) { x.classList.toggle('on', x === b); }); drawCat(); });
+  $('#q').addEventListener('input', function (e) { F.q = e.target.value.trim().toLowerCase(); drawCat(); });
+  $('#catalogue').addEventListener('click', function (e) { var c = e.target.closest('[data-copy]'); if (!c) return; try { navigator.clipboard.writeText(c.dataset.copy); c.textContent = 'copied'; setTimeout(function () { c.textContent = c.dataset.copy; }, 900); } catch (er) {} });
+  drawCat();
+
+  /* ---- screenshots ---- */
+  var SH = [['town', 'Town', 'The floating top bar, glass pills and the dock over the live map.'], ['cards', 'Cards tab', 'Tiles on the rarity gradients, segmented control, filter row.'], ['rewards', 'Rewards', 'Rows, progress bars and gold highlights.'], ['journal', 'Journal', 'Serif titles, rows and the Today page.'], ['character', 'Character', 'Stage with backdrop, avatar and companion.'], ['building', "Building scene", 'Stage, brown sign, speech bubble and the action sheet.'], ['fishing', 'Fishing', 'Full-bleed scene: bank, water, silhouettes and a glass panel.'], ['battle', 'Battle', 'Tabletop board, card fan and the keep-hand dialog.']];
+  $('#shots').innerHTML = SH.map(function (s) { return '<div class="sg-shot"><figure><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><img loading="lazy" src="assets/styleguide/' + s[0] + '-dark.jpg" alt="' + s[1] + ' (dark)"><img loading="lazy" src="assets/styleguide/' + s[0] + '-light.jpg" alt="' + s[1] + ' (light)"></div><figcaption><b>' + s[1] + '</b>' + s[2] + '</figcaption></figure></div>'; }).join('');
+
+  /* ---- motion demo ---- */
+  $('#popDemo').onclick = function () { var b = $('#popBox'); b.style.animation = 'none'; void b.offsetWidth; b.style.animation = 'pop-in .4s cubic-bezier(.34,1.56,.64,1)'; };
+
+  var saved; try { saved = localStorage.getItem('sg-theme'); } catch (e) {}
+  setTheme(saved === 'light' ? 'light' : 'dark');
+})();
+</script>
+</body>
+</html>
