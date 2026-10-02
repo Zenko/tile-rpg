@@ -3,6 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<script>
+// Android home-screen (standalone) installs can report a too-tall viewport for a moment after a reload, so 100dvh made the
+// whole app taller than the visible screen and pushed the bottom menu off it until the app was closed. Measure the visible
+// height ourselves into --app-h and keep it fresh; every full-height rule in css/base.css reads it (falling back to 100dvh).
+(function () {
+  var root = document.documentElement, vv = window.visualViewport;
+  function fit() {
+    var h = Math.round((vv && vv.height) || window.innerHeight || 0);
+    if (h > 200) root.style.setProperty('--app-h', h + 'px');
+  }
+  fit();
+  ['resize', 'orientationchange', 'pageshow', 'focus'].forEach(function (e) { window.addEventListener(e, fit); });
+  document.addEventListener('visibilitychange', fit);
+  if (vv) vv.addEventListener('resize', fit);
+  [50, 250, 700, 1500, 3000].forEach(function (t) { setTimeout(fit, t); });   // the real height can arrive late after a reload
+})();
+</script>
 <title>Tile RPG: a calm card-collecting town</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

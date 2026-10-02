@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta ${RELEASES[0].n} (build $
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'fixed', x: 'The bottom menu no longer slides off the screen after tapping Refresh on the update banner (Android home-screen installs): the app now measures the visible screen height itself.' },
   { t:'new', x: "Tock's Tinker Stall now has a bait counter: daisies, fresh fish and an angler's mix for Pebbles. Card sleeves are sold only at Zeph's Card Shop." },
   { t:'better', x: 'Card sleeves are a grid of big card-back previews with clear Wearing, Wear and price labels, matching the other building screens.' },
   { t:'better', x: "Social is redesigned: each tester is a card with their avatar, level, location and a green dot when they're playing, and a line at the top tells you whether you're visible." },
