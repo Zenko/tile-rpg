@@ -944,3 +944,5 @@ html.calm .cl-cell.rat, html.cozy .cl-cell.rat { animation: none; }
 .di-pass b { display: block; font-family: var(--f-display); font-size: 1rem; }
 .di-pass span { display: block; font-size: .82rem; color: var(--ink-soft); }
 .di-pass.dim { opacity: .6; background: transparent; border-style: dashed; border-color: var(--stone-edge); }
+.di-pass small { font-family: var(--f-ui); font-weight: 700; font-size: .68rem; color: var(--ink-soft); letter-spacing: .04em; margin-left: 4px; }
+.di-arch .di-pass + .di-pass { margin-top: 6px; }

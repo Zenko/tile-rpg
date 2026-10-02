@@ -46,4 +46,17 @@ module.exports = async (page, assert) => {
   });
   assert.strictEqual(d.p, 'stone'); assert.strictEqual(d.none, null);
   assert.ok(d.text.includes('Bedrock'), 'the Deck screen names the passive');
+  // the smaller 6-card step: once per match, and the tier is read from the deck
+  const m = await page.evaluate(() => {
+    const grove = Object.keys(CARD_FAMILY).filter(id => CARD_FAMILY[id] === 'grove' && cardDef(id) && !cardDef(id).spell && !cardDef(id).exclusive);
+    const rest = CARD_POOL.filter(c => CARD_FAMILY[c.id] && CARD_FAMILY[c.id] !== 'grove' && !c.spell && !c.exclusive).slice(0, 6).map(c => c.id);
+    state.deck = grove.slice(0, 6).concat(rest); const tier6 = archetypeTier(); state.deck = grove.slice(0, 8).concat(rest.slice(0, 4)); const tier8 = archetypeTier(); state.deck = grove.slice(0, 6); const short = archetypeTier();
+    const G = BattleEngine.newGame(Array(12).fill(grove[0]), Array(12).fill(grove[0]), () => 0.5, { first: 0, passive: ['grove', null], passiveTier: [1, null] });
+    BattleEngine.startTurn(G); const me = G.p[0]; me.spirit = 5; me.energy = 10;
+    const a = me.hand.find(c => !c.spell); BattleEngine.playCard(G, 0, a.uid); const afterOne = me.spirit;
+    const b = me.hand.find(c => !c.spell); if (b) BattleEngine.playCard(G, 0, b.uid);
+    return { tier6, tier8, short, afterOne, afterTwo: me.spirit };
+  });
+  assert.strictEqual(m.tier6, 1); assert.strictEqual(m.tier8, 2); assert.strictEqual(m.short, 0, 'an unfinished deck has no passive');
+  assert.strictEqual(m.afterOne, 8, 'Seedling restores 3 Spirit'); assert.strictEqual(m.afterTwo, 8, 'only once per match');
 };

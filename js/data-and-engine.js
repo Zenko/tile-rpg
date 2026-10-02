@@ -501,9 +501,17 @@ const BattleEngine = (function () {
     tide:  { icon: '🌊', name: 'Undertow', text: 'The first Tide card you play each turn draws a card, if you hold 4 or fewer.' },
     wind:  { icon: '🪶', name: 'Tailwind', text: 'Swift Wind cards costing 2 or less get +1 power.' }
   };
+  // The smaller step at 6-7 cards of a family (opts.passiveTier = [1|2, ...]; 2 is the default): the same idea, once per match.
+  const MINORS = {
+    grove: { icon: '🌱', name: 'Seedling', text: 'Your first Grove card each match restores 3 Spirit.' },
+    stone: { icon: '⛰️', name: 'Footing',  text: 'Your first Stone card costing 3 or more enters with +1 health.' },
+    tide:  { icon: '🌊', name: 'Ebb',      text: 'Your first Tide card costing 3 or more refunds 1 Energy.' },
+    wind:  { icon: '🪶', name: 'Breeze',   text: 'Your first Swift Wind card each match gets +1 power.' }
+  };
+  const MINOR_RULES = { groveHeal: 3, stoneMinCost: 3, tideMinCost: 3 };   // tuned by simulation
   const PASSIVE_RULES = { windMaxCost: 2, stoneMinCost: 4 };   // Wind only touches Swift cards up to this cost (tuned by simulation)
   function applyPassiveBuild(pl) {
-    if (!pl.passive) return;
+    if (!pl.passive || pl.passiveTier === 1) return;
     pl.deck.forEach(c => {
       if (c.spell || familyOf(c.id) !== pl.passive) return;
       if (pl.passive === 'wind' && c.kw.includes('swift') && c.cost <= PASSIVE_RULES.windMaxCost) c.power++;
@@ -511,6 +519,18 @@ const BattleEngine = (function () {
   }
   function passiveOnPlay(G, who, c) {
     const me = G.p[who]; if (!me.passive || familyOf(c.id) !== me.passive) return;
+    if (me.passiveTier === 1) {
+      if (me.minorUsed) return;
+      if (me.passive === 'wind' && !(c.kw.includes('swift') && c.cost <= PASSIVE_RULES.windMaxCost)) return;
+      if (me.passive === 'stone' && c.cost < MINOR_RULES.stoneMinCost) return;
+      if (me.passive === 'tide' && c.cost < MINOR_RULES.tideMinCost) return;
+      me.minorUsed = true;
+      if (me.passive === 'grove') { const h = Math.min(MINOR_RULES.groveHeal, me.maxSpirit - me.spirit); if (h > 0) { me.spirit += h; emit(G, 'spirit', { who, delta: h }); } }
+      else if (me.passive === 'stone') { c.grit++; c.hp++; emit(G, 'buff', { who, uid: c.uid, amt: 1 }); }
+      else if (me.passive === 'tide') me.energy = Math.min(me.maxEnergy, me.energy + 1);
+      else if (me.passive === 'wind') { c.power++; emit(G, 'buff', { who, uid: c.uid, amt: 1 }); }
+      return;
+    }
     if (me.passive === 'grove') { const h = Math.min(1, me.maxSpirit - me.spirit); if (h > 0) { me.spirit += h; emit(G, 'spirit', { who, delta: h }); } }
     else if (me.passive === 'stone') { if (!me.stoneShielded && !c.shield && c.cost >= PASSIVE_RULES.stoneMinCost) { me.stoneShielded = true; c.shield = true; emit(G, 'shieldup', { who, uid: c.uid }); } }
     else if (me.passive === 'tide' && !me.tideDrew && me.hand.length <= 4) { me.tideDrew = true; draw(G, me); }
@@ -646,7 +666,7 @@ const BattleEngine = (function () {
     G.uid = uid;                                   // later cards (Seedlings) keep numbering from here
     (opts.knack || []).forEach((id, i) => { if (id && KNACKS[id]) G.p[i].knack = id; });
     (opts.fate || []).forEach((id, i) => { if (id && FATES[id]) G.p[i].fate = id; });
-    (opts.passive || []).forEach((f, i) => { if (f && PASSIVES[f]) { G.p[i].passive = f; applyPassiveBuild(G.p[i]); } });
+    (opts.passive || []).forEach((f, i) => { if (f && PASSIVES[f]) { G.p[i].passive = f; G.p[i].passiveTier = (opts.passiveTier || [])[i] === 1 ? 1 : 2; applyPassiveBuild(G.p[i]); } });
     G.p.forEach((pl, i) => { const n = RULES.hand + (i !== first ? 1 : 0); for (let k = 0; k < n; k++) draw(G, pl, true); });
     (opts.spread || []).forEach((ids, i) => { if (ids) layoutSpread(G, i, ids); });
     // opts.startSpirit: begin below full (the Festival Cup carries your Spirit from one round to the next)
@@ -1033,7 +1053,7 @@ const BattleEngine = (function () {
     return deck;
   }
 
-  return { RULES, KEYWORDS, SPELLS, TWISTS, KNACKS, knackReady, setKnack, useKnack, FATES, fateReady, setFate, useFate, spreadBonus, layoutSpread, SPREAD_RULES, PASSIVES, PASSIVE_RULES, MAX_KEYWORDS, defOf, baseIdOf, variantId, suggestDeck, makeCard, familyOf, newGame, startTurn, canPlay, playCard, spellNeedsTarget, legalTargets, attack, endTurn, forfeit, boost, mulligan, aiNextAction, applyAction, aiTurn, guards, valueOf };
+  return { RULES, KEYWORDS, SPELLS, TWISTS, KNACKS, knackReady, setKnack, useKnack, FATES, fateReady, setFate, useFate, spreadBonus, layoutSpread, SPREAD_RULES, PASSIVES, MINORS, PASSIVE_RULES, MINOR_RULES, MAX_KEYWORDS, defOf, baseIdOf, variantId, suggestDeck, makeCard, familyOf, newGame, startTurn, canPlay, playCard, spellNeedsTarget, legalTargets, attack, endTurn, forfeit, boost, mulligan, aiNextAction, applyAction, aiTurn, guards, valueOf };
 })();
 /* END BATTLE ENGINE */
 
