@@ -6,6 +6,8 @@ module.exports = async (page, assert) => {
   assert.ok(r.cards >= r.pool, 'catalogue should list every card, got ' + r.cards + ' of ' + r.pool);
   assert.ok(r.sprites >= 24 && r.tokens >= 20, 'sprites and tokens render: ' + JSON.stringify(r));
   assert.strictEqual(r.rar, 5); assert.strictEqual(r.fam, 4); assert.strictEqual(r.kw, r.kwTotal); assert.strictEqual(r.comp, 6); assert.strictEqual(r.prob, 7); assert.strictEqual(r.backs, 7);
+  const ic = await page.evaluate(() => ({ cards: document.querySelectorAll('#icGrid .sg-ic').length, total: ICON_MANIFEST.icons.length }));
+  assert.ok(ic.total > 300 && ic.cards === ic.total, 'the style guide lists every inventoried icon: ' + JSON.stringify(ic));
   await page.click('#sgLight'); assert.strictEqual(await page.evaluate(() => document.documentElement.dataset.theme), 'light');
   // the checker: a 512 px transparent PNG passes, a 400 px opaque one fails
   const png = (w, fill) => page.evaluate(([w, fill]) => { const c = document.createElement('canvas'); c.width = c.height = w; const x = c.getContext('2d'); x.fillStyle = '#e8955a'; if (fill) x.fillRect(0, 0, w, w); else { x.beginPath(); x.arc(w / 2, w / 2, w * 0.28, 0, 7); x.fill(); } return c.toDataURL('image/png').split(',')[1]; }, [w, fill]);

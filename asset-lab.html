@@ -55,6 +55,10 @@ select.lab-btn, input.lab-btn { font-weight: 600; }
 .av { border-radius: 50%; overflow: hidden; background: var(--stone); object-fit: cover; display: block; }
 .kwi { width: 1em; height: 1em; object-fit: contain; vertical-align: -.14em; display: inline-block; filter: drop-shadow(0 .035em .05em var(--art-sh)); }
 html.lab-noshadow .kwi { filter: none !important; }
+.icon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; }
+.ic { font: inherit; text-align: center; background: var(--stone); border: 1px solid var(--stone-edge); border-radius: 14px; padding: 10px 6px 8px; cursor: pointer; color: var(--ink); display: flex; flex-direction: column; align-items: center; gap: 2px; } .ic:hover { border-color: var(--water); } .ic.has { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--stone)); }
+.ic .pair { display: flex; gap: 6px; align-items: center; height: 40px; } .ic .g { font-size: 30px; line-height: 1; } .ic img.nw { width: 34px; height: 34px; object-fit: contain; } .ic b { font-size: .7rem; line-height: 1.2; } .ic code { font-size: .56rem; word-break: break-all; } .ic small { color: var(--ink-soft); font-size: .62rem; }
+.lab-dlg { border: 1px solid var(--stone-edge); border-radius: 22px; background: var(--stone); color: var(--ink); padding: 22px; width: min(460px, calc(100% - 28px)); text-align: center; } .lab-dlg::backdrop { background: var(--overlay-bg); } .lab-dlg dl { text-align: left; margin: 12px 0 0; font-size: .8rem; } .lab-dlg dt { color: var(--ink-soft); font-weight: 700; margin-top: 6px; } .lab-dlg dd { margin: 0; }
 .empty { padding: 26px; text-align: center; color: var(--ink-soft); border: 1px dashed var(--stone-edge); border-radius: 16px; font-size: .88rem; }
 .stick { position: sticky; top: 64px; z-index: 5; }
 .toast-lab { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); background: var(--ink); color: var(--stone); padding: 9px 18px; border-radius: 999px; font-size: .84rem; font-weight: 700; z-index: 90; opacity: 0; transition: opacity .25s; pointer-events: none; } .toast-lab.show { opacity: 1; }
@@ -67,7 +71,7 @@ html.lab-noshadow .card-art-img, html.lab-noshadow .art-shadow, html.lab-noshado
 
 <header class="lab-top"><div class="lab-top-in">
   <div class="lab-brand">Asset Lab</div>
-  <nav class="lab-nav"><a href="#library">Library</a><a href="#card">One card</a><a href="#screens">In the game</a><a href="#set">Whole set</a><a href="#keywords">Keyword icons</a><a href="#town">Town sprites</a><a href="#other">Portraits &amp; icon</a><a href="#export">Hand-off</a></nav>
+  <nav class="lab-nav"><a href="#library">Library</a><a href="#card">One card</a><a href="#screens">In the game</a><a href="#set">Whole set</a><a href="#keywords">Keyword icons</a><a href="#icons">All icons</a><a href="#town">Town sprites</a><a href="#other">Portraits &amp; icon</a><a href="#export">Hand-off</a></nav>
   <span class="lab-seg" id="shSeg" role="group" aria-label="Game drop shadow on art" title="The game adds a faint drop shadow to card art. Switch it off to see the raw art."><button id="shOn" class="on" type="button">Shadow on</button><button id="shOff" type="button">Off</button></span>
   <span class="lab-seg" id="themeSeg" role="group" aria-label="Preview theme"><button id="thDark" class="on" type="button">Dark</button><button id="thLight" type="button">Light</button></span>
 </div></header>
@@ -120,11 +124,36 @@ html.lab-noshadow .card-art-img, html.lab-noshadow .art-shadow, html.lab-noshado
   <p class="lab-lead">The 13 small rule icons shown on every card (Guard, Swift, Mend and so on). Name a file <code>kw-guard.png</code> (or just <code>guard.png</code>) and it replaces that emoji everywhere in this page: the card faces, the mock screens and the lists. Aim for <b>128 x 128 px</b>, transparent, a single bold shape: they are shown at only 12 to 20 px. <b>Note:</b> the game itself still draws these as emoji; once you are happy, I add image support to the game, as was done for card art.</p>
   <div id="kwLab"></div>
 </section>
+
+<!-- ALL ICONS -->
+<section class="lab-sec" id="icons">
+  <h2>6. All icons</h2>
+  <p class="lab-lead">Every icon the game uses, found by scanning its code: <b id="icCount"></b> different ones, from the dock tabs to the smallest list bullet. Click any icon to replace it. A replacement is swapped in <b>everywhere that icon appears</b>, so one image restyles every screen. Name a file <code>icon-&lt;name&gt;.png</code> (the name is shown on each icon, for example <code>icon-wrapped-present.png</code>), or use the Upload button on an icon. Aim for <b>128 x 128 px</b>, transparent, bold and simple: most are shown at 12 to 24 px.</p>
+  <div class="lab-card" style="margin-bottom:14px">
+    <div class="lab-demo" style="align-items:center;gap:10px">
+      <input id="icQ" class="lab-btn" type="search" placeholder="Search icons (name, area or the emoji)" style="min-width:230px">
+      <select id="icArea" class="lab-btn"></select>
+      <select id="icSort" class="lab-btn"><option value="use">Most used first</option><option value="name">A to Z</option></select>
+      <button class="lab-btn" id="icOnly" type="button">Only replaced</button><button class="lab-btn" id="icSym" type="button">Hide text symbols</button>
+    </div>
+    <p class="lab-note" id="icStat"></p>
+  </div>
+  <div class="icon-grid" id="iconGrid"></div>
+
+  <h3 class="lab-label" style="margin:30px 0 8px">Try it in the real game</h3>
+  <div class="lab-card" id="gamePrev"></div>
+
+  <h3 class="lab-label" style="margin:30px 0 8px">UI sampler (the swap applies live)</h3>
+  <p class="lab-note" style="margin:0 0 12px">Common screens built from the game's real components and icons. Replace an icon above and watch it change here.</p>
+  <div class="lab-grid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr));align-items:start" id="sampler"></div>
+</section>
 </div>
+<dialog id="icDlg" class="lab-dlg"><form method="dialog"><div id="icDlgBody"></div><div class="lab-demo" style="justify-content:center;margin-top:14px"><button class="lab-btn" id="icUp" type="button">Upload replacement</button><button class="lab-btn danger" id="icDel" type="button">Remove replacement</button><button class="lab-btn on" value="close">Close</button></div></form><input type="file" id="icFile" accept="image/png,image/svg+xml,image/webp" hidden></dialog>
+<datalist id="iconList"></datalist>
 
 <!-- TOWN -->
 <section class="lab-sec" id="town">
-  <h2>6. Town sprites</h2>
+  <h2>7. Town sprites</h2>
   <p class="lab-lead">Props, trees, ground pieces and buildings in a small town scene using the game's own district colours. Upload a file named after a sprite id (<code id="spriteIds"></code>) as SVG or PNG to swap it in. Props are 64 x 64, buildings 128 x 128 (bakery 192 x 128).</p>
   <div class="lab-demo" style="align-items:center;margin-bottom:12px"><span class="lab-seg" id="biomeSeg"></span></div>
   <div class="lab-card" style="overflow-x:auto"><div id="townScene"></div></div>
@@ -133,7 +162,7 @@ html.lab-noshadow .card-art-img, html.lab-noshadow .art-shadow, html.lab-noshado
 
 <!-- OTHER -->
 <section class="lab-sec" id="other">
-  <h2>7. Portraits and app icon</h2>
+  <h2>8. Portraits and app icon</h2>
   <p class="lab-lead">The game has no portrait slot yet (characters are emoji), so this previews any image you pick in the places a character appears. It also shows how an image would look as the app icon.</p>
   <div class="lab-demo" style="align-items:center;margin-bottom:12px"><label class="lab-note" style="margin:0" for="otherPick">Image</label><select id="otherPick" class="lab-btn" style="min-width:240px"></select></div>
   <div id="otherOut"></div>
@@ -141,7 +170,7 @@ html.lab-noshadow .card-art-img, html.lab-noshadow .art-shadow, html.lab-noshado
 
 <!-- EXPORT -->
 <section class="lab-sec" id="export">
-  <h2>8. Hand-off</h2>
+  <h2>9. Hand-off</h2>
   <p class="lab-lead">When you are happy: copy this list and send it to me with the files (or commit the PNGs into <code>assets/cards/</code>). I add the ids to the game's art list, regenerate the checklist and publish.</p>
   <div class="lab-card"><div class="lab-label">Cards that pass every check</div><pre id="exp" style="white-space:pre-wrap;word-break:break-all;margin:0;font-size:.8rem"></pre><div class="lab-demo" style="margin-top:12px"><button class="lab-btn" id="copyExp" type="button">Copy</button><button class="lab-btn" id="dlReport" type="button">Download report (.md)</button></div>
   <p class="lab-note" id="expNote"></p></div>
@@ -153,6 +182,9 @@ html.lab-noshadow .card-art-img, html.lab-noshadow .art-shadow, html.lab-noshado
 window.escapeHtml = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
 </script>
 <script src="js/data-and-engine.js"></script>
+<script>window.ICON_SWAP_NO_AUTOLOAD = true;</script>
+<script src="js/icon-swap.js"></script>
+<script src="assets/icons/manifest.js"></script>
 <script>
 (function () {
   var $ = function (s, r) { return (r || document).querySelector(s); }, $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
@@ -161,6 +193,9 @@ window.escapeHtml = function (s) { return String(s).replace(/[&<>"]/g, function 
   var ALL = POOL.concat(FOES, TOKS), BYID = {}; ALL.forEach(function (c) { BYID[c.id] = c; });
   var ORIG = {}; ALL.forEach(function (c) { ORIG[c.id] = c.art; });
   var KWIDS = Object.keys(KW), ORIGKW = {}; KWIDS.forEach(function (k) { ORIGKW[k] = KW[k].icon; });
+  var MAN = (window.ICON_MANIFEST && window.ICON_MANIFEST.icons) || [], IC = {}, SLUG2K = {}; MAN.forEach(function (i) { IC[i.k] = i; SLUG2K[i.slug] = i.k; });
+  $('#iconList').innerHTML = MAN.map(function (i) { return '<option value="' + i.slug + '">' + i.g + ' ' + i.name + '</option>'; }).join('');
+  var ICONMAP = {}, KWMAP = {};
   var SPRITES = $$('symbol').map(function (s) { return { id: s.id, vb: s.getAttribute('viewBox').split(' ').map(Number) }; }), SPR = {}; SPRITES.forEach(function (s) { SPR[s.id] = s; });
   $('#spriteIds').textContent = SPRITES.map(function (s) { return s.id; }).join(', ');
   function famOf(id) { return (typeof CARD_FAMILY !== 'undefined' && CARD_FAMILY[id]) || ''; }
@@ -169,7 +204,8 @@ window.escapeHtml = function (s) { return String(s).replace(/[&<>"]/g, function 
   /* ---------- state: the library (name -> record) ---------- */
   var LIB = {}, sel = POOL[0].id;
   function baseName(n) { return n.replace(/\.[^.]+$/, '').toLowerCase().replace(/\s+/g, '-'); }
-  function targetOf(r) { var k = r.assign || baseName(r.name); if (BYID[k]) return { kind: 'card', id: k }; if (SPR[k]) return { kind: 'sprite', id: k }; var kk = k.replace(/^kw-/, ''); if (KW[kk]) return { kind: 'kw', id: kk }; return null; }
+  function iconKey(b) { var x = b.replace(/^icon-/, ''); return SLUG2K[x] || (IC[x] ? x : null); }
+  function targetOf(r) { var k = r.assign || baseName(r.name), ik = /^icon-/.test(k) ? iconKey(k) : null; if (ik) return { kind: 'icon', id: ik }; if (BYID[k]) return { kind: 'card', id: k }; if (SPR[k]) return { kind: 'sprite', id: k }; var kk = k.replace(/^kw-/, ''); if (KW[kk]) return { kind: 'kw', id: kk }; ik = iconKey(k); return ik ? { kind: 'icon', id: ik } : null; }
 
   /* ---------- IndexedDB (best effort) ---------- */
   var db = null;
@@ -182,7 +218,7 @@ window.escapeHtml = function (s) { return String(s).replace(/[&<>"]/g, function 
     return new Promise(function (res) {
       var img = new Image(), info = [], kb = rec.blob.size / 1024, vec = /svg/.test(rec.blob.type) || /\.svg$/i.test(rec.name);
       img.onload = function () {
-        var w = img.naturalWidth, h = img.naturalHeight, t = targetOf(rec), isCard = !t || t.kind === 'card', isKw = !!t && t.kind === 'kw';
+        var w = img.naturalWidth, h = img.naturalHeight, t = targetOf(rec), isCard = !t || t.kind === 'card', isKw = !!t && (t.kind === 'kw' || t.kind === 'icon');
         if (vec) info.push(['warn', 'SVG: fine for town sprites; cards need a 512 x 512 PNG']);
         else if (isKw) info.push([w === h && w >= 64 ? 'ok' : 'warn', 'Size ' + w + ' x ' + h + (w === h && w >= 64 ? '' : ' (aim for a square, 128 x 128)')]);
         else if (isCard) info.push([w === 512 && h === 512 ? 'ok' : 'bad', 'Size ' + w + ' x ' + h + (w === 512 && h === 512 ? '' : ' (needs 512 x 512)')]);
@@ -226,8 +262,9 @@ window.escapeHtml = function (s) { return String(s).replace(/[&<>"]/g, function 
   var SPRITE_OVR = {};
   function applyOverrides() {
     ALL.forEach(function (c) { if (ORIG[c.id]) c.art = ORIG[c.id]; else delete c.art; });
-    SPRITE_OVR = {}; KWIDS.forEach(function (k) { KW[k].icon = ORIGKW[k]; });
-    Object.keys(LIB).forEach(function (k) { var t = targetOf(LIB[k]); if (!t) return; if (t.kind === 'card') BYID[t.id].art = LIB[k].url; else if (t.kind === 'kw') KW[t.id].icon = '<img class="kwi" src="' + LIB[k].url + '" alt="' + KW[t.id].name + '">'; else SPRITE_OVR[t.id] = LIB[k].url; });
+    SPRITE_OVR = {}; ICONMAP = {}; KWMAP = {};
+    Object.keys(LIB).forEach(function (k) { var t = targetOf(LIB[k]); if (!t) return; var u = LIB[k].url; if (t.kind === 'card') BYID[t.id].art = u; else if (t.kind === 'kw') KWMAP[t.id] = u; else if (t.kind === 'icon') ICONMAP[t.id] = u; else SPRITE_OVR[t.id] = u; });
+    IconSwap.restoreAll(); IconSwap.configure({ map: ICONMAP, kw: KWMAP });
   }
   function hasArt(id) { return !!BYID[id] && BYID[id].art && BYID[id].art !== ORIG[id]; }
 
@@ -248,8 +285,8 @@ window.escapeHtml = function (s) { return String(s).replace(/[&<>"]/g, function 
     $('#libCount').textContent = names.length + ' file' + (names.length === 1 ? '' : 's') + ' · ' + names.filter(function (n) { return targetOf(LIB[n]); }).length + ' matched';
     var opts = '<option value="">Assign to a card or sprite…</option><optgroup label="Cards">' + ALL.map(function (c) { return '<option value="' + c.id + '">' + c.name + ' (' + c.id + ')</option>'; }).join('') + '</optgroup><optgroup label="Keyword icons">' + KWIDS.map(function (k) { return '<option value="kw-' + k + '">' + KW[k].name + '</option>'; }).join('') + '</optgroup><optgroup label="Sprites">' + SPRITES.map(function (s) { return '<option value="' + s.id + '">' + s.id + '</option>'; }).join('') + '</optgroup>';
     $('#lib').innerHTML = '<thead><tr><th></th><th>File</th><th>Matched to</th><th>Checks</th><th></th></tr></thead><tbody>' + names.map(function (n) {
-      var r = LIB[n], t = targetOf(r), st = status(r), tn = t ? (t.kind === 'card' ? BYID[t.id].name + ' · card' : t.kind === 'kw' ? KW[t.id].name + ' · keyword icon' : t.id + ' · sprite') : '';
-      return '<tr data-n="' + escapeHtml(n) + '"><td><img class="lab-thumb" src="' + r.url + '" alt=""></td><td><code>' + escapeHtml(n) + '</code><div class="lab-note" style="margin:2px 0 0">' + r.w + ' x ' + r.h + ' · ' + (r.blob.size / 1024).toFixed(1) + ' KB</div></td><td>' + (t ? '<span class="pill ok">' + escapeHtml(tn) + '</span>' : '<select class="lab-btn" data-assign>' + opts + '</select>') + (t && r.assign ? ' <button class="lab-btn" data-unassign type="button">Unassign</button>' : '') + '</td><td><ul class="lab-checks">' + r.info.map(function (i) { return '<li class="' + i[0] + '">' + escapeHtml(i[1]) + '</li>'; }).join('') + '</ul></td><td>' + (t && (t.kind === 'card' || t.kind === 'kw') ? '<button class="lab-btn" data-show type="button">Preview</button> ' : '') + '<button class="lab-btn danger" data-del type="button">Remove</button></td></tr>';
+      var r = LIB[n], t = targetOf(r), st = status(r), tn = t ? (t.kind === 'card' ? BYID[t.id].name + ' · card' : t.kind === 'kw' ? KW[t.id].name + ' · keyword icon' : t.kind === 'icon' ? IC[t.id].g + ' ' + IC[t.id].name + ' · icon' : t.id + ' · sprite') : '';
+      return '<tr data-n="' + escapeHtml(n) + '"><td><img class="lab-thumb" src="' + r.url + '" alt=""></td><td><code>' + escapeHtml(n) + '</code><div class="lab-note" style="margin:2px 0 0">' + r.w + ' x ' + r.h + ' · ' + (r.blob.size / 1024).toFixed(1) + ' KB</div></td><td>' + (t ? '<span class="pill ok">' + escapeHtml(tn) + '</span>' : '<select class="lab-btn" data-assign>' + opts + '</select><input class="lab-btn" data-assign-icon list="iconList" placeholder="…or type an icon name" style="width:170px;margin-top:6px">') + (t && r.assign ? ' <button class="lab-btn" data-unassign type="button">Unassign</button>' : '') + '</td><td><ul class="lab-checks">' + r.info.map(function (i) { return '<li class="' + i[0] + '">' + escapeHtml(i[1]) + '</li>'; }).join('') + '</ul></td><td>' + (t && (t.kind === 'card' || t.kind === 'kw' || t.kind === 'icon') ? '<button class="lab-btn" data-show type="button">Preview</button> ' : '') + '<button class="lab-btn danger" data-del type="button">Remove</button></td></tr>';
     }).join('') + '</tbody>';
   }
 
@@ -311,21 +348,81 @@ window.escapeHtml = function (s) { return String(s).replace(/[&<>"]/g, function 
   }
 
   /* ---------- 5. keyword icons ---------- */
-  function kwHas(k) { return KW[k].icon !== ORIGKW[k]; }
+  function kwHas(k) { return !!KWMAP[k]; }
   function kwImgOf(k, px, orig) { return orig ? '<span style="font-size:' + px + 'px;line-height:1;display:inline-block">' + ORIGKW[k] + '</span>' : '<span style="font-size:' + px + 'px;line-height:1;display:inline-block">' + KW[k].icon + '</span>'; }
   function renderKeywords() {
     var n = KWIDS.filter(kwHas).length, H = [];
     var FACES = ['dark', 'light'];
     H.push('<div class="lab-card lab-tw"><div class="lab-label">All 13 · today (emoji) and new · ' + n + ' replaced</div><table class="lab-t"><thead><tr><th>Keyword</th><th>Today</th><th>New at 12 / 14 / 16 / 20 / 24 / 32 px</th><th>On a card</th><th>In a rule line</th></tr></thead><tbody>' + KWIDS.map(function (k) {
       var ex = POOL.filter(function (c) { return (c.kw || []).indexOf(k) >= 0; })[0];
-      return '<tr><td><b>' + KW[k].name + '</b>' + (kwHas(k) ? ' <span class="pill ok">new</span>' : '') + '<div class="lab-note" style="margin:2px 0 0"><code>kw-' + k + '.png</code></div></td><td style="font-size:1.6rem">' + ORIGKW[k] + '</td><td>' + (kwHas(k) ? [12, 14, 16, 20, 24, 32].map(function (px) { return '<span style="display:inline-block;margin-right:8px;padding:4px;border-radius:8px;background:var(--board-bg)">' + kwImgOf(k, px) + '</span>'; }).join('') : '<span class="lab-note">upload kw-' + k + '.png</span>') + '</td><td>' + (ex ? '<div class="lab-demo" style="gap:8px;align-items:flex-end;flex-wrap:nowrap">' + tile(ex, '', 74) + battle(ex) + '</div>' : '') + '</td><td style="font-size:.84rem;min-width:200px"><span style="font-size:1.1rem">' + KW[k].icon + '</span> <b>' + KW[k].name + '</b>: ' + KW[k].text + '</td></tr>';
+      return '<tr><td><b>' + KW[k].name + '</b>' + (kwHas(k) ? ' <span class="pill ok">new</span>' : '') + '<div class="lab-note" style="margin:2px 0 0"><code>kw-' + k + '.png</code></div></td><td style="font-size:1.6rem" data-no-icon-swap>' + ORIGKW[k] + '</td><td>' + (kwHas(k) ? [12, 14, 16, 20, 24, 32].map(function (px) { return '<span style="display:inline-block;margin-right:8px;padding:4px;border-radius:8px;background:var(--board-bg)">' + kwImgOf(k, px) + '</span>'; }).join('') : '<span class="lab-note">upload kw-' + k + '.png</span>') + '</td><td>' + (ex ? '<div class="lab-demo" style="gap:8px;align-items:flex-end;flex-wrap:nowrap">' + tile(ex, '', 74) + battle(ex) + '</div>' : '') + '</td><td style="font-size:.84rem;min-width:200px"><span style="font-size:1.1rem">' + KW[k].icon + '</span> <b>' + KW[k].name + '</b>: ' + KW[k].text + '</td></tr>';
     }).join('') + '</tbody></table></div>');
     H.push('<div class="lab-card" style="margin-top:14px"><div class="lab-label">Together: a card with several keywords (the most crowded case)</div><div class="lab-demo" style="gap:18px">' + POOL.filter(function (c) { return (c.kw || []).length >= 2; }).slice(0, 5).map(function (c) { return tile(c, '', 96) + battle(c); }).join('') + '</div></div>');
     H.push('<div class="lab-card lab-tw" style="margin-top:14px"><div class="lab-label">On every rarity face, at 14 px</div><div class="lab-demo" style="gap:10px;align-items:center">' + RARS.map(function (r) { return '<div class="rarity-' + r + '" style="padding:8px 12px;border-radius:12px;color:#fff;font-size:14px;display:flex;gap:8px;align-items:center">' + KWIDS.map(function (k) { return '<span>' + KW[k].icon + '</span>'; }).join('') + '</div>'; }).join('') + '</div></div>');
     $('#kwLab').innerHTML = H.join('');
   }
 
-  /* ---------- 6. town ---------- */
+
+  /* ---------- 6. all icons ---------- */
+  var IF = { q: '', area: '', sort: 'use', only: false, nosym: false }, openIc = null;
+  var AREAS = {}; MAN.forEach(function (i) { Object.keys(i.areas).forEach(function (a) { AREAS[a] = (AREAS[a] || 0) + 1; }); });
+  $('#icArea').innerHTML = '<option value="">All areas</option>' + Object.keys(AREAS).sort().map(function (a) { return '<option>' + a + '</option>'; }).join('');
+  $('#icCount').textContent = MAN.length;
+  function icFiltered() {
+    var q = IF.q.toLowerCase(), list = MAN.filter(function (i) { return (!IF.only || ICONMAP[i.k]) && (!IF.nosym || !i.sym) && (!IF.area || i.areas[IF.area]) && (!q || (i.name + ' ' + i.slug + ' ' + i.g + ' ' + Object.keys(i.areas).join(' ')).toLowerCase().indexOf(q) >= 0); });
+    return list.sort(IF.sort === 'name' ? function (a, b) { return a.name.localeCompare(b.name); } : function (a, b) { return b.n - a.n; });
+  }
+  function renderIcons() {
+    var list = icFiltered(), done = MAN.filter(function (i) { return ICONMAP[i.k]; }).length;
+    $('#icStat').textContent = list.length + ' shown · ' + done + ' of ' + MAN.length + ' replaced so far.';
+    $('#icOnly').classList.toggle('on', IF.only); $('#icSym').classList.toggle('on', IF.nosym);
+    $('#iconGrid').innerHTML = list.map(function (i) { var u = ICONMAP[i.k]; return '<button type="button" class="ic' + (u ? ' has' : '') + '" data-ic="' + i.k + '"><span class="pair"><span class="g" data-no-icon-swap>' + i.g + '</span>' + (u ? '<span style="color:var(--ink-soft)">→</span><img class="nw" src="' + u + '" alt="">' : '') + '</span><b>' + i.name + '</b><code>icon-' + i.slug + '.png</code><small>' + i.n + ' use' + (i.n === 1 ? '' : 's') + (i.sym ? ' · text symbol' : '') + '</small></button>'; }).join('') || '<div class="empty">No icons match.</div>';
+    renderGamePrev();
+  }
+  function openIcon(k) {
+    var i = IC[k], u = ICONMAP[k]; openIc = k;
+    var chips = function (px) { return ['', 'rarity-common', 'rarity-mythic'].map(function (c, n) { return '<span class="' + c + '" style="display:inline-flex;padding:6px;border-radius:10px;' + (n === 0 ? 'background:var(--board-bg)' : '') + '">' + (u ? '<img src="' + u + '" width="' + px + '" height="' + px + '" alt="" style="display:block">' : '<span data-no-icon-swap style="font-size:' + px + 'px;line-height:1;display:block">' + i.g + '</span>') + '</span>'; }).join(' '); };
+    $('#icDlgBody').innerHTML = '<div style="font-size:3rem;line-height:1" data-no-icon-swap>' + i.g + '</div><b style="font-family:var(--f-display);font-weight:500;font-size:1.3rem">' + i.name + '</b><div class="lab-note"><code>icon-' + i.slug + '.png</code> · id <code>' + i.k + '</code></div>' +
+      '<div class="lab-label" style="margin-top:14px">' + (u ? 'Your replacement' : 'Today (emoji)') + ' at 14, 20, 32 and 48 px, on three backgrounds</div><div class="lab-demo" style="justify-content:center;gap:6px;align-items:center;flex-direction:column">' + [14, 20, 32, 48].map(function (px) { return '<div class="lab-demo" style="gap:8px;align-items:center"><span class="lab-note" style="width:34px;margin:0">' + px + '</span>' + chips(px) + '</div>'; }).join('') + '</div>' +
+      '<dl><dt>Used</dt><dd>' + i.n + ' times in ' + Object.keys(i.areas).map(function (a) { return a + ' (' + i.areas[a] + ')'; }).join(', ') + '</dd><dt>Examples in the code</dt><dd>' + i.ctx.map(function (c) { return '<code style="display:block;margin:3px 0;white-space:normal;word-break:break-word">' + escapeHtml(c) + '</code>'; }).join('') + '</dd></dl>';
+    $('#icDel').style.display = u ? '' : 'none'; $('#icUp').textContent = u ? 'Replace again' : 'Upload replacement';
+    var d = $('#icDlg'); if (d.showModal && !d.open) d.showModal();
+  }
+  $('#iconGrid').addEventListener('click', function (e) { var b = e.target.closest('[data-ic]'); if (b) openIcon(b.dataset.ic); });
+  $('#icUp').onclick = function () { $('#icFile').click(); };
+  $('#icFile').addEventListener('change', function () { var f = $('#icFile').files[0], k = openIc; $('#icFile').value = ''; if (!f || !k) return; var ext = (f.name.match(/\.[^.]+$/) || ['.png'])[0].toLowerCase(); $('#icDlg').close(); add([new File([f], 'icon-' + IC[k].slug + ext, { type: f.type })]); });
+  $('#icDel').onclick = function () { var k = openIc; Object.keys(LIB).forEach(function (n) { var t = targetOf(LIB[n]); if (t && t.kind === 'icon' && t.id === k) { URL.revokeObjectURL(LIB[n].url); delete LIB[n]; idb('readwrite', function (st) { st.delete(n); }); } }); $('#icDlg').close(); renderAll(); };
+  $('#icQ').addEventListener('input', function (e) { IF.q = e.target.value.trim(); renderIcons(); });
+  $('#icArea').addEventListener('change', function (e) { IF.area = e.target.value; renderIcons(); }); $('#icSort').addEventListener('change', function (e) { IF.sort = e.target.value; renderIcons(); });
+  $('#icOnly').onclick = function () { IF.only = !IF.only; renderIcons(); }; $('#icSym').onclick = function () { IF.nosym = !IF.nosym; renderIcons(); };
+
+  /* the real game, with these icons: a compact preview pack (96 px PNGs) in this browser's localStorage, read by js/icon-swap.js */
+  function rasterize(url) { return new Promise(function (res) { var im = new Image(); im.onload = function () { var c = document.createElement('canvas'); c.width = c.height = 96; var x = c.getContext('2d'), r = Math.min(96 / (im.naturalWidth || 96), 96 / (im.naturalHeight || 96)), w = (im.naturalWidth || 96) * r, h = (im.naturalHeight || 96) * r; x.drawImage(im, (96 - w) / 2, (96 - h) / 2, w, h); res(c.toDataURL('image/png')); }; im.onerror = function () { res(null); }; im.src = url; }); }
+  function packState() { try { return JSON.parse(localStorage.getItem('tr-icon-preview') || 'null'); } catch (e) { return null; } }
+  function renderGamePrev() {
+    var n = Object.keys(ICONMAP).length + Object.keys(KWMAP).length, ps = packState(), kb = ps ? Math.round(JSON.stringify(ps).length / 1024) : 0;
+    $('#gamePrev').innerHTML = '<p class="lab-note" style="margin:0 0 10px">See the real game with your ' + n + ' replaced icon' + (n === 1 ? '' : 's') + ' (keyword icons included), on this device, without changing the game for anyone else. It works on the live site and wherever the lab and the game are opened from the same place. A small "Icon preview on" tag with an Exit button appears in the game while it is active.</p><div class="lab-demo" style="align-items:center"><button class="lab-btn on" id="gpApply" type="button"' + (n ? '' : ' disabled') + '>' + (ps && ps.on ? 'Update the game preview' : 'Turn on the game preview') + '</button><button class="lab-btn" id="gpOpen" type="button">Open the game</button><button class="lab-btn danger" id="gpOff" type="button"' + (ps && ps.on ? '' : ' disabled') + '>Turn it off</button><span class="lab-note" style="margin:0">' + (ps && ps.on ? 'On · ' + kb + ' KB stored' : 'Off') + '</span></div>';
+  }
+  $('#gamePrev').addEventListener('click', async function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    if (b.id === 'gpApply') { var pk = { on: true, map: {}, kw: {}, t: Date.now() }; b.textContent = 'Preparing…'; for (var k in ICONMAP) { var d = await rasterize(ICONMAP[k]); if (d) pk.map[k] = d; } for (var kk in KWMAP) { var d2 = await rasterize(KWMAP[kk]); if (d2) pk.kw[kk] = d2; }
+      try { localStorage.setItem('tr-icon-preview', JSON.stringify(pk)); toast('Game preview is on'); } catch (er) { toast('Too many icons for browser storage; try fewer or smaller files'); } renderGamePrev(); }
+    else if (b.id === 'gpOff') { var q = packState() || {}; q.on = false; try { localStorage.setItem('tr-icon-preview', JSON.stringify(q)); } catch (er) {} toast('Game preview is off'); renderGamePrev(); }
+    else if (b.id === 'gpOpen') window.open('index.html', '_blank');
+  });
+
+  /* UI sampler: real components and icons; the swap layer restyles them live */
+  function renderSampler() {
+    var M = [];
+    M.push('<div class="phone"><div class="cap">Top bar, weather and dock</div><div class="lab-demo" style="justify-content:center;gap:8px"><div class="hud-stat"><span class="hs-icon">🫧</span><span class="hs-bar"><span class="hs-fill hs-fill-pebbles"></span><span class="hs-val">237</span></span></div><div class="hud-stat"><span class="hs-icon">🃏</span><span class="hs-bar"><span class="hs-fill hs-fill-cards"></span><span class="hs-val">64</span></span></div></div><div class="hud-ambient" style="margin:0 auto"><span class="amb-icon">☀️</span><span class="hud-ambient-text"><span class="amb-time">Midday</span><span class="amb-weather">Clear skies</span></span></div><div style="display:flex;justify-content:space-around;background:var(--stone);border:1px solid var(--stone-edge);border-radius:28px;padding:8px 4px">' + [['🏘️', 'Town', 1], ['📓', 'Journal'], ['🃏', 'Cards'], ['🎁', 'Rewards'], ['🧑', 'Character']].map(function (t) { return '<div style="display:flex;flex-direction:column;align-items:center;gap:1px;font-size:.62rem;font-weight:700;padding:4px 8px;border-radius:20px;' + (t[2] ? 'background:var(--water);color:var(--on-water)' : 'color:var(--ink-soft)') + '"><span class="t-icon" style="font-size:1.3rem;line-height:1.1;filter:none">' + t[0] + '</span>' + t[1] + '</div>'; }).join('') + '</div></div>');
+    M.push('<div class="phone"><div class="cap">Settings rows</div><div class="panel-list" style="text-align:left">' + [['🔊', 'Sound', 'Turns every sound on or off'], ['🌿', 'Town ambience', 'Birds, wind and water'], ['🎵', 'Music', 'A slow pad that never loops'], ['🧘', 'Calm mode', 'Fewer animations'], ['🌗', 'Theme', 'Dark, light or auto']].map(function (r) { return '<div class="st-row" style="display:flex;align-items:center;gap:10px;background:var(--stone);border:1px solid var(--stone-edge);border-radius:12px;padding:9px 10px"><span class="st-ico">' + r[0] + '</span><span class="st-label" style="flex:1;font-size:.86rem">' + r[1] + '<small style="display:block;color:var(--ink-soft);font-size:.68rem">' + r[2] + '</small></span><button class="toggle on" type="button" aria-label="on"></button></div>'; }).join('') + '</div></div>');
+    M.push('<div class="phone"><div class="cap">Lists and rewards</div><div class="panel-list" style="text-align:left">' + [['🎁', 'Daily gift', 'Claim it in Rewards'], ['📜', 'Daily quests', 'Pick a few in Rewards'], ['🪑', 'Help around town', '0 of 8 daily tasks done'], ['🎸', 'Minigame prizes', 'Play a minigame'], ['🧩', 'Daily puzzle', 'A new board in the Nook'], ['🎣', 'Catch five fish', '3 of 5 · 🫧 20']].map(function (r) { return '<div class="panel-item"><span class="panel-icon">' + r[0] + '</span><span class="panel-text"><div class="panel-name">' + r[1] + '</div><div class="panel-desc">' + r[2] + '</div></span><span class="lab-note" style="margin:0">Go →</span></div>'; }).join('') + '</div></div>');
+    M.push('<div class="phone"><div class="cap">Buttons, chips and messages</div><div class="lab-demo" style="justify-content:center"><button class="btn" type="button">🎣 Cast</button><button class="btn btn-ghost" type="button">🔍 Filter</button><button class="btn btn-ghost" type="button">☰ List</button></div><div class="lab-demo" style="justify-content:center">' + Object.keys(FAMILIES).map(function (f) { return '<span class="seg-btn" style="flex:none;border:1px solid var(--stone-edge);background:var(--stone);color:var(--ink)">' + FAMILIES[f].icon + ' ' + FAMILIES[f].name + '</span>'; }).join('') + '</div><div class="lab-demo" style="justify-content:center"><div class="toast show" style="position:static;transform:none;opacity:1">🌱 A seed floats up!</div></div><div class="lab-demo" style="justify-content:center">' + Object.keys(DISTRICTS).map(function (d) { return '<span class="pill" style="font-size:.76rem">' + DISTRICTS[d].bossIcon + ' ' + DISTRICTS[d].boss + '</span>'; }).join('') + '</div></div>');
+    M.push('<div class="phone"><div class="cap">Keyword legend</div><div class="panel-list" style="text-align:left">' + KWIDS.map(function (k) { return '<div class="panel-item"><span class="panel-icon">' + KW[k].icon + '</span><span class="panel-text"><div class="panel-name">' + KW[k].name + '</div><div class="panel-desc">' + KW[k].text + '</div></span></div>'; }).join('') + '</div></div>');
+    $('#sampler').innerHTML = M.join('');
+  }
+
+  /* ---------- 7. town ---------- */
   var biome = 'meadow';
   var BIOMES = [['meadow', 'Town Square'], ['bazaar', 'Market Row'], ['harbor', 'Quiet Harbor'], ['orchard', 'Hollow Garden']];
   function spr(id, T, extra) { /* T = the tile size; a 64 unit sprite is T wide, a 128 unit building is 2T, as on the map */ var s = SPR[id], w = s ? s.vb[2] : 64, h = s ? s.vb[3] : 64, k = T / 64, W = Math.round(w * k), H = Math.round(h * k); return SPRITE_OVR[id] ? '<img src="' + SPRITE_OVR[id] + '" width="' + W + '" height="' + H + '" alt="" style="' + (extra || '') + '">' : '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + w + ' ' + h + '" style="' + (extra || '') + '"><use href="#' + id + '"/></svg>'; }
@@ -357,10 +454,11 @@ window.escapeHtml = function (s) { return String(s).replace(/[&<>"]/g, function 
 
   /* ---------- 7. hand-off ---------- */
   function ready() { return Object.keys(LIB).map(function (n) { return LIB[n]; }).filter(function (r) { var t = targetOf(r); return t && t.kind === 'card' && status(r) !== 'bad'; }); }
+  function iconLine() { var k = Object.keys(ICONMAP); return k.length ? "\n// icon replacements (the game's icon-swap layer wires them): " + k.map(function (x) { return 'icon-' + IC[x].slug + '.png'; }).join(', ') : ''; }
   function kwLine() { var k = KWIDS.filter(kwHas); return k.length ? "\n// keyword icons (need game support first): " + k.map(function (x) { return 'kw-' + x + '.png'; }).join(', ') : ''; }
   function renderExport() {
     var ok = ready(), ids = ok.map(function (r) { return targetOf(r).id; }).sort(), sp = Object.keys(SPRITE_OVR);
-    $('#exp').textContent = ids.length ? "// js/data-and-engine.js, add to CARD_ART:\nconst CARD_ART = " + JSON.stringify(ids).replace(/","/g, "', '").replace(/^\["/, "['").replace(/"\]$/, "']") + ";\n// files: " + ids.map(function (i) { return i + '.png'; }).join(', ') + (sp.length ? "\n// sprites to swap in assets/sprites.js: " + sp.join(', ') : '') + kwLine() : (kwLine().trim() || 'No card art has passed the checks yet.');
+    $('#exp').textContent = ids.length ? "// js/data-and-engine.js, add to CARD_ART:\nconst CARD_ART = " + JSON.stringify(ids).replace(/","/g, "', '").replace(/^\["/, "['").replace(/"\]$/, "']") + ";\n// files: " + ids.map(function (i) { return i + '.png'; }).join(', ') + (sp.length ? "\n// sprites to swap in assets/sprites.js: " + sp.join(', ') : '') + kwLine() + iconLine() : ((kwLine() + iconLine()).trim() || 'No card art has passed the checks yet.');
     var warn = ok.filter(function (r) { return status(r) === 'warn'; }).length;
     $('#expNote').textContent = ids.length ? ids.length + ' card' + (ids.length === 1 ? '' : 's') + ' ready' + (warn ? ' (' + warn + ' with warnings, worth a look)' : '') + '. Files must be named exactly as the ids above.' : '';
   }
@@ -371,7 +469,7 @@ window.escapeHtml = function (s) { return String(s).replace(/[&<>"]/g, function 
   };
 
   /* ---------- render everything ---------- */
-  function renderAll() { applyOverrides(); if (!BYID[sel]) sel = POOL[0].id; renderLibrary(); renderPick(); renderCardLab(); renderMocks(); renderSetControls(); renderSet(); renderKeywords(); renderTown(); renderOther(); renderExport(); }
+  function renderAll() { applyOverrides(); if (!BYID[sel]) sel = POOL[0].id; renderLibrary(); renderPick(); renderCardLab(); renderMocks(); renderSetControls(); renderSet(); renderKeywords(); renderIcons(); renderSampler(); renderTown(); renderOther(); renderExport(); }
 
   /* ---------- events ---------- */
   var drop = $('#drop'), fin = $('#file');
@@ -383,10 +481,11 @@ window.escapeHtml = function (s) { return String(s).replace(/[&<>"]/g, function 
   $('#lib').addEventListener('click', async function (e) {
     var tr = e.target.closest('tr[data-n]'); if (!tr) return; var n = tr.dataset.n, r = LIB[n];
     if (e.target.closest('[data-del]')) { URL.revokeObjectURL(r.url); delete LIB[n]; await idb('readwrite', function (st) { st.delete(n); }); renderAll(); }
-    else if (e.target.closest('[data-show]')) { var t = targetOf(r); if (t && t.kind === 'kw') { $('#keywords').scrollIntoView({ behavior: 'smooth' }); } else if (t) { sel = t.id; renderAll(); $('#card').scrollIntoView({ behavior: 'smooth' }); } }
+    else if (e.target.closest('[data-show]')) { var t = targetOf(r); if (t && t.kind === 'kw') { $('#keywords').scrollIntoView({ behavior: 'smooth' }); } else if (t && t.kind === 'icon') { $('#icons').scrollIntoView({ behavior: 'smooth' }); } else if (t) { sel = t.id; renderAll(); $('#card').scrollIntoView({ behavior: 'smooth' }); } }
     else if (e.target.closest('[data-unassign]')) { r.assign = ''; await reanalyze(r); await idb('readwrite', function (st) { st.put({ name: n, blob: r.blob, assign: '', ts: r.ts }); }); renderAll(); }
   });
   $('#lib').addEventListener('change', async function (e) { var s = e.target.closest('[data-assign]'); if (!s || !s.value) return; var tr = s.closest('tr'), r = LIB[tr.dataset.n]; r.assign = s.value; await reanalyze(r); await idb('readwrite', function (st) { st.put({ name: r.name, blob: r.blob, assign: r.assign, ts: r.ts }); }); var t = targetOf(r); if (t && t.kind === 'card') sel = t.id; renderAll(); });
+  $('#lib').addEventListener('change', async function (e) { var inp = e.target.closest('[data-assign-icon]'); if (!inp || !inp.value) return; var k = SLUG2K[inp.value.trim()]; if (!k) { toast('No icon called "' + inp.value + '"'); return; } var r = LIB[inp.closest('tr').dataset.n]; r.assign = 'icon-' + inp.value.trim(); await reanalyze(r); await idb('readwrite', function (st) { st.put({ name: r.name, blob: r.blob, assign: r.assign, ts: r.ts }); }); renderAll(); });
   $('#clearAll').onclick = async function () { if (!confirm('Remove all files from the lab?')) return; Object.keys(LIB).forEach(function (n) { URL.revokeObjectURL(LIB[n].url); }); LIB = {}; await idb('readwrite', function (st) { st.clear(); }); renderAll(); };
   $('#selAllOk').onclick = function () { var r = ready()[0]; if (r) { sel = targetOf(r).id; renderAll(); $('#card').scrollIntoView({ behavior: 'smooth' }); } else toast('No matched card art yet'); };
   $('#pick').addEventListener('change', function (e) { sel = e.target.value; renderPick(); renderCardLab(); renderMocks(); });
