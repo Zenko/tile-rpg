@@ -181,7 +181,6 @@ function invRow(icon, name, count, desc, actionLabel, onAction) {
   if (onAction) el.querySelector('.inv-use-btn').addEventListener('click', onAction);
   return el;
 }
-document.getElementById('openInventoryBtn').addEventListener('click', () => { closePlayerMenu(); sfx('nav'); buzz(HAP.tap); switchTab('character'); charSetView('bag'); });
 // One clean overlay instead of a stack of toasts firing one after another - everything worth knowing about
 // right now (time, weather and its effect, season, today's event, and the forecast) at a glance together.
 document.getElementById('pillSky').addEventListener('click', () => {
@@ -309,12 +308,6 @@ document.getElementById('resetTown').addEventListener('click', () => {
   if (confirm('Start over? This clears your collection, character, and progress.')) resetGame();
 });
 document.getElementById('feedbackBtn').addEventListener('click', () => sendFeedback('feedback'));
-document.getElementById('visitShopBtn').addEventListener('click', () => {
-  sfx('nav'); buzz(HAP.tap);
-  closePlayerMenu();
-  switchTab('shop');
-  setShopView('customize');
-});
 
 function resetGame() {
   state = {

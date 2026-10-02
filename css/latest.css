@@ -573,10 +573,6 @@ body.in-battle .screen { padding-top: 0; }
    Settings used to be one long run of identical boxes. Now: two shortcut tiles, then titled groups. Each group is one
    rounded card whose rows are separated by hairlines, with an icon, a label, a one-line hint and the control. Slider
    rows sit inside the card under their toggle. All element ids are unchanged, so the JS that wires them is too. */
-.st-shortcuts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 22px; }
-.st-tile { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 10px 14px; border-radius: 18px; border: 1px solid var(--stone-edge); background: var(--stone); color: var(--ink); font: inherit; font-size: .88rem; font-weight: 700; text-align: left; cursor: pointer; }
-.st-tile:active { transform: scale(.97); }
-.st-tile-ico { font-size: 1.4rem; }
 .st-group { margin: 0 0 22px; text-align: left; }
 .st-title { margin: 0 0 8px 4px; font-family: var(--f-display); font-size: 1.15rem; font-weight: 600; }
 .st-card { background: var(--stone); border: 1px solid var(--stone-edge); border-radius: 20px; overflow: hidden; }
@@ -722,3 +718,12 @@ html.calm .reveal-card-frame.pk-flip.pk-down .reveal-card { animation: none; }
 .bn-row em { font-style: normal; text-align: right; font-size: .76rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
 .bn-row.full em { color: var(--accent); }
 .bn-foot { display: flex; justify-content: space-between; gap: 8px; margin-top: 10px; padding-top: 8px; border-top: 1px solid color-mix(in srgb, var(--stone-edge) 65%, transparent); font-size: .76rem; color: var(--ink-soft); }
+
+/* ===== Sliding tabs (build 103): a pill glides under the active button of every .seg, like the bottom dock ===== */
+.seg { position: relative; }
+.seg-pill { position: absolute; left: 0; top: 0; z-index: 0; border-radius: 999px; background: var(--water); pointer-events: none; box-shadow: 0 3px 10px color-mix(in srgb, var(--water) 40%, transparent);
+  transition: transform .42s cubic-bezier(.3, 1.35, .45, 1), width .42s cubic-bezier(.3, 1.35, .45, 1), opacity .2s ease; will-change: transform, width; }
+.seg.has-pill > .seg-btn { position: relative; z-index: 1; transition: color .25s ease; }
+.seg.has-pill > .seg-btn.active { background: transparent; }
+@media (prefers-reduced-motion: reduce) { .seg-pill, .seg.has-pill > .seg-btn { transition: none; } }
+html.calm .seg-pill, html.calm .seg.has-pill > .seg-btn { transition: none; }

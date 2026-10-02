@@ -18,6 +18,8 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta ${RELEASES[0].n} (build $
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'better', x: 'Every set of tabs (Cards, Journal, Rewards, Character, Settings and Social, Deck) now has a pill that glides under the active tab, and the content slides in the direction you moved, like the bottom bar.' },
+  { t:'better', x: 'Your Bag and Shop shortcuts are gone from Settings. Your Bag is in Character → Pantry, and the Card Shop is on Market Row.' },
   { t:'new', x: 'Three rare days now turn up about one day in twelve: Starfall (hidden cards twice as easy to spot, more foils), Friendship Fair (hearts count double) and Tournament Day (+3 Pebbles for every match you win).' },
   { t:'new', x: 'Beating a district boss leaves that district calm for the rest of the day: hidden cards and chests turn up more often there.' },
   { t:'new', x: 'The Sets tab has a Binder: nine pages (one per rarity and one per family) that pay Pebbles the first time you fill them.' },
