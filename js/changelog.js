@@ -18,6 +18,8 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta ${RELEASES[0].n} (build $
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'new', x: 'A small Next goal pill under the top bar in town points at the most useful thing to do (unspent skill points, bread or crops ready, then today\'s tasks). Tap it to go there.' },
+  { t:'better', x: 'Opening a card pack is more of a moment: the card arrives face-down with a glow that hints at its rarity, and you tap it to flip it. New cards get a NEW tag.' },
   { t:'new', x: 'A monthly ladder (Pebble, Stone, Moss, Gem, Star) earned from ghost duels, deck challenges, the Cup, bosses and Draft Runs. You never lose points, and each rank pays Pebbles. Find it in Social.' },
   { t:'new', x: 'Deck archetypes: six cards of one family make a themed deck, and eight give +1 Spirit at the start of matches. Cards → Deck → Your deck also has a Test your deck button that plays practice matches and shows your win rate.' },
   { t:'new', x: 'Deck challenges at the fountain now include family formats (Only Grove, Stone, Tide or Wind cards) and a two-family format.' },

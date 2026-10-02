@@ -130,7 +130,9 @@ function respawnNpc(data, n) {
   n.justArrived = true;   // one-time entrance animation
 }
 
-function showCardReveal(cardId, heading, isGift, note, xpGained) {
+// opts.flip: the card arrives face-down and opens when tapped (pack purchases). opts.isNew adds a NEW tag.
+function showCardReveal(cardId, heading, isGift, note, xpGained, opts) {
+  opts = opts || {};
   const def = cardDef(cardId);
   const tier = RARITY_ORDER.indexOf(def.rarity);
   const card = document.getElementById('pickupCard');
@@ -142,17 +144,31 @@ function showCardReveal(cardId, heading, isGift, note, xpGained) {
   face.classList.remove('reveal-icon'); void face.offsetWidth; face.classList.add('reveal-icon');
 
   pickupTitle.textContent = heading || 'You found a card';
-  pickupDesc.innerHTML = `<span class="rarity-tag rt-${def.rarity}">${RARITY_LABEL[def.rarity]}</span>` + (hasAbility(def) ? `<br><span style="color:var(--accent)">${cardAbilityHtml(def)}</span>` : '') + (note ? `<br><b>${note}</b>` : '') + (xpGained ? `<br><span class="xp-gain-tag">+${Math.round(xpGained)} XP</span>` : '');
+  const descHtml = `<span class="rarity-tag rt-${def.rarity}">${RARITY_LABEL[def.rarity]}</span>${opts.isNew ? ' <span class="rarity-tag rt-new">NEW</span>' : ''}` + (hasAbility(def) ? `<br><span style="color:var(--accent)">${cardAbilityHtml(def)}</span>` : '') + (note ? `<br><b>${note}</b>` : '') + (xpGained ? `<br><span class="xp-gain-tag">+${Math.round(xpGained)} XP</span>` : '');
 
   const sparkCounts = [0, 4, 8, 14, 22];
-  sparkleBurst(document.getElementById('pickupSparkles'), ['✨', '🌟', '·'], sparkCounts[tier] || 0);
-
+  const open = () => {   // everything that celebrates the card itself, either at once or when the face-down card is tapped
+    pickupDesc.innerHTML = descHtml;
+    sparkleBurst(document.getElementById('pickupSparkles'), ['✨', '🌟', '·'], sparkCounts[tier] || 0);
+    if (def.spell) showTipOnce('spells');
+    if (tier >= 4) { sfx('mythic'); buzz(HAP.big); }
+    else if (tier >= 1) { sfx('rare'); buzz(HAP.win); }
+    else { sfx('found'); buzz(HAP.found); }
+    if (isGift) sfx(tier >= 3 ? 'mythic' : 'gift');
+  };
+  const frame = face.parentElement, cont = document.getElementById('pickupContinue');
+  frame.classList.remove('pk-flip', 'pk-down'); frame.onclick = null; cont.classList.remove('hidden');
+  if (opts.flip && (typeof btMotionOk !== 'function' || btMotionOk())) {
+    frame.classList.add('pk-flip', 'pk-down');   // face-down: the card sits behind a back, rarity colour glowing round its edge
+    frame.dataset.r = def.rarity;
+    pickupDesc.innerHTML = '<span class="pk-hint">Tap the card to open it</span>';
+    cont.classList.add('hidden');
+    pickupOverlay.classList.remove('hidden'); sfx('flip');
+    frame.onclick = () => { frame.onclick = null; frame.classList.remove('pk-down'); cont.classList.remove('hidden'); sfx('flip'); setTimeout(open, 320); };
+    return;
+  }
   pickupOverlay.classList.remove('hidden');
-  if (def.spell) showTipOnce('spells');
-  if (tier >= 4) { sfx('mythic'); buzz(HAP.big); }
-  else if (tier >= 1) { sfx('rare'); buzz(HAP.win); }
-  else { sfx('found'); buzz(HAP.found); }
-  if (isGift) sfx(tier >= 3 ? 'mythic' : 'gift');
+  open();
 }
 
 function collectItem(item) {

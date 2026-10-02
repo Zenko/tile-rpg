@@ -104,7 +104,7 @@ function buyPack(packId, price) {
   saveState();
   updateHud();
   bumpPill('pillCards');
-  showCardReveal(id, `${pack.name}`, true);
+  showCardReveal(id, `${pack.name}`, true, null, 0, { flip: true, isNew });
   if (isNew) toast('📖 New entry in your Index');
   checkAchievements();
   return id;

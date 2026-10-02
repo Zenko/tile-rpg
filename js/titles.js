@@ -208,6 +208,7 @@ document.getElementById('weatherOverlayClose').addEventListener('click', () => {
 document.getElementById('weatherOverlay').addEventListener('click', e => { if (e.target.id === 'weatherOverlay') document.getElementById('weatherOverlay').classList.add('hidden'); });
 
 function updateHud() {
+  if (typeof refreshGoalChip === 'function') refreshGoalChip();   // js/skills-gear.js
   cardCountEl.textContent = state.ownedCards.length;
   winCountEl.textContent = state.wins;
   if (deckSizeHudEl) deckSizeHudEl.textContent = `${state.deck.length}/${DECK_SIZE}`;

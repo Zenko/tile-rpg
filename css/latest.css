@@ -687,3 +687,25 @@ body.in-battle .screen { padding-top: 0; }
 .lr-bar { height: 8px; border-radius: 5px; background: var(--track); margin: 7px 0; overflow: hidden; }
 .lr-bar i { display: block; height: 100%; background: var(--accent); border-radius: 5px; }
 .lr-body small { display: block; font-size: .74rem; line-height: 1.4; color: var(--ink-soft); }
+
+/* ===== Pack opening (build 101): the card arrives face-down and flips when tapped ===== */
+.reveal-card-frame.pk-flip { perspective: 800px; cursor: pointer; }
+.reveal-card-frame.pk-flip .reveal-card { transition: transform .5s cubic-bezier(.3,.8,.3,1); transform-style: preserve-3d; }
+.reveal-card-frame.pk-flip.pk-down .reveal-card { transform: rotateY(180deg); }
+.reveal-card-frame.pk-flip.pk-down .reveal-card > * { visibility: hidden; }
+.reveal-card-frame.pk-flip.pk-down .reveal-card { background: linear-gradient(135deg, var(--water-glow), var(--water)); border: 2px solid color-mix(in srgb, var(--hl) 35%, transparent); box-shadow: 0 0 22px color-mix(in srgb, var(--accent) 45%, transparent); animation: pk-bob 1.6s ease-in-out infinite; }
+.reveal-card-frame.pk-flip.pk-down .reveal-card::after { content: '🎴'; position: absolute; inset: 0; display: grid; place-items: center; font-size: 2.6rem; transform: rotateY(180deg); visibility: visible; }
+.reveal-card-frame.pk-flip.pk-down[data-r="rare"] .reveal-card, .reveal-card-frame.pk-flip.pk-down[data-r="ultra"] .reveal-card { box-shadow: 0 0 26px #e2b64c; }
+.reveal-card-frame.pk-flip.pk-down[data-r="super"] .reveal-card, .reveal-card-frame.pk-flip.pk-down[data-r="mythic"] .reveal-card { box-shadow: 0 0 30px #c28cf0; }
+@keyframes pk-bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -5px; } }
+.pk-hint { font-weight: 800; color: var(--ink-soft); }
+.rarity-tag.rt-new { background: var(--accent); color: var(--on-accent); }
+html.calm .reveal-card-frame.pk-flip.pk-down .reveal-card { animation: none; }
+
+/* ===== Next-goal chip (build 101): one pill under the top bar that points at the next useful thing ===== */
+.goal-chip { position: absolute; z-index: 9; left: 12px; top: calc(var(--hud-h) + 10px); max-width: calc(100% - 84px); display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 6px 12px 6px 10px; border-radius: 999px; border: 1px solid var(--stone-edge); background: var(--stone); color: var(--ink); font: inherit; font-size: .78rem; font-weight: 700; text-align: left; box-shadow: 0 6px 18px var(--shadow); cursor: pointer; }
+.goal-chip.hidden { display: none; }
+.goal-ico { flex: none; font-size: 1.15rem; }
+.goal-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.goal-arrow { flex: none; color: var(--ink-soft); font-size: 1.1rem; }
+.goal-chip:active { transform: scale(.97); }
