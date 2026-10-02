@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta ${RELEASES[0].n} (build $
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'better', x: "Social is redesigned: each tester is a card with their avatar, level, location and a green dot when they're playing, and a line at the top tells you whether you're visible." },
   { t:'better', x: 'Settings has a fresh layout: Appearance, Sound, Battles, Comfort, Notifications & privacy and Your save are each their own card, with a short hint under every option.' },
   { t:'better', x: 'The Town Guide has a roomier layout: a Today card with separate rows, section chips under the search box, and larger cards for each entry.' },
   { t:'better', x: 'The Deck tab is split in two: Your deck (a bigger tray, cost chart and keywords) and Add cards (your deck as a pinned strip above your collection).' },

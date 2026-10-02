@@ -170,26 +170,37 @@ function ghostLoss() {
   btGet('battleRetryBtn').classList.remove('hidden');
   sfx('soft');
 }
+// Social view (build 95): a "you" line that says whether you are visible, then one card per tester (avatar tile, name and
+// level, where they are and when, a green dot if seen in the last 10 minutes) with the Duel button at the right.
+function renderSocialYou() {
+  const el = document.getElementById('socialYou'); if (!el) return;
+  const on = presenceSharingOn();
+  el.className = 'so-you' + (on ? ' on' : '');
+  el.innerHTML = `<span class="so-you-ico">${on ? '👋' : '🙈'}</span><span class="so-you-text"><b>${on ? "You're visible to other testers" : "You're hidden"}</b><small>${on ? 'They see your name, level and district.' : 'Turn on "Share that I\'m playing" in Settings to appear here.'}</small></span><button type="button" class="btn btn-ghost st-small" id="socialToSettings">Settings</button>`;
+  document.getElementById('socialToSettings').addEventListener('click', () => document.getElementById('segPmSettings').click());
+}
 async function fetchWhosPlaying() {
   const box = document.getElementById('whosPlayingList');
   if (!box) return;
-  if (!cloudAvailable() || !cloudReady) { box.innerHTML = '<div class="panel-desc">Not connected right now.</div>'; return; }
-  box.innerHTML = '<div class="panel-desc">Loading…</div>';
+  renderSocialYou();
+  const note = (icon, title, text) => `<div class="so-empty"><span>${icon}</span><b>${title}</b><small>${text}</small></div>`;
+  if (!cloudAvailable() || !cloudReady) { box.innerHTML = note('📡', 'Not connected right now', 'Testers show up here when you are online.'); return; }
+  box.innerHTML = note('⏳', 'Loading…', '');
   try {
     const snap = await cloudDb.collection(PRESENCE_COLLECTION).orderBy('lastSeen', 'desc').limit(20).get();
     const now = Date.now();
     const rows = snap.docs.map(d => Object.assign({ id: d.id }, d.data())).filter(p => now - (p.lastSeen || 0) < PRESENCE_STALE_MS);
     ghostRows = rows;
     box.innerHTML = rows.length ? rows.map((p, i) => {
-      const g = p.id !== (cloudUser && cloudUser.uid) ? ghostDeckOf(p) : null;
-      return `<div class="panel-item"><span class="panel-icon">${escapeHtml(String(p.emoji || '🙂').slice(0, 8))}</span><span class="panel-text">
-        <div class="panel-name">${escapeHtml(String(p.name || 'A player').slice(0, 16))} · Lv ${Math.max(1, Math.floor(Number(p.level)) || 1)}</div>
-        <div class="panel-desc">${escapeHtml(p.district || '')}${p.district ? ' · ' : ''}${fmtLogTime(p.lastSeen)}</div></span>
-        ${g ? (featureLocked('ghost') ? `<span class="ghost-lock" title="${featureLockText('ghost')}">👻 🔒 Lv ${FEATURE_LEVELS.ghost.level}</span>` : `<button class="btn btn-ghost ghost-btn" type="button" data-ghost="${i}" title="Duel a ghost of their deck">👻 ${g.fam ? g.fam.icon + ' ' : ''}Duel</button>`) : ''}</div>`;
+      const me = p.id === (cloudUser && cloudUser.uid), g = !me ? ghostDeckOf(p) : null, live = now - (p.lastSeen || 0) < 10 * 60 * 1000;
+      return `<div class="so-card${me ? ' me' : ''}"><span class="so-av">${escapeHtml(String(p.emoji || '🙂').slice(0, 8))}${live ? '<i class="so-live" title="Playing now"></i>' : ''}</span>
+        <span class="so-text"><b>${escapeHtml(String(p.name || 'A player').slice(0, 16))}${me ? ' <em>you</em>' : ''}<span class="so-lv">Lv ${Math.max(1, Math.floor(Number(p.level)) || 1)}</span></b>
+        <small>${escapeHtml(p.district || '')}${p.district ? ' · ' : ''}${live ? 'Playing now' : fmtLogTime(p.lastSeen)}</small></span>
+        ${g ? (featureLocked('ghost') ? `<span class="ghost-lock" title="${featureLockText('ghost')}">🔒 Lv ${FEATURE_LEVELS.ghost.level}</span>` : `<button class="btn ghost-btn so-duel" type="button" data-ghost="${i}" title="Duel a ghost of their deck">👻 ${g.fam ? g.fam.icon + ' ' : ''}Duel</button>`) : ''}</div>`;
     }).join('')
-      : '<div class="panel-desc">Nobody sharing yet - turn it on in Settings and be the first!</div>';
+      : note('🌱', 'Nobody sharing yet', 'Turn it on in Settings and be the first.');
     box.querySelectorAll('[data-ghost]').forEach(b => b.addEventListener('click', () => startGhostDuel(ghostRows[+b.dataset.ghost])));
-  } catch (e) { box.innerHTML = "<div class=\"panel-desc\">Couldn't load right now.</div>"; }
+  } catch (e) { box.innerHTML = note('📡', "Couldn't load right now", 'Try again in a moment.'); }
 }
 
 // force=true (from the explicit "Restore a save" button) always takes the cloud copy, since the player just

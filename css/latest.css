@@ -599,3 +599,29 @@ body.in-battle .screen { padding-top: 0; }
 .st-help-card { display: flex; flex-wrap: wrap; gap: 10px; padding: 14px 16px; margin: 0; background: transparent; }
 .st-help-card .btn { flex: 1 1 140px; min-height: 46px; }
 .st-help-card .st-danger { flex-basis: 100%; color: #e08c84; border-color: color-mix(in srgb, #e08c84 45%, var(--stone-edge)); }
+
+/* ===== Social redesign (build 95) =====
+   Who's Playing as cards: a "you" line saying whether you are visible, then one card per tester. */
+.so-sub { margin: -4px 4px 12px; font-size: .84rem; line-height: 1.5; color: var(--ink-soft); }
+.so-you { display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin-bottom: 14px; border-radius: 18px; border: 1px dashed var(--stone-edge); background: transparent; }
+.so-you.on { border-style: solid; border-color: color-mix(in srgb, var(--water) 45%, var(--stone-edge)); background: color-mix(in srgb, var(--water) 8%, var(--stone)); }
+.so-you-ico { font-size: 1.5rem; flex: none; }
+.so-you-text { flex: 1; min-width: 0; }
+.so-you-text b { display: block; font-size: .92rem; }
+.so-you-text small { display: block; margin-top: 2px; font-size: .76rem; line-height: 1.4; color: var(--ink-soft); }
+.so-list { display: flex; flex-direction: column; gap: 10px; }
+.so-card { display: flex; align-items: center; gap: 14px; padding: 12px 14px; border-radius: 18px; border: 1px solid var(--stone-edge); background: var(--stone); }
+.so-card.me { border-color: color-mix(in srgb, var(--accent) 55%, var(--stone-edge)); }
+.so-av { position: relative; flex: none; width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; font-size: 1.8rem; background: color-mix(in srgb, var(--hl) 7%, transparent); border: 1px solid color-mix(in srgb, var(--stone-edge) 70%, transparent); }
+.so-live { position: absolute; right: -3px; bottom: -3px; width: 13px; height: 13px; border-radius: 50%; background: #5fc58a; border: 2px solid var(--stone); }
+.so-text { flex: 1; min-width: 0; }
+.so-text b { display: flex; align-items: center; gap: 8px; font-size: 1rem; flex-wrap: wrap; }
+.so-text b em { font-style: normal; font-size: .62rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--on-accent); background: var(--accent); border-radius: 999px; padding: 1px 7px; }
+.so-lv { font-size: .7rem; font-weight: 800; color: var(--ink-soft); border: 1px solid var(--stone-edge); border-radius: 999px; padding: 1px 8px; }
+.so-text small { display: block; margin-top: 3px; font-size: .8rem; line-height: 1.4; color: var(--ink-soft); }
+.so-duel { flex: none; min-height: 44px; padding: 8px 16px; background: var(--water); border-color: var(--water); color: var(--on-water); font-weight: 800; }
+.so-card .ghost-lock { flex: none; font-size: .76rem; color: var(--ink-soft); }
+.so-empty { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 28px 16px; text-align: center; border: 1px dashed var(--stone-edge); border-radius: 18px; }
+.so-empty span { font-size: 1.8rem; }
+.so-empty b { font-size: .95rem; }
+.so-empty small { font-size: .8rem; color: var(--ink-soft); }
