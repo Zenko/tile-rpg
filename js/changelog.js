@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta ${RELEASES[0].n} (build $
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'better', x: 'Redesigned screens: the weather board shows Now / Next / Today / Town mood as clear rows, the mailbox groups letters into "Waiting for you" and "Earlier" with avatar tiles and note-paper letters, building speech is a compact bubble, and the cellar floor sits in one framed dark room with the hearts and lantern on a single row.' },
   { t:'better', x: 'Weed the Beds has lighter soil in the light theme.' },
   { t:'better', x: 'Fishing now follows the light theme: a sunlit bank and pale sea-glass water instead of the night-blue scene.' },
   { t:'better', x: 'Every fish swims as a silhouette until it bites the bait, then its colours show - even species you have already caught.' },

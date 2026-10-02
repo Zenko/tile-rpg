@@ -151,6 +151,21 @@ function forecastText() {
   if (!nx) return nowPart;
   return `${nowPart} ${nx === weatherNow() ? `It should stay that way for another ~${mins} min and beyond.` : `In ~${mins} min: ${name(nx)}${fx(nx)}.`}`;
 }
+/* The weather board as rows instead of one long paragraph: Now / Next / Today / Town mood. Same facts as forecastText(). */
+function weatherBoardHtml(quote) {
+  const w = state.weather, nowK = weatherNow(), nx = WEATHER_KINDS[w.next] ? w.next : null, ev = eventNow();
+  const mins = Math.max(1, Math.round(((w.changesAt || 0) - (w.elapsed || 0)) / 60000));
+  const fxLine = k => WEATHER_EFFECTS[k] ? WEATHER_EFFECTS[k].short.split(' · ').map(x => `<span>${x}</span>`).join('') : '';
+  const row = (ico, label, title, sub, tag) => `<div class="wb-row"><span class="wb-ico">${ico}</span><div class="wb-txt"><small>${label}</small><b>${title}</b>${sub}</div>${tag ? `<em class="wb-tag">${tag}</em>` : ''}</div>`;
+  const data = ensureDistrictData(state.currentDistrict), lv = moodLevel(data), n = data.mood || 0, full = lv >= MOOD_STEPS.length;
+  const pct = full ? 100 : Math.min(100, Math.round(n / MOOD_STEPS[lv] * 100));
+  let h = `<p class="wb-quote">${quote}</p><div class="wb-rows">`;
+  h += row(WEATHER_KINDS[nowK].icon || '☀️', 'Now', WEATHER_KINDS[nowK].name, fxLine(nowK), nx && nx !== nowK ? '' : `~${mins} min more`);
+  if (nx && nx !== nowK) h += row(WEATHER_KINDS[nx].icon || '☀️', `In ~${mins} min`, WEATHER_KINDS[nx].name, fxLine(nx), '');
+  h += row(ev.icon, 'Today', ev.name, `<span>${ev.text}</span>`, '');
+  h += `<div class="wb-row wb-mood"><span class="wb-ico">${full ? '🎆' : '🎈'}</span><div class="wb-txt"><small>Town mood</small><b>${MOOD_NAMES[lv]}${full ? ' (full!)' : ''}</b><div class="wb-bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div></div>${full ? '' : `<em class="wb-tag">${n}/${MOOD_STEPS[lv]}</em>`}</div>`;
+  return h + '</div>';
+}
 function weatherEffectLine() { const w = WEATHER_EFFECTS[weatherNow()]; return w ? `${WEATHER_KINDS[weatherNow()].icon} ${w.short}` : ''; }
 
 /* ---------------- ambient flavor line: a quiet, rotating sense-of-place above the event log ---------------- */
@@ -721,7 +736,9 @@ function cancelWalk() { walkToken++; if (playerEl) playerEl.classList.remove('wa
 
 // actions (optional): [{ label, run, danger }] - extra buttons under the text (used to edit a placed decoration).
 function showProp(icon, title, desc, actions) {
-  sceneryIcon.textContent = icon; sceneryTitle.textContent = title; sceneryDesc.textContent = desc;
+  sceneryIcon.textContent = icon; sceneryTitle.textContent = title;
+  if (desc && desc.html) sceneryDesc.innerHTML = desc.html; else sceneryDesc.textContent = desc;   // { html } = a structured body (the weather board)
+  sceneryDesc.classList.toggle('rich', !!(desc && desc.html));
   const box = document.getElementById('sceneryActions'); box.innerHTML = ''; box.classList.toggle('hidden', !(actions && actions.length));
   (actions || []).forEach(a => {
     const b = document.createElement('button'); b.className = 'btn scenery-act' + (a.danger ? ' danger' : ''); b.textContent = a.label;
@@ -812,7 +829,7 @@ function interactWith(kind, t) {
   } else if (kind === 'prop' && t.type === 'sign' && state.currentDistrict === 'market') {
     sfx('claim'); openSceneFx('trades');
   } else if (kind === 'prop' && t.type === 'sign') {
-    showProp('🪧', t.title + ' · weather board', `${t.desc} ${forecastText()} Today: ${eventNow().icon} ${eventNow().name} - ${eventNow().text} ${moodLine()}`); showTipOnce('forecast');
+    showProp('🪧', t.title, { html: weatherBoardHtml(t.desc) }); showTipOnce('forecast');
   } else if (kind === 'prop') {
     const data = ensureDistrictData(state.currentDistrict);
     if (!data.propFinds) data.propFinds = {};

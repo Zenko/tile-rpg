@@ -103,8 +103,9 @@ function cellarMapHtml(st) {
     const g = crawlGridHtml(st);
     if (g) {
       const m = run.map;
-      return `<div class="cl-hud"><div class="cl-hearts" aria-label="${run.hearts} of ${max} hearts">${hearts}</div><div class="cl-boons">${boons}</div></div>
-        <div class="cl-chips" id="clChips"><span class="chip">${m.bright > 0 ? '🔆 Bright' : m.dim > 0 ? '🔅 Dim' : '🔦 Lantern'}</span>${m.key ? '<span class="chip gold">🗝️ Key</span>' : ''}</div>
+      return `<div class="cl-hud"><div class="cl-top"><div class="cl-hearts" aria-label="${run.hearts} of ${max} hearts">${hearts}</div>
+        <div class="cl-chips" id="clChips"><span class="chip">${m.bright > 0 ? '🔆 Bright' : m.dim > 0 ? '🔅 Dim' : '🔦 Lantern'}</span>${m.key ? '<span class="chip gold">🗝️ Key</span>' : ''}</div></div>
+        <div class="cl-boons">${boons}</div></div>
         <div class="cl-grid" id="clGrid" role="group" aria-label="The dark floor. Tap a tile you can see to walk there.">${g}</div>
         ${m.lit ? '' : '<button type="button" class="cl-light" data-act="lightall">💡 Light the whole floor</button>'}`;
     }

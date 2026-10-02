@@ -613,12 +613,14 @@ function renderMailList() {
   // Actionable letters float to the top - gifts still waiting, then unread, then everything else - same
   // idea as sorting claimable quests to the top of Dailies/Weekly.
   const sorted = list.slice(0, 40).map((l, i) => ({ l, i })).sort((a, b) => mailSortKey(a.l) - mailSortKey(b.l) || a.i - b.i);
-  return `<div class="panel-list mail-list">${sorted.map(({ l }) => {
+  // Two groups so the eye lands on what needs doing: gifts to claim and unread letters first, then the rest.
+  const isNew = l => (l.gift && !l.claimed) || !l.read, nNew = sorted.filter(x => isNew(x.l)).length;
+  const item = l => {
     const open = !!scene.mailOpen[l.id], hasGift = l.gift && !l.claimed;
     return `<div class="panel-item mail-item${l.read ? '' : ' unread'}${open ? ' open' : ''}" data-act="toggle:${l.id}">
-      <span class="panel-icon">${l.icon}</span>
+      <span class="mail-ava">${l.icon}${!l.read ? '<i class="mail-dot"></i>' : ''}</span>
       <span class="panel-text">
-        <div class="panel-name">${escapeHtml(l.subject)}${!l.read ? '<span class="mail-dot"></span>' : ''}${hasGift ? ' 🎁' : ''}</div>
+        <div class="panel-name">${escapeHtml(l.subject)}</div>
         <div class="panel-desc">from ${escapeHtml(l.from)} · ${fmtLogTime(l.at)}</div>
         ${open ? `<div class="mail-body">${escapeHtml(l.body)}</div>
           <div class="mail-item-actions">
@@ -626,9 +628,17 @@ function renderMailList() {
               : `<button class="btn btn-ghost mail-delete-btn" data-act="delete:${l.id}">🗑️ Delete</button>`}
           </div>` : ''}
       </span>
+      ${hasGift ? '<span class="mail-gift">🎁 Gift</span>' : ''}
       <span class="mail-chevron">${open ? '▲' : '▼'}</span>
     </div>`;
-  }).join('')}</div>`;
+  };
+  let out = '';
+  sorted.forEach(({ l }, i) => {
+    if (i === 0 && nNew) out += `<div class="mail-sec">Waiting for you · ${nNew}</div>`;
+    if (i === nNew && nNew < sorted.length) out += `<div class="mail-sec">Earlier</div>`;
+    out += item(l);
+  });
+  return `<div class="panel-list mail-list">${out}</div>`;
 }
 function toggleMailItem(id) {
   const l = mailState().list.find(x => x.id === id);
