@@ -904,3 +904,8 @@ html.calm .tr-in { transition: none; }
 html.calm .cl-cell.rat, html.cozy .cl-cell.rat { animation: none; }
 @media (prefers-reduced-motion: reduce) { .cl-cell { transition: none; } .cl-cell.rat { animation: none; } }
 #sceneView.sc-std.cl-crawl { --sc-stage-h: 225px; }
+
+/* ===== Fate: Arcana powers in battle (build 111) ===== */
+#battleView .bt-fate.ready { border-color: #c28cf0; box-shadow: 0 0 0 2px color-mix(in srgb, #c28cf0 55%, transparent), 0 0 14px color-mix(in srgb, #c28cf0 50%, transparent); }
+.fate-row { margin-top: -4px; }
+.fate-row .knack-chip.on { background: #c28cf0; color: #25103a; }

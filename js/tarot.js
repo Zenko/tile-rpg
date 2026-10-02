@@ -38,6 +38,9 @@ const ARCANA = [
   { n: 'XX',    name: 'Judgement',          card: 'silver-phoenix',    kind: 'xp',             val: .05,  up: 'A calling. Rising again.',               rev: 'Self-doubt.' },
   { n: 'XXI',   name: 'The World',          card: 'world-tree',        kind: 'harvestPebbles', val: 1,    up: 'Completion, a full circle.',             rev: 'Nearly there.' },
 ];
+// Each Arcana's battle power (BattleEngine.FATES, js/data-and-engine.js), in the same order.
+const FATE_IDS = ['fool', 'magician', 'priestess', 'empress', 'emperor', 'hierophant', 'lovers', 'chariot', 'strength', 'hermit', 'wheel', 'justice', 'hanged', 'death', 'temperance', 'devil', 'tower', 'star', 'moon', 'sun', 'judgement', 'world'];
+ARCANA.forEach((a, i) => { a.fate = FATE_IDS[i]; });
 const TAROT_FAM = { grove: '🌿', stone: '🪨', tide: '🌊', wind: '🪶' };
 const TAROT_POS = ['Past', 'Present', 'Future'];
 const TAROT_ATTUNE_MAX = 3, TAROT_REVERSED_CHANCE = 0.3;
@@ -75,6 +78,14 @@ function tarotBonus(kind) {
   return v;
 }
 const tarotCanDraw = () => !tarotState().cards;
+
+/* ---------- Fate: the battle power of an attuned Arcana ----------
+   Attune an owned Arcana (above) and it can be taken into a match as a second once-per-match power next to the Keeper's Knack.
+   The choice is saved as an Arcana index in state.progress.fate and only counts while that Arcana is still attuned and owned. */
+function fateChoices() { return tarotState().attuned.filter(i => ARCANA[i] && arcanaOwned(i)); }
+function currentFateIndex() { const i = state.progress.fate; return Number.isInteger(i) && fateChoices().includes(i) ? i : null; }
+function currentFateId() { const i = currentFateIndex(); return i === null ? null : ARCANA[i].fate; }
+function chooseFate(i) { state.progress.fate = i === null ? null : i; saveState(); }
 
 function tarotDraw() {
   const t = tarotState(); if (t.cards) return false;
@@ -143,7 +154,7 @@ function tarotDrawArcana(box) {
   const a = ARCANA[tarotSel], own = arcanaOwned(tarotSel), seen = !!t.seen[tarotSel], d = arcanaCardDef(a), at = t.attuned.includes(tarotSel), n = t.attuned.length;
   const detail = own || seen
     ? `<b>${a.n} · ${a.name}</b><span class="tr-card-line">${TAROT_FAM[arcanaFamily(a)]} ${d.icon} ${d.name} · ${RARITY_LABEL[d.rarity]}</span><span>${a.up} <i>Reversed: ${a.rev.charAt(0).toLowerCase() + a.rev.slice(1)}</i></span>
-       <span class="tr-perk">Fortune: ${tarotPerkText(a.kind, a.val)}</span><span class="tr-perk">Attuned: ${tarotPerkText(tarotAttunedPerk(a).kind, tarotAttunedPerk(a).val)}</span>${own ? '' : `<span class="tr-hint">Not yours yet: find ${d.name} to collect it.</span>`}`
+       <span class="tr-perk">Fortune: ${tarotPerkText(a.kind, a.val)}</span><span class="tr-perk">Attuned: ${tarotPerkText(tarotAttunedPerk(a).kind, tarotAttunedPerk(a).val)}</span><span class="tr-perk">Fate in battle: ${BattleEngine.FATES[a.fate].text} <i>From your turn ${BattleEngine.FATES[a.fate].from}, once per match, when attuned.</i></span>${own ? '' : `<span class="tr-hint">Not yours yet: find ${d.name} to collect it.</span>`}`
     : `<b>${a.n} · ???</b><span>This Arcana has not turned up in a reading yet.</span>`;
   box.innerHTML = `<div class="tr-count">${have} of ${ARCANA.length} collected · ${n}/${TAROT_ATTUNE_MAX} attuned</div><div class="tr-grid">${ARCANA.map(tile).join('')}</div><div class="tr-detail">${detail}</div>
     <div class="calm-actions"><button type="button" class="calm-btn pri wide" id="trAtt" ${own && (at || n < TAROT_ATTUNE_MAX) ? '' : 'disabled'}>${!own ? 'Collect it to attune' : at ? 'Remove attunement' : n >= TAROT_ATTUNE_MAX ? 'Three are attuned already' : '✦ Attune'}</button></div>`;

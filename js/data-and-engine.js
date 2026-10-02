@@ -403,6 +403,83 @@ const BattleEngine = (function () {
     return { ok: true };
   }
 
+  /* ---------- Fate: the Arcana powers (build 111) ----------
+     A second once-per-match power, taken from one of the Major Arcana the player has attuned (js/tarot.js maps each Arcana to
+     one of these ids). Like the Knack it is free, needs no aiming and is used from the player's own turn `from`; unlike the
+     Knack it is situational and always costs a little (Spirit, tempo or a risk), and it comes later (turn 3 to 5). Neighbors
+     have none. Balanced by simulation (see HANDOFF §5): each Fate adds roughly one to five points of win rate. */
+  const FATES = {
+    fool:       { icon: '🃏', name: 'The Fool',           from: 3, text: 'Draw 1 card.' },
+    magician:   { icon: '🎩', name: 'The Magician',       from: 5, text: 'Your strongest card gains +2 power.' },
+    priestess:  { icon: '🌙', name: 'The High Priestess', from: 3, text: 'Take the most expensive card from your deck into your hand.' },
+    empress:    { icon: '🌻', name: 'The Empress',        from: 4, text: 'Restore 3 Spirit and heal each of your cards by 3.' },
+    emperor:    { icon: '👑', name: 'The Emperor',        from: 5, text: 'Your strongest card gains a Shield. You lose 2 Spirit.' },
+    hierophant: { icon: '📿', name: 'The Hierophant',     from: 3, text: 'Restore 5 Spirit and draw 1 card.' },
+    lovers:     { icon: '💞', name: 'The Lovers',         from: 4, text: 'Your weakest card gains +1 power and +2 health.' },
+    chariot:    { icon: '🏇', name: 'The Chariot',        from: 6, text: 'Your strongest card can attack again, or attack on the turn it arrives. You lose 2 Spirit.' },
+    strength:   { icon: '🦁', name: 'Strength',           from: 4, text: 'Every card of yours gains +1 power.' },
+    hermit:     { icon: '🏮', name: 'The Hermit',         from: 4, text: 'Draw 1 card, and your weakest card gains a Shield.' },
+    wheel:      { icon: '☄️', name: 'Wheel of Fortune',   from: 5, text: 'Gain 2 energy this turn.' },
+    justice:    { icon: '⚖️', name: 'Justice',            from: 4, text: 'If your Spirit is lower, restore half the gap (up to 6). Otherwise deal 2 to enemy Spirit.' },
+    hanged:     { icon: '🙃', name: 'The Hanged Man',     from: 5, text: "The enemy's strongest card can't attack on its next turn. You lose 2 Spirit." },
+    death:      { icon: '💀', name: 'Death',              from: 5, text: 'Deal 3 damage to the enemy card with the most power. You lose 2 Spirit.' },
+    temperance: { icon: '🫗', name: 'Temperance',         from: 5, text: 'Restore 2 Spirit. Every card of yours gains +1 health.' },
+    devil:      { icon: '😈', name: 'The Devil',          from: 4, text: 'Deal 5 damage to enemy Spirit. You lose 2 Spirit.' },
+    tower:      { icon: '🗼', name: 'The Tower',          from: 5, text: 'Deal 2 damage to every enemy card. You lose 5 Spirit.' },
+    star:       { icon: '🌟', name: 'The Star',           from: 4, text: 'Restore 7 Spirit.' },
+    moon:       { icon: '🌕', name: 'The Moon',           from: 5, text: 'Strip every enemy Shield, then deal 1 damage to each enemy card.' },
+    sun:        { icon: '☀️', name: 'The Sun',            from: 6, text: 'Every card of yours gains +1/+1.' },
+    judgement:  { icon: '📯', name: 'Judgement',          from: 4, text: 'Draw until you hold 5 cards (up to 3 draws).' },
+    world:      { icon: '🌍', name: 'The World',          from: 5, text: 'Restore 2 Spirit and give your weakest card a Shield.' },
+  };
+  function fateReady(G, who) {
+    const pl = G.p[who], f = pl.fate && FATES[pl.fate];
+    if (!f) return { ok: false, why: 'No Fate chosen' };
+    if (G.over || G.active !== who) return { ok: false, why: 'Not your turn' };
+    if (pl.fateUsed) return { ok: false, why: 'Already used this match' };
+    if (pl.turns < f.from) return { ok: false, why: `Ready on your turn ${f.from}` };
+    return { ok: true };
+  }
+  function setFate(G, who, id) { const pl = G.p[who]; if (!pl.fateUsed) pl.fate = FATES[id] ? id : null; }
+  function useFate(G, who) {
+    const chk = fateReady(G, who); if (!chk.ok) return chk;
+    const me = G.p[who], op = G.p[1 - who], id = me.fate;
+    const strongest = b => b.slice().sort((x, y) => y.power - x.power || y.hp - x.hp)[0], weakest = b => b.slice().sort((x, y) => x.power - y.power || x.hp - y.hp)[0];
+    const heal = (side, n) => { const pl = G.p[side], h = Math.min(n, pl.maxSpirit - pl.spirit); if (h > 0) { pl.spirit += h; emit(G, 'spirit', { who: side, delta: h }); } };
+    const hurtSpirit = (side, n) => { G.p[side].spirit -= n; emit(G, 'spirit', { who: side, delta: -n, spell: true }); };
+    const buff = (x, p, h) => { x.power += p; x.grit += h; x.hp += h; emit(G, 'buff', { who, uid: x.uid, amt: Math.max(p, h) }); };
+    const mend = (x, n) => { const a = Math.min(n, x.grit - x.hp); if (a > 0) { x.hp += a; emit(G, 'mendcard', { who, uid: x.uid, amt: a }); } };
+    const shield = x => { if (x && !x.shield) { x.shield = true; emit(G, 'shieldup', { who, uid: x.uid }); } };
+    me.fateUsed = true;
+    emit(G, 'fate', { who, id });
+    switch (id) {
+      case 'fool': draw(G, me); break;
+      case 'magician': { const t = strongest(me.board); if (t) buff(t, 2, 0); break; }
+      case 'priestess': { if (me.hand.length >= RULES.handMax || !me.deck.length) break; let bi = 0; me.deck.forEach((c, i) => { if (c.cost > me.deck[bi].cost) bi = i; }); const c = me.deck.splice(bi, 1)[0]; me.hand.push(c); emit(G, 'draw', { who, card: c }); break; }
+      case 'empress': heal(who, 3); me.board.forEach(x => mend(x, 3)); break;
+      case 'emperor': if (me.board.length) { shield(strongest(me.board)); hurtSpirit(who, 2); } break;
+      case 'hierophant': heal(who, 5); draw(G, me); break;
+      case 'lovers': { const t = weakest(me.board); if (t) buff(t, 1, 2); break; }
+      case 'chariot': { const t = strongest(me.board); if (t) { t.ready = true; t.attacks = 0; t.lull = 0; emit(G, 'readied', { who, uid: t.uid }); hurtSpirit(who, 2); } break; }
+      case 'strength': me.board.forEach(x => buff(x, 1, 0)); break;
+      case 'hermit': draw(G, me); shield(weakest(me.board)); break;
+      case 'wheel': me.energy += 2; break;
+      case 'justice': { const gap = op.spirit - me.spirit; if (gap > 0) heal(who, Math.min(6, Math.ceil(gap / 2))); else hurtSpirit(1 - who, 2); break; }
+      case 'hanged': { const t = strongest(op.board); if (t) { lullCard(G, 1 - who, t); hurtSpirit(who, 2); } break; }
+      case 'death': { const t = op.board.slice().sort((x, y) => y.power - x.power || y.hp - x.hp)[0]; if (t) { zap(G, 1 - who, t, 3, false, 'fate'); hurtSpirit(who, 2); } break; }
+      case 'temperance': heal(who, 2); me.board.forEach(x => buff(x, 0, 1)); break;
+      case 'devil': hurtSpirit(1 - who, 5); hurtSpirit(who, 2); break;
+      case 'tower': op.board.slice().forEach(x => zap(G, 1 - who, x, 2, false, 'fate')); hurtSpirit(who, 5); break;
+      case 'star': heal(who, 7); break;
+      case 'moon': op.board.slice().forEach(x => { x.shield = false; zap(G, 1 - who, x, 1, false, 'fate'); }); break;
+      case 'sun': me.board.forEach(x => buff(x, 1, 1)); break;
+      case 'judgement': for (let i = 0; i < 3 && me.hand.length < 5; i++) draw(G, me); break;
+      case 'world': heal(who, 2); shield(weakest(me.board)); break;
+    }
+    checkEnd(G);
+    return { ok: true };
+  }
+
   function modsFor(G, side) {
     const m = Object.assign({}, G.mods || {});
     if (G.twist && G.twist.kind === 'bloom' && G.twist.side === side) { m.addKw = 'bloom'; m.addKwMaxCost = 1; }
@@ -496,6 +573,7 @@ const BattleEngine = (function () {
     G.p = [0, 1].map(i => ({ idx: i, spirit: sp[i], maxSpirit: sp[i], deck: mk(i === 0 ? deckA : deckB, i), hand: [], board: [], turns: 0, energy: 0, maxEnergy: 0 }));
     G.uid = uid;                                   // later cards (Seedlings) keep numbering from here
     (opts.knack || []).forEach((id, i) => { if (id && KNACKS[id]) G.p[i].knack = id; });
+    (opts.fate || []).forEach((id, i) => { if (id && FATES[id]) G.p[i].fate = id; });
     G.p.forEach((pl, i) => { const n = RULES.hand + (i !== first ? 1 : 0); for (let k = 0; k < n; k++) draw(G, pl, true); });
     // opts.startSpirit: begin below full (the Festival Cup carries your Spirit from one round to the next)
     (opts.startSpirit || []).forEach((v, i) => { if (typeof v === 'number') G.p[i].spirit = Math.max(1, Math.min(v, G.p[i].maxSpirit)); });
@@ -873,7 +951,7 @@ const BattleEngine = (function () {
     return deck;
   }
 
-  return { RULES, KEYWORDS, SPELLS, TWISTS, KNACKS, knackReady, setKnack, useKnack, MAX_KEYWORDS, defOf, baseIdOf, variantId, suggestDeck, makeCard, familyOf, newGame, startTurn, canPlay, playCard, spellNeedsTarget, legalTargets, attack, endTurn, forfeit, boost, mulligan, aiNextAction, applyAction, aiTurn, guards, valueOf };
+  return { RULES, KEYWORDS, SPELLS, TWISTS, KNACKS, knackReady, setKnack, useKnack, FATES, fateReady, setFate, useFate, MAX_KEYWORDS, defOf, baseIdOf, variantId, suggestDeck, makeCard, familyOf, newGame, startTurn, canPlay, playCard, spellNeedsTarget, legalTargets, attack, endTurn, forfeit, boost, mulligan, aiNextAction, applyAction, aiTurn, guards, valueOf };
 })();
 /* END BATTLE ENGINE */
 

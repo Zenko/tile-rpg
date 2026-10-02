@@ -4,6 +4,7 @@
    its turn rather than stacking on top.
    ============================================================ */
 const TIPS = {
+  fate:       { icon: '🔮', title: 'Fate', text: 'Attune a Major Arcana (Calm corner → Tarot → The Arcana) and you can take its power into a match. Pick it on the keep-this-hand screen; a purple round button by your bar glows when it is ready. Each one works once per match, from its own turn, and most cost a little.' },
   fortune:    { icon: '🔮', title: "Madame Soot's tent", text: 'On Market Row from dusk until dawn. Soot gives your daily tarot reading, swaps one card once a day, tells you the story of your deck, and sells Arcana packs.' },
   tarot:      { icon: '🔮', title: 'Tarot', text: 'Once a day, draw three Arcana. Turn them all over and the middle card gives the day a fortune. The 22 Major Arcana are real cards from the game: own the card and you own the Arcana, and you can attune three for a small permanent perk.' },
   cellarRun:  { icon: '🕯️', title: 'The cellar', text: 'Every floor offers a few doors: a fight, a chest, a campfire, a shrine or a peddler, hidden in the dark: walk with your lantern and tap tiles to explore. Barrels hold Pebbles, a key opens the locked chest, rats dim the light and glowcaps brighten it. You have three hearts; losing a fight costs one, and at zero the run ends. Leaving does not end it.' },

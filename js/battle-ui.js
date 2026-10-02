@@ -108,7 +108,7 @@ function startBattleNow(opponent, first) {
   }
   else {
     G = BattleEngine.newGame(myDeck.slice(), oppDeck.slice(), Math.random, { spirit: [BattleEngine.RULES.spirit, profile.spirit], mods: world.mods,
-      twist: twistKind ? { side: 1, kind: twistKind } : null, startSpirit: opponent.startSpirit ? [opponent.startSpirit, null] : null, first, knack: [currentKnackId(), null] });
+      twist: twistKind ? { side: 1, kind: twistKind } : null, startSpirit: opponent.startSpirit ? [opponent.startSpirit, null] : null, first, knack: [currentKnackId(), null], fate: [neutral ? null : currentFateId(), null] });
     BattleEngine.startTurn(G);
   }
   if (companionSpirit) BattleEngine.boost(G, 0, { spirit: 2 });      // a Guard-type companion stands with you
@@ -151,7 +151,7 @@ function startBattleNow(opponent, first) {
   if (battle.pendingHelp) { state.progress.seenBattleHelp = true; saveState(); }
   const swapBtn = btGet('mulliganSwapBtn'); swapBtn.disabled = false; swapBtn.textContent = 'Draw new hand';
   btRenderMulliganHand();
-  renderSnackRow(); btRenderKnackRow();
+  renderSnackRow(); btRenderKnackRow(); btRenderFateRow();
   // Deal the opening hand slowly from the deck, then offer the keep-or-redraw choice.
   const tk = battle.token; battle.busy = true;
   btRender({ dealAll: true });
@@ -262,6 +262,55 @@ async function btDoKnack() {
   const r = BattleEngine.useKnack(battle.G, 0);
   if (!r.ok) { btToast(r.why); return; }
   battle.busy = true; bumpStat('knacksUsed', 1); saveState();
+  await btAnimate(btFlush(battle.G), token);
+  if (!btAlive(token)) return;
+  battle.busy = false;
+  if (battle.G.over) return btFinish();
+  btRender();
+}
+
+/* ---------- Fate: your attuned Arcana's once-per-match power (build 111) ----------
+   Works like the Knack: pick one of your attuned Arcana on the keep-this-hand screen, then a round button by your bar
+   glows when it can be used (BattleEngine.FATES). Hidden when nothing is attuned, in puzzles and in draft/neutral matches. */
+function btRenderFateRow() {
+  const row = btGet('fateRow'); if (!row || !battle) return;
+  const choices = fateChoices();
+  if (battle.puzzle || battle.neutral || !choices.length) { row.classList.add('hidden'); return; }
+  row.classList.remove('hidden');
+  const cur = battle.G.p[0].fate, F = cur && BattleEngine.FATES[cur], idx = currentFateIndex();
+  row.innerHTML = `<div class="knack-label">🔮 Your Fate - once per match</div><div class="knack-chips"><button type="button" class="knack-chip${idx === null ? ' on' : ''}" data-fate="-1">None</button>${choices.map(i => `<button type="button" class="knack-chip${i === idx ? ' on' : ''}" data-fate="${i}" title="${BattleEngine.FATES[ARCANA[i].fate].text}">${BattleEngine.FATES[ARCANA[i].fate].icon} ${ARCANA[i].name}</button>`).join('')}</div>
+    <div class="knack-desc">${F ? `${F.icon} <b>${F.name}.</b> ${F.text} <i>From your turn ${F.from}.</i>` : 'No Fate this match.'}</div>`;
+  row.querySelectorAll('[data-fate]').forEach(b => b.addEventListener('click', () => {
+    const i = +b.dataset.fate; chooseFate(i < 0 ? null : i); sfx('tap'); BattleEngine.setFate(battle.G, 0, i < 0 ? null : ARCANA[i].fate); btRenderFateRow(); btRenderFate();
+  }));
+}
+function btRenderFate() {
+  const b = btGet('btFate'); if (!b || !battle) return;
+  const G = battle.G, pl = G.p[0], f = pl.fate && BattleEngine.FATES[pl.fate];
+  b.classList.toggle('hidden', !f || !!battle.puzzle);
+  if (!f) return;
+  const chk = BattleEngine.fateReady(G, 0);
+  b.textContent = f.icon;
+  b.classList.toggle('ready', chk.ok && !battle.busy);
+  b.classList.toggle('used', !!pl.fateUsed);
+  b.setAttribute('aria-label', `${f.name}: ${pl.fateUsed ? 'used' : chk.ok ? 'ready' : chk.why}`);
+}
+function btShowFateTip() {
+  if (!battle || battle.G.over) return;
+  const G = battle.G, pl = G.p[0], f = pl.fate && BattleEngine.FATES[pl.fate]; if (!f) return;
+  const chk = BattleEngine.fateReady(G, 0), ok = chk.ok && !battle.busy, tip = btGet('btTip');
+  tip.innerHTML = `<div class="t-h"><span class="ic">${f.icon}</span><b>${f.name}</b><small>Your Fate · once per match</small></div>
+    <div class="kw">${f.text}</div>
+    ${pl.fateUsed ? '<div class="kw" style="color:var(--ink-soft)">Already used this match.</div>' : ok ? '<button class="btn knack-use" id="btFateUse" type="button">Use it now</button>' : `<div class="hint">${chk.why}.</div>`}`;
+  tip.classList.add('show', 'interactive'); battleView.classList.add('tip-open'); btPlaceTip();
+  const use = btGet('btFateUse'); if (use) use.addEventListener('click', btDoFate);
+}
+async function btDoFate() {
+  if (!battle || battle.busy || battle.G.over) return;
+  const token = battle.token; btHideTip(); battle.sel = null;
+  const r = BattleEngine.useFate(battle.G, 0);
+  if (!r.ok) { btToast(r.why); return; }
+  battle.busy = true; bumpStat('fatesUsed', 1); saveState();
   await btAnimate(btFlush(battle.G), token);
   if (!btAlive(token)) return;
   battle.busy = false;
@@ -520,7 +569,7 @@ function btCoach() {
   el.textContent = t;
 }
 
-function btRender(o) { o = o || {}; btRenderKnack(); btRenderBars(); btSyncSnackBadge(); btRenderGems(); btRenderBoards(o.entering); btRenderHand(o.drawn, o.dealAll); btCoach(); }
+function btRender(o) { o = o || {}; btRenderKnack(); btRenderFate(); btRenderBars(); btSyncSnackBadge(); btRenderGems(); btRenderBoards(o.entering); btRenderHand(o.drawn, o.dealAll); btCoach(); }
 
 /* ---------------- card info sheet ---------------- */
 function btShowTip(c, hint) {
@@ -877,6 +926,11 @@ async function btAnimate(evs, token) {
       btRender(); btSpellFlash({ icon: k.icon, name: k.name, rarity: 'rare' });
       btSetMsg(`You use ${k.icon} ${k.name}`);
       sfx('rare'); buzz(HAP.play); await btWait(560);
+    } else if (e.type === 'fate') {
+      const f = BattleEngine.FATES[e.id];
+      btRender(); btSpellFlash({ icon: f.icon, name: f.name, rarity: 'ultra' });
+      btSetMsg(`${e.who === 0 ? 'You draw' : 'The enemy draws'} ${f.icon} ${f.name}`);
+      sfx('mythic'); buzz(HAP.play); await btWait(620);
     } else if (e.type === 'shieldup') {
       btRender();
       const t = document.querySelector(`#battleView .card[data-uid="${e.uid}"]`);
@@ -1181,6 +1235,7 @@ btGet('btAtkFace').addEventListener('click', btAttackFace);
 btGet('btHelp').addEventListener('click', btShowHelp);
 btGet('btYield').addEventListener('click', btYield);
 btGet('btKnack').addEventListener('click', () => { ensureAudio(); if (btGet('btTip').classList.contains('interactive')) btHideTip(); else btShowKnackTip(); });
+btGet('btFate').addEventListener('click', () => { ensureAudio(); if (btGet('btTip').classList.contains('interactive')) btHideTip(); else btShowFateTip(); });
 btGet('btHelpClose').addEventListener('click', () => { btGet('btHelpOverlay').classList.add('hidden'); btOpponentOpens(); });
 btGet('mulliganKeepBtn').addEventListener('click', () => { ensureAudio(); btCloseMulligan(); });
 btGet('mulliganSwapBtn').addEventListener('click', () => {
@@ -1194,7 +1249,7 @@ btGet('mulliganSwapBtn').addEventListener('click', () => {
 // Tap outside to deselect. This runs in the CAPTURE phase, before the tapped card's own handler re-renders the board:
 // afterwards the tapped element is detached from the page, and would wrongly look like a tap outside.
 document.addEventListener('click', e => {
-  if (battle && inBattle && btGet('btTip').classList.contains('interactive') && !e.target.closest('#btTip') && !e.target.closest('#btKnack')) btHideTip();   // tap away from the Knack sheet
+  if (battle && inBattle && btGet('btTip').classList.contains('interactive') && !e.target.closest('#btTip') && !e.target.closest('#btKnack') && !e.target.closest('#btFate')) btHideTip();   // tap away from the Knack sheet
   if (!battle || !inBattle || !battle.sel) return;
   if (e.target.closest('#battleView .card') || e.target.closest('#btOppBar') || e.target.closest('#btAtkFace') || e.target.closest('#btTip') || e.target.closest('#btEnd')) return;
   battle.sel = null; btHideTip(); btRender();
