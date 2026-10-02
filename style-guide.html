@@ -325,7 +325,7 @@ table.sg-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
   <div class="sg-grid" style="grid-template-columns:repeat(auto-fill,minmax(210px,1fr))" id="compose"></div>
 
   <h3 id="c-problems" class="sg-h3a">Good art and common problems</h3>
-  <p class="sg-note" style="margin:-4px 0 12px">The same creature drawn well and then with five typical mistakes. The small chips show each at 32 px on the common and mythic faces, the way a player sees it.</p>
+  <p class="sg-note" style="margin:-4px 0 12px">The same creature drawn well and then with six typical mistakes. The small chips show each at 32 px on the common and mythic faces, the way a player sees it.</p>
   <div class="sg-grid" style="grid-template-columns:repeat(auto-fill,minmax(250px,1fr))" id="problems"></div>
 
   <h3 id="c-try" class="sg-h3a">Try your art</h3>
@@ -377,6 +377,7 @@ table.sg-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
     <li><label><input type="checkbox"> 512 x 512 px, PNG, transparent background</label></li>
     <li><label><input type="checkbox"> Subject inside the 410 x 410 safe area; round subjects inside the circle</label></li>
     <li><label><input type="checkbox"> No frame, border, cost, name or stat numbers drawn in</label></li>
+    <li><label><input type="checkbox"> No drop shadow baked in (the game adds its own); a flat ground shadow is fine</label></li>
     <li><label><input type="checkbox"> Reads clearly at 32 px (try the checker above)</label></li>
     <li><label><input type="checkbox"> Looks right on all five rarity faces, in Dark and Light</label></li>
     <li><label><input type="checkbox"> No white or black halo on the edges</label></li>
@@ -587,6 +588,7 @@ window.escapeHtml = function (s) { return String(s).replace(/[&<>"]/g, function 
     ['bad', 'Frame baked in', base + '<rect x="10" y="10" width="492" height="492" rx="46" fill="none" stroke="#fff" stroke-width="14"/><circle cx="62" cy="62" r="44" fill="#232b34"/><text x="62" y="82" text-anchor="middle" font-family="sans-serif" font-size="56" font-weight="800" fill="#fff">3</text><text x="256" y="494" text-anchor="middle" font-family="sans-serif" font-size="40" fill="#fff">Fox</text>', 'The game draws the card frame, cost and name. Anything you draw there doubles up.'],
     ['bad', 'Outside the safe area', '<g transform="translate(-100 -92) scale(1.4)">' + base + '</g>', 'Too big: the subject is cropped and touches the edge, which clashes with the rounded card corners.'],
     ['bad', 'White halo', base.replace(/fill="(#[0-9a-f]+|rgba[^"]*)"/g, 'fill="#fff" stroke="#fff" stroke-width="26" stroke-linejoin="round"') + base, 'A white or black fringe looks fine on one face and ugly on another. Keep edges clean and transparent.'],
+    ['bad', 'Baked-in drop shadow', '<defs><filter id="ds" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="16" stdDeviation="16" flood-color="#000" flood-opacity=".6"/></filter></defs><g filter="url(#ds)">' + base + '</g>', 'The game already adds a faint shadow, scaled to each size and theme. A baked one doubles up and turns muddy when small. (A flat ground shadow under a standing creature, as in the good example, is fine.)'],
     ['bad', 'Thin outline only', base.replace(/fill="(#[0-9a-f]+|rgba[^"]*)"/g, 'fill="none" stroke="#3a2a1c" stroke-width="3"'), 'Hairlines disappear when scaled and take no colour from the rarity face. Use filled shapes.']
   ];
   $('#problems').innerHTML = PROBS.map(function (p) { return '<div class="sg-card sg-prob ' + p[0] + '"><div class="box sg-checker"><svg class="art" viewBox="0 0 512 512" aria-hidden="true">' + p[2] + '</svg></div><div class="verdict">' + (p[0] === 'good' ? '✓ ' : '✕ ') + p[1] + '</div>' + chips32(svgOf(p[2])) + '<div class="sg-note" style="margin:0">' + p[3] + '</div></div>'; }).join('');

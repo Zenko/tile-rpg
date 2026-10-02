@@ -56,6 +56,7 @@ select.lab-btn, input.lab-btn { font-weight: 600; }
 .empty { padding: 26px; text-align: center; color: var(--ink-soft); border: 1px dashed var(--stone-edge); border-radius: 16px; font-size: .88rem; }
 .stick { position: sticky; top: 64px; z-index: 5; }
 .toast-lab { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); background: var(--ink); color: var(--stone); padding: 9px 18px; border-radius: 999px; font-size: .84rem; font-weight: 700; z-index: 90; opacity: 0; transition: opacity .25s; pointer-events: none; } .toast-lab.show { opacity: 1; }
+html.lab-noshadow .card-art-img, html.lab-noshadow .art-shadow { filter: none !important; }
 @media (max-width: 560px) { .lab-sec > h2 { font-size: 1.45rem; } }
 </style>
 </head>
@@ -65,6 +66,7 @@ select.lab-btn, input.lab-btn { font-weight: 600; }
 <header class="lab-top"><div class="lab-top-in">
   <div class="lab-brand">Asset Lab</div>
   <nav class="lab-nav"><a href="#library">Library</a><a href="#card">One card</a><a href="#screens">In the game</a><a href="#set">Whole set</a><a href="#town">Town sprites</a><a href="#other">Portraits &amp; icon</a><a href="#export">Hand-off</a></nav>
+  <span class="lab-seg" id="shSeg" role="group" aria-label="Game drop shadow on art" title="The game adds a faint drop shadow to card art. Switch it off to see the raw art."><button id="shOn" class="on" type="button">Shadow on</button><button id="shOff" type="button">Off</button></span>
   <span class="lab-seg" id="themeSeg" role="group" aria-label="Preview theme"><button id="thDark" class="on" type="button">Dark</button><button id="thLight" type="button">Light</button></span>
 </div></header>
 
@@ -89,7 +91,7 @@ select.lab-btn, input.lab-btn { font-weight: 600; }
 <!-- ONE CARD -->
 <section class="lab-sec" id="card">
   <h2>2. One card, every way</h2>
-  <p class="lab-lead">Pick a card (the ones with new art are marked). Everything below shows that card with its new art, using the real card faces. Use the Dark / Light switch at the top to check both themes.</p>
+  <p class="lab-lead">Pick a card (the ones with new art are marked). Everything below shows that card with its new art, using the real card faces. Use the Dark / Light switch at the top to check both themes, and the Shadow switch to compare with and without the faint drop shadow the game adds to art itself.</p>
   <div class="lab-demo" style="align-items:center;margin-bottom:16px"><label class="lab-note" style="margin:0" for="pick">Card</label><select id="pick" class="lab-btn" style="min-width:240px"></select><span class="lab-note" id="pickInfo" style="margin:0"></span></div>
   <div id="cardLab"></div>
 </section>
@@ -225,7 +227,7 @@ window.escapeHtml = function (s) { return String(s).replace(/[&<>"]/g, function 
   function reveal(d) { return '<div class="reveal-card rarity-' + (d.rarity || 'rare') + (d.spell ? ' spell' : '') + '">' + cardFaceHtml(d) + '</div>'; }
   function emojiDef(d) { return Object.assign({}, d, { art: ORIG[d.id] }); }
   function withR(d, r) { return Object.assign({}, d, { rarity: r }); }
-  function artImg(d, px) { return d.art ? '<img src="' + d.art + '" width="' + px + '" height="' + px + '" alt="" style="display:block">' : '<span style="font-size:' + px + 'px;line-height:1;display:block">' + d.icon + '</span>'; }
+  function artImg(d, px) { return d.art ? '<img class="art-shadow" src="' + d.art + '" width="' + px + '" height="' + px + '" alt="" style="display:block;font-size:' + px + 'px">' : '<span style="font-size:' + px + 'px;line-height:1;display:block">' + d.icon + '</span>'; }
   var GRAD = { dark: { common: ['#5b9fb2', '#3f7f94'], rare: ['#c9bce8', '#9a86c9'], ultra: ['#a8cbe8', '#6a96c2'], super: ['#f0cf94', '#e8cb88'], mythic: ['#eaa8c4', '#c27a9c'] }, light: { common: ['#5aa397', '#3f7f78'], rare: ['#c9bce8', '#9a86c9'], ultra: ['#a8cbe8', '#6a96c2'], super: ['#f0cf94', '#b5832a'], mythic: ['#eaa8c4', '#c27a9c'] } };
 
   /* ---------- 1. library table ---------- */
@@ -369,11 +371,14 @@ window.escapeHtml = function (s) { return String(s).replace(/[&<>"]/g, function 
   $('#biomeSeg').addEventListener('click', function (e) { var b = e.target.closest('[data-bi]'); if (b) { biome = b.dataset.bi; renderTown(); } });
   $('#otherPick').addEventListener('change', function (e) { otherSel = e.target.value; renderOther(); });
   function setTheme(t) { root.setAttribute('data-theme', t); $('#thDark').classList.toggle('on', t === 'dark'); $('#thLight').classList.toggle('on', t === 'light'); try { localStorage.setItem('lab-theme', t); } catch (e) {} if (typeof renderCardLab === 'function' && BYID[sel]) { renderCardLab(); } }
+  function setShadow(on) { root.classList.toggle('lab-noshadow', !on); $('#shOn').classList.toggle('on', on); $('#shOff').classList.toggle('on', !on); try { localStorage.setItem('lab-shadow', on ? '1' : '0'); } catch (e) {} }
+  $('#shOn').onclick = function () { setShadow(true); }; $('#shOff').onclick = function () { setShadow(false); };
   $('#thDark').onclick = function () { setTheme('dark'); }; $('#thLight').onclick = function () { setTheme('light'); };
 
   /* ---------- boot ---------- */
   (async function () {
     var th; try { th = localStorage.getItem('lab-theme'); } catch (e) {} root.setAttribute('data-theme', th === 'light' ? 'light' : 'dark'); $('#thDark').classList.toggle('on', th !== 'light'); $('#thLight').classList.toggle('on', th === 'light');
+    try { setShadow(localStorage.getItem('lab-shadow') !== '0'); } catch (e) {}
     await idbOpen(); var saved = await idbAll();
     for (var i = 0; i < saved.length; i++) { var s = saved[i], rec = { name: s.name, blob: s.blob, url: URL.createObjectURL(s.blob), assign: s.assign || '', ts: s.ts }; var a = await analyze(rec); rec.info = a.info; rec.w = a.w; rec.h = a.h; LIB[rec.name] = rec; }
     var first = Object.keys(LIB).map(function (k) { return targetOf(LIB[k]); }).filter(function (t) { return t && t.kind === 'card'; })[0]; if (first) sel = first.id;

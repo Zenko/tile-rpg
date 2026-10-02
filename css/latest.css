@@ -1020,3 +1020,10 @@ html.calm .cl-cell.rat, html.cozy .cl-cell.rat { animation: none; }
 .cl-cell.fog { background: rgba(255,255,255,.035); box-shadow: inset 0 0 0 1px rgba(255,255,255,.025); }
 .cl-cell.wall { border-radius: 6px; }
 .cl-light { border-style: solid; background: color-mix(in srgb, var(--accent) 14%, var(--stone)); border-color: color-mix(in srgb, var(--accent) 45%, var(--stone-edge)); color: var(--ink); }
+
+/* Card art gets a faint drop shadow from the game (build 125), not from the art files: it is sized in em so it scales with the icon
+   (18 to 67 px), and tuned per theme so it lifts the picture off every rarity face without muddying small sizes. Designers should NOT
+   bake a shadow into their PNGs (a flat ground shadow under a standing creature is fine; it is part of the drawing). */
+:root { --art-sh: rgba(0, 0, 0, .34); }
+:root[data-theme="light"] { --art-sh: rgba(60, 40, 20, .24); }
+.card-art-img, .art-shadow { filter: drop-shadow(0 .035em .05em var(--art-sh)); }
