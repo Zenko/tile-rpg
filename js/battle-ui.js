@@ -1066,13 +1066,15 @@ function btShowResult(won, yielded) {
     if (battle.isBoss) { bumpStat('bossesWon', 1); markDistrictCalm(state.currentDistrict); }
     logEvent(battle.isBoss ? '👑' : '⚔️', battle.isBoss ? `Defeated ${npc.name}, boss of ${DISTRICTS[state.currentDistrict].name}.` : `Won a friendly match against ${npc.name}.`);
     if (isNew) setTimeout(() => toast('📖 New entry in your Index'), 900);
-  } else if (!won && npc.dungeon && npc.dungeon.deep && !battle.rewarded) {
-    battle.rewarded = true;                                   // settle the run exactly once
-    dungeonLoss();
+  } else if (!won && npc.dungeon && !battle.rewarded) {
+    battle.rewarded = true;                                   // settle the heart exactly once
+    const lost = dungeonLoss() || { ended: true, hearts: 0 };
     icon.textContent = '🕳️'; icon.className = 'big-icon';
     btGet('battleSparkles').innerHTML = '';
-    battleEndTitle.textContent = 'The deep pushes you back.';
-    battleEndStats.innerHTML = `${npc.name} held floor ${npc.dungeon.floor + 1}. You cleared <b>${npc.dungeon.floor}</b> floors this run · deepest <b>${cellarBest()}</b>.<br>The cellar rests for a while before the next climb.`;
+    battleEndTitle.textContent = lost.ended ? 'The dark pushes you back.' : 'You lose a heart.';
+    battleEndStats.innerHTML = lost.ended
+      ? `${npc.name} held floor ${npc.dungeon.floor + 1}. You cleared <b>${npc.dungeon.floor}</b> floors this run · deepest <b>${cellarBest()}</b>.<br>${npc.dungeon.floor >= CELLAR.floors.length ? 'The cellar rests for a while before the next climb.' : 'You can go straight back down.'}`
+      : `${npc.name} held floor ${npc.dungeon.floor + 1}. <b>${'♥'.repeat(lost.hearts)}</b> left.<br>Pick a door again, or try a different one.`;
     btGet('battleRetryBtn').classList.add('hidden');
     sfx('soft');
   } else if (!won) {

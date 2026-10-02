@@ -347,6 +347,8 @@ function cellarState() {
   const st = buildingState('cellar');
   if (typeof st.floor !== 'number') st.floor = 0;
   if (typeof st.best !== 'number') st.best = 0;
+  // a save from before the Descent Map (js/cellar-run.js) that is mid-climb gets a run at its current floor
+  if (!st.run && st.floor > 0 && !st.clearedAt && !st.resting && typeof cellarNewRun === 'function') cellarNewRun(st);
   // an older save "rested" by sitting on floor 3 with clearedAt set; the rest now has its own flag
   if (st.clearedAt && !st.resting && st.floor >= CELLAR.floors.length && !st.inRun) st.resting = true;
   if (st.resting && Date.now() - (st.clearedAt || 0) >= CELLAR.cooldownMs) { st.floor = 0; st.clearedAt = null; st.resting = false; st.inRun = false; }
@@ -354,9 +356,11 @@ function cellarState() {
 }
 // Ends a deep run: the cellar rests, the record stays.
 function endCellarRun(st, reason) {
-  st.resting = true; st.inRun = false; st.clearedAt = Date.now();
   const reached = st.floor;                                // floors cleared this run
-  if (reached > CELLAR.floors.length) logEvent('🕳️', `Climbed out of the cellar after clearing floor ${reached}${reason ? ' (' + reason + ')' : ''}.`);
+  st.run = null; st.inRun = false;
+  // a short run costs nothing (start again at once); from three floors on the cellar rests for a few minutes
+  if (reached >= CELLAR.floors.length) { st.resting = true; st.clearedAt = Date.now(); logEvent('🕳️', `Climbed out of the cellar after clearing floor ${reached}${reason ? ' (' + reason + ')' : ''}.`); }
+  else { st.floor = 0; st.resting = false; st.clearedAt = null; }
   saveState();
 }
 function cellarBest() { return Math.max(state.progress.cellarBest || 0, cellarState().best || 0); }
@@ -419,8 +423,8 @@ function openScene(id) {
   if (id === 'cellar') {
     const st = cellarState();
     scene.text = st.resting ? 'The cellar is quiet. Whatever lives here is resting.'
-      : st.floor === CELLAR.floors.length && !st.inRun ? (showTipOnce('cellarDeep'), 'Behind the old chest, a crack in the wall leads further down. Cold air breathes out of it.')
-      : (st.floor === 0 ? 'Cool air rises from the stairs. ' : '') + cellarFloor(st.floor).blurb;
+      : !cellarRun(st) ? 'Cool air rises from the stairs. Torches flicker on the walls, and every floor has more than one way on.'
+      : `Floor ${st.floor + 1}. ${cellarIsGuardian(st.floor) ? cellarFloor(st.floor).blurb : 'Pick a door.'}`;
   } else if (id === 'cup') { scene.text = cupIntro(); showTipOnce('cup'); }
   else if (id === 'trades') { scene.text = `Neighbors pin up offers here each morning. Only spare copies can be traded. ${forecastText()}`; showTipOnce('trades'); }
   else if (id === 'home') { const g = INTERIORS.home.greet; scene.text = g(); showTipOnce('home'); }
@@ -679,23 +683,22 @@ function renderSceneBody() {
   const stage = document.getElementById('scStage'), pips = document.getElementById('scPips'), acts = document.getElementById('scActions');
   document.getElementById('scText').textContent = scene.text;
   renderHomeShelf();                                  // only draws in your own cottage; clears itself anywhere else
+  if (!scene || scene.id !== 'cellar') cellarDecorateStage(false);   // torches and barrels belong to the cellar only
   if (scene.id === 'cellar') {
     const st = cellarState(), fl = CELLAR.floors, resting = st.resting, deep = isDeepFloor(st.floor);
     sceneView.dataset.theme = 'dark';
     document.getElementById('scTitle').textContent = deep && !resting ? 'The Deep Cellar' : 'The Old Cellar';
-    document.getElementById('scWho').textContent = resting ? '🕯️' : cellarFloor(st.floor).icon;
-    const best = cellarBest();
-    pips.innerHTML = deep && !resting
-      ? `<span class="pip-label">🕳️ Floor ${st.floor + 1}${best ? ` · deepest ${best}` : ''}</span>`
-      : fl.map((f, i) => `<span class="pip ${i < st.floor ? 'done' : (i === st.floor && !resting ? 'now' : '')}"></span>`).join('') + (best > fl.length ? `<span class="pip-label">deepest ${best}</span>` : '');
+    const run = cellarRun(st), best = cellarBest();
+    cellarDecorateStage(true);
+    document.getElementById('scWho').textContent = resting ? '🕯️' : run ? (cellarIsGuardian(st.floor) ? cellarFloor(st.floor).icon : '🚪') : '🪜';
+    pips.innerHTML = run && !resting ? `<span class="pip-label">🕳️ Floor ${st.floor + 1}${best ? ` · deepest ${best}` : ''}</span>`
+      : best ? `<span class="pip-label">Deepest floor ${best}</span>` : '';
     if (resting) {
       acts.innerHTML = sceneBtn('rest', `Quiet for now (${fmtClock(CELLAR.cooldownMs - (Date.now() - st.clearedAt))})`, true) + sceneBtn('leave', 'Climb back up');
-    } else if (deep) {
-      const f = cellarFloor(st.floor);
-      acts.innerHTML = sceneBtn('descend', `${f.guardian ? '🗝️' : '🕳️'} Floor ${st.floor + 1}: ${f.name}`) +
-        sceneBtn('leave', st.inRun ? `Climb back up (ends the run at floor ${st.floor})` : 'Climb back up (the cellar rests)');
+    } else if (run) {
+      acts.innerHTML = cellarMapHtml(st) + (st.floor > 0 ? sceneBtn('climb', `Climb out (ends the run at floor ${st.floor})`) : '') + sceneBtn('leave', 'Leave for now (the run waits)');
     } else {
-      acts.innerHTML = sceneBtn('descend', st.floor === 0 ? '🕯️ Go down the stairs' : `🕯️ Floor ${st.floor + 1}: ${fl[st.floor].name}`) + sceneBtn('leave', 'Climb back up');
+      acts.innerHTML = sceneBtn('descend', '🕯️ Go down the stairs') + sceneBtn('leave', 'Climb back up');
     }
   } else if (scene.id === 'cup') {
     const cs = cupState();
@@ -768,8 +771,7 @@ function addPebbles(n, src) { state.progress.pebbles += n; econNote(n, src); sav
 function sceneAction(actId) {
   if (!scene) return;
   if (actId === 'leave') {
-    // Past the Root Keeper's chest, walking away ends the run and lets the cellar rest (and reset) as it always did.
-    if (scene.id === 'cellar') { const st = cellarState(); if (!st.resting && isDeepFloor(st.floor)) endCellarRun(st, 'climbed out'); }
+    // Leaving the cellar does not end a run any more (js/cellar-run.js): the run waits, and "Climb out" is how you end one.
     if (doorFading || scene.leaving) return;
     sfx('nav'); buzz(HAP.tap);
     // The sheet drops away and the speech fades first, then the usual fade to the street (v1.77.0)
@@ -780,13 +782,20 @@ function sceneAction(actId) {
     return;
   }
   if (scene.id === 'cellar') {
-    if (actId !== 'descend') return;
     const st = cellarState(); if (st.resting) return;
-    const f = cellarFloor(st.floor);
-    if (f.deep) st.inRun = true;
-    const foe = { id: 'cellar-' + st.floor, name: f.name, icon: f.icon, deck: f.deep ? deepDeck(f) : themedDeck(f.theme, st.floor), isBoss: !!(f.final || f.guardian), rewardCard: null, defeated: false,
-                  profile: f.profile, dungeon: { id: 'cellar', district: state.currentDistrict, floor: st.floor, deep: !!f.deep } };
-    sfx('tap'); buzz(HAP.tap); startBattle(foe); return;
+    if (actId === 'descend') { if (!cellarRun(st)) { cellarNewRun(st); saveState(); showTipOnce('cellarRun'); } scene.text = `Floor ${st.floor + 1}. ${cellarIsGuardian(st.floor) ? cellarFloor(st.floor).blurb : 'Pick a door.'}`; sfx('creak'); buzz(HAP.tap); renderScene(); return; }
+    if (actId === 'climb') { endCellarRun(st, 'climbed out'); scene.text = st.resting ? 'You climb back into the light. The cellar settles and rests.' : 'You climb back up.'; sfx('nav'); renderScene(); return; }
+    if (actId.startsWith('door:')) {
+      const run = cellarRun(st), d = run && run.doors[+actId.slice(5)]; if (!d) return;
+      if (d.k === 'fight' || d.k === 'boss') {
+        const f = cellarFloor(st.floor);
+        const foe = { id: 'cellar-' + st.floor, name: f.name, icon: f.icon, deck: f.deep ? deepDeck(f) : themedDeck(f.theme, st.floor), isBoss: !!(f.final || f.guardian), rewardCard: null, defeated: false,
+                      profile: f.profile, dungeon: { id: 'cellar', district: state.currentDistrict, floor: st.floor, deep: !!f.deep } };
+        sfx('tap'); buzz(HAP.tap); startBattle(foe); return;
+      }
+      scene.text = cellarOpenDoor(st, +actId.slice(5)); sfx('tap'); renderScene(); return;
+    }
+    return;
   }
   if (actId === 'back') { scene.mode = null; sfx('nav'); renderScene(); return; }
   if (actId === 'mg-again' && mini) { miniStart(mini.id); return; }
@@ -975,7 +984,9 @@ function dungeonWin() {
   const newBest = st.floor > (state.progress.cellarBest || 0);
   st.best = Math.max(st.best || 0, st.floor);
   state.progress.cellarBest = Math.max(state.progress.cellarBest || 0, st.floor);
-  addPebbles(f.pebbles, 'cellar');
+  const pay = cellarPebblesFor(f.pebbles, st);
+  addPebbles(pay, 'cellar');
+  if (cellarRun(st)) cellarAdvance(st);              // new doors for the next floor (js/cellar-run.js)
   bumpStat('battlesWon', 1);
   let cardId = null, heading = '';
   if (f.final) { cardId = randomCardId(rollRewardRarity(false)); heading = 'From the old chest'; }
@@ -997,20 +1008,24 @@ function dungeonWin() {
   saveState();
   icon.textContent = f.final || f.guardian ? '🗝️' : '🕯️'; icon.className = 'big-icon reveal-icon';
   battleEndTitle.textContent = f.final ? 'The cellar gives up its chest.' : f.guardian ? `${f.name} sinks back into the dark.` : `${f.name} steps aside.`;
-  battleEndStats.innerHTML = `You won with <b>${Math.max(0, battle.G.p[0].spirit)}</b> Spirit left. <b>+${f.pebbles} 🫧</b>${cardLine}` +
-    (f.final ? '<br><small>A crack behind the chest leads deeper…</small>' : f.deep ? `<br><small>Floor ${st.floor} cleared · deepest ${cellarBest()}</small>` : '');
+  battleEndStats.innerHTML = `You won with <b>${Math.max(0, battle.G.p[0].spirit)}</b> Spirit left. <b>+${pay} 🫧</b>${cardLine}` +
+    `<br><small>Floor ${st.floor} cleared · deepest ${cellarBest()}</small>`;
   btGet('battleRetryBtn').classList.add('hidden');
   sparkleBurst(btGet('battleSparkles'), ['✨', '🕯️', '🌿'], f.final || f.guardian ? 18 : 8);
   sfx(f.final || f.guardian ? 'mythic' : 'win'); buzz(HAP.win);
   bumpPill('pillWins');
 }
 // A loss (or a yield) on a deep floor ends the run.
+// A lost (or yielded) cellar fight costs a heart. At zero the run ends. Returns { ended, hearts }.
 function dungeonLoss() {
   const d = battle.npc.dungeon;
-  if (!d || !d.deep) return false;
+  if (!d) return null;
   const data = ensureDistrictData(d.district), st = data.buildings[d.id] || (data.buildings[d.id] = {});
-  endCellarRun(st, 'the deep pushed back');
-  return true;
+  const run = cellarRun(st) || (typeof cellarNewRun === 'function' ? cellarNewRun(st) : null);
+  if (!run) { endCellarRun(st, 'the dark pushed back'); return { ended: true, hearts: 0 }; }
+  run.hearts--;
+  if (run.hearts <= 0) { endCellarRun(st, 'the dark pushed back'); return { ended: true, hearts: 0 }; }
+  saveState(); return { ended: false, hearts: run.hearts };
 }
 
 /* ---------- graves: tap for the epitaph and a countdown ---------- */
