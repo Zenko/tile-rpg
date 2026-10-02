@@ -159,7 +159,7 @@ const GUIDE = [
     { icon: '🍞', name: "Maple's Bakery", where: 'Town Square, bottom left', how: 'Bake bread, cook dishes from your pantry, and play Cake Toppings.' },
     { icon: '🌱', name: "Fern's Cottage", where: 'Town Square, the blue house', how: 'Seeds for your garden, and Weed the Beds.' },
     { icon: '🫖', name: "Wren's Cottage & the Reading Nook", where: 'Town Square, top', how: 'Tea, advice, the memory game, the card quiz and the daily puzzle.' },
-    { icon: '🏪', name: 'Market stalls', where: 'Market Row', how: "Pip, Clover, Saffron's daily deal, Tock's card sleeves and Zeph's Card Shop - each with a game (the Card Shop is where you buy packs, sleeves, cosmetics and decorations).", lock: () => needs('market') },
+    { icon: '🏪', name: 'Market stalls', where: 'Market Row', how: "Pip, Clover, Saffron's daily deal, Tock's fishing bait and Zeph's Card Shop - each with a game (the Card Shop is where you buy packs, card sleeves, cosmetics and decorations).", lock: () => needs('market') },
     { icon: '🏛️', name: 'Card Museum & expeditions', where: 'Market Row, by the east hedge', how: 'Donate spare cards to six wings, and send spare cards on expeditions.', lock: () => needs('market') },
     { icon: '🏮', name: 'Lantern Market', where: 'Market Row, after dark', how: 'Night Packs, glowing decorations, and Pebbles for critters.', lock: () => needs('market') },
     { icon: '🦦', name: 'The Net Loft', where: 'Quiet Harbor', how: "Tam mends nets for Pebbles, and keeps a buoy box worth checking once a day.", lock: () => needs('harbor') },

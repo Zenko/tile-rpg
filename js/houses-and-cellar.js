@@ -69,8 +69,8 @@ const INTERIORS = {
               { id: 'customize', label: '🎨 Customize', kind: 'shopmode', mode: 'customize' },
               { id: 'items', label: '🪑 Items & decorations', kind: 'shopmode', mode: 'items' }] },
   'stall-tinker': { title: "Tock's Tinker Stall", who: '🦝', name: 'Tock', theme: 'cool',
-    greet: 'Sleeves! Fancy card sleeves! Your cards will look their best in a match - only your side sees the shine, mind you.',
-    actions: [{ id: 'sleeves', label: '🎴 Browse card sleeves', kind: 'sleeves' },
+    greet: () => `Lures, lines and little baits! Fish bite better when they like what is on the hook. ${baitHaveLine()}`,
+    actions: [{ id: 'bait', label: '🎣 Bait counter', kind: 'bait' },
               { id: 'mg-gears', kind: 'minigame', game: 'gears', view: () => miniView('gears') },
               { id: 'sort', label: '🔧 Help sort the spare parts', kind: 'daily', pebbles: 2,
                 done: 'Springs here, cogs there. Tock pays you two Pebbles and a very small screw you did not ask for.', already: 'Tock waves you off. "Parts are sorted! Come back tomorrow."' }] },
@@ -216,7 +216,35 @@ function spiceDealAction() {
   return 'Saffron slides the card across the counter with a wink.';
 }
 
-/* ---------------- Tock's tinker stall: card sleeves, a purely cosmetic frame for your own cards in battle ---------------- */
+/* ---------------- Tock's bait counter (replaced the sleeves, which now live only in Zeph's Card Shop) ----------------
+   Bait is bought straight into the pantry, where fishing already reads it (js/fishing.js BAITS: daisies and fish), so the
+   fishing code did not change. Night bugs are not sold on purpose: Lumen buys bugs back, so selling them would be a free
+   Pebble loop. The pantry holds PANTRY_MAX of each, which is also the cap on how much you can stock up. */
+const BAIT_STOCK = [
+  { id: 'daisy', icon: '🌼', name: 'Daisy bunch', give: { flowers: 4 }, cost: 8 },
+  { id: 'fish',  icon: '🐟', name: 'Fresh fish',  give: { fish: 3 },    cost: 15 },
+  { id: 'mix',   icon: '🧺', name: "Angler's mix", give: { flowers: 2, fish: 2 }, cost: 14 },
+];
+function baitHaveLine() { return `You have 🌼 ${ingredientCount('flowers')} and 🐟 ${ingredientCount('fish')} for bait.`; }
+function baitButtons() {
+  return BAIT_STOCK.map(b => {
+    const ks = Object.keys(b.give), parts = ks.map(k => `${ks.length > 1 ? INGREDIENTS[k].icon : ''}×${b.give[k]}`).join(' ');   // the icon is only needed when a bundle holds two things
+    return sceneBtn('bait:' + b.id, `${b.icon} ${b.name} ${parts} · 🫧 ${b.cost}`, false);
+  }).join('');
+}
+function baitAction(id) {
+  const b = BAIT_STOCK.find(x => x.id === id);
+  if (!b) return '';
+  if (Object.keys(b.give).every(k => ingredientCount(k) >= PANTRY_MAX)) { sfx('tie'); return `"Your pantry is already full of those," says Tock. ${baitHaveLine()}`; }
+  if (state.progress.pebbles < b.cost) { sfx('tie'); return `"That one's 🫧 ${b.cost}," says Tock, tying a hook anyway.`; }
+  spendPebbles(b.cost, 'bait');
+  Object.keys(b.give).forEach(k => addIngredient(k, b.give[k]));
+  logEvent('🎣', `Bought ${b.name} from Tock for 🫧 ${b.cost}.`);
+  saveState(); updateHud(); bumpPill('pillPebbles'); sfx('claim'); buzz(HAP.found);
+  return `${b.icon} Tock wraps it up. ${baitHaveLine()}`;
+}
+
+/* ---------------- Card sleeves (sold in Zeph's Card Shop): a purely cosmetic frame for your own cards in battle ---------------- */
 const SLEEVES = [
   { id: '',       name: 'Plain',        icon: '▫️', cost: 0 },
   { id: 'leafy',  name: 'Leafy',        icon: '🍃', cost: 25 },
@@ -711,6 +739,7 @@ function renderSceneBody() {
     mountShopView(shopModeActive() ? scene.mode : null);
     if (shopModeActive()) acts.innerHTML = sceneBtn('back', '← Back to the counter');
     else if (scene.mode === 'sleeves') acts.innerHTML = sleeveButtons() + sceneBtn('back', '← Back to the counter');
+    else if (scene.mode === 'bait') acts.innerHTML = baitButtons() + sceneBtn('back', '← Back to the counter');
     else if (scene.mode === 'seeds') acts.innerHTML = seedButtons() + sceneBtn('back', '← Back');
     else if (scene.mode === 'cook') acts.innerHTML = cookButtons() + sceneBtn('back', '← Back to the counter');
     else if (scene.mode === 'decorate') acts.innerHTML = shelfButtons() + sceneBtn('back', '← Done');
@@ -766,6 +795,7 @@ function sceneAction(actId) {
   if (actId.startsWith('exp-')) { scene.text = expedAction(actId) || scene.text; renderScene(); return; }
   if (actId === 'mg-back') { miniStop(); const g = INTERIORS[scene.id].greet; scene.text = typeof g === 'function' ? g() : g; sfx('nav'); renderScene(); return; }
   if (scene.id === 'cup') { cupAction(actId); return; }
+  if (actId.startsWith('bait:')) { scene.text = baitAction(actId.slice(5)); renderScene(); return; }
   if (actId.startsWith('sleeve:')) { scene.text = sleeveAction(actId.slice(7)); renderScene(); return; }
   if (actId.startsWith('dish:')) { scene.text = cookDish(actId.slice(5)); renderScene(); return; }
   if (actId.startsWith('nightdeco:')) { const d = DECORATION_ITEMS.find(x => x.id === actId.slice(10)); if (d) { if (state.progress.pebbles < d.cost) { scene.text = `That one is 🫧 ${d.cost}.`; sfx('tie'); } else { buyDecoration(d); scene.text = `${d.icon} Lumen wraps the ${d.name} in dark paper. Place it from Shop → Items.`; } } renderScene(); return; }
@@ -782,6 +812,7 @@ function sceneAction(actId) {
   if (a.kind === 'oven') { scene.text = ovenAction(); }
   else if (a.kind === 'deal') { scene.text = spiceDealAction(); }
   else if (a.kind === 'sleeves') { scene.mode = 'sleeves'; scene.text = `Pick a sleeve. You're wearing ${currentSleeve().name}.`; sfx('tap'); }
+  else if (a.kind === 'bait') { scene.mode = 'bait'; scene.text = `Fresh bait, fair prices. ${baitHaveLine()}`; sfx('tap'); }
   else if (a.kind === 'seeds') { scene.mode = 'seeds'; scene.text = seedsIntro(); sfx('tap'); }
   else if (a.kind === 'puzzle') { startPuzzle(); return; }
   else if (a.kind === 'minigame') { miniStart(a.game); return; }
