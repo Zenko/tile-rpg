@@ -18,6 +18,9 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta ${RELEASES[0].n} (build $
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'better', x: 'Weed the Beds has lighter soil in the light theme.' },
+  { t:'better', x: 'Fishing now follows the light theme: a sunlit bank and pale sea-glass water instead of the night-blue scene.' },
+  { t:'better', x: 'Every fish swims as a silhouette until it bites the bait, then its colours show - even species you have already caught.' },
   { t:'fixed', x: 'Fish you could not fish: some swimming fish were drawn out in open water with nowhere to stand, so tapping them did nothing. Fish now only appear in water you can reach from the bank.' },
   { t:'better', x: 'The everyday chime (tapping buildings, claiming rewards) is now a much softer, shorter note that sits quietly under the music.' },
   { t:'new', x: 'Family passives now start earlier: with 6 or 7 cards of one family you get a smaller once-per-match passive (Seedling, Footing, Ebb or Breeze), and at 8 it becomes the full one. The Deck screen shows both steps.' },

@@ -149,11 +149,12 @@ function fishBand() {   // the part of the water that isn't hidden behind the pa
   const hi = sc.height ? (pn.top - sc.top) / sc.height * 100 - 6 : 58;
   return { lo: 34, hi: Math.max(46, Math.min(80, hi)) };
 }
-// A species you have not caught yet swims as a dark silhouette; its colours are revealed by landing one (v1.88.0).
+// Every fish swims as a dark silhouette, caught before or not: its colours only show once it bites the bait (the fish that
+// takes the hook is swapped for the coloured one at the bite). A first-ever catch still leaps out with the .reveal flourish.
 function fishKnown(fish) { return !!fishState().caught[fish.id]; }
 function fishMakeSwimmer(fish, x, y, fade) {
   const el = document.createElement('div'), inn = document.createElement('span');
-  el.className = 'fs-sw ' + fishSizeOf(fish) + (fish.legendary ? ' legend' : '') + (fishKnown(fish) ? '' : ' unknown') + (fade && fishMotionOk() ? ' fadein' : '');
+  el.className = 'fs-sw ' + fishSizeOf(fish) + (fish.legendary ? ' legend' : '') + ' unknown' + (fade && fishMotionOk() ? ' fadein' : '');
   el.style.left = x + '%'; el.style.top = y + '%'; inn.className = 'in'; inn.textContent = fish.icon;
   inn.style.setProperty('--sw', fishRnd(30, 70) + 'px'); inn.style.setProperty('--dur', fishRnd(12, 22) + 's'); inn.style.setProperty('--dl', -fishRnd(0, 12) + 's');
   el.appendChild(inn); fe('fishSwim').appendChild(el);
@@ -257,7 +258,7 @@ function fishCast() {
   if (n) { s = n.s; fishing.swimmers.splice(fishing.swimmers.indexOf(s), 1); }
   else { s = fishMakeSwimmer(pickFish(true), Math.random() < 0.5 ? 4 : 96, aim.y + fishRnd(-6, 6), false); }   // nothing close: one wanders in from the edge
   const koi = fishDef('star-koi');   // a very long dry spell guarantees the legendary is the one that comes
-  if ((fishState().sinceLegendary || 0) >= FISH_LEGEND_PITY && koi && fishAvailable(koi) && !s.fish.legendary) { s.fish = koi; s.el.className = 'fs-sw large legend' + (fishKnown(koi) ? '' : ' unknown'); s.el.firstChild.textContent = koi.icon; }
+  if ((fishState().sinceLegendary || 0) >= FISH_LEGEND_PITY && koi && fishAvailable(koi) && !s.fish.legendary) { s.fish = koi; s.el.className = 'fs-sw large legend unknown'; s.el.firstChild.textContent = koi.icon; }
   s.el.classList.remove('near');
   Object.assign(fishing, { bait, fish: s.fish, size: fishSizeOf(s.fish), sw: s, hook: { x: aim.x, y: aim.y }, dist0: n ? n.d : 60 });
   fishPhase('cast');
@@ -441,7 +442,6 @@ function fishLand(fish) {
   const gold = !!(fish.legendary || isBig || cardId), bp = fishBucketPos(), el = fe('fishFish'), sz = fishing.size, ic = cardId ? '🃏' : fish.icon;
   el.textContent = ic; const rev = firstOfKind && !cardId && fishMotionOk() ? ' reveal' : '';       // a new kind is revealed in colour as it leaps
   fishPlaceFish(FISH_BANK.x, FISH_BANK.y + 2, 'shown ' + sz + rev, 0); fishSetLine(FISH_BANK.x, FISH_BANK.y + 2, 0);
-  fishing.swimmers.forEach(w => { if (w.fish.id === fish.id) w.el.classList.remove('unknown'); });   // every swimmer of this kind turns colourful
   fishSplashAt(FISH_BANK.x, FISH_BANK.y + 2, 10); fishFlash(FISH_BANK.x, FISH_BANK.y + 6, gold); fishDrops(FISH_BANK.x, FISH_BANK.y + 2, gold ? 10 : 5, gold);
   const t = n => fishMs(n);
   if (fishMotionOk()) {

@@ -477,4 +477,4 @@ body.in-fishing .toast.show { transform: translateX(-50%) translateY(0); }
 /* The dark-scoped game-world containers must also reset the inherited text colour, which would otherwise
    still be the light theme's dark ink (custom properties re-resolve on the element, but `color` is inherited
    as an already-computed value). */
-:root[data-theme="light"] .town-map-wrap, :root[data-theme="light"] #fishOverlay { color: var(--ink); }
+:root[data-theme="light"] .town-map-wrap { color: var(--ink); }

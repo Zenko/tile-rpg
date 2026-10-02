@@ -3,9 +3,9 @@
    overrides an earlier one. Append new rules to latest.css unless you know nothing later overrides them. */
 /* Theme tokens. Two looks, switched by <html data-theme="dark|light"> (see applyTheme() in js/audio.js):
    dark = "Slate glass", light = "Sand and sea glass". The dark values are on bare :root, so they are also
-   the fallback. The town map and the fishing scene keep their night colours in the light theme (it re-declares the dark
+   the fallback. The town map keeps its night colours in the light theme (it re-declares the dark
    tokens on those containers); battles and building interiors follow the theme since v1.88.0 / v1.79.0. */
-:root, :root[data-theme="light"] .town-map-wrap, :root[data-theme="light"] #fishOverlay {
+:root, :root[data-theme="light"] .town-map-wrap {
   color-scheme: dark;
   --bg-top: #1b2128;
   --bg-bottom: #12161b;
