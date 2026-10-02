@@ -61,6 +61,7 @@ function cellarDoors(floor, run) {
 function cellarNewRun(st) { st.run = { hearts: CELLAR_HEARTS, boons: [], doors: [] }; st.inRun = true; st.run.doors = cellarDoors(st.floor, st.run); return st.run; }
 // Moving to the next floor: bump the record and deal new doors.
 function cellarAdvance(st) {
+  if (cellarRun(st)) cellarRun(st).map = null;   // a new floor is a new dark room (js/cellar-crawl.js)
   state.progress.cellarBest = Math.max(state.progress.cellarBest || 0, st.floor); st.best = Math.max(st.best || 0, st.floor);
   const run = cellarRun(st); if (run) run.doors = cellarDoors(st.floor, run);
   saveState();
@@ -97,6 +98,17 @@ function cellarMapHtml(st) {
   const hearts = Array.from({ length: max }, (_, i) => `<span class="cl-heart${i < run.hearts ? ' on' : ''}">♥</span>`).join('');
   const boons = run.boons.map(id => { const b = CELLAR_BOONS.find(x => x.id === id); return `<span class="cl-boon" title="${b.name}: ${b.text}">${b.icon} ${b.name}</span>`; }).join('') || '<span class="cl-none">No boons yet</span>';
   const f = cellarFloor(st.floor);
+  // Exploring on (js/cellar-crawl.js): a dark room to walk through instead of a row of doors.
+  if (crawlOn()) {
+    const g = crawlGridHtml(st);
+    if (g) {
+      const m = run.map;
+      return `<div class="cl-hud"><div class="cl-hearts" aria-label="${run.hearts} of ${max} hearts">${hearts}</div><div class="cl-boons">${boons}</div></div>
+        <div class="cl-chips" id="clChips"><span class="chip">${m.bright > 0 ? '🔆 Bright' : m.dim > 0 ? '🔅 Dim' : '🔦 Lantern'}</span>${m.key ? '<span class="chip gold">🗝️ Key</span>' : ''}</div>
+        <div class="cl-grid" id="clGrid" role="group" aria-label="The dark floor. Tap a tile you can see to walk there.">${g}</div>
+        ${m.lit ? '' : '<button type="button" class="cl-light" data-act="lightall">💡 Light the whole floor</button>'}`;
+    }
+  }
   const doors = run.doors.map((d, i) => {
     const def = CELLAR_DOORS[d.k], fight = d.k === 'fight' || d.k === 'boss';
     const icon = fight ? f.icon : def.icon, name = d.k === 'boss' ? f.name : def.name, hint = fight ? (d.k === 'boss' ? 'Guardian · prize card' : f.name) : def.hint;

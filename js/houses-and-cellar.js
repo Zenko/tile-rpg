@@ -424,7 +424,7 @@ function openScene(id) {
     const st = cellarState();
     scene.text = st.resting ? 'The cellar is quiet. Whatever lives here is resting.'
       : !cellarRun(st) ? 'Cool air rises from the stairs. Torches flicker on the walls, and every floor has more than one way on.'
-      : `Floor ${st.floor + 1}. ${cellarIsGuardian(st.floor) ? cellarFloor(st.floor).blurb : 'Pick a door.'}`;
+      : `Floor ${st.floor + 1}. ${cellarIsGuardian(st.floor) ? cellarFloor(st.floor).blurb : crawlOn() ? 'It is dark. Walk with your lantern and find a door.' : 'Pick a door.'}`;
   } else if (id === 'cup') { scene.text = cupIntro(); showTipOnce('cup'); }
   else if (id === 'trades') { scene.text = `Neighbors pin up offers here each morning. Only spare copies can be traded. ${forecastText()}`; showTipOnce('trades'); }
   else if (id === 'home') { const g = INTERIORS.home.greet; scene.text = g(); showTipOnce('home'); }
@@ -684,6 +684,7 @@ function renderSceneBody() {
   document.getElementById('scText').textContent = scene.text;
   renderHomeShelf();                                  // only draws in your own cottage; clears itself anywhere else
   if (!scene || scene.id !== 'cellar') cellarDecorateStage(false);   // torches and barrels belong to the cellar only
+  sceneView.classList.remove('cl-crawl');                            // set again below while a dark floor is showing
   if (scene.id === 'cellar') {
     const st = cellarState(), fl = CELLAR.floors, resting = st.resting, deep = isDeepFloor(st.floor);
     sceneView.dataset.theme = 'dark';
@@ -696,6 +697,7 @@ function renderSceneBody() {
     if (resting) {
       acts.innerHTML = sceneBtn('rest', `Quiet for now (${fmtClock(CELLAR.cooldownMs - (Date.now() - st.clearedAt))})`, true) + sceneBtn('leave', 'Climb back up');
     } else if (run) {
+      sceneView.classList.toggle('cl-crawl', crawlOn() && !!document.getElementById('scActions'));
       acts.innerHTML = cellarMapHtml(st) + (st.floor > 0 ? sceneBtn('climb', `Climb out (ends the run at floor ${st.floor})`) : '') + sceneBtn('leave', 'Leave for now (the run waits)');
     } else {
       acts.innerHTML = sceneBtn('descend', '🕯️ Go down the stairs') + sceneBtn('leave', 'Climb back up');
@@ -783,8 +785,10 @@ function sceneAction(actId) {
   }
   if (scene.id === 'cellar') {
     const st = cellarState(); if (st.resting) return;
-    if (actId === 'descend') { if (!cellarRun(st)) { cellarNewRun(st); saveState(); showTipOnce('cellarRun'); } scene.text = `Floor ${st.floor + 1}. ${cellarIsGuardian(st.floor) ? cellarFloor(st.floor).blurb : 'Pick a door.'}`; sfx('creak'); buzz(HAP.tap); renderScene(); return; }
+    if (actId === 'descend') { if (!cellarRun(st)) { cellarNewRun(st); saveState(); showTipOnce('cellarRun'); } scene.text = `Floor ${st.floor + 1}. ${cellarIsGuardian(st.floor) ? cellarFloor(st.floor).blurb : crawlOn() ? 'It is dark. Walk with your lantern and find a door.' : 'Pick a door.'}`; sfx('creak'); buzz(HAP.tap); renderScene(); return; }
     if (actId === 'climb') { endCellarRun(st, 'climbed out'); scene.text = st.resting ? 'You climb back into the light. The cellar settles and rests.' : 'You climb back up.'; sfx('nav'); renderScene(); return; }
+    if (actId.startsWith('cell:')) { const [cx, cy] = actId.slice(5).split(',').map(Number); crawlGo(cx, cy); return; }
+    if (actId === 'lightall') { crawlLightAll(); return; }
     if (actId.startsWith('door:')) {
       const run = cellarRun(st), d = run && run.doors[+actId.slice(5)]; if (!d) return;
       if (d.k === 'fight' || d.k === 'boss') {

@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta ${RELEASES[0].n} (build $
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'new', x: 'The cellar floors are dark rooms to explore with a lantern: tap tiles to walk, find the doors in the dark, smash barrels for Pebbles, find a key for the locked chest, avoid rats that dim your light and grab glowcaps to brighten it. "Light the whole floor" shows everything, and Settings → Comfort can turn exploring off.' },
   { t:'new', x: 'Tarot (Journal → Today → Calm corner): one reading a day with three Arcana, each upright or reversed. Turn all three over and the Present card gives the day a fortune. The 22 Major Arcana are real cards in the game, so owning the card collects the Arcana. Attune up to three for a small permanent perk, and a full set fills a new Binder page.' },
   { t:'new', x: 'The Old Cellar is a Descent Map: every floor offers a choice of doors (a fight, a chest, a campfire, a shrine or a peddler). You have three hearts, boons last for the run, and every 5th floor is a guardian with a rare prize. Torches, barrels and drips make it look the part.' },
   { t:'better', x: 'Leaving the cellar no longer ends a run, and a short run costs no waiting. "Climb out" ends one on purpose.' },
