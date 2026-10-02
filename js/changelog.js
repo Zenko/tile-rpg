@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta ${RELEASES[0].n} (build $
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'better', x: 'Every calm corner activity (breathing pond, sand garden, lanterns, wind chimes, star gazing, bonsai) now uses the same layout as the tea ritual: a stage card, one quiet line, step or progress chips and full-width buttons.' },
   { t:'better', x: 'The tea ritual now matches the other screens: a cup on a saucer with a thin stream, three step chips (Pour, Steep, Sip) and two full-width buttons. The sand garden, wind chimes and tea no longer have a double frame.' },
   { t:'new', x: 'Calm corner: quiet things that score nothing. A breathing pond (five breaths leave you Rested, +5% XP for the day), a sand garden that remembers your raking, wind chimes, a tea ritual, star gazing and lantern release after dark, a bonsai that grows on real days, and postcards of places you like. Find it in Journal → Today, at Wren\'s, your cottage and the Net Loft.' },
   { t:'better', x: 'Sitting on a bench now zooms the town out gently and lets the day drift by until you stand up.' },

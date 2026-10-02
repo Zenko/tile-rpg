@@ -112,10 +112,10 @@ function calmRenderCards() {
 
 /* ---------- breathing ---------- */
 function calmBreathe(body) {
-  body.innerHTML = `<div class="calm-pond" id="cPond"><div class="calm-orb" id="cOrb"></div><div class="calm-say" id="cSay">Tap the pond to begin</div></div><div class="calm-row"><button type="button" class="calm-btn pri" id="cGo">Begin</button><span class="calm-count" id="cCount"></span></div>`;
+  body.innerHTML = `<div class="calm-pond" id="cPond"><div class="calm-orb" id="cOrb"></div><div class="calm-say" id="cSay">Tap the pond to begin</div></div><div class="calm-say sm" id="cCount">In for 4, hold, out for 6.</div><div class="calm-actions"><button type="button" class="calm-btn pri wide" id="cGo">Begin</button></div>`;
   const orb = document.getElementById('cOrb'), say = document.getElementById('cSay'), go = document.getElementById('cGo'), pond = document.getElementById('cPond'), count = document.getElementById('cCount');
   let running = false, timers = [];
-  const showCount = () => { const c = calmState(), n = c.breathDay === todayKey() ? c.breathsToday || 0 : 0; count.textContent = n ? `${n} breath${n === 1 ? '' : 's'} today${n >= 5 ? ' · Rested' : ''}` : ''; };
+  const showCount = () => { const c = calmState(), n = c.breathDay === todayKey() ? c.breathsToday || 0 : 0; count.textContent = n ? `${n} breath${n === 1 ? '' : 's'} today${n >= 5 ? ' · Rested' : ''}` : 'In for 4, hold, out for 6.'; };
   showCount();
   const set = (t, ms) => timers.push(setTimeout(t, ms)); calmCleanups.push(() => timers.forEach(clearTimeout));
   const scale = (s, sec) => { if (!calmMotion()) return; orb.style.transitionDuration = sec + 's'; orb.style.transform = `scale(${s})`; };
@@ -133,7 +133,7 @@ function calmBreathe(body) {
 
 /* ---------- sand garden ---------- */
 function calmSand(body) {
-  body.innerHTML = `<div class="calm-sand" id="cSand"><canvas id="cSandCv" aria-label="Sand garden: drag to rake"></canvas></div><div class="calm-row"><button type="button" class="calm-btn" id="cStone" aria-pressed="false">🪨 Place stones</button><button type="button" class="calm-btn" id="cSmooth">Smooth the sand</button></div>`;
+  body.innerHTML = `<div class="calm-sand" id="cSand"><canvas id="cSandCv" aria-label="Sand garden: drag to rake"></canvas></div><div class="calm-say sm">Drag to rake. Use Place stones, then tap the sand.</div><div class="calm-actions two"><button type="button" class="calm-btn wide" id="cStone" aria-pressed="false">🪨 Place stones</button><button type="button" class="calm-btn wide" id="cSmooth">Smooth the sand</button></div>`;
   const box = document.getElementById('cSand'), cv = document.getElementById('cSandCv'), cx = cv.getContext('2d'), st = calmState().sand, stoneBtn = document.getElementById('cStone');
   let placing = false, drawing = false, last = null, cur = null, W = 0, H = 0;
   const POINT_CAP = 1600, count = () => st.strokes.reduce((n, s) => n + s.length, 0);
@@ -167,7 +167,7 @@ function calmSand(body) {
 
 /* ---------- lanterns ---------- */
 function calmLanterns(body) {
-  body.innerHTML = `<div class="calm-night" id="cNight"><div class="calm-hint-top">Tap the sky</div></div><div class="calm-row"><span class="calm-count" id="cLCount"></span></div>`;
+  body.innerHTML = `<div class="calm-night" id="cNight"><div class="calm-hint-top">Tap the sky</div></div><div class="calm-say sm" id="cLCount"></div>`;
   const sky = document.getElementById('cNight'), c = calmState(), info = document.getElementById('cLCount');
   const show = () => { info.textContent = `${c.lanterns || 0} lantern${(c.lanterns || 0) === 1 ? '' : 's'} released in all`; }; show();
   for (let i = 0; i < 40; i++) { const s = document.createElement('i'); s.className = 'calm-star'; s.style.left = Math.random() * 100 + '%'; s.style.top = Math.random() * 75 + '%'; s.style.opacity = 0.25 + Math.random() * 0.6; sky.appendChild(s); }
@@ -181,7 +181,7 @@ function calmLanterns(body) {
 
 /* ---------- wind chimes ---------- */
 function calmChimes(body) {
-  body.innerHTML = `<div class="calm-chimes" id="cChimes" role="group" aria-label="Wind chimes"><div class="calm-beam"></div></div><div class="calm-row"><span class="calm-count">Drag across them, or tap one.</span></div>`;
+  body.innerHTML = `<div class="calm-chimes" id="cChimes" role="group" aria-label="Wind chimes"><div class="calm-beam"></div></div><div class="calm-say sm">Drag across them, or tap one.</div>`;
   const box = document.getElementById('cChimes'); let lastI = -1;
   CALM_SCALE.forEach((f, i) => { const c = document.createElement('div'); c.className = 'calm-chime'; c.dataset.i = i; c.style.setProperty('--string', (30 + (i % 3) * 14) + 'px'); c.style.setProperty('--len', (150 - i * 11) + 'px'); c.innerHTML = '<i></i>'; box.appendChild(c); });
   const ring = i => { const c = box.children[i + 1]; if (!c) return; c.classList.remove('ring'); void c.offsetWidth; if (calmMotion()) c.classList.add('ring'); calmNote(CALM_SCALE[i], 0.05, 2.4); };
@@ -191,10 +191,10 @@ function calmChimes(body) {
 
 /* ---------- star gazing ---------- */
 function calmStars(body) {
-  body.innerHTML = `<div class="calm-night" id="cSky"><svg class="calm-lines" id="cLines" viewBox="0 0 100 100" preserveAspectRatio="none"></svg><div class="calm-hint-top" id="cStarHint">Tap a star, then the next one</div></div><div class="calm-row"><span class="calm-count" id="cStarCount"></span></div>`;
+  body.innerHTML = `<div class="calm-night" id="cSky"><svg class="calm-lines" id="cLines" viewBox="0 0 100 100" preserveAspectRatio="none"></svg><div class="calm-hint-top" id="cStarHint">Tap a star, then the next one</div></div><div class="calm-say sm" id="cStarCount"></div><div class="calm-steps wrap" id="cStarSteps"></div>`;
   const sky = document.getElementById('cSky'), lines = document.getElementById('cLines'), hint = document.getElementById('cStarHint'), c = calmState();
   const found = () => CALM_CONSTELLATIONS.filter(k => c.stars[k.name]).length;
-  const refresh = () => { document.getElementById('cStarCount').textContent = `${found()} of ${CALM_CONSTELLATIONS.length} constellations found`; }; refresh();
+  const refresh = () => { document.getElementById('cStarCount').textContent = `${found()} of ${CALM_CONSTELLATIONS.length} constellations found`; document.getElementById('cStarSteps').innerHTML = CALM_CONSTELLATIONS.map(k => `<span class="${c.stars[k.name] ? 'on' : ''}">${c.stars[k.name] ? '✓ ' : ''}${k.name}</span>`).join(''); }; refresh();
   for (let i = 0; i < 50; i++) { const s = document.createElement('i'); s.className = 'calm-star'; s.style.left = Math.random() * 100 + '%'; s.style.top = Math.random() * 100 + '%'; s.style.opacity = 0.2 + Math.random() * 0.5; sky.appendChild(s); }
   const prog = {};
   CALM_CONSTELLATIONS.forEach((k, ci) => {
@@ -244,11 +244,15 @@ function bonsaiStage() { const g = bonsaiGrowthDays(); let s = 0; BONSAI_STAGES.
 function calmBonsai(body) {
   const c = calmState();
   const draw = () => {
-    if (!c.bonsai) { body.innerHTML = `<div class="calm-tree"><div class="calm-tree-ico">🫘</div><div class="calm-say">Nothing planted yet</div></div><div class="calm-row"><button type="button" class="calm-btn pri" id="cPlant">Plant a seedling</button></div><p class="calm-hint">It grows with real days. Tending it helps a little. Missing days costs nothing.</p>`; document.getElementById('cPlant').addEventListener('click', () => { c.bonsai = { since: Date.now(), trims: 0, trimDay: '', paid: 0 }; saveState(); sfx('claim'); draw(); }); return; }
+    if (!c.bonsai) { body.innerHTML = `<div class="calm-tree"><div class="calm-tree-ico">🫘</div></div><div class="calm-say">Nothing planted yet</div><div class="calm-say sm">It grows with real days. Tending it helps a little. Missing days costs nothing.</div><div class="calm-actions"><button type="button" class="calm-btn pri wide" id="cPlant">Plant a seedling</button></div>`; document.getElementById('cPlant').addEventListener('click', () => { c.bonsai = { since: Date.now(), trims: 0, trimDay: '', paid: 0 }; saveState(); sfx('claim'); draw(); }); return; }
     const s = bonsaiStage(), st = BONSAI_STAGES[s], nx = BONSAI_STAGES[s + 1], g = bonsaiGrowthDays(), tended = c.bonsai.trimDay === todayKey();
     if (s > (c.bonsai.paid || 0)) { const peb = 10 * s; addPebbles(peb, 'bonsai'); c.bonsai.paid = s; saveState(); toast(`${st.icon} Your bonsai is now a ${st.name.toLowerCase()}. +${peb} 🫧`); sfx('found'); }
-    body.innerHTML = `<div class="calm-tree"><div class="calm-tree-ico s${s}">${st.icon}</div><div class="calm-say">${st.name}</div><small class="calm-hint">${nx ? `${Math.max(0, nx.at - g).toFixed(1)} days to ${nx.name.toLowerCase()}` : 'As grown as it gets. Still lovely.'}</small></div>
-      <div class="calm-row"><button type="button" class="calm-btn pri" id="cTend" ${tended ? 'disabled' : ''}>${tended ? 'Tended today ✓' : '✂️ Trim and water'}</button></div><p class="calm-hint">Tending once a day speeds it up a little. Nothing is lost if you miss a day.</p>`;
+    const pct = nx ? Math.min(100, Math.round((g - st.at) / (nx.at - st.at) * 100)) : 100;
+    body.innerHTML = `<div class="calm-tree"><div class="calm-tree-ico s${s}">${st.icon}</div><div class="calm-grow"><i style="width:${pct}%"></i></div></div>
+      <div class="calm-say">${st.name}</div><div class="calm-say sm">${nx ? `${Math.max(0, nx.at - g).toFixed(1)} days to ${nx.name.toLowerCase()}` : 'As grown as it gets. Still lovely.'}</div>
+      <div class="calm-steps five" id="cStages">${BONSAI_STAGES.map((x, i) => `<span class="${i === s ? 'on' : i < s ? 'done' : ''}" title="${x.name}">${x.icon}</span>`).join('')}</div>
+      <div class="calm-actions"><button type="button" class="calm-btn pri wide" id="cTend" ${tended ? 'disabled' : ''}>${tended ? 'Tended today ✓' : '✂️ Trim and water'}</button></div>
+      <div class="calm-say sm">Tending once a day speeds it up a little. Nothing is lost if you miss a day.</div>`;
     const b = document.getElementById('cTend'); if (b) b.addEventListener('click', () => { c.bonsai.trims = (c.bonsai.trims || 0) + 1; c.bonsai.trimDay = todayKey(); saveState(); sfx('soft'); calmNote(587, 0.03, 1.8); draw(); });
   };
   draw();
