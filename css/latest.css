@@ -926,3 +926,14 @@ html.calm .cl-cell.rat, html.cozy .cl-cell.rat { animation: none; }
 .sp-pick.used { border-color: #e6c06a; box-shadow: 0 0 10px rgba(230, 192, 106, .35); } .sp-pick i { position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; border-radius: 50%; background: #e6c06a; color: #2b1d05; font-style: normal; font-size: .7rem; font-weight: 800; display: grid; place-items: center; }
 .sp-line { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; } .sp-line span { padding: 4px 10px; border-radius: 999px; background: var(--board-bg); border: 1px solid var(--stone-edge); font-size: .74rem; } .sp-line small { display: block; font-size: .56rem; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); }
 #battleView .hcard .spread-past::after, #battleView .hcard .spread-present::after, #battleView .hcard .spread-future::after { content: '🃏'; position: absolute; top: -8px; left: 50%; transform: translateX(-50%); font-size: .8rem; filter: drop-shadow(0 0 4px rgba(230, 192, 106, .9)); pointer-events: none; z-index: 3; }
+
+/* ---- Tarot Trials (build 114) ---- */
+.tl-list { display: flex; flex-direction: column; gap: 10px; }
+.tl-row { display: grid; grid-template-columns: 44px 1fr auto; gap: 12px; align-items: center; padding: 14px; border-radius: 18px; border: 1px solid var(--stone-edge); background: var(--stone); }
+.tl-row.done { border-color: color-mix(in srgb, var(--accent, #8bc4d6) 55%, var(--stone-edge)); }
+.tl-row.lock { opacity: .55; }
+.tl-ic { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; font-size: 1.5rem; background: rgba(255,255,255,.06); }
+.tl-txt { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.tl-txt b { font-family: var(--f-display); font-size: 1rem; }
+.tl-txt small { color: var(--ink-soft); font-size: .78rem; line-height: 1.4; }
+.tl-txt small.tl-fate { opacity: .85; }

@@ -4,6 +4,7 @@
    its turn rather than stacking on top.
    ============================================================ */
 const TIPS = {
+  trials:     { icon: '🔮', title: 'Trials', text: 'In the Tarot screen (Calm corner → Tarot → Trials), five foes each bring a Fate and a Spread of their own. Beat one for the first time to take home its Arcana card. They open in order, and they are meant to be hard.' },
   spread:     { icon: '🃏', title: 'Fate Spread', text: 'On the Deck screen, lay three cards as Past, Present and Future. Past is always in your opening hand, Present enters with a Shield, and Future arrives on your 4th turn. Three cards of one family give Harmony (+2 Spirit); three different families give Contrast (+1 card).' },
   fate:       { icon: '🔮', title: 'Fate', text: 'Attune a Major Arcana (Calm corner → Tarot → The Arcana) and you can take its power into a match. Pick it on the keep-this-hand screen; a purple round button by your bar glows when it is ready. Each one works once per match, from its own turn, and most cost a little.' },
   fortune:    { icon: '🔮', title: "Madame Soot's tent", text: 'On Market Row from dusk until dawn. Soot gives your daily tarot reading, swaps one card once a day, tells you the story of your deck, and sells Arcana packs.' },

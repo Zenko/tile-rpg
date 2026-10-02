@@ -117,14 +117,14 @@ function tarotFaceHtml(i, rev, tag) {
 }
 let tarotView = 'reading';
 function calmTarot(body) {
-  body.innerHTML = `<div class="seg" id="trSeg" role="tablist"><button class="seg-btn${tarotView === 'reading' ? ' active' : ''}" data-tv="reading" role="tab">Reading</button><button class="seg-btn${tarotView === 'arcana' ? ' active' : ''}" data-tv="arcana" role="tab">The Arcana</button></div><div id="trBody" class="tr-body"></div>`;
+  body.innerHTML = `<div class="seg" id="trSeg" role="tablist"><button class="seg-btn${tarotView === 'reading' ? ' active' : ''}" data-tv="reading" role="tab">Reading</button><button class="seg-btn${tarotView === 'arcana' ? ' active' : ''}" data-tv="arcana" role="tab">The Arcana</button><button class="seg-btn${tarotView === 'trials' ? ' active' : ''}" data-tv="trials" role="tab">Trials</button></div><div id="trBody" class="tr-body"></div>`;
   onAll(body, '#trSeg [data-tv]', b => { tarotView = b.dataset.tv; sfx('nav'); tarotDrawBody(); });
   tarotDrawBody();
 }
 function tarotDrawBody() {
   const box = document.getElementById('trBody'); if (!box) return;
   document.querySelectorAll('#trSeg [data-tv]').forEach(b => b.classList.toggle('active', b.dataset.tv === tarotView));
-  if (tarotView === 'arcana') tarotDrawArcana(box); else tarotDrawReading(box);
+  if (tarotView === 'arcana') tarotDrawArcana(box); else if (tarotView === 'trials') tarotDrawTrials(box); else tarotDrawReading(box);
 }
 function tarotDrawReading(box) {
   const t = tarotState(), cards = t.cards;

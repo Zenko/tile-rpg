@@ -16,6 +16,7 @@ module.exports = async (page, assert) => {
           if (!G.over) BattleEngine.endTurn(G, G.active);
         }
         if (!G.over) bad.push(id + ' never finished');
+        if (G.p[0].fateUsed) used[id] = (used[id] || 0) + 1;
         G.p.forEach(p => { if (p.board.length > BattleEngine.RULES.board) bad.push(id + ' overfull board'); if (p.board.some(c => c.hp <= 0)) bad.push(id + ' dead card on board'); if (p.hand.length > BattleEngine.RULES.handMax) bad.push(id + ' overfull hand'); });
       }
     });

@@ -971,7 +971,11 @@ const BattleEngine = (function () {
   /* Whole AI turn at once: used by tests and simulations. The UI uses aiNextAction() step by step. */
   function aiTurn(G, who, level) {
     const steps = [];
-    for (let i = 0; i < 40 && !G.over; i++) { const a = aiNextAction(G, who, level); if (a.type === 'end') break; steps.push(a); applyAction(G, who, a); }
+    for (let i = 0; i < 40 && !G.over; i++) {
+      const a = aiNextAction(G, who, level);
+      if (a.type === 'end') { if (G.p[who].fate && fateReady(G, who).ok && useFate(G, who).ok) { steps.push({ type: 'fate' }); continue; } break; }   // a foe with a Fate uses it once it has nothing better to do
+      steps.push(a); applyAction(G, who, a);
+    }
     return steps;
   }
 

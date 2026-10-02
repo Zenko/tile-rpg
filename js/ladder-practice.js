@@ -19,7 +19,7 @@ const LADDER_RANKS = [
   { id: 'gem',    name: 'Gem',    icon: '💎', at: 450 },
   { id: 'star',   name: 'Star',   icon: '⭐', at: 700 },
 ];
-const LADDER_FROM = { ghostWins: 10, challengesWon: 8, cupTrophies: 15, bossesWon: 6, draftClears: 20, rivalWins: 8 };
+const LADDER_FROM = { ghostWins: 10, challengesWon: 8, cupTrophies: 15, bossesWon: 6, draftClears: 20, rivalWins: 8, trialsWon: 12 };
 const LADDER_RANK_PEBBLES = 15, LADDER_SEASON_PEBBLES = 25;   // per rank index: first time this season / paid when a season ends
 const monthKey = () => todayKey().slice(0, 7);
 function ladderRankIndex(pts) { let r = 0; LADDER_RANKS.forEach((k, i) => { if (pts >= k.at) r = i; }); return r; }

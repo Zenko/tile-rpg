@@ -86,7 +86,7 @@ function startBattleNow(opponent, first) {
   const companionSpirit = hasPerk('spirit') && !opponent.puzzle && !neutral;
   // Plain neighbors and district bosses get a fresh deck each fight, scaled to how many wins you have (their stored deck
   // predates enhanced and unique foe cards). Every other kind of opponent brings its own deck.
-  const plainFoe = !opponent.dungeon && !opponent.cup && !opponent.draft && !opponent.ghost && !opponent.challenge && !opponent.signature && !opponent.isRival && !opponent.puzzle;
+  const plainFoe = !opponent.dungeon && !opponent.cup && !opponent.draft && !opponent.ghost && !opponent.challenge && !opponent.signature && !opponent.isRival && !opponent.puzzle && !opponent.trial;
   const oppDeck = plainFoe ? buildDeckForOpponent(DECK_SIZE, isBoss, null, opponent.name, state.currentDistrict)   // a district's folk favour its family
     : (Array.isArray(opponent.deck) && opponent.deck.length === DECK_SIZE) ? opponent.deck : buildDeckForOpponent(DECK_SIZE, isBoss);
   const twistKind = bossTwistFor(opponent);
@@ -108,7 +108,7 @@ function startBattleNow(opponent, first) {
   }
   else {
     G = BattleEngine.newGame(myDeck.slice(), oppDeck.slice(), Math.random, { spirit: [BattleEngine.RULES.spirit, profile.spirit], mods: world.mods,
-      twist: twistKind ? { side: 1, kind: twistKind } : null, startSpirit: opponent.startSpirit ? [opponent.startSpirit, null] : null, first, knack: [currentKnackId(), null], fate: [neutral ? null : currentFateId(), null], spread: [neutral ? null : currentSpread(), null] });
+      twist: twistKind ? { side: 1, kind: twistKind } : null, startSpirit: opponent.startSpirit ? [opponent.startSpirit, null] : null, first, knack: [currentKnackId(), null], fate: [neutral ? null : currentFateId(), opponent.fate || null], spread: [neutral ? null : currentSpread(), opponent.spread || null] });
     BattleEngine.startTurn(G);
   }
   if (companionSpirit) BattleEngine.boost(G, 0, { spirit: 2 });      // a Guard-type companion stands with you
@@ -124,7 +124,7 @@ function startBattleNow(opponent, first) {
   battle = { npc: opponent, isBoss, first, neutral, G, profile, weather, sel: null, busy: false, ended: false, rewarded: false, yieldArmed: false, token: ++battleToken, startedAt: Date.now() };
   const chip = [weather === 'snow' ? (isBoss ? '❄️ Boss +2 Spirit · richer prize' : '❄️ Richer prize') : '', ...world.chips].filter(Boolean).join(' · ');
   const tw = twistKind ? BattleEngine.TWISTS[twistKind] : null;
-  btGet('btWeather').textContent = opponent.puzzle ? '🧩 Ending your turn resets the board' : [tw ? `${tw.icon} ${tw.text}` : '', chip, plainFoe ? '✦ Seasoned deck' : ''].filter(Boolean).join(' · ');
+  btGet('btWeather').textContent = opponent.puzzle ? '🧩 Ending your turn resets the board' : [tw ? `${tw.icon} ${tw.text}` : '', opponent.trial ? '🔮 Brings a Fate and a Spread' : '', chip, plainFoe ? '✦ Seasoned deck' : ''].filter(Boolean).join(' · ');
   battle.puzzle = !!opponent.puzzle;
 
   townPanel.classList.add('hidden');
@@ -1013,7 +1013,10 @@ async function btOpponentTurn(token) {
   await btWait(650); if (!btAlive(token)) return;
   for (let i = 0; i < 40 && !G.over; i++) {
     const a = BattleEngine.aiNextAction(G, 1, lv);
-    if (a.type === 'end') break;
+    if (a.type === 'end') {
+      if (G.p[1].fate && BattleEngine.fateReady(G, 1).ok && BattleEngine.useFate(G, 1).ok) { await btAnimate(btFlush(G), token); if (!btAlive(token)) return; continue; }   // a trial foe's Fate
+      break;
+    }
     BattleEngine.applyAction(G, 1, a);
     await btAnimate(btFlush(G), token); if (!btAlive(token)) return;
     if (G.over) break;
@@ -1074,6 +1077,8 @@ function btShowResult(won, yielded) {
     battleEndStats.textContent = `There is a way to win this turn${state.progress.puzzle && state.progress.puzzle.steps ? ` in ${state.progress.puzzle.steps} moves` : ''}. Try again - the board resets exactly as it was.`;
     btGet('battleRetryBtn').classList.remove('hidden');
     sfx('soft');
+  } else if (won && !battle.rewarded && npc.trial) {
+    trialWin();
   } else if (won && !battle.rewarded && npc.challenge) {
     challengeWin();
   } else if (won && !battle.rewarded && npc.ghost) {
@@ -1167,7 +1172,7 @@ function btRenderEndStats(G, won, yielded, turns, npc) {
 function closeBattle(retry) {
   if (battle && battle.closing) return;                 // a second tap on Continue while the fade is running
   const fromDungeon = !!(battle && battle.npc && battle.npc.dungeon), fromPuzzle = !!(battle && battle.npc && battle.npc.puzzle), fromCup = !!(battle && battle.npc && battle.npc.cup), fromDraft = !!(battle && battle.npc && battle.npc.draft),
-        fromChallenge = !!(battle && battle.npc && battle.npc.challenge);
+        fromChallenge = !!(battle && battle.npc && battle.npc.challenge), fromTrial = !!(battle && battle.npc && battle.npc.trial);
   if (battle) { battle.ended = true; battleToken++; }
   if (retry && battle) { battleEndOverlay.classList.add('hidden'); btGet('mulliganOverlay').classList.add('hidden'); startBattle(battle.npc); return; }
   if (battle) battle.closing = true;
@@ -1190,6 +1195,7 @@ function closeBattle(retry) {
     else if (fromPuzzle) openScene('nook');
     else if (fromCup) openScene('cup');
     else if (fromDraft) { openScene('cup'); scene.mode = 'draft'; scene.text = draftIntro(); renderScene(); }
+    else if (fromTrial) { tarotView = 'trials'; openCalm('tarot'); }
     else if (fromChallenge) { openScene('cup'); scene.mode = 'chal'; scene.text = 'The challenge board, again.'; renderScene(); }
   };
   if (doorFading) leave(); else withDoorFade(leave, 430, 560);
