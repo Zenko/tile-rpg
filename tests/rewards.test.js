@@ -8,6 +8,8 @@ module.exports = async (page, assert) => {
   const before = await page.evaluate(() => state.ownedCards.length);
   await page.click('#dailyClaim [data-claimall]'); await page.waitForTimeout(250);
   assert.strictEqual(await page.evaluate(() => state.ownedCards.length), before + ready);
+  // Claiming a card can itself finish another quest (e.g. "find a card"), so keep claiming until nothing is left.
+  for (let i = 0; i < 4 && await page.locator('#dailyClaim [data-claimall]').count(); i++) { await page.click('#dailyClaim [data-claimall]'); await page.waitForTimeout(250); }
   assert.match(await page.locator('#dailyClaim .claim-hero').innerText(), /Nothing to claim/);
   await page.click('#dailyClaim [data-nsopen]');
   assert.ok(await page.locator('#dailyClaim .quest').count() > 5, 'not-started group did not open');
