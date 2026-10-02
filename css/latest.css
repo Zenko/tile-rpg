@@ -937,3 +937,10 @@ html.calm .cl-cell.rat, html.cozy .cl-cell.rat { animation: none; }
 .tl-txt b { font-family: var(--f-display); font-size: 1rem; }
 .tl-txt small { color: var(--ink-soft); font-size: .78rem; line-height: 1.4; }
 .tl-txt small.tl-fate { opacity: .85; }
+
+/* ---- Family passives (build 116) ---- */
+.di-pass { display: flex; gap: 10px; align-items: flex-start; margin-top: 8px; padding: 10px 12px; border-radius: 14px; background: rgba(141,188,203,.12); border: 1px solid rgba(141,188,203,.4); }
+.di-pass i { font-style: normal; font-size: 1.3rem; line-height: 1; }
+.di-pass b { display: block; font-family: var(--f-display); font-size: 1rem; }
+.di-pass span { display: block; font-size: .82rem; color: var(--ink-soft); }
+.di-pass.dim { opacity: .6; background: transparent; border-style: dashed; border-color: var(--stone-edge); }

@@ -14,9 +14,9 @@ module.exports = async (page, assert) => {
   const a = await page.evaluate(() => {
     const grove = Object.keys(CARD_FAMILY).filter(id => CARD_FAMILY[id] === 'grove' && cardDef(id) && !cardDef(id).spell && !cardDef(id).exclusive).slice(0, 8);
     const rest = CARD_POOL.filter(c => CARD_FAMILY[c.id] && CARD_FAMILY[c.id] !== 'grove' && !c.spell && !c.exclusive).slice(0, 4).map(c => c.id);
-    state.deck = grove.concat(rest); return { arch: deckArchetype(state.deck), bonus: archetypeBonus(), n: state.deck.length };
+    state.deck = grove.concat(rest); return { arch: deckArchetype(state.deck), bonus: archetypePassive(), n: state.deck.length };
   });
-  assert.strictEqual(a.n, 12); assert.strictEqual(a.arch.fam, 'grove'); assert.strictEqual(a.bonus, 1);
+  assert.strictEqual(a.n, 12); assert.strictEqual(a.arch.fam, 'grove'); assert.strictEqual(a.bonus, 'grove');
   const p = await page.evaluate(async () => {
     state.deck = BattleEngine.suggestDeck(Object.fromEntries(CARD_POOL.filter(c => !c.exclusive && !c.foe).slice(0, 40).map(c => [c.id, 2])));
     runPractice(); await new Promise(res => { const t = setInterval(() => { if (!practiceRunning) { clearInterval(t); res(); } }, 50); });

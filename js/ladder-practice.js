@@ -66,7 +66,8 @@ function deckArchetype(deck) {
   if (!top || tally[top] < 6) return null;
   return { fam: top, n: tally[top], bonus: tally[top] >= 8 && deck.length >= DECK_SIZE };
 }
-function archetypeBonus() { const a = deckArchetype(state.deck); return a && a.bonus ? 1 : 0; }
+// The family whose passive this deck plays with (8+ cards of one family, full deck), or null. Neutral and puzzle matches ignore it.
+function archetypePassive() { const a = deckArchetype(state.deck); return a && a.bonus ? a.fam : null; }
 
 /* ---------- practice ---------- */
 const PRACTICE_TIERS = [{ tier: 1, label: 'Easy', ai: 'normal', spirit: 17 }, { tier: 2, label: 'Middling', ai: 'normal', spirit: 17 }, { tier: 3, label: 'Hard', ai: 'smart', spirit: 20 }];
@@ -98,8 +99,9 @@ function runPractice() {
 function renderDeckInsights() {
   const el = document.getElementById('deckInsights'); if (!el) return;
   const a = deckArchetype(state.deck), full = state.deck.length >= DECK_SIZE;
-  const arch = a ? `<div class="di-arch"><b>${FAMILIES[a.fam].icon} ${FAMILIES[a.fam].name} deck</b><span>${a.n} of ${state.deck.length} cards${a.bonus ? ' · <em>+1 Spirit at the start</em>' : ' · 8 or more gives +1 Spirit at the start'}</span></div>`
-    : `<div class="di-arch"><b>Mixed deck</b><span>Six cards of one family make a themed deck; eight earn +1 Spirit at the start.</span></div>`;
+  const P = a && BattleEngine.PASSIVES[a.fam];
+  const arch = a ? `<div class="di-arch"><b>${FAMILIES[a.fam].icon} ${FAMILIES[a.fam].name} deck</b><span>${a.n} of ${state.deck.length} cards${a.bonus ? '' : ` · 8 or more unlocks ${P.name}`}</span>${a.bonus ? `<div class="di-pass"><i>${P.icon}</i><div><b>${P.name}</b><span>${P.text}</span></div></div>` : `<div class="di-pass dim"><i>🔒</i><div><b>${P.name}</b><span>${P.text}</span></div></div>`}</div>`
+    : `<div class="di-arch"><b>Mixed deck</b><span>Six cards of one family make a themed deck; eight unlock that family's passive.</span></div>`;
   const stale = practiceResult && practiceResult.deck && practiceResult.deck.join() !== state.deck.join();
   const res = practiceResult && practiceResult.wins.length ? `<div class="di-bars${stale ? ' stale' : ''}">${PRACTICE_TIERS.map((t, i) => practiceResult.wins[i] === undefined ? `<div class="di-row"><span>${t.label}</span><i class="di-bar"><b style="width:0"></b></i><em>…</em></div>` : `<div class="di-row"><span>${t.label}</span><i class="di-bar"><b style="width:${practiceResult.wins[i]}%"></b></i><em>${practiceResult.wins[i]}%</em></div>`).join('')}</div><small class="di-note">${stale ? 'Your deck has changed since this test. ' : ''}Plain rules, ${PRACTICE_GAMES} practice games each, no skills, charms or mastery.</small>` : '';
   el.innerHTML = arch + `<button type="button" class="dk-tool-btn di-test" id="deckPractice" ${full && !practiceRunning ? '' : 'disabled'}>${practiceRunning ? 'Testing…' : full ? '🧪 Test your deck' : 'Fill your deck to test it'}</button>` + res;

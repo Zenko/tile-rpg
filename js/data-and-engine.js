@@ -491,6 +491,30 @@ const BattleEngine = (function () {
      The same three cards can be listed in any order; spells count as having no family. Pure engine, opts.spread = [ids|null, ids|null].
      Cards are matched by id; a spread that names a card the deck does not hold is quietly ignored. */
   const SPREAD_RULES = { presentDiscount: 0, presentMinCost: 0, presentShield: 1, harmonySpirit: 2, contrastDraw: 1, futureTurn: 4 };
+  /* ---------- Family passives (build 116) ----------
+     A deck of 8 or more cards of one family plays with that family's passive (opts.passive = [family|null, family|null]; the deck
+     screen and battle UI work the family out in archetypePassive(), js/ladder-practice.js). Wind changes the cards when the
+     decks are built; Grove, Stone and Tide trigger when a card of the family is played. Re-run the simulation before changing a number. */
+  const PASSIVES = {
+    grove: { icon: '🌱', name: 'Rooted',   text: 'Grove cards restore 1 Spirit when they arrive.' },
+    stone: { icon: '⛰️', name: 'Bedrock',  text: 'Your first Stone card costing 4 or more enters with a Shield.' },
+    tide:  { icon: '🌊', name: 'Undertow', text: 'The first Tide card you play each turn draws a card, if you hold 4 or fewer.' },
+    wind:  { icon: '🪶', name: 'Tailwind', text: 'Swift Wind cards costing 2 or less get +1 power.' }
+  };
+  const PASSIVE_RULES = { windMaxCost: 2, stoneMinCost: 4 };   // Wind only touches Swift cards up to this cost (tuned by simulation)
+  function applyPassiveBuild(pl) {
+    if (!pl.passive) return;
+    pl.deck.forEach(c => {
+      if (c.spell || familyOf(c.id) !== pl.passive) return;
+      if (pl.passive === 'wind' && c.kw.includes('swift') && c.cost <= PASSIVE_RULES.windMaxCost) c.power++;
+    });
+  }
+  function passiveOnPlay(G, who, c) {
+    const me = G.p[who]; if (!me.passive || familyOf(c.id) !== me.passive) return;
+    if (me.passive === 'grove') { const h = Math.min(1, me.maxSpirit - me.spirit); if (h > 0) { me.spirit += h; emit(G, 'spirit', { who, delta: h }); } }
+    else if (me.passive === 'stone') { if (!me.stoneShielded && !c.shield && c.cost >= PASSIVE_RULES.stoneMinCost) { me.stoneShielded = true; c.shield = true; emit(G, 'shieldup', { who, uid: c.uid }); } }
+    else if (me.passive === 'tide' && !me.tideDrew && me.hand.length <= 4) { me.tideDrew = true; draw(G, me); }
+  }
   function spreadBonus(ids) {
     const fams = ids.map(id => CARD_FAMILY[baseIdOf(id)] || null);
     if (fams.some(f => !f)) return { harmony: false, contrast: false };
@@ -622,6 +646,7 @@ const BattleEngine = (function () {
     G.uid = uid;                                   // later cards (Seedlings) keep numbering from here
     (opts.knack || []).forEach((id, i) => { if (id && KNACKS[id]) G.p[i].knack = id; });
     (opts.fate || []).forEach((id, i) => { if (id && FATES[id]) G.p[i].fate = id; });
+    (opts.passive || []).forEach((f, i) => { if (f && PASSIVES[f]) { G.p[i].passive = f; applyPassiveBuild(G.p[i]); } });
     G.p.forEach((pl, i) => { const n = RULES.hand + (i !== first ? 1 : 0); for (let k = 0; k < n; k++) draw(G, pl, true); });
     (opts.spread || []).forEach((ids, i) => { if (ids) layoutSpread(G, i, ids); });
     // opts.startSpirit: begin below full (the Festival Cup carries your Spirit from one round to the next)
@@ -641,7 +666,7 @@ const BattleEngine = (function () {
 
   function startTurn(G) {
     const me = G.p[G.active];
-    me.turns++;
+    me.turns++; me.tideDrew = false;
     const bonus = (G.active !== (G.first || 0) && me.turns <= RULES.secondBonusTurns) ? RULES.secondBonus : 0;
     me.maxEnergy = Math.min(me.turns + bonus, RULES.ecap);
     me.energy = me.maxEnergy;
@@ -693,6 +718,7 @@ const BattleEngine = (function () {
     me.hand.splice(me.hand.indexOf(c), 1);
     me.energy -= c.cost; me.board.push(c);
     emit(G, 'play', { who, card: c });
+    passiveOnPlay(G, who, c);
     if (c.kw.includes('echo')) { const dmg = RULES.echo + ((G.mods && G.mods.echoBonus) || 0); op.spirit -= dmg; emit(G, 'spirit', { who: 1 - who, delta: -dmg, source: c, echo: true }); }
     if (c.kw.includes('rally')) me.board.forEach(x => { if (x !== c) { x.power++; emit(G, 'buff', { who, uid: x.uid, amt: 1, rally: true }); } });
     if (c.kw.includes('kin')) {
@@ -1007,7 +1033,7 @@ const BattleEngine = (function () {
     return deck;
   }
 
-  return { RULES, KEYWORDS, SPELLS, TWISTS, KNACKS, knackReady, setKnack, useKnack, FATES, fateReady, setFate, useFate, spreadBonus, layoutSpread, SPREAD_RULES, MAX_KEYWORDS, defOf, baseIdOf, variantId, suggestDeck, makeCard, familyOf, newGame, startTurn, canPlay, playCard, spellNeedsTarget, legalTargets, attack, endTurn, forfeit, boost, mulligan, aiNextAction, applyAction, aiTurn, guards, valueOf };
+  return { RULES, KEYWORDS, SPELLS, TWISTS, KNACKS, knackReady, setKnack, useKnack, FATES, fateReady, setFate, useFate, spreadBonus, layoutSpread, SPREAD_RULES, PASSIVES, PASSIVE_RULES, MAX_KEYWORDS, defOf, baseIdOf, variantId, suggestDeck, makeCard, familyOf, newGame, startTurn, canPlay, playCard, spellNeedsTarget, legalTargets, attack, endTurn, forfeit, boost, mulligan, aiNextAction, applyAction, aiTurn, guards, valueOf };
 })();
 /* END BATTLE ENGINE */
 

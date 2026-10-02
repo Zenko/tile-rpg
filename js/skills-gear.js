@@ -59,7 +59,6 @@ function skillBonus(kind) {
   if (typeof tarotBonus === 'function') v += tarotBonus(kind);   // the day's fortune and attuned Arcana (js/tarot.js)
   if (typeof cellarRunBonus === 'function') v += cellarRunBonus(kind);   // boons while a cellar fight is on (js/cellar-run.js)
   if (kind === 'xp' && typeof calmRested === 'function' && calmRested()) v += 0.05;   // Rested after five breaths (js/calm.js)
-  if (kind === 'startSpirit' && typeof archetypeBonus === 'function') v += archetypeBonus();   // 8+ cards of one family (js/ladder-practice.js)
   return v;
 }
 

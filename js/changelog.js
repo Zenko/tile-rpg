@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta ${RELEASES[0].n} (build $
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'new', x: 'Family passives: a full deck with 8 or more cards of one family now plays with that family\'s passive instead of +1 Spirit. Grove: Grove cards restore 1 Spirit when they arrive. Stone: your first Stone card costing 4 or more enters with a Shield. Tide: your first Tide card each turn draws a card if you hold 4 or fewer. Wind: Swift Wind cards costing 2 or less get +1 power. It shows on the Deck screen and as a line in battle.' },
   { t:'new', x: 'Weekly Rule: one small rule bends every card match for a whole week, the same for both sides (Swift cards +1 power, Mend heals +1, Shield or Guard cards +1 health, Bloom +1 power, Echo hits +1). It shows as a chip in battle and on the Social ladder card.' },
   { t:'new', x: 'Trials of the Arcana (Calm corner → Tarot → Trials, level 6): five matches against foes who bring a Fate and a Fate Spread of their own, opening in order from The Fool to The World. The first win over each gives you its Arcana card; later wins pay 6 Pebbles. Foes now use their Fate when they have one.' },
   { t:'new', x: 'Fate Spread (Deck screen, level 6): lay three cards from your deck as Past, Present and Future. Past is always in your opening hand, Present enters with a Shield, and Future arrives on your 4th turn. Three cards of one family give Harmony (+2 Spirit); three different families give Contrast (+1 card).' },

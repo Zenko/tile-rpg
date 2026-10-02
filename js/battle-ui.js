@@ -109,7 +109,7 @@ function startBattleNow(opponent, first) {
   }
   else {
     G = BattleEngine.newGame(myDeck.slice(), oppDeck.slice(), Math.random, { spirit: [BattleEngine.RULES.spirit, profile.spirit], mods: world.mods,
-      twist: twistKind ? { side: 1, kind: twistKind } : null, startSpirit: opponent.startSpirit ? [opponent.startSpirit, null] : null, first, knack: [currentKnackId(), null], fate: [neutral ? null : currentFateId(), opponent.fate || null], spread: [neutral ? null : currentSpread(), opponent.spread || null] });
+      twist: twistKind ? { side: 1, kind: twistKind } : null, startSpirit: opponent.startSpirit ? [opponent.startSpirit, null] : null, first, knack: [currentKnackId(), null], fate: [neutral ? null : currentFateId(), opponent.fate || null], spread: [neutral ? null : currentSpread(), opponent.spread || null], passive: [neutral || opponent.puzzle ? null : archetypePassive(), null] });
     BattleEngine.startTurn(G);
   }
   if (companionSpirit) BattleEngine.boost(G, 0, { spirit: 2 });      // a Guard-type companion stands with you
@@ -125,7 +125,7 @@ function startBattleNow(opponent, first) {
   battle = { npc: opponent, isBoss, first, neutral, G, profile, weather, sel: null, busy: false, ended: false, rewarded: false, yieldArmed: false, token: ++battleToken, startedAt: Date.now() };
   const chip = [weather === 'snow' ? (isBoss ? '❄️ Boss +2 Spirit · richer prize' : '❄️ Richer prize') : '', ...world.chips].filter(Boolean).join(' · ');
   const tw = twistKind ? BattleEngine.TWISTS[twistKind] : null;
-  btGet('btWeather').textContent = opponent.puzzle ? '🧩 Ending your turn resets the board' : [tw ? `${tw.icon} ${tw.text}` : '', opponent.trial ? '🔮 Brings a Fate and a Spread' : '', chip, plainFoe ? '✦ Seasoned deck' : ''].filter(Boolean).join(' · ');
+  btGet('btWeather').textContent = opponent.puzzle ? '🧩 Ending your turn resets the board' : [tw ? `${tw.icon} ${tw.text}` : '', opponent.trial ? '🔮 Brings a Fate and a Spread' : '', (G.p[0].passive ? `${BattleEngine.PASSIVES[G.p[0].passive].icon} ${BattleEngine.PASSIVES[G.p[0].passive].name}: ${BattleEngine.PASSIVES[G.p[0].passive].text}` : ''), chip, plainFoe ? '✦ Seasoned deck' : ''].filter(Boolean).join(' · ');
   battle.puzzle = !!opponent.puzzle;
 
   townPanel.classList.add('hidden');
