@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en" class="sg-html">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tile RPG Asset Lab</title>
+<!-- Asset Lab: a sandbox for trying new art against the real game. It loads the game's own stylesheets, sprites and card data,
+     swaps your uploaded images in IN MEMORY (the real game files are never touched) and shows them in the game's card faces,
+     sizes, rarities, mock screens and town. Uploads are kept in this browser (IndexedDB) so they survive a reload.
+     Name a file after a card id (sprout.png) or a sprite id (s-oak.svg) and it is matched automatically. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;1,400&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/screens.css">
+<link rel="stylesheet" href="css/battle-town.css">
+<link rel="stylesheet" href="css/buildings.css">
+<link rel="stylesheet" href="css/battle-v2.css">
+<link rel="stylesheet" href="css/latest.css">
+<style>
+html.sg-html { height: auto; }
+body.lab { display: block; height: auto; overflow: visible; overflow-x: hidden; -webkit-user-select: text; user-select: text; padding: 0; text-align: left; font-size: 16px; line-height: 1.55; }
+.lab-wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px 90px; }
+.lab-top { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg-top) 94%, transparent); border-bottom: 1px solid var(--stone-edge); }
+.lab-top-in { max-width: 1120px; margin: 0 auto; padding: 10px 20px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.lab-brand { font-family: var(--f-display); font-size: 1.15rem; font-weight: 500; margin-right: auto; white-space: nowrap; }
+.lab-nav { display: flex; gap: 2px; flex-wrap: wrap; } .lab-nav a { color: var(--ink-soft); text-decoration: none; font-size: .76rem; font-weight: 700; padding: 6px 10px; border-radius: 999px; } .lab-nav a:hover { background: var(--board-bg); color: var(--ink); }
+.lab-seg { display: inline-flex; background: var(--stone); border: 1px solid var(--stone-edge); border-radius: 999px; padding: 3px; } .lab-seg button { border: 0; background: none; font: inherit; font-size: .76rem; font-weight: 700; color: var(--ink-soft); padding: 6px 13px; border-radius: 999px; cursor: pointer; } .lab-seg button.on { background: var(--water); color: var(--on-water); }
+.lab-hero { padding: 40px 0 8px; } .lab-hero h1 { font-family: var(--f-display); font-weight: 500; font-size: clamp(1.8rem, 5vw, 2.7rem); line-height: 1.1; margin: 0 0 8px; } .lab-hero p { color: var(--ink-soft); max-width: 740px; margin: 0 0 6px; }
+.lab-sec { padding-top: 46px; scroll-margin-top: 70px; } .lab-sec > h2 { font-family: var(--f-display); font-weight: 500; font-size: 1.7rem; margin: 0 0 4px; } .lab-lead { color: var(--ink-soft); max-width: 760px; margin: 0 0 18px; }
+.lab-card { background: var(--stone); border: 1px solid var(--stone-edge); border-radius: 18px; padding: 18px; }
+.lab-grid { display: grid; gap: 14px; } .lab-g2 { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+.lab-label { font-size: .7rem; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 8px; }
+.lab-note { font-size: .82rem; color: var(--ink-soft); margin: 8px 0 0; } .lab-note b { color: var(--ink); }
+code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .82em; background: var(--board-bg); padding: 1px 6px; border-radius: 6px; }
+.lab-demo { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; }
+.lab-tw { overflow-x: auto; } table.lab-t { width: 100%; border-collapse: collapse; font-size: .84rem; } .lab-t th { text-align: left; font-size: .66rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); font-weight: 800; padding: 7px 8px; border-bottom: 1px solid var(--stone-edge); } .lab-t td { padding: 8px; border-bottom: 1px solid color-mix(in srgb, var(--stone-edge) 55%, transparent); vertical-align: middle; }
+.lab-drop { border: 2px dashed var(--stone-edge); border-radius: 20px; padding: 34px 16px; text-align: center; cursor: pointer; transition: border-color .2s, background .2s; } .lab-drop:hover, .lab-drop.over, .lab-drop:focus-visible { border-color: var(--water); background: var(--board-bg); outline: none; } .lab-drop b { font-size: 1.05rem; }
+.lab-btn { font: inherit; font-size: .76rem; font-weight: 700; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--stone-edge); background: var(--stone); color: var(--ink); cursor: pointer; } .lab-btn:hover { border-color: var(--water); } .lab-btn.on { background: var(--water); color: var(--on-water); border-color: transparent; } .lab-btn.danger:hover { border-color: var(--boss-glow); color: var(--boss-glow); }
+select.lab-btn, input.lab-btn { font-weight: 600; }
+.lab-thumb { width: 52px; height: 52px; border-radius: 10px; object-fit: contain; background: conic-gradient(#8883 25%, #0000 0 50%, #8883 0 75%, #0000 0) 0 0 / 12px 12px; }
+.pill { display: inline-block; font-size: .68rem; font-weight: 800; padding: 2px 9px; border-radius: 999px; background: var(--board-bg); } .pill.ok { background: color-mix(in srgb, var(--win-glow) 25%, transparent); } .pill.warn { background: color-mix(in srgb, var(--accent) 30%, transparent); } .pill.bad { background: color-mix(in srgb, var(--boss-glow) 25%, transparent); }
+.lab-checks { list-style: none; margin: 0; padding: 0; font-size: .8rem; } .lab-checks li { padding: 2px 0 2px 20px; position: relative; } .lab-checks li::before { position: absolute; left: 0; font-weight: 800; } .lab-checks .ok::before { content: '✓'; color: var(--win-glow); } .lab-checks .warn::before { content: '!'; color: var(--accent); } .lab-checks .bad::before { content: '✕'; color: var(--boss-glow); }
+.checker { background: conic-gradient(#8883 25%, #0000 0 50%, #8883 0 75%, #0000 0) 0 0 / 16px 16px; }
+.lab-prev { position: relative; width: 100%; max-width: 320px; aspect-ratio: 1; border-radius: 14px; overflow: hidden; } .lab-prev img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; } .lab-prev svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+#battleView.sg-bv { position: relative; inset: auto; display: block; overflow: visible; padding: 0; text-align: left; }
+.phone { width: 100%; max-width: 400px; margin: 0 auto; border-radius: 28px; padding: 16px 12px 18px; background: linear-gradient(180deg, var(--bg-top), var(--bg-bottom)); border: 1px solid var(--stone-edge); display: flex; flex-direction: column; gap: 10px; text-align: center; position: relative; }
+.phone .cap { font-size: .7rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; } .grid3 .alm-card { width: 100%; min-height: 104px; } .grid3 .hit { outline: 3px solid var(--accent); outline-offset: 2px; }
+.cat { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 12px; } .cat .alm-card { width: 100%; } .cat-item { text-align: center; cursor: pointer; } .cat-item code { display: block; font-size: .6rem; margin-top: 5px; word-break: break-all; } .cat-item.has .alm-card { outline: 2px solid var(--accent); outline-offset: 2px; }
+.row-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; } .slot { aspect-ratio: 84 / 112; position: relative; }
+.fan { display: flex; justify-content: center; padding: 18px 0 4px; } .fan > div { width: 78px; height: 104px; margin: 0 -10px; transform-origin: 50% 120%; }
+.sheet { background: var(--stone); border-radius: 22px 22px 0 0; padding: 12px 16px 18px; text-align: center; box-shadow: 0 -8px 24px var(--shadow); } .sheet .grab { width: 40px; height: 4px; border-radius: 2px; background: var(--stone-edge); margin: 0 auto 12px; }
+.town { position: relative; overflow: hidden; border-radius: 16px; background: var(--ground); margin: 0; } .town span { position: absolute; display: block; } .town .tile { width: var(--t); height: var(--t); }
+.av { border-radius: 50%; overflow: hidden; background: var(--stone); object-fit: cover; display: block; }
+.empty { padding: 26px; text-align: center; color: var(--ink-soft); border: 1px dashed var(--stone-edge); border-radius: 16px; font-size: .88rem; }
+.stick { position: sticky; top: 64px; z-index: 5; }
+.toast-lab { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); background: var(--ink); color: var(--stone); padding: 9px 18px; border-radius: 999px; font-size: .84rem; font-weight: 700; z-index: 90; opacity: 0; transition: opacity .25s; pointer-events: none; } .toast-lab.show { opacity: 1; }
+@media (max-width: 560px) { .lab-sec > h2 { font-size: 1.45rem; } }
+</style>
+</head>
+<body class="lab">
+<script src="assets/sprites.js"></script>
+
+<header class="lab-top"><div class="lab-top-in">
+  <div class="lab-brand">Asset Lab</div>
+  <nav class="lab-nav"><a href="#library">Library</a><a href="#card">One card</a><a href="#screens">In the game</a><a href="#set">Whole set</a><a href="#town">Town sprites</a><a href="#other">Portraits &amp; icon</a><a href="#export">Hand-off</a></nav>
+  <span class="lab-seg" id="themeSeg" role="group" aria-label="Preview theme"><button id="thDark" class="on" type="button">Dark</button><button id="thLight" type="button">Light</button></span>
+</div></header>
+
+<main class="lab-wrap">
+<section class="lab-hero">
+  <h1>Try new art in the real game's clothes.</h1>
+  <p>Drop your images in below and they are swapped into the game's own card faces, sizes, rarities, screens and town, right here in your browser. The real game is never changed. Name a file after a card id (<code>sprout.png</code>) or a sprite id (<code>s-oak.svg</code>) and it attaches to the right thing by itself; anything else can be assigned by hand.</p>
+</section>
+
+<!-- LIBRARY -->
+<section class="lab-sec" id="library">
+  <h2>1. Library</h2>
+  <p class="lab-lead">Add as many files as you like, in one go or over several visits. They stay in this browser until you remove them.</p>
+  <div class="lab-drop" id="drop" tabindex="0" role="button" aria-label="Choose images"><input type="file" id="file" accept="image/png,image/svg+xml,image/webp,image/jpeg" multiple hidden><b>Drop images here</b> or click to choose<br><span class="lab-note">PNG 512 x 512 transparent for cards. SVG or PNG for town sprites. You can drop a whole folder's worth at once.</span></div>
+  <div class="lab-card lab-tw" id="libWrap" style="margin-top:14px" hidden>
+    <div class="lab-demo" style="justify-content:space-between;align-items:center;margin-bottom:10px"><div class="lab-label" style="margin:0" id="libCount"></div><span><button class="lab-btn" id="selAllOk" type="button">Open first matched card</button> <button class="lab-btn danger" id="clearAll" type="button">Remove all</button></span></div>
+    <table class="lab-t" id="lib"></table>
+  </div>
+</section>
+
+<div id="battleView" class="sg-bv">
+<!-- ONE CARD -->
+<section class="lab-sec" id="card">
+  <h2>2. One card, every way</h2>
+  <p class="lab-lead">Pick a card (the ones with new art are marked). Everything below shows that card with its new art, using the real card faces. Use the Dark / Light switch at the top to check both themes.</p>
+  <div class="lab-demo" style="align-items:center;margin-bottom:16px"><label class="lab-note" style="margin:0" for="pick">Card</label><select id="pick" class="lab-btn" style="min-width:240px"></select><span class="lab-note" id="pickInfo" style="margin:0"></span></div>
+  <div id="cardLab"></div>
+</section>
+
+<!-- SCREENS -->
+<section class="lab-sec" id="screens">
+  <h2>3. In the game</h2>
+  <p class="lab-lead">The selected card dropped into mock-ups built from the game's real components, surrounded by the other cards in their current look (emoji, or your other uploads). This is the "does it fit?" check.</p>
+  <div class="lab-grid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr));align-items:start" id="mocks"></div>
+</section>
+
+<!-- SET -->
+<section class="lab-sec" id="set">
+  <h2>4. Whole set</h2>
+  <p class="lab-lead">Every card at once, with your uploads in place and the rest still showing today's emoji, so you can judge consistency across a family or rarity.</p>
+  <div class="lab-demo" style="align-items:center;margin-bottom:12px" id="setFilters"></div>
+  <div class="cat" id="setGrid"></div>
+  <p class="lab-note" id="setCount"></p>
+</section>
+</div>
+
+<!-- TOWN -->
+<section class="lab-sec" id="town">
+  <h2>5. Town sprites</h2>
+  <p class="lab-lead">Props, trees, ground pieces and buildings in a small town scene using the game's own district colours. Upload a file named after a sprite id (<code id="spriteIds"></code>) as SVG or PNG to swap it in. Props are 64 x 64, buildings 128 x 128 (bakery 192 x 128).</p>
+  <div class="lab-demo" style="align-items:center;margin-bottom:12px"><span class="lab-seg" id="biomeSeg"></span></div>
+  <div class="lab-card" style="overflow-x:auto"><div id="townScene"></div></div>
+  <div class="lab-card" style="margin-top:14px"><div class="lab-label">All sprites (swapped ones are outlined)</div><div class="lab-demo" id="spriteAll" style="gap:12px"></div></div>
+</section>
+
+<!-- OTHER -->
+<section class="lab-sec" id="other">
+  <h2>6. Portraits and app icon</h2>
+  <p class="lab-lead">The game has no portrait slot yet (characters are emoji), so this previews any image you pick in the places a character appears. It also shows how an image would look as the app icon.</p>
+  <div class="lab-demo" style="align-items:center;margin-bottom:12px"><label class="lab-note" style="margin:0" for="otherPick">Image</label><select id="otherPick" class="lab-btn" style="min-width:240px"></select></div>
+  <div id="otherOut"></div>
+</section>
+
+<!-- EXPORT -->
+<section class="lab-sec" id="export">
+  <h2>7. Hand-off</h2>
+  <p class="lab-lead">When you are happy: copy this list and send it to me with the files (or commit the PNGs into <code>assets/cards/</code>). I add the ids to the game's art list, regenerate the checklist and publish.</p>
+  <div class="lab-card"><div class="lab-label">Cards that pass every check</div><pre id="exp" style="white-space:pre-wrap;word-break:break-all;margin:0;font-size:.8rem"></pre><div class="lab-demo" style="margin-top:12px"><button class="lab-btn" id="copyExp" type="button">Copy</button><button class="lab-btn" id="dlReport" type="button">Download report (.md)</button></div>
+  <p class="lab-note" id="expNote"></p></div>
+</section>
+</main>
+<div class="toast-lab" id="toast" role="status"></div>
+
+<script>
+window.escapeHtml = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+</script>
+<script src="js/data-and-engine.js"></script>
+<script>
+(function () {
+  var $ = function (s, r) { return (r || document).querySelector(s); }, $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var root = document.documentElement, RARS = ['common', 'rare', 'ultra', 'super', 'mythic'], RN = { common: 'Common', rare: 'Rare', ultra: 'Ultra rare', super: 'Super ultra rare', mythic: 'Mythic' };
+  var POOL = CARD_POOL.slice(), FOES = (typeof FOE_CARDS !== 'undefined' ? FOE_CARDS : []), TOKS = (typeof TOKEN_CARDS !== 'undefined' ? TOKEN_CARDS : []);
+  var ALL = POOL.concat(FOES, TOKS), BYID = {}; ALL.forEach(function (c) { BYID[c.id] = c; });
+  var ORIG = {}; ALL.forEach(function (c) { ORIG[c.id] = c.art; });
+  var SPRITES = $$('symbol').map(function (s) { return { id: s.id, vb: s.getAttribute('viewBox').split(' ').map(Number) }; }), SPR = {}; SPRITES.forEach(function (s) { SPR[s.id] = s; });
+  $('#spriteIds').textContent = SPRITES.map(function (s) { return s.id; }).join(', ');
+  function famOf(id) { return (typeof CARD_FAMILY !== 'undefined' && CARD_FAMILY[id]) || ''; }
+  function toast(t) { var e = $('#toast'); e.textContent = t; e.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(function () { e.classList.remove('show'); }, 1600); }
+
+  /* ---------- state: the library (name -> record) ---------- */
+  var LIB = {}, sel = POOL[0].id;
+  function baseName(n) { return n.replace(/\.[^.]+$/, '').toLowerCase().replace(/\s+/g, '-'); }
+  function targetOf(r) { var k = r.assign || baseName(r.name); if (BYID[k]) return { kind: 'card', id: k }; if (SPR[k]) return { kind: 'sprite', id: k }; return null; }
+
+  /* ---------- IndexedDB (best effort) ---------- */
+  var db = null;
+  function idb(mode, fn) { return new Promise(function (res) { if (!db) return res(); try { var tx = db.transaction('files', mode), st = tx.objectStore('files'); fn(st); tx.oncomplete = function () { res(); }; tx.onerror = function () { res(); }; } catch (e) { res(); } }); }
+  function idbOpen() { return new Promise(function (res) { try { var rq = indexedDB.open('tile-rpg-asset-lab', 1); rq.onupgradeneeded = function () { rq.result.createObjectStore('files', { keyPath: 'name' }); }; rq.onsuccess = function () { db = rq.result; res(); }; rq.onerror = function () { res(); }; } catch (e) { res(); } }); }
+  function idbAll() { return new Promise(function (res) { if (!db) return res([]); try { var rq = db.transaction('files').objectStore('files').getAll(); rq.onsuccess = function () { res(rq.result || []); }; rq.onerror = function () { res([]); }; } catch (e) { res([]); } }); }
+
+  /* ---------- analysis (the same preflight as the style guide) ---------- */
+  function analyze(rec) {
+    return new Promise(function (res) {
+      var img = new Image(), info = [], kb = rec.blob.size / 1024, vec = /svg/.test(rec.blob.type) || /\.svg$/i.test(rec.name);
+      img.onload = function () {
+        var w = img.naturalWidth, h = img.naturalHeight, t = targetOf(rec), isCard = !t || t.kind === 'card';
+        if (vec) info.push(['warn', 'SVG: fine for town sprites; cards need a 512 x 512 PNG']);
+        else if (isCard) info.push([w === 512 && h === 512 ? 'ok' : 'bad', 'Size ' + w + ' x ' + h + (w === 512 && h === 512 ? '' : ' (needs 512 x 512)')]);
+        else info.push(['ok', 'Size ' + w + ' x ' + h]);
+        info.push([kb <= 60 ? 'ok' : kb <= 120 ? 'warn' : 'bad', kb.toFixed(1) + ' KB' + (kb <= 60 ? '' : ' (aim for under 60)')]);
+        try {
+          var N = 128, cv = document.createElement('canvas'); cv.width = cv.height = N; var cx = cv.getContext('2d'); cx.drawImage(img, 0, 0, N, N);
+          var px = cx.getImageData(0, 0, N, N).data, a = function (x, y) { return px[(y * N + x) * 4 + 3]; };
+          var cn = [a(0, 0), a(N - 1, 0), a(0, N - 1), a(N - 1, N - 1), a(N >> 1, 0), a(N >> 1, N - 1), a(0, N >> 1), a(N - 1, N >> 1)], clear = cn.every(function (v) { return v < 10; });
+          info.push([clear ? 'ok' : (isCard ? 'bad' : 'warn'), clear ? 'Transparent edges' : 'Edges are not transparent']);
+          if (isCard) {
+            var x0 = N, y0 = N, x1 = 0, y1 = 0, y, x; for (y = 0; y < N; y++) for (x = 0; x < N; x++) if (a(x, y) > 24) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+            if (x1 > x0) { var s = 512 / N, L = Math.round(x0 * s), T = Math.round(y0 * s), R = Math.round((x1 + 1) * s), B = Math.round((y1 + 1) * s), ins = L >= 45 && T >= 45 && R <= 467 && B <= 467; info.push([ins ? 'ok' : 'warn', ins ? 'Inside the safe area' : 'Leaves the safe area (' + L + ',' + T + ' to ' + R + ',' + B + ')']); }
+            else info.push(['bad', 'Looks empty']);
+          }
+        } catch (e) { info.push(['warn', 'Could not read pixels']); }
+        res({ info: info, w: w, h: h });
+      };
+      img.onerror = function () { res({ info: [['bad', 'Could not read this image']], w: 0, h: 0 }); };
+      img.src = rec.url;
+    });
+  }
+  function status(r) { var worst = 'ok'; (r.info || []).forEach(function (i) { if (i[0] === 'bad') worst = 'bad'; else if (i[0] === 'warn' && worst !== 'bad') worst = 'warn'; }); return worst; }
+
+  /* ---------- add / remove ---------- */
+  async function add(files) {
+    var lastCard = '';
+    for (var i = 0; i < files.length; i++) {
+      var f = files[i]; if (!/^image\//.test(f.type) && !/\.(png|svg|webp|jpe?g)$/i.test(f.name)) continue;
+      if (LIB[f.name] && LIB[f.name].url) URL.revokeObjectURL(LIB[f.name].url);
+      var old = LIB[f.name], rec = { name: f.name, blob: f, url: URL.createObjectURL(f), assign: old ? old.assign : '', ts: Date.now() };
+      var a = await analyze(rec); rec.info = a.info; rec.w = a.w; rec.h = a.h; LIB[rec.name] = rec; var tg = targetOf(rec); if (tg && tg.kind === 'card') lastCard = tg.id;
+      await idb('readwrite', function (st) { st.put({ name: rec.name, blob: rec.blob, assign: rec.assign, ts: rec.ts }); });
+    }
+    if (lastCard) sel = lastCard;
+    renderAll();
+  }
+  async function reanalyze(rec) { var a = await analyze(rec); rec.info = a.info; rec.w = a.w; rec.h = a.h; }
+
+  /* ---------- overrides: put the uploads onto the real card defs, in memory ---------- */
+  var SPRITE_OVR = {};
+  function applyOverrides() {
+    ALL.forEach(function (c) { if (ORIG[c.id]) c.art = ORIG[c.id]; else delete c.art; });
+    SPRITE_OVR = {};
+    Object.keys(LIB).forEach(function (k) { var t = targetOf(LIB[k]); if (!t) return; if (t.kind === 'card') BYID[t.id].art = LIB[k].url; else SPRITE_OVR[t.id] = LIB[k].url; });
+  }
+  function hasArt(id) { return !!BYID[id] && BYID[id].art && BYID[id].art !== ORIG[id]; }
+
+  /* ---------- card markup (real game components) ---------- */
+  function stats(d) { return d.spell ? '✨ Spell' : '⚔' + d.power + ' ♥' + d.grit; }
+  function tile(d, extra, w) { return '<span class="alm-card tile rarity-' + (d.rarity || 'rare') + (extra || '') + '" style="width:' + (w || 104) + 'px"><span class="ac-cost">' + d.cost + '</span><span class="ac-icon">' + cardArtHtml(d) + '</span><span class="ac-power">' + stats(d) + '</span><span class="ac-name">' + d.name + '</span>' + (d.kw && d.kw.length ? '<span class="ac-kw">' + d.kw.map(function (k) { return KW[k].icon; }).join(' ') + '</span>' : '') + '</span>'; }
+  function battle(d, st) { return '<div style="width:84px;height:112px"><div class="card rarity-' + (d.rarity || 'rare') + '"' + (st ? ' style="' + st + '"' : '') + '>' + cardFaceHtml(d) + '</div></div>'; }
+  function reveal(d) { return '<div class="reveal-card rarity-' + (d.rarity || 'rare') + (d.spell ? ' spell' : '') + '">' + cardFaceHtml(d) + '</div>'; }
+  function emojiDef(d) { return Object.assign({}, d, { art: ORIG[d.id] }); }
+  function withR(d, r) { return Object.assign({}, d, { rarity: r }); }
+  function artImg(d, px) { return d.art ? '<img src="' + d.art + '" width="' + px + '" height="' + px + '" alt="" style="display:block">' : '<span style="font-size:' + px + 'px;line-height:1;display:block">' + d.icon + '</span>'; }
+  var GRAD = { dark: { common: ['#5b9fb2', '#3f7f94'], rare: ['#c9bce8', '#9a86c9'], ultra: ['#a8cbe8', '#6a96c2'], super: ['#f0cf94', '#e8cb88'], mythic: ['#eaa8c4', '#c27a9c'] }, light: { common: ['#5aa397', '#3f7f78'], rare: ['#c9bce8', '#9a86c9'], ultra: ['#a8cbe8', '#6a96c2'], super: ['#f0cf94', '#b5832a'], mythic: ['#eaa8c4', '#c27a9c'] } };
+
+  /* ---------- 1. library table ---------- */
+  function renderLibrary() {
+    var names = Object.keys(LIB).sort(), wrap = $('#libWrap'); wrap.hidden = !names.length;
+    if (!names.length) return;
+    $('#libCount').textContent = names.length + ' file' + (names.length === 1 ? '' : 's') + ' · ' + names.filter(function (n) { return targetOf(LIB[n]); }).length + ' matched';
+    var opts = '<option value="">Assign to a card or sprite…</option><optgroup label="Cards">' + ALL.map(function (c) { return '<option value="' + c.id + '">' + c.name + ' (' + c.id + ')</option>'; }).join('') + '</optgroup><optgroup label="Sprites">' + SPRITES.map(function (s) { return '<option value="' + s.id + '">' + s.id + '</option>'; }).join('') + '</optgroup>';
+    $('#lib').innerHTML = '<thead><tr><th></th><th>File</th><th>Matched to</th><th>Checks</th><th></th></tr></thead><tbody>' + names.map(function (n) {
+      var r = LIB[n], t = targetOf(r), st = status(r), tn = t ? (t.kind === 'card' ? BYID[t.id].name + ' · card' : t.id + ' · sprite') : '';
+      return '<tr data-n="' + escapeHtml(n) + '"><td><img class="lab-thumb" src="' + r.url + '" alt=""></td><td><code>' + escapeHtml(n) + '</code><div class="lab-note" style="margin:2px 0 0">' + r.w + ' x ' + r.h + ' · ' + (r.blob.size / 1024).toFixed(1) + ' KB</div></td><td>' + (t ? '<span class="pill ok">' + escapeHtml(tn) + '</span>' : '<select class="lab-btn" data-assign>' + opts + '</select>') + (t && r.assign ? ' <button class="lab-btn" data-unassign type="button">Unassign</button>' : '') + '</td><td><ul class="lab-checks">' + r.info.map(function (i) { return '<li class="' + i[0] + '">' + escapeHtml(i[1]) + '</li>'; }).join('') + '</ul></td><td>' + (t && t.kind === 'card' ? '<button class="lab-btn" data-show type="button">Preview</button> ' : '') + '<button class="lab-btn danger" data-del type="button">Remove</button></td></tr>';
+    }).join('') + '</tbody>';
+  }
+
+  /* ---------- 2. one card ---------- */
+  function renderPick() {
+    var up = ALL.filter(function (c) { return hasArt(c.id); }), rest = ALL.filter(function (c) { return !hasArt(c.id); });
+    $('#pick').innerHTML = (up.length ? '<optgroup label="With new art">' + up.map(function (c) { return '<option value="' + c.id + '">★ ' + c.name + '</option>'; }).join('') + '</optgroup>' : '') + '<optgroup label="Other cards (still emoji)">' + rest.map(function (c) { return '<option value="' + c.id + '">' + c.name + '</option>'; }).join('') + '</optgroup>';
+    $('#pick').value = sel; var d = BYID[sel]; $('#pickInfo').textContent = RN[d.rarity] + ' · ' + (d.spell ? 'spell' : 'cost ' + d.cost + ', ' + d.power + '/' + d.grit) + (famOf(d.id) ? ' · ' + FAMILIES[famOf(d.id)].name : '') + (hasArt(d.id) ? ' · new art loaded' : ' · no new art yet (showing the emoji)');
+  }
+  var prevBg = 'checker', guides = true;
+  function renderCardLab() {
+    var d = BYID[sel], o = emojiDef(d), L = [];
+    var art = d.art || '';
+    L.push('<div class="lab-grid lab-g2"><div class="lab-card"><div class="lab-label">The four forms</div><div class="lab-demo" style="gap:22px;padding-top:12px">' + [['tile', tile(d)], ['battle', battle(d)], ['reveal / pack', reveal(d)], ['inspect', '<div class="ins-card rarity-' + d.rarity + '" style="margin:0"><div class="ins-icon" style="font-size:67px">' + cardArtHtml(d) + '</div></div>']].map(function (x) { return '<div>' + x[1] + '<div class="lab-note">' + x[0] + '</div></div>'; }).join('') + '</div></div>' +
+      '<div class="lab-card"><div class="lab-label">Canvas</div><div class="lab-demo" style="margin-bottom:8px">' + [['checker', 'Checker'], ['#fbf7ef', 'Light'], ['#232b34', 'Dark']].concat(RARS.map(function (r) { return ['r:' + r, RN[r].split(' ')[0]]; })).map(function (b) { return '<button class="lab-btn' + (prevBg === b[0] ? ' on' : '') + '" data-bg="' + b[0] + '" type="button">' + b[1] + '</button>'; }).join('') + '<label class="lab-btn" style="display:inline-flex;gap:6px;align-items:center"><input type="checkbox" id="gd"' + (guides ? ' checked' : '') + '> Guides</label></div>' +
+      '<div class="lab-prev ' + (prevBg === 'checker' ? 'checker' : '') + '" style="' + (prevBg === 'checker' ? '' : prevBg.indexOf('r:') === 0 ? 'background:linear-gradient(135deg,' + GRAD[root.dataset.theme][prevBg.slice(2)].join(',') + ')' : 'background:' + prevBg) + '">' + (art ? '<img src="' + art + '" alt="Your art">' : '<div style="position:absolute;inset:0;display:grid;place-items:center;font-size:7rem">' + d.icon + '</div>') + (guides ? '<svg viewBox="0 0 512 512" aria-hidden="true"><rect x="51" y="51" width="410" height="410" rx="24" fill="none" stroke="#3f9f8f" stroke-width="3"/><circle cx="256" cy="256" r="205" fill="none" stroke="#c98b3c" stroke-width="3" stroke-dasharray="3 7"/><path d="M64 448H448" stroke="#b86c8c" stroke-width="3"/></svg>' : '') + '</div></div></div>');
+    /* emoji vs art */
+    L.push('<div class="lab-card" style="margin-top:14px"><div class="lab-label">Before and after</div><div class="lab-demo" style="gap:30px;align-items:flex-start">' + [['Today (emoji)', o], ['New art', d]].map(function (p) { return '<div><div class="lab-note" style="margin:0 0 6px"><b>' + p[0] + '</b></div><div class="lab-demo" style="gap:12px">' + tile(p[1]) + battle(p[1]) + '<div style="width:96px">' + reveal(p[1]).replace('<div class="reveal-card', '<div style="transform:scale(.72);transform-origin:top left;margin-bottom:-50px" class="reveal-card') + '</div></div></div>'; }).join('') + '</div></div>');
+    /* rarities */
+    L.push('<div class="lab-card" style="margin-top:14px"><div class="lab-label">On every rarity (the art does not change; the face does)</div><div class="lab-demo" style="gap:16px">' + RARS.map(function (r) { return '<div>' + tile(withR(d, r)) + '<div class="lab-note" style="text-align:center">' + r + '</div></div>'; }).join('') + '</div></div>');
+    /* both themes */
+    L.push('<div class="lab-card" style="margin-top:14px"><div class="lab-label">Both themes at once (face gradients as they are in Dark and in Light)</div>' + ['dark', 'light'].map(function (th) { return '<div class="lab-demo" style="gap:10px;margin:8px 0;align-items:center"><span class="lab-note" style="width:44px;margin:0"><b>' + th + '</b></span>' + RARS.map(function (r) { return [64, 42, 30].map(function (px) { return '<span style="display:inline-block;padding:' + Math.round(px / 8) + 'px;border-radius:12px;background:linear-gradient(135deg,' + GRAD[th][r].join(',') + ')' + (r === 'mythic' ? ';box-shadow:0 0 10px rgba(217,143,176,.5)' : '') + '">' + artImg(d, px) + '</span>'; }).join(''); }).join('<span style="width:8px"></span>') + '</div>'; }).join('') + '</div>');
+    /* size ladder */
+    var SZ = [16, 20, 26, 30, 37, 42, 67, 96, 128];
+    L.push('<div class="lab-card lab-tw" style="margin-top:14px"><div class="lab-label">Size ladder (the game uses roughly 26 to 67 px)</div><table class="lab-t"><thead><tr><th>Size</th>' + RARS.map(function (r) { return '<th>' + r + '</th>'; }).join('') + '</tr></thead><tbody>' + SZ.map(function (s) { return '<tr><td><code>' + s + ' px</code></td>' + RARS.map(function (r) { return '<td><span class="rarity-' + r + '" style="display:inline-block;padding:' + Math.max(3, Math.round(s / 8)) + 'px;border-radius:12px">' + artImg(d, s) + '</span></td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div>');
+    /* states */
+    L.push('<div class="lab-card" style="margin-top:14px"><div class="lab-label">Special states</div><div class="lab-demo" style="gap:18px">' + [['foil', tile(d, ' foil')], ['refined', tile(d, ' crafted')], ['opponent', '<span class="card foe-card" style="display:block;border-radius:14px;overflow:visible;position:relative;background:none;width:auto;height:auto;box-shadow:0 0 0 2px #d9a441,0 0 10px rgba(217,164,65,.55)">' + tile(d) + '</span>'], ['tired (already attacked)', '<span style="filter:saturate(.55) brightness(.92);display:block">' + tile(d) + '</span>'], ['in a deck (dimmed)', tile(d, ' dim')]].map(function (x) { return '<div>' + x[1] + '<div class="lab-note" style="text-align:center">' + x[0] + '</div></div>'; }).join('') + '</div></div>');
+    $('#cardLab').innerHTML = L.join('');
+  }
+
+  /* ---------- 3. mock screens ---------- */
+  function others(n, rarity) {
+    var up = ALL.filter(function (c) { return c.id !== sel && hasArt(c.id) && !c.foe && !c.token; }), rest = POOL.filter(function (c) { return c.id !== sel && !hasArt(c.id) && !c.spell; });
+    var near = rest.filter(function (c) { return c.rarity === rarity; }).concat(rest.filter(function (c) { return c.rarity !== rarity; }));
+    return up.concat(near).slice(0, n);
+  }
+  function renderMocks() {
+    var d = BYID[sel], oc = others(8, d.rarity), M = [];
+    var cells = oc.slice(0, 4).concat([d]).concat(oc.slice(4, 8));
+    M.push('<div class="phone"><div class="cap">Cards tab · My Cards</div><div class="seg" style="margin:0"><button class="seg-btn active" type="button">My Cards</button><button class="seg-btn" type="button">Deck</button><button class="seg-btn" type="button">Sets</button></div><div class="grid3">' + cells.map(function (c) { return tile(c, c === d ? ' hit' : '', null).replace('style="width:104px"', ''); }).join('') + '</div></div>');
+    var hand = oc.slice(0, 4).concat([d]), board = [oc[4], d, oc[5]].filter(Boolean), foe = FOES.slice(0, 3);
+    M.push('<div class="phone"><div class="cap">Battle · board and hand</div><div class="row-board">' + foe.map(function (c) { return '<div class="slot"><div class="card rarity-' + c.rarity + ' foe-card" style="box-shadow:0 0 0 2px #d9a441">' + cardFaceHtml(c) + '</div></div>'; }).join('') + '<div class="slot" style="border:1.5px dashed var(--stone-edge);border-radius:12px"></div></div><div style="height:1px;background:var(--stone-edge)"></div><div class="row-board">' + board.map(function (c) { return '<div class="slot"><div class="card rarity-' + c.rarity + (c === d ? ' can-act' : '') + '">' + cardFaceHtml(c) + '</div></div>'; }).join('') + '<div class="slot" style="border:1.5px dashed var(--stone-edge);border-radius:12px"></div></div><div class="fan">' + hand.map(function (c, i) { var m = i - (hand.length - 1) / 2; return '<div style="transform:rotate(' + (m * 7) + 'deg) translateY(' + Math.abs(m) * 5 + 'px)"><div class="card rarity-' + c.rarity + '" style="width:100%;height:100%">' + cardFaceHtml(c) + '</div></div>'; }).join('') + '</div></div>');
+    M.push('<div class="phone"><div class="cap">Pack opening</div><div class="overlay-card glow-' + (d.rarity === 'common' ? 'rare' : d.rarity) + '" style="margin:0 auto;padding:22px 20px;max-width:none;width:100%"><div class="rarity-tag rarity-' + d.rarity + '">' + RN[d.rarity] + '</div><h2 style="margin:0 0 10px">You found ' + d.name + '!</h2><div class="lab-demo" style="justify-content:center;margin:0 0 10px">' + reveal(d) + '</div><button class="btn" type="button">Nice</button></div></div>');
+    var mini = oc.slice(0, 5).concat([d]).concat(oc.slice(5, 8)).slice(0, 8);
+    M.push('<div class="phone"><div class="cap">Deck builder · tray and inspect</div><div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;justify-items:center">' + mini.concat([d, oc[0], d]).slice(0, 12).map(function (c) { return '<div class="card-mini rarity-' + c.rarity + '"><span class="c-icon">' + cardArtHtml(c) + '</span><span class="c-power">' + (c.spell ? '✨' : '⚔' + c.power) + '</span></div>'; }).join('') + '</div><div class="sheet" style="margin-top:6px"><div class="grab"></div><div class="ins-card rarity-' + d.rarity + '" style="margin:0 auto 10px"><span class="ins-cost">' + d.cost + '</span><div class="ins-icon" style="font-size:67px">' + cardArtHtml(d) + '</div></div><b style="font-family:var(--f-display);font-weight:500;font-size:1.2rem">' + d.name + '</b><div class="lab-note">' + stats(d) + (d.kw && d.kw.length ? ' · ' + d.kw.map(function (k) { return KW[k].icon + ' ' + KW[k].name; }).join(', ') : '') + '</div><div class="lab-demo" style="justify-content:center;margin-top:10px"><button class="btn" type="button">Add to deck</button><button class="btn btn-ghost" type="button">Release</button></div></div></div>');
+    $('#mocks').innerHTML = M.join('');
+  }
+
+  /* ---------- 4. whole set ---------- */
+  var SF = { only: false, f: 'all', q: '' };
+  function renderSetControls() {
+    var F = [['all', 'All'], ['common', 'Common'], ['rare', 'Rare'], ['ultra', 'Ultra'], ['super', 'Super'], ['mythic', 'Mythic'], ['spell', 'Spells'], ['grove', 'Grove'], ['stone', 'Stone'], ['tide', 'Tide'], ['wind', 'Wind']];
+    $('#setFilters').innerHTML = '<button class="lab-btn' + (SF.only ? ' on' : '') + '" data-only type="button">Only cards with new art</button>' + F.map(function (f) { return '<button class="lab-btn' + (SF.f === f[0] ? ' on' : '') + '" data-sf="' + f[0] + '" type="button">' + f[1] + '</button>'; }).join('') + '<input id="sq" class="lab-btn" type="search" placeholder="Search" value="' + escapeHtml(SF.q) + '" style="min-width:150px">';
+  }
+  function renderSet() {
+    var list = ALL.filter(function (c) { var f = SF.f; var ok = f === 'all' || (f === 'spell' ? c.spell : FAMILIES[f] ? famOf(c.id) === f : (c.rarity === f && !c.spell && !c.foe && !c.token)); return ok && (!SF.only || hasArt(c.id)) && (!SF.q || (c.name + c.id).toLowerCase().indexOf(SF.q) >= 0); });
+    $('#setGrid').innerHTML = list.map(function (c) { return '<div class="cat-item' + (hasArt(c.id) ? ' has' : '') + '" data-id="' + c.id + '">' + tile(c) + '<code>' + c.id + '</code></div>'; }).join('');
+    $('#setCount').textContent = list.length + ' shown · ' + ALL.filter(function (c) { return hasArt(c.id); }).length + ' of ' + ALL.length + ' cards have new art (outlined in gold). Click a card to open it above.';
+  }
+
+  /* ---------- 5. town ---------- */
+  var biome = 'meadow';
+  var BIOMES = [['meadow', 'Town Square'], ['bazaar', 'Market Row'], ['harbor', 'Quiet Harbor'], ['orchard', 'Hollow Garden']];
+  function spr(id, T, extra) { /* T = the tile size; a 64 unit sprite is T wide, a 128 unit building is 2T, as on the map */ var s = SPR[id], w = s ? s.vb[2] : 64, h = s ? s.vb[3] : 64, k = T / 64, W = Math.round(w * k), H = Math.round(h * k); return SPRITE_OVR[id] ? '<img src="' + SPRITE_OVR[id] + '" width="' + W + '" height="' + H + '" alt="" style="' + (extra || '') + '">' : '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + w + ' ' + h + '" style="' + (extra || '') + '"><use href="#' + id + '"/></svg>'; }
+  function renderTown() {
+    $('#biomeSeg').innerHTML = BIOMES.map(function (b) { return '<button class="' + (biome === b[0] ? 'on' : '') + '" data-bi="' + b[0] + '" type="button">' + b[1] + '</button>'; }).join('');
+    var T = 48, items = [], put = function (id, c, r, sz) { items.push('<span style="left:' + c * T + 'px;top:' + r * T + 'px">' + spr(id, T) + '</span>'); };
+    var tiles = ''; for (var r = 0; r < 6; r++) for (var c = 0; c < 12; c++) { var path = (r === 3) || (c === 6 && r > 3), v = (c * 7 + r * 13) % 3; tiles += '<span class="tile" style="left:' + c * T + 'px;top:' + r * T + 'px;background:' + (path ? 'var(--path)' : v === 0 ? 'var(--ground)' : v === 1 ? 'var(--ground2)' : 'var(--ground3)') + '"></span>'; if (path) tiles += '<span class="tile" style="left:' + c * T + 'px;top:' + r * T + 'px;box-shadow:inset 0 0 0 1px var(--path-edge)"></span>'; else if ((c + r) % 4 === 0) tiles += '<span style="left:' + (c * T + 8) + 'px;top:' + (r * T + 8) + 'px">' + spr('s-tuft', 32) + '</span>'; }
+    put('s-oak', 0, 0); put('s-pine', 1, 0); put('s-oak2', 2, 0); put('b-cottage', 3, 0, 96); put('b-nook', 5, 0, 96); put('s-hedge', 7, 1); put('s-hedge', 8, 1); put('p-fountain', 9, 0); put('p-well', 10, 1); put('p-sign', 11, 0); put('s-rock', 0, 2); put('s-flowers', 1, 2); put('p-bench', 2, 2); put('p-lamp', 3, 2); put('g-grave', 9, 2); put('p-lamp', 5, 2); put('s-pine', 0, 4); put('s-pine', 1, 4); put('s-oak', 11, 4);
+    items.push('<span style="left:' + 7 * T + 'px;top:' + 4 * T + 'px">' + spr('b-bakery', 48) + '</span>'); put('s-ripple', 3, 4); put('s-pebbles', 4, 4); put('s-cobble', 8, 4); put('s-flowers', 10, 3);
+    $('#townScene').innerHTML = '<div class="town-view town" data-biome="' + biome + '" style="--t:' + T + 'px;width:' + 12 * T + 'px;height:' + 6 * T + 'px">' + tiles + items.join('') + '</div>';
+    $('#spriteAll').innerHTML = SPRITES.map(function (s) { var big = s.vb[2] > 64; return '<div style="text-align:center;font-size:.64rem;color:var(--ink-soft)"><div class="town-view town" data-biome="' + biome + '" style="width:' + (s.vb[2] > 128 ? 168 : big ? 120 : 72) + 'px;height:' + (big ? 108 : 72) + 'px;border-radius:10px;display:grid;place-items:center;' + (SPRITE_OVR[s.id] ? 'outline:2px solid var(--accent);outline-offset:2px' : '') + '">' + '<span style="position:static">' + spr(s.id, big ? 48 : 60) + '</span></div><code>' + s.id + '</code></div>'; }).join('');
+  }
+
+  /* ---------- 6. portraits and icon ---------- */
+  var otherSel = '';
+  function renderOther() {
+    var names = Object.keys(LIB).sort(); $('#otherPick').innerHTML = names.length ? names.map(function (n) { return '<option value="' + escapeHtml(n) + '">' + escapeHtml(n) + '</option>'; }).join('') : '<option value="">Add an image first</option>';
+    if (!LIB[otherSel]) otherSel = names[0] || ''; $('#otherPick').value = otherSel;
+    var r = LIB[otherSel]; if (!r) { $('#otherOut').innerHTML = '<div class="empty">Add an image in the library to preview it as a portrait or app icon.</div>'; return; }
+    var u = r.url, circle = function (px, ring) { return '<img class="av" src="' + u + '" width="' + px + '" height="' + px + '" alt="" style="border:' + ring + 'px solid var(--water);box-shadow:0 2px 8px var(--shadow)">'; };
+    $('#otherOut').innerHTML = '<div class="lab-grid lab-g2"><div class="lab-card"><div class="lab-label">As a character portrait (preview only)</div><div class="lab-demo" style="gap:26px;align-items:flex-end">' +
+      '<div style="text-align:center"><div style="position:relative;display:inline-block">' + circle(40, 3) + '<span class="lvl-badge">12</span></div><div class="lab-note">top bar · 40 px</div></div>' +
+      '<div style="text-align:center">' + circle(48, 2) + '<div style="font-size:.66rem;font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.6);color:#fff;margin-top:2px">Wren</div><div class="lab-note">on the map · 48 px</div></div>' +
+      '<div style="text-align:center">' + circle(72, 3) + '<div class="lab-note">battle intro · 72 px</div></div>' +
+      '<div style="text-align:center">' + circle(96, 4) + '<div class="lab-note">talk dialog · 96 px</div></div>' +
+      '<div style="text-align:center"><img src="' + u + '" height="140" alt="" style="display:block;max-width:140px;object-fit:contain"><div class="lab-note">character stage · 140 px</div></div></div></div>' +
+      '<div class="lab-card"><div class="lab-label">As the app icon</div><div class="lab-demo" style="gap:22px;align-items:flex-end"><div style="text-align:center"><img src="' + u + '" width="96" height="96" alt="" style="border-radius:22px;display:block;background:#2f6f56"><div class="lab-note">192 · home screen</div></div><div style="text-align:center"><img src="' + u + '" width="60" height="60" alt="" style="border-radius:14px;display:block;background:#2f6f56"><div class="lab-note">60</div></div><div style="text-align:center"><img src="' + u + '" width="32" height="32" alt="" style="display:block"><div class="lab-note">favicon 32</div></div><div style="text-align:center"><img src="' + u + '" width="96" height="96" alt="" style="border-radius:50%;display:block;background:#2f6f56"><div class="lab-note">round mask</div></div></div><p class="lab-note">Keep the important part inside the middle 80% so a rounded or circular mask never crops it.</p></div></div>';
+  }
+
+  /* ---------- 7. hand-off ---------- */
+  function ready() { return Object.keys(LIB).map(function (n) { return LIB[n]; }).filter(function (r) { var t = targetOf(r); return t && t.kind === 'card' && status(r) !== 'bad'; }); }
+  function renderExport() {
+    var ok = ready(), ids = ok.map(function (r) { return targetOf(r).id; }).sort(), sp = Object.keys(SPRITE_OVR);
+    $('#exp').textContent = ids.length ? "// js/data-and-engine.js, add to CARD_ART:\nconst CARD_ART = " + JSON.stringify(ids).replace(/","/g, "', '").replace(/^\["/, "['").replace(/"\]$/, "']") + ";\n// files: " + ids.map(function (i) { return i + '.png'; }).join(', ') + (sp.length ? "\n// sprites to swap in assets/sprites.js: " + sp.join(', ') : '') : 'No card art has passed the checks yet.';
+    var warn = ok.filter(function (r) { return status(r) === 'warn'; }).length;
+    $('#expNote').textContent = ids.length ? ids.length + ' card' + (ids.length === 1 ? '' : 's') + ' ready' + (warn ? ' (' + warn + ' with warnings, worth a look)' : '') + '. Files must be named exactly as the ids above.' : '';
+  }
+  $('#copyExp').onclick = function () { try { navigator.clipboard.writeText($('#exp').textContent); toast('Copied'); } catch (e) { toast('Select the text and copy'); } };
+  $('#dlReport').onclick = function () {
+    var md = '# Asset Lab report\n\n' + Object.keys(LIB).sort().map(function (n) { var r = LIB[n], t = targetOf(r); return '## ' + n + '\n- Matched: ' + (t ? t.kind + ' `' + t.id + '`' : 'not matched') + '\n- Size: ' + r.w + 'x' + r.h + ', ' + (r.blob.size / 1024).toFixed(1) + ' KB\n' + r.info.map(function (i) { return '- ' + ({ ok: 'OK', warn: 'WARN', bad: 'FAIL' })[i[0]] + ': ' + i[1]; }).join('\n') + '\n'; }).join('\n');
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([md], { type: 'text/markdown' })); a.download = 'asset-lab-report.md'; a.click();
+  };
+
+  /* ---------- render everything ---------- */
+  function renderAll() { applyOverrides(); if (!BYID[sel]) sel = POOL[0].id; renderLibrary(); renderPick(); renderCardLab(); renderMocks(); renderSetControls(); renderSet(); renderTown(); renderOther(); renderExport(); }
+
+  /* ---------- events ---------- */
+  var drop = $('#drop'), fin = $('#file');
+  drop.addEventListener('click', function () { fin.click(); }); drop.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fin.click(); } });
+  fin.addEventListener('change', function () { var fl = Array.prototype.slice.call(fin.files); fin.value = ''; add(fl); });
+  ['dragenter', 'dragover'].forEach(function (ev) { document.addEventListener(ev, function (e) { if (e.dataTransfer && e.dataTransfer.types && e.dataTransfer.types.indexOf('Files') >= 0) { e.preventDefault(); drop.classList.add('over'); } }); });
+  ['dragleave', 'drop'].forEach(function (ev) { document.addEventListener(ev, function (e) { if (ev === 'drop') e.preventDefault(); drop.classList.remove('over'); }); });
+  document.addEventListener('drop', function (e) { if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) add(Array.prototype.slice.call(e.dataTransfer.files)); });
+  $('#lib').addEventListener('click', async function (e) {
+    var tr = e.target.closest('tr[data-n]'); if (!tr) return; var n = tr.dataset.n, r = LIB[n];
+    if (e.target.closest('[data-del]')) { URL.revokeObjectURL(r.url); delete LIB[n]; await idb('readwrite', function (st) { st.delete(n); }); renderAll(); }
+    else if (e.target.closest('[data-show]')) { var t = targetOf(r); if (t) { sel = t.id; renderAll(); $('#card').scrollIntoView({ behavior: 'smooth' }); } }
+    else if (e.target.closest('[data-unassign]')) { r.assign = ''; await reanalyze(r); await idb('readwrite', function (st) { st.put({ name: n, blob: r.blob, assign: '', ts: r.ts }); }); renderAll(); }
+  });
+  $('#lib').addEventListener('change', async function (e) { var s = e.target.closest('[data-assign]'); if (!s || !s.value) return; var tr = s.closest('tr'), r = LIB[tr.dataset.n]; r.assign = s.value; await reanalyze(r); await idb('readwrite', function (st) { st.put({ name: r.name, blob: r.blob, assign: r.assign, ts: r.ts }); }); var t = targetOf(r); if (t && t.kind === 'card') sel = t.id; renderAll(); });
+  $('#clearAll').onclick = async function () { if (!confirm('Remove all files from the lab?')) return; Object.keys(LIB).forEach(function (n) { URL.revokeObjectURL(LIB[n].url); }); LIB = {}; await idb('readwrite', function (st) { st.clear(); }); renderAll(); };
+  $('#selAllOk').onclick = function () { var r = ready()[0]; if (r) { sel = targetOf(r).id; renderAll(); $('#card').scrollIntoView({ behavior: 'smooth' }); } else toast('No matched card art yet'); };
+  $('#pick').addEventListener('change', function (e) { sel = e.target.value; renderPick(); renderCardLab(); renderMocks(); });
+  $('#card').addEventListener('click', function (e) { var b = e.target.closest('[data-bg]'); if (b) { prevBg = b.dataset.bg; renderCardLab(); } });
+  $('#card').addEventListener('change', function (e) { if (e.target.id === 'gd') { guides = e.target.checked; renderCardLab(); } });
+  $('#setFilters').addEventListener('click', function (e) { var o = e.target.closest('[data-only]'), f = e.target.closest('[data-sf]'); if (o) SF.only = !SF.only; else if (f) SF.f = f.dataset.sf; else return; renderSetControls(); renderSet(); });
+  $('#setFilters').addEventListener('input', function (e) { if (e.target.id === 'sq') { SF.q = e.target.value.trim().toLowerCase(); renderSet(); } });
+  $('#setGrid').addEventListener('click', function (e) { var it = e.target.closest('[data-id]'); if (!it) return; sel = it.dataset.id; renderPick(); renderCardLab(); renderMocks(); $('#card').scrollIntoView({ behavior: 'smooth' }); });
+  $('#biomeSeg').addEventListener('click', function (e) { var b = e.target.closest('[data-bi]'); if (b) { biome = b.dataset.bi; renderTown(); } });
+  $('#otherPick').addEventListener('change', function (e) { otherSel = e.target.value; renderOther(); });
+  function setTheme(t) { root.setAttribute('data-theme', t); $('#thDark').classList.toggle('on', t === 'dark'); $('#thLight').classList.toggle('on', t === 'light'); try { localStorage.setItem('lab-theme', t); } catch (e) {} if (typeof renderCardLab === 'function' && BYID[sel]) { renderCardLab(); } }
+  $('#thDark').onclick = function () { setTheme('dark'); }; $('#thLight').onclick = function () { setTheme('light'); };
+
+  /* ---------- boot ---------- */
+  (async function () {
+    var th; try { th = localStorage.getItem('lab-theme'); } catch (e) {} root.setAttribute('data-theme', th === 'light' ? 'light' : 'dark'); $('#thDark').classList.toggle('on', th !== 'light'); $('#thLight').classList.toggle('on', th === 'light');
+    await idbOpen(); var saved = await idbAll();
+    for (var i = 0; i < saved.length; i++) { var s = saved[i], rec = { name: s.name, blob: s.blob, url: URL.createObjectURL(s.blob), assign: s.assign || '', ts: s.ts }; var a = await analyze(rec); rec.info = a.info; rec.w = a.w; rec.h = a.h; LIB[rec.name] = rec; }
+    var first = Object.keys(LIB).map(function (k) { return targetOf(LIB[k]); }).filter(function (t) { return t && t.kind === 'card'; })[0]; if (first) sel = first.id;
+    renderAll();
+  })();
+  window.__lab = { add: add, get lib() { return LIB; }, get sel() { return sel; } };
+})();
+</script>
+</body>
+</html>

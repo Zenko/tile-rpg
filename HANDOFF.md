@@ -178,6 +178,8 @@ Each file below still has the same banner comments (the `====` blocks) it had wh
 
 - **Style guide (build 122).** `style-guide.html` at the repo root is a living reference for whoever makes art: it loads the game's own `css/*.css`, `assets/sprites.js` and `js/data-and-engine.js`, so components, keyword icons, sprites and the card catalogue (with the `<id>.png` file name for every card) are always current. Only the hex/size tables in it are typed by hand: update them when the tokens in `css/base.css` change. The card art canvas is `assets/cards/template.svg`; the reference screenshots in `assets/styleguide/` are static, so re-take them (a Playwright script, 400x860 at 2x, both themes) after a big visual change. Not precached by `sw.js` (it is not linked from `index.html`).
 
+- **Asset Lab (build 124).** `asset-lab.html` at the repo root is a sandbox for trying new art without touching the game: the owner drops PNG/SVG files in, it matches them to card ids (`sprout.png`) or sprite ids (`s-oak.svg`) by file name, runs the same preflight as the style guide, and shows them in the game's real card faces, rarities, sizes, mock screens, a town scene and portrait/icon previews. Uploads are swapped onto the live `CARD_POOL` defs in memory only (never written anywhere), and kept in the browser's IndexedDB. Its "Hand-off" section prints the `CARD_ART` list to paste into `js/data-and-engine.js` once art is approved. Like the style guide it loads the game's own CSS, sprites and `js/data-and-engine.js`, so it stays current; it is not linked from `index.html`.
+
 ## 6. State and saves
 
 - Saved in `localStorage['quiet-commons-state-v4']`, with settings in `'quiet-commons-prefs'`. Each tester has their own save in their own browser.
