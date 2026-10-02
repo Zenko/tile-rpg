@@ -100,7 +100,8 @@ function entryTileFor(m, dir, at) {
 // A minority of water tiles are ever fishable at once - the visible swimming-fish sprite (drawn in
 // buildWorld from this same set) is the only tell, and only those tiles will open the fishing overlay.
 // Which ones light up reshuffles every FISH_ROTATE_MS, seeded by district + a time bucket, so the school
-// moves around rather than sitting in the same spots forever. getMap() re-checks the bucket on every call
+// moves around rather than sitting in the same spots forever. Only tiles with a reachable bank qualify (bankFor, js/fishing.js):
+// a fish out in open water used to be drawn but ignored the tap, because tryFishTap has nowhere to stand. getMap() re-checks the bucket on every call
 // (which is often - most renders call it), so a reshuffle takes effect the moment the bucket ticks over.
 const FISH_ROTATE_MS = 10 * 60 * 1000;
 function refreshFishTiles(m, key) {
@@ -109,7 +110,7 @@ function refreshFishTiles(m, key) {
   m.fishBucket = bucket;
   const frnd = seeded('fish-' + key + '-' + bucket);
   const tiles = {};
-  for (let y = 0; y < m.h; y++) for (let x = 0; x < m.w; x++) if (m.rows[y][x] === '~' && frnd() < 0.3) tiles[x + ',' + y] = true;
+  for (let y = 0; y < m.h; y++) for (let x = 0; x < m.w; x++) if (m.rows[y][x] === '~' && frnd() < 0.3 && bankFor(m, x, y)) tiles[x + ',' + y] = true;
   m.fishTiles = tiles;
 }
 
