@@ -265,28 +265,44 @@
         <div class="alm-grid hidden" id="almanacGrid"></div>
         <div class="hidden" id="craftView"></div>
         <div id="deckPanel" class="hidden">
-          <div class="dk-slots" id="deckSlots"></div>
-          <div class="dk-tray" id="deckTray"></div>
-          <div class="deck-count" id="deckHeader"></div>
-          <div class="dk-curve" id="deckCurve"></div>
-          <div class="dk-kws" id="deckKws"></div>
-          <div class="dk-tip hidden" id="deckTip"></div>
-          <div class="dk-toolbar">
-            <button class="dk-tool-btn" id="deckAuto">✨ Auto-fill</button>
-            <button class="dk-tool-btn" id="deckClear">Clear</button>
-            <button class="dk-tool-btn" id="deckInfoToggle" aria-pressed="false">ⓘ Info mode</button>
-            <button class="dk-tool-btn" id="deckOptionsToggle" aria-expanded="false">⚙️ More</button>
-            <button class="dk-tool-btn" id="deckFilterToggle" aria-expanded="false">🔍 Filter</button>
+          <div class="seg sm" id="deckSeg" role="tablist" aria-label="Deck sections">
+            <button class="seg-btn active" id="deckSegBuild" role="tab">Your deck</button>
+            <button class="seg-btn" id="deckSegAdd" role="tab">Add cards</button>
           </div>
-          <div class="dk-options hidden" id="deckOptions">
-            <div class="dk-actions">
-              <button class="panel-action" id="deckHelp">How battles work</button>
-              <button class="panel-action" id="deckShare">📋 Share code</button>
-              <button class="panel-action" id="deckLoad">📥 Load a code</button>
+          <div class="dk-slots" id="deckSlots"></div>
+          <div id="deckBuild">
+            <div class="dk-tray" id="deckTray"></div>
+            <div class="deck-count" id="deckHeader"></div>
+            <div class="dk-curve" id="deckCurve"></div>
+            <div class="dk-kws" id="deckKws"></div>
+            <div class="dk-tip hidden" id="deckTip"></div>
+            <div class="dk-toolbar">
+              <button class="dk-tool-btn" id="deckAuto">✨ Auto-fill</button>
+              <button class="dk-tool-btn" id="deckClear">Clear</button>
+              <button class="dk-tool-btn" id="deckInfoToggle" aria-pressed="false">ⓘ Info mode</button>
+              <button class="dk-tool-btn" id="deckOptionsToggle" aria-expanded="false">⚙️ More</button>
+            </div>
+            <div class="dk-options hidden" id="deckOptions">
+              <div class="dk-actions">
+                <button class="panel-action" id="deckHelp">How battles work</button>
+                <button class="panel-action" id="deckShare">📋 Share code</button>
+                <button class="panel-action" id="deckLoad">📥 Load a code</button>
+              </div>
             </div>
           </div>
-          <div class="card-filter hidden" id="deckFilter"></div>
-          <div class="panel-list" id="deckList"></div>
+          <div id="deckAdd" class="hidden">
+            <div class="dk-pin">
+              <div class="dk-strip" id="deckStrip"></div>
+              <div class="dk-pin-row">
+                <span class="dk-pin-count" id="deckAddCount"></span>
+                <button class="dk-tool-btn" id="deckAutoAdd">✨ Auto-fill</button>
+                <button class="dk-tool-btn" id="deckInfoToggleAdd" aria-pressed="false">ⓘ Info</button>
+                <button class="dk-tool-btn" id="deckFilterToggle" aria-expanded="false">🔍 Filter</button>
+              </div>
+            </div>
+            <div class="card-filter hidden" id="deckFilter"></div>
+            <div class="panel-list" id="deckList"></div>
+          </div>
         </div>
       </div>
 

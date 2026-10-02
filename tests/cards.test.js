@@ -12,11 +12,14 @@ module.exports = async (page, assert) => {
   await page.click('#collViewToggle');
   assert.ok(await page.locator('.card-row[data-tile]').count() > 10, 'list view empty');
   await page.click('#segDeck'); await page.click('#deckAuto');
+  assert.ok(await page.locator('#deckBuild').isVisible() && !(await page.locator('#deckAdd').isVisible()), 'Deck should open on Your deck');
   assert.strictEqual(await page.evaluate(() => state.deck.length), 12);
   assert.strictEqual(await page.locator('#deckTray [data-tray]').count(), 12);
   await page.locator('#deckTray [data-tray]').first().click();
   assert.strictEqual(await page.evaluate(() => state.deck.length), 11);
-  await page.click('#deckInfoToggle'); await page.locator('#deckList [data-tile]').first().click(); await page.waitForTimeout(350);
+  await page.click('#deckSegAdd');
+  assert.strictEqual(await page.locator('#deckStrip [data-tray]').count(), 11, 'strip should mirror the deck');
+  await page.click('#deckInfoToggleAdd'); await page.locator('#deckList [data-tile]').first().click(); await page.waitForTimeout(350);
   assert.strictEqual(await page.evaluate(() => state.deck.length), 11, 'Info mode must not edit the deck');
   assert.ok(await page.evaluate(() => document.getElementById('cardSheet').classList.contains('show')));
   await page.click('#cardScrim', { position: { x: 5, y: 5 } }); await page.waitForTimeout(350);

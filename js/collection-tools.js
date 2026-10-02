@@ -1,6 +1,7 @@
 /* ---------------- search, filter and sort for My Cards and the Deck segment (one shared setting) ---------------- */
 const cardFilter = { q: '', rarity: 'all', fam: 'all', sort: 'rarity' };
 let collView = 'grid';       // My Cards: 'grid' (tiles, tap for the detail sheet) or 'list'
+let deckView = 'build';     // Deck sub-view: 'build' (tray, chart, keywords) or 'add' (pinned strip + your cards)
 let deckInfoMode = false;    // Deck: tapping a card reads it instead of adding it
 let collFilterOpen = true;   // My Cards' filter starts open (browse-first screen); setCardsView() reads this instead of forcing it open every time the tab is shown
 const FILTER_CHIPS = [['all', 'All'], ['common', 'Common'], ['rare', 'Rare'], ['ultra', 'Ultra'], ['super', 'Super'], ['mythic', 'Mythic'], ['spell', '✨ Spells']];
@@ -342,9 +343,26 @@ function renderDeckPanel() {
     if (deckInfoMode) { openCardSheet(b.dataset.tray); return; }
     deckRemove(b.dataset.tray); cardsKeepScroll(renderDeckPanel);
   }));
-  const infoBtn = document.getElementById('deckInfoToggle');
-  infoBtn.classList.toggle('active', deckInfoMode); infoBtn.setAttribute('aria-pressed', String(deckInfoMode));
-  infoBtn.textContent = deckInfoMode ? 'ⓘ Info mode: on' : 'ⓘ Info mode';
+  // Add cards view: the same twelve cards as a thin strip that stays pinned above the collection, so the deck is never out of sight.
+  const strip = document.getElementById('deckStrip');
+  strip.innerHTML = Array.from({ length: DECK_SIZE }, (_, i) => {
+    const id = state.deck[i];
+    if (!id) return '<div class="dk-sslot empty"></div>';
+    const def = cardDef(id);
+    return `<button type="button" class="dk-sslot card-mini rarity-${def.rarity}${def.crafted ? ' crafted' : ''}" data-tray="${id}" aria-label="${deckInfoMode ? 'Read' : 'Remove'} ${escapeHtml(def.name)}"><span class="c-icon">${cardArtHtml(def)}</span></button>`;
+  }).join('');
+  strip.querySelectorAll('[data-tray]').forEach(b => b.addEventListener('click', () => {
+    if (deckInfoMode) { openCardSheet(b.dataset.tray); return; }
+    deckRemove(b.dataset.tray); cardsKeepScroll(renderDeckPanel);
+  }));
+  document.getElementById('deckAddCount').innerHTML = `<b>${total}/${DECK_SIZE}</b> · avg ${avg}`;
+  document.getElementById('deckAutoAdd').disabled = total >= DECK_SIZE || ids.length === 0;
+  ['deckInfoToggle', 'deckInfoToggleAdd'].forEach(id => {
+    const b = document.getElementById(id), short = id === 'deckInfoToggleAdd';
+    b.classList.toggle('active', deckInfoMode); b.setAttribute('aria-pressed', String(deckInfoMode));
+    b.textContent = deckInfoMode ? (short ? 'ⓘ On' : 'ⓘ Info mode: on') : (short ? 'ⓘ Info' : 'ⓘ Info mode');
+  });
+  setDeckSubView(deckView, true);
   // A full deck with almost nothing cheap has little to play in the first turns, and simulation showed those decks lose a lot.
   const cheap = state.deck.filter(id => cardDef(id).cost <= 2).length, tipEl = document.getElementById('deckTip');
   const needTip = total >= DECK_SIZE && cheap < 4;
@@ -375,6 +393,18 @@ function renderDeckPanel() {
   if (deckSizeHudEl) deckSizeHudEl.textContent = `${state.deck.length}/${DECK_SIZE}`;
 }
 
+// Your deck / Add cards: two views of the same Deck tab. `quiet` skips the click sound when a render re-applies the current view.
+function setDeckSubView(view, quiet) {
+  deckView = view;
+  document.getElementById('deckBuild').classList.toggle('hidden', view !== 'build');
+  document.getElementById('deckAdd').classList.toggle('hidden', view !== 'add');
+  document.getElementById('deckSegBuild').classList.toggle('active', view === 'build');
+  document.getElementById('deckSegAdd').classList.toggle('active', view === 'add');
+  if (!quiet) { sfx('nav'); buzz(HAP.tap); }
+}
+document.getElementById('deckSegBuild').addEventListener('click', () => { if (deckView !== 'build') cardsKeepScroll(() => setDeckSubView('build')); });
+document.getElementById('deckSegAdd').addEventListener('click', () => { if (deckView !== 'add') cardsKeepScroll(() => setDeckSubView('add')); });
+
 // Shared toggle behavior for any button/panel pair that shows or hides a section - used by Deck's
 // Options/Filter toggles (both start collapsed: the deck screen's most common job, adding/removing a
 // few cards, needs neither visible up front) and My Cards' Filter toggle (starts open: My Cards is a
@@ -390,14 +420,14 @@ document.getElementById('deckFilterToggle').addEventListener('click', function (
 document.getElementById('collFilterToggle').addEventListener('click', function () { panelToggleSection(this, document.getElementById('collFilter')); collFilterOpen = this.classList.contains('active'); });
 
 document.getElementById('deckHelp').addEventListener('click', () => btShowHelp());
-document.getElementById('deckInfoToggle').addEventListener('click', () => { deckInfoMode = !deckInfoMode; sfx('nav'); buzz(HAP.tap); renderDeckPanel(); });
-document.getElementById('deckAuto').addEventListener('click', () => {
+['deckInfoToggle', 'deckInfoToggleAdd'].forEach(id => document.getElementById(id).addEventListener('click', () => { deckInfoMode = !deckInfoMode; sfx('nav'); buzz(HAP.tap); renderDeckPanel(); }));
+['deckAuto', 'deckAutoAdd'].forEach(id => document.getElementById(id).addEventListener('click', () => {
   if (state.deck.length >= DECK_SIZE) return;
   state.deck = BattleEngine.suggestDeck(ownedCardCounts(), state.deck);   // keeps your picks, fills the rest
   state.progress.deckEdits++; saveState(); sfx('claim'); buzz(HAP.tap);
   renderDeckPanel(); updateHud(); checkAchievements();
   toast(state.deck.length >= DECK_SIZE ? '🎴 Deck filled' : `🎴 Only ${state.deck.length} cards available so far`);
-});
+}));
 document.getElementById('deckClear').addEventListener('click', () => {
   state.deck = []; state.progress.deckEdits++; saveState(); sfx('tap'); buzz(HAP.tap);
   renderDeckPanel(); updateHud();

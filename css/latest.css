@@ -507,3 +507,30 @@ button.alm-card:active { transform: scale(0.95); }
    use --hud-h directly) are untouched. Battles keep their own zero padding. */
 .screen { padding-top: calc(var(--hud-h) + 10px); }
 body.in-battle .screen { padding-top: 0; }
+
+/* ===== Deck: "Your deck" / "Add cards" (build 92) =====
+   The Deck tab used to stack slots, tray, chart, keywords, five buttons and the collection on one long page. It is now two
+   views: Your deck (a bigger 4-wide tray, chart, keywords, tools) and Add cards (the deck as a thin strip pinned above the
+   collection, so it is always in sight while you pick). Both read the same state; only the layout changed. */
+#deckSeg { margin: 0 auto 10px; max-width: 360px; padding: 2px; }
+#deckSeg .seg-btn { padding: 6px 4px; min-height: 36px; }
+#deckBuild .dk-tray { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px 10px; margin: 6px 0 12px; }
+#deckBuild .dk-tray .dk-tslot { max-width: 76px; }
+#deckBuild .dk-tray .c-icon { font-size: 1.9rem; }
+#deckBuild .dk-tray .c-cost { width: 22px; height: 22px; font-size: .75rem; top: -7px; left: -7px; }
+.dk-pin { position: sticky; top: 6px; z-index: 6; margin: 0 -4px 10px; padding: 8px 8px 8px; background: var(--stone); border: 1px solid var(--stone-edge); border-radius: 20px; box-shadow: 0 8px 22px var(--shadow); }
+.dk-strip { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 3px; margin-bottom: 8px; }
+.dk-sslot { width: 100%; min-width: 0; height: 40px; padding: 0; border: 0; border-radius: 6px; cursor: pointer; color: inherit; font: inherit; box-shadow: none; }
+.dk-sslot .c-icon { font-size: .95rem; }
+.dk-sslot.crafted { outline-width: 1.5px; outline-offset: 0; }
+.dk-sslot.crafted::after { display: none; }
+.dk-sslot.empty { background: transparent; border: 1.5px dashed var(--stone-edge); cursor: default; }
+.dk-sslot:active:not(.empty) { transform: scale(.92); }
+.dk-pin-row { display: flex; align-items: center; gap: 6px; justify-content: space-between; }
+.dk-pin-count { font-size: .74rem; color: var(--ink-soft); margin-right: auto; text-align: left; }
+.dk-pin-count b { color: var(--ink); font-size: .86rem; }
+.dk-pin-row .dk-tool-btn { min-height: 38px; padding: 6px 12px; }
+
+/* Workshop: the trade-up tray and its button stick while the card list scrolls. They had no background, so the rows
+   showed straight through them. Now a solid panel that sits below the floating top bar. */
+.cr-dock { top: 6px; margin: 0 0 10px; padding: 12px 12px 12px; background: var(--stone); border: 1px solid var(--stone-edge); border-radius: 22px; box-shadow: 0 8px 22px var(--shadow); }
