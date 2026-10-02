@@ -800,3 +800,22 @@ body.calm-sit .hud, body.calm-sit #bottomNav, body.calm-sit #goalChip, body.calm
 html.cozy .cr-ready, html.cozy .cr-slot.next, html.cozy .bt-pulse { animation: none !important; }
 html.calm .calm-orb, html.calm .calm-bigstar, html.calm .calm-lantern, html.calm .calm-chime.ring { animation-duration: .01s; }
 @media (prefers-reduced-motion: reduce) { .calm-orb, body.calm-sit .town-map-wrap { transition: none; } .calm-ripple, .calm-lantern, .calm-chime.ring, .calm-bigstar { animation-duration: .01s; } }
+
+/* Calm corner: stages keep a sensible height so the buttons stay close, and the tea ritual matches the other screens
+   (a stage card, a one-line message, three step chips, two full-width buttons). */
+.calm-pond, .calm-sand, .calm-night, .calm-chimes, .calm-tree, .calm-stage { flex: 1 1 auto; min-height: 260px; max-height: 440px; }
+.calm-stage { position: relative; border-radius: 22px; overflow: hidden; border: 1px solid var(--stone-edge); user-select: none; -webkit-user-select: none; }
+.calm-tea-stage { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 0; padding-bottom: 28px; background: radial-gradient(ellipse at 50% 85%, #4a3826, #2a2118 70%); }
+.calm-tea-stage .calm-steam { position: absolute; top: 20%; left: 0; right: 0; text-align: center; }
+.calm-stream { position: absolute; top: 0; left: calc(50% + 8px); width: 4px; height: 0; border-radius: 2px; background: linear-gradient(180deg, transparent, #c8893f); opacity: 0; transition: height .35s ease, opacity .25s ease; }
+.calm-stream.on { height: calc(100% - 128px); opacity: .9; }
+.calm-cup { position: relative; width: 132px; height: 104px; border-radius: 6px 6px 56px 56px; border: 3px solid #e9dfc8; border-top-width: 2px; overflow: hidden; background: rgba(255, 255, 255, .06); z-index: 1; }
+.calm-saucer { width: 190px; height: 16px; margin-top: -4px; border-radius: 50%; background: radial-gradient(ellipse at 50% 30%, #f0e6cf, #bfae8a); box-shadow: 0 8px 14px rgba(0, 0, 0, .35); }
+.calm-steps { display: flex; gap: 8px; flex: none; }
+.calm-steps span { flex: 1; text-align: center; padding: 9px 4px; border-radius: 999px; border: 1px solid var(--stone-edge); background: var(--stone); font-size: .78rem; font-weight: 800; color: var(--ink-soft); transition: background .3s ease, color .3s ease; }
+.calm-steps span.on { background: var(--water); border-color: var(--water); color: var(--on-water); }
+.calm-steps span.done { color: var(--ink); border-color: color-mix(in srgb, var(--water) 55%, var(--stone-edge)); }
+.calm-actions { display: flex; flex-direction: column; gap: 10px; flex: none; }
+.calm-btn.wide { width: 100%; min-height: 52px; font-size: .95rem; }
+.calm-btn:disabled { opacity: .45; }
+.calm-body .calm-say { flex: none; }

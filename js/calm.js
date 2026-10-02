@@ -78,7 +78,7 @@ function calmRender() {
   const def = CALM_ACTIVITIES.find(a => a.id === calmCur);
   title.textContent = def ? def.name : calmCur === 'sit' ? '' : 'Calm corner';
   back.classList.toggle('hidden', calmCur === 'hub' || calmCur === 'sit');
-  body.className = 'calm-body calm-' + calmCur; body.innerHTML = '';
+  body.className = 'calm-body calm-act-' + calmCur;   // not calm-<id>: that is also the stage's own class body.innerHTML = '';
   ({ hub: calmHub, breathe: calmBreathe, sand: calmSand, lanterns: calmLanterns, chimes: calmChimes, stars: calmStars, tea: calmTea, bonsai: calmBonsai, sit: calmSitView })[calmCur](body);
 }
 
@@ -213,22 +213,28 @@ function calmStars(body) {
   });
 }
 
-/* ---------- tea ritual ---------- */
+/* ---------- tea ritual ----------
+   Three steps shown as chips (Pour, Steep, Sip), a stage with a cup on a saucer, and two full-width buttons that always sit in the
+   same place, like the other screens. Holding the pour button runs a thin stream into the cup. */
 function calmTea(body) {
-  body.innerHTML = `<div class="calm-tea"><div class="calm-steam" id="cSteam">♨</div><div class="calm-cup"><i id="cFill"></i></div><div class="calm-say" id="cTeaSay">Hold the kettle to pour</div></div>
-    <div class="calm-row"><button type="button" class="calm-btn pri" id="cPour">🫖 Hold to pour</button><button type="button" class="calm-btn" id="cSteep" disabled>Let it steep</button></div>`;
-  const fill = document.getElementById('cFill'), say = document.getElementById('cTeaSay'), pour = document.getElementById('cPour'), steep = document.getElementById('cSteep'), steam = document.getElementById('cSteam');
+  body.innerHTML = `<div class="calm-stage calm-tea-stage"><div class="calm-steam" id="cSteam">♨</div><div class="calm-stream" id="cStream"></div>
+      <div class="calm-cup"><i id="cFill"></i></div><div class="calm-saucer"></div></div>
+    <div class="calm-say" id="cTeaSay">Hold the button to pour</div>
+    <div class="calm-steps" id="cSteps"><span class="on">1 · Pour</span><span>2 · Steep</span><span>3 · Sip</span></div>
+    <div class="calm-actions"><button type="button" class="calm-btn pri wide" id="cPour">🫖 Hold to pour</button><button type="button" class="calm-btn wide" id="cSteep" disabled>Let it steep</button></div>`;
+  const fill = document.getElementById('cFill'), say = document.getElementById('cTeaSay'), pour = document.getElementById('cPour'), steep = document.getElementById('cSteep'), steam = document.getElementById('cSteam'), stream = document.getElementById('cStream'), steps = [...document.querySelectorAll('#cSteps span')];
   let level = 0, pouring = null, stage = 'pour';
+  const setStep = n => steps.forEach((el, i) => { el.classList.toggle('on', i === n); el.classList.toggle('done', i < n); });
   const draw = () => { fill.style.height = level + '%'; };
-  const stopPour = () => { clearInterval(pouring); pouring = null; };
-  pour.addEventListener('pointerdown', e => { if (stage !== 'pour' || pouring) return; pour.setPointerCapture(e.pointerId); say.textContent = 'Pouring…'; pouring = setInterval(() => { level = Math.min(88, level + 1.2); draw(); if (level >= 88) { stopPour(); say.textContent = 'Just right'; steep.disabled = false; } }, 60); calmNote(330, 0.012, 2); });
-  ['pointerup', 'pointercancel'].forEach(t => pour.addEventListener(t, () => { if (!pouring) return; stopPour(); if (level > 30) { steep.disabled = false; say.textContent = 'Whenever you are ready'; } }));
+  const stopPour = () => { clearInterval(pouring); pouring = null; stream.classList.remove('on'); };
+  pour.addEventListener('pointerdown', e => { if (stage !== 'pour' || pouring) return; pour.setPointerCapture(e.pointerId); say.textContent = 'Pouring…'; stream.classList.add('on');
+    pouring = setInterval(() => { level = Math.min(88, level + 1.2); draw(); if (level >= 88) { stopPour(); say.textContent = 'Just right'; steep.disabled = false; steep.classList.add('pri'); pour.classList.remove('pri'); } }, 60); calmNote(330, 0.012, 2); });
+  ['pointerup', 'pointercancel'].forEach(t => pour.addEventListener(t, () => { if (!pouring) return; stopPour(); if (level > 30) { steep.disabled = false; steep.classList.add('pri'); pour.classList.remove('pri'); say.textContent = 'Whenever you are ready'; } }));
   calmCleanups.push(stopPour);
   steep.addEventListener('click', () => {
-    if (stage !== 'pour') { // sip
-      say.textContent = CALM_TEA_LINES[Math.floor(Math.random() * CALM_TEA_LINES.length)]; level = Math.max(20, level - 28); draw(); calmNote(523, 0.03, 2); steam.classList.add('on'); steep.textContent = 'Another sip'; return; }
-    stage = 'steep'; steep.disabled = true; pour.disabled = true; steam.classList.add('on'); say.textContent = 'Steeping…';
-    calmLater(() => { stage = 'sip'; steep.disabled = false; steep.textContent = 'Take a sip'; steep.classList.add('pri'); say.textContent = 'Ready'; calmNote(659, 0.03, 2); }, calmMotion() ? 7000 : 1500);
+    if (stage !== 'pour') { say.textContent = CALM_TEA_LINES[Math.floor(Math.random() * CALM_TEA_LINES.length)]; level = Math.max(20, level - 28); draw(); calmNote(523, 0.03, 2); steam.classList.add('on'); steep.textContent = 'Another sip'; return; }
+    stage = 'steep'; setStep(1); steep.disabled = true; pour.disabled = true; steep.classList.remove('pri'); steam.classList.add('on'); say.textContent = 'Steeping…';
+    calmLater(() => { stage = 'sip'; setStep(2); steep.disabled = false; steep.textContent = 'Take a sip'; steep.classList.add('pri'); say.textContent = 'Ready'; calmNote(659, 0.03, 2); }, calmMotion() ? 7000 : 1500);
   });
 }
 
