@@ -84,65 +84,101 @@
         </div>
 
         <div id="pmSettingsView">
-          <div class="customize-section">
-            <div class="settings-group-label">Appearance</div>
-            <div class="seg" id="themeSeg" role="group" aria-label="Colour theme">
-              <button class="seg-btn" type="button" data-theme-pick="dark">🌙 Dark</button>
-              <button class="seg-btn" type="button" data-theme-pick="light">☀️ Light</button>
-              <button class="seg-btn" type="button" data-theme-pick="auto">Auto</button>
-            </div>
-
-            <div class="settings-group-label">Audio</div>
-            <div class="settings-row"><span>🔊 Sound</span><button class="toggle" id="soundToggle" aria-label="Toggle all sound"></button></div>
-            <div class="settings-row"><span>🎵 Music</span><button class="toggle" id="musicToggle" aria-label="Toggle music"></button></div>
-            <div class="settings-row"><span>🌿 Town ambience</span><button class="toggle" id="ambientToggle" aria-label="Toggle town ambient sounds"></button></div>
-            <div class="vol-row" id="musicVolRow">
-              <span class="vol-lbl">Music</span>
-              <input type="range" class="vol" id="musicVol" min="0" max="100" step="1" aria-label="Music volume">
-              <span class="vol-num" id="musicVolNum">50</span>
-            </div>
-            <div class="vol-row" id="sfxVolRow">
-              <span class="vol-lbl">Effects</span>
-              <input type="range" class="vol" id="sfxVol" min="0" max="100" step="1" aria-label="Effects volume">
-              <span class="vol-num" id="sfxVolNum">70</span>
-            </div>
-            <div class="settings-row"><span>📳 Haptics</span><button class="toggle" id="hapticToggle" aria-label="Toggle haptics"></button></div>
-
-            <div class="settings-group-label">Accessibility &amp; battles</div>
-            <div class="settings-row"><span>🪙 Who goes first</span></div>
-            <div class="seg" id="tossSeg" role="group" aria-label="How the first turn is decided">
-              <button class="seg-btn" type="button" data-toss-pick="mix">Mix</button>
-              <button class="seg-btn" type="button" data-toss-pick="coin">🪙 Coin</button>
-              <button class="seg-btn" type="button" data-toss-pick="dice">🎲 Dice</button>
-              <button class="seg-btn" type="button" data-toss-pick="skip">Skip</button>
-            </div>
-            <div class="settings-row"><span>⏩ Fast battles</span><button class="toggle" id="fastToggle" aria-label="Toggle fast battle animations"></button></div>
-            <div class="settings-row"><span>🎣 Easy reeling</span><button class="toggle" id="fishEasyToggle" aria-label="Toggle easy fishing reel"></button></div>
-            <div class="settings-row"><span>🔠 Larger text</span><button class="toggle" id="bigTextToggle" aria-label="Toggle larger text"></button></div>
-            <div class="settings-row"><span>🌙 Calm motion</span><button class="toggle" id="calmToggle" aria-label="Toggle reduced motion"></button></div>
-
-            <div class="settings-group-label">Notifications &amp; privacy</div>
-            <div class="settings-row"><span>🔔 Notify me (bread, boss)</span><button class="toggle" id="notifsToggle" aria-label="Toggle notifications for bread baking and the district boss"></button></div>
-            <div class="settings-row"><span>👋 Share that I'm playing</span><button class="toggle" id="presenceToggle" aria-label="Toggle sharing your name and activity with other testers"></button></div>
-            <div class="settings-row"><span>👻 Let testers duel my deck</span><button class="toggle" id="shareDeckToggle" aria-label="Toggle letting other testers play a ghost duel against your deck"></button></div>
-            <div class="settings-row"><span>📊 Pebble ledger</span><button class="btn btn-ghost" id="econToggle" type="button" style="min-height:36px;padding:4px 12px">Show</button></div>
-            <div class="panel-desc hidden" id="econPanel" style="white-space:pre-line;font-size:.74rem"></div>
-            <div class="settings-row"><span>☁️ Cloud save</span><span id="cloudStatus">—</span></div>
-            <div class="controls" style="margin-top:6px">
-              <button id="cloudBackupBtn" class="btn btn-ghost">🔗 Back up your save</button>
-              <button id="cloudRestoreBtn" class="btn btn-ghost">📥 Restore a save</button>
-            </div>
+          <div class="st-shortcuts">
+            <button id="openInventoryBtn" class="st-tile" type="button"><span class="st-tile-ico">🎒</span><span>Your Bag</span></button>
+            <button id="visitShopBtn" class="st-tile" type="button"><span class="st-tile-ico">🛍️</span><span>Shop for items</span></button>
           </div>
+
+          <section class="st-group">
+            <h3 class="st-title">Appearance</h3>
+            <div class="st-card">
+              <div class="st-block">
+                <div class="st-label">Colour theme<small>The map, battles and interiors stay dark either way.</small></div>
+                <div class="seg" id="themeSeg" role="group" aria-label="Colour theme">
+                  <button class="seg-btn" type="button" data-theme-pick="dark">🌙 Dark</button>
+                  <button class="seg-btn" type="button" data-theme-pick="light">☀️ Light</button>
+                  <button class="seg-btn" type="button" data-theme-pick="auto">Auto</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="st-group">
+            <h3 class="st-title">Sound</h3>
+            <div class="st-card">
+              <div class="st-row"><span class="st-ico">🔊</span><span class="st-label">Sound<small>Turns every sound on or off</small></span><button class="toggle" id="soundToggle" aria-label="Toggle all sound"></button></div>
+              <div class="st-row"><span class="st-ico">🎵</span><span class="st-label">Music</span><button class="toggle" id="musicToggle" aria-label="Toggle music"></button></div>
+              <div class="vol-row" id="musicVolRow">
+                <span class="vol-lbl">Music</span>
+                <input type="range" class="vol" id="musicVol" min="0" max="100" step="1" aria-label="Music volume">
+                <span class="vol-num" id="musicVolNum">50</span>
+              </div>
+              <div class="vol-row" id="sfxVolRow">
+                <span class="vol-lbl">Effects</span>
+                <input type="range" class="vol" id="sfxVol" min="0" max="100" step="1" aria-label="Effects volume">
+                <span class="vol-num" id="sfxVolNum">70</span>
+              </div>
+              <div class="st-row"><span class="st-ico">🌿</span><span class="st-label">Town ambience<small>Birds, wind and water</small></span><button class="toggle" id="ambientToggle" aria-label="Toggle town ambient sounds"></button></div>
+              <div class="st-row"><span class="st-ico">📳</span><span class="st-label">Haptics<small>Small vibrations when you tap</small></span><button class="toggle" id="hapticToggle" aria-label="Toggle haptics"></button></div>
+            </div>
+          </section>
+
+          <section class="st-group">
+            <h3 class="st-title">Battles</h3>
+            <div class="st-card">
+              <div class="st-block">
+                <div class="st-label"><span class="st-ico">🪙</span>Who goes first<small>How each match decides the first turn</small></div>
+                <div class="seg" id="tossSeg" role="group" aria-label="How the first turn is decided">
+                  <button class="seg-btn" type="button" data-toss-pick="mix">Mix</button>
+                  <button class="seg-btn" type="button" data-toss-pick="coin">🪙 Coin</button>
+                  <button class="seg-btn" type="button" data-toss-pick="dice">🎲 Dice</button>
+                  <button class="seg-btn" type="button" data-toss-pick="skip">Skip</button>
+                </div>
+              </div>
+              <div class="st-row"><span class="st-ico">⏩</span><span class="st-label">Fast battles<small>Quicker animations</small></span><button class="toggle" id="fastToggle" aria-label="Toggle fast battle animations"></button></div>
+              <div class="st-row"><span class="st-ico">🎣</span><span class="st-label">Easy reeling<small>A wider safe zone when fishing</small></span><button class="toggle" id="fishEasyToggle" aria-label="Toggle easy fishing reel"></button></div>
+            </div>
+          </section>
+
+          <section class="st-group">
+            <h3 class="st-title">Comfort</h3>
+            <div class="st-card">
+              <div class="st-row"><span class="st-ico">🔠</span><span class="st-label">Larger text</span><button class="toggle" id="bigTextToggle" aria-label="Toggle larger text"></button></div>
+              <div class="st-row"><span class="st-ico">🌙</span><span class="st-label">Calm motion<small>Less movement on screen</small></span><button class="toggle" id="calmToggle" aria-label="Toggle reduced motion"></button></div>
+            </div>
+          </section>
+
+          <section class="st-group">
+            <h3 class="st-title">Notifications &amp; privacy</h3>
+            <div class="st-card">
+              <div class="st-row"><span class="st-ico">🔔</span><span class="st-label">Notify me<small>When bread is ready or the boss appears</small></span><button class="toggle" id="notifsToggle" aria-label="Toggle notifications for bread baking and the district boss"></button></div>
+              <div class="st-row"><span class="st-ico">👋</span><span class="st-label">Share that I'm playing<small>Your name and activity, shown to other testers</small></span><button class="toggle" id="presenceToggle" aria-label="Toggle sharing your name and activity with other testers"></button></div>
+              <div class="st-row"><span class="st-ico">👻</span><span class="st-label">Let testers duel my deck<small>They play a ghost copy of your deck</small></span><button class="toggle" id="shareDeckToggle" aria-label="Toggle letting other testers play a ghost duel against your deck"></button></div>
+            </div>
+          </section>
+
+          <section class="st-group">
+            <h3 class="st-title">Your save</h3>
+            <div class="st-card">
+              <div class="st-row"><span class="st-ico">☁️</span><span class="st-label">Cloud save<small id="cloudStatus">—</small></span></div>
+              <div class="st-block st-pair">
+                <button id="cloudBackupBtn" class="btn btn-ghost">🔗 Back up</button>
+                <button id="cloudRestoreBtn" class="btn btn-ghost">📥 Restore</button>
+              </div>
+              <div class="st-row"><span class="st-ico">📊</span><span class="st-label">Pebble ledger<small>Where your Pebbles came from</small></span><button class="btn btn-ghost st-small" id="econToggle" type="button">Show</button></div>
+              <div class="panel-desc hidden st-econ" id="econPanel"></div>
+            </div>
+          </section>
         </div>
 
-        <button id="openInventoryBtn" class="btn shop-cta-btn">🎒 Open your Bag</button>
-        <button id="visitShopBtn" class="btn shop-cta-btn">🛍️ Visit Shop For Items</button>
-
-        <div class="controls" id="townControls">
-          <button id="resetTown" class="btn btn-ghost">Start Over</button>
-          <button id="feedbackBtn" class="btn btn-ghost">💬 Feedback</button>
-          <button id="bugBtn" class="btn btn-ghost">🐞 Report a bug</button>
-        </div>
+        <section class="st-group st-help">
+          <h3 class="st-title">Help</h3>
+          <div class="controls st-card st-help-card" id="townControls">
+            <button id="feedbackBtn" class="btn btn-ghost">💬 Feedback</button>
+            <button id="bugBtn" class="btn btn-ghost">🐞 Report a bug</button>
+            <button id="resetTown" class="btn btn-ghost st-danger">Start over</button>
+          </div>
+        </section>
         <div class="pm-version" id="pmVersion"></div>
       </div>
     </div>
