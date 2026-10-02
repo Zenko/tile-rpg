@@ -1027,3 +1027,9 @@ html.calm .cl-cell.rat, html.cozy .cl-cell.rat { animation: none; }
 :root { --art-sh: rgba(0, 0, 0, .34); }
 :root[data-theme="light"] { --art-sh: rgba(60, 40, 20, .24); }
 .card-art-img, .art-shadow { filter: drop-shadow(0 .035em .05em var(--art-sh)); }
+
+/* The same faint shadow on the static UI icons (build 126): emoji fallbacks on cards, keyword icons, list/panel/guide/quest icons and the dock tabs.
+   Deliberately NOT on anything that moves every frame (map characters, bobbing chests, fish, weather, scene characters) or that already has its own
+   effect (the level-up glow, the cellar doors), because a filter on a moving element repaints every frame on a phone. */
+.card-emoji, .jtd-ic, .jr-ic, .bn-ico, .hs-icon, .dk-kws span, .ch-peb, .panel-icon, .ac-kw, .kws, .big-icon, .st-ico, .gd-icon, .gd-row-ico, .q-icon, .sf-icon, .le-icon, .wb-ico, .goal-ico, .story-icon, .life-ico, .sp-ico, .tr-ico, .pt-ico, .ps-icon, .hp-icon, .a-emoji, .wx-icon, .amb-icon, .hud-ambient-icon,
+#bottomNav .tab-btn .t-icon { filter: drop-shadow(0 .035em .05em var(--art-sh)); }
