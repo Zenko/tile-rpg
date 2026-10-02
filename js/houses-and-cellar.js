@@ -42,6 +42,12 @@ const INTERIORS = {
               { id: 'sellbugs', kind: 'sellbugs', view: () => ({ label: jarValue() ? `🫙 Trade your jar of critters for 🫧 ${jarValue()}` : '🫙 Your critter jar is empty', disabled: !jarValue() }) },
               { id: 'nightdeco', label: '🕯️ Night-only decorations', kind: 'nightdeco' },
               { id: 'mg-lanterns', kind: 'minigame', game: 'lanterns', view: () => miniView('lanterns') }] },
+  fortune: { title: "Madame Soot's Tent", who: '🐈‍⬛', name: 'Soot', theme: 'dark',
+    greet: () => `Beads click, a candle gutters. "Sit, sit," purrs Soot. ${typeof tarotCanDraw === 'function' && tarotCanDraw() ? 'Your daily reading has not been drawn yet.' : 'The cards know you already.'}`,
+    actions: [{ id: 'fortune-read', label: '🔮 Daily reading', kind: 'calm', game: 'tarot' },
+              { id: 'fortune-redraw', kind: 'fortune', view: () => { const s = fortuneRedrawState(); return { label: `🃏 Draw once more · 🫧 ${FORTUNE_REDRAW_COST}${s === 'used' ? ' (done today)' : ''}`, disabled: s === 'used' }; } },
+              { id: 'fortune-story', label: '📜 Hear your deck\'s story', kind: 'fortune' },
+              { id: 'fortune-pack', kind: 'fortune', view: () => ({ label: `🃏 Arcana Pack · 🫧 ${FORTUNE_PACK_COST}`, disabled: state.progress.pebbles < FORTUNE_PACK_COST }) }] },
   museum: { title: 'The Card Museum', who: '🦚', name: 'Curator Paz', theme: 'cool',
     greet: () => `Welcome! Every card has a story, and we would love to keep one of each. Spare copies only - we never take your last. ${MUSEUM_WINGS.filter(w => museumState().wings[w.id]).length}/${MUSEUM_WINGS.length} wings complete.`,
     actions: [{ id: 'wings', label: '🏛️ Donate to the wings', kind: 'wings' },
@@ -763,6 +769,7 @@ function renderSceneBody() {
     else if (scene.mode === 'wings') acts.innerHTML = museumWingButtons() + sceneBtn('back', '← Back to the curator');
     else if (scene.mode === 'wing') acts.innerHTML = museumCardButtons(scene.wing) + sceneBtn('wings-back', '← All wings');
     else if (scene.mode === 'exped') acts.innerHTML = expedButtons();
+    else if (scene.mode === 'redraw') acts.innerHTML = fortuneRedrawButtons() + sceneBtn('back', '← Back to the table');
     else if (scene.mode === 'nightdeco') acts.innerHTML = DECORATION_ITEMS.filter(d => d.night).map(d => sceneBtn('nightdeco:' + d.id, `${d.icon} ${d.name} · 🫧 ${d.cost}${decorationInventoryCount(d.id) ? ` (have ${decorationInventoryCount(d.id)})` : ''}`)).join('') + sceneBtn('back', '← Back');
     // an action may compute its own label (a timer, a sold-out deal) through view()
     else acts.innerHTML = it.actions.map(a => { const v = a.view ? a.view(a) : null; return sceneBtn(a.id, v ? v.label : a.label, v && v.disabled); }).join('') + sceneBtn('leave', 'Head back out');
@@ -812,6 +819,7 @@ function sceneAction(actId) {
   if (actId.startsWith('exp-')) { scene.text = expedAction(actId) || scene.text; renderScene(); return; }
   if (actId === 'mg-back') { miniStop(); const g = INTERIORS[scene.id].greet; scene.text = typeof g === 'function' ? g() : g; sfx('nav'); renderScene(); return; }
   if (scene.id === 'cup') { cupAction(actId); return; }
+  if (actId.startsWith('redraw:')) { scene.text = tarotRedraw(+actId.slice(7)); scene.mode = null; renderScene(); return; }
   if (actId.startsWith('bait:')) { scene.text = baitAction(actId.slice(5)); renderScene(); return; }
   if (actId.startsWith('sleeve:')) { scene.text = sleeveAction(actId.slice(7)); renderScene(); return; }
   if (actId.startsWith('dish:')) { scene.text = cookDish(actId.slice(5)); renderScene(); return; }
@@ -842,6 +850,7 @@ function sceneAction(actId) {
   else if (a.kind === 'exped') { scene.mode = 'exped'; scene.text = 'Send spare cards off to explore. They come back with Pebbles, supplies and sometimes a card - and a little mastery.'; sfx('tap'); showTipOnce('expeditions'); }
   else if (a.kind === 'nightpack') { scene.text = buyNightPack(); }
   else if (a.kind === 'sellbugs') { scene.text = sellJar(); }
+  else if (a.kind === 'fortune') { scene.text = fortuneAction(a.id); }
   else if (a.kind === 'nightdeco') { scene.mode = 'nightdeco'; scene.text = 'They glow once the sun goes down.'; sfx('tap'); }
   else if (a.kind === 'cook') { scene.mode = 'cook'; scene.text = `Maple ties on an apron. "What shall we make?" ${pantryLine()}`; sfx('tap'); showTipOnce('cook'); }
   else if (a.kind === 'daily') {

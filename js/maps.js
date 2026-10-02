@@ -162,6 +162,7 @@ function occupiedSet(data) {
   (data.crops || []).forEach(c => s.add(c.x + ',' + c.y));
   (data.bugs || []).forEach(b => s.add(b.x + ',' + b.y));
   if (data === state.districtData[LANTERN_TILE.district]) s.add(LANTERN_TILE.x + ',' + LANTERN_TILE.y);   // Lumen's pitch stays clear
+  if (data === state.districtData[FORTUNE_TILE.district]) s.add(FORTUNE_TILE.x + ',' + FORTUNE_TILE.y);     // and so does Madame Soot's tent
   return s;
 }
 

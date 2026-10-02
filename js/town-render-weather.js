@@ -552,6 +552,7 @@ function renderEntities(data) {
     const ce = add('companion', state.companionPos.x, state.companionPos.y, `<span>${state.companion.icon}</span>`); ce.style.zIndex = state.companionPos.y * 2 + 2;
   }
   if (lanternOpen()) { const lv = add('vendor', LANTERN_TILE.x, LANTERN_TILE.y, '<span>🦉</span><div class="ent-name">Lantern Market</div>'); lv.style.zIndex = LANTERN_TILE.y * 2 + 2; }
+  if (fortuneOpen()) { const fv = add('vendor', FORTUNE_TILE.x, FORTUNE_TILE.y, '<span>🔮</span><div class="ent-name">Fortune Teller</div>'); fv.style.zIndex = FORTUNE_TILE.y * 2 + 2; }
   (data.bugs || []).forEach(b => { const def = bugDef(b.kind); add('bug' + (def && def.legendary ? ' legendary' : ''), b.x, b.y, `<span>${def ? def.icon : '✨'}</span>`); });
   if (state.currentDistrict === 'square' && unreadMail()) { const mf = add('mail-flag', 11, 1, '<span>📬</span>'); mf.style.zIndex = 60; }
   const liveFighterIds = new Set();
@@ -889,6 +890,7 @@ function handleMapTap(tx, ty) {
     walkThen(adjacentTo(state.companionPos), () => interactWith('companion')); return;
   }
   if (lanternOpen() && tx === LANTERN_TILE.x && ty === LANTERN_TILE.y) { walkThen(adjacentTo(LANTERN_TILE), () => { sfx('claim'); withDoorFade(() => { openScene('lantern'); showTipOnce('lantern'); }); }); return; }
+  if (fortuneOpen() && tx === FORTUNE_TILE.x && ty === FORTUNE_TILE.y) { walkThen(adjacentTo(FORTUNE_TILE), () => { sfx('claim'); withDoorFade(() => { openScene('fortune'); showTipOnce('fortune'); }); }); return; }
   const spirit = (data.spirits || []).find(s => s.x === tx && s.y === ty);
   if (spirit) { walkThen(adjacentTo(spirit), () => interactWith('spirit', spirit)); return; }
   const crop = cropAt(data, tx, ty);

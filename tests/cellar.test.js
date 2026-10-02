@@ -82,6 +82,8 @@ module.exports = async (page, assert) => {
   assert.ok(await page.locator('.cl-cell.fog').count() > 20, 'most of the floor starts in the dark');
   await page.locator('.cl-light').click({ force: true }); await page.waitForTimeout(400);
   assert.strictEqual(await page.locator('.cl-cell.fog').count(), 0, 'lighting the floor reveals it all');
+  // clear barrels, rats and the rest from the way so the walk is not (correctly) interrupted
+  await page.evaluate(() => { const m = cellarRun(cellarState()).map; Object.keys(m.objs).forEach(k => { if (m.objs[k].k !== 'door') delete m.objs[k]; }); });
   const door = await page.evaluate(() => { const m = cellarRun(cellarState()).map; return Object.keys(m.objs).filter(k => m.objs[k].k === 'door' && cellarRun(cellarState()).doors[m.objs[k].i].k === 'camp')[0]; });
   await page.locator(`[data-act="cell:${door}"]`).click({ force: true });
   await page.waitForFunction(() => cellarState().floor === 1, null, { timeout: 15000 });

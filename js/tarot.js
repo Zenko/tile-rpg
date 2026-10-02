@@ -45,7 +45,7 @@ const TAROT_ATTUNE_MAX = 3, TAROT_REVERSED_CHANCE = 0.3;
 function tarotState() {
   const p = state.progress; if (!p.tarot || typeof p.tarot !== 'object') p.tarot = {};
   const t = p.tarot;
-  if (t.day !== todayKey()) { t.day = todayKey(); t.cards = null; t.flipped = [false, false, false]; t.fortune = null; }   // a new day, a new reading
+  if (t.day !== todayKey()) { t.day = todayKey(); t.cards = null; t.flipped = [false, false, false]; t.fortune = null; t.redrawn = false; }   // a new day, a new reading
   if (!t.seen) t.seen = {}; if (!Array.isArray(t.attuned)) t.attuned = [];
   return t;
 }
@@ -149,4 +149,72 @@ function tarotDrawArcana(box) {
     <div class="calm-actions"><button type="button" class="calm-btn pri wide" id="trAtt" ${own && (at || n < TAROT_ATTUNE_MAX) ? '' : 'disabled'}>${!own ? 'Collect it to attune' : at ? 'Remove attunement' : n >= TAROT_ATTUNE_MAX ? 'Three are attuned already' : '✦ Attune'}</button></div>`;
   onAll(box, '[data-ar]', b => { tarotSel = +b.dataset.ar; sfx('tap'); tarotDrawArcana(box); });
   document.getElementById('trAtt').addEventListener('click', () => { const r = tarotAttune(tarotSel); if (r) { sfx(r === 'on' ? 'claim' : 'soft'); tarotDrawArcana(box); } });
+}
+
+/* ============================================================
+   MADAME SOOT'S TENT (build 110)
+   Market Row, from dusk until dawn (the Lantern Market keeps the deep night). A black cat reads cards for travellers:
+     - the daily reading, as the Tarot screen
+     - Draw once more (🫧 15, once a day): swap one card of today's reading for a new Arcana; it comes down face-down again
+     - Hear your deck's story (free): a few lines about your deck, and the Arcana it most resembles
+     - an Arcana Pack (🫧 90): one card from the 22 Major Arcana, three times as likely to be one you do not own yet
+   It is a scene (INTERIORS.fortune in js/houses-and-cellar.js) opened by walking up to the tent, like the Lantern Market.
+   ============================================================ */
+const FORTUNE_TILE = { district: 'market', x: 9, y: 4 };
+const FORTUNE_REDRAW_COST = 15, FORTUNE_PACK_COST = 90;
+function fortuneOpen() { return state.currentDistrict === FORTUNE_TILE.district && skyPhase().dim >= 0.2; }
+function fortuneRedrawState() { const t = tarotState(); return !t.cards ? 'none' : t.redrawn ? 'used' : 'ok'; }
+function fortuneRedrawButtons() {
+  const t = tarotState();
+  return (t.cards || []).map((c, k) => sceneBtn('redraw:' + k, `${TAROT_POS[k]}: ${ARCANA[c.i].name}${t.flipped[k] ? '' : ' (face down)'} · 🫧 ${FORTUNE_REDRAW_COST}`, state.progress.pebbles < FORTUNE_REDRAW_COST)).join('');
+}
+function tarotRedraw(k) {
+  const t = tarotState();
+  if (!t.cards || t.redrawn || !t.cards[k]) return '"Nothing to turn over just now," purrs Soot.';
+  if (state.progress.pebbles < FORTUNE_REDRAW_COST) { sfx('tie'); return `"That is 🫧 ${FORTUNE_REDRAW_COST}, dear," says Soot, not unkindly.`; }
+  const taken = new Set(t.cards.map(c => c.i)), pool = ARCANA.map((a, i) => ({ i, w: arcanaOwned(i) ? 3 : 1 })).filter(x => !taken.has(x.i));
+  const total = pool.reduce((n, x) => n + x.w, 0); let r = Math.random() * total, pick = pool[0];
+  for (const x of pool) { r -= x.w; if (r < 0) { pick = x; break; } }
+  spendPebbles(FORTUNE_REDRAW_COST, 'fortune');
+  const old = ARCANA[t.cards[k].i].name; t.cards[k] = { i: pick.i, rev: Math.random() < TAROT_REVERSED_CHANCE }; t.flipped[k] = false; t.fortune = null; t.redrawn = true;
+  saveState(); sfx('flip'); buzz(HAP.tap);
+  return `Soot sweeps ${old} aside and lays a new card face down in the ${TAROT_POS[k].toLowerCase()} place. Turn it over at the Tarot screen.`;
+}
+// A few lines about your deck, and the Arcana it most resembles.
+function fortuneDeckStory() {
+  const deck = state.deck.filter(id => cardDef(id));
+  if (deck.length < DECK_SIZE) return `"Your deck has ${deck.length} of ${DECK_SIZE} cards," Soot says. "Fill it, dear, and I will tell you who it is."`;
+  const defs = deck.map(cardDef), fam = {}, kw = {};
+  defs.forEach(d => { const f = CARD_FAMILY[BattleEngine.baseIdOf(d.id)]; if (f) fam[f] = (fam[f] || 0) + 1; (d.kw || []).forEach(k => { kw[k] = (kw[k] || 0) + 1; }); });
+  const fams = Object.keys(fam).sort((a, b) => fam[b] - fam[a]), top = fams[0] || 'stone', second = fams[1];
+  const avg = defs.reduce((n, d) => n + d.cost, 0) / defs.length, spells = defs.filter(d => d.spell).length, topKw = Object.keys(kw).sort((a, b) => kw[b] - kw[a])[0];
+  const pace = avg < 2.4 ? 'quick off the mark' : avg > 3.2 ? 'slow to wake, heavy when it does' : 'steady from the first turn';
+  const arch = fam[top] >= 6 ? `a ${FAMILIES[top].name} deck` : 'a deck of many hands';
+  const heart = second && fam[second] >= 3 ? ` with a ${FAMILIES[second].name} heart` : '';
+  const trick = spells >= 3 ? ` It keeps ${spells} tricks up its sleeve.` : '';
+  const key = topKw && KW[topKw] ? ` Its favourite word is ${KW[topKw].icon} ${KW[topKw].name}.` : '';
+  const cand = ARCANA.map((a, i) => ({ a, i, f: arcanaFamily(a), c: arcanaCardDef(a).cost })).filter(x => x.f === top).sort((x, y) => Math.abs(x.c - avg) - Math.abs(y.c - avg))[0];
+  const like = cand ? ` If it were a card, it would be ${cand.a.name}: ${cand.a.up.charAt(0).toLowerCase() + cand.a.up.slice(1)}` : '';
+  return `"${arch.charAt(0).toUpperCase() + arch.slice(1)}${heart}, ${pace}.${trick}${key}${like}" Soot nods slowly.`;
+}
+function fortuneBuyPack() {
+  if (state.progress.pebbles < FORTUNE_PACK_COST) { sfx('tie'); return `"The Arcana pack is 🫧 ${FORTUNE_PACK_COST}," says Soot. "They do not like to be hurried."`; }
+  const disc = discoveredSet(), pool = ARCANA.map(a => ({ id: a.card, w: disc.has(a.card) ? 1 : 3 })), total = pool.reduce((n, x) => n + x.w, 0);
+  let r = Math.random() * total, pick = pool[0]; for (const x of pool) { r -= x.w; if (r < 0) { pick = x; break; } }
+  const isNew = !disc.has(pick.id); spendPebbles(FORTUNE_PACK_COST, 'fortune');
+  state.ownedCards.push(pick.id); noteCardsFound(1); bumpPill('pillCards'); saveState(); updateHud(); if (typeof checkSets === 'function') checkSets(); checkAchievements();
+  setTimeout(() => showCardReveal(pick.id, 'An Arcana from Soot', true, null, 0, { flip: true, isNew }), 250);
+  if (isNew) setTimeout(() => toast('📖 New entry in your Index'), 900);
+  return `Soot slides a card across the cloth without looking at it. "That one was always yours."`;
+}
+function fortuneAction(id) {
+  if (id === 'fortune-story') { sfx('soft'); return fortuneDeckStory(); }
+  if (id === 'fortune-pack') return fortuneBuyPack();
+  if (id === 'fortune-redraw') {
+    const s = fortuneRedrawState();
+    if (s === 'none') return '"You have not drawn today, dear. Take your daily reading first, then we will see."';
+    if (s === 'used') return '"Once a day is plenty. The cards get cross."';
+    scene.mode = 'redraw'; return 'Which card shall I turn?';
+  }
+  return '';
 }
