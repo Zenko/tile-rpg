@@ -4,6 +4,7 @@
    its turn rather than stacking on top.
    ============================================================ */
 const TIPS = {
+  tarot:      { icon: '🔮', title: 'Tarot', text: 'Once a day, draw three Arcana. Turn them all over and the middle card gives the day a fortune. The 22 Major Arcana are real cards from the game: own the card and you own the Arcana, and you can attune three for a small permanent perk.' },
   cellarRun:  { icon: '🕯️', title: 'The cellar', text: 'Every floor offers a few doors: a fight, a chest, a campfire, a shrine or a peddler. You have three hearts; losing a fight costs one, and at zero the run ends. Boons you pick up last for the run. Leaving does not end it.' },
   calm:       { icon: '🧘', title: 'The calm corner', text: 'A few quiet things to do that score nothing and cost nothing: breathe, rake sand, watch the stars, drink tea, tend a bonsai. Five slow breaths leave you Rested for the day.' },
   path:       { icon: '🧭', title: 'Your path', text: 'Every level gives you a skill point. Spend them on Angler, Gardener, Duelist or Wanderer, and upgrade your rod, watering can and lantern with Pebbles. You can reset your points for free any time.' },

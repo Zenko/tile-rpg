@@ -82,7 +82,7 @@ function todayModel() {
   const ch = challengeState().list || [], chWon = ch.filter(c => c.won).length;
   if (ch.length) daily.push({ icon: '🎯', title: 'Deck challenges', sub: `${chWon} of ${ch.length} beaten today`, done: chWon >= ch.length, frac: chWon / ch.length, bar: [chWon, ch.length], go: JPLACES.cup });
 
-  week.push({ icon: '🧘', title: 'Calm corner', sub: calmRested() ? 'Rested today' : 'Breathe, rake sand, look at the stars', done: false, frac: 0, go: { calm: true } });
+  week.push({ icon: '🧘', title: 'Calm corner', sub: typeof tarotCanDraw === 'function' && tarotCanDraw() ? 'Your daily tarot reading is waiting' : calmRested() ? 'Rested today' : 'Breathe, rake sand, look at the stars', done: false, frac: 0, go: { calm: true } });
   const cs = cupState();
   week.push({ icon: '🏆', title: cupName(), sub: cs.trophy ? 'Trophy won this week' : cs.active ? `Round ${cs.round + 1} of 3 in progress` : 'Three matches, no healing', done: !!cs.trophy, frac: cs.trophy ? 1 : cs.round / 3, go: JPLACES.cup });
   if (featureLocked('draft')) locked.push({ icon: '🎴', title: featureLockText('draft').replace(/^🎴 /, '') });
