@@ -37,6 +37,7 @@ function eventIs(id) { return eventNow().id === id; }
 function noteTodayEvent() {
   const pr = state.progress, ev = eventNow();
   if (pr.eventSeen === todayKey()) return;
+  if (prefs.cozy) { pr.eventSeen = todayKey(); return; }   // Cozy mode: no event toast (it is still shown next to the district name)
   pr.eventSeen = todayKey(); saveState();
   setTimeout(() => toast(`${ev.icon} Today in town: ${ev.name} - ${ev.text}`), 1500);
   logEvent(ev.icon, `Today in town: ${ev.name}. ${ev.text}`);
@@ -191,6 +192,7 @@ const GUIDE = [
     { icon: '🤝', name: 'Trading board', where: 'The sign in Market Row', how: 'Three trades a day for spare cards.', lock: () => needs('market') },
     { icon: '✨', name: 'Foil cards', where: 'Any new card', how: 'Now and then a new card arrives as a shimmering foil. Your running total shows at the top of Cards → Sets and in your cottage trophy case.' },
     { icon: '🏅', name: 'Ladder & deck test', where: 'Social (ladder) · Cards → Deck → Your deck', how: 'Ghost duels, deck challenges, the Cup, bosses and Draft Runs earn ladder points. Ranks (Pebble, Stone, Moss, Gem, Star) pay Pebbles, you never lose points, and the season resets monthly. Your deck gets an archetype label (6+ of a family; 8+ gives +1 Spirit at the start), and Test your deck plays practice matches to show a win rate.' },
+    { icon: '🧘', name: 'Calm corner', where: 'Journal → Today · Wren, your cottage, the Net Loft · any bench', how: 'Quiet things that score nothing: a breathing pond (five breaths leave you Rested: +5% XP for the day), a sand garden, lanterns and stargazing after dark, wind chimes, a tea ritual, a bonsai that grows on real days, and postcards of places. Sitting on a bench zooms the town out until you stand up. Cozy mode in Settings hides the goal pill and event nudges.' },
     { icon: '🧭', name: 'Skills & gear', where: 'Character → Path', how: 'Every level gives a skill point for Angler, Gardener, Duelist or Wanderer (five ranks each; reset for free). Upgrade your rod, watering can and lantern with Pebbles as you level. A companion also grows closer when you win matches and catch fish, and its perk gets stronger.' },
     { icon: '🧑', name: 'Character tab', where: 'Bottom bar, far right', how: 'Everything about your character. Me shows level and stats, Look is where you change your name, avatar, colour, table mat, backdrop and title (some cost Pebbles), and then Bag, Milestones and Companion. Settings and Social are behind your avatar at the top.' },
     { icon: '🎣', name: 'Fishing', where: 'Tap water from a bank', how: 'Pick a bait, cast, and watch the shadow: its size hints at the fish. Tap when it bites, then hold to reel and keep the marker in the green. Easy reeling is in Settings.' },
@@ -260,6 +262,7 @@ function renderGuide() {
    COMFORT SETTINGS: fast battles, larger text, calmer motion
    ============================================================ */
 function applyComfortPrefs() {
+  document.documentElement.classList.toggle('cozy', !!prefs.cozy);
   document.documentElement.classList.toggle('big-text', !!prefs.bigText);
   document.documentElement.classList.toggle('calm', !!prefs.calm);
 }
@@ -309,6 +312,11 @@ document.getElementById('econToggle').addEventListener('click', () => {
   if (!open) return;
   const r = econReport(), fmt = l => l.slice(0, 8).map(x => `${x.src}: ${x.total} (${Math.round(x.perHour)}/h)`).join('\n') || '-';
   panel.textContent = `Over ${r.hours}h of play\nEarned ${r.earned} (${r.earnedPerHour}/h) · Spent ${r.spent} (${r.spentPerHour}/h)\n\nEARNED\n${fmt(r.earn)}\n\nSPENT\n${fmt(r.spend)}`;
+});
+document.getElementById('cozyToggle').addEventListener('click', () => {
+  sfx('tap'); prefs.cozy = !prefs.cozy; savePrefs(); syncToggles(); document.documentElement.classList.toggle('cozy', !!prefs.cozy);
+  if (typeof refreshGoalChip === 'function') refreshGoalChip(true);
+  toast(prefs.cozy ? '🍃 Cozy mode on' : 'Cozy mode off');
 });
 document.getElementById('statsToggle').addEventListener('click', () => {
   sfx('tap'); prefs.shareStats = prefs.shareStats === false; savePrefs(); syncToggles();

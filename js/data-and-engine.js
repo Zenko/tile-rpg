@@ -35,6 +35,7 @@ const PACKS = [
 // buyDecoration / startPlacingDecoration / handleDecorationTap for the buy -> store -> place flow.
 // cat groups the Items shop's filter chips: 'plant', 'seating', 'lighting', 'ornament'.
 const DECORATION_ITEMS = [
+  { id: 'wind-chime', name: 'Wind Chime', icon: '🎐', cost: 16, desc: 'Tap it and it sings a soft note.', cat: 'ornament' },
   { id: 'planter', name: 'Potted Plant', icon: '🪴', cost: 10, desc: 'A leafy little planter for a quiet corner.', cat: 'plant' },
   { id: 'flag', name: 'Little Flag', icon: '🚩', cost: 10, desc: 'Marks the spot as yours.', cat: 'ornament' },
   { id: 'wildflowers', name: 'Wildflower Patch', icon: '🌼', cost: 12, desc: "A little wild, on purpose.", cat: 'plant' },

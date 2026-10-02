@@ -18,6 +18,10 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta ${RELEASES[0].n} (build $
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'new', x: 'Calm corner: quiet things that score nothing. A breathing pond (five breaths leave you Rested, +5% XP for the day), a sand garden that remembers your raking, wind chimes, a tea ritual, star gazing and lantern release after dark, a bonsai that grows on real days, and postcards of places you like. Find it in Journal → Today, at Wren\'s, your cottage and the Net Loft.' },
+  { t:'better', x: 'Sitting on a bench now zooms the town out gently and lets the day drift by until you stand up.' },
+  { t:'new', x: 'Wind Chime decoration: place it in town and tap it for a soft note.' },
+  { t:'new', x: 'Cozy mode in Settings → Comfort hides the goal pill and day-event nudges, and stops anything pulsing for attention.' },
   { t:'better', x: 'Every set of tabs (Cards, Journal, Rewards, Character, Settings and Social, Deck) now has a pill that glides under the active tab, and the content slides in the direction you moved, like the bottom bar.' },
   { t:'better', x: 'Your Bag and Shop shortcuts are gone from Settings. Your Bag is in Character → Pantry, and the Card Shop is on Market Row.' },
   { t:'new', x: 'Three rare days now turn up about one day in twelve: Starfall (hidden cards twice as easy to spot, more foils), Friendship Fair (hearts count double) and Tournament Day (+3 Pebbles for every match you win).' },

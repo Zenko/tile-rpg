@@ -841,6 +841,7 @@ function interactWith(kind, t) {
     if (cropStage(t) === 2) harvestCrop(t); else showCrop(t);
   } else if (kind === 'decoration') {
     const def = DECORATION_ITEMS.find(x => x.id === t.id);
+    if (t.id === 'wind-chime' && typeof calmNote === 'function') { const f = CALM_SCALE[Math.floor(Math.random() * CALM_SCALE.length)]; calmNote(f, 0.05, 2.4); setTimeout(() => calmNote(CALM_SCALE[Math.floor(Math.random() * CALM_SCALE.length)], 0.04, 2.4), 260); }
     // tapping something you placed lets you edit it right here: move it, put it back in your decorations, or remove it
     showProp(def ? def.icon : '❔', def ? def.name : 'A decoration', (def ? def.desc : 'Something you placed here.') + ' You set this down yourself.',
       def ? [{ label: '🔀 Move it', run: () => startPlacingDecoration(def, t.uid) },

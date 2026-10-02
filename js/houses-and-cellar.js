@@ -4,7 +4,8 @@
 const INTERIORS = {
   cottage: { title: "Wren's Cottage", who: '🧓', name: 'Wren', theme: 'warm',
     greet: 'Come in, come in. The kettle is on, and there is always room by the fire.',
-    actions: [{ id: 'mg-tea', kind: 'minigame', game: 'tea', view: () => miniView('tea') },
+    actions: [{ id: 'calm-tea', label: '🍵 Tea ritual', kind: 'calm', game: 'tea' },
+              { id: 'mg-tea', kind: 'minigame', game: 'tea', view: () => miniView('tea') },
               { id: 'tea', label: '☕ Share a pot of tea', kind: 'daily', pebbles: 4,
       done: 'Wren pours you a cup and presses two Pebbles into your hand. "For the road."', already: 'The teapot is empty for today. "Come back tomorrow, dear."' }] },
   nook: { title: 'The Reading Nook', who: '🧙', name: 'Olwen', theme: 'cool',
@@ -28,6 +29,8 @@ const INTERIORS = {
     greet: () => `Home, sweet home. ${unreadMail() ? `📬 ${unreadMail()} unread letter${unreadMail() === 1 ? '' : 's'} in the mailbox.` : 'The mailbox is empty for now.'}`,
     actions: [{ id: 'mail', kind: 'mail', view: () => ({ label: `📬 Mailbox${unreadMail() ? ` (${unreadMail()} new)` : ''}` }) },
               { id: 'mg-tidy', kind: 'minigame', game: 'tidy', view: () => miniView('tidy') },
+              { id: 'calm-sand', label: '🪨 Sand garden', kind: 'calm', game: 'sand' },
+              { id: 'calm-bonsai', label: '🪴 Your bonsai', kind: 'calm', game: 'bonsai' },
               { id: 'decorate', label: '🖼️ Decorate the shelves', kind: 'decorate' },
               { id: 'favs', label: '⭐ Choose favourite cards to frame', kind: 'favs' },
               { id: 'trophies', label: '🏆 Look over the trophy case', kind: 'trophies' },
@@ -76,7 +79,8 @@ const INTERIORS = {
                 done: 'Springs here, cogs there. Tock pays you two Pebbles and a very small screw you did not ask for.', already: 'Tock waves you off. "Parts are sorted! Come back tomorrow."' }] },
   'harbor-hut': { title: 'The Net Loft', who: '🦦', name: 'Tam', theme: 'cool',
     greet: 'Salt in the air, gulls on the roof. Mind the nets drying by the door - I only just finished mending them.',
-    actions: [{ id: 'mend', label: '🪢 Help mend a net', kind: 'daily', pebbles: 4,
+    actions: [{ id: 'calm-lanterns', kind: 'calm', game: 'lanterns', view: () => ({ label: skyPhase().isNight ? '🏮 Release a lantern' : '🏮 Lanterns (after dark)', disabled: !skyPhase().isNight }) },
+              { id: 'mend', label: '🪢 Help mend a net', kind: 'daily', pebbles: 4,
       done: 'You work a knot loose and tie it back tighter. Tam presses four Pebbles into your hand. "Steady hands, you."', already: 'Tam pats the nets, all mended. "Nothing left to fix today - come back tomorrow."' },
               { id: 'buoy', label: '🎣 Check the old buoy box', kind: 'chest', done: 'Something washed up in the buoy box, wedged between the floats.', already: 'Tam shrugs. "That box only ever had the one surprise in it."' }] },
   'garden-glass': { title: 'The Glasshouse', who: '🐌', name: 'Iris', theme: 'warm',
@@ -813,6 +817,7 @@ function sceneAction(actId) {
   else if (a.kind === 'deal') { scene.text = spiceDealAction(); }
   else if (a.kind === 'sleeves') { scene.mode = 'sleeves'; scene.text = `Pick a sleeve. You're wearing ${currentSleeve().name}.`; sfx('tap'); }
   else if (a.kind === 'bait') { scene.mode = 'bait'; scene.text = `Fresh bait, fair prices. ${baitHaveLine()}`; sfx('tap'); }
+  else if (a.kind === 'calm') { openCalm(a.game); return; }
   else if (a.kind === 'seeds') { scene.mode = 'seeds'; scene.text = seedsIntro(); sfx('tap'); }
   else if (a.kind === 'puzzle') { startPuzzle(); return; }
   else if (a.kind === 'minigame') { miniStart(a.game); return; }

@@ -87,7 +87,7 @@ function lifeDo(id, p) {
     sfx('creak'); lifeMood(1);
     const company = state.companion ? ` ${state.companion.icon} hops up beside you.` : '';
     if (lifeUses('sit') < 5) { lifeUse('sit'); addXP(2); }
-    toast('🍃 You rest a moment. The town goes about its day.' + company);
+    calmSit(state.companion ? state.companion.icon : '');   // js/calm.js: the town zooms out gently until you stand up
   } else if (id === 'wish') {
     if (lifeUses('wish') >= 5) { toast('🪙 The well has heard enough wishes today.'); return; }
     if ((state.progress.pebbles || 0) < 1) { toast('🪙 You need a Pebble to make a wish.'); return; }

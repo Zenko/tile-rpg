@@ -165,6 +165,7 @@
             <h3 class="st-title">Comfort</h3>
             <div class="st-card">
               <div class="st-row"><span class="st-ico">🔠</span><span class="st-label">Larger text</span><button class="toggle" id="bigTextToggle" aria-label="Toggle larger text"></button></div>
+              <div class="st-row"><span class="st-ico">🍃</span><span class="st-label">Cozy mode<small>Hides the goal pill and day-event nudges</small></span><button class="toggle" id="cozyToggle" aria-label="Toggle cozy mode"></button></div>
               <div class="st-row"><span class="st-ico">🌙</span><span class="st-label">Calm motion<small>Less movement on screen</small></span><button class="toggle" id="calmToggle" aria-label="Toggle reduced motion"></button></div>
             </div>
           </section>
@@ -501,6 +502,11 @@
   </div>
 </div>
 
+<div class="calm hidden" id="calmOverlay" role="dialog" aria-label="Calm corner">
+  <div class="calm-top"><button type="button" class="calm-back hidden" id="calmBack" aria-label="Back to the calm corner">‹</button><span class="calm-title" id="calmTitle">Calm corner</span><button type="button" class="calm-x" id="calmClose" aria-label="Close">✕</button></div>
+  <div class="calm-body" id="calmBody"></div>
+</div>
+
 <div class="overlay hidden" id="draftOverlay" role="dialog" aria-labelledby="draftTitle">
   <div class="overlay-card draft-wrap">
     <div style="font-size:1.8rem;line-height:1.1">🎴</div>
@@ -763,6 +769,7 @@
 <script src="js/skills-gear.js"></script>
 <script src="js/ladder-practice.js"></script>
 <script src="js/binder.js"></script>
+<script src="js/calm.js"></script>
 <script src="js/seg-slide.js"></script>
 <script src="js/ui-polish.js"></script>
 <script src="js/town-life.js"></script>
