@@ -1,0 +1,10 @@
+<symbol id="p-mailbox" viewBox="0 0 64 64">
+  <ellipse cx="32" cy="59" rx="15" ry="4" style="fill:var(--tshadow);"/>
+  <rect x="29" y="30" width="6" height="29" rx="2" style="fill:var(--plank);"/>
+  <rect x="33" y="30" width="2" height="29" rx="1" style="fill:var(--plank2);"/>
+  <rect x="12" y="13" width="40" height="23" rx="11" style="fill:var(--roof);"/>
+  <rect x="12" y="27" width="40" height="9" rx="4.5" style="fill:var(--roof2);"/>
+  <rect x="21" y="22" width="22" height="3.5" rx="1.75" style="fill:var(--door);"/>
+  <rect x="48" y="6" width="3" height="20" rx="1.5" style="fill:var(--stone);"/>
+  <path d="M51 6 L60 10 L51 14 Z" style="fill:var(--flower2);"/>
+  <rect x="24" y="19" width="16" height="4" rx="1" style="fill:var(--wall);"/></symbol>

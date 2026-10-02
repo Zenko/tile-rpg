@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <title>Example town sprite, design version: a mailbox (64 x 64). Plain colours from the Town Square palette so the converter can map them to the game's variables.</title>
+  <!-- ground shadow: every prop has this soft ellipse at the bottom -->
+  <ellipse cx="32" cy="59" rx="15" ry="4" fill="#000000" fill-opacity="0.32"/>
+  <!-- post -->
+  <rect x="29" y="30" width="6" height="29" rx="2" fill="#8e7148"/>
+  <rect x="33" y="30" width="2" height="29" rx="1" fill="#6f5836"/>
+  <!-- box body, with a darker underside -->
+  <rect x="12" y="13" width="40" height="23" rx="11" fill="#a5503d"/>
+  <rect x="12" y="27" width="40" height="9" rx="4.5" fill="#8a4231"/>
+  <!-- the slot -->
+  <rect x="21" y="22" width="22" height="3.5" rx="1.75" fill="#4f3624"/>
+  <!-- the little flag and a letter peeking out -->
+  <rect x="48" y="6" width="3" height="20" rx="1.5" fill="#76756f"/>
+  <path d="M51 6 L60 10 L51 14 Z" fill="#dcbd58"/>
+  <rect x="24" y="19" width="16" height="4" rx="1" fill="#c9bda6"/>
+</svg>

@@ -113,6 +113,8 @@ table.sg-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
 .sg-dlg { border: 1px solid var(--stone-edge); border-radius: 22px; background: var(--stone); color: var(--ink); padding: 22px; width: min(360px, calc(100% - 32px)); text-align: center; } .sg-dlg::backdrop { background: var(--overlay-bg); } .sg-dlg .reveal-card { margin: 0 auto 14px; width: 150px; } .sg-dlg dl { text-align: left; margin: 12px 0 0; }
 .sg-cat-item { cursor: pointer; } .sg-cat-item .alm-card { transition: transform .12s ease; } .sg-cat-item:hover .alm-card { transform: translateY(-2px); }
 .sg-icg { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 8px; } .sg-ic { text-align: center; background: var(--stone); border: 1px solid var(--stone-edge); border-radius: 12px; padding: 10px 4px 8px; cursor: copy; font: inherit; color: var(--ink); display: flex; flex-direction: column; align-items: center; gap: 2px; } .sg-ic:hover { border-color: var(--water); } .sg-ic .g { font-size: 28px; line-height: 1.1; } .sg-ic b { font-size: .68rem; line-height: 1.2; } .sg-ic code { font-size: .54rem; word-break: break-all; } .sg-ic small { color: var(--ink-soft); font-size: .6rem; }
+.sg-pre { margin: 10px 0 0; padding: 12px; border-radius: 12px; background: var(--board-bg); border: 1px solid var(--stone-edge); font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .68rem; line-height: 1.5; overflow: auto; max-height: 340px; white-space: pre; color: var(--ink); } .sg-pre mark { background: color-mix(in srgb, var(--accent) 30%, transparent); color: inherit; border-radius: 4px; padding: 0 2px; }
+.sg-vrow { display: grid; grid-template-columns: 78px repeat(4, 1fr); gap: 6px; align-items: center; font-size: .66rem; margin: 3px 0; } .sg-vrow i { height: 20px; border-radius: 6px; border: 1px solid rgba(128,128,128,.3); display: block; } .sg-vrow code { font-size: .64rem; }
 /* a static toast / overlay card for the demos */
 .sg-static { position: static !important; transform: none !important; opacity: 1 !important; animation: none !important; }
 </style>
@@ -270,6 +272,27 @@ table.sg-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
     <div class="sg-demo" style="justify-content:flex-start;margin-top:10px"><img src="assets/icon-192.png" width="96" height="96" alt="" style="border-radius:22px"><img src="assets/icon-192.png" width="48" height="48" alt="" style="border-radius:11px"><img src="assets/icon-32.png" width="32" height="32" alt=""></div></div>
   <h3>Keyword icons (new art slot, preview in the Asset Lab)</h3>
   <div class="sg-card"><p class="sg-note" style="margin-top:0">The 13 keyword icons are emoji today. To replace them, make one image per keyword: <b>128 x 128 px, PNG, transparent, under about 15 KB</b>, named <code>kw-guard.png</code>, <code>kw-swift.png</code>, <code>kw-mend.png</code>, <code>kw-bloom.png</code>, <code>kw-shield.png</code>, <code>kw-echo.png</code>, <code>kw-thorns.png</code>, <code>kw-rally.png</code>, <code>kw-drain.png</code>, <code>kw-seed.png</code>, <code>kw-lull.png</code>, <code>kw-kin.png</code>, <code>kw-sting.png</code>. They are shown at only 12 to 20 px, so use one bold shape each, no fine detail, and keep them readable as a set. They also appear next to the rule text in lists. Preview them in the <a href="asset-lab.html#keywords" style="color:var(--water-ink)">Asset Lab</a>; the game needs a small code change to show images instead of emoji, which I add once you approve them.</p></div>
+  <h3 id="sprite-howto">How a town sprite is built, with an example</h3>
+  <div class="sg-card">
+    <p class="sg-note" style="margin-top:0">A town sprite is a small SVG drawn on a <b>64 x 64</b> grid (buildings 128 x 128). The important part: <b>no shape has a fixed colour</b>. Each fill is a theme variable such as <code>var(--roof)</code> or <code>var(--leaf1)</code>, and every district, in Dark and Light, defines its own value for each variable. So one drawing is automatically a green Town Square, a sandy Market Row, a cool Harbor and a mossy Garden. Below is a mailbox: first as you would design it (plain colours, what Figma exports), then as the game uses it (variables), shown in all four districts.</p>
+    <div class="sg-grid sg-g2" style="margin-top:14px">
+      <div><div class="sg-row-label">1. Design version (plain colours)</div><div class="sg-demo" style="justify-content:flex-start;gap:14px" id="exDesignPrev"></div><pre class="sg-pre" id="exDesign"></pre></div>
+      <div><div class="sg-row-label">2. Game version (theme variables) in each district</div><div class="sg-demo" style="justify-content:flex-start;gap:10px" id="exGamePrev"></div><pre class="sg-pre" id="exGame"></pre></div>
+    </div>
+    <div class="sg-row-label" style="margin-top:16px">How to make one</div>
+    <ol style="margin:6px 0 0;padding-left:20px;font-size:.88rem">
+      <li>Draw on a 64 x 64 frame (buildings 128 x 128) in Figma. Keep a soft ground shadow ellipse near the bottom, as every prop has.</li>
+      <li>Use only colours from the Town Square palette (Colour, Town palettes). Each palette colour is one game variable: roof, wall, leaf1, trunk, plank and so on.</li>
+      <li>Export as SVG, then run <code>python3 scripts/svg-to-sprite.py my-sprite.svg p-my-sprite</code>. It swaps each colour for its variable, reports any colour that doesn't match, and prints the sprite ready to paste.</li>
+      <li>Give me the output (or the SVG) and I add it to <code>assets/sprites.js</code> and publish. Preview it first in the Asset Lab, Town sprites section.</li>
+    </ol>
+    <p class="sg-note">Download the example: <a href="assets/sprites/example-mailbox-design.svg" download style="color:var(--water-ink)">example-mailbox-design.svg</a> (open it in Figma), <a href="assets/sprites/example-mailbox-game.txt" download style="color:var(--water-ink)">example-mailbox-game.txt</a> (the converted version). A flat PNG sprite also works, but it will look identical in every district and theme.</p>
+  </div>
+  <div class="sg-card" style="margin-top:14px">
+    <div class="sg-row-label">Look inside a real sprite</div>
+    <div class="sg-demo" style="justify-content:flex-start;align-items:center;margin:8px 0"><label for="spSel" class="sg-note" style="margin:0">Sprite</label><select id="spSel" class="sg-fb"></select><span class="sg-note" id="spInfo" style="margin:0"></span></div>
+    <div class="sg-grid sg-g2"><div><div class="sg-demo" style="justify-content:flex-start;gap:10px" id="spPrev"></div><div class="sg-row-label" style="margin-top:14px">Variables it uses, and their value in each district</div><div id="spVars"></div></div><div><div class="sg-row-label">Its SVG source (from assets/sprites.js)</div><pre class="sg-pre" id="spSrc"></pre></div></div>
+  </div>
   <h3 id="all-icons">Every icon in the game</h3>
   <div class="sg-card">
     <p class="sg-note" style="margin-top:0"><b id="icTotal"></b> different icons, found by scanning the game's code (<span id="icUses"></span> uses in all). Each shows its file name; to replace one, make a 128 x 128 transparent PNG with that name and try it in the <a href="asset-lab.html#icons" style="color:var(--water-ink)">Asset Lab</a>. A replacement is applied everywhere that icon appears, so a single image restyles every screen. Click an icon to copy its file name. This list is generated by <code>scripts/icon-inventory.py</code>, so it is rebuilt whenever icons are added.</p>
@@ -461,7 +484,7 @@ window.escapeHtml = function (s) { return String(s).replace(/[&<>"]/g, function 
   var root = document.documentElement;
 
   /* ---- theme switch (the game's own <html data-theme>) ---- */
-  function setTheme(t) { root.setAttribute('data-theme', t); $('#sgDark').classList.toggle('on', t === 'dark'); $('#sgLight').classList.toggle('on', t === 'light'); try { localStorage.setItem('sg-theme', t); } catch (e) {} updateLive(); }
+  function setTheme(t) { root.setAttribute('data-theme', t); document.dispatchEvent(new Event('sg-theme')); $('#sgDark').classList.toggle('on', t === 'dark'); $('#sgLight').classList.toggle('on', t === 'light'); try { localStorage.setItem('sg-theme', t); } catch (e) {} updateLive(); }
   $('#sgDark').onclick = function () { setTheme('dark'); }; $('#sgLight').onclick = function () { setTheme('light'); };
 
   /* ---- colour tables ---- */
@@ -687,6 +710,34 @@ window.escapeHtml = function (s) { return String(s).replace(/[&<>"]/g, function 
     var dlg = $('#cardDlg'); if (dlg.showModal) dlg.showModal();
   });
   drawCat();
+
+  /* ---- how a town sprite is built ---- */
+  var EX_DESIGN = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"64\" height=\"64\" viewBox=\"0 0 64 64\">\n  <title>Example town sprite, design version: a mailbox (64 x 64). Plain colours from the Town Square palette so the converter can map them to the game's variables.</title>\n  <!-- ground shadow: every prop has this soft ellipse at the bottom -->\n  <ellipse cx=\"32\" cy=\"59\" rx=\"15\" ry=\"4\" fill=\"#000000\" fill-opacity=\"0.32\"/>\n  <!-- post -->\n  <rect x=\"29\" y=\"30\" width=\"6\" height=\"29\" rx=\"2\" fill=\"#8e7148\"/>\n  <rect x=\"33\" y=\"30\" width=\"2\" height=\"29\" rx=\"1\" fill=\"#6f5836\"/>\n  <!-- box body, with a darker underside -->\n  <rect x=\"12\" y=\"13\" width=\"40\" height=\"23\" rx=\"11\" fill=\"#a5503d\"/>\n  <rect x=\"12\" y=\"27\" width=\"40\" height=\"9\" rx=\"4.5\" fill=\"#8a4231\"/>\n  <!-- the slot -->\n  <rect x=\"21\" y=\"22\" width=\"22\" height=\"3.5\" rx=\"1.75\" fill=\"#4f3624\"/>\n  <!-- the little flag and a letter peeking out -->\n  <rect x=\"48\" y=\"6\" width=\"3\" height=\"20\" rx=\"1.5\" fill=\"#76756f\"/>\n  <path d=\"M51 6 L60 10 L51 14 Z\" fill=\"#dcbd58\"/>\n  <rect x=\"24\" y=\"19\" width=\"16\" height=\"4\" rx=\"1\" fill=\"#c9bda6\"/>\n</svg>\n", EX_GAME = "<symbol id=\"p-mailbox\" viewBox=\"0 0 64 64\">\n  <ellipse cx=\"32\" cy=\"59\" rx=\"15\" ry=\"4\" style=\"fill:var(--tshadow);\"/>\n  <rect x=\"29\" y=\"30\" width=\"6\" height=\"29\" rx=\"2\" style=\"fill:var(--plank);\"/>\n  <rect x=\"33\" y=\"30\" width=\"2\" height=\"29\" rx=\"1\" style=\"fill:var(--plank2);\"/>\n  <rect x=\"12\" y=\"13\" width=\"40\" height=\"23\" rx=\"11\" style=\"fill:var(--roof);\"/>\n  <rect x=\"12\" y=\"27\" width=\"40\" height=\"9\" rx=\"4.5\" style=\"fill:var(--roof2);\"/>\n  <rect x=\"21\" y=\"22\" width=\"22\" height=\"3.5\" rx=\"1.75\" style=\"fill:var(--door);\"/>\n  <rect x=\"48\" y=\"6\" width=\"3\" height=\"20\" rx=\"1.5\" style=\"fill:var(--stone);\"/>\n  <path d=\"M51 6 L60 10 L51 14 Z\" style=\"fill:var(--flower2);\"/>\n  <rect x=\"24\" y=\"19\" width=\"16\" height=\"4\" rx=\"1\" style=\"fill:var(--wall);\"/></symbol>";
+  var BIO = [['meadow', 'Town Square'], ['bazaar', 'Market Row'], ['harbor', 'Quiet Harbor'], ['orchard', 'Hollow Garden']];
+  function esc2(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function hi(t) { return esc2(t).replace(/var\(--([a-z0-9-]+)\)/g, function (m) { return '<mark>' + m + '</mark>'; }); }
+  function inner(sym) { return sym.replace(/^<symbol[^>]*>/, '').replace(/<\/symbol>\s*$/, ''); }
+  function box(content, px, biome) { return '<div class="town-view" data-biome="' + biome + '" style="--t:48px;width:' + px + 'px;height:' + px + 'px;border-radius:12px;margin:0;display:grid;place-items:center"><svg width="' + (px - 16) + '" height="' + (px - 16) + '" viewBox="0 0 64 64" aria-hidden="true">' + content + '</svg></div>'; }
+  function renderSpriteHowto() {
+    $('#exDesignPrev').innerHTML = '<div style="width:104px;height:104px;border-radius:12px;background:#2c3a2c;display:grid;place-items:center"><svg width="88" height="88" viewBox="0 0 64 64">' + EX_DESIGN.replace(/^[\s\S]*?<ellipse/, '<ellipse').replace(/<\/svg>\s*$/, '') + '</svg></div><div class="sg-note" style="max-width:200px;margin:0">Fixed colours: it looks the same everywhere.</div>';
+    $('#exDesign').textContent = EX_DESIGN.replace(/<title>[\s\S]*?<\/title>\n\s*/, '');
+    $('#exGamePrev').innerHTML = BIO.map(function (b) { return '<div style="text-align:center;font-size:.62rem;color:var(--ink-soft)">' + box(inner(EX_GAME), 104, b[0]) + b[1] + '</div>'; }).join('');
+    $('#exGame').innerHTML = hi(EX_GAME);
+    var syms = $$('symbol').map(function (s) { return s.id; });
+    if (!$('#spSel').options.length) $('#spSel').innerHTML = syms.map(function (id) { return '<option>' + id + '</option>'; }).join('');
+    var id = $('#spSel').value || syms[0], sym = document.getElementById(id), vb = sym.getAttribute('viewBox');
+    $('#spInfo').textContent = 'viewBox ' + vb;
+    $('#spPrev').innerHTML = BIO.map(function (b) { var big = +vb.split(' ')[2] > 64; return '<div style="text-align:center;font-size:.62rem;color:var(--ink-soft)"><div class="town-view" data-biome="' + b[0] + '" style="width:' + (big ? 120 : 84) + 'px;height:' + (big ? 100 : 84) + 'px;border-radius:12px;margin:0;display:grid;place-items:center"><svg width="' + (big ? 108 : 72) + '" height="' + (big ? 88 : 72) + '" viewBox="' + vb + '"><use href="#' + id + '"/></svg></div>' + b[1] + '</div>'; }).join('');
+    var src = sym.outerHTML.replace(/>\s*<\/(ellipse|rect|polygon|circle|path|line|polyline)>/g, '/>').replace(/></g, '>\n<').replace(/xmlns="[^"]*" ?/g, '');
+    $('#spSrc').innerHTML = hi(src);
+    var used = []; (src.match(/var\(--([a-z0-9-]+)\)/g) || []).forEach(function (v) { var n = v.slice(6, -1); if (used.indexOf(n) < 0) used.push(n); });
+    var probes = BIO.map(function (b) { var p = document.createElement('div'); p.className = 'town-view'; p.setAttribute('data-biome', b[0]); p.style.cssText = 'position:absolute;visibility:hidden;width:0;height:0'; document.body.appendChild(p); return p; });
+    $('#spVars').innerHTML = '<div class="sg-vrow" style="color:var(--ink-soft)"><span></span>' + BIO.map(function (b) { return '<span>' + b[1].split(' ')[0] + '</span>'; }).join('') + '</div>' + used.map(function (n) { return '<div class="sg-vrow"><code>--' + n + '</code>' + probes.map(function (p) { var v = getComputedStyle(p).getPropertyValue('--' + n).trim(); return '<i style="background:' + v + '" title="' + v + '"></i>'; }).join('') + '</div>'; }).join('');
+    probes.forEach(function (p) { p.remove(); });
+  }
+  $('#spSel').addEventListener('change', renderSpriteHowto);
+  document.addEventListener('sg-theme', renderSpriteHowto);
+  renderSpriteHowto();
 
   /* ---- every icon (generated manifest) ---- */
   (function () {
