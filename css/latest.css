@@ -625,3 +625,20 @@ body.in-battle .screen { padding-top: 0; }
 .so-empty span { font-size: 1.8rem; }
 .so-empty b { font-size: .95rem; }
 .so-empty small { font-size: .8rem; color: var(--ink-soft); }
+
+/* ===== Card sleeves (build 96) =====
+   Tock's sleeves as a grid of big card-back previews inside the standard building sheet, instead of a list of rows with a
+   tiny swatch. The worn sleeve is outlined; ones you do not own show their price and are dimmed a little. */
+.sl-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; flex: none; }
+.sl-tile { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 6px 10px; border-radius: 18px; border: 1px solid var(--stone-edge); background: color-mix(in srgb, var(--hl) 5%, transparent); color: var(--ink); font: inherit; cursor: pointer; min-width: 0; }
+.sl-tile:active { transform: scale(.97); }
+.sl-tile.worn { border-color: var(--water); background: color-mix(in srgb, var(--water) 12%, var(--stone)); box-shadow: 0 0 0 1px var(--water); }
+.sl-tile.locked .sl-card { filter: saturate(.7); opacity: .85; }
+.sl-card { position: relative; display: block; width: 54px; height: 76px; }
+.sl-card .sleeve-chip { display: block; width: 100%; height: 100%; margin: 0; border-radius: 10px; vertical-align: top; box-shadow: 0 4px 10px var(--shadow); }
+.sl-mark { position: absolute; inset: 0; display: grid; place-items: center; font-size: 1.5rem; pointer-events: none; }
+.sl-name { font-size: .84rem; font-weight: 800; line-height: 1.2; text-align: center; }
+.sl-status { font-size: .72rem; font-weight: 800; padding: 3px 10px; border-radius: 999px; background: color-mix(in srgb, var(--hl) 9%, transparent); color: var(--ink-soft); }
+.sl-status.worn { background: var(--water); color: var(--on-water); }
+.sl-status.price { color: var(--ink); }
+.sl-status.short { color: var(--ink-soft); opacity: .8; }

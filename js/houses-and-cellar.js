@@ -229,13 +229,17 @@ const SLEEVES = [
 function ensureSleeves() { const ch = state.character; if (!Array.isArray(ch.unlockedSleeves)) ch.unlockedSleeves = ['']; if (typeof ch.sleeve !== 'string') ch.sleeve = ''; return ch; }
 function currentSleeve() { const id = ensureSleeves().sleeve; return SLEEVES.find(s => s.id === id) || SLEEVES[0]; }
 function sleeveChip(s) { return `<span class="sleeve-chip${s.id ? ' sleeve-' + s.id : ''}"><span class="sleeve-fx"></span></span>`; }
+// A grid of big card-back previews (build 96), in the same sheet as every other building screen. Each tile still carries
+// data-act="sleeve:<id>", so the scene's one click handler (and sleeveAction) work exactly as they did with the old rows.
 function sleeveButtons() {
-  const ch = ensureSleeves();
-  return SLEEVES.map(s => {
+  const ch = ensureSleeves(), peb = state.progress.pebbles;
+  return '<div class="sl-grid">' + SLEEVES.map(s => {
     const owned = ch.unlockedSleeves.includes(s.id), worn = ch.sleeve === s.id;
-    const label = worn ? `${sleeveChip(s)} ${s.name} · wearing` : owned ? `${sleeveChip(s)} Wear ${s.name}` : `${sleeveChip(s)} ${s.name} · 🫧 ${s.cost}`;
-    return sceneBtn('sleeve:' + s.id, label, worn);
-  }).join('');
+    const status = worn ? '<span class="sl-status worn">✓ Wearing</span>' : owned ? '<span class="sl-status">Wear</span>' : `<span class="sl-status price${peb < s.cost ? ' short' : ''}">🫧 ${s.cost}</span>`;
+    return `<button type="button" class="sl-tile${worn ? ' worn' : ''}${owned ? '' : ' locked'}" data-act="sleeve:${s.id}" aria-label="${s.name}${worn ? ', wearing' : owned ? ', wear' : ', buy for ' + s.cost + ' Pebbles'}" aria-pressed="${worn}">
+      <span class="sl-card"><span class="sleeve-chip${s.id ? ' sleeve-' + s.id : ''}"><span class="sleeve-fx"></span></span><span class="sl-mark">${s.id ? s.icon : ''}</span></span>
+      <span class="sl-name">${s.name}</span>${status}</button>`;
+  }).join('') + '</div>';
 }
 function sleeveAction(id) {
   const ch = ensureSleeves(), s = SLEEVES.find(x => x.id === id);
