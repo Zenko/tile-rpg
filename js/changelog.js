@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta ${RELEASES[0].n} (build $
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'better', x: 'The everyday chime (tapping buildings, claiming rewards) is now a much softer, shorter note that sits quietly under the music.' },
   { t:'new', x: 'Family passives now start earlier: with 6 or 7 cards of one family you get a smaller once-per-match passive (Seedling, Footing, Ebb or Breeze), and at 8 it becomes the full one. The Deck screen shows both steps.' },
   { t:'new', x: 'Family passives: a full deck with 8 or more cards of one family now plays with that family\'s passive instead of +1 Spirit. Grove: Grove cards restore 1 Spirit when they arrive. Stone: your first Stone card costing 4 or more enters with a Shield. Tide: your first Tide card each turn draws a card if you hold 4 or fewer. Wind: Swift Wind cards costing 2 or less get +1 power. It shows on the Deck screen and as a line in battle.' },
   { t:'new', x: 'Weekly Rule: one small rule bends every card match for a whole week, the same for both sides (Swift cards +1 power, Mend heals +1, Shield or Guard cards +1 health, Bloom +1 power, Echo hits +1). It shows as a chip in battle and on the Social ladder card.' },

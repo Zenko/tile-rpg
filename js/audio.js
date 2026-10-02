@@ -694,7 +694,9 @@ const SFX = {
   gift:   () => { [392, 523, 659, 784, 988].forEach((f, i) => bell(f, i * 0.1, 0.7, 0.045)); },
   rare:   () => { [523, 659, 784].forEach((f, i) => bell(f, i * 0.11, 1.1, 0.05)); noiseBurst('bandpass', 5200, 3200, 0.5, 0.012, 0.3); },
   mythic: () => { [523, 659, 784, 1047, 1319].forEach((f, i) => bell(f, i * 0.13, 1.4, 0.05)); noiseBurst('bandpass', 5600, 3000, 0.9, 0.016, 0.5); },
-  claim:  () => { bell(784, 0, 0.7, 0.05); bell(1175, 0.09, 0.95, 0.045); },
+  // The everyday chime (62 call sites: building taps, claims, rewards). Kept deliberately subtle: one soft low note with a
+  // barely-there second, about a third of the old volume and half the ring-out, so it never competes with the music.
+  claim:  () => { bell(659, 0, 0.4, 0.02); bell(988, 0.08, 0.5, 0.012); },
   // Battle and progression sounds (build 102): a thump for a hit, a clink for a block, a rising chime for healing, a swoosh for a spell,
   // a short fanfare for ranking up and a two-note chime for a skill point. All built from the same small helpers as the rest.
   hit:    () => { wood(0.085, 120 * wob(0.05)); noiseBurst('bandpass', 1800, 900, 0.09, 0.055); },
