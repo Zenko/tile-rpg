@@ -1141,3 +1141,34 @@ html.calm .cl-cell.rat, html.cozy .cl-cell.rat { animation: none; }
 .alm-card.tile .ac-paper { border-radius: 0 0 14px 14px; }
 .alm-card.tile .ac-name { font-size: calc(var(--u) * .95); color: var(--ink); }
 .alm-row.card-grid { row-gap: 18px; padding-top: 6px; }
+
+/* ==========================================================================================================
+   KEEP-THIS-HAND SCREEN (build 138)
+   One sheet that always fits the phone: a header, the hand in one clean row (no overlap, wrapping to a second row when
+   perks add cards), four loadout rows (snack, Knack, Fate, Spread) that each show your current pick and open one at a time,
+   and the Draw / Keep buttons pinned at the foot so they never scroll away. Markup in index.html, rows built by mullRowHtml()
+   in js/battle-ui.js.
+   ========================================================================================================== */
+#mulliganOverlay .overlay-card.mull-sheet { width: min(360px, 94vw); max-height: min(92vh, 720px); padding: 0; display: flex; flex-direction: column; overflow: hidden; text-align: left; }
+.mull-head { padding: 16px 16px 0; text-align: center; }
+.mull-head h2 { margin: 0; }
+.mull-head p { margin: 2px 0 0; font-size: .8rem; color: var(--ink-soft); }
+#battleView #mulliganHand { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 5px; height: auto; padding: 16px 10px 10px; margin: 0; overflow: visible; }
+#battleView #mulliganHand .hcard { flex: 0 0 calc((100% - 20px) / 5); max-width: none; height: auto; aspect-ratio: 3 / 4; margin: 0; transform: none; }
+#battleView #mulliganHand .card .nm { display: none; }   /* five cards in a row are about 60 px wide: the art, badges and numbers carry it; tap a card to read it */
+.mull-lo { display: flex; flex-direction: column; gap: 6px; padding: 4px 12px 10px; overflow-y: auto; flex: 1 1 auto; min-height: 0; }
+#mulliganOverlay .lorow { display: block; margin: 0; text-align: left; border: 1px solid var(--stone-edge); background: color-mix(in srgb, var(--bg-top) 35%, var(--stone)); border-radius: 14px; }
+.lohead { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 50px; padding: 7px 10px; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.lotile { width: 34px; height: 34px; border-radius: 10px; background: var(--board-bg); display: grid; place-items: center; font-size: 1.15rem; flex: none; }
+.lolab { flex: 1; min-width: 0; }
+.lolab small { display: block; font-size: .6rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
+.lolab b { display: block; font-size: .9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chev { color: var(--ink-soft); font-size: 1.1rem; transition: transform .2s; }
+.lorow.open .chev { transform: rotate(90deg); }
+.lobody { display: none; padding: 0 10px 10px; }
+.lorow.open .lobody { display: block; }
+#mulliganOverlay .knack-chips, #mulliganOverlay .sp-line, .snack-opts { justify-content: flex-start; }
+.snack-opts { display: flex; flex-wrap: wrap; gap: 6px; }
+#mulliganOverlay .knack-desc { text-align: left; }
+#mulliganOverlay .controls { display: flex; gap: 10px; padding: 10px 12px 14px; margin: 0; border-top: 1px solid var(--stone-edge); background: var(--stone); }
+#mulliganOverlay .controls .btn { flex: 1; min-height: 46px; margin: 0; padding: 12px 8px; font-size: .9rem; white-space: nowrap; }

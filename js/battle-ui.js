@@ -153,6 +153,7 @@ function startBattleNow(opponent, first) {
   if (battle.pendingHelp) { state.progress.seenBattleHelp = true; saveState(); }
   const swapBtn = btGet('mulliganSwapBtn'); swapBtn.disabled = false; swapBtn.textContent = 'Draw new hand';
   btRenderMulliganHand();
+  battle.mullOpen = 'knack';   // which loadout row is open on the keep-this-hand screen (one at a time)
   renderSnackRow(); btRenderKnackRow(); btRenderFateRow(); btRenderSpreadRow();
   // Deal the opening hand slowly from the deck, then offer the keep-or-redraw choice.
   const tk = battle.token; battle.busy = true;
@@ -163,13 +164,23 @@ function startBattleNow(opponent, first) {
     btGet('mulliganOverlay').classList.remove('hidden');
   });
 }
+/* The keep-this-hand loadout (snack, Knack, Fate, Spread) is four rows that share one look: a header showing your current pick
+   (tap it to open the row) and the choices underneath. Only one row is open at a time (battle.mullOpen), so the screen never
+   grows past the phone and the Keep / Draw buttons stay pinned in view. All four rows are always in the DOM (closed rows are
+   hidden by CSS), and a tap on a header only flips the `open` class. */
+function mullRowHtml(key, icon, label, value, body) {
+  const open = !!battle && battle.mullOpen === key;
+  return `<button type="button" class="lohead" data-mull="${key}" aria-expanded="${open}"><span class="lotile">${icon}</span><span class="lolab"><small>${label}</small><b>${value}</b></span><span class="chev" aria-hidden="true">›</span></button><div class="lobody">${body}</div>`;
+}
+function mullRowOpen(row, key) { row.classList.toggle('open', !!battle && battle.mullOpen === key); }
 // Dishes that help in battle can be eaten on the keep-this-hand screen, one per match.
 function renderSnackRow() {
   const row = btGet('snackRow'), list = battle.snack || battle.neutral ? [] : snackDishes();
   row.classList.toggle('hidden', !list.length && !battle.snack);
-  if (battle.snack) { const r = recipeDef(battle.snack); const fx = r.desc.replace(/^Eat before a match: /, ''); row.innerHTML = `<span class="snack-done">${r.icon} You ate the ${r.name}: ${fx.charAt(0).toLowerCase() + fx.slice(1)}</span>`; return; }
-  row.innerHTML = '<span class="snack-label">🍽️ Snack first?</span>' + list.map(r =>
-    `<button class="snack-btn" data-snack="${r.id}">${r.icon} ${r.name} <small>${[r.battle.spirit ? `+${r.battle.spirit}♥` : '', r.battle.draw ? `+${r.battle.draw}🃏` : ''].filter(Boolean).join(' ')} · ${dishCount(r.id)}</small></button>`).join('');
+  if (battle.snack) { const r = recipeDef(battle.snack); const fx = r.desc.replace(/^Eat before a match: /, ''); row.innerHTML = mullRowHtml('snack', r.icon, 'Snack first?', `Ate ${r.name}`, `<div class="snack-done">${r.icon} You ate the ${r.name}: ${fx.charAt(0).toLowerCase() + fx.slice(1)}</div>`); mullRowOpen(row, 'snack'); return; }
+  row.innerHTML = mullRowHtml('snack', '🍽️', 'Snack first?', list.length === 1 ? list[0].name : `${list.length} dishes`, '<div class="snack-opts">' + list.map(r =>
+    `<button class="snack-btn" data-snack="${r.id}">${r.icon} ${r.name} <small>${[r.battle.spirit ? `+${r.battle.spirit}♥` : '', r.battle.draw ? `+${r.battle.draw}🃏` : ''].filter(Boolean).join(' ')} · ${dishCount(r.id)}</small></button>`).join('') + '</div><div class="knack-desc">One snack per match, eaten before you decide on your hand.</div>');
+  mullRowOpen(row, 'snack');
   row.querySelectorAll('[data-snack]').forEach(b => b.addEventListener('click', () => eatSnack(b.dataset.snack)));
 }
 function eatSnack(id) {
@@ -233,7 +244,8 @@ function btRenderKnackRow() {
   if (battle.puzzle) { row.classList.add('hidden'); return; }
   row.classList.remove('hidden');
   const cur = battle.G.p[0].knack, k = BattleEngine.KNACKS[cur];
-  row.innerHTML = `<div class="knack-label">✨ Your Knack - once per match</div><div class="knack-chips">${knackChipsHtml(cur)}</div><div class="knack-desc">${k ? `${k.icon} <b>${k.name}.</b> ${k.text} <i>From your turn ${k.from}.</i>` : ''}</div>`;
+  row.innerHTML = mullRowHtml('knack', k ? k.icon : '✨', 'Knack · once per match', k ? k.name : 'None', `<div class="knack-chips">${knackChipsHtml(cur)}</div><div class="knack-desc">${k ? `${k.icon} <b>${k.name}.</b> ${k.text} <i>From your turn ${k.from}.</i>` : ''}</div>`);
+  mullRowOpen(row, 'knack');
   knackPickerWire(row, id => { BattleEngine.setKnack(battle.G, 0, id); btRenderKnackRow(); btRenderKnack(); });
 }
 function btRenderKnack() {
@@ -280,8 +292,9 @@ function btRenderFateRow() {
   if (battle.puzzle || battle.neutral || !choices.length) { row.classList.add('hidden'); return; }
   row.classList.remove('hidden');
   const cur = battle.G.p[0].fate, F = cur && BattleEngine.FATES[cur], idx = currentFateIndex();
-  row.innerHTML = `<div class="knack-label">🔮 Your Fate - once per match</div><div class="knack-chips"><button type="button" class="knack-chip${idx === null ? ' on' : ''}" data-fate="-1">None</button>${choices.map(i => `<button type="button" class="knack-chip${i === idx ? ' on' : ''}" data-fate="${i}" title="${BattleEngine.FATES[ARCANA[i].fate].text}">${BattleEngine.FATES[ARCANA[i].fate].icon} ${ARCANA[i].name}</button>`).join('')}</div>
-    <div class="knack-desc">${F ? `${F.icon} <b>${F.name}.</b> ${F.text} <i>From your turn ${F.from}.</i>` : 'No Fate this match.'}</div>`;
+  row.innerHTML = mullRowHtml('fate', F ? F.icon : '🔮', 'Fate · once per match', F ? F.name : 'None', `<div class="knack-chips"><button type="button" class="knack-chip${idx === null ? ' on' : ''}" data-fate="-1">None</button>${choices.map(i => `<button type="button" class="knack-chip${i === idx ? ' on' : ''}" data-fate="${i}" title="${BattleEngine.FATES[ARCANA[i].fate].text}">${BattleEngine.FATES[ARCANA[i].fate].icon} ${ARCANA[i].name}</button>`).join('')}</div>
+    <div class="knack-desc">${F ? `${F.icon} <b>${F.name}.</b> ${F.text} <i>From your turn ${F.from}.</i>` : 'No Fate this match.'}</div>`);
+  mullRowOpen(row, 'fate');
   row.querySelectorAll('[data-fate]').forEach(b => b.addEventListener('click', () => {
     const i = +b.dataset.fate; chooseFate(i < 0 ? null : i); sfx('tap'); BattleEngine.setFate(battle.G, 0, i < 0 ? null : ARCANA[i].fate); btRenderFateRow(); btRenderFate();
   }));
@@ -1246,6 +1259,12 @@ btGet('btKnack').addEventListener('click', () => { ensureAudio(); if (btGet('btT
 btGet('btFate').addEventListener('click', () => { ensureAudio(); if (btGet('btTip').classList.contains('interactive')) btHideTip(); else btShowFateTip(); });
 btGet('btHelpClose').addEventListener('click', () => { btGet('btHelpOverlay').classList.add('hidden'); btOpponentOpens(); });
 btGet('mulliganKeepBtn').addEventListener('click', () => { ensureAudio(); btCloseMulligan(); });
+// Tap a loadout header to open its row (one at a time); tapping the open one closes it. Rows are always in the DOM, so this only flips a class.
+btGet('mulliganOverlay').addEventListener('click', e => {
+  const h = e.target.closest('[data-mull]'); if (!h || !battle) return;
+  battle.mullOpen = battle.mullOpen === h.dataset.mull ? null : h.dataset.mull; sfx('tap');
+  document.querySelectorAll('#mulliganOverlay .lorow').forEach(r => { const b = r.querySelector('[data-mull]'); if (!b) return; const on = b.dataset.mull === battle.mullOpen; r.classList.toggle('open', on); b.setAttribute('aria-expanded', String(on)); });
+});
 btGet('mulliganSwapBtn').addEventListener('click', () => {
   ensureAudio();
   const swapBtn = btGet('mulliganSwapBtn');

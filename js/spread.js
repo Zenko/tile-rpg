@@ -63,5 +63,6 @@ function btRenderSpreadRow() {
   if (!pl.spread) { row.classList.add('hidden'); return; }
   const b = BattleEngine.spreadBonus(pl.spread.ids);
   row.classList.remove('hidden');
-  row.innerHTML = `<div class="knack-label">🃏 Your Fate Spread</div><div class="sp-line">${pl.spread.ids.map((id, i) => `<span><small>${SPREAD_SLOTS[i].pos}</small>${cardDef(id).icon} ${cardDef(id).name}</span>`).join('')}</div>${b.harmony ? '<div class="knack-desc">✨ Harmony: +2 Spirit</div>' : b.contrast ? '<div class="knack-desc">🌈 Contrast: one extra card</div>' : ''}`;
+  row.innerHTML = mullRowHtml('spread', '🃏', 'Fate Spread', b.harmony ? 'Harmony · +2 Spirit' : b.contrast ? 'Contrast · +1 card' : 'Past · Present · Future', `<div class="sp-line">${pl.spread.ids.map((id, i) => `<span><small>${SPREAD_SLOTS[i].pos}</small>${cardDef(id).icon} ${cardDef(id).name}</span>`).join('')}</div>${b.harmony ? '<div class="knack-desc">✨ Harmony: +2 Spirit</div>' : b.contrast ? '<div class="knack-desc">🌈 Contrast: one extra card</div>' : ''}`);
+  mullRowOpen(row, 'spread');
 }

@@ -450,18 +450,18 @@
         </div>
         <div class="tip" id="btTip"></div>
         <div class="overlay hidden" id="mulliganOverlay">
-          <div class="overlay-card" style="width:min(340px,92vw)">
-            <div style="font-size:2rem;line-height:1.1">🔄</div>
-            <h2>Keep this hand?</h2>
-            <p>You can trade it for a fresh one, once, before the match begins.</p>
-            <div class="hand" id="mulliganHand" style="margin:4px 0 14px"></div>
-            <div class="snack-row hidden" id="snackRow"></div>
-            <div class="knack-row" id="knackRow"></div>
-            <div class="knack-row fate-row hidden" id="fateRow"></div>
-            <div class="knack-row spread-row hidden" id="spreadRow"></div>
+          <div class="overlay-card mull-sheet">
+            <div class="mull-head"><h2>Keep this hand?</h2><p>You can trade it once for a fresh one.</p></div>
+            <div class="hand" id="mulliganHand"></div>
+            <div class="mull-lo">
+              <div class="snack-row lorow hidden" id="snackRow"></div>
+              <div class="knack-row lorow" id="knackRow"></div>
+              <div class="knack-row fate-row lorow hidden" id="fateRow"></div>
+              <div class="knack-row spread-row lorow hidden" id="spreadRow"></div>
+            </div>
             <div class="controls">
-              <button id="mulliganKeepBtn" class="btn btn-ghost">Keep hand</button>
-              <button id="mulliganSwapBtn" class="btn">Draw new hand</button>
+              <button id="mulliganSwapBtn" class="btn btn-ghost">Draw new hand</button>
+              <button id="mulliganKeepBtn" class="btn">Keep hand</button>
             </div>
           </div>
         </div>
