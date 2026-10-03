@@ -655,11 +655,16 @@ const BattleEngine = (function () {
      opts.first  = 0 or 1 - who takes the first turn (the coin/dice toss). The other seat is "second" and gets the catch-up
                    bonus: +1 card and +1 energy on its first turns. Old puzzle snapshots have no G.first, so it reads as 0. */
   function newGame(deckA, deckB, rng, opts) {
-    rng = rng || Math.random; opts = opts || {};
+    opts = opts || {};
+    // opts.seed makes the whole match reproducible (server refereeing, replays). Without one, behaviour is exactly as before.
+    // The AI draws from its own stream (G.aiRng): a replay re-applies recorded actions without re-running the AI, so if the
+    // AI shared G.rng the rules' own random draws (shuffles, random targets) would shift and the replay would diverge.
+    const seeded = !rng && opts.seed != null;
+    rng = rng || (seeded ? makeRng(opts.seed) : Math.random);
     let uid = 1;
     const mods = opts.mods || {};
     const first = opts.first === 1 ? 1 : 0;
-    const G = { rng, turn: 0, first, active: first, over: false, winner: null, why: null, events: [], aiMemo: null, mods, twist: opts.twist || null, p: [] };
+    const G = { rng, aiRng: seeded ? makeRng(String(opts.seed) + ':ai') : null, turn: 0, first, active: first, over: false, winner: null, why: null, events: [], aiMemo: null, mods, twist: opts.twist || null, p: [] };
     const mk = (deck, i) => shuffled(deck, rng).map(id => makeCard(id, uid++, modsFor(G, i)));
     const sp = opts.spirit || [RULES.spirit, RULES.spirit];
     G.p = [0, 1].map(i => ({ idx: i, spirit: sp[i], maxSpirit: sp[i], deck: mk(i === 0 ? deckA : deckB, i), hand: [], board: [], turns: 0, energy: 0, maxEnergy: 0 }));
@@ -964,7 +969,7 @@ const BattleEngine = (function () {
   const RANDOMNESS = { gentle: 0.55, normal: 0.25, smart: 0 };
 
   function aiNextAction(G, who, level) {
-    const me = G.p[who], op = G.p[1 - who], rng = G.rng;
+    const me = G.p[who], op = G.p[1 - who], rng = G.aiRng || G.rng;
     const r = RANDOMNESS[level] != null ? RANDOMNESS[level] : 0.25;
     if (!G.aiMemo || G.aiMemo.turn !== G.turn) G.aiMemo = { turn: G.turn, stopPlaying: false };
     const memo = G.aiMemo;
@@ -1053,7 +1058,60 @@ const BattleEngine = (function () {
     return deck;
   }
 
-  return { RULES, KEYWORDS, SPELLS, TWISTS, KNACKS, knackReady, setKnack, useKnack, FATES, fateReady, setFate, useFate, spreadBonus, layoutSpread, SPREAD_RULES, PASSIVES, MINORS, PASSIVE_RULES, MINOR_RULES, MAX_KEYWORDS, defOf, baseIdOf, variantId, suggestDeck, makeCard, familyOf, newGame, startTurn, canPlay, playCard, spellNeedsTarget, legalTargets, attack, endTurn, forfeit, boost, mulligan, aiNextAction, applyAction, aiTurn, guards, valueOf };
+  /* ---------- Seeds, match records and replay (no DOM, no Math.random: runs unchanged in Node) ----------
+     makeRng(seed) is a small seeded generator (mulberry32; a string seed is hashed first), so the same seed always gives the same
+     shuffles. A match is fully described by a record { seed, decks: [A, B], opts, actions }, where an action is one of
+       { type: 'start' } (once, first) | { type: 'mulligan', who } | { type: 'play', who, uid, target } |
+       { type: 'attack', who, uid, target } | { type: 'knack', who } | { type: 'fate', who } | { type: 'end', who }.
+     replay(record) rebuilds the game from the seed and re-applies the actions, so a server can referee a match by checking the
+     moves it receives against the same rules the client runs, and a finished match can be replayed move by move.
+     simulate() plays a whole AI-vs-AI match and returns its record. Keep every random draw in the rules on G.rng and every AI
+     decision on G.aiRng, or replays drift. */
+  function makeRng(seed) {
+    let a;
+    if (typeof seed === 'string') { a = 2166136261; for (let i = 0; i < seed.length; i++) { a ^= seed.charCodeAt(i); a = Math.imul(a, 16777619); } a >>>= 0; }
+    else a = seed >>> 0;
+    return function () {
+      a = (a + 0x6D2B79F5) >>> 0;
+      let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function step(G, a) {
+    switch (a.type) {
+      case 'start': startTurn(G); return { ok: true };
+      case 'mulligan': mulligan(G, a.who); return { ok: true };
+      case 'play': case 'attack': return applyAction(G, a.who, a);
+      case 'knack': return useKnack(G, a.who);
+      case 'fate': return useFate(G, a.who);
+      case 'end': endTurn(G, a.who); return { ok: true };
+    }
+    return { ok: false, why: 'unknown action ' + a.type };
+  }
+  function replay(rec) {
+    const G = newGame(rec.decks[0], rec.decks[1], null, Object.assign({}, rec.opts, { seed: rec.seed }));
+    for (let i = 0; i < rec.actions.length; i++) {
+      const r = step(G, rec.actions[i]);
+      if (r && r.ok === false) { G.replayError = { at: i, action: rec.actions[i], why: r.why || 'rejected' }; break; }
+    }
+    return G;
+  }
+  function simulate(seed, deckA, deckB, o) {
+    o = o || {};
+    const levels = o.levels || ['smart', 'smart'], rec = { seed, decks: [deckA, deckB], opts: o.opts || {}, actions: [{ type: 'start' }] };
+    const G = newGame(deckA, deckB, null, Object.assign({}, rec.opts, { seed }));
+    startTurn(G);
+    // o.mulligan = [seat0, seat1]: the keep-hand screen comes after the first startTurn in the real game, before any play.
+    [0, 1].forEach(who => { if (o.mulligan && o.mulligan[who]) { mulligan(G, who); rec.actions.push({ type: 'mulligan', who }); } });
+    for (let t = 0; t < (o.maxTurns || 200) && !G.over; t++) {
+      const who = G.active;
+      aiTurn(G, who, levels[who]).forEach(a => rec.actions.push(Object.assign({ who }, a)));
+      if (!G.over) { endTurn(G, who); rec.actions.push({ type: 'end', who }); }
+    }
+    return { G, record: rec };
+  }
+
+  return { makeRng, step, replay, simulate, RULES, KEYWORDS, SPELLS, TWISTS, KNACKS, knackReady, setKnack, useKnack, FATES, fateReady, setFate, useFate, spreadBonus, layoutSpread, SPREAD_RULES, PASSIVES, MINORS, PASSIVE_RULES, MINOR_RULES, MAX_KEYWORDS, defOf, baseIdOf, variantId, suggestDeck, makeCard, familyOf, newGame, startTurn, canPlay, playCard, spellNeedsTarget, legalTargets, attack, endTurn, forfeit, boost, mulligan, aiNextAction, applyAction, aiTurn, guards, valueOf };
 })();
 /* END BATTLE ENGINE */
 
