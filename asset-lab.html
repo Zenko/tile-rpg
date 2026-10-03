@@ -270,7 +270,7 @@ window.escapeHtml = function (s) { return String(s).replace(/[&<>"]/g, function 
 
   /* ---------- card markup (real game components) ---------- */
   function stats(d) { return d.spell ? '✨ Spell' : '⚔' + d.power + ' ♥' + d.grit; }
-  function tile(d, extra, w) { return '<span class="alm-card tile rarity-' + (d.rarity || 'rare') + (extra || '') + '" style="width:' + (w || 104) + 'px"><span class="ac-cost">' + d.cost + '</span><span class="ac-icon">' + cardArtHtml(d) + '</span><span class="ac-power">' + stats(d) + '</span><span class="ac-name">' + d.name + '</span>' + (d.kw && d.kw.length ? '<span class="ac-kw">' + d.kw.map(function (k) { return KW[k].icon; }).join(' ') + '</span>' : '') + '</span>'; }
+  function tile(d, extra, w) { return '<span class="alm-card tile rarity-' + (d.rarity || 'rare') + (extra || '') + '" style="width:' + (w || 104) + 'px"><span class="ac-cost">' + d.cost + '</span><span class="ac-icon">' + cardArtHtml(d) + '</span>' + (!d.spell && d.kw && d.kw.length ? '<span class="ac-kw">' + d.kw.map(function (k) { return '<i>' + KW[k].icon + '</i>'; }).join('') + '</span>' : '') + '<span class="ac-paper"><span class="ac-name">' + d.name + '</span><span class="ac-power">' + stats(d) + '</span></span></span>'; }
   function battle(d, st) { return '<div style="width:84px;height:112px"><div class="card rarity-' + (d.rarity || 'rare') + '"' + (st ? ' style="' + st + '"' : '') + '>' + cardFaceHtml(d) + '</div></div>'; }
   function reveal(d) { return '<div class="reveal-card rarity-' + (d.rarity || 'rare') + (d.spell ? ' spell' : '') + '">' + cardFaceHtml(d) + '</div>'; }
   function emojiDef(d) { return Object.assign({}, d, { art: ORIG[d.id] }); }

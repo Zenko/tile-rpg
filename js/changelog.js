@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta ${RELEASES[0].n} (build $
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'better', x: 'A new card look: the picture is bigger, the keyword icons are round badges stacked under the cost number, and the name and attack / health sit on a calm panel at the bottom of the card. It is the same in battle (hand and board), in My Cards and the deck list, and when you find or open a card. The panel is tinted to match the card in the dark theme and cream in the light theme.' },
   { t:'better', x: 'A smoother town: the map, trees and water are now drawn with your phone\'s graphics chip, so walking, looking around and rain or snow take much less effort. It looks the same. If the map ever looks wrong, Settings > Comfort > Smooth map turns it off.' },
   { t:'new', x: 'Look around the town: drag the map with your finger (or mouse) to see the rest of the district. A target button appears to bring the camera back to your character, and walking somewhere does too. A drag never sends your character walking.' },
   { t:'better', x: 'Card pictures and the icons across menus, lists and the dock get a faint drop shadow so they lift off their background.' },

@@ -1055,3 +1055,91 @@ html.calm .cl-cell.rat, html.cozy .cl-cell.rat { animation: none; }
 .town-front { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
 .town-tile.ov { background: none; }
 .town-tile.ov:not(.placeable):not(.hideseek-spot):not(.hideseek-found):not(.hideseek-wrong) { outline: none; }
+
+/* ==========================================================================================================
+   CARD FACE: "circle stack on paper" (build 135)
+   One look for every full card: battle hand and board (#battleView .card), the reveal popup and draft offers
+   (.reveal-card) and the collection / deck tiles (.alm-card.tile). The art sits on the card's own rarity colour,
+   the keywords are round badges stacked under the cost bubble, and a paper panel at the foot holds the name and
+   the attack / health numbers (or the Spell label). Sizes come from the card's own width: each face is a size
+   container, so `--u` (10cqw = one tenth of the card's width) scales the art, text and badges together at every
+   size, the same way the card-lab mockups did. In dark mode the panel is a deep shade of the rarity colour; in
+   light mode it is the cream surface (--stone). Descendants read --u, the card itself never does.
+   ========================================================================================================== */
+.rarity-common { --pc: var(--rc-b); --rg: linear-gradient(135deg, var(--rc-a), var(--rc-b)); }
+.rarity-rare   { --pc: var(--rare);   --rg: linear-gradient(135deg, #c9bce8, var(--rare)); }
+.rarity-ultra  { --pc: var(--epic);   --rg: linear-gradient(135deg, #a8cbe8, var(--epic)); }
+.rarity-super  { --pc: var(--accent); --rg: linear-gradient(135deg, #f0cf94, var(--accent)); }
+.rarity-mythic { --pc: var(--mythic); --rg: linear-gradient(135deg, #eaa8c4, var(--mythic)); }
+#battleView .card, .reveal-card, .alm-card.tile { --panel: color-mix(in srgb, var(--pc, var(--rc-b)) 30%, #12171d); --hurt: #e8826f; }
+:root[data-theme="light"] #battleView .card, :root[data-theme="light"] .reveal-card, :root[data-theme="light"] .alm-card.tile { --panel: var(--stone); --hurt: #c0453d; }
+
+#battleView .card, .reveal-card, .alm-card.tile { container-type: inline-size; --u: 10cqw; padding: 0; justify-content: flex-start; align-items: center; gap: 0; }
+#battleView .card[class*="rarity-"], .reveal-card[class*="rarity-"], .alm-card.tile[class*="rarity-"] {
+  background: radial-gradient(circle at 50% 38%, rgba(255,255,255,.5), rgba(255,255,255,0) 64%), var(--rg);
+}
+/* the art takes everything the paper panel leaves */
+#battleView .card .icon, #battleView .hand .card .icon, .reveal-card .icon, .alm-card.tile .ac-icon {
+  flex: 1 1 auto; min-height: 0; width: 100%; margin: 0; display: flex; align-items: center; justify-content: center; line-height: 1; font-size: calc(var(--u) * 6.4);
+}
+/* keywords: round badges stacked under the cost bubble, in the cost bubble's own style */
+#battleView .card .kws, .reveal-card .kws, .alm-card.tile .ac-kw {
+  position: absolute; z-index: 3; top: calc(var(--u) * 2.55); left: calc(var(--u) * -.6); min-height: 0; display: flex; flex-direction: column; gap: calc(var(--u) * .3); font-size: calc(var(--u) * 1.25); letter-spacing: 0;
+}
+#battleView .card .kws span, .reveal-card .kws span, .alm-card.tile .ac-kw i {
+  width: 1.75em; height: 1.75em; border-radius: 50%; background: var(--ink); box-shadow: 0 1px 3px var(--shadow); display: flex; align-items: center; justify-content: center; font-style: normal; line-height: 1;
+}
+/* the paper panel */
+#battleView .card .paper, .reveal-card .paper, .alm-card.tile .ac-paper {
+  flex: none; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(var(--u) * .2);
+  padding: calc(var(--u) * .55) calc(var(--u) * .6) calc(var(--u) * .6); background: var(--panel); color: var(--ink);
+  border-top: 1px solid color-mix(in srgb, var(--hl) 22%, transparent);
+}
+/* corner radii are fixed px (a card cannot read its own container units), and each paper panel matches its card */
+#battleView .card .paper { border-radius: 0 0 11px 11px; }
+#battleView .card .nm, #battleView .hand .card .nm, .reveal-card .nm, .alm-card.tile .ac-name {
+  font-size: calc(var(--u) * .95); font-weight: 800; line-height: 1.1; opacity: 1; color: var(--ink); text-shadow: none; text-align: center; max-width: 100%; padding: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; letter-spacing: 0;
+}
+#battleView .card .stats, #battleView .hand .card .stats, .reveal-card .stats, .alm-card.tile .ac-power {
+  width: 100%; display: flex; justify-content: space-between; padding: 0 calc(var(--u) * .25); font-size: calc(var(--u) * 1.2); font-weight: 800; line-height: 1.1; color: var(--ink); text-shadow: none;
+}
+.alm-card.tile .ac-power { justify-content: center; gap: calc(var(--u) * 1.4); white-space: nowrap; }
+#battleView .card .stats .pw, #battleView .card .stats .hp, .reveal-card .stats .pw, .reveal-card .stats .hp { color: inherit; text-shadow: none; }
+#battleView .card .stats .hp.hurt, .reveal-card .stats .hp.hurt { color: var(--hurt); }
+/* battle cards are small (about 75px wide), so their text is scaled up from the shared sizes above */
+#battleView .card .nm { font-size: calc(var(--u) * 1.2); }
+#battleView .card .stats, #battleView .hand .card .stats { font-size: calc(var(--u) * 1.55); padding: 0 calc(var(--u) * .3); }
+#battleView .card .paper { gap: calc(var(--u) * .1); padding: calc(var(--u) * .5) calc(var(--u) * .5) calc(var(--u) * .55); }
+/* the hand has no room for names (as before), so its panel is just the numbers */
+#battleView .hand .card .nm { display: none; }
+#battleView .card .spell-tag, .reveal-card .spell-tag {
+  margin: 0; background: none; padding: 0; color: var(--ink-soft); font-size: calc(var(--u) * 1.05); font-weight: 800; letter-spacing: .04em; text-shadow: none; line-height: 1.1;
+}
+#battleView .card.spell::after, .reveal-card.spell::after { display: none; }
+/* cost bubble: size follows the card now */
+.reveal-card .cost { width: calc(var(--u) * 2.4); height: calc(var(--u) * 2.4); font-size: calc(var(--u) * 1.2); top: calc(var(--u) * -.6); left: calc(var(--u) * -.6); }
+/* the mastery stars sat above the old stat row; they now sit just above the paper panel */
+#battleView .card .mastery-stars, #battleView .hand .card .mastery-stars { bottom: calc(var(--u) * 4.1); }
+/* reveal popup and draft offers */
+.reveal-card { border-radius: 16px; }
+.reveal-card .paper { border-radius: 0 0 16px 16px; }
+.draft-opt .reveal-card { font-size: inherit; padding: 0; }
+.draft-opt .reveal-card .icon { font-size: calc(var(--u) * 6.4); margin-top: 0; }
+.draft-opt .reveal-card .nm { font-size: calc(var(--u) * .95); }
+.draft-opt .reveal-card .stats { font-size: calc(var(--u) * 1.2); padding: 0 calc(var(--u) * .25); }
+
+#battleView .card .spell-tag { font-size: calc(var(--u) * 1.3); }
+.reveal-card-frame .reveal-card { width: 160px; }
+
+/* collection and deck tiles */
+.alm-card.tile { aspect-ratio: 3 / 4; min-height: 0; overflow: visible; border-radius: 14px; }
+.alm-card.tile .ac-cost {
+  top: -6px; left: -6px; width: 22px; height: 22px; padding: 0; border-radius: 50%; background: var(--ink); color: var(--stone); font-size: .72rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px var(--shadow); z-index: 4;
+}
+.alm-card.tile .ac-kw { top: 19px; left: -6px; }
+.alm-card.tile .ac-count { top: -6px; right: -6px; z-index: 4; background: var(--ink); color: var(--stone); }
+.alm-card.tile .ac-in { bottom: -8px; left: 50%; right: auto; width: auto; transform: translateX(-50%); padding: 1px 8px; border-radius: 999px; background: var(--ink); color: var(--stone); font-size: .56rem; white-space: nowrap; z-index: 4; }
+.alm-card.tile .ac-paper { border-radius: 0 0 14px 14px; }
+.alm-card.tile .ac-name { font-size: calc(var(--u) * .95); color: var(--ink); }
+.alm-row.card-grid { row-gap: 18px; padding-top: 6px; }

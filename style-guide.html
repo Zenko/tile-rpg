@@ -68,8 +68,7 @@ table.sg-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
 .sg-checker { background: conic-gradient(#8883 25%, #0000 0 50%, #8883 0 75%, #0000 0) 0 0 / 16px 16px; }
 /* card anatomy */
 .sg-anat { position: relative; width: 211px; margin: 0 auto; }
-.sg-anat .reveal-card { width: 211px; padding: 14px 12px 12px; }
-.sg-anat .reveal-card .icon { font-size: 4rem; margin-top: 12px; } .sg-anat .reveal-card .nm { font-size: 1.05rem; } .sg-anat .reveal-card .stats { font-size: 1.5rem; }
+.sg-anat .reveal-card { width: 211px; }   /* the face scales from its own width (--u), so only the width is set here */
 .sg-pin { position: absolute; width: 22px; height: 22px; border-radius: 50%; background: #ff5f57; color: #fff; font-size: .72rem; font-weight: 800; display: grid; place-items: center; border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,.4); z-index: 5; }
 .sg-cat { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 12px; }
 .sg-cat .alm-card { width: 100%; }
@@ -326,10 +325,10 @@ table.sg-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
     <div class="sg-card"><div class="sg-anat" id="anat"></div>
       <table class="sg-t" style="margin-top:16px"><tbody>
         <tr><td><b>1</b></td><td><b>Cost</b>: a round badge hanging off the top-left corner (22 px, <code>--ink</code> fill, <code>--stone</code> number). Cards cost 0 to 5.</td></tr>
-        <tr><td><b>2</b></td><td><b>Art</b>: your picture, centred, drawn at <code>1em</code> inside the icon area. This is the only part you make.</td></tr>
-        <tr><td><b>3</b></td><td><b>Name</b>: one line, white, centred, cut off with an ellipsis if it is too long.</td></tr>
-        <tr><td><b>4</b></td><td><b>Keyword icons</b>: up to three small emoji (see Keywords). Spells show a "Spell" tag instead.</td></tr>
-        <tr><td><b>5</b></td><td><b>Stats</b>: power (sword) left, health (heart) right, bold white with a soft shadow.</td></tr>
+        <tr><td><b>2</b></td><td><b>Keyword badges</b>: up to three round badges in the cost badge's style, stacked straight down under it (see Keywords). Spells have none.</td></tr>
+        <tr><td><b>3</b></td><td><b>Art</b>: your picture, centred, drawn at <code>1em</code> inside the art area, which is the card's own rarity colour with a soft glow. This is the only part you make.</td></tr>
+        <tr><td><b>4</b></td><td><b>Name</b>: one line on the paper panel, in ink, centred, cut off with an ellipsis if it is too long. The panel is a deep shade of the rarity colour in dark mode and cream in light mode.</td></tr>
+        <tr><td><b>5</b></td><td><b>Stats</b>: power (sword) left, health (heart) right on the paper panel. Spells show a "Spell" label there instead.</td></tr>
       </tbody></table></div>
     <div class="sg-card"><div class="sg-row-label">The art canvas</div>
       <div class="sg-checker" style="border-radius:14px;padding:10px;max-width:340px;margin:8px auto 0"><img src="assets/cards/template.svg" alt="Card art template with safe area" style="width:100%;display:block"></div>
@@ -541,7 +540,7 @@ window.escapeHtml = function (s) { return String(s).replace(/[&<>"]/g, function 
   function famOf(id) { return (typeof CARD_FAMILY !== 'undefined' && CARD_FAMILY[id]) || ''; }
   function faceStats(d) { return d.spell ? '✨ Spell' : '⚔' + d.power + ' ♥' + d.grit; }
   function tile(d, extra, w) {
-    return '<span class="alm-card tile rarity-' + (d.rarity || 'rare') + (extra || '') + '" style="width:' + (w || 104) + 'px"><span class="ac-cost">' + d.cost + '</span><span class="ac-icon">' + cardArtHtml(d) + '</span><span class="ac-power">' + faceStats(d) + '</span><span class="ac-name">' + d.name + '</span>' + (d.kw && d.kw.length ? '<span class="ac-kw">' + d.kw.map(function (k) { return KW[k].icon; }).join(' ') + '</span>' : '') + '</span>';
+    return '<span class="alm-card tile rarity-' + (d.rarity || 'rare') + (extra || '') + '" style="width:' + (w || 104) + 'px"><span class="ac-cost">' + d.cost + '</span><span class="ac-icon">' + cardArtHtml(d) + '</span>' + (!d.spell && d.kw && d.kw.length ? '<span class="ac-kw">' + d.kw.map(function (k) { return '<i>' + KW[k].icon + '</i>'; }).join('') + '</span>' : '') + '<span class="ac-paper"><span class="ac-name">' + d.name + '</span><span class="ac-power">' + faceStats(d) + '</span></span></span>';
   }
   function battleCard(d) { return '<div style="width:84px;height:112px"><div class="card rarity-' + (d.rarity || 'rare') + '">' + cardFaceHtml(d) + '</div></div>'; }
   function revealCard(d) { return '<div class="reveal-card rarity-' + (d.rarity || 'rare') + (d.spell ? ' spell' : '') + '">' + cardFaceHtml(d) + '</div>'; }
@@ -560,7 +559,7 @@ window.escapeHtml = function (s) { return String(s).replace(/[&<>"]/g, function 
   $('#famTable').innerHTML = '<thead><tr><th>Family</th>' + RARS.map(function (r) { return '<th>' + r.slice(0, 4) + '</th>'; }).join('') + '<th>All</th></tr></thead><tbody>' + FKEYS.map(function (f) { var c = POOL.filter(function (x) { return famOf(x.id) === f; }); return '<tr><td>' + (f ? FAMILIES[f].icon + ' ' + FAMILIES[f].name : 'Neutral') + '</td>' + RARS.map(function (r) { return '<td>' + c.filter(function (x) { return x.rarity === r; }).length + '</td>'; }).join('') + '<td><b>' + c.length + '</b></td></tr>'; }).join('') + '</tbody>';
 
   /* anatomy + forms + ladder */
-  $('#anat').innerHTML = '<div class="reveal-card rarity-rare">' + cardFaceHtml(samples[1]) + '</div>' + [[1, '-30px', '3%'], [2, 'calc(100% + 8px)', '25%'], [3, 'calc(100% + 8px)', '58%'], [4, 'calc(100% + 8px)', '74%'], [5, 'calc(100% + 8px)', '90%']].map(function (p) { return '<span class="sg-pin" style="left:' + p[1] + ';top:' + p[2] + '">' + p[0] + '</span>'; }).join('');
+  $('#anat').innerHTML = '<div class="reveal-card rarity-rare">' + cardFaceHtml(samples[1]) + '</div>' + [[1, '-30px', '3%'], [2, '-30px', '17%'], [3, 'calc(100% + 8px)', '25%'], [4, 'calc(100% + 8px)', '66%'], [5, 'calc(100% + 8px)', '84%']].map(function (p) { return '<span class="sg-pin" style="left:' + p[1] + ';top:' + p[2] + '">' + p[0] + '</span>'; }).join('');
   var ART = '<svg viewBox="0 0 512 512" width="100%" height="100%" aria-hidden="true">' + foxParts() + '</svg>';
   var SZ = [['Inline in text and logs', 'n/a', 18], ['Battle hand and board', 'about 93 x 113', 32], ['Collection tile', '105 to 119 x 104', 30], ['Reveal and pack card', '132 x 176', 42], ['Inspect sheet', '104 x 140', 67]];
   $('#ladder tbody').innerHTML = SZ.map(function (z) { return '<tr><td>' + z[0] + '</td><td class="sg-hex">' + z[1] + (z[1] === 'n/a' ? '' : ' px') + '</td><td class="sg-hex">' + z[2] + ' px</td>' + RARS.map(function (r) { return '<td><div class="rarity-' + r + '" style="display:inline-block;padding:6px;border-radius:12px"><div style="width:' + z[2] + 'px;height:' + z[2] + 'px">' + ART + '</div></div></td>'; }).join('') + '</tr>'; }).join('');

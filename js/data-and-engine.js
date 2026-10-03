@@ -312,12 +312,15 @@ function cardArtHtml(def, cls) {
 // The full card-face markup (cost/art/name/keywords/stats) shared by the battle-hand card (btCardEl) and
 // the card-reveal popup (showCardReveal) - built from a card's base def rather than a live battle instance,
 // so it always shows the card's resting stats (def.grit, not a damaged battle-instance hp).
+// Card face layout ("circle stack on paper"): the art sits on the card's own colour, the keywords are round badges stacked
+// under the cost bubble, and a calm paper panel at the foot holds the name and the attack / health numbers (or the Spell
+// label). btCardEl in js/battle-ui.js and cardTileHtml in js/collection-tools.js build the same layout for live cards and
+// collection tiles; the CSS is the "card face" block at the end of css/latest.css.
 function cardFaceHtml(def) {
   return def.spell
-    ? `<div class="cost">${def.cost}</div><div class="icon">${cardArtHtml(def)}</div><div class="nm">${def.name}</div><div class="spell-tag">✨ Spell</div>`
-    : `<div class="cost">${def.cost}</div><div class="icon">${cardArtHtml(def)}</div><div class="nm">${def.name}</div>
-    <div class="kws">${def.kw.map(k => `<span>${KW[k].icon}</span>`).join('')}</div>
-    <div class="stats"><span class="pw">⚔${def.power}</span><span class="hp">♥${def.grit}</span></div>`;
+    ? `<div class="cost">${def.cost}</div><div class="icon">${cardArtHtml(def)}</div><div class="paper"><div class="nm">${def.name}</div><div class="spell-tag">✨ Spell</div></div>`
+    : `<div class="cost">${def.cost}</div><div class="icon">${cardArtHtml(def)}</div>${def.kw.length ? `<div class="kws">${def.kw.map(k => `<span>${KW[k].icon}</span>`).join('')}</div>` : ''}
+    <div class="paper"><div class="nm">${def.name}</div><div class="stats"><span class="pw">⚔${def.power}</span><span class="hp">♥${def.grit}</span></div></div>`;
 }
 
 /* BEGIN BATTLE ENGINE */

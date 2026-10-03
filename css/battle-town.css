@@ -184,7 +184,7 @@ body.in-battle .screen { position: relative; overflow: hidden; padding-bottom: c
 @keyframes bt_tide { from { transform:translateX(-100%); } to { transform:translateX(100%); } }
 /* card sleeves (Tinker's stall): an inner pattern layer and a corner emblem, only ever on your own cards */
 #battleView .card .sleeve-fx { position:absolute; inset:0; border-radius:12px; pointer-events:none; opacity:.35; z-index:0; }
-#battleView .card.sleeved > *:not(.sleeve-fx):not(.sleeve-mark):not(.cost):not(.badge):not(.floater):not(.impact-spark) { position:relative; z-index:1; }
+#battleView .card.sleeved > *:not(.sleeve-fx):not(.sleeve-mark):not(.cost):not(.badge):not(.floater):not(.impact-spark):not(.kws) { position:relative; z-index:1; }
 #battleView .card .sleeve-mark { position:absolute; top:3px; right:4px; font-size:.62rem; line-height:1; z-index:2; filter:drop-shadow(0 1px 1px rgba(0,0,0,.5)); }
 #battleView .card.sleeved { outline:2px solid var(--sleeve-edge, rgba(255,255,255,.6)); outline-offset:-2px; }
 .sleeve-gilded { --sleeve-edge:#f2cf6b; } .sleeve-gilded .sleeve-fx { background:linear-gradient(135deg, rgba(255,230,150,.9) 0 10%, transparent 10% 45%, rgba(255,230,150,.7) 45% 50%, transparent 50% 90%, rgba(255,230,150,.9) 90%); }
