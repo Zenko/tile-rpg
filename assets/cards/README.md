@@ -10,11 +10,11 @@ The full to-do list, rarest first, is in [ART-LIST.md](ART-LIST.md).
 
 | | |
 |---|---|
-| Size | **512 × 512 px**, square (the game shows it at 1em, from about 16px up to 64px) |
+| Size | **512 × 512 px**, square. The game draws it in a square **64% of the card's width**, centred: about 38–50 px on the battle board, 47 px in the hand, 67–82 px in My Cards, 102 px in the reveal (and 16–20 px inline in text) |
 | Format | PNG with a **transparent background** (no card frame - the game draws the rarity-coloured card around it) |
-| Safe area | Keep the subject inside the central ~80%; leave a little breathing room at the edges |
-| Style | Bold, simple silhouettes read best at small sizes. Test it at 32px |
-| Backgrounds it sits on | Teal (common), purple (rare), blue (ultra), gold (super), pink (mythic) gradients, light *and* dark theme. Avoid pure white or very pale fringes |
+| Safe area | Keep the subject inside the central ~80%, and let it **fill** most of that: because the art is drawn at 64% of the card width, a small subject looks tiny. Aim for 300 px or more across |
+| Style | Bold, simple silhouettes read best at small sizes. Test it at 40px (the board size) |
+| Backgrounds it sits on | Teal (common), purple (rare), blue (ultra), gold (super), pink (mythic) gradients, light *and* dark theme. Avoid pure white or very pale fringes. The name, numbers and keyword badges are drawn on a panel and circles *outside* the art square, so never draw them in |
 | Weight | Aim for under ~60 KB each (Figma's PNG export is fine; run it through any PNG optimiser if larger) |
 | File name | `<card id>.png`, exactly as listed in ART-LIST.md (e.g. `aurora-stag.png`) |
 
@@ -37,3 +37,14 @@ The full to-do list, rarest first, is in [ART-LIST.md](ART-LIST.md).
 - The opponent-only Ember Fox is now called **Cinder Fox** (`cinder-fox`) so it no longer clashes with the collectible
   **Ember Fox** (`ember-fox`).
 - The art is also used in the small spell flash and reveal screens, so a spell card's picture should feel like an effect, not a creature.
+
+## Card layout and keyword icons (build 135)
+
+Cards use one layout everywhere: art on the rarity colour at the top (about 72% of the card's height), keyword badges as
+round circles stacked under the cost number, and a paper panel at the foot with the name and attack / health. See the
+style guide's **Cards > Anatomy and sizes** section and the Asset Lab for live previews at every size.
+
+Keyword icons (`kw-<keyword>.png`, 128 × 128 px, transparent PNG, under about 15 KB) are drawn inside a round badge about
+22% of the card's width (14–18 px on the board, 36 px in the reveal) at about 55% of the badge, so they appear at only
+**8–20 px**. The badge is pale grey-white in the Dark theme and charcoal in the Light theme, so each icon has to read on
+both: mid-tone saturated colours, a bold single shape, no pure white or pure black fills, subject inside the central 70%.

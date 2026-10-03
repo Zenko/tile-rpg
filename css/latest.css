@@ -1111,8 +1111,6 @@ html.calm .cl-cell.rat, html.cozy .cl-cell.rat { animation: none; }
 #battleView .card .nm { font-size: calc(var(--u) * 1.2); }
 #battleView .card .stats, #battleView .hand .card .stats { font-size: calc(var(--u) * 1.55); padding: 0 calc(var(--u) * .3); }
 #battleView .card .paper { gap: calc(var(--u) * .1); padding: calc(var(--u) * .5) calc(var(--u) * .5) calc(var(--u) * .55); }
-/* the hand has no room for names (as before), so its panel is just the numbers */
-#battleView .hand .card .nm { display: none; }
 #battleView .card .spell-tag, .reveal-card .spell-tag {
   margin: 0; background: none; padding: 0; color: var(--ink-soft); font-size: calc(var(--u) * 1.05); font-weight: 800; letter-spacing: .04em; text-shadow: none; line-height: 1.1;
 }

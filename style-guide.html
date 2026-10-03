@@ -68,6 +68,11 @@ table.sg-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
 .sg-checker { background: conic-gradient(#8883 25%, #0000 0 50%, #8883 0 75%, #0000 0) 0 0 / 16px 16px; }
 /* card anatomy */
 .sg-anat { position: relative; width: 211px; margin: 0 auto; }
+/* the dashed square marks where the art is drawn (measured from the live card, see the script) */
+.sg-artbox { position: absolute; border: 2px dashed #3f9f8f; border-radius: 6px; pointer-events: none; z-index: 4; } .sg-artbox span { position: absolute; left: 50%; top: 100%; transform: translateX(-50%); margin-top: 3px; font-size: .62rem; font-weight: 800; color: #fff; background: #3f9f8f; border-radius: 99px; padding: 1px 7px; white-space: nowrap; }
+.sg-kb { display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; line-height: 1; flex: none; } .sg-kbs { display: flex; gap: 6px; align-items: center; }
+.sg-lay { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; margin-top: 12px; } .sg-lay h4 { margin: 0 0 6px; font-size: .86rem; } .sg-lay p { margin: 0; font-size: .82rem; color: var(--ink-soft); }
+.sg-pan { display: flex; gap: 8px; align-items: center; font-size: .78rem; margin: 4px 0; } .sg-pan i { width: 34px; height: 20px; border-radius: 6px; border: 1px solid color-mix(in srgb, var(--ink) 18%, transparent); display: inline-block; } .sg-pan code { font-size: .7rem; }
 .sg-anat .reveal-card { width: 211px; }   /* the face scales from its own width (--u), so only the width is set here */
 .sg-pin { position: absolute; width: 22px; height: 22px; border-radius: 50%; background: #ff5f57; color: #fff; font-size: .72rem; font-weight: 800; display: grid; place-items: center; border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,.4); z-index: 5; }
 .sg-cat { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 12px; }
@@ -102,7 +107,7 @@ table.sg-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
 .sg-comp { text-align: center; font-size: .78rem; } .sg-comp .box, .sg-prob .box { position: relative; border-radius: 14px; overflow: hidden; aspect-ratio: 1; margin-bottom: 8px; }
 .sg-comp .box svg.art, .sg-prob .box svg.art { position: absolute; inset: 0; width: 100%; height: 100%; }
 .sg-comp .box svg.gd { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-.sg-chips32 { display: flex; gap: 8px; justify-content: center; margin: 6px 0; } .sg-chips32 > div { width: 46px; height: 46px; border-radius: 11px; padding: 7px; }
+.sg-chips32 { display: flex; gap: 8px; justify-content: center; margin: 6px 0; } .sg-chips32 > div { width: 54px; height: 54px; border-radius: 11px; padding: 7px; }
 .sg-prob { font-size: .8rem; } .sg-prob.bad .verdict { color: var(--boss-glow); } .sg-prob.good .verdict { color: var(--win-glow); } .sg-prob .verdict { font-weight: 800; font-size: .74rem; letter-spacing: .06em; text-transform: uppercase; }
 .sg-drop { border: 2px dashed var(--stone-edge); border-radius: 18px; padding: 30px 16px; text-align: center; cursor: pointer; transition: border-color .2s, background .2s; } .sg-drop:hover, .sg-drop.over, .sg-drop:focus-visible { border-color: var(--water); background: var(--board-bg); outline: none; }
 .sg-checks { list-style: none; margin: 8px 0 0; padding: 0; font-size: .84rem; } .sg-checks li { padding: 5px 0 5px 26px; position: relative; } .sg-checks li::before { position: absolute; left: 0; top: 5px; width: 18px; text-align: center; font-weight: 800; }
@@ -270,7 +275,7 @@ table.sg-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
   <div class="sg-card"><p class="sg-note" style="margin-top:0">Currently a placeholder (a card emoji on a green square) at <code>assets/icon-180.png</code>, <code>icon-192.png</code>, <code>icon-512.png</code> and a 32 px favicon. Replace these four files with the final logo; nothing else changes.</p>
     <div class="sg-demo" style="justify-content:flex-start;margin-top:10px"><img src="assets/icon-192.png" width="96" height="96" alt="" style="border-radius:22px"><img src="assets/icon-192.png" width="48" height="48" alt="" style="border-radius:11px"><img src="assets/icon-32.png" width="32" height="32" alt=""></div></div>
   <h3>Keyword icons (new art slot, preview in the Asset Lab)</h3>
-  <div class="sg-card"><p class="sg-note" style="margin-top:0">The 13 keyword icons are emoji today. To replace them, make one image per keyword: <b>128 x 128 px, PNG, transparent, under about 15 KB</b>, named <code>kw-guard.png</code>, <code>kw-swift.png</code>, <code>kw-mend.png</code>, <code>kw-bloom.png</code>, <code>kw-shield.png</code>, <code>kw-echo.png</code>, <code>kw-thorns.png</code>, <code>kw-rally.png</code>, <code>kw-drain.png</code>, <code>kw-seed.png</code>, <code>kw-lull.png</code>, <code>kw-kin.png</code>, <code>kw-sting.png</code>. They are shown at only 12 to 20 px, so use one bold shape each, no fine detail, and keep them readable as a set. They also appear next to the rule text in lists. Preview them in the <a href="asset-lab.html#keywords" style="color:var(--water-ink)">Asset Lab</a>; the game needs a small code change to show images instead of emoji, which I add once you approve them.</p></div>
+  <div class="sg-card"><p class="sg-note" style="margin-top:0">The 13 keyword icons are emoji today. To replace them, make one image per keyword: <b>128 x 128 px, PNG, transparent, under about 15 KB</b>, named <code>kw-guard.png</code>, <code>kw-swift.png</code>, <code>kw-mend.png</code>, <code>kw-bloom.png</code>, <code>kw-shield.png</code>, <code>kw-echo.png</code>, <code>kw-thorns.png</code>, <code>kw-rally.png</code>, <code>kw-drain.png</code>, <code>kw-seed.png</code>, <code>kw-lull.png</code>, <code>kw-kin.png</code>, <code>kw-sting.png</code>. On a card each one sits inside a <b>round badge</b> (about 22% of the card's width; 14 to 18 px on the board, 36 px in the reveal) and is drawn at about <b>55% of the badge</b>, so it is shown at only <b>8 to 20 px</b>. Use one bold shape each, no fine detail, and keep them readable as a set. The badge is filled with <code>--ink</code>: pale grey-white in Dark, charcoal in Light. <b>Each icon has to read on both circles</b>, so use mid-tone, saturated colours with a clear outline shape, and avoid pure white or pure black fills. Keep the subject in the central 70% so the circle does not crop it. They also appear next to the rule text in lists. Preview them in the <a href="asset-lab.html#keywords" style="color:var(--water-ink)">Asset Lab</a>; the game needs a small code change to show images instead of emoji, which I add once you approve them.</p></div>
   <h3 id="sprite-howto">How a town sprite is built, with an example</h3>
   <div class="sg-card">
     <p class="sg-note" style="margin-top:0">A town sprite is a small SVG drawn on a <b>64 x 64</b> grid (buildings 128 x 128). The important part: <b>no shape has a fixed colour</b>. Each fill is a theme variable such as <code>var(--roof)</code> or <code>var(--leaf1)</code>, and every district, in Dark and Light, defines its own value for each variable. So one drawing is automatically a green Town Square, a sandy Market Row, a cool Harbor and a mossy Garden. Below is a mailbox: first as you would design it (plain colours, what Figma exports), then as the game uses it (variables), shown in all four districts.</p>
@@ -301,13 +306,13 @@ table.sg-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
   </div>
   <h3>Icon rules for new art</h3>
   <p class="sg-note" style="margin:-4px 0 12px">The game adds a faint drop shadow to card art and to static UI icons (dock tabs, list and panel icons, keyword icons), sized with the icon and tuned per theme. Don't bake a shadow into icon art.</p>
-  <div class="sg-grid sg-g2"><div class="sg-do"><h4>Do</h4><ul><li>Bold, simple silhouettes with soft rounded edges</li><li>2 or 3 tones plus a highlight; gentle gradients are fine</li><li>Keep the subject in the central 80% of the canvas</li><li>Check at 32 px and on both themes</li></ul></div><div class="sg-dont"><h4>Don't</h4><ul><li>Thin outlines, tiny details or text inside icons</li><li>Pure white or pure black edges that vanish on one theme</li><li>Neon or high-saturation colours</li><li>A baked-in card frame, border or rarity colour</li></ul></div></div>
+  <div class="sg-grid sg-g2"><div class="sg-do"><h4>Do</h4><ul><li>Bold, simple silhouettes with soft rounded edges</li><li>2 or 3 tones plus a highlight; gentle gradients are fine</li><li>Keep the subject in the central 80% of the canvas</li><li>Check at 40 px and on both themes</li><li>For keyword icons, check at 10 px on a pale and a charcoal circle</li></ul></div><div class="sg-dont"><h4>Don't</h4><ul><li>Thin outlines, tiny details or text inside icons</li><li>Pure white or pure black edges that vanish on one theme</li><li>Neon or high-saturation colours</li><li>A baked-in card frame, border or rarity colour</li></ul></div></div>
 </section>
 
 <!-- ============ CARDS ============ -->
 <section class="sg-sec" id="cards">
   <h2>Cards</h2>
-  <p class="sg-lead">A card is a rarity-coloured face the game draws for you, with your picture in the middle. You supply only the picture (and, for new cards, the name and stats). This section explains every part: the numbers, the rarities, the four families, the types, the keywords, how to compose the art, a checker to test your own file, and the complete catalogue with file names.</p>
+  <p class="sg-lead">A card is a rarity-coloured face the game draws for you. Your picture sits large at the top, keyword badges stack under the cost number, and a paper panel at the foot holds the name and the attack and health numbers. You supply only the picture (and, for new cards, the name and stats). This section explains every part: the numbers, the rarities, the four families, the types, the keywords, how to compose the art, a checker to test your own file, and the complete catalogue with file names.</p>
   <div id="battleView" class="sg-bv">
   <nav class="sg-subnav" aria-label="Card topics">
     <a href="#c-glance">At a glance</a><a href="#c-anatomy">Anatomy and sizes</a><a href="#c-rarity">Rarities</a><a href="#c-family">Families</a><a href="#c-types">Types and variants</a><a href="#c-kw">Keywords</a><a href="#c-compose">Composition</a><a href="#c-problems">Good and problem art</a><a href="#c-try">Try your art</a><a href="#c-write">Names and stats</a><a href="#c-backs">Card backs</a><a href="#c-catalogue">Catalogue</a><a href="#c-qa">Checklist</a>
@@ -334,9 +339,20 @@ table.sg-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
       <div class="sg-checker" style="border-radius:14px;padding:10px;max-width:340px;margin:8px auto 0"><img src="assets/cards/template.svg" alt="Card art template with safe area" style="width:100%;display:block"></div>
       <p class="sg-note"><b>512 x 512 px</b>, PNG, transparent background, no frame. The teal square is the safe area (410 x 410): keep the subject inside it. The dotted circle is the zone for round subjects; the pink line is a ground line for standing creatures. Download: <a href="assets/cards/template.svg" download style="color:var(--water-ink)">template.svg</a> (import into Figma, hide the GUIDES group before export).</p></div>
   </div>
+  <div class="sg-card" style="margin-top:14px"><div class="sg-row-label">The card layout ("circle stack on paper"), in proportions</div>
+    <p class="sg-note" style="margin-top:0">Every full card is drawn the same way at every size: battle board and hand, My Cards and the deck list, the reveal and pack popup, and draft offers. Everything scales from the card's own width, so the proportions below hold from a 63 px board card to the 165 px reveal card. The cards are always 3:4.</p>
+    <div class="sg-lay">
+      <div><h4>Art area</h4><p>The top of the card, about <b>72% of its height</b>, on the rarity colour with a soft white glow behind the picture. Your picture is drawn here in a square <b>64% of the card's width</b>, centred, which leaves about 18% clear on each side.</p></div>
+      <div><h4>Paper panel</h4><p>The bottom <b>28 to 33%</b> of the card. It holds the name (one line, ink) and power on the left, health on the right. Spells show a "Spell" label instead of the numbers. You never draw on it.</p></div>
+      <div><h4>Cost and keyword badges</h4><p>The cost is a round badge on the top-left corner. Keyword badges are round too, about <b>22% of the card's width</b>, stacked straight down under the cost and hanging a little over the left edge. They sit outside the art square, so art never goes under them.</p></div>
+    </div>
+    <div class="sg-row-label" style="margin-top:16px">Paper panel colour</div>
+    <div class="sg-lay" id="panelCols"></div>
+    <p class="sg-note">In <b>Dark</b> the panel is a deep shade of the card's own rarity colour (30% rarity colour over <code>#12171d</code>), so a rare card has a purple panel and a mythic one a plum panel. In <b>Light</b> it is the cream <code>--stone</code> for every rarity, with ink text. The code reads this from <code>--panel</code> and <code>--pc</code> in <code>css/latest.css</code>.</p>
+  </div>
   <div class="sg-card sg-tw" style="margin-top:14px"><div class="sg-row-label">Where your art appears, and how big (measured on a 400 px phone)</div>
     <table class="sg-t" id="ladder"><thead><tr><th>Where</th><th>Card size</th><th>Art size</th><th>common</th><th>rare</th><th>ultra</th><th>super</th><th>mythic</th></tr></thead><tbody></tbody></table>
-    <p class="sg-note">The stand-in creature is a plain SVG. If it still reads clearly in the smallest row, your art will work everywhere. Other places: inline in text and the log (about 16 to 20 px), deck-builder tray slots (76 x 102 card, small icon), pack opening and spell flashes (uses the same art, so spells should feel like an effect).</p></div>
+    <p class="sg-note">The swatches are drawn at a size inside each range. The art is drawn at <b>64% of the card's width</b> (a 10-column grid of the card, 6.4 columns wide), so it is now noticeably larger than before: 38 to 50 px on the board, 102 px in the reveal. The stand-in creature is a plain SVG. If it still reads clearly in the board row, your art will work everywhere. Sizes were measured on 360 to 430 px wide phones. Other places: the deck tray and Workshop lists use small chips (about 30 px art), and pack opening and spell flashes use the same art, so spells should feel like an effect. 512 px is plenty: even the 102 px reveal at 3x pixel density needs only about 310 px.</p></div>
 
   <h3 id="c-rarity" class="sg-h3a">Rarities</h3>
   <p class="sg-note" style="margin:-4px 0 12px">Rarity sets the face colour, the glow, and how special the card feels. It is not a different canvas: the art area, size and rules are the same, but the amount of care and richness should rise with rarity. Examples below are real cards.</p>
@@ -350,15 +366,15 @@ table.sg-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
   <div class="sg-grid sg-g2" id="typeCols"></div>
 
   <h3 id="c-kw" class="sg-h3a">Keywords</h3>
-  <p class="sg-note" style="margin:-4px 0 12px">A keyword is a rule shown as one small emoji on the card. It is a good source of visual ideas: art that hints at the ability helps players read a card at a glance. Counts and examples are live.</p>
+  <p class="sg-note" style="margin:-4px 0 12px">A keyword is a rule shown as a small round badge under the cost on the card. It is a good source of visual ideas: art that hints at the ability helps players read a card at a glance. Counts and examples are live.</p>
   <div class="sg-grid" style="grid-template-columns:repeat(auto-fill,minmax(250px,1fr))" id="kwCards"></div>
 
   <h3 id="c-compose" class="sg-h3a">Composition templates</h3>
-  <p class="sg-note" style="margin:-4px 0 12px">Six ways to place a subject on the canvas. Each is shown with the template guides (teal = safe area, dotted = circle zone, pink = ground line) and at 32 px. Draw your own versions of these shapes; they are examples of placement, not a style to copy.</p>
+  <p class="sg-note" style="margin:-4px 0 12px">Six ways to place a subject on the canvas. Each is shown with the template guides (teal = safe area, dotted = circle zone, pink = ground line) and at 40 px. Draw your own versions of these shapes; they are examples of placement, not a style to copy.</p>
   <div class="sg-grid" style="grid-template-columns:repeat(auto-fill,minmax(210px,1fr))" id="compose"></div>
 
   <h3 id="c-problems" class="sg-h3a">Good art and common problems</h3>
-  <p class="sg-note" style="margin:-4px 0 12px">The same creature drawn well and then with six typical mistakes. The small chips show each at 32 px on the common and mythic faces, the way a player sees it.</p>
+  <p class="sg-note" style="margin:-4px 0 12px">The same creature drawn well and then with six typical mistakes. The small chips show each at 40 px (the size on a board card) on the common and mythic faces, the way a player sees it.</p>
   <div class="sg-grid" style="grid-template-columns:repeat(auto-fill,minmax(250px,1fr))" id="problems"></div>
 
   <h3 id="c-try" class="sg-h3a">Try your art</h3>
@@ -409,9 +425,11 @@ table.sg-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
   <div class="sg-card"><ul class="sg-checks sg-todo" id="qa">
     <li><label><input type="checkbox"> 512 x 512 px, PNG, transparent background</label></li>
     <li><label><input type="checkbox"> Subject inside the 410 x 410 safe area; round subjects inside the circle</label></li>
+    <li><label><input type="checkbox"> Subject fills most of the safe area (it is drawn at 64% of the card width, so a small subject looks tiny)</label></li>
+    <li><label><input type="checkbox"> Keyword icons read on both a pale and a charcoal circle, at 10 px</label></li>
     <li><label><input type="checkbox"> No frame, border, cost, name or stat numbers drawn in</label></li>
     <li><label><input type="checkbox"> No drop shadow baked in (the game adds its own); a flat ground shadow is fine</label></li>
-    <li><label><input type="checkbox"> Reads clearly at 32 px (try the checker above)</label></li>
+    <li><label><input type="checkbox"> Reads clearly at 40 px (try the checker above)</label></li>
     <li><label><input type="checkbox"> Looks right on all five rarity faces, in Dark and Light</label></li>
     <li><label><input type="checkbox"> No white or black halo on the edges</label></li>
     <li><label><input type="checkbox"> Under about 60 KB (optimise if larger)</label></li>
@@ -523,7 +541,9 @@ window.escapeHtml = function (s) { return String(s).replace(/[&<>"]/g, function 
   }
 
   /* ---- keyword legend ---- */
-  $('#kwGrid').innerHTML = Object.keys(KW).map(function (k) { return '<div class="sg-sw"><div class="sg-chip" style="display:grid;place-items:center;font-size:1.5rem;background:var(--board-bg)">' + KW[k].icon + '</div><div><b>' + KW[k].name + '</b><small>' + KW[k].text + '</small></div></div>'; }).join('');
+  /* a keyword badge on both circle colours the game uses (--ink is pale in Dark, charcoal in Light) */
+  function KB(k, d) { return ['#e9edf1', '#4b4a46'].map(function (bg) { return '<span class="sg-kb" style="width:' + d + 'px;height:' + d + 'px;background:' + bg + ';font-size:' + Math.round(d * .55) + 'px">' + KW[k].icon + '</span>'; }).join(''); }
+  $('#kwGrid').innerHTML = Object.keys(KW).map(function (k) { return '<div class="sg-sw"><div class="sg-kbs">' + KB(k, 36) + '</div><div><b>' + KW[k].name + '</b><small>' + KW[k].text + '</small></div></div>'; }).join('');
 
   /* ---- sprites ---- */
   var SPR = $$('symbol').map(function (s) { return [s.id, s.getAttribute('viewBox')]; });
@@ -560,9 +580,15 @@ window.escapeHtml = function (s) { return String(s).replace(/[&<>"]/g, function 
 
   /* anatomy + forms + ladder */
   $('#anat').innerHTML = '<div class="reveal-card rarity-rare">' + cardFaceHtml(samples[1]) + '</div>' + [[1, '-30px', '3%'], [2, '-30px', '17%'], [3, 'calc(100% + 8px)', '25%'], [4, 'calc(100% + 8px)', '66%'], [5, 'calc(100% + 8px)', '84%']].map(function (p) { return '<span class="sg-pin" style="left:' + p[1] + ';top:' + p[2] + '">' + p[0] + '</span>'; }).join('');
+  (function () { /* dashed square = the art box, measured from the live card so it can never drift from the game's CSS */
+    var anat = $('#anat'); function mark() { var old = anat.querySelector('.sg-artbox'); if (old) old.remove(); var ic = anat.querySelector('.icon'), a = anat.getBoundingClientRect(), r = ic.getBoundingClientRect(), fs = parseFloat(getComputedStyle(ic).fontSize), card = anat.querySelector('.reveal-card').getBoundingClientRect(), b = document.createElement('div'); b.className = 'sg-artbox'; b.style.cssText = 'left:' + (r.left + r.width / 2 - fs / 2 - a.left) + 'px;top:' + (r.top + r.height / 2 - fs / 2 - a.top) + 'px;width:' + fs + 'px;height:' + fs + 'px'; b.innerHTML = '<span>' + Math.round(fs / card.width * 100) + '% art box</span>'; anat.appendChild(b); }
+    mark(); window.addEventListener('resize', mark); document.addEventListener('sg-theme', function () { setTimeout(mark, 60); });
+    var DK = { common: '#203641', rare: '#3b3851', ultra: '#2c3d4e', super: '#524d3d', mythic: '#473543' };
+    $('#panelCols').innerHTML = RARS.map(function (r) { return '<div><h4 style="text-transform:capitalize">' + r + '</h4><div class="sg-pan"><i style="background:' + DK[r] + '"></i>Dark <code>' + DK[r] + '</code></div><div class="sg-pan"><i style="background:#fbf7ef"></i>Light <code>#fbf7ef</code></div></div>'; }).join('');
+  })();
   var ART = '<svg viewBox="0 0 512 512" width="100%" height="100%" aria-hidden="true">' + foxParts() + '</svg>';
-  var SZ = [['Inline in text and logs', 'n/a', 18], ['Battle hand and board', 'about 93 x 113', 32], ['Collection tile', '105 to 119 x 104', 30], ['Reveal and pack card', '132 x 176', 42], ['Inspect sheet', '104 x 140', 67]];
-  $('#ladder tbody').innerHTML = SZ.map(function (z) { return '<tr><td>' + z[0] + '</td><td class="sg-hex">' + z[1] + (z[1] === 'n/a' ? '' : ' px') + '</td><td class="sg-hex">' + z[2] + ' px</td>' + RARS.map(function (r) { return '<td><div class="rarity-' + r + '" style="display:inline-block;padding:6px;border-radius:12px"><div style="width:' + z[2] + 'px;height:' + z[2] + 'px">' + ART + '</div></div></td>'; }).join('') + '</tr>'; }).join('');
+  var SZ = [['Inline in text and logs', 'n/a', '16 to 20', 18], ['Battle board', '63 to 82 px wide, 3:4', '38 to 50', 44], ['Battle hand', 'about 87 x 109 px', '47', 47], ['Collection tile and deck list', '105 to 129 px wide, 3:4', '67 to 82', 75], ['Reveal, pack and draft card', '165 x 222 px', '102', 102], ['Inspect sheet', '104 x 140 px', '67', 67]];
+  $('#ladder tbody').innerHTML = SZ.map(function (z) { return '<tr><td>' + z[0] + '</td><td class="sg-hex">' + z[1] + '</td><td class="sg-hex">' + z[2] + ' px</td>' + RARS.map(function (r) { return '<td><div class="rarity-' + r + '" style="display:inline-block;padding:6px;border-radius:12px"><div style="width:' + z[3] + 'px;height:' + z[3] + 'px">' + ART + '</div></div></td>'; }).join('') + '</tr>'; }).join('');
   /* one card in four forms (inserted after the ladder card) */
   var forms = document.createElement('div'); forms.className = 'sg-card'; forms.style.marginTop = '14px';
   forms.innerHTML = '<div class="sg-row-label">One card in its four forms</div><div class="sg-demo" style="justify-content:flex-start;gap:26px;padding:12px 6px 0;align-items:flex-end"><div>' + tile(samples[2]) + '<div class="sg-note">collection tile</div></div><div>' + battleCard(samples[2]) + '<div class="sg-note">battle</div></div><div>' + revealCard(samples[2]) + '<div class="sg-note">reveal / pack</div></div><div><div style="display:flex;align-items:center;gap:8px"><div class="ins-card rarity-' + samples[2].rarity + '" style="margin:0"><div class="ins-icon" style="font-size:67px">' + cardArtHtml(samples[2]) + '</div></div></div><div class="sg-note">inspect sheet</div></div></div>';
@@ -598,7 +624,7 @@ window.escapeHtml = function (s) { return String(s).replace(/[&<>"]/g, function 
 
   /* keywords */
   var KAC = { guard: 'A wide planted stance; shells, walls, shields.', swift: 'Leaning forward, wings or motion shapes.', mend: 'Soft glow, leaves or water, a calm pose.', bloom: 'Flowers opening, growth rising upward.', shield: 'A glassy bubble or sheen around the subject.', echo: 'Sound rings, bells or a bright burst.', thorns: 'Spikes, brambles and spines.', rally: 'Horns, banners, raised arms.', drain: 'A swirl pulling inward, dusky colours.', seed: 'Seed pods, acorns, dandelions.', lull: 'Sleepy eyes, mist, the moon.', kin: 'Part of a group, matching markings.', sting: 'A sharp point or stinger on a small fierce shape.' };
-  $('#kwCards').innerHTML = Object.keys(KW).map(function (k) { var cs = POOL.filter(function (c) { return (c.kw || []).indexOf(k) >= 0; }); return '<div class="sg-card"><div class="sg-sw"><div class="sg-chip" style="display:grid;place-items:center;font-size:1.6rem;background:var(--board-bg)">' + KW[k].icon + '</div><div><b>' + KW[k].name + ' <span class="sg-hex">' + cs.length + ' cards</span></b><small>' + KW[k].text + '</small></div></div><p class="sg-note"><b>Art cue:</b> ' + KAC[k] + '</p><div class="sg-minis">' + cs.slice(0, 3).map(function (d) { return tile(d, '', 70); }).join('') + '</div></div>'; }).join('');
+  $('#kwCards').innerHTML = Object.keys(KW).map(function (k) { var cs = POOL.filter(function (c) { return (c.kw || []).indexOf(k) >= 0; }); return '<div class="sg-card"><div class="sg-sw"><div class="sg-kbs">' + KB(k, 38) + '</div><div><b>' + KW[k].name + ' <span class="sg-hex">' + cs.length + ' cards</span></b><small>' + KW[k].text + '</small></div></div><p class="sg-note"><b>Art cue:</b> ' + KAC[k] + '</p><div class="sg-minis">' + cs.slice(0, 3).map(function (d) { return tile(d, '', 70); }).join('') + '</div></div>'; }).join('');
 
   /* composition templates and problem examples (stand-in SVGs) */
   function foxParts() {
@@ -613,13 +639,13 @@ window.escapeHtml = function (s) { return String(s).replace(/[&<>"]/g, function 
     effect: ['Spell effect', 'Not a creature: a swirl, glow or burst built from one bold shape plus sparkles, centred.', '<path d="M256 96c110 0 168 96 120 184-36 66-130 74-176 22-34-38-22-100 28-116 42-14 78 14 70 52-6 30-44 38-60 18" fill="none" stroke="#ffd36b" stroke-width="30" stroke-linecap="round"/><path d="M256 96c110 0 168 96 120 184-36 66-130 74-176 22" fill="none" stroke="#fff3c4" stroke-width="10" stroke-linecap="round" opacity=".7"/><path d="M400 120l10 26 26 10-26 10-10 26-10-26-26-10 26-10z" fill="#fff3c4"/><path d="M110 380l8 20 20 8-20 8-8 20-8-20-20-8 20-8z" fill="#fff3c4"/><path d="M130 130l6 14 14 6-14 6-6 14-6-14-14-6 14-6z" fill="#ffd36b"/>']
   };
   var GUIDES = '<svg class="gd" viewBox="0 0 512 512" aria-hidden="true"><rect x="51" y="51" width="410" height="410" rx="24" fill="none" stroke="#3f9f8f" stroke-width="3"/><circle cx="256" cy="256" r="205" fill="none" stroke="#c98b3c" stroke-width="3" stroke-dasharray="3 7"/><path d="M64 448H448" stroke="#b86c8c" stroke-width="3"/></svg>';
-  function chips32(inner) { return '<div class="sg-chips32"><div class="rarity-common"><div style="width:32px;height:32px">' + inner + '</div></div><div class="rarity-mythic"><div style="width:32px;height:32px">' + inner + '</div></div></div>'; }
+  function chips32(inner) { return '<div class="sg-chips32"><div class="rarity-common"><div style="width:40px;height:40px">' + inner + '</div></div><div class="rarity-mythic"><div style="width:40px;height:40px">' + inner + '</div></div></div>'; }
   function svgOf(inner) { return '<svg viewBox="0 0 512 512" width="100%" height="100%" aria-hidden="true">' + inner + '</svg>'; }
   $('#compose').innerHTML = Object.keys(COMPS).map(function (k) { var c = COMPS[k]; return '<div class="sg-card sg-comp"><div class="box sg-checker"><svg class="art" viewBox="0 0 512 512" aria-hidden="true">' + c[2] + '</svg>' + GUIDES + '</div><b>' + c[0] + '</b>' + chips32(svgOf(c[2])) + '<div class="sg-note" style="margin:0">' + c[1] + '</div></div>'; }).join('');
   var base = foxParts(), many = ''; for (var i = 0; i < 90; i++) { var x = 150 + ((i * 53) % 220), y = 150 + ((i * 97) % 270); many += '<path d="M' + x + ' ' + y + 'l' + (5 + i % 6) + ' ' + (7 + i % 7) + '" stroke="#3a2a1c" stroke-width="1.6" fill="none"/>'; }
   var PROBS = [
     ['good', 'Good', base, 'Bold shapes, two to three tones, a clear silhouette, inside the safe area, clean edges.'],
-    ['bad', 'Too much detail', base + many, 'Fine hatching and tiny marks turn to noise at 32 px. Simplify to big shapes.'],
+    ['bad', 'Too much detail', base + many, 'Fine hatching and tiny marks turn to noise at 40 px. Simplify to big shapes.'],
     ['bad', 'Frame baked in', base + '<rect x="10" y="10" width="492" height="492" rx="46" fill="none" stroke="#fff" stroke-width="14"/><circle cx="62" cy="62" r="44" fill="#232b34"/><text x="62" y="82" text-anchor="middle" font-family="sans-serif" font-size="56" font-weight="800" fill="#fff">3</text><text x="256" y="494" text-anchor="middle" font-family="sans-serif" font-size="40" fill="#fff">Fox</text>', 'The game draws the card frame, cost and name. Anything you draw there doubles up.'],
     ['bad', 'Outside the safe area', '<g transform="translate(-100 -92) scale(1.4)">' + base + '</g>', 'Too big: the subject is cropped and touches the edge, which clashes with the rounded card corners.'],
     ['bad', 'White halo', base.replace(/fill="(#[0-9a-f]+|rgba[^"]*)"/g, 'fill="#fff" stroke="#fff" stroke-width="26" stroke-linejoin="round"') + base, 'A white or black fringe looks fine on one face and ugly on another. Keep edges clean and transparent.'],
@@ -633,7 +659,7 @@ window.escapeHtml = function (s) { return String(s).replace(/[&<>"]/g, function 
   function tryRender(url, info) {
     $('#tryOut').hidden = false; $('#tryImg').src = url;
     $('#tryChecks').innerHTML = info.map(function (c) { return '<li class="' + c[0] + '">' + c[1] + '</li>'; }).join('');
-    var SIZES = [18, 26, 32, 42, 67];
+    var SIZES = [18, 40, 67, 102];
     $('#tryLadder').innerHTML = '<thead><tr><th>Size</th>' + RARS.map(function (r) { return '<th>' + r + '</th>'; }).join('') + '</tr></thead><tbody>' + SIZES.map(function (s) { return '<tr><td class="sg-hex">' + s + ' px</td>' + RARS.map(function (r) { return '<td><div class="rarity-' + r + '" style="display:inline-block;padding:6px;border-radius:12px"><img src="' + url + '" width="' + s + '" height="' + s + '" alt=""></div></td>'; }).join('') + '</tr>'; }).join('') + '</tbody>';
     var d = Object.assign({}, samples[2], { art: url, name: 'Your card' }), sp = Object.assign({}, spellsOf('rare')[0], { art: url, name: 'Your spell' });
     $('#tryFaces').innerHTML = [tile(d), tile(Object.assign({}, samples[4], { art: url, name: 'Your mythic' })), battleCard(d), battleCard(Object.assign({}, samples[0], { art: url, name: 'Your common' })), revealCard(d), revealCard(sp)].join('');
@@ -656,7 +682,8 @@ window.escapeHtml = function (s) { return String(s).replace(/[&<>"]/g, function 
         info.push([corners.every(function (v) { return v < 10; }) ? 'ok' : 'bad', corners.every(function (v) { return v < 10; }) ? 'Transparent background' : 'Background is not transparent at the edges']);
         var x0 = N, y0 = N, x1 = 0, y1 = 0; for (var y = 0; y < N; y++) for (var x = 0; x < N; x++) if (a(x, y) > 24) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
         if (x1 > x0) { var s = 512 / N, L = Math.round(x0 * s), T = Math.round(y0 * s), R = Math.round((x1 + 1) * s), B = Math.round((y1 + 1) * s), inside = L >= 45 && T >= 45 && R <= 467 && B <= 467;
-          info.push([inside ? 'ok' : 'warn', 'Content spans ' + L + ',' + T + ' to ' + R + ',' + B + (inside ? ' (inside the safe area)' : ' (leaves the 51 to 461 safe area)')]); }
+          info.push([inside ? 'ok' : 'warn', 'Content spans ' + L + ',' + T + ' to ' + R + ',' + B + (inside ? ' (inside the safe area)' : ' (leaves the 51 to 461 safe area)')]);
+          var big = Math.max(R - L, B - T); info.push([big >= 300 ? 'ok' : 'warn', 'Subject is ' + big + ' px across' + (big >= 300 ? '' : ' (small: it is drawn at 64% of the card width, so aim for 300 px or more)')]); }
         else info.push(['bad', 'The image looks empty']);
       } catch (e) { info.push(['warn', 'Could not read pixels for the transparency check.']); }
       tryRender(tryUrl, info);

@@ -12,9 +12,12 @@ module.exports = async (page, assert) => {
   assert.ok(sp.prev === 4 && sp.src && sp.vars > 3, 'the sprite how-to renders the example in 4 districts and a real sprite source: ' + JSON.stringify(sp));
   await page.click('#sgLight'); assert.strictEqual(await page.evaluate(() => document.documentElement.dataset.theme), 'light');
   // the checker: a 512 px transparent PNG passes, a 400 px opaque one fails
-  const png = (w, fill) => page.evaluate(([w, fill]) => { const c = document.createElement('canvas'); c.width = c.height = w; const x = c.getContext('2d'); x.fillStyle = '#e8955a'; if (fill) x.fillRect(0, 0, w, w); else { x.beginPath(); x.arc(w / 2, w / 2, w * 0.28, 0, 7); x.fill(); } return c.toDataURL('image/png').split(',')[1]; }, [w, fill]);
+  const png = (w, fill) => page.evaluate(([w, fill]) => { const c = document.createElement('canvas'); c.width = c.height = w; const x = c.getContext('2d'); x.fillStyle = '#e8955a'; if (fill === true) x.fillRect(0, 0, w, w); else { x.beginPath(); x.arc(w / 2, w / 2, w * (fill === 'small' ? 0.18 : 0.34), 0, 7); x.fill(); } return c.toDataURL('image/png').split(',')[1]; }, [w, fill]);
   const send = async (b64) => { await page.setInputFiles('#tryFile', { name: 'a.png', mimeType: 'image/png', buffer: Buffer.from(b64, 'base64') }); await page.waitForTimeout(500); return page.evaluate(() => [...document.querySelectorAll('#tryChecks li')].map(l => l.className)); };
   const good = await send(await png(512, false)), bad = await send(await png(400, true));
   assert.ok(good.every(c => c === 'ok'), 'a good file should pass every check: ' + good);
   assert.ok(bad.includes('bad'), 'a 400 px opaque file should fail a check: ' + bad);
+  // a subject much smaller than the safe area passes the hard checks but warns: the art is drawn at 64% of the card width
+  const small = await send(await png(512, 'small'));
+  assert.ok(small.includes('warn') && !small.includes('bad'), 'a small subject should only warn: ' + small);
 };
