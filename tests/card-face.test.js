@@ -34,7 +34,7 @@ module.exports = async (page, assert) => {
   await page.evaluate(() => { const st = document.createElement('style'); st.id = 'testHideOverlays'; st.textContent = '.overlay{display:none!important}'; document.head.appendChild(st); });
 
   // battle: hand and board cards share the layout
-  await page.evaluate(() => { CARD_POOL.slice(0, 14).forEach(c => state.ownedCards.push(c.id)); state.deck = CARD_POOL.slice(0, 12).map(c => c.id); saveState(); });
+  await page.evaluate(() => { CARD_POOL.slice(0, 14).forEach(c => state.ownedCards.push(c.id)); state.deck = CARD_POOL.slice(0, 12).map(c => c.id); state.character.sleeve = 'tide'; window.masteryRank = () => 3; saveState(); });   // a sleeve and mastery stars add extra children: the panel must still sit flush with the card bottom
   await page.evaluate(() => { prefs.tossStyle = 'skip'; prefs.fast = true; prefs.calm = true; startBattle(state.districtData.square.npcs[0]); });
   await page.waitForFunction(() => typeof battle !== 'undefined' && battle && battle.G, null, { timeout: 8000 });
   await page.waitForTimeout(1500);
@@ -44,7 +44,7 @@ module.exports = async (page, assert) => {
     const cards = [...document.querySelectorAll('#battleView #btYouBoard .card, #battleView .hand .card')].filter(c => c.getBoundingClientRect().height > 0);
     return { n: cards.length, allPaper: cards.every(c => c.querySelector('.paper')), boxed: cards.every(c => getComputedStyle(c).containerType === 'inline-size'),
       badgesOk: cards.every(c => c.classList.contains('spell') || c.querySelectorAll('.kws span').length === (c.querySelector('.kws') ? c.querySelectorAll('.kws span').length : 0)),
-      paperInside: cards.every(c => { const r = c.getBoundingClientRect(), p = c.querySelector('.paper').getBoundingClientRect(); return p.bottom <= r.bottom + 1.5 && p.top > r.top; }) };
+      paperInside: cards.every(c => { const r = c.getBoundingClientRect(), p = c.querySelector('.paper').getBoundingClientRect(); return p.bottom <= r.bottom + 1.5 && r.bottom - p.bottom < 1.5 && p.top > r.top; }) };
   });
   assert.ok(bt.n >= 2, 'expected hand and board cards');
   assert.ok(bt.allPaper && bt.boxed && bt.paperInside, `battle cards off: ${JSON.stringify(bt)}`);
