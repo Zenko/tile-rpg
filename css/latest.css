@@ -1043,3 +1043,7 @@ html.calm .cl-cell.rat, html.cozy .cl-cell.rat { animation: none; }
 #townGrid { touch-action: none; cursor: grab; } #townGrid.panning { cursor: grabbing; }
 .map-recenter-btn { top: calc(var(--hud-h) + 62px); color: var(--ink); }
 .map-recenter-btn.hidden { display: none; }
+
+/* Optional one-canvas rain and snow (js/weather-canvas.js, only with ?renderer=canvas). .town-weather is 1.2x wide and 1.4x tall
+   (inset: -20% -10%), so the canvas sits over the middle of it, exactly where the town view is. */
+.town-weather .fx-canvas { position: absolute; left: 8.3333%; top: 14.2857%; width: 83.3333%; height: 71.4286%; pointer-events: none; }

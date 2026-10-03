@@ -297,7 +297,7 @@ function updateSkyBadgeIcon() {
 
 let snowFlakes = [];
 function buildSnowFlakes() {
-  if (!snowFieldEl) return;
+  if (!snowFieldEl || weatherCanvasOn()) return;   // the canvas draws the flakes instead
   snowFieldEl.innerHTML = '';
   snowFlakes = [];
   const count = 22;
@@ -316,7 +316,7 @@ function buildSnowFlakes() {
 }
 let rainBuilt = false, rainLayerEl = null;
 function buildRainDrops(storm) {
-  if (!rainLayerEl) return;
+  if (!rainLayerEl || weatherCanvasOn()) return;   // the canvas draws the drops instead
   rainLayerEl.innerHTML = '';
   const count = 60;
   // Pixel fall distance for the transform-based animation (see rain-fall's CSS comment) - computed once from
@@ -354,6 +354,7 @@ function applyWeather(instant) {
   // every kind now has its own gentle overlay: a faint sun burst for clear, soft cloud-shadows for cloudy,
   // alongside the existing rain/storm/snow effects - so the sky never just sits there doing nothing.
   weatherEl.className = 'town-weather on weather-' + kind;
+  if (weatherCanvasOn()) fxSet(kind, instant);
   if (kind === 'snow' && !snowFlakes.length) buildSnowFlakes();
   if ((kind === 'rain' || kind === 'storm') && !rainBuilt) buildRainDrops(kind === 'storm');
   const weatherText = document.getElementById('hudWeatherText');
@@ -453,6 +454,7 @@ function buildSkyLayers() {
   lightningEl = weatherEl.querySelector('.lightning');
   if (lightningEl) lightningEl.style.animation = 'none';   // freshly built: force it off until applyWeather() below says otherwise
   rainBuilt = false;
+  if (weatherCanvasOn()) fxAttach(weatherEl);   // js/weather-canvas.js: optional one-canvas rain and snow (off unless ?renderer=canvas)
   applyWeather(true); applySky(true);
 }
 
@@ -466,6 +468,7 @@ function layoutTown() {
   townView.style.setProperty('--t', tilePx + 'px');
   townView.style.width = vw + 'px';
   townView.style.height = vh + 'px';
+  if (weatherCanvasOn()) fxResize();
   return true;
 }
 /* ---------------- look around: drag the map ----------------
