@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tile RPG PixiJS Lab</title>
+<!-- PixiJS lab: the town map drawn with PixiJS (WebGL) instead of one <div> per tile, using the game's own map data, sprites and colour tokens.
+     A sandbox like asset-lab.html: it is not linked from index.html, not cached by sw.js, and nothing here is used by the game yet.
+     Open it from the repo root or the live site, ideally on a phone, and compare with the real town. PixiJS 8 is vendored in assets/vendor/
+     (MIT licence next to it) so it works offline and from file://, like the rest of the project. -->
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/screens.css">
+<link rel="stylesheet" href="css/battle-town.css">
+<link rel="stylesheet" href="css/buildings.css">
+<link rel="stylesheet" href="css/battle-v2.css">
+<link rel="stylesheet" href="css/latest.css">
+<style>
+/* lab chrome only (.pl-*); the map itself is a WebGL canvas */
+html, body.pl { margin: 0; height: 100%; overflow: hidden; background: #12161b; display: block; padding: 0; -webkit-user-select: none; user-select: none; overscroll-behavior: none; font: 13px/1.35 system-ui, -apple-system, "Segoe UI", sans-serif; color: #e8eef2; }
+#plStage { position: fixed; inset: 0; touch-action: none; }
+#plStage canvas { display: block; width: 100%; height: 100%; }
+.pl-top { position: fixed; left: 8px; right: 8px; top: calc(8px + env(safe-area-inset-top)); display: flex; gap: 8px; align-items: flex-start; pointer-events: none; z-index: 5; }
+.pl-card { background: rgba(18, 22, 27, .82); border: 1px solid rgba(255, 255, 255, .14); border-radius: 12px; padding: 8px 10px; pointer-events: auto; }
+.pl-stats { font-variant-numeric: tabular-nums; min-width: 168px; }
+.pl-stats b { display: inline-block; min-width: 3.4em; text-align: right; color: #8fc4b8; }
+.pl-stats .row { display: flex; justify-content: space-between; gap: 10px; }
+.pl-stats .k { opacity: .75; }
+.pl-fps { font-size: 20px; font-weight: 800; color: #8fc4b8; }
+.pl-bottom { position: fixed; left: 8px; right: 8px; bottom: calc(8px + env(safe-area-inset-bottom)); z-index: 5; max-height: 56vh; overflow: auto; }
+.pl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px 10px; }
+.pl-grid label { display: flex; flex-direction: column; gap: 3px; font-size: 11px; opacity: .95; }
+.pl-grid select, .pl-btn { font: inherit; font-size: 13px; color: #e8eef2; background: #232a31; border: 1px solid rgba(255, 255, 255, .2); border-radius: 8px; padding: 7px 8px; min-height: 36px; }
+.pl-btn.on { background: #2f5f57; border-color: #8fc4b8; }
+.pl-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; font-weight: 700; }
+.pl-hint { opacity: .7; font-size: 11px; margin-top: 6px; }
+.pl-err { position: fixed; inset: 0; display: none; place-items: center; text-align: center; padding: 24px; z-index: 9; background: #12161b; }
+</style>
+</head>
+<body class="pl">
+<div id="plStage"></div>
+
+<div class="pl-top">
+  <div class="pl-card pl-stats" id="plStats" aria-live="off"></div>
+</div>
+
+<div class="pl-bottom pl-card" id="plPanel">
+  <div class="pl-head"><span>PixiJS town lab</span><button class="pl-btn" id="plToggle" type="button">Hide</button></div>
+  <div id="plBody">
+    <div class="pl-grid">
+      <label>Map <select id="plMap">
+        <option value="square">Town Square (16 x 17)</option><option value="market">Market Row (14 x 15)</option>
+        <option value="harbor">Harbor</option><option value="garden">Garden</option>
+        <option value="big60">Generated 60 x 60</option><option value="big120">Generated 120 x 120</option><option value="big200">Generated 200 x 200</option>
+      </select></label>
+      <label>Weather <select id="plWeather"><option>clear</option><option>rain</option><option>snow</option></select></label>
+      <label>Time <select id="plTime"><option>day</option><option>dusk</option><option>night</option></select></label>
+      <label>Theme <select id="plTheme"><option>dark</option><option>light</option></select></label>
+      <label>Biome <select id="plBiome"><option value="auto">auto (map)</option><option>meadow</option><option>bazaar</option><option>harbor</option><option>orchard</option></select></label>
+      <label>Season <select id="plSeason"><option value="">summer</option><option>spring</option><option>autumn</option><option>winter</option></select></label>
+      <label>Wandering NPCs <select id="plNpcs"><option>6</option><option>60</option><option>300</option></select></label>
+      <label>Walking <button class="pl-btn" id="plAuto" type="button">Auto-walk: off</button></label>
+    </div>
+    <div class="pl-hint">Tap the map to walk there. Bigger maps cost almost nothing: only the tiles on screen are ever in the scene.</div>
+  </div>
+</div>
+<div class="pl-err" id="plErr"><div><b>WebGL is not available here.</b><br>This lab needs a browser with WebGL.<br><span id="plErrMsg"></span></div></div>
+
+<script src="assets/sprites.js"></script>
+<script src="assets/vendor/pixi.min.js"></script>
+<script src="js/data-and-engine.js"></script>
+<script>function bankFor() { return false; }   /* fishing.js's helper for picking fishable water; the lab has no fishing */</script>
+<script src="js/maps.js"></script>
+<script>
+(async () => {
+'use strict';
+/* =====================================================================================================================
+   How this works (read this before changing it)
+   - World units: one tile is T = 64 units. The world container is scaled so a tile is `tilePx` screen pixels (viewport width / 7 like the
+     game, VIEW_COLS = 7), and moved to follow the player.
+   - Ground: Canvas2D draws every tile variant ONCE into one atlas texture (3 grass tones, 16 path edge masks, 16 water edge masks), so all
+     ground sprites share one texture and batch into one draw call. Ground sprites are created per 8 x 8 chunk the first time the chunk
+     scrolls into view, and chunks off screen are hidden.
+   - Objects (trees, flowers, buildings, props, characters) live in one sortable layer; static ones are added when their tile enters the
+     view window and removed when it leaves, so a 200 x 200 map still has only a few hundred sprites in the scene.
+   - Sprites are the game's own SVG <symbol>s: each is turned into a standalone SVG with its var(--token) colours replaced by the values
+     computed from the game's CSS for the chosen biome, season and theme, then rasterised once into a texture.
+   - Weather and night are a handful of sprites and one rectangle in screen space above the world.
+   ===================================================================================================================== */
+const T = 64, TEX = 128, VIEW_COLS = 7, CHUNK = 8, STEP_MS = 140;
+const $ = id => document.getElementById(id);
+const host = $('plStage');
+
+/* ---------------- PixiJS setup ---------------- */
+const app = new PIXI.Application();
+try {
+  await app.init({ resizeTo: window, background: '#12161b', antialias: false, resolution: Math.min(window.devicePixelRatio || 1, 2), autoDensity: true, preference: 'webgl' });
+} catch (e) { $('plErr').style.display = 'grid'; $('plErrMsg').textContent = String(e && e.message || e); return; }
+host.appendChild(app.canvas);
+
+const world = new PIXI.Container();
+const groundLayer = new PIXI.Container();
+const objLayer = new PIXI.Container(); objLayer.sortableChildren = true;
+world.addChild(groundLayer, objLayer);
+const fxLayer = new PIXI.Container();                 // screen space: weather
+const tint = new PIXI.Graphics();                      // screen space: day / dusk / night
+app.stage.addChild(world, fxLayer, tint);
+
+/* ---------------- palette: the game's own tokens for a biome / season / theme ---------------- */
+const probe = document.createElement('div'); probe.className = 'town-view'; probe.style.cssText = 'position:absolute;visibility:hidden;pointer-events:none';
+document.body.appendChild(probe);
+const VARS = ['ground', 'ground2', 'ground3', 'path', 'path-edge', 'water', 'shore', 'tshadow', 'trunk', 'leaf1', 'leaf2', 'leaf3', 'pine1', 'pine2', 'flower1', 'flower2', 'flower3', 'tuft', 'path-dot', 'plank', 'plank2', 'stone', 'stone2', 'stone3', 'wall', 'wall2', 'roof', 'roof2', 'door', 'window', 'lamp', 'bread', 'water2', 'well-in', 'cellar-in'];
+let pal = {};
+function readPalette(biome, season, theme) {
+  document.documentElement.dataset.theme = theme;
+  probe.dataset.biome = biome; if (season) probe.dataset.season = season; else delete probe.dataset.season;
+  const cs = getComputedStyle(probe); pal = {};
+  VARS.forEach(v => { pal[v] = cs.getPropertyValue('--' + v).trim() || '#808080'; });
+}
+
+/* ---------------- textures ---------------- */
+let atlas = null, tileTex = {}, symTex = {}, emojiTex = {}, fxTex = {};
+const mask = (x, y, same, at) => (same(at(x, y - 1)) ? 0 : 1) | (same(at(x + 1, y)) ? 0 : 2) | (same(at(x, y + 1)) ? 0 : 4) | (same(at(x - 1, y)) ? 0 : 8);
+function rr(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+function buildAtlas() {
+  const STRIDE = TEX + 4, COLS = 8, ROWS = 5, cv = document.createElement('canvas'); cv.width = COLS * STRIDE; cv.height = ROWS * STRIDE;
+  const c = cv.getContext('2d'), k = TEX / 56, pad = 1.5 * k, rad = 6 * k, cells = [];
+  const cell = (i, fill, edgeColor, edgePx, m) => {
+    const ox = (i % COLS) * STRIDE + 2, oy = Math.floor(i / COLS) * STRIDE + 2;
+    c.save(); c.translate(ox, oy);
+    c.save(); rr(c, pad, pad, TEX - 2 * pad, TEX - 2 * pad, rad); c.clip();
+    c.fillStyle = fill; c.fillRect(0, 0, TEX, TEX);
+    if (m) {                                   // the CSS draws these as inset box-shadows on every side that has a different neighbour
+      c.fillStyle = edgeColor; const e = edgePx * k;
+      if (m & 1) c.fillRect(0, 0, TEX, pad + e); if (m & 2) c.fillRect(TEX - pad - e, 0, pad + e, TEX);
+      if (m & 4) c.fillRect(0, TEX - pad - e, TEX, pad + e); if (m & 8) c.fillRect(0, 0, pad + e, TEX);
+    }
+    c.restore();
+    c.strokeStyle = 'rgba(0,0,0,0.32)'; c.lineWidth = k; rr(c, k / 2, k / 2, TEX - k, TEX - k, rad); c.stroke();   // outline: 1px rgba(0,0,0,.32)
+    c.restore(); cells[i] = new PIXI.Rectangle(ox, oy, TEX, TEX);
+  };
+  ['ground', 'ground2', 'ground3'].forEach((g, i) => cell(i, pal[g]));
+  for (let m = 0; m < 16; m++) { cell(3 + m, pal.path, pal['path-edge'], 3, m); cell(19 + m, pal.water, pal.shore, 4, m); }
+  const base = PIXI.Texture.from(cv); base.source.scaleMode = 'linear';
+  tileTex = { g: [0, 1, 2].map(i => new PIXI.Texture({ source: base.source, frame: cells[i] })), path: [], water: [] };
+  for (let m = 0; m < 16; m++) { tileTex.path[m] = new PIXI.Texture({ source: base.source, frame: cells[3 + m] }); tileTex.water[m] = new PIXI.Texture({ source: base.source, frame: cells[19 + m] }); }
+  atlas = base;
+}
+async function symbolTexture(id, scale) {
+  const sym = document.getElementById(id); if (!sym) return PIXI.Texture.EMPTY;
+  const vb = (sym.getAttribute('viewBox') || '0 0 64 64').split(/\s+/).map(Number), w = Math.round(vb[2] * scale), h = Math.round(vb[3] * scale);
+  const inner = sym.innerHTML.replace(/var\((--[a-z0-9-]+)\)/g, (_, n) => pal[n.slice(2)] || '#808080');
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb.join(' ')}" width="${w}" height="${h}">${inner}</svg>`;
+  const img = new Image(); img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); await img.decode();
+  const cv = document.createElement('canvas'); cv.width = w; cv.height = h; cv.getContext('2d').drawImage(img, 0, 0, w, h);
+  const t = PIXI.Texture.from(cv); t.source.scaleMode = 'linear'; return t;
+}
+async function buildSymbols() {
+  const ids = [...document.querySelectorAll('symbol')].map(s => s.id);
+  symTex = {};
+  await Promise.all(ids.map(async id => { symTex[id] = await symbolTexture(id, id.startsWith('b-') ? 2 : 2); }));
+}
+function emojiTexture(ch) {
+  if (emojiTex[ch]) return emojiTex[ch];
+  const cv = document.createElement('canvas'); cv.width = cv.height = 96; const c = cv.getContext('2d');
+  c.font = '72px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(ch, 48, 52);
+  const t = PIXI.Texture.from(cv); t.source.scaleMode = 'linear'; return (emojiTex[ch] = t);
+}
+function buildFxTextures() {
+  const mk = (w, h, draw) => { const cv = document.createElement('canvas'); cv.width = w; cv.height = h; draw(cv.getContext('2d'), w, h); return PIXI.Texture.from(cv); };
+  fxTex.rain = mk(4, 48, (c, w, h) => { const g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, 'rgba(200,215,235,0)'); g.addColorStop(1, 'rgba(200,215,235,0.7)'); c.fillStyle = g; c.fillRect(1, 0, 2, h); });
+  fxTex.snow = mk(16, 16, (c, w, h) => { const g = c.createRadialGradient(8, 8, 0, 8, 8, 8); g.addColorStop(0, 'rgba(242,247,250,0.95)'); g.addColorStop(0.6, 'rgba(242,247,250,0.7)'); g.addColorStop(1, 'rgba(242,247,250,0)'); c.fillStyle = g; c.fillRect(0, 0, w, h); });
+  fxTex.shadow = mk(64, 24, (c, w, h) => { const g = c.createRadialGradient(32, 12, 0, 32, 12, 30); g.addColorStop(0, 'rgba(0,0,0,0.45)'); g.addColorStop(1, 'rgba(0,0,0,0)'); c.save(); c.scale(1, h / w * 1.2); c.fillStyle = g; c.fillRect(0, 0, w, w); c.restore(); });
+}
+
+/* ---------------- maps ---------------- */
+function bigMap(n) {
+  const rnd = seeded('pixi-big-' + n), rows = [], solid = [];
+  const noise = (() => { const g = Array.from({ length: 25 }, () => Array.from({ length: 25 }, rnd)); return (x, y) => { const fx = x / 8, fy = y / 8, ix = Math.floor(fx), iy = Math.floor(fy), tx = fx - ix, ty = fy - iy; const s = t => t * t * (3 - 2 * t); const a = g[iy % 25][ix % 25], b = g[iy % 25][(ix + 1) % 25], c = g[(iy + 1) % 25][ix % 25], d = g[(iy + 1) % 25][(ix + 1) % 25]; return (a + (b - a) * s(tx)) * (1 - s(ty)) + (c + (d - c) * s(tx)) * s(ty); }; })();
+  const GRID = 14;
+  for (let y = 0; y < n; y++) { const r = []; for (let x = 0; x < n; x++) {
+    let ch = '.';
+    const nv = noise(x, y), edge = x < 1 || y < 1 || x >= n - 1 || y >= n - 1;
+    if (edge) ch = rnd() < 0.5 ? 'o' : 'i';
+    else if (nv < 0.26) ch = '~';
+    else if (nv > 0.72) ch = rnd() < 0.55 ? 'o' : rnd() < 0.5 ? 'i' : 'h';
+    else if (rnd() < 0.05) ch = ',';
+    else if (rnd() < 0.015) ch = 'r';
+    r.push(ch); } rows.push(r); }
+  const road = (x, y) => { if (x > 0 && y > 0 && x < n - 1 && y < n - 1) rows[y][x] = rows[y][x] === '~' ? 'b' : '='; };
+  for (let g = GRID; g < n - 2; g += GRID) for (let i = 1; i < n - 1; i++) { road(g, i); road(i, g); }
+  for (let gy = GRID; gy < n - 2; gy += GRID) for (let gx = GRID; gx < n - 2; gx += GRID) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (rows[gy + dy] && rows[gy + dy][gx + dx] && rows[gy + dy][gx + dx] !== '~') rows[gy + dy][gx + dx] = '#';
+  const buildings = [], types = [['cottage', 2, 2], ['nook', 2, 2], ['bakery', 3, 2], ['cellar', 2, 2]];
+  for (let gy = GRID; gy < n - 6; gy += GRID) for (let gx = GRID; gx < n - 8; gx += GRID) for (let k = 0; k < 3; k++) {
+    const [type, w, h] = types[Math.floor(rnd() * types.length)], bx = gx + 2 + k * 3 + (k ? 1 : 0), by = gy - 3 - Math.floor(rnd() * 2);
+    let free = by > 0 && bx + w < n - 1; for (let dy = 0; dy < h && free; dy++) for (let dx = 0; dx < w; dx++) if (!'.,'.includes(rows[by + dy][bx + dx])) free = false;
+    if (free) { for (let dy = 0; dy < h; dy++) for (let dx = 0; dx < w; dx++) rows[by + dy][bx + dx] = '.'; buildings.push({ x: bx, y: by, w, h, sprite: 'b-' + type }); }
+  }
+  const props = [];
+  for (let g = GRID; g < n - 2; g += GRID) for (let i = 4; i < n - 4; i += 6) if (rows[i][g + 1] === '.') props.push({ x: g + 1, y: i, type: 'lamp' });
+  rows.forEach((r, y) => { solid[y] = r.map(ch => 'oihr~'.includes(ch)); });
+  buildings.forEach(b => { for (let dy = 0; dy < b.h; dy++) for (let dx = 0; dx < b.w; dx++) solid[b.y + dy][b.x + dx] = true; });
+  props.forEach(p => { solid[p.y][p.x] = true; });
+  return { key: 'big' + n, w: n, h: n, rows: rows.map(r => r.join('')), solid, buildings, props, spawn: { x: GRID, y: GRID + 2 }, biome: 'meadow' };
+}
+function loadMap(key) { return key.startsWith('big') ? bigMap(+key.slice(3)) : getMap(key); }
+
+/* ---------------- state ---------------- */
+const S = { map: null, key: 'square', tilePx: 56, player: { x: 0, y: 0 }, path: [], stepAt: 0, walkFrom: null, npcs: [], auto: false, weather: 'clear', time: 'day', cam: { x: 0, y: 0 }, camInit: false };
+let ground = new Map(), live = new Map(), pool = [], statics = [], decor = 0, range = null, playerSpr, playerShadow, npcSprs = [];
+const player = { x: 0, y: 0, rx: 0, ry: 0 };
+
+function resetWorld() {
+  groundLayer.removeChildren().forEach(c => c.destroy({ children: true })); ground = new Map();
+  objLayer.removeChildren().forEach(c => c.destroy()); live = new Map(); pool = []; range = null; npcSprs = [];
+  playerSpr = playerShadow = null;
+}
+
+async function buildMapObjects() {
+  const m = S.map, rnd = seeded('tiles-' + m.key), at = (x, y) => (x < 0 || y < 0 || x >= m.w || y >= m.h) ? 'o' : m.rows[y][x];
+  const isPath = c => c === '=' || c === 'b' || c === '#', isWater = c => c === '~' || c === 'b';
+  m.tile = new Array(m.w * m.h); statics = new Array(m.w * m.h); decor = 0;
+  for (let y = 0; y < m.h; y++) for (let x = 0; x < m.w; x++) {
+    const c = m.rows[y][x], tone = rnd(), r2 = rnd(), i = y * m.w + x; let tex, obj = null;
+    if (c === '=' || c === '#') { tex = tileTex.path[mask(x, y, isPath, at)]; if (c === '#') obj = ['s-cobble']; else if (r2 < 0.24) obj = ['s-pebbles']; }
+    else if (c === '~' || c === 'b') { tex = tileTex.water[mask(x, y, isWater, at)]; if (c === 'b') obj = [at(x + 1, y) === 'b' ? 's-bridge-l' : at(x - 1, y) === 'b' ? 's-bridge-r' : 's-bridge']; else if (r2 < 0.55) obj = ['s-ripple']; }
+    else {
+      tex = tileTex.g[tone < 0.34 ? 0 : tone < 0.67 ? 1 : 2];
+      if (c === 'o') obj = [r2 < 0.5 ? 's-oak' : 's-oak2', 'tree']; else if (c === 'i') obj = ['s-pine', 'tree']; else if (c === 'h') obj = ['s-hedge', 'tree']; else if (c === 'r') obj = ['s-rock', 'tree'];
+      else if (c === ',') obj = ['s-flowers']; else if (r2 < 0.17) obj = ['s-tuft'];
+    }
+    m.tile[i] = tex;
+    if (obj) { decor++; statics[i] = [{ id: obj[0], tree: obj[1] === 'tree', x, y }]; }
+  }
+  m.buildings.forEach(b => { const i = b.y * m.w + b.x; (statics[i] = statics[i] || []).push({ id: b.sprite, bld: true, x: b.x, y: b.y, w: b.w, h: b.h }); decor++; });
+  m.props.forEach(p => { const i = p.y * m.w + p.x, id = PROP_SPRITE[p.type]; if (id) { (statics[i] = statics[i] || []).push({ id, prop: true, x: p.x, y: p.y }); decor++; } });
+  m.reach = null;
+}
+
+/* ground chunks: made lazily, hidden when off screen */
+function chunkAt(cx, cy) {
+  const key = cx + ',' + cy; let ch = ground.get(key); if (ch) return ch;
+  ch = new PIXI.Container(); const m = S.map;
+  for (let y = cy * CHUNK; y < Math.min(m.h, (cy + 1) * CHUNK); y++) for (let x = cx * CHUNK; x < Math.min(m.w, (cx + 1) * CHUNK); x++) {
+    const s = new PIXI.Sprite(m.tile[y * m.w + x]); s.position.set(x * T, y * T); s.width = s.height = T; ch.addChild(s);
+  }
+  groundLayer.addChild(ch); ground.set(key, ch); return ch;
+}
+function spriteFor(d) {
+  const s = pool.pop() || new PIXI.Sprite(); s.texture = symTex[d.id] || PIXI.Texture.EMPTY; s.visible = true;
+  if (d.bld) { s.position.set(d.x * T, d.y * T); s.width = d.w * T; s.height = d.h * T; s.zIndex = (d.y + d.h - 1) * 2 + 1; }
+  else if (d.tree) { s.position.set(d.x * T - T * 0.1, d.y * T - T * 0.2); s.width = s.height = T * 1.2; s.zIndex = d.y * 2; }
+  else { s.position.set(d.x * T, d.y * T); s.width = s.height = T; s.zIndex = d.prop ? d.y * 2 + 1 : -1; }
+  return s;
+}
+/* keep exactly the tiles near the camera in the scene */
+function syncRange() {
+  const m = S.map, tp = S.tilePx, vw = app.screen.width, vh = app.screen.height;
+  const x0 = Math.max(0, Math.floor(-world.x / tp) - 2), y0 = Math.max(0, Math.floor(-world.y / tp) - 2);
+  const x1 = Math.min(m.w - 1, Math.ceil((vw - world.x) / tp) + 2), y1 = Math.min(m.h - 1, Math.ceil((vh - world.y) / tp) + 3);
+  const r = x0 + ',' + y0 + ',' + x1 + ',' + y1; if (range === r) return; range = r;
+  const cx0 = Math.floor(x0 / CHUNK), cx1 = Math.floor(x1 / CHUNK), cy0 = Math.floor(y0 / CHUNK), cy1 = Math.floor(y1 / CHUNK);
+  ground.forEach((ch, key) => { const [cx, cy] = key.split(',').map(Number); ch.visible = cx >= cx0 && cx <= cx1 && cy >= cy0 && cy <= cy1; });
+  for (let cy = cy0; cy <= cy1; cy++) for (let cx = cx0; cx <= cx1; cx++) chunkAt(cx, cy).visible = true;
+  const want = new Set();
+  for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) { const list = statics[y * m.w + x]; if (!list) continue; list.forEach((d, j) => { const key = (y * m.w + x) + ':' + j; want.add(key); if (!live.has(key)) { const s = spriteFor(d); objLayer.addChild(s); live.set(key, s); } }); }
+  live.forEach((s, key) => { if (!want.has(key)) { objLayer.removeChild(s); s.visible = false; pool.push(s); live.delete(key); } });
+}
+
+/* ---------------- characters ---------------- */
+const NPC_ICONS = ['🧑', '👩', '🧔', '👨', '🧑‍🦱', '🧑‍🦳', '🧕', '🧑‍🎨', '🐰', '🐹', '🐭', '🐿️'];
+function charSprite(ch) {
+  const g = new PIXI.Container(), sh = new PIXI.Sprite(fxTex.shadow), s = new PIXI.Sprite(emojiTexture(ch));
+  sh.anchor.set(0.5); sh.position.set(T / 2, T * 0.86); sh.width = T * 0.6; sh.height = T * 0.16;
+  s.anchor.set(0.5); s.position.set(T / 2, T / 2); s.width = s.height = T * 0.66;
+  g.addChild(sh, s); g.sortableChildren = false; objLayer.addChild(g); return g;
+}
+function freeTile(m, x, y) { return x >= 0 && y >= 0 && x < m.w && y < m.h && !m.solid[y][x]; }
+function makeNpcs(count) {
+  const m = S.map, rnd = seeded('npcs'); S.npcs = []; npcSprs.forEach(s => { objLayer.removeChild(s); s.destroy({ children: true }); }); npcSprs = [];
+  let tries = 0;
+  while (S.npcs.length < count && tries++ < count * 40) {
+    const x = Math.floor(rnd() * m.w), y = Math.floor(rnd() * m.h); if (!freeTile(m, x, y) || m.rows[y][x] === 'b') continue;
+    S.npcs.push({ x, y, rx: x, ry: y, next: 0, from: { x, y }, t: 1, icon: NPC_ICONS[Math.floor(rnd() * NPC_ICONS.length)] });
+  }
+  S.npcs.forEach(n => { n.spr = charSprite(n.icon); n.spr.position.set(n.x * T, n.y * T); n.spr.zIndex = n.y * 2 + 1; npcSprs.push(n.spr); });
+}
+
+/* ---------------- walking (BFS on the same solid grid the game uses) ---------------- */
+function bfs(m, from, to) {
+  if (!freeTile(m, to.x, to.y)) return null; const W = m.w, prev = new Int32Array(m.w * m.h).fill(-1), q = [from.y * W + from.x]; prev[q[0]] = q[0];
+  for (let h = 0; h < q.length; h++) { const c = q[h], cx = c % W, cy = (c / W) | 0; if (cx === to.x && cy === to.y) break;
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = cx + dx, ny = cy + dy; if (!freeTile(m, nx, ny)) continue; const n = ny * W + nx; if (prev[n] !== -1) continue; prev[n] = c; q.push(n); } }
+  const goal = to.y * W + to.x; if (prev[goal] === -1) return null; const path = []; for (let c = goal; c !== from.y * W + from.x; c = prev[c]) path.push({ x: c % W, y: (c / W) | 0 }); return path.reverse();
+}
+function walkTo(x, y) { const p = bfs(S.map, S.player, { x, y }); if (p && p.length) { S.path = p; S.walkFrom = { x: S.player.x, y: S.player.y }; S.stepAt = performance.now(); } }
+function autoWalk() { const m = S.map; for (let k = 0; k < 40; k++) { const x = Math.floor(Math.random() * m.w), y = Math.floor(Math.random() * m.h); const p = bfs(m, S.player, { x, y }); if (p && p.length > 6) { S.path = p.slice(0, 60); S.walkFrom = { x: S.player.x, y: S.player.y }; S.stepAt = performance.now(); return; } } }
+
+/* ---------------- camera, weather, night ---------------- */
+function layout() {
+  const vw = app.screen.width, vh = app.screen.height; S.tilePx = Math.max(38, Math.ceil(vw / VIEW_COLS)); world.scale.set(S.tilePx / T);
+  tint.clear().rect(0, 0, vw, vh).fill({ color: 0xffffff }); applyTime(); buildWeather();
+}
+function camTarget() {
+  const m = S.map, tp = S.tilePx, vw = app.screen.width, vh = app.screen.height, padT = 70, padB = 96;
+  let cx = vw / 2 - (player.rx + 0.5) * tp, cy = (padT + vh - padB) / 2 - (player.ry + 0.5) * tp;
+  cx = m.w * tp <= vw ? (vw - m.w * tp) / 2 : Math.min(0, Math.max(vw - m.w * tp, cx));
+  cy = m.h * tp <= vh - padB ? (padT + vh - padB - m.h * tp) / 2 : Math.min(padT, Math.max(vh - m.h * tp - padB, cy));
+  return { cx, cy };
+}
+const TIMES = { day: [0xffffff, 0], dusk: [0xb3541e, 0.2], night: [0x0b1230, 0.5] };
+function applyTime() { const [c, a] = TIMES[S.time]; tint.tint = c; tint.alpha = a; }
+let drops = [];
+function buildWeather() {
+  fxLayer.removeChildren().forEach(c => c.destroy()); drops = []; const vw = app.screen.width, vh = app.screen.height;
+  const n = S.weather === 'rain' ? 70 : S.weather === 'snow' ? 40 : 0;
+  for (let i = 0; i < n; i++) {
+    const s = new PIXI.Sprite(S.weather === 'rain' ? fxTex.rain : fxTex.snow); const snow = S.weather === 'snow';
+    s.x = Math.random() * vw; s.y = Math.random() * vh;
+    if (snow) { const z = 3 + Math.random() * 5; s.width = s.height = z * 1.6; s.alpha = 0.85; } else { s.height = 30 + Math.random() * 30; s.width = 2; s.rotation = -0.14; s.alpha = 0.8; }
+    drops.push({ s, vy: snow ? 50 + Math.random() * 60 : 700 + Math.random() * 300, ph: Math.random() * 6, snow }); fxLayer.addChild(s);
+  }
+}
+
+/* ---------------- frame loop ---------------- */
+app.ticker.add(tk => {
+  const now = performance.now(), dt = tk.deltaMS / 1000, vw = app.screen.width, vh = app.screen.height;
+  // player walk: one tile per STEP_MS, like the game
+  if (S.path.length) {
+    const t = Math.min(1, (now - S.stepAt) / STEP_MS), a = S.walkFrom, b = S.path[0];
+    player.rx = a.x + (b.x - a.x) * t; player.ry = a.y + (b.y - a.y) * t;
+    if (t >= 1) { S.player = { x: b.x, y: b.y }; S.walkFrom = { x: b.x, y: b.y }; S.path.shift(); S.stepAt = now; }
+  } else { player.rx = S.player.x; player.ry = S.player.y; if (S.auto) autoWalk(); }
+  if (playerSpr) { playerSpr.position.set(player.rx * T, player.ry * T); playerSpr.zIndex = Math.round(player.ry) * 2 + 1; }
+  // NPCs wander
+  for (const n of S.npcs) {
+    if (n.t < 1) { n.t = Math.min(1, n.t + dt * 1000 / 520); n.rx = n.from.x + (n.x - n.from.x) * n.t; n.ry = n.from.y + (n.y - n.from.y) * n.t; }
+    else if (now > n.next) { n.next = now + 700 + Math.random() * 1800; const d = [[1, 0], [-1, 0], [0, 1], [0, -1]][Math.floor(Math.random() * 4)], nx = n.x + d[0], ny = n.y + d[1]; if (freeTile(S.map, nx, ny) && S.map.rows[ny][nx] !== 'b') { n.from = { x: n.x, y: n.y }; n.x = nx; n.y = ny; n.t = 0; } }
+  }
+  // camera eases toward its target; the first frame snaps
+  const { cx, cy } = camTarget();
+  if (!S.camInit) { world.x = cx; world.y = cy; S.camInit = true; } else { const k = 1 - Math.pow(0.0005, dt); world.x += (cx - world.x) * k; world.y += (cy - world.y) * k; }
+  syncRange();
+  // NPCs: only those near the view are shown
+  const tp = S.tilePx; for (const n of S.npcs) { const sx = n.rx * tp + world.x, sy = n.ry * tp + world.y, vis = sx > -tp * 2 && sx < vw + tp && sy > -tp * 2 && sy < vh + tp; n.spr.visible = vis; if (vis) { n.spr.position.set(n.rx * T, n.ry * T); n.spr.zIndex = Math.round(n.ry) * 2 + 1; } }
+  // weather
+  for (const d of drops) {
+    d.ph += dt; d.s.y += d.vy * dt; if (d.snow) d.s.x += Math.sin(d.ph * 1.3) * 18 * dt; else d.s.x -= d.vy * 0.14 * dt;
+    if (d.s.y > vh + 20) { d.s.y = -30; d.s.x = Math.random() * vw; } if (d.s.x < -10) d.s.x = vw + 5;
+  }
+  statsTick(now);
+});
+
+/* ---------------- stats ---------------- */
+let frames = 0, lastStat = performance.now();
+function statsTick(now) {
+  frames++; if (now - lastStat < 500) return; const fps = frames * 1000 / (now - lastStat); frames = 0; lastStat = now;
+  const m = S.map, tiles = m.w * m.h, inScene = objLayer.children.length + [...ground.values()].filter(c => c.visible).reduce((a, c) => a + c.children.length, 0);
+  $('plStats').innerHTML = `<div class="pl-fps">${fps.toFixed(0)} <span style="font-size:11px;font-weight:600;opacity:.7">fps</span></div>
+   <div class="row"><span class="k">renderer</span><b>${app.renderer.name}</b></div>
+   <div class="row"><span class="k">map</span><b>${m.w} x ${m.h}</b></div>
+   <div class="row"><span class="k">tiles in map</span><b>${tiles.toLocaleString()}</b></div>
+   <div class="row"><span class="k">sprites in scene</span><b>${inScene}</b></div>
+   <div class="row"><span class="k">page DOM nodes</span><b>${document.getElementsByTagName('*').length}</b></div>
+   <div class="row" title="The current DOM town draws one div per tile plus an svg and use per decoration"><span class="k">DOM town would need</span><b>~${(tiles + decor * 2).toLocaleString()}</b></div>`;
+}
+
+/* ---------------- controls ---------------- */
+async function rebuildAll(mapKey) {
+  if (mapKey) S.key = mapKey;
+  resetWorld(); S.map = loadMap(S.key);
+  const biomeSel = $('plBiome').value, biome = biomeSel === 'auto' ? S.map.biome : biomeSel;
+  readPalette(biome, $('plSeason').value, $('plTheme').value);
+  app.renderer.background.color = pal.ground;
+  buildAtlas(); await buildSymbols(); await buildMapObjects();
+  const sp = S.map.spawn; S.player = { x: sp.x, y: sp.y }; S.path = []; player.rx = sp.x; player.ry = sp.y; S.camInit = false;
+  playerSpr = charSprite('🧑'); makeNpcs(+$('plNpcs').value); layout(); range = null;
+}
+// recolour only (theme, biome, season): same map, new atlas + sprite textures
+async function repaint() {
+  const biomeSel = $('plBiome').value, biome = biomeSel === 'auto' ? S.map.biome : biomeSel;
+  readPalette(biome, $('plSeason').value, $('plTheme').value); app.renderer.background.color = pal.ground;
+  const keep = S.player; await rebuildAll(); S.player = keep; player.rx = keep.x; player.ry = keep.y;
+}
+$('plMap').onchange = e => rebuildAll(e.target.value);
+['plTheme', 'plBiome', 'plSeason'].forEach(id => { $(id).onchange = repaint; });
+$('plWeather').onchange = e => { S.weather = e.target.value; buildWeather(); };
+$('plTime').onchange = e => { S.time = e.target.value; applyTime(); };
+$('plNpcs').onchange = e => makeNpcs(+e.target.value);
+$('plAuto').onclick = e => { S.auto = !S.auto; e.target.textContent = 'Auto-walk: ' + (S.auto ? 'on' : 'off'); e.target.classList.toggle('on', S.auto); if (S.auto) autoWalk(); };
+$('plToggle').onclick = e => { const b = $('plBody'), hide = b.style.display !== 'none'; b.style.display = hide ? 'none' : ''; e.target.textContent = hide ? 'Show' : 'Hide'; };
+app.canvas.addEventListener('pointerdown', e => {
+  const r = app.canvas.getBoundingClientRect(), tp = S.tilePx, x = Math.floor((e.clientX - r.left - world.x) / tp), y = Math.floor((e.clientY - r.top - world.y) / tp);
+  if (x >= 0 && y >= 0 && x < S.map.w && y < S.map.h) { S.auto = false; $('plAuto').textContent = 'Auto-walk: off'; $('plAuto').classList.remove('on'); walkTo(x, y); }
+});
+window.addEventListener('keydown', e => { const d = { ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0], w: [0, -1], s: [0, 1], a: [-1, 0], d: [1, 0] }[e.key]; if (d && !S.path.length) walkTo(S.player.x + d[0], S.player.y + d[1]); });
+app.renderer.on('resize', layout);
+
+buildFxTextures();
+const qs = new URLSearchParams(location.search);
+['map:plMap', 'weather:plWeather', 'time:plTime', 'theme:plTheme', 'biome:plBiome', 'season:plSeason', 'npcs:plNpcs'].forEach(p => { const [k, id] = p.split(':'); if (qs.has(k)) $(id).value = qs.get(k); });
+S.weather = $('plWeather').value; S.time = $('plTime').value;
+await rebuildAll($('plMap').value);
+if (qs.get('auto') === '1') { S.auto = true; $('plAuto').textContent = 'Auto-walk: on'; $('plAuto').classList.add('on'); }
+if (qs.get('panel') === '0') { $('plBody').style.display = 'none'; $('plToggle').textContent = 'Show'; }
+window.__lab = { S, app, world, rebuildAll, ready: true };
+})();
+</script>
+</body>
+</html>
