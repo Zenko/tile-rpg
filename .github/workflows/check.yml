@@ -19,3 +19,5 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Browser tests
         run: node tests/run.js
+      - name: Browser tests (classic DOM town, the WebGL fallback)
+        run: TILE_RENDERER=dom node tests/run.js

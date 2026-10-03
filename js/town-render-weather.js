@@ -377,9 +377,11 @@ setInterval(tickSkyAndWeather, 5000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) state.sky.lastTickAt = Date.now(); });
 
 /* ---------------- static world (ground, trees, water, buildings) ---------------- */
+let tileOv = new Map();   // 'x,y' -> transparent overlay <div class="town-tile ov"> (fish hints, and the glow in placement / Hide and Seek) while js/town-gl.js draws the ground
 function buildWorld(key) {
-  const m = getMap(key);
+  const m = getMap(key), gl = tglWanted();   // gl: js/town-gl.js draws the ground, so no per-tile <div>s are made here
   townView.innerHTML = '';
+  tileOv = new Map();
   townView.dataset.biome = m.biome;
   townWorld = document.createElement('div');
   townWorld.id = 'townWorld'; townWorld.className = 'town-world';
@@ -396,11 +398,35 @@ function buildWorld(key) {
     if (!is(at(x - 1, y))) s.push(`inset ${px}px 0 0 0 ${color}`);
     return s.join(',');
   };
+  const glTiles = gl ? new Array(m.w * m.h) : null;
   for (let y = 0; y < m.h; y++) for (let x = 0; x < m.w; x++) {
-    const c = m.rows[y][x], el = document.createElement('div');
+    const c = m.rows[y][x];
+    let html = '', tone = rnd(), r2 = rnd();
+    if (gl) {
+      // Same choices as the DOM branch below (keep the two in step), recorded for js/town-gl.js instead of becoming elements.
+      let decor = null;
+      if (c === '=' || c === '#') { if (c === '#') decor = { id: 's-cobble' }; else if (r2 < 0.24) decor = { id: 's-pebbles' }; }
+      else if (c === '~' || c === 'b') {
+        if (c === 'b') decor = { id: at(x + 1, y) === 'b' ? 's-bridge-l' : at(x - 1, y) === 'b' ? 's-bridge-r' : 's-bridge' };
+        else {
+          if (r2 < 0.55) decor = { id: 's-ripple' };
+          if (m.fishTiles[x + ',' + y]) {
+            const dur = (3.2 + rnd() * 2.2).toFixed(2), delay = (rnd() * 2.6).toFixed(2), ov = document.createElement('div');
+            ov.className = 'town-tile ov fishspot'; ov.dataset.x = x; ov.dataset.y = y; ov.style.setProperty('--x', x); ov.style.setProperty('--y', y);
+            ov.innerHTML = `<span class="fish-hint" style="--fdur:${dur}s;--fdelay:${delay}s">🐟</span>`;
+            frag.appendChild(ov); tileOv.set(x + ',' + y, ov);
+          }
+        }
+      } else {
+        const tree = c === 'o' ? (r2 < 0.5 ? 's-oak' : 's-oak2') : c === 'i' ? 's-pine' : c === 'h' ? 's-hedge' : c === 'r' ? 's-rock' : null;
+        if (tree) decor = { id: tree, tree: true }; else if (c === ',') decor = { id: 's-flowers' }; else if (r2 < 0.17) decor = { id: 's-tuft' };
+      }
+      glTiles[y * m.w + x] = { tone, decor };
+      continue;
+    }
+    const el = document.createElement('div');
     el.className = 'town-tile'; el.dataset.x = x; el.dataset.y = y;
     el.style.setProperty('--x', x); el.style.setProperty('--y', y);
-    let html = '', tone = rnd(), r2 = rnd();
     if (c === '=' || c === '#') {
       el.classList.add('t-path'); el.style.boxShadow = edge(x, y, isPath, 'var(--path-edge)', 3);
       if (c === '#') html = svgUse('s-cobble'); else if (r2 < 0.24) html = svgUse('s-pebbles');
@@ -437,6 +463,7 @@ function buildWorld(key) {
   });
   townWorld.appendChild(frag);
   townView.appendChild(townWorld);
+  if (gl) { tglMount(); tglSetMap(m, glTiles); }
   buildSkyLayers();
   playerEl = null; townBuiltFor = key;
 }
@@ -469,6 +496,7 @@ function layoutTown() {
   townView.style.width = vw + 'px';
   townView.style.height = vh + 'px';
   if (weatherCanvasOn()) fxResize();
+  tglResize();   // js/town-gl.js: size the WebGL canvas and its world scale to the new tile size
   return true;
 }
 /* ---------------- look around: drag the map ----------------
@@ -491,8 +519,11 @@ function updateCamera(animate) {
   cx = Math.min(0, Math.max(vw - m.w * tilePx, cx)); cy = Math.min(padT, Math.max(vh - m.h * tilePx - padB, cy));
   if (camFree && (camFree.district !== state.currentDistrict || inScene || inBattle)) camRelease();   // a dragged camera only lives in the district and view it was dragged in
   if (camFree) { const b = camBounds(); cx = Math.min(b.maxX, Math.max(b.minX, camFree.cx)); cy = Math.min(b.maxY, Math.max(b.minY, camFree.cy)); animate = false; }
-  townWorld.style.transition = animate ? `transform ${STEP_MS}ms linear` : 'none';
-  townWorld.style.transform = `translate(${cx}px, ${cy}px)`;
+  if (tglOn()) tglCamera(cx, cy, animate);   // the canvas, the entity layer and the tree overhangs move together, driven from JS
+  else {
+    townWorld.style.transition = animate ? `transform ${STEP_MS}ms linear` : 'none';
+    townWorld.style.transform = `translate(${cx}px, ${cy}px)`;
+  }
   lastCam = { cx, cy, vw, vh };
   updateNightHole(cx, cy, vw, vh);
 }
@@ -968,17 +999,32 @@ function hideseekCandidateSpots(radius) {
   }
   return out;
 }
-function hideseekEl(x, y) { return townWorld && townWorld.querySelector(`.town-tile[data-x="${x}"][data-y="${y}"]`); }
+// The tile element at x,y: the real tile <div> in the classic renderer; in the WebGL renderer there are no tile elements, so a transparent
+// overlay <div> is made on demand (the same .town-tile class, so the glow CSS is shared) and released when the highlight goes away.
+function tileEl(x, y) {
+  if (!townWorld) return null;
+  const key = x + ',' + y; let el = tileOv.get(key);
+  if (!el) el = townWorld.querySelector(`.town-tile[data-x="${x}"][data-y="${y}"]`);
+  if (!el && tglWanted()) {
+    el = document.createElement('div'); el.className = 'town-tile ov'; el.dataset.x = x; el.dataset.y = y; el.style.setProperty('--x', x); el.style.setProperty('--y', y);
+    townWorld.appendChild(el); tileOv.set(key, el);
+  }
+  return el;
+}
+function releaseTileOverlays() {   // drop overlay divs that are no longer highlighted (fish hints stay)
+  tileOv.forEach((el, key) => { if (!el.classList.contains('fishspot') && !el.classList.contains('placeable') && !el.className.includes('hideseek-')) { el.remove(); tileOv.delete(key); } });
+}
+function hideseekEl(x, y) { return tileEl(x, y); }
 function hideseekHighlight() {
   if (!townWorld) return;
-  const valid = new Set(HIDESEEK.spots.map(s => s.x + ',' + s.y));
-  townWorld.querySelectorAll('.town-tile').forEach(el => {
-    el.classList.toggle('hideseek-spot', HIDESEEK.phase === 'seek' && valid.has(el.dataset.x + ',' + el.dataset.y));
-  });
+  townWorld.querySelectorAll('.town-tile.hideseek-spot').forEach(el => el.classList.remove('hideseek-spot'));
+  if (HIDESEEK.phase === 'seek') HIDESEEK.spots.forEach(s => { const el = tileEl(s.x, s.y); if (el) el.classList.add('hideseek-spot'); });
+  releaseTileOverlays();
 }
 function hideseekClearHighlight() {
   if (!townWorld) return;
   townWorld.querySelectorAll('.town-tile').forEach(el => el.classList.remove('hideseek-spot', 'hideseek-found', 'hideseek-wrong'));
+  releaseTileOverlays();
 }
 function hideseekHint(text, showTimer) {
   document.getElementById('hideseekHintText').textContent = text;
@@ -1107,14 +1153,14 @@ function canPlaceDecorationAt(district, x, y) {
 }
 function highlightPlaceableTiles() {
   if (!townWorld || !placingDecoration) return;
-  const valid = new Set(decorationPlaceableTiles(placingDecoration.district).map(t => t.x + ',' + t.y));
-  townWorld.querySelectorAll('.town-tile').forEach(el => {
-    el.classList.toggle('placeable', valid.has(el.dataset.x + ',' + el.dataset.y));
-  });
+  townWorld.querySelectorAll('.town-tile.placeable').forEach(el => el.classList.remove('placeable'));
+  decorationPlaceableTiles(placingDecoration.district).forEach(t => { const el = tileEl(t.x, t.y); if (el) el.classList.add('placeable'); });
+  releaseTileOverlays();
 }
 function clearPlaceableHighlight() {
   if (!townWorld) return;
   townWorld.querySelectorAll('.town-tile.placeable').forEach(el => el.classList.remove('placeable'));
+  releaseTileOverlays();
 }
 // Every placed decoration, wherever it is: [{ district, deco }].
 function allDecorations() {
@@ -1242,11 +1288,11 @@ townView.addEventListener('click', e => {
 });
 
 /* ---- drag handling (pointer events cover finger and mouse; touch-action:none on the map is in css/latest.css) ---- */
-function camCurrent() { const mt = new DOMMatrix(getComputedStyle(townWorld).transform); return { cx: mt.m41, cy: mt.m42 }; }
+function camCurrent() { const g = tglOn() && tglCamNow(); if (g) return { cx: g.cx, cy: g.cy }; const mt = new DOMMatrix(getComputedStyle(townWorld).transform); return { cx: mt.m41, cy: mt.m42 }; }
 function camPan(cx, cy) {
   const b = camBounds(); cx = Math.min(b.maxX, Math.max(b.minX, cx)); cy = Math.min(b.maxY, Math.max(b.minY, cy));
   camFree = { cx, cy, district: state.currentDistrict };
-  townWorld.style.transition = 'none'; townWorld.style.transform = `translate(${cx}px, ${cy}px)`;
+  if (tglOn()) tglCamera(cx, cy, false); else { townWorld.style.transition = 'none'; townWorld.style.transform = `translate(${cx}px, ${cy}px)`; }
   lastCam = { cx, cy, vw: b.vw, vh: b.vh }; updateNightHole(cx, cy, b.vw, b.vh);
   document.getElementById('camRecenter').classList.remove('hidden');
   return { cx, cy, atX: cx <= b.minX || cx >= b.maxX, atY: cy <= b.minY || cy >= b.maxY };

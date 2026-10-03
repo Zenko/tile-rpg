@@ -4,17 +4,18 @@
    town-render-weather.js). Each one is its own animated element sitting on top of the whole map, which is what the
    frame-time benchmark (scripts/perf-town.js) found to be the most consistent cost on a throttled CPU. This file draws
    the same effect into a single <canvas> from one requestAnimationFrame loop instead.
-   It is OFF by default and only switches on with ?renderer=canvas in the URL or localStorage['tr-renderer']='canvas',
-   so the live game is unchanged until the owner has compared the two on a real phone. When it is off nothing in this
-   file runs except the three one-line guards in town-render-weather.js.
+   It is ON by default (since build 134, together with the WebGL ground in js/town-gl.js) and switched off only by
+   ?renderer=dom in the URL or localStorage['tr-renderer']='dom', which brings back the old CSS drops and flakes exactly.
+   ?renderer=canvas keeps the old tiles but uses this weather. When it is off nothing in this file runs except the
+   one-line guards in town-render-weather.js.
    Rules it keeps: nothing is drawn (and no loop runs) while a battle, a building, another tab or a hidden page covers
    the town, or when Calm mode / reduced motion is on - the CSS version froze in Calm mode too. Fades match the CSS
    (about 2.2s), a change of weather fades the old one out before the new one in. Lightning, sun and cloud shadows stay
    CSS: each is a single element.
    ===================================================================================================================== */
 const WEATHER_CANVAS = (() => {
-  try { return new URLSearchParams(location.search).get('renderer') === 'canvas' || localStorage.getItem('tr-renderer') === 'canvas'; }
-  catch (e) { return false; }
+  try { return (new URLSearchParams(location.search).get('renderer') || localStorage.getItem('tr-renderer') || 'gl') !== 'dom'; }
+  catch (e) { return true; }
 })();
 function weatherCanvasOn() { return WEATHER_CANVAS; }
 

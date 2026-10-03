@@ -16,10 +16,14 @@ const NOISE = /gstatic|googleapis|firebase|fonts|ERR_|Failed to load resource/;
   const browser = await chromium.launch();
   let failed = 0;
   for (const f of files) {
-    const ctx = await browser.newContext({ viewport: { width: 400, height: 860 } }), page = await ctx.newPage(), errors = [];
+    const ctx = await browser.newContext({ viewport: { width: 400, height: 860 } });
+    // TILE_RENDERER=dom runs the whole suite on the classic DOM town (the fallback path); the default is the WebGL town.
+    if (process.env.TILE_RENDERER) await ctx.addInitScript(r => { try { localStorage.setItem('tr-renderer', r); } catch (e) { /* ignore */ } }, process.env.TILE_RENDERER);
+    const page = await ctx.newPage(), errors = [];
     page.on('pageerror', e => errors.push(e.message));
     page.on('console', m => m.type() === 'error' && !NOISE.test(m.text()) && errors.push(m.text()));
     page.on('dialog', d => setTimeout(() => d.accept().catch(() => {}), 50));
+    if (process.env.DEBUG_NAV) { page.on('framenavigated', fr => console.log('      [nav] ' + fr.url().slice(-50) + ' at ' + (Date.now() - t0) + 'ms')); page.on('crash', () => console.log('      [page crashed]')); page.on('close', () => console.log('      [page close] at ' + (Date.now() - t0) + 'ms')); page.on('popup', () => console.log('      [popup]')); page.on('frameattached', fr => console.log('      [frame attached] ' + fr.url().slice(-40))); page.on('framedetached', fr => console.log('      [frame detached] ' + fr.url().slice(-40) + ' at ' + (Date.now() - t0) + 'ms')); page.on('console', m => /error|warn/.test(m.type()) && console.log('      [console ' + m.type() + '] ' + m.text().slice(0, 160))); }
     const t0 = Date.now();
     try {
       await page.goto('file://' + path.join(root, 'index.html')); await page.waitForTimeout(600);

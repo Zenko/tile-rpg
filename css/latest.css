@@ -1047,3 +1047,11 @@ html.calm .cl-cell.rat, html.cozy .cl-cell.rat { animation: none; }
 /* Optional one-canvas rain and snow (js/weather-canvas.js, only with ?renderer=canvas). .town-weather is 1.2x wide and 1.4x tall
    (inset: -20% -10%), so the canvas sits over the middle of it, exactly where the town view is. */
 .town-weather .fx-canvas { position: absolute; left: 8.3333%; top: 14.2857%; width: 83.3333%; height: 71.4286%; pointer-events: none; }
+
+/* WebGL town (js/town-gl.js): the ground canvas sits behind #townWorld (entities, buildings), the front canvas redraws the overhang of
+   each tree over the entities, above the world and below the sky layers (z-index 5+). Overlay tiles (.ov) are transparent boxes used only for
+   fish hints and for the placement / Hide and Seek glow, which reuse the .town-tile outline rules. */
+.town-gl { position: absolute; left: 0; top: 0; pointer-events: none; }
+.town-front { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+.town-tile.ov { background: none; }
+.town-tile.ov:not(.placeable):not(.hideseek-spot):not(.hideseek-found):not(.hideseek-wrong) { outline: none; }

@@ -39,6 +39,8 @@ const CASES = ALL_CASES.filter(c => !ONLY || (c.name + ' ' + c.cpu + 'x').includ
       state.sky.elapsedMs = sky;
       saveState();
       const st = document.createElement('style'); st.textContent = '.overlay{display:none!important}'; document.head.appendChild(st);
+      // A neighbour standing in the walking corridor makes findPath return nothing and the run silently idle, so the district is emptied first.
+      const d0 = ensureDistrictData(state.currentDistrict); d0.npcs.length = 0; d0.boss = null; d0.items = []; d0.spirits = []; d0.bugs = [];
       applyWeather(true); applySky(true); renderTown();
       const css = { weather: '.town-weather{display:none!important}', sky: '.town-sky,.town-vignette{display:none!important}', tiles: '.town-tile *{display:none!important}' };
       const off = hide === 'all' ? Object.values(css).join('') : (css[hide] || '');
@@ -63,17 +65,18 @@ const CASES = ALL_CASES.filter(c => !ONLY || (c.name + ' ' + c.cpu + 'x').includ
       };
       walk();
       }
-      const gaps = []; let last = performance.now(); const t0 = last;
-      await new Promise(res => { const f = t => { gaps.push(t - last); last = t; if (t - t0 < seconds * 1000) requestAnimationFrame(f); else res(); }; requestAnimationFrame(f); });
+      const gaps = []; let last = performance.now(); const t0 = last, moves = { n: 0, at: pixi ? null : JSON.stringify(state.playerPos) };
+      await new Promise(res => { const f = t => { gaps.push(t - last); last = t; if (!pixi) { const at = JSON.stringify(state.playerPos); if (at !== moves.at) { moves.at = at; moves.n++; } } if (t - t0 < seconds * 1000) requestAnimationFrame(f); else res(); }; requestAnimationFrame(f); });
       stop = true;
       const s = gaps.slice(1).sort((a, b) => a - b), q = p => s[Math.min(s.length - 1, Math.floor(s.length * p))];
-      return { p50: q(0.5), p95: q(0.95), max: s[s.length - 1], slow: s.filter(x => x > 20).length, n: s.length, dom: pixi ? document.getElementsByTagName('*').length : townView.getElementsByTagName('*').length };
+      return { p50: q(0.5), p95: q(0.95), max: s[s.length - 1], slow: s.filter(x => x > 20).length, n: s.length, moves: pixi ? -1 : moves.n, dom: pixi ? document.getElementsByTagName('*').length : townView.getElementsByTagName('*').length };
     }, [SECONDS, RENDERER === 'pixi']);
     const m1 = Object.fromEntries((await cdp.send('Performance.getMetrics')).metrics.map(x => [x.name, x.value]));
     // Main-thread busy time per second of wall clock: steadier than frame gaps, which vary a lot from run to run.
     const busy = k => ((m1[k] - m0[k]) / SECONDS * 100).toFixed(1) + '%';
     r.cpu = `task ${busy('TaskDuration')} script ${busy('ScriptDuration')} layout ${busy('LayoutDuration')} style ${busy('RecalcStyleDuration')}`;
-    console.log(c.name.padEnd(18) + (c.cpu + 'x').padEnd(5) + r.p50.toFixed(1).padEnd(8) + r.p95.toFixed(1).padEnd(8) + r.max.toFixed(1).padEnd(8) + String(r.slow).padEnd(8) + String(r.n).padEnd(8) + String(r.dom).padEnd(8) + r.cpu);
+    console.log(c.name.padEnd(18) + (c.cpu + 'x').padEnd(5) + r.p50.toFixed(1).padEnd(8) + r.p95.toFixed(1).padEnd(8) + r.max.toFixed(1).padEnd(8) + String(r.slow).padEnd(8) + String(r.n).padEnd(8) + String(r.dom).padEnd(8) + (r.moves >= 0 ? 'steps ' + r.moves + '  ' : '') + r.cpu);
+    if (r.moves === 0) console.log('  ^ the player never walked in this run: its numbers are idle and mean nothing');
     await ctx.close();
   }
   await browser.close();
