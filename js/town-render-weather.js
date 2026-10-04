@@ -431,7 +431,7 @@ function buildWorld(key) {
       el.classList.add('t-path'); el.style.boxShadow = edge(x, y, isPath, 'var(--path-edge)', 3);
       if (c === '#') html = svgUse('s-cobble'); else if (r2 < 0.24) html = svgUse('s-pebbles');
     } else if (c === '~' || c === 'b') {
-      el.classList.add('t-water'); el.style.boxShadow = edge(x, y, isWater, 'var(--shore)', 4);
+      el.classList.add('t-water');   // no sand band: the water fills the whole tile (the WebGL town does the same)
       if (c === 'b') html = svgUse(at(x + 1, y) === 'b' ? 's-bridge-l' : at(x - 1, y) === 'b' ? 's-bridge-r' : 's-bridge');
       else {
         if (r2 < 0.55) html = svgUse('s-ripple');

@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta ${RELEASES[0].n} (build $
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'fixed', x: 'Water tiles now fill the whole tile. The sand band that used to sit inside the edge of every shore tile is gone.' },
   { t:'better', x: 'Calm motion is gone from Settings. The game still follows your device\'s own reduced-motion setting. The Atlas\'s four matches are tuned so they climb in difficulty, the Wall cellar deck is back to a full 12 cards, and the five new cards use emoji as their picture for now.' },
   { t:'better', x: 'The Journal\'s Notes page is now Theories: write down your guesses about the dream, and the Atlas\'s answers are kept above them as hints. Foil cards are now Reborn cards, the characters and districts speak with their dream voices, and the opponent-only cards have dream names too.' },
   { t:'better', x: 'More dream names: the card packs are Nap, Daydream, Moonlit, Midnight, Lucid, Reverie and Lullaby Packs (and Lumen\'s is the Lantern Pack), Tarot is the Fates, Keeper level is Dreamer level, the Keeper\'s Knack is the Dreamer\'s Gift, Fishing and Gardening are Thought Fishing and Thought Tending, the bug jar is the Glow Jar, ghost duels are lingering duels, and the weather has dream names (Mist, Moonrain, Dream storm, Drifting stars).' },

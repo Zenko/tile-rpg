@@ -93,11 +93,12 @@ function tglBuildAtlas(pal, TEX) {
     c.restore(); cells[i] = new PIXI.Rectangle(ox, oy, TEX, TEX);
   };
   ['ground', 'ground2', 'ground3'].forEach((g, i) => cell(i, pal[g]));
-  for (let m = 0; m < 16; m++) { cell(3 + m, pal.path, pal['path-edge'], 3, m); cell(19 + m, pal.water, pal.shore, 4, m); }
+  for (let m = 0; m < 16; m++) cell(3 + m, pal.path, pal['path-edge'], 3, m);
+  cell(19, pal.water);                          // water has no sand band: the blue fills the whole tile, like every other tile (the 16 edge variants are gone)
   const base = PIXI.Texture.from(cv); base.source.scaleMode = 'linear';
   const sub = i => new PIXI.Texture({ source: base.source, frame: cells[i] });
   const tile = { g: [0, 1, 2].map(sub), path: [], water: [] };
-  for (let m = 0; m < 16; m++) { tile.path[m] = sub(3 + m); tile.water[m] = sub(19 + m); }
+  for (let m = 0; m < 16; m++) { tile.path[m] = sub(3 + m); tile.water[m] = sub(19); }
   return { base, tile };
 }
 async function tglSymbol(id, pal, px) {
