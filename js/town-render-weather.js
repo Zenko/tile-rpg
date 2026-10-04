@@ -92,8 +92,8 @@ function rollWeather(isNight) {
   return 'clear';
 }
 const WEATHER_LOG = {
-  clear: 'The sky clears up.', cloudy: 'Clouds roll in overhead.', rain: 'Rain starts to fall.',
-  storm: 'A storm rolls in. Thunder rumbles somewhere over the rooftops.', snow: 'Snow begins to drift down.'
+  clear: 'The sky clears up.', cloudy: 'Mist drifts in.', rain: 'Moonrain starts to fall.',
+  storm: 'A dream storm rolls in. Something hums far above the rooftops.', snow: 'Stars begin to drift down.'
 };
 // What each kind of weather actually changes. `short` goes on the battle chip and in toasts; the numbers are read
 // by the systems they touch (fishing, finds, chests, spirits, battles, rewards) through weatherIs()/WEATHER_EFFECTS.
@@ -180,10 +180,10 @@ const DISTRICT_AMBIENT = {
             night: ['Night-blooming flowers open their petals.', 'Crickets sing from somewhere in the garden.', 'The garden holds its breath in the moonlight.'] },
 };
 const WEATHER_AMBIENT = {
-  cloudy: ['Clouds drift lazily overhead.', 'The light has gone soft and grey.'],
-  rain: ['Rain patters steadily on rooftops.', 'Puddles gather along the path.', 'The air smells like wet stone.'],
-  storm: ['Thunder rumbles somewhere beyond the rooftops.', 'Wind rattles the shutters.'],
-  snow: ['Snow gathers quietly on the rooftops.', 'Footprints trail behind you in the fresh snow.'],
+  cloudy: ['Mist drifts lazily between the buildings.', 'The light has gone soft and pearly.'],
+  rain: ['Moonrain patters on the rooftops, silver and slow.', 'Puddles gather along the path, each holding a small moon.', 'The air smells like wet stone.'],
+  storm: ['Something hums beyond the rooftops.', 'The whole dream shivers a little.'],
+  snow: ['Stars gather quietly on the rooftops.', 'Soft light trails behind you where you walk.'],
 };
 let ambientState = { key: '', at: 0, el: null };
 function updateAmbient() {

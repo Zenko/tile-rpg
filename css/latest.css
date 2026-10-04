@@ -1203,3 +1203,7 @@ html.cozy .cl-cell.rat { animation: none; }
 .atlas-hints { margin: 6px 0 10px; padding: 8px 12px; border-radius: 14px; background: color-mix(in srgb, var(--atlas) 12%, transparent); border: 1px solid color-mix(in srgb, var(--atlas) 35%, transparent); }
 .atlas-hint { font-size: 13px; line-height: 1.4; color: var(--ink-soft); padding: 4px 0; font-style: italic; }
 .atlas-hint.more { opacity: .7; font-style: normal; }
+
+/* Dream names are longer than the old ones ("Moonwhisper Dragon", "Mountain of Memory"): on the collection and deck tiles a long name wraps to a
+   second line instead of being cut off. Battle cards keep their one-line names. */
+.alm-card.tile .ac-name { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; text-overflow: clip; overflow: hidden; line-height: 1.1; }

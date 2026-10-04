@@ -136,11 +136,11 @@ function renderLog() {
 
 /* ---------------- battle history: the last matches you played, and your overall record ---------------- */
 const BATTLE_LOG_MAX = 40;
-const BATTLE_KIND_LABEL = { neighbor: 'Friendly', boss: 'Boss', cellar: 'Cellar', deep: 'Deep cellar', rival: 'Rival', signature: 'Signature', cup: 'Cup', challenge: 'Challenge', draft: 'Draft', ghost: 'Ghost' };
+const BATTLE_KIND_LABEL = { neighbor: 'Friendly', boss: 'Boss', cellar: 'Cellar', deep: 'Deep cellar', rival: 'Rival', signature: 'Signature', cup: 'Cup', challenge: 'Challenge', draft: 'Draft', ghost: 'Lingering', atlas: 'Atlas' };
 function battleLog() { const p = state.progress; if (!Array.isArray(p.battleLog)) p.battleLog = []; return p.battleLog; }
 function recordBattle(won, yielded, prizes) {
   const npc = battle.npc, G = battle.G, p = state.progress;
-  const kind = npc.ghost ? 'ghost' : npc.draft ? 'draft' : npc.challenge ? 'challenge' : npc.cup ? 'cup' : npc.dungeon ? (npc.dungeon.deep ? 'deep' : 'cellar') : npc.isRival ? 'rival' : npc.signature ? 'signature' : npc.isBoss ? 'boss' : 'neighbor';
+  const kind = npc.atlas ? 'atlas' : npc.ghost ? 'ghost' : npc.draft ? 'draft' : npc.challenge ? 'challenge' : npc.cup ? 'cup' : npc.dungeon ? (npc.dungeon.deep ? 'deep' : 'cellar') : npc.isRival ? 'rival' : npc.signature ? 'signature' : npc.isBoss ? 'boss' : 'neighbor';
   battleLog().unshift({ at: Date.now(), name: npc.name, icon: opponentPortrait(npc), kind, won, yielded,
     turns: Math.ceil(G.turn / 2) + 1, spirit: Math.max(0, G.p[0].spirit), opp: Math.max(0, G.p[1].spirit),
     district: (npc.dungeon && npc.dungeon.district) || state.currentDistrict, weather: battle.weather,

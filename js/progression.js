@@ -446,6 +446,19 @@ function sanitizeCards() {
   state.ownedCards = state.ownedCards.filter(id => !!cardDef(id));
   state.deck = state.deck.filter(id => !!cardDef(id));
   if (!Array.isArray(state.progress.discovered)) state.progress.discovered = [];
+  // Cards that were cut from the game (the 100-card pool) can still be named by an older save in places other than the collection.
+  const pr = state.progress, known = id => !!(id && cardDef(id));
+  if (state.companion && !known(state.companion.cardId)) { state.companion = null; state.companionPos = null; }
+  if (Array.isArray(pr.charms)) pr.charms = pr.charms.map(id => (known(id) ? id : null));
+  if (pr.foils && typeof pr.foils === 'object') Object.keys(pr.foils).forEach(k => { if (!known(BattleEngine.baseIdOf(k))) delete pr.foils[k]; });
+  if (pr.home && Array.isArray(pr.home.favs)) pr.home.favs = pr.home.favs.filter(known);
+  if (pr.trades && Array.isArray(pr.trades.offers) && pr.trades.offers.some(o => (o.want && !known(o.want)) || (o.give && !known(o.give)))) delete pr.trades;
+  if (pr.puzzle && pr.puzzle.snap && (JSON.stringify(pr.puzzle.snap).match(/"id":"[a-z][a-z0-9~.-]*"/g) || []).some(m => !known(m.slice(6, -1)))) pr.puzzle.snap = null;
+  // The Card Museum and Expeditions left in Beta 1: send any team that was still away home with its cards.
+  if (pr.expeditions && Array.isArray(pr.expeditions.active)) {
+    pr.expeditions.active.forEach(t => (t.cards || []).forEach(id => { if (known(id)) state.ownedCards.push(id); }));
+    pr.expeditions.active = []; pr.expeditions.picking = null;
+  }
 }
 
 // only: 'spell' limits the draw to spells (the Lullaby Pack). Cards marked `exclusive` (cellar or rival prizes)

@@ -155,10 +155,10 @@ function talkReact(emoji) {
 }
 const TALK_WEATHER = {
   clear:  ['Lovely and bright, isn\'t it? Good day for a wander.', 'Not a cloud to complain about. I could sit out in this all afternoon.'],
-  cloudy: ['A bit grey, but I don\'t mind. It keeps the glare off the cards.', 'Cloudy days are for slow walks and warm drinks.'],
-  rain:   ['Listen to that rain on the roofs. I do love the sound.', 'Puddles everywhere! Mind your step.'],
-  storm:  ['Quite the storm! Everything feels a little faster in this weather.', 'Thunder always makes my cards tingle. Stay dry, friend.'],
-  snow:   ['Snow! Everything is so quiet under it.', 'Winter suits this town. Come and find me by the warm windows later.']
+  cloudy: ['A bit misty, but I don\'t mind. It keeps the glare off the cards.', 'Misty days are for slow walks and warm drinks.'],
+  rain:   ['Listen to the moonrain on the roofs. I do love the sound.', 'Puddles everywhere, each with its own little moon!'],
+  storm:  ['Quite the dream storm! Everything feels a little faster in this weather.', 'It always makes my cards tingle. Stay close, friend.'],
+  snow:   ['Drifting stars! Everything is so quiet under them.', 'Come and find me by the warm windows later.']
 };
 const TALK_GOSSIP = [
   place => `Things are calm around ${place}. I like it that way.`,

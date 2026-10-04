@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta ${RELEASES[0].n} (build $
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'fixed', x: 'Older saves load cleanly after the card cut: a companion, charm, foil, framed favourite or trade that named a removed card is tidied away, and cards that were away on an expedition come home. Long card names now wrap to two lines in My Cards and the Deck instead of being cut off, and the weather has its dream wording everywhere (Mist, Moonrain, Dream storm, drifting stars).' },
   { t:'fixed', x: 'Water tiles now fill the whole tile. The sand band that used to sit inside the edge of every shore tile is gone.' },
   { t:'better', x: 'Calm motion is gone from Settings. The game still follows your device\'s own reduced-motion setting. The Atlas\'s four matches are tuned so they climb in difficulty, the Wall cellar deck is back to a full 12 cards, and the five new cards use emoji as their picture for now.' },
   { t:'better', x: 'The Journal\'s Notes page is now Theories: write down your guesses about the dream, and the Atlas\'s answers are kept above them as hints. Foil cards are now Reborn cards, the characters and districts speak with their dream voices, and the opponent-only cards have dream names too.' },
