@@ -1,6 +1,6 @@
 /* ============================================================
    AFTER DARK: the Lantern Market and night critters
-   At night Lumen sets up in Market Row (a tile you can walk to, like a spirit it never blocks the way), and a few
+   At night Lumen sets up in El Mercado de Susurros (a tile you can walk to, like a spirit it never blocks the way), and a few
    critters glow in every district's grass. Catch them for the critter log and to trade at the Lantern Market.
    ============================================================ */
 const LANTERN_TILE = { district: 'market', x: 4, y: 5 };
@@ -79,10 +79,10 @@ function sellJar() {
    its card's first keyword. One companion at a time; letting it go returns it to the wild.
    ============================================================ */
 const COMPANION_PERKS = {
-  spirit:  { icon: '🛡️', text: '+2 Spirit at the start of every match' },
+  spirit:  { icon: '🛡️', text: '+2 Calm at the start of every match' },
   finds:   { icon: '👀', text: 'Spots more hidden cards in the grass' },
   crops:   { icon: '🌱', text: 'Crops grow 25% faster' },
-  harvest: { icon: '🧺', text: '+2 Pebbles from every harvest' },
+  harvest: { icon: '🧺', text: '+2 Embers from every harvest' },
   chest:   { icon: '🗝️', text: 'Hidden chests turn up more often' },
   fish:    { icon: '🎣', text: 'Fish bite sooner' },
   xp:      { icon: '⭐', text: '+10% XP from everything' },
@@ -153,12 +153,12 @@ const CHARM_KINDS = {
   echo:   { kind: 'fish',           val: t => 0.05 * t,        text: v => `Fish bite ${Math.round(v * 100)}% sooner` },
   swift:  { kind: 'finds',          val: t => 0.10 * t,        text: v => `Hidden finds +${Math.round(v * 100)}%` },
   guard:  { kind: 'chest',          val: t => 0.10 * t,        text: v => `Hidden chests +${Math.round(v * 100)}%` },
-  bloom:  { kind: 'harvestPebbles', val: t => t,               text: v => `+${v} Pebble${v === 1 ? '' : 's'} per harvest` },
-  shield: { kind: 'startSpirit',    val: t => Math.ceil(t / 2), text: v => `+${v} Spirit at the start of matches` },
+  bloom:  { kind: 'harvestPebbles', val: t => t,               text: v => `+${v} Ember${v === 1 ? '' : 's'} per harvest` },
+  shield: { kind: 'startSpirit',    val: t => Math.ceil(t / 2), text: v => `+${v} Calm at the start of matches` },
   rally:  { kind: 'xp',             val: t => 0.02 * t,        text: v => `+${Math.round(v * 100)}% XP` },
   drain:  { kind: 'bake',           val: t => 0.06 * t,        text: v => `Bread bakes ${Math.round(v * 100)}% faster` },
-  thorns: { kind: 'winPebbles',     val: t => t,               text: v => `+${v} Pebble${v === 1 ? '' : 's'} for every match won` },
-  spell:  { kind: 'miniPebbles',    val: t => Math.ceil(t / 2), text: v => `+${v} Pebble${v === 1 ? '' : 's'} per mini-game medal` },
+  thorns: { kind: 'winPebbles',     val: t => t,               text: v => `+${v} Ember${v === 1 ? '' : 's'} for every match won` },
+  spell:  { kind: 'miniPebbles',    val: t => Math.ceil(t / 2), text: v => `+${v} Ember${v === 1 ? '' : 's'} per mini-game medal` },
 };
 const CHARM_SLOT_LEVELS = [1, 5, 10];      // level needed for charm slot 1, 2, 3
 function charmSlotsOpen() { return CHARM_SLOT_LEVELS.filter(l => (state.progress.level || 1) >= l).length; }
@@ -187,10 +187,10 @@ const CARD_SETS = [
   { id: 'koi',      name: 'Koi Pond',       icon: '🎏', cards: ['koi', 'copper-carp', 'koi-ascending', 'void-koi'],                      kind: 'fish',        val: 0.10, text: 'Fish bite 10% sooner' },
   { id: 'moon',     name: 'Moon Phases',    icon: '🌙', cards: ['moonlit-shrine', 'moon-viewing', 'moonstone', 'moon-dragon'],           kind: 'xp',          val: 0.05, text: '+5% XP' },
   { id: 'garden',   name: 'Garden Party',   icon: '🌷', cards: ['sprout', 'blossom', 'foxglove', 'garden-spirit', 'garden-titan'],       kind: 'crops',       val: 0.10, text: 'Crops grow 10% faster' },
-  { id: 'stones',   name: 'Rock Collection', icon: '🪨', cards: ['pebble', 'flintstone', 'geode', 'boulder', 'quartz-cluster'],          kind: 'startSpirit', val: 1,    text: '+1 Spirit at the start of matches' },
+  { id: 'stones',   name: 'Rock Collection', icon: '🪨', cards: ['pebble', 'flintstone', 'geode', 'boulder', 'quartz-cluster'],          kind: 'startSpirit', val: 1,    text: '+1 Calm at the start of matches' },
   { id: 'birds',    name: 'Birdwatching',   icon: '🐦', cards: ['feather', 'dove', 'nightjar', 'heron', 'pinewood-owl', 'celestial-owl'], kind: 'finds',      val: 0.15, text: 'Hidden finds +15%' },
   { id: 'storm',    name: 'Stormchaser',    icon: '⛈️', cards: ['gale', 'thunderhead', 'thunderclap', 'storm-lily'],                     kind: 'chest',       val: 0.15, text: 'Hidden chests +15%' },
-  { id: 'festival', name: 'Festival Night', icon: '🏮', cards: ['paper-fan', 'paper-lantern', 'festival-drum', 'temple-bell', 'lucky-cat'], kind: 'miniPebbles', val: 1, text: '+1 Pebble per mini-game medal' },
+  { id: 'festival', name: 'Festival Night', icon: '🏮', cards: ['paper-fan', 'paper-lantern', 'festival-drum', 'temple-bell', 'lucky-cat'], kind: 'miniPebbles', val: 1, text: '+1 Ember per mini-game medal' },
   { id: 'spells',   name: 'Spellbook',      icon: '📜', cards: CARD_POOL.filter(c => c.spell).map(c => c.id),                             kind: 'startDraw',   val: 1,    text: 'Draw 1 extra card at the start of matches' },
 ];
 function setProgress(s) { const own = baseOwnedSet(); return s.cards.filter(id => own.has(id)).length; }
@@ -289,13 +289,13 @@ function museumCardButtons(wid) {
 }
 
 /* ---------------- expeditions: send up to three spare cards away for a while ----------------
-   The cards leave your collection while they travel and come home with the loot. Keywords matter: Swift shortens the
-   trip, Guard / Shield / Thorns make a mishap less likely, Echo improves the odds of a card, Bloom and Drain bring
-   extra supplies, Rally adds Pebbles, Mend brings back more experience. Strength (power + health) scales the Pebbles. */
+   The cards leave your collection while they travel and come home with the loot. Keywords matter: Flicker shortens the
+   trip, Watch / Haze / Briar make a mishap less likely, Startle improves the odds of a card, Bloom and Sip bring
+   extra supplies, Chorus adds Embers, Rest brings back more experience. Strength (power + health) scales the Embers. */
 const EXPEDITIONS = [
-  { id: 'meadow', name: 'Meadow Walk',     icon: '🌾', mins: 20,  need: 8,  desc: 'Seeds, daisies and Pebbles. A common card now and then.' },
-  { id: 'shore',  name: 'Along the Shore', icon: '🐚', mins: 45,  need: 14, desc: 'Fish, Pebbles, and a fair chance of a rare card.' },
-  { id: 'ruins',  name: 'Old Ruins',       icon: '🏚️', mins: 90,  need: 20, desc: 'Plenty of Pebbles and a good chance of a rare card or better.' },
+  { id: 'meadow', name: 'Meadow Walk',     icon: '🌾', mins: 20,  need: 8,  desc: 'Seeds, daisies and Embers. A common card now and then.' },
+  { id: 'shore',  name: 'Along the Shore', icon: '🐚', mins: 45,  need: 14, desc: 'Fish, Embers, and a fair chance of a rare card.' },
+  { id: 'ruins',  name: 'Old Ruins',       icon: '🏚️', mins: 90,  need: 20, desc: 'Plenty of Embers and a good chance of a rare card or better.' },
   { id: 'peaks',  name: 'Misty Peaks',     icon: '⛰️', mins: 180, need: 28, desc: 'A long climb. The best odds of an ultra rare card or better, and Moonbeans.' },
 ];
 const EXPED_TEAMS = 2, EXPED_PARTY = 3;
@@ -379,7 +379,7 @@ function expedButtons() {
 }
 function expedAction(act) {
   const es = expedState();
-  if (act.startsWith('exp-plan:')) { es.picking = { id: act.slice(9), cards: [] }; const e = expedDef(es.picking.id); return `${e.icon} ${e.name}: ${e.desc} Pick up to 3 spare cards. Swift ones travel faster, Guards keep the team safe, Echo cards sniff out treasure.`; }
+  if (act.startsWith('exp-plan:')) { es.picking = { id: act.slice(9), cards: [] }; const e = expedDef(es.picking.id); return `${e.icon} ${e.name}: ${e.desc} Pick up to 3 spare cards. Flicker ones travel faster, Watch cards keep the team safe, Startle cards sniff out treasure.`; }
   if (act === 'exp-cancel') { es.picking = null; return 'Where shall your cards go?'; }
   if (act.startsWith('exp-pick:')) {
     const id = act.slice(9), p = es.picking.cards;
@@ -395,7 +395,7 @@ function checkExpeditions() {
   expedState().active.forEach(t => { if (!t.notified && Date.now() >= t.ends) { t.notified = true; toast(`${expedDef(t.id).icon} Your ${expedDef(t.id).name} team is back - collect them at the museum`); saveState(); } });
 }
 
-/* ---------------- the trading board (Market Row sign): three new offers every day ----------------
+/* ---------------- the trading board (El Mercado de Susurros sign): three new offers every day ----------------
    swap   : a specific spare card of yours for a card of the same rarity you have never had
    bundle : any 3 spare cards of one rarity for a named card of the next rarity
    buyer  : a specific spare card of yours for three times what releasing it would pay */
@@ -470,7 +470,7 @@ function tradeButtons() {
 /* ---------------- deck challenges (at the fountain): win with a deck that follows today's rule ---------------- */
 const CHALLENGE_RULES = [
   { id: 'commons',  icon: '🌱', text: 'Only common cards',               test: ds => ds.every(d => d.rarity === 'common') },
-  { id: 'noguard',  icon: '🚫', text: 'No Guard cards at all',            test: ds => ds.every(d => !d.kw.includes('guard')) },
+  { id: 'noguard',  icon: '🚫', text: 'No Watch cards at all',            test: ds => ds.every(d => !d.kw.includes('guard')) },
   { id: 'spells',   icon: '✨', text: 'At least 3 spells',                test: ds => ds.filter(d => d.spell).length >= 3 },
   { id: 'cheap',    icon: '🪶', text: 'Nothing costing more than 2',      test: ds => ds.every(d => d.cost <= 2) },
   { id: 'single',   icon: '🎴', text: 'No two cards the same',            test: ds => new Set(ds.map(d => BattleEngine.baseIdOf(d.id))).size === ds.length },
@@ -478,10 +478,10 @@ const CHALLENGE_RULES = [
   { id: 'keywords', icon: '🧩', text: 'Every card has a keyword or is a spell', test: ds => ds.every(d => d.spell || d.kw.length) },
   { id: 'rareplus', icon: '💎', text: 'Only rare cards or better',         test: ds => ds.every(d => d.rarity !== 'common') },
   // Family formats (build 100): spells have no family, so they are allowed in every one.
-  { id: 'fam-grove', icon: '🌿', text: 'Only Grove cards (and spells)',    test: ds => ds.every(d => d.spell || CARD_FAMILY[BattleEngine.baseIdOf(d.id)] === 'grove') },
-  { id: 'fam-stone', icon: '🪨', text: 'Only Stone cards (and spells)',    test: ds => ds.every(d => d.spell || CARD_FAMILY[BattleEngine.baseIdOf(d.id)] === 'stone') },
-  { id: 'fam-tide',  icon: '🌊', text: 'Only Tide cards (and spells)',     test: ds => ds.every(d => d.spell || CARD_FAMILY[BattleEngine.baseIdOf(d.id)] === 'tide') },
-  { id: 'fam-wind',  icon: '🪶', text: 'Only Wind cards (and spells)',     test: ds => ds.every(d => d.spell || CARD_FAMILY[BattleEngine.baseIdOf(d.id)] === 'wind') },
+  { id: 'fam-grove', icon: '🌿', text: 'Only Brote cards (and spells)',    test: ds => ds.every(d => d.spell || CARD_FAMILY[BattleEngine.baseIdOf(d.id)] === 'grove') },
+  { id: 'fam-stone', icon: '🪨', text: 'Only Recuerdo cards (and spells)',    test: ds => ds.every(d => d.spell || CARD_FAMILY[BattleEngine.baseIdOf(d.id)] === 'stone') },
+  { id: 'fam-tide',  icon: '🌊', text: 'Only Deriva cards (and spells)',     test: ds => ds.every(d => d.spell || CARD_FAMILY[BattleEngine.baseIdOf(d.id)] === 'tide') },
+  { id: 'fam-wind',  icon: '🪶', text: 'Only Susurro cards (and spells)',     test: ds => ds.every(d => d.spell || CARD_FAMILY[BattleEngine.baseIdOf(d.id)] === 'wind') },
   { id: 'two-fam',   icon: '🎭', text: 'Cards from at most two families',  test: ds => new Set(ds.filter(d => !d.spell).map(d => CARD_FAMILY[BattleEngine.baseIdOf(d.id)] || 'none')).size <= 2 },
 ];
 function challengeState() {

@@ -8,7 +8,7 @@ const ITEM_DESPAWN_MS = 30000;
 const ITEM_RESPAWN_MS = 20000;
 const NPC_RESPAWN_MS = 180000;
 
-// Pebbles: earned by releasing spare copies, spent on card packs.
+// Embers: earned by releasing spare copies, spent on card packs.
 // A pack costs more than any single release pays, so it can never be looped for profit.
 const RELEASE_VALUE = { common: 1, rare: 3, ultra: 8, super: 20, mythic: 50 };
 // Pack odds are flat on purpose: they must NOT scale with wins, or a veteran's packs would
@@ -30,7 +30,7 @@ const PACKS = [
     odds: { common: 0.45, rare: 0.36, ultra: 0.13, super: 0.045, mythic: 0.015 } }
 ];   // defeated neighbors return after 3 minutes
 
-// Shop > Items: decorations the player places into Town Square. Buying one adds it to the player's
+// Shop > Items: decorations the player places into El Umbral. Buying one adds it to the player's
 // decoration inventory (state.decorationInventory) rather than spending it immediately - see
 // buyDecoration / startPlacingDecoration / handleDecorationTap for the buy -> store -> place flow.
 // cat groups the Items shop's filter chips: 'plant', 'seating', 'lighting', 'ornament'.
@@ -60,7 +60,7 @@ const DECORATION_ITEMS = [
   { id: 'firefly-jar', name: 'Firefly Jar', icon: '🫙', cost: 30, desc: 'A soft, flickering light for dark evenings.', night: true, cat: 'lighting' },
   { id: 'star-garland', name: 'Star Garland', icon: '💫', cost: 35, desc: 'Twinkles like a tiny night sky.', night: true, cat: 'lighting' },
   { id: 'moon-lamp', name: 'Moon Lamp', icon: '🌕', cost: 45, desc: 'A little moon of your own.', night: true, cat: 'lighting' },
-  // Premium decorations (v1.87.0): the big, aspirational Pebble sinks. `level` is the Keeper level that opens them in the shop.
+  // Premium decorations (v1.87.0): the big, aspirational Ember sinks. `level` is the Keeper level that opens them in the shop.
   { id: 'moon-gate', name: 'Moon Gate', icon: '⛩️', cost: 90, level: 6, desc: 'A round stone gate. Walk through it twice for luck.', cat: 'ornament' },
   { id: 'koi-pond', name: 'Koi Pond', icon: '🐟', cost: 120, level: 8, desc: 'A still pond with a slow, golden visitor.', cat: 'plant' },
   { id: 'crystal-fountain', name: 'Crystal Fountain', icon: '⛲', cost: 160, level: 10, desc: 'Water that chimes as it falls.', cat: 'ornament' },
@@ -186,7 +186,7 @@ const CARD_POOL = [
   { id: 'silver-phoenix', name: 'Silver Phoenix', icon: '🕊️', rarity: 'mythic', cost: 5, power: 8, grit: 7, kw: ['echo'] },
   { id: 'eclipse-panther', name: 'Eclipse Panther', icon: '🐆', rarity: 'mythic', cost: 5, power: 9, grit: 6, kw: ['swift'] },
 
-  // Thorns, Rally and Drain
+  // Briar, Chorus and Sip
   { id: 'bramble', name: 'Bramble', icon: '🥀', rarity: 'common', cost: 1, power: 1, grit: 3, kw: ['thorns'] },
   { id: 'morning-bugle', name: 'Morning Bugle', icon: '📯', rarity: 'common', cost: 2, power: 2, grit: 2, kw: ['rally'] },
   { id: 'dusk-bat', name: 'Dusk Bat', icon: '🦇', rarity: 'common', cost: 2, power: 2, grit: 2, kw: ['drain'] },
@@ -214,29 +214,29 @@ const CARD_POOL = [
   { id: 'echo-cavern', name: 'Echo Cavern', icon: '🕳️', rarity: 'super', cost: 4, power: 6, grit: 6, kw: ['echo', 'guard'], exclusive: 'cellar' },
   { id: 'deep-wyrm', name: 'Deep Wyrm', icon: '🐉', rarity: 'mythic', cost: 5, power: 9, grit: 9, kw: ['bloom', 'guard'], exclusive: 'cellar' },
   { id: 'rooks-ace', name: "Rook's Ace", icon: '🎭', rarity: 'mythic', cost: 4, power: 7, grit: 6, kw: ['swift', 'echo'], exclusive: 'rival' },
-  // v1.82.0 - four families (CARD_FAMILY below), one per district, and the Seed / Lull / Kin / Sting keywords. Appended at the
+  // v1.82.0 - four families (CARD_FAMILY below), one per district, and the Echo / Lull / Kin / Sting keywords. Appended at the
   // end on purpose: deck share codes store cards by their position in this list.
-  // Grove (Hollow Garden): Seed leaves a Seedling behind, Kin grows with its family.
+  // Grove (El Jardín Lúcido): Echo leaves an Afterthought behind, Kin grows with its family.
   { id: 'seedpod', name: 'Seedpod', icon: '🫘', rarity: 'common', cost: 1, power: 1, grit: 2, kw: ['seed'] },
   { id: 'fern-sprite', name: 'Fern Sprite', icon: '🌿', rarity: 'common', cost: 2, power: 2, grit: 2, kw: ['seed'] },
   { id: 'moss-hare', name: 'Moss Hare', icon: '🐇', rarity: 'rare', cost: 3, power: 3, grit: 3, kw: ['kin'] },
   { id: 'dandelion', name: 'Dandelion', icon: '🏵️', rarity: 'rare', cost: 3, power: 2, grit: 3, kw: ['seed', 'bloom'] },
   { id: 'oak-warden', name: 'Oak Warden', icon: '🌳', rarity: 'super', cost: 4, power: 4, grit: 6, kw: ['seed', 'guard'] },
   { id: 'world-tree', name: 'World Tree', icon: '🎄', rarity: 'mythic', cost: 5, power: 6, grit: 9, kw: ['seed', 'kin'] },
-  // Stone (Town Square): steady bodies that dig the small things out.
+  // Stone (El Umbral): steady bodies that dig the small things out.
   { id: 'stone-hen', name: 'Stone Hen', icon: '🐔', rarity: 'common', cost: 2, power: 2, grit: 3, kw: ['kin'] },
   { id: 'cliff-goat', name: 'Cliff Goat', icon: '🐐', rarity: 'rare', cost: 3, power: 2, grit: 5, kw: ['guard', 'kin'] },
   { id: 'badger', name: 'Badger', icon: '🦡', rarity: 'rare', cost: 3, power: 3, grit: 4, kw: ['sting'] },
   { id: 'quarry-bear', name: 'Quarry Bear', icon: '🐻', rarity: 'ultra', cost: 4, power: 4, grit: 6, kw: ['sting', 'guard'] },
   { id: 'mossy-titan', name: 'Mossy Titan', icon: '🗻', rarity: 'mythic', cost: 5, power: 7, grit: 9, kw: ['guard', 'kin'] },
-  // Tide (Quiet Harbor): Lull holds the enemy's best card back for a turn.
+  // Tide (La Orilla del Arrullo): Lull holds the enemy's best card back for a turn.
   { id: 'hermit-crab', name: 'Hermit Crab', icon: '🦀', rarity: 'common', cost: 2, power: 1, grit: 3, kw: ['lull'] },
   { id: 'puffer', name: 'Puffer', icon: '🐡', rarity: 'common', cost: 2, power: 2, grit: 3, kw: ['thorns'] },
   { id: 'harbor-seal', name: 'Harbor Seal', icon: '🦭', rarity: 'rare', cost: 3, power: 3, grit: 4, kw: ['lull'] },
   { id: 'moon-jelly', name: 'Moon Jelly', icon: '🪼', rarity: 'ultra', cost: 3, power: 2, grit: 4, kw: ['lull', 'shield'] },
   { id: 'tide-caller', name: 'Tide Caller', icon: '🐚', rarity: 'ultra', cost: 4, power: 4, grit: 5, kw: ['lull', 'mend'] },
   { id: 'kraken', name: 'Kraken', icon: '🦑', rarity: 'mythic', cost: 5, power: 6, grit: 8, kw: ['lull', 'drain'] },
-  // Wind (Market Row): fast cards that sting on the way in.
+  // Wind (El Mercado de Susurros): fast cards that sting on the way in.
   { id: 'honeybee', name: 'Honeybee', icon: '🐝', rarity: 'common', cost: 2, power: 2, grit: 2, kw: ['sting'] },
   { id: 'market-sparrow', name: 'Market Sparrow', icon: '🐦', rarity: 'rare', cost: 3, power: 3, grit: 2, kw: ['swift', 'sting'] },
   { id: 'kite-runner', name: 'Kite Runner', icon: '🪁', rarity: 'ultra', cost: 3, power: 4, grit: 2, kw: ['swift', 'kin'] },
@@ -270,10 +270,10 @@ const FOE_CARDS = [
 // Families (v1.82.0): each district leans on one. Kin cards grow with the other cards of their family on your board, and a
 // district's neighbors and boss build decks that favour their family (buildDeckForOpponent). Spells and unlisted cards have none.
 const FAMILIES = {
-  grove: { icon: '🌿', name: 'Grove', district: 'garden' },
-  stone: { icon: '🪨', name: 'Stone', district: 'square' },
-  tide:  { icon: '🌊', name: 'Tide',  district: 'harbor' },
-  wind:  { icon: '🪶', name: 'Wind',  district: 'market' }
+  grove: { icon: '🌿', name: 'Brote', district: 'garden' },
+  stone: { icon: '🪨', name: 'Recuerdo', district: 'square' },
+  tide:  { icon: '🌊', name: 'Deriva',  district: 'harbor' },
+  wind:  { icon: '🪶', name: 'Susurro',  district: 'market' }
 };
 const CARD_FAMILY = (() => {
   const lists = {
@@ -288,7 +288,7 @@ const CARD_FAMILY = (() => {
 })();
 // Tokens that cards create mid-battle. Never in packs, pools, decks or the Index; BattleEngine.defOf still knows them.
 const TOKEN_CARDS = [
-  { id: 'seedling', name: 'Seedling', icon: '🌱', rarity: 'common', cost: 0, power: 1, grit: 2, kw: [], token: true }
+  { id: 'seedling', name: 'Afterthought', icon: '🌱', rarity: 'common', cost: 0, power: 1, grit: 2, kw: [], token: true }
 ];
 const EXCLUSIVE_HINT = { cellar: 'found deep in the cellar', rival: "a rival's final prize" };
 
@@ -325,26 +325,26 @@ function cardFaceHtml(def) {
 
 /* BEGIN BATTLE ENGINE */
 /* Pure rules for the turn-based card battle. No DOM. Reads card stats from CARD_POOL.
-   - Spirit (health) 20 each. Board up to 4. Energy 1..5, +1 per turn. Second player: +1 card, and +1 energy on its first 2 turns.
-   - Cards you play stay on the board and can attack from the following turn (Swift: the same turn), once per turn.
-   - An attack targets an enemy card, or the enemy Spirit (at most 4 damage to Spirit per attack).
-   - Guard: while an enemy has a Guard card, attacks must be aimed at a Guard.
+   - Calm (health) 20 each. Board up to 4. Energy 1..5, +1 per turn. Second player: +1 card, and +1 energy on its first 2 turns.
+   - Cards you play stay on the board and can attack from the following turn (Flicker: the same turn), once per turn.
+   - An attack targets an enemy card, or the enemy Calm (at most 4 damage to Calm per attack).
+   - Watch: while an enemy has a Watch card, attacks must be aimed at a Watch.
    - No retaliation: a card that survives a hit does not hit back.                                                       */
 const BattleEngine = (function () {
   'use strict';
   const RULES = { spirit: 20, board: 4, hand: 3, ecap: 5, secondBonus: 1, secondBonusTurns: 2, faceCap: 4, mend: 1, echo: 2, handMax: 7, turnCap: 60, deck: 12, copies: 2 };
 
   const KEYWORDS = {
-    guard:  { icon: '🛡️', name: 'Guard',  text: 'Enemies must attack Guard cards first.' },
-    swift:  { icon: '💨', name: 'Swift',  text: 'Can attack the turn it arrives.' },
-    mend:   { icon: '🌿', name: 'Mend',   text: 'At the end of your turn, restore 1 Spirit.' },
+    guard:  { icon: '🛡️', name: 'Watch',  text: 'Enemies must attack Watch cards first.' },
+    swift:  { icon: '💨', name: 'Flicker',  text: 'Can attack the turn it arrives.' },
+    mend:   { icon: '🌿', name: 'Rest',   text: 'At the end of your turn, restore 1 Calm.' },
     bloom:  { icon: '🌸', name: 'Bloom',  text: 'Gains +1 power each time it attacks.' },
-    shield: { icon: '🫧', name: 'Shield', text: 'Ignores the first damage it takes.' },
-    echo:   { icon: '🔔', name: 'Echo',   text: 'When played, deals 2 damage to enemy Spirit.' },
-    thorns: { icon: '🌵', name: 'Thorns', text: 'Deals 1 damage back to any card that attacks it.' },
-    rally:  { icon: '📯', name: 'Rally',  text: 'When played, your other cards gain +1 power.' },
-    drain:  { icon: '🌀', name: 'Drain',  text: 'Each time it attacks, restore 2 Spirit.' },
-    seed:   { icon: '🌰', name: 'Seed',   text: 'When it falls, a 1/2 Seedling grows in its place.' },
+    shield: { icon: '🫧', name: 'Haze', text: 'Ignores the first damage it takes.' },
+    echo:   { icon: '🔔', name: 'Startle',   text: 'When played, deals 2 damage to enemy Calm.' },
+    thorns: { icon: '🌵', name: 'Briar', text: 'Deals 1 damage back to any card that attacks it.' },
+    rally:  { icon: '📯', name: 'Chorus',  text: 'When played, your other cards gain +1 power.' },
+    drain:  { icon: '🌀', name: 'Sip',  text: 'Each time it attacks, restore 2 Calm.' },
+    seed:   { icon: '🌰', name: 'Echo',   text: 'When it falls, a 1/2 Afterthought grows in its place.' },
     lull:   { icon: '😴', name: 'Lull',   text: "When played, the enemy's strongest card can't attack on its next turn." },
     kin:    { icon: '🤝', name: 'Kin',    text: 'When played, gains +1/+1 for each other card of its family on your board.' },
     sting:  { icon: '🐝', name: 'Sting',  text: 'When played, deals 1 damage to the enemy card with the least health.' }
@@ -352,14 +352,14 @@ const BattleEngine = (function () {
 
   /* ---------- Boss twists ----------
      Each district boss bends one rule for its side (G.twist.side):
-       roots : restores 3 Spirit at the end of each of its turns
-       wall  : its Guard cards have +1 health
+       roots : restores 3 Calm at the end of each of its turns
+       wall  : its Watch cards have +1 health
        tide  : every 4th of its turns, the strongest card facing it washes back to its owner's hand
        bloom : every card it plays costing 1 has Bloom
      (tuned by simulation so each twist is worth roughly the same few points of win rate to the boss) */
   const TWISTS = {
-    roots: { icon: '🌳', text: 'Restores 3 Spirit at the end of each of its turns.' },
-    wall:  { icon: '🧱', text: 'Its Guard cards have +1 health.' },
+    roots: { icon: '🌳', text: 'Restores 3 Calm at the end of each of its turns.' },
+    wall:  { icon: '🧱', text: 'Its Watch cards have +1 health.' },
     tide:  { icon: '🌊', text: 'Every 4th turn, the tide washes your strongest card back to your hand.' },
     bloom: { icon: '🌻', text: 'Its 1-cost cards all have Bloom.' }
   };
@@ -369,10 +369,10 @@ const BattleEngine = (function () {
      have one: it is the player's edge. `level` is the Keeper level that unlocks it (progression.js reads it). */
   const KNACKS = {
     forage:     { icon: '🧺', name: 'Forage',      level: 1,  from: 2, text: 'Draw 2 cards.' },
-    soothe:     { icon: '🌿', name: 'Soothe',      level: 3,  from: 2, text: 'Restore 6 Spirit and heal each of your cards by 2.' },
-    sow:        { icon: '🌱', name: 'Sow',         level: 5,  from: 2, text: 'Grow two 1/2 Seedlings on your board (as many as fit).' },
-    sparkstorm: { icon: '⚡', name: 'Spark Storm', level: 8,  from: 2, text: 'Deal 1 damage to every enemy card and 1 to enemy Spirit.' },
-    bulwark:    { icon: '🛡️', name: 'Bulwark',     level: 11, from: 2, text: 'Every card on your board gains a Shield.' },
+    soothe:     { icon: '🌿', name: 'Soothe',      level: 3,  from: 2, text: 'Restore 6 Calm and heal each of your cards by 2.' },
+    sow:        { icon: '🌱', name: 'Sow',         level: 5,  from: 2, text: 'Grow two 1/2 Afterthoughts on your board (as many as fit).' },
+    sparkstorm: { icon: '⚡', name: 'Spark Storm', level: 8,  from: 2, text: 'Deal 1 damage to every enemy card and 1 to enemy Calm.' },
+    bulwark:    { icon: '🛡️', name: 'Bulwark',     level: 11, from: 2, text: 'Every card on your board gains a Haze.' },
     tidal:      { icon: '🌊', name: 'Tidal Hush',  level: 15, from: 2, text: "The enemy's two strongest cards can't attack on their next turn." }
   };
   function knackReady(G, who) {
@@ -409,31 +409,31 @@ const BattleEngine = (function () {
   /* ---------- Fate: the Arcana powers (build 111) ----------
      A second once-per-match power, taken from one of the Major Arcana the player has attuned (js/tarot.js maps each Arcana to
      one of these ids). Like the Knack it is free, needs no aiming and is used from the player's own turn `from`; unlike the
-     Knack it is situational and always costs a little (Spirit, tempo or a risk), and it comes later (turn 3 to 5). Neighbors
+     Knack it is situational and always costs a little (Calm, tempo or a risk), and it comes later (turn 3 to 5). Neighbors
      have none. Balanced by simulation (see HANDOFF §5): each Fate adds roughly one to five points of win rate. */
   const FATES = {
     fool:       { icon: '🃏', name: 'The Fool',           from: 3, text: 'Draw 1 card.' },
     magician:   { icon: '🎩', name: 'The Magician',       from: 5, text: 'Your strongest card gains +2 power.' },
     priestess:  { icon: '🌙', name: 'The High Priestess', from: 3, text: 'Take the most expensive card from your deck into your hand.' },
-    empress:    { icon: '🌻', name: 'The Empress',        from: 4, text: 'Restore 3 Spirit and heal each of your cards by 3.' },
-    emperor:    { icon: '👑', name: 'The Emperor',        from: 5, text: 'Your strongest card gains a Shield. You lose 2 Spirit.' },
-    hierophant: { icon: '📿', name: 'The Hierophant',     from: 3, text: 'Restore 5 Spirit and draw 1 card.' },
+    empress:    { icon: '🌻', name: 'The Empress',        from: 4, text: 'Restore 3 Calm and heal each of your cards by 3.' },
+    emperor:    { icon: '👑', name: 'The Emperor',        from: 5, text: 'Your strongest card gains a Haze. You lose 2 Calm.' },
+    hierophant: { icon: '📿', name: 'The Hierophant',     from: 3, text: 'Restore 5 Calm and draw 1 card.' },
     lovers:     { icon: '💞', name: 'The Lovers',         from: 4, text: 'Your weakest card gains +1 power and +2 health.' },
-    chariot:    { icon: '🏇', name: 'The Chariot',        from: 6, text: 'Your strongest card can attack again, or attack on the turn it arrives. You lose 2 Spirit.' },
+    chariot:    { icon: '🏇', name: 'The Chariot',        from: 6, text: 'Your strongest card can attack again, or attack on the turn it arrives. You lose 2 Calm.' },
     strength:   { icon: '🦁', name: 'Strength',           from: 4, text: 'Every card of yours gains +1 power.' },
-    hermit:     { icon: '🏮', name: 'The Hermit',         from: 4, text: 'Draw 1 card, and your weakest card gains a Shield.' },
+    hermit:     { icon: '🏮', name: 'The Hermit',         from: 4, text: 'Draw 1 card, and your weakest card gains a Haze.' },
     wheel:      { icon: '☄️', name: 'Wheel of Fortune',   from: 5, text: 'Gain 2 energy this turn.' },
-    justice:    { icon: '⚖️', name: 'Justice',            from: 4, text: 'If your Spirit is lower, restore half the gap (up to 6). Otherwise deal 2 to enemy Spirit.' },
-    hanged:     { icon: '🙃', name: 'The Hanged Man',     from: 5, text: "The enemy's strongest card can't attack on its next turn. You lose 2 Spirit." },
-    death:      { icon: '💀', name: 'Death',              from: 5, text: 'Deal 3 damage to the enemy card with the most power. You lose 2 Spirit.' },
-    temperance: { icon: '🫗', name: 'Temperance',         from: 5, text: 'Restore 2 Spirit. Every card of yours gains +1 health.' },
-    devil:      { icon: '😈', name: 'The Devil',          from: 4, text: 'Deal 5 damage to enemy Spirit. You lose 2 Spirit.' },
-    tower:      { icon: '🗼', name: 'The Tower',          from: 5, text: 'Deal 2 damage to every enemy card. You lose 5 Spirit.' },
-    star:       { icon: '🌟', name: 'The Star',           from: 4, text: 'Restore 7 Spirit.' },
-    moon:       { icon: '🌕', name: 'The Moon',           from: 5, text: 'Strip every enemy Shield, then deal 1 damage to each enemy card.' },
+    justice:    { icon: '⚖️', name: 'Justice',            from: 4, text: 'If your Calm is lower, restore half the gap (up to 6). Otherwise deal 2 to enemy Calm.' },
+    hanged:     { icon: '🙃', name: 'The Hanged Man',     from: 5, text: "The enemy's strongest card can't attack on its next turn. You lose 2 Calm." },
+    death:      { icon: '💀', name: 'Death',              from: 5, text: 'Deal 3 damage to the enemy card with the most power. You lose 2 Calm.' },
+    temperance: { icon: '🫗', name: 'Temperance',         from: 5, text: 'Restore 2 Calm. Every card of yours gains +1 health.' },
+    devil:      { icon: '😈', name: 'The Devil',          from: 4, text: 'Deal 5 damage to enemy Calm. You lose 2 Calm.' },
+    tower:      { icon: '🗼', name: 'The Tower',          from: 5, text: 'Deal 2 damage to every enemy card. You lose 5 Calm.' },
+    star:       { icon: '🌟', name: 'The Star',           from: 4, text: 'Restore 7 Calm.' },
+    moon:       { icon: '🌕', name: 'The Moon',           from: 5, text: 'Strip every enemy Haze, then deal 1 damage to each enemy card.' },
     sun:        { icon: '☀️', name: 'The Sun',            from: 6, text: 'Every card of yours gains +1/+1.' },
     judgement:  { icon: '📯', name: 'Judgement',          from: 4, text: 'Draw until you hold 5 cards (up to 3 draws).' },
-    world:      { icon: '🌍', name: 'The World',          from: 5, text: 'Restore 2 Spirit and give your weakest card a Shield.' },
+    world:      { icon: '🌍', name: 'The World',          from: 5, text: 'Restore 2 Calm and give your weakest card a Haze.' },
   };
   function fateReady(G, who) {
     const pl = G.p[who], f = pl.fate && FATES[pl.fate];
@@ -486,11 +486,11 @@ const BattleEngine = (function () {
   /* ---------- Fate Spread (build 112) ----------
      Before a match the player can lay three cards from their deck as a tarot spread (saved with the deck slot):
        Past    - always in your opening hand (it is put back if a mulligan shuffles it away)
-       Present - enters play with a Shield
+       Present - enters play with a Haze
        Future  - held back, and joins your hand at the start of your 4th turn
-     All one family is Harmony (+2 Spirit); three different families is Contrast (draw 1 extra card at the start).
+     All one family is Harmony (+2 Calm); three different families is Contrast (draw 1 extra card at the start).
      Balanced by paired simulation (400-500 games, SPREAD_RULES holds the knobs): the spread adds roughly +4 to +6 win points. A
-     one-cost discount on the Present card was tried first and was worth +7 to +13 on its own, far too much, so it became a Shield.
+     one-cost discount on the Present card was tried first and was worth +7 to +13 on its own, far too much, so it became a Haze.
      The same three cards can be listed in any order; spells count as having no family. Pure engine, opts.spread = [ids|null, ids|null].
      Cards are matched by id; a spread that names a card the deck does not hold is quietly ignored. */
   const SPREAD_RULES = { presentDiscount: 0, presentMinCost: 0, presentShield: 1, harmonySpirit: 2, contrastDraw: 1, futureTurn: 4 };
@@ -499,20 +499,20 @@ const BattleEngine = (function () {
      screen and battle UI work the family out in archetypePassive(), js/ladder-practice.js). Wind changes the cards when the
      decks are built; Grove, Stone and Tide trigger when a card of the family is played. Re-run the simulation before changing a number. */
   const PASSIVES = {
-    grove: { icon: '🌱', name: 'Rooted',   text: 'Grove cards restore 1 Spirit when they arrive.' },
-    stone: { icon: '⛰️', name: 'Bedrock',  text: 'Your first Stone card costing 4 or more enters with a Shield.' },
-    tide:  { icon: '🌊', name: 'Undertow', text: 'The first Tide card you play each turn draws a card, if you hold 4 or fewer.' },
-    wind:  { icon: '🪶', name: 'Tailwind', text: 'Swift Wind cards costing 2 or less get +1 power.' }
+    grove: { icon: '🌱', name: 'Rooted',   text: 'Brote cards restore 1 Calm when they arrive.' },
+    stone: { icon: '⛰️', name: 'Bedrock',  text: 'Your first Recuerdo card costing 4 or more enters with a Haze.' },
+    tide:  { icon: '🌊', name: 'Undertow', text: 'The first Deriva card you play each turn draws a card, if you hold 4 or fewer.' },
+    wind:  { icon: '🪶', name: 'Tailwind', text: 'Flicker Susurro cards costing 2 or less get +1 power.' }
   };
   // The smaller step at 6-7 cards of a family (opts.passiveTier = [1|2, ...]; 2 is the default): the same idea, once per match.
   const MINORS = {
-    grove: { icon: '🌱', name: 'Seedling', text: 'Your first Grove card each match restores 3 Spirit.' },
-    stone: { icon: '⛰️', name: 'Footing',  text: 'Your first Stone card costing 3 or more enters with +1 health.' },
-    tide:  { icon: '🌊', name: 'Ebb',      text: 'Your first Tide card costing 3 or more refunds 1 Energy.' },
-    wind:  { icon: '🪶', name: 'Breeze',   text: 'Your first Swift Wind card each match gets +1 power.' }
+    grove: { icon: '🌱', name: 'Seedling', text: 'Your first Brote card each match restores 3 Calm.' },
+    stone: { icon: '⛰️', name: 'Footing',  text: 'Your first Recuerdo card costing 3 or more enters with +1 health.' },
+    tide:  { icon: '🌊', name: 'Ebb',      text: 'Your first Deriva card costing 3 or more refunds 1 Energy.' },
+    wind:  { icon: '🪶', name: 'Breeze',   text: 'Your first Flicker Susurro card each match gets +1 power.' }
   };
   const MINOR_RULES = { groveHeal: 3, stoneMinCost: 3, tideMinCost: 3 };   // tuned by simulation
-  const PASSIVE_RULES = { windMaxCost: 2, stoneMinCost: 4 };   // Wind only touches Swift cards up to this cost (tuned by simulation)
+  const PASSIVE_RULES = { windMaxCost: 2, stoneMinCost: 4 };   // Wind only touches Flicker cards up to this cost (tuned by simulation)
   function applyPassiveBuild(pl) {
     if (!pl.passive || pl.passiveTier === 1) return;
     pl.deck.forEach(c => {
@@ -584,25 +584,25 @@ const BattleEngine = (function () {
 
   /* ---------- Spells ----------
      A spell is played from the hand, spends its energy, resolves at once and is gone - it never takes a board slot.
-     target 'enemy' : needs an enemy card to aim at (Guard does not protect against spells).
+     target 'enemy' : needs an enemy card to aim at (Watch does not protect against spells).
      needs  'own'   : only worth casting while you have a card on the board.
      value          : how much deck-builders and the AI like it. */
   const SPELLS = {
     'spark':        { target: 'enemy', value: 5,  text: 'Deal 2 damage to an enemy card.' },
-    'rain-shower':  { value: 4,  text: 'Restore 2 Spirit and heal each of your cards by 1.' },
+    'rain-shower':  { value: 4,  text: 'Restore 2 Calm and heal each of your cards by 1.' },
     'harvest':      { value: 6,  text: 'Draw 2 cards.' },
     'gust':         { target: 'enemy', value: 7,  text: "Return an enemy card to its owner's hand." },
     'sunbeam':      { needs: 'own', value: 6, text: 'Your cards on the board gain +1 power.' },
-    'thunderclap':  { value: 8,  text: 'Deal 1 damage to every enemy card and 2 to enemy Spirit.' },
+    'thunderclap':  { value: 8,  text: 'Deal 1 damage to every enemy card and 2 to enemy Calm.' },
     'second-wind':  { needs: 'own', value: 7, text: 'Your cards on the board can attack again this turn.' },
     'moonlit-tide': { value: 11, text: 'Deal 3 damage to every enemy card.' },
-    'starfall':     { target: 'enemy', value: 14, text: 'Defeat an enemy card outright (even through Shield), then deal 3 damage to enemy Spirit.' },
+    'starfall':     { target: 'enemy', value: 14, text: 'Defeat an enemy card outright (even through Haze), then deal 3 damage to enemy Calm.' },
     'chill':        { target: 'enemy', value: 5, text: "Deal 1 damage to an enemy card. It can't attack on its next turn." },
-    'overgrowth':   { needs: 'room', value: 6, text: 'Grow two 1/2 Seedlings on your board (as many as fit).' },
-    'stone-skin':   { needs: 'guard', value: 7, text: 'Your Guard cards gain +2 health and +1 power.' },
+    'overgrowth':   { needs: 'room', value: 6, text: 'Grow two 1/2 Afterthoughts on your board (as many as fit).' },
+    'stone-skin':   { needs: 'guard', value: 7, text: 'Your Watch cards gain +2 health and +1 power.' },
     'undertow':     { value: 7, text: "Return every enemy card that costs 2 or less to its owner's hand." },
     'quickstep':    { needs: 'own', value: 7, text: 'Your cards that just arrived can attack right away.' },
-    'picnic':       { value: 8, text: 'Restore 5 Spirit and draw a card.' }
+    'picnic':       { value: 8, text: 'Restore 5 Calm and draw a card.' }
   };
 
   /* ---------- Card definitions, including crafted variants ----------
@@ -634,7 +634,7 @@ const BattleEngine = (function () {
   }
   function variantId(baseId, stat, skill) { return baseId + '~' + (stat || '') + (skill ? '.' + skill : ''); }
 
-  // mods.swiftBonus: extra power for every Swift card (storms), applied to both sides alike.
+  // mods.swiftBonus: extra power for every Flicker card (storms), applied to both sides alike.
   function makeCard(id, uid, mods) {
     const d = defOf(id);
     if (d.spell) return { uid, id, cost: d.cost, spell: d.spell, power: 0, grit: 0, hp: 0, kw: [], shield: false, ready: false, attacks: 0 };
@@ -649,10 +649,10 @@ const BattleEngine = (function () {
 
   function shuffled(a, rng) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
-  /* opts.spirit = [spiritForPlayer0, spiritForPlayer1] lets friendly opponents start with less Spirit.
+  /* opts.spirit = [spiritForPlayer0, spiritForPlayer1] lets friendly opponents start with less Calm.
      opts.mods   = the world's effect on a match, the same for both sides (battleWorld() in js/battle-ui.js builds it):
-                   swiftBonus (+power to Swift), bloomStart (+power to Bloom), shieldHp (+health to Shield), mendBonus (Mend restores
-                   more), echoBonus (Echo hits harder) and famHp { family, hp } (a district's "home turf": its family is tougher).
+                   swiftBonus (+power to Flicker), bloomStart (+power to Bloom), shieldHp (+health to Haze), mendBonus (Rest restores
+                   more), echoBonus (Startle hits harder) and famHp { family, hp } (a district's "home turf": its family is tougher).
      opts.twist  = { side, kind } - a district boss's rule twist (see TWISTS).
      opts.knack  = [idForPlayer0, idForPlayer1] - Keeper's Knack choices (see KNACKS); only the player uses one.
      opts.first  = 0 or 1 - who takes the first turn (the coin/dice toss). The other seat is "second" and gets the catch-up
@@ -671,13 +671,13 @@ const BattleEngine = (function () {
     const mk = (deck, i) => shuffled(deck, rng).map(id => makeCard(id, uid++, modsFor(G, i)));
     const sp = opts.spirit || [RULES.spirit, RULES.spirit];
     G.p = [0, 1].map(i => ({ idx: i, spirit: sp[i], maxSpirit: sp[i], deck: mk(i === 0 ? deckA : deckB, i), hand: [], board: [], turns: 0, energy: 0, maxEnergy: 0 }));
-    G.uid = uid;                                   // later cards (Seedlings) keep numbering from here
+    G.uid = uid;                                   // later cards (Afterthoughts) keep numbering from here
     (opts.knack || []).forEach((id, i) => { if (id && KNACKS[id]) G.p[i].knack = id; });
     (opts.fate || []).forEach((id, i) => { if (id && FATES[id]) G.p[i].fate = id; });
     (opts.passive || []).forEach((f, i) => { if (f && PASSIVES[f]) { G.p[i].passive = f; G.p[i].passiveTier = (opts.passiveTier || [])[i] === 1 ? 1 : 2; applyPassiveBuild(G.p[i]); } });
     G.p.forEach((pl, i) => { const n = RULES.hand + (i !== first ? 1 : 0); for (let k = 0; k < n; k++) draw(G, pl, true); });
     (opts.spread || []).forEach((ids, i) => { if (ids) layoutSpread(G, i, ids); });
-    // opts.startSpirit: begin below full (the Festival Cup carries your Spirit from one round to the next)
+    // opts.startSpirit: begin below full (the Dreamers’ Cup carries your Calm from one round to the next)
     (opts.startSpirit || []).forEach((v, i) => { if (typeof v === 'number') G.p[i].spirit = Math.max(1, Math.min(v, G.p[i].maxSpirit)); });
     return G;
   }
@@ -730,7 +730,7 @@ const BattleEngine = (function () {
       if (fx.target === 'enemy' && !G.p[1 - who].board.length) return { ok: false, why: 'No enemy card to aim at' };
       if (fx.needs === 'own' && !me.board.length) return { ok: false, why: 'You need a card on the board first' };
       if (fx.needs === 'room' && me.board.length >= RULES.board) return { ok: false, why: 'Your board is full' };
-      if (fx.needs === 'guard' && !me.board.some(x => x.kw.includes('guard'))) return { ok: false, why: 'You need a Guard card on the board' };
+      if (fx.needs === 'guard' && !me.board.some(x => x.kw.includes('guard'))) return { ok: false, why: 'You need a Watch card on the board' };
       return { ok: true };
     }
     if (me.board.length >= RULES.board) return { ok: false, why: 'Your board is full' };
@@ -763,7 +763,7 @@ const BattleEngine = (function () {
   }
 
   /* ---------- casting ---------- */
-  // Spell damage to a card: a Shield still soaks the first hit, exactly like an attack.
+  // Spell damage to a card: a Haze still soaks the first hit, exactly like an attack.
   function zap(G, side, t, dmg, pierce, tag) {
     const pl = G.p[side];
     let blocked = false;
@@ -773,7 +773,7 @@ const BattleEngine = (function () {
     emit(G, 'zap', { who: side, uid: t.uid, dmg: pierce ? 0 : dmg, blocked, pierce: !!pierce, tag: tag || null });
     if (t.hp <= 0 && pl.board.includes(t)) fall(G, side, t);
   }
-  // A card leaves the board for good. Seed cards leave a Seedling behind (if there is room).
+  // A card leaves the board for good. Echo cards leave an Afterthought behind (if there is room).
   function fall(G, side, t) {
     const pl = G.p[side];
     if (pl.board.includes(t)) pl.board.splice(pl.board.indexOf(t), 1);
@@ -899,7 +899,7 @@ const BattleEngine = (function () {
     if (a.attacks > 0) return { ok: false, why: 'Already attacked' };
     const legal = legalTargets(G, who, attackerUid);
     if (!legal.some(t => t.kind === target.kind && (t.kind === 'spirit' || t.uid === target.uid)))
-      return { ok: false, why: guards(op).length ? 'A Guard must be attacked first' : 'Invalid target' };
+      return { ok: false, why: guards(op).length ? 'A Watch must be attacked first' : 'Invalid target' };
 
     if (a.kw.includes('bloom')) { a.power++; emit(G, 'grow', { card: a }); }
     a.attacks++;
@@ -948,7 +948,7 @@ const BattleEngine = (function () {
   }
 
   function forfeit(G, who) { if (!G.over) finish(G, 1 - who, 'yield'); }
-  // A head start before the first turn: extra Spirit (raising the cap with it) and extra cards.
+  // A head start before the first turn: extra Calm (raising the cap with it) and extra cards.
   function boost(G, who, b) {
     const pl = G.p[who];
     if (b.spirit) { pl.spirit += b.spirit; pl.maxSpirit += b.spirit; }
@@ -1154,16 +1154,16 @@ function opponentPortrait(opponent) {
 }
 
 const DISTRICTS = {
-  square: { name: 'Town Square', theme: 'square', unlockWins: 0, unlockLevel: 1, boss: 'Elder Yew', bossIcon: '🌳',
+  square: { name: 'El Umbral', theme: 'square', unlockWins: 0, unlockLevel: 1, boss: 'Duermevela', bossIcon: '🌳',
     scenery: [{ icon: '🪑', title: 'A quiet bench', desc: 'A good place to sit and watch the town go by.' },
               { icon: '⛲', title: 'The old fountain', desc: 'Coins glimmer faintly beneath the water.' }] },
-  market: { name: 'Market Row', theme: 'market', unlockWins: 1, unlockLevel: 2, boss: 'Old Bramble, the Market Warden', bossIcon: '🦡',
+  market: { name: 'El Mercado de Susurros', theme: 'market', unlockWins: 1, unlockLevel: 2, boss: 'Murmullo', bossIcon: '🦡',
     scenery: [{ icon: '🏪', title: 'A small stall', desc: 'The vendor is out today, but the awning gives good shade.' },
               { icon: '🧺', title: 'A basket of goods', desc: 'Nothing to take, but it smells like fresh bread.' }] },
-  harbor: { name: 'Quiet Harbor', theme: 'harbor', unlockWins: 3, unlockLevel: 4, boss: 'The Harbor Keeper', bossIcon: '⚓',
+  harbor: { name: 'La Orilla del Arrullo', theme: 'harbor', unlockWins: 3, unlockLevel: 4, boss: 'Marea Lenta', bossIcon: '⚓',
     scenery: [{ icon: '⛵', title: 'A moored boat', desc: 'It rocks gently against the dock.' },
               { icon: '🦭', title: 'A resting seal', desc: 'It barely opens an eye as you pass.' }] },
-  garden: { name: 'Hollow Garden', theme: 'garden', unlockWins: 5, unlockLevel: 6, boss: 'The Garden Sentinel', bossIcon: '🌻',
+  garden: { name: 'El Jardín Lúcido', theme: 'garden', unlockWins: 5, unlockLevel: 6, boss: 'Ensueño', bossIcon: '🌻',
     scenery: [{ icon: '🌻', title: 'Sunflowers', desc: 'They turn slowly to follow the light.' },
               { icon: '🪴', title: 'A potted fern', desc: 'Someone tends this carefully.' }] }
 };

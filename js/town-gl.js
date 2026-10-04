@@ -1,9 +1,9 @@
 /* =====================================================================================================================
    TOWN GROUND ON WEBGL (PixiJS)
    The town used to be one <div> per tile (plus an <svg><use> for every tree, flower and ripple): about 650 elements for the 16 x 17
-   Town Square, all restyled and re-composited as the map moved, and a hard limit on how big a map could be. This file draws the GROUND
+   El Umbral, all restyled and re-composited as the map moved, and a hard limit on how big a map could be. This file draws the GROUND
    (tiles, trees, hedges, rocks, flowers, tufts, pebbles, cobbles, ripples, bridges) with PixiJS instead, into one canvas behind the
-   entity layer. Only the tiles near the camera are ever in the scene, so a 200 x 200 map costs about the same as Town Square.
+   entity layer. Only the tiles near the camera are ever in the scene, so a 200 x 200 map costs about the same as El Umbral.
    What stays DOM, on purpose: every entity (player, neighbors, boss, cards, spirits, crops, decorations, companion, props, birds...),
    the buildings (.bld), the sky/vignette/weather layers and all the tap / look-around logic. They carry a lot of per-kind CSS and
    behaviour in other files, and there are only a few dozen of them.

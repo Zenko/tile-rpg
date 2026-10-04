@@ -38,11 +38,11 @@ function journalGo(t) {
 }
 const GUIDE_GO = {
   'Districts': { map: 1 }, 'Themes': { menu: 'settings' }, 'Inventory': { tab: 'character' }, 'Character tab': { tab: 'character' },
-  'Draft Run': JPLACES.cup, 'Festival Cup': JPLACES.cup, 'Deck challenges': JPLACES.cup, 'Daily puzzle': JPLACES.nook,
+  'Draft Run': JPLACES.cup, 'Dreamers’ Cup': JPLACES.cup, 'Deck challenges': JPLACES.cup, 'Daily puzzle': JPLACES.nook,
   'The cellar': JPLACES.cellar, 'Letters': JPLACES.home, 'Your cottage': JPLACES.home, 'Card Museum & expeditions': JPLACES.museum,
   'Packs & decorations': JPLACES.shop, 'Lantern Market': JPLACES.lantern, 'The Net Loft': JPLACES.net, 'The Glasshouse': JPLACES.glass,
   'Workshop': { tab: 'collection' }, 'Index & sets': { tab: 'collection' }, 'Charms & mastery': { tab: 'collection' },
-  'Pebbles and soft limits': { menu: 'settings' }, 'Who goes first': { menu: 'settings' }, 'Ghost duels': { menu: 'social' }
+  'Embers and soft limits': { menu: 'settings' }, 'Who goes first': { menu: 'settings' }, 'Ghost duels': { menu: 'social' }
 };
 function guideTarget(name) { return GUIDE_GO[name] || null; }
 
@@ -63,9 +63,9 @@ function todayModel() {
   const bake = (ensureDistrictData('square').buildings.bakery || {}).oven;
   if (bake && bake.startedAt && now - bake.startedAt >= (bake.ms || BAKE_MS)) away.push({ icon: '🍞', title: "Bread is ready at Maple's", sub: 'Take it out, then share it or cook with it', go: JPLACES.bakery });
   const home = expedState().active.filter(t => t.ends <= now).length;
-  if (home) away.push({ icon: '🧭', title: `${home === 1 ? 'An expedition team is' : home + ' expedition teams are'} home`, sub: 'Collect Pebbles, supplies and maybe a card', go: JPLACES.museum });
+  if (home) away.push({ icon: '🧭', title: `${home === 1 ? 'An expedition team is' : home + ' expedition teams are'} home`, sub: 'Collect Embers, supplies and maybe a card', go: JPLACES.museum });
   const ripe = cropsIn().filter(c => cropProgress(c) >= 1).length;
-  if (ripe) away.push({ icon: '🌻', title: `${ripe} crop${ripe === 1 ? ' is' : 's are'} ripe`, sub: 'Harvest them in Town Square', go: { tab: 'town' } });
+  if (ripe) away.push({ icon: '🌻', title: `${ripe} crop${ripe === 1 ? ' is' : 's are'} ripe`, sub: 'Harvest them in El Umbral', go: { tab: 'town' } });
   const mail = unreadMail();
   if (mail) away.push({ icon: '📬', title: `${mail} unread letter${mail === 1 ? '' : 's'}`, sub: 'Read them at your cottage', go: JPLACES.home });
 
@@ -82,7 +82,7 @@ function todayModel() {
   const ch = challengeState().list || [], chWon = ch.filter(c => c.won).length;
   if (ch.length) daily.push({ icon: '🎯', title: 'Deck challenges', sub: `${chWon} of ${ch.length} beaten today`, done: chWon >= ch.length, frac: chWon / ch.length, bar: [chWon, ch.length], go: JPLACES.cup });
 
-  week.push({ icon: '🧘', title: 'Calm corner', sub: typeof tarotCanDraw === 'function' && tarotCanDraw() ? 'Your daily tarot reading is waiting' : calmRested() ? 'Rested today' : 'Breathe, rake sand, look at the stars', done: false, frac: 0, go: { calm: true } });
+  week.push({ icon: '🧘', title: 'Quiet Nook', sub: typeof tarotCanDraw === 'function' && tarotCanDraw() ? 'Your daily tarot reading is waiting' : calmRested() ? 'Rested today' : 'Breathe, rake sand, look at the stars', done: false, frac: 0, go: { calm: true } });
   const cs = cupState();
   week.push({ icon: '🏆', title: cupName(), sub: cs.trophy ? 'Trophy won this week' : cs.active ? `Round ${cs.round + 1} of 3 in progress` : 'Three matches, no healing', done: !!cs.trophy, frac: cs.trophy ? 1 : cs.round / 3, go: JPLACES.cup });
   if (featureLocked('draft')) locked.push({ icon: '🎴', title: featureLockText('draft').replace(/^🎴 /, '') });
@@ -120,7 +120,7 @@ function renderToday() {
 /* ---------- Almanac ---------- */
 let almTab = 'fish', almFam = 'all', almSel = '';
 const ALM_TABS = [['fish', '🐟 Fish'], ['cards', '🃏 Cards'], ['recipes', '🍲 Recipes'], ['bugs', '✨ Critters']];
-const ALM_FAMS = [['all', 'All'], ['grove', '🌿 Grove'], ['stone', '🪨 Stone'], ['tide', '🌊 Tide'], ['wind', '🪶 Wind'], ['spell', '✨ Spells']];
+const ALM_FAMS = [['all', 'All'], ['grove', '🌿 Brote'], ['stone', '🪨 Recuerdo'], ['tide', '🌊 Deriva'], ['wind', '🪶 Susurro'], ['spell', '✨ Spells']];
 function almanacSet(tab) {
   if (tab === 'fish') { const f = fishState(); return FISH.map(x => ({ id: x.id, icon: x.icon, name: x.name, found: !!f.caught[x.id], hint: x.hint || '', blurb: x.blurb, extra: f.caught[x.id] ? `Caught ${f.caught[x.id]}×` : '' })); }
   if (tab === 'cards') { const d = discoveredSet(); return CARD_POOL.map(c => ({ id: c.id, icon: c.icon, art: c, name: c.name, found: d.has(c.id), card: c, fam: c.spell ? 'spell' : CARD_FAMILY[c.id] || '', hint: c.exclusive ? ('A prize ' + (EXCLUSIVE_HINT[c.exclusive] || 'from a special place')) : 'Packs, the ground, prizes and Draft Runs' })); }

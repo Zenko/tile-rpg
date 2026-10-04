@@ -227,13 +227,13 @@ function renderTalk() {
     e.main.textContent = '💬 Chat'; e.main.dataset.act = 'ask';
   } else if (r.state === 'open') {
     talkSay(r.text); e.sub.textContent = r.hint;
-    e.tag.textContent = r.reward ? `Reward: a ${REQ_WIN_RARITY} card or better` : `Reward: 🫧 ${r.pebbles} Pebbles`;
+    e.tag.textContent = r.reward ? `Reward: a ${REQ_WIN_RARITY} card or better` : `Reward: 🫧 ${r.pebbles} Embers`;
     if (activeCount() >= REQ_MAX_ACTIVE) { e.main.textContent = 'You have two favours open already'; e.main.disabled = true; e.main.dataset.act = ''; }
     else { e.main.textContent = '✅ Happy to help'; e.main.dataset.act = 'accept'; }
   } else if (r.state === 'active') {
     talkSay(requestDone(r) ? 'You did it? Wonderful!' : r.text);
     e.sub.textContent = requestDone(r) ? 'Thank you, truly.' : `${r.hint}  (${requestProgressText(r)})`;
-    e.tag.textContent = r.reward ? `Reward: a ${REQ_WIN_RARITY} card or better` : `Reward: 🫧 ${r.pebbles} Pebbles`;
+    e.tag.textContent = r.reward ? `Reward: a ${REQ_WIN_RARITY} card or better` : `Reward: 🫧 ${r.pebbles} Embers`;
     if (requestDone(r)) { e.main.textContent = '🎁 Hand it in'; e.main.dataset.act = 'complete'; }
     else { e.main.textContent = 'Still working on it'; e.main.disabled = true; e.main.dataset.act = ''; }
   } else {
@@ -264,9 +264,9 @@ function completeRequest(f) {
   let rewardCard = null;
   if (r.reward) { rewardCard = randomCardId(rollRewardRarity(false)); state.ownedCards.push(rewardCard); bumpStat('cardsFound', 1); bumpPill('pillCards'); }
   else addPebbles(r.pebbles, 'favours');
-  logEvent('🎁', `Finished a favour for ${f.name}${rewardCard ? '' : ` for 🫧 ${r.pebbles} Pebbles`}.`);
+  logEvent('🎁', `Finished a favour for ${f.name}${rewardCard ? '' : ` for 🫧 ${r.pebbles} Embers`}.`);
   saveState(); updateHud(); renderTalk(); sfx('claim'); buzz(HAP.win);
-  toast(rewardCard ? '🎁 A card, as thanks' : `🫧 +${r.pebbles} Pebbles`);
+  toast(rewardCard ? '🎁 A card, as thanks' : `🫧 +${r.pebbles} Embers`);
   if (rewardCard) setTimeout(() => showCardReveal(rewardCard, `A gift from ${f.name}`, true), 300);
 }
 function closeTalk() { document.getElementById('talkCards').classList.add('hidden'); clearInterval(talkTypeTimer); talkSaid = ''; document.getElementById('talkPortrait').dataset.for = ''; if (talkTo) { delete talkTo._thanks; delete talkTo._topics; delete talkTo._reacted; } talkTo = null; talkEls().ov.classList.add('hidden'); }
@@ -284,7 +284,7 @@ const BREAD_THANKS = [
   'You remembered I like the crusty ones. Thank you!',
 ];
 function giftsToday() { const p = state.progress; if (!p.gifts || p.gifts.day !== todayKey()) p.gifts = { day: todayKey(), to: {} }; return p.gifts; }
-// A neighbor is known by district + name, so "Wren of Town Square" is the same person every time they turn up.
+// A neighbor is known by district + name, so "Wren of El Umbral" is the same person every time they turn up.
 function neighborKey(f) { const d = /^npc-([a-z]+)-/.exec(f.id || ''); return (d ? d[1] : state.currentDistrict) + ':' + f.name; }
 function canShareBread(f) { return !!f && breadCount() > 0 && !f.isBoss && !f.isRival && !giftsToday().to[neighborKey(f)]; }
 // A cooked dish counts as the day's gift too, but is worth more friendship than bread.
@@ -424,7 +424,7 @@ function startSignatureMatch(f) {
   startBattle(foe);
 }
 document.getElementById('talkSig').addEventListener('click', () => { const f = talkTo; if (f) startSignatureMatch(f); });
-// The first signature win with a friend each day pays an ultra rare card or better; later ones a few Pebbles.
+// The first signature win with a friend each day pays an ultra rare card or better; later ones a few Embers.
 function signatureWin() {
   const npc = battle.npc, s = npc.signature, fr = friendsState()[s.key];
   battle.rewarded = true;

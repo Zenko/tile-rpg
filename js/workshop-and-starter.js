@@ -180,7 +180,7 @@ function renderCraft() {
   const box = document.getElementById('craftView');
   const counts = ownedCardCounts();
   const pct = n => Math.round(n * 100);
-  box.innerHTML = `<div class="cr-intro">Combine cards into something better. <b>Nothing here costs Pebbles</b>: the cards are the price.</div>`;
+  box.innerHTML = `<div class="cr-intro">Combine cards into something better. <b>Nothing here costs Embers</b>: the cards are the price.</div>`;
 
   // ----- Refine -----
   const refinable = Object.keys(counts).filter(id => counts[id] >= 2 && cardDef(id) && !cardDef(id).crafted && !cardDef(id).spell)
@@ -316,7 +316,7 @@ function renderPacks() {
     <div class="wallet">
       <div>
         <div class="w-amt">🫧 ${peb}</div>
-        <div class="w-sub">${spares > 0 ? `${spares} spare card${spares === 1 ? '' : 's'} could be released for ${totalSpareValue()} more` : 'Release spare copies from My Cards to earn Pebbles'}</div>
+        <div class="w-sub">${spares > 0 ? `${spares} spare card${spares === 1 ? '' : 's'} could be released for ${totalSpareValue()} more` : 'Release spare copies from My Cards to earn Embers'}</div>
       </div>
       ${spares > 0 ? '<button class="panel-action active" id="goRelease">Release</button>' : ''}
     </div>`;
@@ -337,7 +337,7 @@ function renderPacks() {
     el.querySelector('.btn').addEventListener('click', () => {
       ensureAudio();
       if (buyPack(pack.id)) { /* reveal overlay handles feedback */ }
-      else { toast('Not enough Pebbles yet'); sfx('tie'); }
+      else { toast('Not enough Embers yet'); sfx('tie'); }
     });
     box.appendChild(el);
   });
@@ -517,7 +517,7 @@ function renderItems() {
   note.textContent = 'Buying a decoration adds it to Your Decorations above. Place it whenever you like - it goes in whichever district you are standing in.';
   box.appendChild(note);
 }
-// One swatch in the Shop's Customize rows: unlocked ones equip on tap, locked ones show their Pebble
+// One swatch in the Shop's Customize rows: unlocked ones equip on tap, locked ones show their Ember
 // price and buy-then-equip on tap (via buyCosmetic).
 function shopCosmeticSwatch(kind, value, label, cost, isEquipped, isUnlocked) {
   const el = document.createElement('div');

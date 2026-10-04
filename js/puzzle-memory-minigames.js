@@ -32,7 +32,7 @@ function solvePuzzle(G, depth, budget) {
   }
   return null;
 }
-// Would just swinging every ready card at their Spirit win? Then it's not much of a puzzle.
+// Would just swinging every ready card at their Calm win? Then it's not much of a puzzle.
 function naiveWins(G) {
   const H = cloneBattle(G);
   H.p[0].board.forEach(a => { if (BattleEngine.legalTargets(H, 0, a.uid).some(t => t.kind === 'spirit')) BattleEngine.attack(H, 0, a.uid, { kind: 'spirit' }); });
@@ -198,7 +198,7 @@ function memoryFinish() {
   saveState(); updateHud();
   scene.text = !rewarded ? `${memory.pairs} pairs in ${memory.flips} flips. Olwen nods approvingly, though today's reward is spent.`
     : cardId ? `${memory.pairs} pairs in ${memory.flips} flips. Tucked between two books: a card!`
-    : `${memory.pairs} pairs in ${memory.flips} flips. Olwen slides ${pebbles} Pebble${pebbles > 1 ? 's' : ''} across the table.`;
+    : `${memory.pairs} pairs in ${memory.flips} flips. Olwen slides ${pebbles} Ember${pebbles > 1 ? 's' : ''} across the table.`;
   memory.done = true;
   renderScene();
   if (cardId) { const isNew = !discoveredSet().has(BattleEngine.baseIdOf(cardId)); if (isNew) toast('📖 New entry in your Index'); setTimeout(() => showCardReveal(cardId, 'Found between the pages', false), 350); }
@@ -233,7 +233,7 @@ document.getElementById('scStage').addEventListener('click', e => {
    HOUSE MINI-GAMES
    One small game in every building you can enter, all run by the same frame: the game draws into the scene stage,
    taps land through data-mg attributes (on pointerdown, so fast games never lose a tap to a redraw), and a finished
-   game earns a medal. The first MINI_DAILY_REWARDED medals of each game every day pay Pebbles (gold may add a card);
+   game earns a medal. The first MINI_DAILY_REWARDED medals of each game every day pay Embers (gold may add a card);
    playing is never blocked. Each game is { house, icon, title, how, init, begin?, tap, render, scoreText,
    tiers {bronze, silver, gold} or tierOf(score), lowerBetter?, pebbles?(score) }.
    ============================================================ */
@@ -662,6 +662,6 @@ function openChest(data) {
   saveState(); updateHud(); renderTown();
   sfx('claim'); buzz(HAP.big);
   logEvent('🗝️', 'Opened a hidden chest.');
-  showCardReveal(cardId, '🗝️ A hidden chest!', true, `+${pebbles} 🫧 Pebbles`, xp);
+  showCardReveal(cardId, '🗝️ A hidden chest!', true, `+${pebbles} 🫧 Embers`, xp);
 }
 

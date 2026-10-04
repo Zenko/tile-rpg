@@ -5,7 +5,7 @@
    does nothing at all (no observer is even started).
    Icon ids are the emoji's code points in hex without the variation selector (the wrapped present is 1f381); assets/icons/manifest.js lists every
    icon in the game with its id and file name (regenerate it with scripts/icon-inventory.py).
-   Keyword icons can be replaced one by one even though they share emoji with other things (the leaf on Mend is also the Grove leaf): a replaced
+   Keyword icons can be replaced one by one even though they share emoji with other things (the leaf on Rest is also the Grove leaf): a replaced
    keyword's icon text gets invisible marker characters appended, which this layer recognises.
    Two sources of replacements:
      ICON_ART / KW_ART below   the approved, committed ones (id -> file path). Empty until art is approved.

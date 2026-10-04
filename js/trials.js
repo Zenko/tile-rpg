@@ -1,7 +1,7 @@
 /* ============================================================
-   TAROT TRIALS (build 114)  - Calm corner -> Tarot -> Trials
+   TAROT TRIALS (build 114)  - Quiet Nook -> Tarot -> Trials
    Five themed matches against a foe who brings its own Fate and Fate Spread (the same pieces you can use). They run in order;
-   beating a trial the first time gives you its Arcana card, later wins pay a few Pebbles. A trial foe is a normal opponent
+   beating a trial the first time gives you its Arcana card, later wins pay a few Embers. A trial foe is a normal opponent
    (battle.npc.trial) that carries `fate` and `spread` into BattleEngine.newGame, and uses its Fate through aiTurn / btOpponentTurn.
    Needs Keeper level 6 (the Fate Spread unlock). Progress: state.progress.trials = { done: { [fateId]: true } }.
    Balance: see HANDOFF. Foes are pre-built decks (not scaled to your wins), so the difficulty is fixed.

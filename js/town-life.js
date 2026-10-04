@@ -56,7 +56,7 @@ document.getElementById('lifeClose').addEventListener('click', () => { lifeSheet
 function lifeActionsFor(p) {
   const d = state.currentDistrict, a = [];
   if (p.type === 'bench') { a.push({ id: 'sit', label: '🪑 Sit for a moment' }); if (d === 'square' && p.id === 'bench2') a.push({ id: 'busk', label: '🎸 Busk for tips' }); }
-  else if (p.type === 'well') { a.push({ id: 'wish', label: '🪙 Make a wish (1 Pebble)' }); if (d === 'garden') a.push({ id: 'water', label: '🚿 Water the plants' }); }
+  else if (p.type === 'well') { a.push({ id: 'wish', label: '🪙 Make a wish (1 Ember)' }); if (d === 'garden') a.push({ id: 'water', label: '🚿 Water the plants' }); }
   else if (p.type === 'lamp') a.push({ id: 'lamp', label: skyPhase().isNight ? '🏮 Light the lamp' : '🏮 Light it (after dark)' });
   else if (p.type === 'crate') a.push({ id: 'haggle', label: '🤝 Haggle with the trader' });
   else if (p.type === 'nets') a.push({ id: 'nets', label: '🪢 Haul in the nets' });
@@ -90,12 +90,12 @@ function lifeDo(id, p) {
     calmSit(state.companion ? state.companion.icon : '');   // js/calm.js: the town zooms out gently until you stand up
   } else if (id === 'wish') {
     if (lifeUses('wish') >= 5) { toast('🪙 The well has heard enough wishes today.'); return; }
-    if ((state.progress.pebbles || 0) < 1) { toast('🪙 You need a Pebble to make a wish.'); return; }
+    if ((state.progress.pebbles || 0) < 1) { toast('🪙 You need a Ember to make a wish.'); return; }
     lifeUse('wish'); spendPebbles(1, 'wishing'); sfx('wish'); lifeMood(1);
     const r = Math.random();
     if (r < 0.06) { grantHiddenCard('The well answers'); }
     else if (r < 0.18) { const id2 = ['daisy', 'daisy', 'pumpkin', 'sunflower'][Math.floor(Math.random() * 4)]; seedInv()[id2] = seedCount(id2) + 1; saveState(); toast(`${seedDef(id2).icon} Something glints below... a ${seedDef(id2).name} seed floats up!`); sfx('found'); }
-    else if (r < 0.43) { addPebbles(3, 'wishing'); toast('🪙 Your coin comes back with two friends! +2 Pebbles net.'); sfx('found'); }
+    else if (r < 0.43) { addPebbles(3, 'wishing'); toast('🪙 Your coin comes back with two friends! +2 Embers net.'); sfx('found'); }
     else toast('🪙 ' + WISH_LINES[Math.floor(Math.random() * WISH_LINES.length)]);
   } else if (id === 'lamp') {
     if (!skyPhase().isNight) { toast('🏮 Better to wait until dusk to light it.'); return; }
@@ -105,18 +105,18 @@ function lifeDo(id, p) {
     toast('🏮 The lamp glows warm until morning.');
   } else if (id === 'busk') {
     lifeGame('busk', 'Busk by the fountain', '🎸', 'Tap in the green zone to keep the beat. Every hit earns a tip.', h => {
-      addPebbles(h + (h === 5 ? 2 : 0), 'town-games'); return `🎸 The crowd tips you ${h + (h === 5 ? 2 : 0)} Pebbles${h === 5 ? ' - and cheers for an encore' : ''}.`; });
+      addPebbles(h + (h === 5 ? 2 : 0), 'town-games'); return `🎸 The crowd tips you ${h + (h === 5 ? 2 : 0)} Embers${h === 5 ? ' - and cheers for an encore' : ''}.`; });
   } else if (id === 'haggle') {
     lifeGame('haggle', 'Haggle with the trader', '🤝', 'Tap when the marker is in the green zone to land each counter-offer.', h => {
       const gain = h + (h >= 4 ? 1 : 0); addPebbles(gain, 'town-games');
       if (h === 5 && Math.random() < 0.4) setTimeout(() => grantHiddenCard('A trader slips you something extra'), 600);
-      return `🤝 You talk the price down and pocket ${gain} Pebbles${h === 5 ? ' (and the trader grumbles a bonus)' : ''}.`; });
+      return `🤝 You talk the price down and pocket ${gain} Embers${h === 5 ? ' (and the trader grumbles a bonus)' : ''}.`; });
   } else if (id === 'nets') {
     lifeGame('nets', 'Haul in the nets', '🪢', 'Pull when the marker is in the green zone. Time it right and the haul comes in smooth.', h => {
       addPebbles(h, 'town-games'); if (h >= 4 && Math.random() < 0.35) setTimeout(() => grantHiddenCard('Something shiny in the net'), 600);
-      return `🪢 You land a good haul: ${h} Pebbles' worth of fish.`; });
+      return `🪢 You land a good haul: ${h} Embers' worth of fish.`; });
   } else if (id === 'water') {
-    lifeGame('water', 'Water the plants', '🚿', 'Pump when the marker is in the green zone. Every good pump also helps the crops in Town Square grow.', h => {
+    lifeGame('water', 'Water the plants', '🚿', 'Pump when the marker is in the green zone. Every good pump also helps the crops in El Umbral grow.', h => {
       let helped = 0; (cropsIn() || []).forEach(c => { if (cropProgress(c) < 1) { c.grown = Math.min(cropGrowMs(c), (c.grown || 0) + h * 90000); helped++; } });
       let line = `🚿 You water the garden${helped ? ` and the water carries down to ${helped} plot${helped > 1 ? 's' : ''} in the Square` : ''}.`;
       if (h >= 3) { const sid = Math.random() < 0.7 ? 'daisy' : 'pumpkin'; seedInv()[sid] = seedCount(sid) + 1; line += ` ${seedDef(sid).icon} A ${seedDef(sid).name} seed sprouts loose.`; }
@@ -199,7 +199,7 @@ function lifeShake(tx, ty) {
   const r = Math.random(), garden = state.currentDistrict === 'garden' || state.currentDistrict === 'square';
   if (r < 0.03) grantHiddenCard('Something was tucked in the branches');
   else if (r < 0.15 && garden) { const sid = Math.random() < 0.7 ? 'daisy' : 'pumpkin'; seedInv()[sid] = seedCount(sid) + 1; saveState(); toast(`${seedDef(sid).icon} A ${seedDef(sid).name} seed drops into your hand.`); sfx('found'); }
-  else if (r < 0.4) { addPebbles(1, 'acorns'); toast('🌰 An acorn drops - you pocket it for a Pebble.'); sfx('found'); }
+  else if (r < 0.4) { addPebbles(1, 'acorns'); toast('🌰 An acorn drops - you pocket it for a Ember.'); sfx('found'); }
   else townLog.textContent = 'Leaves flutter down around you.';
 }
 function lifeSkip(tx, ty) {

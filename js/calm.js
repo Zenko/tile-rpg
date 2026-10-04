@@ -13,7 +13,7 @@
      sit      - on any bench, the town zooms out gently and the sky drifts by until you stand up.
      postcards - save a small card of this place and moment.
 
-   Entry points: the Journal's Today page (Calm corner), Wren's tea, your cottage (sand, bonsai), the Net Loft (lanterns), and
+   Entry points: the Journal's Today page (Quiet Nook), Wren's tea, your cottage (sand, bonsai), the Net Loft (lanterns), and
    every bench. Cozy mode (Settings -> Comfort) hides the nudges that ask for your attention. Everything honours Calm motion.
    Saved in state.progress.calm (created lazily), nothing in it can run out or expire.
    ============================================================ */
@@ -77,7 +77,7 @@ function calmRender() {
   calmReset();
   const body = calmBody(), title = document.getElementById('calmTitle'), back = document.getElementById('calmBack');
   const def = CALM_ACTIVITIES.find(a => a.id === calmCur);
-  title.textContent = def ? def.name : calmCur === 'sit' ? '' : 'Calm corner';
+  title.textContent = def ? def.name : calmCur === 'sit' ? '' : 'Quiet Nook';
   back.classList.toggle('hidden', calmCur === 'hub' || calmCur === 'sit');
   body.className = 'calm-body calm-act-' + calmCur;   // not calm-<id>: that is also the stage's own class body.innerHTML = '';
   ({ hub: calmHub, breathe: calmBreathe, sand: calmSand, lanterns: calmLanterns, chimes: calmChimes, stars: calmStars, tea: calmTea, bonsai: calmBonsai, tarot: calmTarot, sit: calmSitView })[calmCur](body);

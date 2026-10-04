@@ -10,8 +10,8 @@ const FISH = [
   { id: 'minnow', name: 'Minnow',      icon: '🐟', pebbles: 2, weight: 58, blurb: 'Small, silver and quick.',        drain: 3.0, pull: 16, hint: 'Bites anywhere, any time' },
   { id: 'perch',  name: 'Perch',       icon: '🐠', pebbles: 3, weight: 30, blurb: 'Striped and a little proud of it.', drain: 5.5, pull: 13, hint: 'Bites anywhere, any time' },
   { id: 'carp',   name: 'Golden Carp', icon: '🏅', pebbles: 5, weight: 12, blurb: 'It shimmers like a coin in the sun.', drain: 8.0, pull: 10, hint: 'Anywhere, but shy' },
-  { id: 'crab',   name: 'Harbor Crab', icon: '🦀', pebbles: 3, weight: 26, where: ['harbor'], blurb: 'It pinches the line, then lets go politely.', drain: 4.5, pull: 14, hint: 'Scuttles only in Quiet Harbor' },
-  { id: 'puffer', name: 'Pufferfish',  icon: '🐡', pebbles: 5, weight: 12, where: ['harbor'], blurb: 'It puffs up, offended, then settles down.', drain: 6.0, pull: 12, hint: 'Lives only in Quiet Harbor' },
+  { id: 'crab',   name: 'Harbor Crab', icon: '🦀', pebbles: 3, weight: 26, where: ['harbor'], blurb: 'It pinches the line, then lets go politely.', drain: 4.5, pull: 14, hint: 'Scuttles only in La Orilla del Arrullo' },
+  { id: 'puffer', name: 'Pufferfish',  icon: '🐡', pebbles: 5, weight: 12, where: ['harbor'], blurb: 'It puffs up, offended, then settles down.', drain: 6.0, pull: 12, hint: 'Lives only in La Orilla del Arrullo' },
   { id: 'eel',    name: 'Moonlit Eel', icon: '🐍', pebbles: 4, weight: 18, night: true, blurb: 'Long and silver, like a ribbon of moonlight.', drain: 6.0, pull: 12, hint: 'Bites only at night' },
   { id: 'trout',  name: 'Rainbow Trout', icon: '🌈', pebbles: 5, weight: 18, weather: ['rain'], blurb: 'Every scale a different colour.', drain: 6.5, pull: 12, hint: 'Rises only in the rain' },
   { id: 'pike',   name: 'Thunder Pike', icon: '⚡', pebbles: 6, weight: 14, weather: ['storm'], blurb: 'It crackles faintly when it thrashes.', drain: 8.5, pull: 10, hint: 'Hunts only in storms' },
@@ -27,7 +27,7 @@ function fishAvailable(f) {
   return true;
 }
 const FISH_REEL_TICK_MS = 220;    // how often the fish tugs back while you're reeling it in
-const FISH_CARD_ODDS = 1 / 14;       // chance that a rewarded catch is a card of rare or better instead of Pebbles
+const FISH_CARD_ODDS = 1 / 14;       // chance that a rewarded catch is a card of rare or better instead of Embers
 const FISH_DAILY_REWARDED = 8;       // rewarded catches per day; fishing itself is never blocked
 const FISH_WAIT_MS = [1500, 4000];   // random wait before a bite
 const FISH_BITE_MS = 1100;           // how long the bite window stays open
@@ -459,7 +459,7 @@ function fishLand(fish) {
     fishPlaceFish(50, 50, ''); fishFill(); fishSettle();
   }, t(1000));
   const chips = [];
-  if (gotPeb) chips.push(`<span class="fs-chip gold">+${gotPeb} Pebble${gotPeb > 1 ? 's' : ''}${eventIs('fishing-derby') ? ' (derby!)' : ''}</span>`);
+  if (gotPeb) chips.push(`<span class="fs-chip gold">+${gotPeb} Ember${gotPeb > 1 ? 's' : ''}${eventIs('fishing-derby') ? ' (derby!)' : ''}</span>`);
   if (firstOfKind) chips.push(`<span class="fs-chip ok">New · Log ${FISH.filter(x => f.caught[x.id]).length}/${FISH.length}</span>`);
   if (isBig) chips.push('<span class="fs-chip gold">Big one</span>');
   const rr = fe('fishResult'); rr.innerHTML = chips.join(''); rr.classList.toggle('hidden', !chips.length);

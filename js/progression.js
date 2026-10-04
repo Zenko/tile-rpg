@@ -4,21 +4,21 @@
    its turn rather than stacking on top.
    ============================================================ */
 const TIPS = {
-  trials:     { icon: '🔮', title: 'Trials', text: 'In the Tarot screen (Calm corner → Tarot → Trials), five foes each bring a Fate and a Spread of their own. Beat one for the first time to take home its Arcana card. They open in order, and they are meant to be hard.' },
-  spread:     { icon: '🃏', title: 'Fate Spread', text: 'On the Deck screen, lay three cards as Past, Present and Future. Past is always in your opening hand, Present enters with a Shield, and Future arrives on your 4th turn. Three cards of one family give Harmony (+2 Spirit); three different families give Contrast (+1 card).' },
-  fate:       { icon: '🔮', title: 'Fate', text: 'Attune a Major Arcana (Calm corner → Tarot → The Arcana) and you can take its power into a match. Pick it on the keep-this-hand screen; a purple round button by your bar glows when it is ready. Each one works once per match, from its own turn, and most cost a little.' },
-  fortune:    { icon: '🔮', title: "Madame Soot's tent", text: 'On Market Row from dusk until dawn. Soot gives your daily tarot reading, swaps one card once a day, tells you the story of your deck, and sells Arcana packs.' },
+  trials:     { icon: '🔮', title: 'Trials', text: 'In the Tarot screen (Quiet Nook → Tarot → Trials), five foes each bring a Fate and a Spread of their own. Beat one for the first time to take home its Arcana card. They open in order, and they are meant to be hard.' },
+  spread:     { icon: '🃏', title: 'Fate Spread', text: 'On the Deck screen, lay three cards as Past, Present and Future. Past is always in your opening hand, Present enters with a Haze, and Future arrives on your 4th turn. Three cards of one family give Harmony (+2 Calm); three different families give Contrast (+1 card).' },
+  fate:       { icon: '🔮', title: 'Fate', text: 'Attune a Major Arcana (Quiet Nook → Tarot → The Arcana) and you can take its power into a match. Pick it on the keep-this-hand screen; a purple round button by your bar glows when it is ready. Each one works once per match, from its own turn, and most cost a little.' },
+  fortune:    { icon: '🔮', title: "Madame Brume's tent", text: 'On El Mercado de Susurros from dusk until dawn. Soot gives your daily tarot reading, swaps one card once a day, tells you the story of your deck, and sells Arcana packs.' },
   tarot:      { icon: '🔮', title: 'Tarot', text: 'Once a day, draw three Arcana. Turn them all over and the middle card gives the day a fortune. The 22 Major Arcana are real cards from the game: own the card and you own the Arcana, and you can attune three for a small permanent perk.' },
-  cellarRun:  { icon: '🕯️', title: 'The cellar', text: 'Every floor offers a few doors: a fight, a chest, a campfire, a shrine or a peddler, hidden in the dark: walk with your lantern and tap tiles to explore. Barrels hold Pebbles, a key opens the locked chest, rats dim the light and glowcaps brighten it. You have three hearts; losing a fight costs one, and at zero the run ends. Leaving does not end it.' },
-  calm:       { icon: '🧘', title: 'The calm corner', text: 'A few quiet things to do that score nothing and cost nothing: breathe, rake sand, watch the stars, drink tea, tend a bonsai. Five slow breaths leave you Rested for the day.' },
-  path:       { icon: '🧭', title: 'Your path', text: 'Every level gives you a skill point. Spend them on Angler, Gardener, Duelist or Wanderer, and upgrade your rod, watering can and lantern with Pebbles. You can reset your points for free any time.' },
+  cellarRun:  { icon: '🕯️', title: 'The cellar', text: 'Every floor offers a few doors: a fight, a chest, a campfire, a shrine or a peddler, hidden in the dark: walk with your lantern and tap tiles to explore. Barrels hold Embers, a key opens the locked chest, rats dim the light and glowcaps brighten it. You have three hearts; losing a fight costs one, and at zero the run ends. Leaving does not end it.' },
+  calm:       { icon: '🧘', title: 'The quiet nook', text: 'A few quiet things to do that score nothing and cost nothing: breathe, rake sand, watch the stars, drink tea, tend a bonsai. Five slow breaths leave you Rested for the day.' },
+  path:       { icon: '🧭', title: 'Your path', text: 'Every level gives you a skill point. Spend them on Angler, Gardener, Duelist or Wanderer, and upgrade your rod, watering can and lantern with Embers. You can reset your points for free any time.' },
   bakery:     { icon: '🍞', title: 'The bakery', text: 'Put a loaf in the oven - it bakes in real time. Share bread with neighbors (one gift each per day) to grow your friendship, or cook with it.' },
   cook:       { icon: '🍳', title: 'Cooking', text: 'Harvests and fish land in your pantry. Cook them into dishes: give one as a gift (worth more than bread), eat it on the keep-this-hand screen for a head start, or bring one to a neighbor who asked.' },
-  garden:     { icon: '🌱', title: 'Gardening', text: 'Buy seeds here, then tap a glowing patch of Town Square to plant. Crops grow in real time (faster in the rain). Card seeds grow a card.' },
+  garden:     { icon: '🌱', title: 'Gardening', text: 'Buy seeds here, then tap a glowing patch of El Umbral to plant. Crops grow in real time (faster in the rain). Card seeds grow a card.' },
   puzzle:     { icon: '🧩', title: 'The daily puzzle', text: 'A fixed board: win it this turn. Ending your turn gives up and resets the board, so take your time. The first solve each day pays a card.' },
-  cup:        { icon: '🏆', title: 'The Festival Cup', text: 'Three matches in a row. Your Spirit carries over between rounds - there is no healing - and a loss ends the run. Sweep all three for the week\'s trophy.' },
+  cup:        { icon: '🏆', title: 'The Dreamers’ Cup', text: 'Three matches in a row. Your Calm carries over between rounds - there is no healing - and a loss ends the run. Sweep all three for the week\'s trophy.' },
   home:       { icon: '🏠', title: 'Your cottage', text: 'Your own place. Read letters in the mailbox, put decorations on the shelves, frame favourite cards, and see your trophies.' },
-  lantern:    { icon: '🏮', title: 'The Lantern Market', text: 'Lumen only trades after dark: Night Packs full of moonlit cards, glowing decorations, and Pebbles for the critters in your jar.' },
+  lantern:    { icon: '🏮', title: 'The Lantern Market', text: 'Lumen only trades after dark: Night Packs full of moonlit cards, glowing decorations, and Embers for the critters in your jar.' },
   bugs:       { icon: '✨', title: 'Night critters', text: 'Glowing critters come out at night. Tap one to catch it - it goes in your jar for the Lantern Market and in the critter log under Cards → Fish.' },
   companion:  { icon: '👻', title: 'A companion', text: 'You can invite one wandering spirit to follow you. Each brings a small perk depending on its card. Let it go any time from your profile.' },
   companionPlay: { icon: '🙈', title: 'Play with your companion', text: "Tap your companion in town to play Hide and Seek right there on the map - it ducks behind a real spot nearby, so watch closely, then tap where it went from memory. Rounds get quicker and add more hiding spots the longer your streak runs." },
@@ -26,14 +26,14 @@ const TIPS = {
   rival:      { icon: '🎭', title: 'A rival', text: 'Rook moves between districts. Every win sends them off to build a stronger deck - eight chapters in all, with a unique final prize.' },
   friends:    { icon: '💞', title: 'Friendship', text: 'Favours, gifts and friendly wins earn hearts. At 3 hearts a neighbor plays their signature deck with you; at 5 they give you a keepsake.' },
   inspect:    { icon: '🔍', title: 'Look closer', text: 'Press and hold any card - in your collection, the deck, a battle or the Index - to see it large, with its full name, rules and story.' },
-  spells:     { icon: '✨', title: 'Spell cards', text: 'Spells are cast from your hand for an instant effect and never take a board slot. Aimed spells ignore Guard.' },
-  museum:      { icon: '🏛️', title: 'The Card Museum', text: 'Donate spare copies of cards to fill six wings. The museum never takes your last copy or one your deck uses. Each finished wing pays Pebbles and gives a keepsake decoration.' },
-  expeditions: { icon: '🧭', title: 'Expeditions', text: 'Send up to three spare cards away for a while - two teams at once. Swift cards travel faster, Guards keep the team safe, Echo cards find treasure, and stronger teams bring back more. Your cards come home with loot and a little mastery.' },
+  spells:     { icon: '✨', title: 'Spell cards', text: 'Spells are cast from your hand for an instant effect and never take a board slot. Aimed spells ignore Watch.' },
+  museum:      { icon: '🏛️', title: 'The Card Museum', text: 'Donate spare copies of cards to fill six wings. The museum never takes your last copy or one your deck uses. Each finished wing pays Embers and gives a keepsake decoration.' },
+  expeditions: { icon: '🧭', title: 'Expeditions', text: 'Send up to three spare cards away for a while - two teams at once. Flicker cards travel faster, Watch cards keep the team safe, Startle cards find treasure, and stronger teams bring back more. Your cards come home with loot and a little mastery.' },
   trades:      { icon: '🤝', title: 'The trading board', text: 'Three new offers every morning: swap a spare for a card you have never had, bundle three spares for a rarer card, or sell one to a collector for three times its release value.' },
   challenges:  { icon: '🎯', title: 'Deck challenges', text: 'Three rules a day, like "only commons" or "no two cards the same". Win with a deck that follows the rule for a card prize. Keep a deck slot for challenges so switching is quick.' },
-  minigames:  { icon: '🎲', title: 'Mini-games', text: 'Every house has a little game. Earn a bronze, silver or gold medal; the first three medals in each game every day pay Pebbles, and gold can turn up a card. Play as much as you like after that.' },
+  minigames:  { icon: '🎲', title: 'Mini-games', text: 'Every house has a little game. Earn a bronze, silver or gold medal; the first three medals in each game every day pay Embers, and gold can turn up a card. Play as much as you like after that.' },
   lookaround: { icon: '🖐️', title: 'Look around', text: 'Drag the town map with your finger to look at the rest of the district. Tap the target button to bring the camera back to your character; walking somewhere does it too.' },
-  forecast:   { icon: '🪧', title: 'The weather board', text: 'Signs show the forecast. Weather changes play: clear pays a little extra on daily tasks, cloudy doubles spirit XP, rain helps fishing and growing, storms boost Swift cards, snow toughens bosses for richer prizes.' },
+  forecast:   { icon: '🪧', title: 'The weather board', text: 'Signs show the forecast. Weather changes play: clear pays a little extra on daily tasks, cloudy doubles spirit XP, rain helps fishing and growing, storms boost Flicker cards, snow toughens bosses for richer prizes.' },
   events:     { icon: '📅', title: 'Daily town events', text: "One event runs each day, shown next to the district name - a Fishing Derby, Market Day, Harvest Fair and more, each bending the rules a little in your favor." },
   foils:      { icon: '✨', title: 'Foil cards', text: 'A shimmering foil is purely a collector\'s chase - the same card, just shinier. Your foil total shows at the top of Cards → Sets and in your cottage trophy case.' },
   townlife:   { icon: '🪑', title: 'Things to do around town', text: 'Props do things now: sit on benches, make a wish at wells, light lamps after dark, haggle, haul nets, water plants or busk for tips. Shake trees, skip stones, splash through puddles in the rain. Everything nudges the district\'s town mood - fill it up and the district dresses itself up for good.' },
@@ -74,9 +74,9 @@ const XP_PER_STAT = {
 };
 /* ============================================================
    PEBBLE LEDGER (v1.87.0)
-   Every Pebble earned or spent is tagged with where it came from (addPebbles(n, 'fishing'), spendPebbles(n, 'packs')) and
+   Every Ember earned or spent is tagged with where it came from (addPebbles(n, 'fishing'), spendPebbles(n, 'packs')) and
    counted in state.progress.econ, together with active play time, so "is the economy too generous?" can be answered with
-   numbers instead of feel. Nothing here changes any amount. The report is in Settings -> Pebble ledger, is attached to
+   numbers instead of feel. Nothing here changes any amount. The report is in Settings -> Ember ledger, is attached to
    feedback/bug reports (testerInfo), and `econReport()` can be called from the console. Add a tag whenever a new
    source or sink is added; an untagged one lands in 'other'.
    ============================================================ */
@@ -105,10 +105,10 @@ function econReport() {
 function econSummaryText() {
   const r = econReport(); if (!r.earned && !r.spent) return '';
   const top = list => list.slice(0, 4).map(x => `${x.src} ${x.total}`).join(', ');
-  return `Pebbles over ${r.hours}h: earned ${r.earned} (${r.earnedPerHour}/h) [${top(r.earn)}] · spent ${r.spent} [${top(r.spend)}]`;
+  return `Embers over ${r.hours}h: earned ${r.earned} (${r.earnedPerHour}/h) [${top(r.earn)}] · spent ${r.spent} [${top(r.spend)}]`;
 }
-// Soft daily limits (v1.87.0): the more of one activity's Pebbles you have already earned today, the less the next ones pay.
-// Full pay up to `softCap` Pebbles a day, half up to double that, a quarter beyond. It is read straight from the ledger, so it
+// Soft daily limits (v1.87.0): the more of one activity's Embers you have already earned today, the less the next ones pay.
+// Full pay up to `softCap` Embers a day, half up to double that, a quarter beyond. It is read straight from the ledger, so it
 // follows the same tags as addPebbles(n, src), and it resets with the day. It keeps a repeatable activity (fishing, the cup,
 // drafts, crops) from being the answer to everything, without ever stopping it or touching its other rewards.
 function econTaper(src, n, softCap) {
@@ -189,7 +189,7 @@ function showLevelUp(level, pebbles, bonusCardId) {
   logEvent('⭐', `Reached Level ${level}.`);
   document.getElementById('levelUpNum').textContent = level;
   const desc = document.getElementById('levelUpDesc');
-  desc.innerHTML = `You reached <b>Level ${level}</b>!<br>+${pebbles} 🫧 Pebbles` + (bonusCardId ? `<br><b>A bonus card is waiting for you.</b>` : '');
+  desc.innerHTML = `You reached <b>Level ${level}</b>!<br>+${pebbles} 🫧 Embers` + (bonusCardId ? `<br><b>A bonus card is waiting for you.</b>` : '');
   sparkleBurst(document.getElementById('levelUpSparkles'), ['⭐', '✨', '🌟'], 16);
   document.getElementById('levelUpOverlay').classList.remove('hidden');
   sfx('claim'); buzz(HAP.win);
@@ -510,7 +510,7 @@ function buildDeckForOpponent(count, forBoss, tier, seed, district, wins) {
     if (tier <= 3) return rollRarity(false, wins);
     return r < 0.35 ? 'super' : (Math.random() < 0.55 ? 'ultra' : 'rare');
   };
-  // A district's folk lean on their family (Stone in Town Square, Wind in Market Row, Tide in the Harbor, Grove in the
+  // A district's folk lean on their family (Recuerdo in El Umbral, Susurro in El Mercado de Susurros, Deriva in the Harbor, Grove in the
   // Garden): the everyday commons shrink to that family's, and about half the picks come from it.
   const fam = districtFamily(district);
   const pool = BASE_COMMONS.filter(id => !fam || !CARD_FAMILY[id] || CARD_FAMILY[id] === fam);
@@ -555,8 +555,8 @@ function foeEnhanceDeck(deck, tier, seed, extra) {
 }
 
 // How hard an opponent is: chosen at battle time from how many battles you have won.
-// Difficulty is tuned by simulation (see the notes with the game). Friendly neighbors start with less Spirit.
-// Regular neighbors: gentle -> normal -> sharp as you win more. Bosses: normal, then sharp from 5 wins, with full-strength Spirit.
+// Difficulty is tuned by simulation (see the notes with the game). Friendly neighbors start with less Calm.
+// Regular neighbors: gentle -> normal -> sharp as you win more. Bosses: normal, then sharp from 5 wins, with full-strength Calm.
 function opponentProfile(isBoss) {
   const w = state.wins;
   if (isBoss) return w < 5 ? { level: 'normal', spirit: 18 } : { level: 'smart', spirit: 20 };

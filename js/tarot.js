@@ -1,7 +1,7 @@
 /* ============================================================
    TAROT (build 108)
-   The game's cards already read like a tarot deck: four families are the four suits (Grove = Wands, Stone = Pentacles,
-   Tide = Cups, Wind = Swords), and twenty-two of its mythic and super cards stand in for the Major Arcana. Nothing new is
+   The game's cards already read like a tarot deck: four families are the four suits (Brote = Wands, Recuerdo = Pentacles,
+   Deriva = Cups, Susurro = Swords), and twenty-two of its mythic and super cards stand in for the Major Arcana. Nothing new is
    printed: an Arcana IS the card, so owning the card collects it.
 
      Daily reading - once a day, three Arcana are drawn (Past, Present, Future), each upright or reversed. Turning all three
@@ -11,8 +11,8 @@
 
    Perks use the kinds the game already reads through cardBonus() (js/afterdark-companion-cards.js), added by tarotBonus()
    inside skillBonus() (js/skills-gear.js), so no new hooks. Attuned perks are deliberately gentler than the day's fortune:
-   a percentage is halved, a Pebble perk stays, and Spirit or card draw turns into +3% XP so the battle start is not stacked.
-   Everything lives in the calm corner (js/calm.js) and is saved in state.progress.tarot.
+   a percentage is halved, a Ember perk stays, and Calm or card draw turns into +3% XP so the battle start is not stacked.
+   Everything lives in the quiet nook (js/calm.js) and is saved in state.progress.tarot.
    ============================================================ */
 const ARCANA = [
   { n: '0',     name: 'The Fool',           card: 'winter-hare',       kind: 'startDraw',      val: 1,    up: 'New beginnings, a light step.',          rev: 'Rushing in without looking.' },
@@ -58,8 +58,8 @@ const arcanaFamily = a => CARD_FAMILY[a.card] || 'stone';
 // Perk wording for one kind and value.
 function tarotPerkText(kind, val) {
   const pct = Math.round(val * 100);
-  return ({ startSpirit: `+${val} Spirit at the start of matches`, startDraw: `Draw ${val} extra card at the start of matches`, xp: `+${pct}% XP`, crops: `Crops grow ${pct}% faster`, finds: `Hidden finds +${pct}%`, chest: `Hidden chests +${pct}%`,
-    harvestPebbles: `+${val} Pebble per harvest`, winPebbles: `+${val} Pebble for every match won`, miniPebbles: `+${val} Pebble per mini-game medal`, bake: `Bread bakes ${pct}% faster` })[kind] || '';
+  return ({ startSpirit: `+${val} Calm at the start of matches`, startDraw: `Draw ${val} extra card at the start of matches`, xp: `+${pct}% XP`, crops: `Crops grow ${pct}% faster`, finds: `Hidden finds +${pct}%`, chest: `Hidden chests +${pct}%`,
+    harvestPebbles: `+${val} Ember per harvest`, winPebbles: `+${val} Ember for every match won`, miniPebbles: `+${val} Ember per mini-game medal`, bake: `Bread bakes ${pct}% faster` })[kind] || '';
 }
 const TAROT_FRACTION = { startSpirit: 0, startDraw: 0 };
 // The perk an Arcana gives while attuned (gentler than the day's fortune).
@@ -110,7 +110,7 @@ function tarotAttune(i) {
   t.attuned.push(i); saveState(); return 'on';
 }
 
-/* ---------- the screen (an activity of the calm corner) ---------- */
+/* ---------- the screen (an activity of the quiet nook) ---------- */
 function tarotFaceHtml(i, rev, tag) {
   const a = ARCANA[i], d = arcanaCardDef(a), fam = arcanaFamily(a);
   return `<div class="tr-face"><span class="tr-num">${a.n}</span><span class="tr-ico"><span class="${rev ? 'rev' : ''}">${d.icon}</span></span><b>${a.name}</b><small>${TAROT_FAM[fam]} ${d.name}</small>${tag ? `<span class="tr-tag">${tag}</span>` : ''}</div>`;
@@ -164,7 +164,7 @@ function tarotDrawArcana(box) {
 
 /* ============================================================
    MADAME SOOT'S TENT (build 110)
-   Market Row, from dusk until dawn (the Lantern Market keeps the deep night). A black cat reads cards for travellers:
+   El Mercado de Susurros, from dusk until dawn (the Lantern Market keeps the deep night). A black cat reads cards for travellers:
      - the daily reading, as the Tarot screen
      - Draw once more (🫧 15, once a day): swap one card of today's reading for a new Arcana; it comes down face-down again
      - Hear your deck's story (free): a few lines about your deck, and the Arcana it most resembles

@@ -60,7 +60,7 @@
           <span class="hs-icon">🃏</span>
           <span class="hs-bar"><span class="hs-fill hs-fill-cards"></span><span class="hs-val" id="cardCount">0</span></span>
         </div>
-        <div class="hud-stat" id="pillPebbles" title="Pebbles - the Card Shop on Market Row sells packs, sleeves and more" role="button" tabindex="0">
+        <div class="hud-stat" id="pillPebbles" title="Embers - the Card Shop on El Mercado de Susurros sells packs, sleeves and more" role="button" tabindex="0">
           <span class="hs-icon">🫧</span>
           <span class="hs-bar"><span class="hs-fill hs-fill-pebbles"></span><span class="hs-val" id="pebbleCount">0</span></span>
         </div>
@@ -70,7 +70,7 @@
       <span class="hud-clock" id="hudClock" title="Game time">12:00 PM</span>
       <div class="hud-ambient" id="pillSky" title="Time and weather">
         <span class="hud-ambient-text">
-          <span class="hud-district" id="hudDistrict">Town Square</span>
+          <span class="hud-district" id="hudDistrict">El Umbral</span>
           <span class="hud-ambient-sub">
             <span class="hud-ambient-icon" id="hudSkyIcon">☀️</span>
             <span class="amb-time" id="hudTimeText">Midday</span>
@@ -104,7 +104,7 @@
           <section class="st-group">
             <h3 class="st-title">Ghost duels</h3>
             <div class="st-card">
-              <div class="st-row"><span class="st-ico">👻</span><span class="st-label">Play against a tester's deck<small>The game plays their 12 cards for them. Beat a ghost for 8 Pebbles, once per ghost a day.</small></span></div>
+              <div class="st-row"><span class="st-ico">👻</span><span class="st-label">Play against a tester's deck<small>The game plays their 12 cards for them. Beat a ghost for 8 Embers, once per ghost a day.</small></span></div>
             </div>
           </section>
         </div>
@@ -190,7 +190,7 @@
                 <button id="cloudBackupBtn" class="btn btn-ghost">🔗 Back up</button>
                 <button id="cloudRestoreBtn" class="btn btn-ghost">📥 Restore</button>
               </div>
-              <div class="st-row"><span class="st-ico">📊</span><span class="st-label">Pebble ledger<small>Where your Pebbles came from</small></span><button class="btn btn-ghost st-small" id="econToggle" type="button">Show</button></div>
+              <div class="st-row"><span class="st-ico">📊</span><span class="st-label">Ember ledger<small>Where your Embers came from</small></span><button class="btn btn-ghost st-small" id="econToggle" type="button">Show</button></div>
               <div class="panel-desc hidden st-econ" id="econPanel"></div>
             </div>
           </section>
@@ -212,7 +212,7 @@
     <div class="screen" id="screen">
 
       <div id="townPanel">
-        <div class="district-label" id="districtLabel">You're in <b id="districtName">Town Square</b><span class="season-tag" id="seasonTag"></span></div>
+        <div class="district-label" id="districtLabel">You're in <b id="districtName">El Umbral</b><span class="season-tag" id="seasonTag"></span></div>
         <button type="button" class="goal-chip hidden" id="goalChip"><span class="goal-ico" id="goalIcon">🧭</span><span class="goal-text" id="goalText"></span><span class="goal-arrow" aria-hidden="true">›</span></button>
         <div class="decoration-hint hidden" id="decorationHint">
           <span id="decorationHintText">Placing a decoration</span>
@@ -426,7 +426,7 @@
           <div class="nmv"><span class="who" id="btOppName">Neighbor</span><div class="sbar" id="btOppSbar"><div class="fill"></div><span class="sn"></span></div><span class="deckcount" id="btOppDeck"></span></div>
           <div class="ohand" id="btOppHand" aria-label="Opponent's hand"></div>
         </div>
-        <div class="divider"><span class="msg" id="btMsg">Your turn</span><span class="bt-weather" id="btWeather"></span><button class="atk-face hidden" id="btAtkFace" type="button">⚔ Attack Spirit</button></div>
+        <div class="divider"><span class="msg" id="btMsg">Your turn</span><span class="bt-weather" id="btWeather"></span><button class="atk-face hidden" id="btAtkFace" type="button">⚔ Attack Calm</button></div>
         <div class="field">
           <div class="table">
             <div class="trow" id="btOppRow"><div class="board" id="btOppBoard"></div><div class="pile" id="btOppPile"></div></div>
@@ -509,8 +509,8 @@
   </div>
 </div>
 
-<div class="calm hidden" id="calmOverlay" role="dialog" aria-label="Calm corner">
-  <div class="calm-top"><button type="button" class="calm-back hidden" id="calmBack" aria-label="Back to the calm corner">‹</button><span class="calm-title" id="calmTitle">Calm corner</span><button type="button" class="calm-x" id="calmClose" aria-label="Close">✕</button></div>
+<div class="calm hidden" id="calmOverlay" role="dialog" aria-label="Quiet Nook">
+  <div class="calm-top"><button type="button" class="calm-back hidden" id="calmBack" aria-label="Back to the quiet nook">‹</button><span class="calm-title" id="calmTitle">Quiet Nook</span><button type="button" class="calm-x" id="calmClose" aria-label="Close">✕</button></div>
   <div class="calm-body" id="calmBody"></div>
 </div>
 

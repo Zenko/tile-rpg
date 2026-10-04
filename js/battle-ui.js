@@ -26,7 +26,7 @@ function startBattle(opponent) {
 function btIntro(opponent, isBoss, first) {
   return new Promise(resolve => {
     const tw = bossTwistFor(opponent), t = tw ? BattleEngine.TWISTS[tw] : null;
-    const tag = isBoss ? '👑 District boss' : opponent.cup ? '🏆 Festival Cup' : opponent.draft ? '🎴 Draft Run' : opponent.ghost ? '👻 Ghost duel' : opponent.dungeon ? '🕯️ Cellar' : opponent.isRival ? '⚡ Rival' : '⚔️ Friendly match';
+    const tag = isBoss ? '👑 District boss' : opponent.cup ? '🏆 Dreamers’ Cup' : opponent.draft ? '🎴 Draft Run' : opponent.ghost ? '👻 Ghost duel' : opponent.dungeon ? '🕯️ Cellar' : opponent.isRival ? '⚡ Rival' : '⚔️ Friendly match';
     const el = document.createElement('div'); el.className = 'bt-intro' + (isBoss ? ' boss' : '');
     el.innerHTML = `<div class="bt-intro-side opp"><span class="bt-intro-av"></span><div><div class="bt-intro-name"></div><div class="bt-intro-tag">${tag}</div></div></div>
       <div class="bt-intro-vs">VS</div>
@@ -51,8 +51,8 @@ function btIntro(opponent, isBoss, first) {
   });
 }
 /* ---------- the world in the match (v1.83.0) ----------
-   Three layers change how a match plays, the same for both sides: the weather (WEATHER_EFFECTS), night (Echo hits +1) and the
-   district's "home turf" (its family has +1 health - Stone in Town Square, Wind in Market Row, Tide in the Harbor, Grove in the
+   Three layers change how a match plays, the same for both sides: the weather (WEATHER_EFFECTS), night (Startle hits +1) and the
+   district's "home turf" (its family has +1 health - Recuerdo in El Umbral, Susurro in El Mercado de Susurros, Deriva in the Harbor, Grove in the
    Garden). Returns the engine's `mods` and the short chips the battle screen shows. The cellar and puzzles are shut away from
    all of it. */
 function battleWorld(opponent, weather) {
@@ -61,7 +61,7 @@ function battleWorld(opponent, weather) {
   const fx = WEATHER_EFFECTS[weather] || {};
   ['swiftBonus', 'bloomStart', 'shieldHp', 'mendBonus'].forEach(k => { if (fx[k]) mods[k] = fx[k]; });
   if (fx.battle) chips.push(fx.battle);
-  if (skyPhase().isNight) { mods.echoBonus = 1; chips.push('🌙 Night: Echo hits +1'); }
+  if (skyPhase().isNight) { mods.echoBonus = 1; chips.push('🌙 Night: Startle hits +1'); }
   if (typeof applyWeeklyRule === 'function' && !opponent.playerDeck) applyWeeklyRule(mods, chips);
   const fam = districtFamily(state.currentDistrict);
   if (fam) { mods.famHp = { family: fam, hp: 1 }; chips.push(`${FAMILIES[fam].icon} ${FAMILIES[fam].name} home turf +1♥`); }
@@ -113,7 +113,7 @@ function startBattleNow(opponent, first) {
       twist: twistKind ? { side: 1, kind: twistKind } : null, startSpirit: opponent.startSpirit ? [opponent.startSpirit, null] : null, first, knack: [currentKnackId(), null], fate: [neutral ? null : currentFateId(), opponent.fate || null], spread: [neutral ? null : currentSpread(), opponent.spread || null], passive: [neutral || opponent.puzzle ? null : archetypePassive(), null], passiveTier: [archetypeTier(), null] });
     BattleEngine.startTurn(G);
   }
-  if (companionSpirit) BattleEngine.boost(G, 0, { spirit: 2 });      // a Guard-type companion stands with you
+  if (companionSpirit) BattleEngine.boost(G, 0, { spirit: 2 });      // a Watch-type companion stands with you
   if (!opponent.puzzle && !neutral) {
     const sp = cardBonus('startSpirit'), dr = cardBonus('startDraw');     // charms and completed sets
     if (sp || dr) BattleEngine.boost(G, 0, { spirit: sp, draw: dr });
@@ -124,7 +124,7 @@ function startBattleNow(opponent, first) {
 
   inBattle = true;
   battle = { npc: opponent, isBoss, first, neutral, G, profile, weather, sel: null, busy: false, ended: false, rewarded: false, yieldArmed: false, token: ++battleToken, startedAt: Date.now() };
-  const chip = [weather === 'snow' ? (isBoss ? '❄️ Boss +2 Spirit · richer prize' : '❄️ Richer prize') : '', ...world.chips].filter(Boolean).join(' · ');
+  const chip = [weather === 'snow' ? (isBoss ? '❄️ Boss +2 Calm · richer prize' : '❄️ Richer prize') : '', ...world.chips].filter(Boolean).join(' · ');
   const tw = twistKind ? BattleEngine.TWISTS[twistKind] : null;
   btGet('btWeather').textContent = opponent.puzzle ? '🧩 Ending your turn resets the board' : [tw ? `${tw.icon} ${tw.text}` : '', opponent.trial ? '🔮 Brings a Fate and a Spread' : '', (G.p[0].passive ? (d => `${d.icon} ${d.name}: ${d.text}`)(passiveDef(G.p[0].passive, G.p[0].passiveTier)) : ''), chip, plainFoe ? '✦ Seasoned deck' : ''].filter(Boolean).join(' · ');
   battle.puzzle = !!opponent.puzzle;
@@ -194,7 +194,7 @@ function eatSnack(id) {
   btRender(); btRenderMulliganHand(); renderSnackRow();
   // The spirit bar alone doesn't make a max-spirit boost visible (it raises current and max together,
   // so a full bar still looks full) - this floater is the immediate "yes, that did something" moment.
-  const bonusText = [r.battle.spirit ? `+${r.battle.spirit} Max Spirit` : '', r.battle.draw ? `+${r.battle.draw} Card` : ''].filter(Boolean).join(' · ');
+  const bonusText = [r.battle.spirit ? `+${r.battle.spirit} Max Calm` : '', r.battle.draw ? `+${r.battle.draw} Card` : ''].filter(Boolean).join(' · ');
   if (bonusText) btFloater(btGet('btYouBar'), bonusText, 'heal');
 }
 // The one persistent, whole-match reminder that a snack buff is active - called from btRender() so it
@@ -491,7 +491,7 @@ function btRenderBars() {
     const p = G.p[i], pct = Math.max(0, p.spirit / p.maxSpirit * 100);
     const sp = btGet('bt' + k + 'Spirit');
     sp.querySelector('.fill').style.width = pct + '%';
-    sp.style.setProperty('--p', pct + '%');   // the Spirit ring around the portrait is a conic-gradient driven by this
+    sp.style.setProperty('--p', pct + '%');   // the Calm ring around the portrait is a conic-gradient driven by this
     sp.querySelector('.num').textContent = `${Math.max(0, p.spirit)}/${p.maxSpirit}`;
     sp.classList.toggle('low', p.spirit <= Math.ceil(p.maxSpirit * 0.3));
     const sb = btGet('bt' + k + 'Sbar');       // the life bar under the name: always readable at a glance
@@ -515,7 +515,7 @@ function btRenderGems() {
 
 function btRenderBoards(entering) {
   const G = battle.G, sel = battle.sel;
-  // An aimed spell can hit any enemy card - Guard only protects against attacks.
+  // An aimed spell can hit any enemy card - Watch only protects against attacks.
   const targets = sel && sel.kind === 'attack' ? BattleEngine.legalTargets(G, 0, sel.uid)
     : sel && sel.kind === 'spell' ? G.p[1].board.map(c => ({ kind: 'card', uid: c.uid })) : [];
   const tCards = new Set(targets.filter(t => t.kind === 'card').map(t => t.uid));
@@ -539,7 +539,7 @@ function btRenderBoards(entering) {
     }
   });
   btGet('btOppBar').classList.toggle('target-glow', tFace);
-  btGet('btAtkFace').classList.toggle('hidden', !tFace);   // a big, obvious button for hitting the Spirit directly
+  btGet('btAtkFace').classList.toggle('hidden', !tFace);   // a big, obvious button for hitting the Calm directly
 }
 
 function btRenderHand(drawnUid, dealAll) {
@@ -574,9 +574,9 @@ function btCoach() {
   let t;
   if (battle.sel && battle.sel.kind === 'spell') t = 'Tap a glowing enemy card to aim your spell.';
   else if (playable.length) t = 'Drag a card onto the table to play it, or tap it to read it first.';
-  else if (ready.length && g) t = 'An enemy 🛡️ Guard blocks the way. Attack it first.';
+  else if (ready.length && g) t = 'An enemy 🛡️ Watch blocks the way. Attack it first.';
   else if (ready.length) t = ready.some(a => op.board.some(c => !c.shield && a.power >= c.hp))
-    ? 'One of your cards can defeat an enemy card. Removing their cards is often better than hitting Spirit.'
+    ? 'One of your cards can defeat an enemy card. Removing their cards is often better than hitting Calm.'
     : 'Tap a glowing card, then pick a target.';
   else if (me.board.some(c => !c.ready)) t = 'New cards 💤 can attack next turn. End your turn when you are ready.';
   else t = 'Nothing left to do. End your turn.';
@@ -645,12 +645,12 @@ function btDragBegin() {
     const next = slots.find(s => !s.querySelector('.card')); if (next) next.classList.add('drop-next');
   } else if (d.kind === 'spell') battleView.querySelector('.table').classList.add('cast-zone');
   else if (d.kind === 'attack') {
-    // light up everything this card may legally hit: enemy cards, and the enemy Spirit when no Guard stands in the way
+    // light up everything this card may legally hit: enemy cards, and the enemy Calm when no Watch stands in the way
     const legal = BattleEngine.legalTargets(battle.G, 0, c.uid), ids = new Set(legal.filter(t => t.kind === 'card').map(t => t.uid));
     battleView.querySelectorAll('#btOppBoard .card').forEach(x => { if (ids.has(+x.dataset.uid)) x.classList.add('targetable'); });
     if (legal.some(t => t.kind === 'spirit')) { btGet('btOppBar').classList.add('target-glow'); d.glow = true; }
     // make the attack unmistakable: a dashed aim line from the attacker to the ghost, everything that can't be hit
-    // dims, and the Spirit says what a drop there does
+    // dims, and the Calm says what a drop there does
     battleView.classList.add('attack-drag'); g.classList.add('attack-ghost');
     const line = document.createElement('div'); line.className = 'aim-line'; battleView.appendChild(line); d.line = line;
     const bv = battleView.getBoundingClientRect(); d.ox = r.left + r.width / 2 - bv.left; d.oy = r.top + r.height / 2 - bv.top;
@@ -678,7 +678,7 @@ function btDragTarget() {
   if (d.kind === 'attack') {
     const legal = BattleEngine.legalTargets(battle.G, 0, d.c.uid), card = el.closest('#btOppBoard .card');
     if (card) return { card, ok: legal.some(t => t.kind === 'card' && t.uid === +card.dataset.uid) };
-    // anywhere above the enemy row counts as "at the opponent": drag up past their cards to hit their Spirit
+    // anywhere above the enemy row counts as "at the opponent": drag up past their cards to hit their Calm
     if (el.closest('#btOppBar, .divider') || d.cy < btGet('btOppBoard').getBoundingClientRect().top) return { face: true, ok: legal.some(t => t.kind === 'spirit') };
     return null;
   }
@@ -688,7 +688,7 @@ function btDragTarget() {
 function btDragHover(t) {
   const d = btDrag;
   battleView.querySelectorAll('.drop-hover, .atk-blocked').forEach(x => x.classList.remove('drop-hover', 'atk-blocked'));
-  if (d.kind === 'attack' && t && t.card && t.ok === false) t.card.classList.add('atk-blocked');   // a Guard stands in the way
+  if (d.kind === 'attack' && t && t.card && t.ok === false) t.card.classList.add('atk-blocked');   // a Watch stands in the way
   if (d.line) d.line.classList.toggle('locked', !!(t && t.ok));
   if (t && t.slot) t.slot.classList.add('drop-hover');
   if (t && t.card && (t.ok !== false)) t.card.classList.add('drop-hover');
@@ -726,11 +726,11 @@ function btDragEnd(e) {
   btDragCleanup(); btDragEndedAt = Date.now();
   if (!battle || battle.busy || battle.G.over || battle.G.active !== 0) return;
   if (!t) {
-    if (!cancelled && !btDropHintShown) { btDropHintShown = true; btToast(kind === 'attack' ? 'Drop it on an enemy card, or drag up to hit their Spirit' : kind === 'aimed' ? 'Drop it on an enemy card to aim it' : 'Drop it on your side of the table to play it'); }
+    if (!cancelled && !btDropHintShown) { btDropHintShown = true; btToast(kind === 'attack' ? 'Drop it on an enemy card, or drag up to hit their Calm' : kind === 'aimed' ? 'Drop it on an enemy card to aim it' : 'Drop it on your side of the table to play it'); }
     return;
   }
   if (kind === 'attack') {
-    if (!t.ok) { btToast('A Guard must be attacked first'); return; }
+    if (!t.ok) { btToast('A Watch must be attacked first'); return; }
     battle.sel = null; btHideTip();
     btDoAttack(c.uid, t.face ? { kind: 'spirit' } : { kind: 'card', uid: +t.card.dataset.uid });
     return;
@@ -784,7 +784,7 @@ function btOnBoardCard(side, c) {
     if (!c.ready) { battle.sel = null; btShowTip(c, 'Just arrived. It can attack next turn.'); btRender(); return; }
     if (c.attacks > 0) { btShowTip(c, 'Already attacked this turn.'); return; }
     battle.sel = { kind: 'attack', uid: c.uid };
-    btShowTip(c, BattleEngine.guards(G.p[1]).length ? 'A Guard blocks the way. Attack a highlighted card.' : 'Tap a highlighted enemy card, or the enemy Spirit bar.');
+    btShowTip(c, BattleEngine.guards(G.p[1]).length ? 'A Watch blocks the way. Attack a highlighted card.' : 'Tap a highlighted enemy card, or the enemy Calm bar.');
     btRender();
   } else {
     if (battle.sel && battle.sel.kind === 'spell') {
@@ -792,7 +792,7 @@ function btOnBoardCard(side, c) {
     }
     if (battle.sel && battle.sel.kind === 'attack') {
       const legal = BattleEngine.legalTargets(G, 0, battle.sel.uid).some(t => t.kind === 'card' && t.uid === c.uid);
-      if (!legal) { btToast('A Guard must be attacked first'); return; }
+      if (!legal) { btToast('A Watch must be attacked first'); return; }
       const u = battle.sel.uid; battle.sel = null; btHideTip(); btDoAttack(u, { kind: 'card', uid: c.uid }); return;
     }
     btShowTip(c, '');
@@ -823,7 +823,7 @@ function btShake(hard) {
   const c = hard ? 'shake-hard' : 'shake'; battleView.classList.remove('shake', 'shake-hard'); void battleView.offsetWidth; battleView.classList.add(c);
   setTimeout(() => battleView.classList.remove(c), 340);
 }
-// A colour wash around the edge of the screen: red when you are hit, gold when you land one on their Spirit.
+// A colour wash around the edge of the screen: red when you are hit, gold when you land one on their Calm.
 function btVignette(kind) { if (!btMotionOk()) return; const el = document.createElement('div'); el.className = 'fx fx-vig ' + kind; battleView.appendChild(el); setTimeout(() => el.remove(), 650); }
 // Bar hit/heal flashes go on both the ring and the life bar.
 function btSpiritFlash(who, cls, ms) {
@@ -1177,7 +1177,7 @@ function btRenderEndStats(G, won, yielded, turns, npc) {
   const box = btGet('battleEndGrid');
   if (npc.puzzle || yielded) { box.classList.add('hidden'); return; }
   const st = battle.stats || { played: 0, dealt: 0, taken: 0, ko: 0 }, me = G.p[0];
-  const tiles = [['⏱️', turns, 'Turns'], ['❤️', `${Math.max(0, me.spirit)}/${me.maxSpirit}`, 'Your Spirit'], ['🃏', st.played, 'Cards played'],
+  const tiles = [['⏱️', turns, 'Turns'], ['❤️', `${Math.max(0, me.spirit)}/${me.maxSpirit}`, 'Your Calm'], ['🃏', st.played, 'Cards played'],
                  ['⚔️', st.dealt, 'Damage dealt'], ['💥', st.ko, 'Foes cleared'], ['🛡️', st.taken, 'Damage taken']];
   box.innerHTML = tiles.map(([ic, v, l], i) => `<div class="end-stat" style="--n:${i}"><span class="es-ic">${ic}</span><b>${v}</b><span class="es-l">${l}</span></div>`).join('');
   box.classList.remove('hidden');
@@ -1230,25 +1230,25 @@ function btYield() {
 function btShowHelp() {
   const ov = btGet('btHelpOverlay');
   btGet('btHelpBody').innerHTML = `
-    <b>Goal:</b> bring the other side's Spirit to 0.<br><br>
+    <b>Goal:</b> bring the other side's Calm to 0.<br><br>
     <b>Energy ⚡</b> grows by one each turn (up to 5). Spend it to play cards.<br><br>
     <b>Cards stay on the board</b> (up to 4). A card can attack the turn <i>after</i> it arrives; 💤 means it just did.<br><br>
-    <b>To attack:</b> tap a glowing card of yours, then a target: an enemy card, or their Spirit bar. Hitting Spirit is capped at 4 per attack, so removing enemy cards is often better.<br><br>
-    <b>Friendly neighbors</b> start with less Spirit than you.<br><br>
-    <b>✨ Spells</b> are cast from your hand for an instant effect and never take a board slot. Some are aimed: cast it, then tap an enemy card. Guard does not stop a spell.<br><br>
-    <b>District bosses</b> each bend one rule: 🌳 Elder Yew heals 3 Spirit every turn, 🧱 Old Bramble's Guards are extra sturdy, 🌊 the Harbor Keeper's tide washes your strongest card back to hand every 4th turn, and 🌻 the Garden Sentinel's cheap cards all Bloom.<br><br>
-    <b>The world joins in</b> (for both sides): ☀️ clear Bloom +1 power, ☁️ cloud Shield +1 health, 🌧️ rain Mend heals +1, ⛈️ storm Swift +1 power, 🌙 night Echo +1, and each district is home turf for its card family (+1 health). In ❄️ snow bosses are tougher but pay better.<br><br>
+    <b>To attack:</b> tap a glowing card of yours, then a target: an enemy card, or their Calm bar. Hitting Calm is capped at 4 per attack, so removing enemy cards is often better.<br><br>
+    <b>Friendly neighbors</b> start with less Calm than you.<br><br>
+    <b>✨ Spells</b> are cast from your hand for an instant effect and never take a board slot. Some are aimed: cast it, then tap an enemy card. Watch does not stop a spell.<br><br>
+    <b>District bosses</b> each bend one rule: 🌳 Duermevela heals 3 Calm every turn, 🧱 Murmullo's Watch cards are extra sturdy, 🌊 Marea Lenta's tide washes your strongest card back to hand every 4th turn, and 🌻 Ensueño's cheap cards all Bloom.<br><br>
+    <b>The world joins in</b> (for both sides): ☀️ clear Bloom +1 power, ☁️ cloud Haze +1 health, 🌧️ rain Rest heals +1, ⛈️ storm Flicker +1 power, 🌙 night Startle +1, and each district is home turf for its card family (+1 health). In ❄️ snow bosses are tougher but pay better.<br><br>
     <b>✨ Your Knack</b> is a free once-per-match power you pick on the keep-this-hand screen. Tap its round button by your bar when it glows.<br><br>
     <b>Who goes first</b> comes from a coin call or dice roll before the match. Going second means an extra card and +1 energy on your first two turns.<br><br>
     ${Object.values(KW).map(k => `${k.icon} <b>${k.name}.</b> ${k.text}`).join('<br>')}<br><br>
-    <i>Drag a card onto the table to play it, or tap it to read it and tap it again to play it. To attack, tap a glowing card then a target (or the red Attack Spirit button), or drag it onto an enemy card or up past their cards.</i>`;
+    <i>Drag a card onto the table to play it, or tap it to read it and tap it again to play it. To attack, tap a glowing card then a target (or the red Attack Calm button), or drag it onto an enemy card or up past their cards.</i>`;
   ov.classList.remove('hidden');
 }
 
 btGet('btEnd').addEventListener('click', () => { if (!battle || battle.busy || battle.G.over || battle.G.active !== 0) return; ensureAudio(); btPlayerEnd(); });
 function btAttackFace() {
   if (!battle || battle.busy || !battle.sel || battle.sel.kind !== 'attack') return;
-  if (!BattleEngine.legalTargets(battle.G, 0, battle.sel.uid).some(t => t.kind === 'spirit')) { btToast('A Guard must be attacked first'); return; }
+  if (!BattleEngine.legalTargets(battle.G, 0, battle.sel.uid).some(t => t.kind === 'spirit')) { btToast('A Watch must be attacked first'); return; }
   const u = battle.sel.uid; battle.sel = null; btHideTip(); btDoAttack(u, { kind: 'spirit' });
 }
 btGet('btOppBar').addEventListener('click', btAttackFace);

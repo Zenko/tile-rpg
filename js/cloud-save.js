@@ -71,7 +71,7 @@ function cloudPush() {
    PLAYTEST STATS (build 102): one anonymous summary document per tester at stats/{uid}, so the owner can see from the Firebase
    console which features get used and how the economy and balance feel. No name, no avatar, no free text: the build, level,
    play time, wins, every counter in state.progress.totals, skill ranks, gear tiers, ladder points, the deck's family mix and
-   the Pebble ledger totals. On by default with a switch in Settings (prefs.shareStats === false turns it off). Needs the
+   the Ember ledger totals. On by default with a switch in Settings (prefs.shareStats === false turns it off). Needs the
    write-only rule in HANDOFF §1a; until that is pasted in, this fails silently like every other unreachable-Firestore case.
    ============================================================ */
 function statsSharingOn() { return prefs.shareStats !== false; }
@@ -138,7 +138,7 @@ async function pushFeedback(kind, text, info, player) {
    GHOST DUELS (v1.86.0): your current deck rides along with your presence entry (as a deck code, the same TRPG1 string the
    Deck screen shares), so another tester can fight a "ghost" of it - the AI piloting your 12 cards - from Who's Playing.
    No new Firestore rule: it is one more field on the `players/{uid}` document that everyone signed in can already read.
-   Nothing is written about the duel itself, so nobody is notified and nothing of yours changes. Wins pay a few Pebbles
+   Nothing is written about the duel itself, so nobody is notified and nothing of yours changes. Wins pay a few Embers
    (once per ghost per day, five a day) and count for their own stat, never for district wins.
    ============================================================ */
 let ghostRows = [];

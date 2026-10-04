@@ -3,15 +3,15 @@
    Lay three cards from your deck as a tarot spread (Cards -> Deck -> Your deck). It is saved with the deck slot and applies to
    every match played with that deck (BattleEngine.layoutSpread, js/data-and-engine.js):
      Past    - always in your opening hand
-     Present - enters play with a Shield
+     Present - enters play with a Haze
      Future  - joins your hand at the start of your 4th turn
-   Three cards of one family are Harmony (+2 Spirit at the start); three different families are Contrast (one extra card).
+   Three cards of one family are Harmony (+2 Calm at the start); three different families are Contrast (one extra card).
    A spread names cards by id. If the deck no longer holds all three, the spread waits (it is not erased) and says so.
    Unlocked at Keeper level 6 (FEATURE_LEVELS.spread in js/progression.js). Neutral (draft) and puzzle matches ignore it.
    ============================================================ */
 const SPREAD_SLOTS = [
   { pos: 'Past',    icon: '🕰️', fx: 'Starts in your hand' },
-  { pos: 'Present', icon: '🔮', fx: 'Enters play with a Shield' },
+  { pos: 'Present', icon: '🔮', fx: 'Enters play with a Haze' },
   { pos: 'Future',  icon: '🌅', fx: 'Joins your hand on turn 4' },
 ];
 let spreadEditing = false;
@@ -34,8 +34,8 @@ function renderDeckSpread() {
   const chip = (i) => { const id = ids[i], d = id && cardDef(id), s = SPREAD_SLOTS[i];
     return `<button type="button" class="sp-slot${d ? ' filled' : ''}${d && !valid ? ' off' : ''}" data-spslot="${i}" aria-label="${s.pos}: ${d ? d.name + '. Tap to remove.' : 'empty'}"><span class="sp-pos">${s.icon} ${s.pos}</span><span class="sp-card">${d ? `<span class="sp-ico">${cardArtHtml(d)}</span><b>${d.name}</b>` : '<span class="sp-ico">?</span><b>Choose a card</b>'}</span><small>${s.fx}</small></button>`; };
   const note = ids.length === 3 && !valid ? '<div class="sp-note">Your deck no longer holds all three of these cards, so the spread is resting. Put them back or lay a new one.</div>'
-    : bonus.harmony ? '<div class="sp-bonus">✨ Harmony: all one family · +2 Spirit at the start</div>' : bonus.contrast ? '<div class="sp-bonus">🌈 Contrast: three families · draw 1 extra card at the start</div>'
-    : ids.length === 3 ? '<div class="sp-hint">No bonus. One family gives Harmony, three different families give Contrast.</div>' : '<div class="sp-hint">Past starts in your hand, Present enters with a Shield, Future arrives on turn 4.</div>';
+    : bonus.harmony ? '<div class="sp-bonus">✨ Harmony: all one family · +2 Calm at the start</div>' : bonus.contrast ? '<div class="sp-bonus">🌈 Contrast: three families · draw 1 extra card at the start</div>'
+    : ids.length === 3 ? '<div class="sp-hint">No bonus. One family gives Harmony, three different families give Contrast.</div>' : '<div class="sp-hint">Past starts in your hand, Present enters with a Haze, Future arrives on turn 4.</div>';
   let pick = '';
   if (spreadEditing) {
     const seen = {}; const tiles = state.deck.map((id, i) => { const d = cardDef(id); if (!d) return ''; const n = ids.filter(x => x === id).length, copies = state.deck.filter(x => x === id).length;
@@ -63,6 +63,6 @@ function btRenderSpreadRow() {
   if (!pl.spread) { row.classList.add('hidden'); return; }
   const b = BattleEngine.spreadBonus(pl.spread.ids);
   row.classList.remove('hidden');
-  row.innerHTML = mullRowHtml('spread', '🃏', 'Fate Spread', b.harmony ? 'Harmony · +2 Spirit' : b.contrast ? 'Contrast · +1 card' : 'Past · Present · Future', `<div class="sp-line">${pl.spread.ids.map((id, i) => `<span><small>${SPREAD_SLOTS[i].pos}</small>${cardDef(id).icon} ${cardDef(id).name}</span>`).join('')}</div>${b.harmony ? '<div class="knack-desc">✨ Harmony: +2 Spirit</div>' : b.contrast ? '<div class="knack-desc">🌈 Contrast: one extra card</div>' : ''}`);
+  row.innerHTML = mullRowHtml('spread', '🃏', 'Fate Spread', b.harmony ? 'Harmony · +2 Calm' : b.contrast ? 'Contrast · +1 card' : 'Past · Present · Future', `<div class="sp-line">${pl.spread.ids.map((id, i) => `<span><small>${SPREAD_SLOTS[i].pos}</small>${cardDef(id).icon} ${cardDef(id).name}</span>`).join('')}</div>${b.harmony ? '<div class="knack-desc">✨ Harmony: +2 Calm</div>' : b.contrast ? '<div class="knack-desc">🌈 Contrast: one extra card</div>' : ''}`);
   mullRowOpen(row, 'spread');
 }

@@ -1,12 +1,12 @@
 /* ============================================================
    PATH: SKILLS, GEAR AND COMPANION BOND (build 99)
    The RPG layer. Every level from 2 up gives one skill point to spend in four branches (Angler, Gardener, Duelist,
-   Wanderer, five ranks each). Three tools (rod, watering can, lantern) are upgraded with Pebbles. A companion grows
+   Wanderer, five ranks each). Three tools (rod, watering can, lantern) are upgraded with Embers. A companion grows
    closer to you as you win matches and catch fish and reaches bond levels 2 and 3, which strengthen its perk.
 
    None of this adds a new hook to the game's systems: everything is summed by kind in skillBonus(kind), which
    cardBonus() (js/afterdark-companion-cards.js) already adds to the charm and set perks, so fishing, gardening, finds,
-   chests, XP, battle starts and win Pebbles all pick it up through the hooks they had.
+   chests, XP, battle starts and win Embers all pick it up through the hooks they had.
    Saved in state.progress.skills / .gear (and state.companion.bond), created lazily - older saves just start at zero.
    ============================================================ */
 const SKILL_MAX_RANK = 5;
@@ -16,10 +16,10 @@ const SKILL_BRANCHES = [
     text: r => `Fish bite ${4 * r}% sooner` },
   { id: 'gardener', icon: '🌱', name: 'Gardener', blurb: 'Crops grow faster and pay more',
     perks: r => [{ kind: 'crops', val: 0.04 * r }, { kind: 'harvestPebbles', val: Math.floor(r / 2) }],
-    text: r => `Crops grow ${4 * r}% faster${r >= 2 ? `, +${Math.floor(r / 2)} Pebble${r >= 4 ? 's' : ''} per harvest` : ''}` },
+    text: r => `Crops grow ${4 * r}% faster${r >= 2 ? `, +${Math.floor(r / 2)} Ember${r >= 4 ? 's' : ''} per harvest` : ''}` },
   { id: 'duelist',  icon: '⚔️', name: 'Duelist',  blurb: 'A better start in every match',
     perks: r => [{ kind: 'startSpirit', val: Math.floor(r / 2) }, { kind: 'winPebbles', val: r >= 3 ? 1 : 0 }, { kind: 'startDraw', val: r >= 5 ? 1 : 0 }],
-    text: r => r < 2 ? 'Unlocks at rank 2' : `+${Math.floor(r / 2)} Spirit at the start${r >= 3 ? ', +1 Pebble per win' : ''}${r >= 5 ? ', draw 1 extra card' : ''}` },
+    text: r => r < 2 ? 'Unlocks at rank 2' : `+${Math.floor(r / 2)} Calm at the start${r >= 3 ? ', +1 Ember per win' : ''}${r >= 5 ? ', draw 1 extra card' : ''}` },
   { id: 'wanderer', icon: '🧭', name: 'Wanderer', blurb: 'Sharper eyes and quicker learning',
     perks: r => [{ kind: 'finds', val: 0.06 * r }, { kind: 'chest', val: 0.04 * r }, { kind: 'xp', val: 0.02 * r }],
     text: r => `Finds +${6 * r}%, chests +${4 * r}%, XP +${2 * r}%` },

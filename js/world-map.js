@@ -1,5 +1,5 @@
 /* ---------------- world map: a spatial layout of the plus-shaped town, radar preview + full overlay ---------------- */
-// Grid rows/cols are 1-indexed to match CSS grid-row/grid-column. Town Square sits in the middle;
+// Grid rows/cols are 1-indexed to match CSS grid-row/grid-column. El Umbral sits in the middle;
 // the others are one map over in the direction their in-town exit actually leads (see DISTRICT_LINKS).
 const WORLD_LAYOUT = { square: { row: 2, col: 2 }, market: { row: 2, col: 3 }, harbor: { row: 3, col: 2 }, garden: { row: 2, col: 1 } };
 function districtStatus(key) {
@@ -50,7 +50,7 @@ const WM_ART = {
 };
 // Text and the few facts that aren't stored anywhere else. Buildings and neighbour names come from the real maps/save.
 const WM_INFO = {
-  square: { short: 'Square', blurb: 'The heart of town. Everything starts here, and every road leads back to it.', extras: ['Festival Cup fountain', 'Weather sign'] },
+  square: { short: 'Square', blurb: 'The heart of town. Everything starts here, and every road leads back to it.', extras: ['Dreamers’ Cup fountain', 'Weather sign'] },
   market: { short: 'Market', blurb: 'East of the Square. Stalls, a museum, and a lantern market that only opens after dark.', extras: ['Trading board', "Lumen's Lantern Market (night only)"] },
   harbor: { short: 'Harbor', blurb: 'Salt air and slow water. The best fishing in town, and a keeper who bends the tide.', extras: ['Fishing spots (they shuffle every 10 minutes)'] },
   garden: { short: 'Garden', blurb: 'A hush of flowers and hedges, with a glasshouse tucked in the middle.', extras: [] }
@@ -218,7 +218,7 @@ function travelToDistrictNow(key) {
 }
 
 // Kept deliberately small - five of each, one free starter per row, the rest unlocked from the Shop with
-// Pebbles (see COSMETIC_SHOP_COST and buyCosmetic()). Player picks are stored as the raw emoji/hex value,
+// Embers (see COSMETIC_SHOP_COST and buyCosmetic()). Player picks are stored as the raw emoji/hex value,
 // and state.character.unlocked{Emojis,Accessories,Colors} tracks which values this player can select.
 const EMOJI_OPTIONS = [
   { emoji: '🧑', cost: 0 },
@@ -287,7 +287,7 @@ const BORDER_OPTIONS = [
   { id: 'sunset',  name: 'Sunset fade', cost: 24, grad: c => `linear-gradient(135deg, ${c}, color-mix(in srgb, ${c} 35%, #ff8fb1))` },
   { id: 'rainbow', name: 'Rainbow',    cost: 30, fixed: true, grad: () => 'conic-gradient(#e86a6a, #f0c05a, #7fbf8a, #6fc3d6, #7a8fe0, #c27ad6, #e86a6a)' },
   { id: 'gold',    name: 'Gilded',     cost: 36, fixed: true, glow: true, grad: () => 'conic-gradient(#f6e3a1, #c9962d, #fff0b8, #a87420, #f6e3a1)' },
-  // Premium rings (v1.87.0): the high-end Pebble sinks
+  // Premium rings (v1.87.0): the high-end Ember sinks
   { id: 'prism',   name: 'Prism',      cost: 90,  fixed: true, grad: () => 'conic-gradient(from 30deg, #ffd1dc, #ffe9b8, #d1f5d3, #c4e7ff, #e0d1ff, #ffd1dc)' },
   { id: 'ember',   name: 'Ember',      cost: 120, fixed: true, glow: true, grad: () => 'conic-gradient(#ff9a3c, #e8443a, #ffd36b, #e8443a, #ff9a3c)' },
   { id: 'galaxy',  name: 'Galaxy',     cost: 170, fixed: true, glow: true, grad: () => 'conic-gradient(#2b1f5c, #7a4fd6, #3fb6e8, #7a4fd6, #2b1f5c)' },

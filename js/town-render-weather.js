@@ -100,10 +100,10 @@ const WEATHER_LOG = {
 const WEATHER_EFFECTS = {
   // `battle` is the weather's effect on a card match (BattleEngine mods, same for both sides; see battleWorld() in js/battle-ui.js).
   clear:  { short: 'Daily tasks pay a little extra · 🌸 Bloom cards +1 power in battle', dailyBonus: 1, bloomStart: 1, battle: '☀️ Bloom +1 power' },
-  cloudy: { short: 'Spirits give double XP · 🫧 Shield cards +1 health in battle', shieldHp: 1, battle: '☁️ Shield +1 health' },
-  rain:   { short: 'Fish bite sooner, rare fish more often · 🌿 Mend heals +1 in battle', biteSpeed: 0.6, rareFish: 2.5, mendBonus: 1, battle: '🌧️ Mend heals +1' },
-  storm:  { short: '💨 Swift cards +1 power in battle', swiftBonus: 1, battle: '⛈️ Swift +1 power' },
-  snow:   { short: 'Bosses +2 Spirit, richer rewards', bossSpirit: 2, richerRewards: true },
+  cloudy: { short: 'Spirits give double XP · 🫧 Haze cards +1 health in battle', shieldHp: 1, battle: '☁️ Haze +1 health' },
+  rain:   { short: 'Fish bite sooner, rare fish more often · 🌿 Rest heals +1 in battle', biteSpeed: 0.6, rareFish: 2.5, mendBonus: 1, battle: '🌧️ Rest heals +1' },
+  storm:  { short: '💨 Flicker cards +1 power in battle', swiftBonus: 1, battle: '⛈️ Flicker +1 power' },
+  snow:   { short: 'Bosses +2 Calm, richer rewards', bossSpirit: 2, richerRewards: true },
 };
 /* ---------------- seasons: one real week each, spring -> summer -> autumn -> winter ----------------
    A season recolours the trees, swaps the music's chord set, tilts the weather, and makes its own cards turn up
@@ -1132,7 +1132,7 @@ document.getElementById('hideseekStopBtn').addEventListener('click', () => cance
 /* ---------------- decoration placement: buy in Shop > Items, then tap a glowing tile in whichever district you are in ----------------
    Decorations don't block movement (unlike map props), so placement never needs the "would this wall off
    part of the village" safety check that NPC/item spawns use - it only needs an open, reachable, unoccupied tile.
-   The same flow plants seeds (placingDecoration.seed), which always go in Town Square's garden ground. */
+   The same flow plants seeds (placingDecoration.seed), which always go in El Umbral's garden ground. */
 // placingDecoration: { item, district, movingUid, movingOriginal, seed } - movingUid/movingOriginal are set only when
 // repositioning an already-placed decoration (Move), seed only when planting.
 let placingDecoration = null;
@@ -1250,7 +1250,7 @@ function handleDecorationTap(tx, ty) {
 }
 function buyDecoration(item) {
   if (item.level && ensureLevel().level < item.level) { toast(`Unlocks at level ${item.level}`); sfx('tie'); return; }
-  if (state.progress.pebbles < item.cost) { toast('Not enough Pebbles yet'); sfx('tie'); return; }
+  if (state.progress.pebbles < item.cost) { toast('Not enough Embers yet'); sfx('tie'); return; }
   spendPebbles(item.cost, 'decorations');
   state.decorationInventory[item.id] = decorationInventoryCount(item.id) + 1;
   saveState(); updateHud(); bumpPill('pillPebbles');

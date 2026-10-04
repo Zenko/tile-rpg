@@ -63,11 +63,11 @@ function ensureCosmeticUnlocks() {
   if (ch.color && !ch.unlockedColors.includes(ch.color)) ch.unlockedColors.push(ch.color);
   if (typeof ch.accessory === 'string' && !ch.unlockedAccessories.includes(ch.accessory)) ch.unlockedAccessories.push(ch.accessory);
 }
-// Spends Pebbles to unlock a cosmetic and immediately equips it, so the Shop purchase doubles as picking it.
+// Spends Embers to unlock a cosmetic and immediately equips it, so the Shop purchase doubles as picking it.
 function buyCosmetic(kind, value, cost) {
   ensureCosmeticUnlocks();
   const ch = state.character, pr = state.progress;
-  if (pr.pebbles < cost) { toast('Not enough Pebbles yet'); sfx('tie'); return false; }
+  if (pr.pebbles < cost) { toast('Not enough Embers yet'); sfx('tie'); return false; }
   spendPebbles(cost, 'cosmetics');
   const key = kind === 'emoji' ? 'unlockedEmojis' : kind === 'accessory' ? 'unlockedAccessories' : kind === 'mat' ? 'unlockedMats' : kind === 'stage' ? 'unlockedStages' : kind === 'border' ? 'unlockedAvBorders' : 'unlockedColors';
   if (!ch[key].includes(value)) ch[key].push(value);

@@ -1,6 +1,6 @@
 /* ============================================================
    QUESTS, ACHIEVEMENTS AND THE REWARDS SCREEN
-   Moved out of js/progression.js. Loads straight after it; progression.js keeps tips, levelling, the Pebble ledger, the DOM
+   Moved out of js/progression.js. Loads straight after it; progression.js keeps tips, levelling, the Ember ledger, the DOM
    handles, save/load and the opponent/reward helpers. Everything here is looked up at run time, so the split changes no behaviour.
    ============================================================ */
 // The "wander" line: one quest at every 500-step rung up to 10,000, escalating rewards for the grind -
@@ -52,12 +52,12 @@ const QUEST_POOL = [
   { id: 'bake1',    icon: '🍞', name: 'Bake a loaf at the bakery',    goal: 1,  stat: 'breadBaked',      reward: 'rare' },
   { id: 'share1',   icon: '🥖', name: 'Share a loaf with a neighbor', goal: 1,  stat: 'breadShared',     reward: 'rare' },
   { id: 'spell3',   icon: '✨', name: 'Cast 3 spells in battle',      goal: 3,  stat: 'spellsCast',      reward: 'rare' },
-  { id: 'plant2',   icon: '🌱', name: 'Plant 2 seeds in Town Square', goal: 2,  stat: 'seedsPlanted',    reward: 'common' },
+  { id: 'plant2',   icon: '🌱', name: 'Plant 2 seeds in El Umbral', goal: 2,  stat: 'seedsPlanted',    reward: 'common' },
   { id: 'harvest1', icon: '🌻', name: 'Harvest something you grew',   goal: 1,  stat: 'cropsHarvested',  reward: 'rare' },
   { id: 'rival1',   icon: '🎭', name: 'Beat your rival, Rook',        goal: 1,  stat: 'rivalWins',       reward: 'ultra' },
   { id: 'cook1',    icon: '🍳', name: 'Cook a dish with Maple',       goal: 1,  stat: 'dishesCooked',    reward: 'rare' },
   { id: 'puzzle1',  icon: '🧩', name: "Solve Olwen's daily puzzle",   goal: 1,  stat: 'puzzlesSolved',   reward: 'ultra' },
-  { id: 'cupwin1',  icon: '🥉', name: 'Win a Festival Cup match',     goal: 1,  stat: 'cupRoundsWon',    reward: 'rare' },
+  { id: 'cupwin1',  icon: '🥉', name: 'Win a Dreamers’ Cup match',     goal: 1,  stat: 'cupRoundsWon',    reward: 'rare' },
   { id: 'bugs2',    icon: '✨', name: 'Catch 2 night critters',       goal: 2,  stat: 'bugsCaught',      reward: 'common' },
   { id: 'mini3',    icon: '🎲', name: 'Play 3 house mini-games',      goal: 3,  stat: 'minigamesPlayed', reward: 'common' },
   { id: 'donate1',  icon: '🏛️', name: 'Donate a card to the museum',  goal: 1,  stat: 'donations',       reward: 'common' },
@@ -104,7 +104,7 @@ const WEEKLY_QUEST_POOL = [
   { id: 'w_spell20',  icon: '📜', name: 'Cast 20 spells in battle',  goal: 20, stat: 'spellsCast',      reward: 'super' },
   { id: 'w_harvest8', icon: '🧺', name: 'Harvest 8 crops',           goal: 8,  stat: 'cropsHarvested',  reward: 'super' },
   { id: 'w_rival3',   icon: '🎭', name: 'Beat Rook 3 times',         goal: 3,  stat: 'rivalWins',       reward: 'mythic' },
-  { id: 'w_cup',      icon: '🏆', name: "Win this week's Festival Cup", goal: 1, stat: 'cupTrophies',     reward: 'mythic' },
+  { id: 'w_cup',      icon: '🏆', name: "Win this week's Dreamers’ Cup", goal: 1, stat: 'cupTrophies',     reward: 'mythic' },
   { id: 'w_cook6',    icon: '🥘', name: 'Cook 6 dishes',             goal: 6,  stat: 'dishesCooked',    reward: 'super' },
   { id: 'w_puzzle4',  icon: '🧩', name: 'Solve 4 daily puzzles',     goal: 4,  stat: 'puzzlesSolved',   reward: 'mythic' },
   { id: 'w_bugs12',   icon: '🫙', name: 'Catch 12 night critters',   goal: 12, stat: 'bugsCaught',      reward: 'super' },
@@ -585,7 +585,7 @@ function renderFavours() {
     const ready = requestDone(r);
     const el = document.createElement('div');
     el.className = 'quest' + (ready ? ' done' : '');
-    const rewardText = r.reward ? `a ${REQ_WIN_RARITY} card or better` : `🫧 ${r.pebbles} Pebbles`;
+    const rewardText = r.reward ? `a ${REQ_WIN_RARITY} card or better` : `🫧 ${r.pebbles} Embers`;
     el.innerHTML = `
       <div class="quest-top">
         <span class="q-icon">🤝</span>

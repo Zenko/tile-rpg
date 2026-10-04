@@ -121,7 +121,7 @@ html.lab-noshadow .card-art-img, html.lab-noshadow .art-shadow, html.lab-noshado
 <!-- KEYWORDS -->
 <section class="lab-sec" id="keywords">
   <h2>5. Keyword icons</h2>
-  <p class="lab-lead">The 13 small rule icons shown on every card (Guard, Swift, Mend and so on). Name a file <code>kw-guard.png</code> (or just <code>guard.png</code>) and it replaces that emoji everywhere in this page: the card faces, the mock screens and the lists. Aim for <b>128 x 128 px</b>, transparent, a single bold shape. On a card each one sits inside a round badge (about 22% of the card width, filled pale in the Dark theme and charcoal in the Light theme) at about 55% of the badge, so it is shown at only <b>8 to 20 px</b>. Make sure it reads on <b>both</b> circles: mid-tone, saturated colours, no pure white or black fills, subject inside the central 70%. <b>Note:</b> the game itself still draws these as emoji; once you are happy, I add image support to the game, as was done for card art.</p>
+  <p class="lab-lead">The 13 small rule icons shown on every card (Watch, Flicker, Rest and so on). Name a file <code>kw-guard.png</code> (or just <code>guard.png</code>) and it replaces that emoji everywhere in this page: the card faces, the mock screens and the lists. Aim for <b>128 x 128 px</b>, transparent, a single bold shape. On a card each one sits inside a round badge (about 22% of the card width, filled pale in the Dark theme and charcoal in the Light theme) at about 55% of the badge, so it is shown at only <b>8 to 20 px</b>. Make sure it reads on <b>both</b> circles: mid-tone, saturated colours, no pure white or black fills, subject inside the central 70%. <b>Note:</b> the game itself still draws these as emoji; once you are happy, I add image support to the game, as was done for card art.</p>
   <div id="kwLab"></div>
 </section>
 
@@ -338,7 +338,7 @@ window.escapeHtml = function (s) { return String(s).replace(/[&<>"]/g, function 
   /* ---------- 4. whole set ---------- */
   var SF = { only: false, f: 'all', q: '' };
   function renderSetControls() {
-    var F = [['all', 'All'], ['common', 'Common'], ['rare', 'Rare'], ['ultra', 'Ultra'], ['super', 'Super'], ['mythic', 'Mythic'], ['spell', 'Spells'], ['grove', 'Grove'], ['stone', 'Stone'], ['tide', 'Tide'], ['wind', 'Wind']];
+    var F = [['all', 'All'], ['common', 'Common'], ['rare', 'Rare'], ['ultra', 'Ultra'], ['super', 'Super'], ['mythic', 'Mythic'], ['spell', 'Spells'], ['grove', 'Brote'], ['stone', 'Recuerdo'], ['tide', 'Deriva'], ['wind', 'Susurro']];
     $('#setFilters').innerHTML = '<button class="lab-btn' + (SF.only ? ' on' : '') + '" data-only type="button">Only cards with new art</button>' + F.map(function (f) { return '<button class="lab-btn' + (SF.f === f[0] ? ' on' : '') + '" data-sf="' + f[0] + '" type="button">' + f[1] + '</button>'; }).join('') + '<input id="sq" class="lab-btn" type="search" placeholder="Search" value="' + escapeHtml(SF.q) + '" style="min-width:150px">';
   }
   function renderSet() {
@@ -425,7 +425,7 @@ window.escapeHtml = function (s) { return String(s).replace(/[&<>"]/g, function 
 
   /* ---------- 7. town ---------- */
   var biome = 'meadow';
-  var BIOMES = [['meadow', 'Town Square'], ['bazaar', 'Market Row'], ['harbor', 'Quiet Harbor'], ['orchard', 'Hollow Garden']];
+  var BIOMES = [['meadow', 'El Umbral'], ['bazaar', 'El Mercado de Susurros'], ['harbor', 'La Orilla del Arrullo'], ['orchard', 'El Jardín Lúcido']];
   function spr(id, T, extra) { /* T = the tile size; a 64 unit sprite is T wide, a 128 unit building is 2T, as on the map */ var s = SPR[id], w = s ? s.vb[2] : 64, h = s ? s.vb[3] : 64, k = T / 64, W = Math.round(w * k), H = Math.round(h * k); return SPRITE_OVR[id] ? '<img src="' + SPRITE_OVR[id] + '" width="' + W + '" height="' + H + '" alt="" style="' + (extra || '') + '">' : '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + w + ' ' + h + '" style="' + (extra || '') + '"><use href="#' + id + '"/></svg>'; }
   function renderTown() {
     $('#biomeSeg').innerHTML = BIOMES.map(function (b) { return '<button class="' + (biome === b[0] ? 'on' : '') + '" data-bi="' + b[0] + '" type="button">' + b[1] + '</button>'; }).join('');

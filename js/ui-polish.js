@@ -4,9 +4,9 @@
      - Card inspect: press and hold any element carrying data-inspect="<card id>" (collection, deck, Index, Craft,
        memory game, battle cards) to see that card large. A short tap still does whatever it did before - the
        long-press swallows only the click that would otherwise follow it.
-     - Reward fly: bumpPill() on the Cards/Pebbles counters also launches a little icon from the middle of the
+     - Reward fly: bumpPill() on the Cards/Embers counters also launches a little icon from the middle of the
        screen to the counter, so a reward and the number that changed feel connected.
-     - HUD shortcuts: the Cards counter opens Cards; the Pebbles counter points to the Card Shop.
+     - HUD shortcuts: the Cards counter opens Cards; the Embers counter points to the Card Shop.
      - Bottom sheets: drag the handle of a .sheet card (or the inspect card) downward to dismiss it.
    Everything here only adds listeners; nothing needs to load before it, and nothing below runs at parse time
    against another file, so its position in the load order is not critical.
@@ -81,15 +81,15 @@ function flyToHud(icon, pillId) {
 })();
 
 /* ---------- HUD counters open their screens ---------- */
-/* The Shop is no longer a bottom tab - it lives in the Card Shop on Market Row. The Pebbles counter points there,
-   and until Market Row has opened it falls back to the Shop screen itself so a new player can still spend Pebbles. */
+/* The Shop is no longer a bottom tab - it lives in the Card Shop on El Mercado de Susurros. The Embers counter points there,
+   and until El Mercado de Susurros has opened it falls back to the Shop screen itself so a new player can still spend Embers. */
 [['pillCards', 'collection'], ['pillPebbles', 'shop']].forEach(([id, tab]) => {
   const el = document.getElementById(id); if (!el) return;
   const go = () => {
     if (typeof inBattle !== 'undefined' && inBattle) return;
     if (typeof inScene !== 'undefined' && inScene && typeof closeScene === 'function') closeScene();
     sfx('nav'); buzz(HAP.tap);
-    if (tab === 'shop' && typeof districtUnlocked === 'function' && districtUnlocked('market')) { toast('🛍️ Spend Pebbles at the Card Shop on Market Row'); return; }
+    if (tab === 'shop' && typeof districtUnlocked === 'function' && districtUnlocked('market')) { toast('🛍️ Spend Embers at the Card Shop on El Mercado de Susurros'); return; }
     switchTab(tab);
   };
   el.addEventListener('click', go);

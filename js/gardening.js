@@ -1,17 +1,17 @@
 /* ============================================================
    GARDENING
-   Buy seeds from Fern (the blue cottage) or find them in the Hollow Garden's grass, plant them on open ground in
-   Town Square, and harvest when grown. Growth runs on real time and the rain makes it half again as fast.
-   Card seeds grow a card instead of (well, as well as) Pebbles.
+   Buy seeds from Fern (the blue cottage) or find them in El Jardín Lúcido's grass, plant them on open ground in
+   El Umbral, and harvest when grown. Growth runs on real time and the rain makes it half again as fast.
+   Card seeds grow a card instead of (well, as well as) Embers.
    ============================================================ */
 const SEEDS = [
   { id: 'daisy',     name: 'Daisy',     icon: '🌼', cost: 5,  growMin: 5,  pebbles: 7,  xp: 10, desc: 'Quick and cheerful.' },
   { id: 'pumpkin',   name: 'Pumpkin',   icon: '🎃', cost: 12, growMin: 15, pebbles: 18, xp: 20, desc: 'Slow, but it pays.' },
   { id: 'sunflower', name: 'Sunflower', icon: '🌻', cost: 22, growMin: 25, pebbles: 6,  xp: 25, card: 'rare',  desc: 'A card seed: grows a rare card or better.' },
-  { id: 'moonbean',  name: 'Moonbean',  icon: '🌙', cost: 0,  growMin: 40, pebbles: 8,  xp: 40, card: 'ultra', found: true, desc: 'Only found in the Hollow Garden. Grows an ultra rare card or better.' },
+  { id: 'moonbean',  name: 'Moonbean',  icon: '🌙', cost: 0,  growMin: 40, pebbles: 8,  xp: 40, card: 'ultra', found: true, desc: 'Only found in El Jardín Lúcido. Grows an ultra rare card or better.' },
 ];
 const PLOT_MAX = 8;
-const SEED_FIND_CHANCE = 0.03;          // per Hollow Garden grass tile walked, reset daily
+const SEED_FIND_CHANCE = 0.03;          // per El Jardín Lúcido grass tile walked, reset daily
 function seedDef(id) { return SEEDS.find(s => s.id === id); }
 const CROP_INGREDIENT = { daisy: 'flowers', pumpkin: 'pumpkin', sunflower: 'sunflower', moonbean: 'moonbean' };
 function seedInv() { const p = state.progress; if (!p.seeds || typeof p.seeds !== 'object') p.seeds = {}; return p.seeds; }
@@ -42,7 +42,7 @@ function seedsGreeting() {
 }
 function seedsIntro() {
   const used = cropsIn().length;
-  return `Seeds grow in real time in the square's soft ground, and the rain makes them grow faster. ${used}/${PLOT_MAX} plots in use. Moonbeans hide in the Hollow Garden's grass.`;
+  return `Seeds grow in real time in the square's soft ground, and the rain makes them grow faster. ${used}/${PLOT_MAX} plots in use. Moonbeans hide in El Jardín Lúcido's grass.`;
 }
 function seedButtons() {
   const buy = SEEDS.filter(s => !s.found).map(s => sceneBtn('seed:buy-' + s.id, `${s.icon} Buy ${s.name} seed · 🫧 ${s.cost}${s.card ? ' · grows a card' : ''}`));
@@ -75,7 +75,7 @@ function plantSeed(seedId, x, y) {
   cropsIn().push({ uid: 'crop-' + now + '-' + Math.floor(Math.random() * 1000), seed: seedId, x, y, plantedAt: now, lastTick: now, grown: 0 });
   bumpStat('seedsPlanted', 1);
   toast(`🌱 ${s.name} planted - ready in about ${s.growMin} min`);
-  logEvent('🌱', `Planted a ${s.name} seed in Town Square.`);
+  logEvent('🌱', `Planted a ${s.name} seed in El Umbral.`);
 }
 function cropCardRarity(floor) {
   if (floor === 'ultra') { const r = Math.random(); return r < 0.12 ? 'mythic' : r < 0.4 ? 'super' : 'ultra'; }
@@ -93,7 +93,7 @@ function harvestCrop(c) {
     const cid = randomCardId(cropCardRarity(s.card)), isNew = !discoveredSet().has(cid);
     state.ownedCards.push(cid); bumpStat('cardsFound', 1); bumpPill('pillCards');
     saveState(); renderTown();
-    showCardReveal(cid, `${s.icon} Harvested!`, true, `+${s.pebbles} 🫧 Pebbles`, s.xp);
+    showCardReveal(cid, `${s.icon} Harvested!`, true, `+${s.pebbles} 🫧 Embers`, s.xp);
     if (isNew) toast('📖 New entry in your Index');
     return;
   }
@@ -104,7 +104,7 @@ function showCrop(c) {
   const s = seedDef(c.seed), left = Math.ceil((cropGrowMs(c) - (c.grown || 0)) / (weatherIs('rain') ? 1.5 : 1));
   showProp(cropIcon(c), `${s.name} (${Math.round(cropProgress(c) * 100)}% grown)`, `About ${fmtLeft(left)} to go${weatherIs('rain') ? ' - the rain is helping it along.' : '.'} ${s.desc}`);
 }
-// Hollow Garden grass hides a few seeds each day.
+// El Jardín Lúcido grass hides a few seeds each day.
 function maybeFindSeed(data, tk) {
   if (state.currentDistrict !== 'garden') return false;
   if (data.seedDay !== todayKey()) { data.seedDay = todayKey(); data.seedTiles = {}; }

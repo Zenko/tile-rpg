@@ -2,11 +2,11 @@
    THE CELLAR AS A DESCENT MAP (build 107)
    The cellar used to be a list: one button per floor, fight, repeat. Now every floor is a choice of doors:
 
-     ⚔️ Skirmish  - the floor's battle (the same themed decks and deep foes as before), pays Pebbles
-     🧰 Chest     - Pebbles, or a boon
+     ⚔️ Skirmish  - the floor's battle (the same themed decks and deep foes as before), pays Embers
+     🧰 Chest     - Embers, or a boon
      🔥 Campfire  - restores a heart
      ⛩️ Shrine    - a boon
-     🧳 Peddler   - sells a boon for Pebbles
+     🧳 Peddler   - sells a boon for Embers
      👁️ Guardian  - every 5th floor (and the Root Keeper on floor 3) is a single door: a hard fight and a prize card
 
    A run has three hearts. Losing or yielding a fight costs one (you pick a door again); at zero the run ends, the cellar
@@ -17,15 +17,15 @@
    ============================================================ */
 const CELLAR_HEARTS = 3;
 const CELLAR_BOONS = [
-  { id: 'skin',   icon: '🛡️', name: 'Thick Skin',  text: '+2 Spirit at the start of cellar fights', kind: 'startSpirit', val: 2 },
+  { id: 'skin',   icon: '🛡️', name: 'Thick Skin',  text: '+2 Calm at the start of cellar fights', kind: 'startSpirit', val: 2 },
   { id: 'sharp',  icon: '🗡️', name: 'Sharp Start', text: 'Draw 1 extra card in cellar fights',       kind: 'startDraw',   val: 1 },
-  { id: 'lucky',  icon: '🍀', name: 'Lucky Penny', text: 'Fights and chests pay 25% more Pebbles' },
+  { id: 'lucky',  icon: '🍀', name: 'Lucky Penny', text: 'Fights and chests pay 25% more Embers' },
   { id: 'warm',   icon: '🔥', name: 'Warm Hands',  text: 'Campfires restore one more heart' },
   { id: 'moss',   icon: '🌱', name: 'Mossy Boots', text: 'The peddler charges less' },
   { id: 'wick',   icon: '🕯️', name: 'Long Wick',   text: '+1 heart now, and one more at most' },
 ];
 const CELLAR_DOORS = {
-  fight: { icon: '⚔️', name: 'Skirmish', weight: 3 }, chest: { icon: '🧰', name: 'Chest', hint: 'Pebbles or a boon', weight: 2 },
+  fight: { icon: '⚔️', name: 'Skirmish', weight: 3 }, chest: { icon: '🧰', name: 'Chest', hint: 'Embers or a boon', weight: 2 },
   camp:  { icon: '🔥', name: 'Campfire', hint: 'Restore a heart', weight: 1.2 }, shrine: { icon: '⛩️', name: 'Shrine', hint: 'Gain a boon', weight: 1.2 },
   shop:  { icon: '🧳', name: 'Peddler', hint: 'Buy a boon', weight: 1 }, boss: { icon: '👁️', name: 'Guardian', weight: 0 },
 };

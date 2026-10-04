@@ -189,7 +189,7 @@ function drawCardSheet() {
       if (i >= 0) clearCharm(i); else if (!charmInfo(id)) { toast('That card has no charm effect'); return; } else setCharm(id);
     } else if (act === 'release') {
       const gain = releaseCard(id);
-      if (gain) { ensureAudio(); sfx('claim'); buzz(HAP.tap); bumpPill('pillPebbles'); toast(`🫧 +${gain} ${gain === 1 ? 'Pebble' : 'Pebbles'}`); }
+      if (gain) { ensureAudio(); sfx('claim'); buzz(HAP.tap); bumpPill('pillPebbles'); toast(`🫧 +${gain} ${gain === 1 ? 'Ember' : 'Embers'}`); }
     }
     drawCardSheet(); refreshCardsView();
   }));

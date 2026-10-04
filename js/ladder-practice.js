@@ -4,9 +4,9 @@
 
    - The ladder: a monthly rank (Pebble, Stone, Moss, Gem, Star) earned from ghost duels, deck challenges, cup trophies,
      bosses, the rival and Draft clears. It only ever goes up inside a season (nothing is lost by losing), and a new
-     month halves your points and pays Pebbles for the best rank you reached. Calm by design: you climb against ghosts and
+     month halves your points and pays Embers for the best rank you reached. Calm by design: you climb against ghosts and
      the town, never against a live player.
-   - Archetypes: a deck with 6+ cards of one family is a "<Family> deck"; with 8+ it gets +1 Spirit at the start of
+   - Archetypes: a deck with 6+ cards of one family is a "<Family> deck"; with 8+ it gets +1 Calm at the start of
      matches (read through skillBonus('startSpirit') in js/skills-gear.js, so it needs no new battle hook).
    - Practice: "Test your deck" plays the deck against sample opponents at three strengths on the plain rules (no skills,
      charms or mastery) and reports a win rate, so a player can compare two builds without spending real matches.

@@ -1,12 +1,12 @@
 /* ============================================================
-   RELEASE + PACKS (Pebbles economy)
+   RELEASE + PACKS (Embers economy)
    ============================================================ */
 // How many copies of a card are genuinely spare: never the last one, never one the deck is using.
 /* ---------- Workshop: Refine and Trade up ----------
    Refine  : 2 copies of a plain card become 1 stronger version (+1 power or +1 health you choose), sometimes with a skill.
    Trade up: 3 cards of one rarity become 1 random card of the next rarity, sometimes with a skill.
-   Nothing costs Pebbles; the cards are the price. Skills come from a small pool because simulation showed that
-   Swift and Shield hand out too much power for free (see the notes with the game). */
+   Nothing costs Embers; the cards are the price. Skills come from a small pool because simulation showed that
+   Flicker and Haze hand out too much power for free (see the notes with the game). */
 const CRAFT = {
   skills: ['guard', 'mend', 'bloom', 'echo', 'thorns', 'drain'],
   refineSkillChance: 0.30,

@@ -3,8 +3,8 @@
    Each floor of the Descent Map (js/cellar-run.js) is now a small dark room you walk through with a lantern. The doors are
    still the choices, but you have to find them first. Around them:
 
-     🛢️ barrels   - smash for a few Pebbles
-     🗝️ a key     - opens the 🔒 locked chest on the same floor (a boon and Pebbles)
+     🛢️ barrels   - smash for a few Embers
+     🗝️ a key     - opens the 🔒 locked chest on the same floor (a boon and Embers)
      🐀 rats      - scurry across and knock your lantern: the light shrinks to one tile for a few steps
      🍄 glowcaps  - make the lantern burn bright for a few steps (three tiles)
 

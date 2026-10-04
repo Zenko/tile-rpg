@@ -1,11 +1,11 @@
 /* ============================================================
    DRAFT RUN (v1.85.0)
-   A run at the fountain (the Festival Cup scene): you build a fresh 12-card deck out of the WHOLE card list - not your
+   A run at the fountain (the Dreamers’ Cup scene): you build a fresh 12-card deck out of the WHOLE card list - not your
    collection - by taking one card from each of twelve offers of three, then take it through four matches of rising
    difficulty. A loss ends the run. It plays on neutral ground: your collection's extras (mastery, charms, snacks, the
    companion) stay home, so a new player and a veteran draft on equal terms (battle.neutral, see startBattleNow).
    The Keeper's Knack still counts, since that is yours rather than your cards'.
-   Rewards: Pebbles per round (the first 3 runs a day pay in full, then half), and a super-or-better card for the first
+   Rewards: Embers per round (the first 3 runs a day pay in full, then half), and a super-or-better card for the first
    clear each day. Wins here don't count toward district wins; they have their own stats.
    State lives in state.progress.draft (draftState()); the pick screen is #draftOverlay, the run's buttons are the
    fountain scene's 'draft' mode (draftButtons / draftAction, wired in js/houses-and-cellar.js).
@@ -53,14 +53,14 @@ function draftFoes() {
   const a = shuffledArr(all);
   return [{ name: a[0].name, icon: a[0].icon }, { name: a[1].name, icon: a[1].icon }, { name: a[2].name, icon: a[2].icon }, { name: 'The Draft Master', icon: '🎴' }];
 }
-// Pebbles taper off after about a run's worth a day (econTaper, js/progression.js), so a second and third run mostly pay in cards and fun.
+// Embers taper off after about a run's worth a day (econTaper, js/progression.js), so a second and third run mostly pay in cards and fun.
 function draftPebbles(base) { return econTaper('draft', base * (typeof eventIs === 'function' && eventIs('festival-day') ? 2 : 1), 40); }
 
 function draftIntro() {
   const d = draftState();
   if (d.active && d.stage === 'pick') return `Your draft is in progress: ${d.picks.length} of ${DRAFT_PICKS} cards chosen. Pick one card from each offer to build a deck from scratch.`;
   if (d.active) return `Your deck is ready. ${DRAFT_ROUNDS[d.round].title}: ${d.foes[d.round].icon} ${d.foes[d.round].name} is waiting. A loss ends the run.`;
-  return `The Draft Run: build a fresh deck by picking 1 card from each of ${DRAFT_PICKS} offers of three - from every card in the game, not just yours - then win four matches in a row. Your collection's perks stay home, so everyone drafts on equal terms. Pebble prizes shrink once you have earned plenty from drafts in a day.${d.best ? ` Best so far: ${d.best} round${d.best === 1 ? '' : 's'}.` : ''}`;
+  return `The Draft Run: build a fresh deck by picking 1 card from each of ${DRAFT_PICKS} offers of three - from every card in the game, not just yours - then win four matches in a row. Your collection's perks stay home, so everyone drafts on equal terms. Ember prizes shrink once you have earned plenty from drafts in a day.${d.best ? ` Best so far: ${d.best} round${d.best === 1 ? '' : 's'}.` : ''}`;
 }
 
 function draftButtons() {

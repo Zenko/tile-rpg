@@ -181,7 +181,7 @@ function renderBattleLog() {
   list.innerHTML = rows.map(b => {
     const where = b.floor ? `floor ${b.floor}` : (DISTRICTS[b.district] ? DISTRICTS[b.district].name : '');
     const wx = b.weather && b.weather !== 'clear' && WEATHER_KINDS[b.weather] ? ' ' + WEATHER_KINDS[b.weather].icon : '';
-    const result = b.yielded ? 'Stepped away' : b.won ? `Won · ${b.spirit} Spirit left` : `Lost · they had ${b.opp} Spirit left`;
+    const result = b.yielded ? 'Stepped away' : b.won ? `Won · ${b.spirit} Calm left` : `Lost · they had ${b.opp} Calm left`;
     const open = btOpen === b.i, mine = log.filter(x => x.name === b.name && !x.yielded), w = mine.filter(x => x.won).length;
     const npc = open ? rematchNpc(b) : null;
     return `<div class="bl-entry"><button class="bl-head" type="button" data-i="${b.i}" aria-expanded="${open}"><span class="le-icon">${b.icon}</span><span class="le-text"><b>${escapeHtml(b.name)}</b><span class="q-kind">${BATTLE_KIND_LABEL[b.kind] || ''}</span>

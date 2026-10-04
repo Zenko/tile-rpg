@@ -230,10 +230,10 @@ const WEATHER_MUSIC_PROFILE = {
 // changing key: which of the 5 tones get picked (low/high/mixed), how much they shimmer, and how unhurried the
 // changes feel. The notes themselves always come from musicChords() - only the voicing and pacing shift here.
 const BIOME_MUSIC = {
-  meadow:  { voicing: 'mixed', shimmer: 0.6,  tempoMul: 1 },       // Town Square: the original balanced feel
-  bazaar:  { voicing: 'high',  shimmer: 0.5,  tempoMul: 0.82 },    // Market Row: brighter and a little quicker
-  harbor:  { voicing: 'low',   shimmer: 0.45, tempoMul: 1.25 },    // Quiet Harbor: deep and unhurried
-  orchard: { voicing: 'mixed', shimmer: 0.8,  tempoMul: 1.05 },    // Hollow Garden: more sparkle overhead
+  meadow:  { voicing: 'mixed', shimmer: 0.6,  tempoMul: 1 },       // El Umbral: the original balanced feel
+  bazaar:  { voicing: 'high',  shimmer: 0.5,  tempoMul: 0.82 },    // El Mercado de Susurros: brighter and a little quicker
+  harbor:  { voicing: 'low',   shimmer: 0.45, tempoMul: 1.25 },    // La Orilla del Arrullo: deep and unhurried
+  orchard: { voicing: 'mixed', shimmer: 0.8,  tempoMul: 1.05 },    // El Jardín Lúcido: more sparkle overhead
 };
 function biomeMusic() { return BIOME_MUSIC[BIOME_OF[state.currentDistrict] || 'meadow'] || BIOME_MUSIC.meadow; }
 function applyWeatherToMusic() {

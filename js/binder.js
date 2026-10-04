@@ -1,7 +1,7 @@
 /* ============================================================
    BINDER (build 102)
    Collection depth for the Sets tab: nine "pages" (one per rarity and one per card family) each showing how much of that
-   page you have discovered. Filling a page for the first time pays Pebbles once. Progress counts discovered cards (the same
+   page you have discovered. Filling a page for the first time pays Embers once. Progress counts discovered cards (the same
    Index the rest of the game uses), so nothing is lost by trading or releasing a card after you have found it.
    Saved: state.progress.binderDone = { pageId: true }.
    ============================================================ */
@@ -30,7 +30,7 @@ function binderHtml() {
     return `<div class="bn-row${full ? ' full' : ''}"><span class="bn-ico">${pg.icon}</span><span class="bn-name">${pg.name}</span><i class="bn-bar"><b style="width:${Math.round(n / pg.ids.length * 100)}%"></b></i><em>${full ? '✓' : n + '/' + pg.ids.length}</em></div>`; };
   const pages = binderPages(), byRar = pages.filter(p => RARITY_ORDER.includes(p.id)), byFam = pages.filter(p => !RARITY_ORDER.includes(p.id) && p.id !== 'tarot'), byArc = pages.filter(p => p.id === 'tarot');
   const stars = Object.keys(state.progress.mastery || {}).reduce((n, id) => n + masteryRank(id), 0);
-  return `<div class="bn-card"><div class="bn-title">Binder</div><div class="bn-sub">Fill a page for a one-time Pebble prize.</div>
+  return `<div class="bn-card"><div class="bn-title">Binder</div><div class="bn-sub">Fill a page for a one-time Ember prize.</div>
     <div class="bn-group">By rarity</div>${byRar.map(row).join('')}<div class="bn-group">By family</div>${byFam.map(row).join('')}${byArc.length ? `<div class="bn-group">Tarot</div>${byArc.map(row).join('')}` : ''}
     <div class="bn-foot"><span>★ ${stars} mastery stars</span><span>${Object.keys(done).length} of ${pages.length} pages complete</span></div></div>`;
 }

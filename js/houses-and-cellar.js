@@ -7,7 +7,7 @@ const INTERIORS = {
     actions: [{ id: 'calm-tea', label: '🍵 Tea ritual', kind: 'calm', game: 'tea' },
               { id: 'mg-tea', kind: 'minigame', game: 'tea', view: () => miniView('tea') },
               { id: 'tea', label: '☕ Share a pot of tea', kind: 'daily', pebbles: 4,
-      done: 'Wren pours you a cup and presses two Pebbles into your hand. "For the road."', already: 'The teapot is empty for today. "Come back tomorrow, dear."' }] },
+      done: 'Wren pours you a cup and presses two Embers into your hand. "For the road."', already: 'The teapot is empty for today. "Come back tomorrow, dear."' }] },
   nook: { title: 'The Reading Nook', who: '🧙', name: 'Olwen', theme: 'cool',
     greet: 'Ah, a visitor. Books are quiet, but I am not. Ask me anything about your deck.',
     actions: [{ id: 'puzzle', kind: 'puzzle', view: () => puzzleView() },
@@ -19,7 +19,7 @@ const INTERIORS = {
     greet: 'Fresh grain, still warm from the sack! Try a handful, on the house.',
     actions: [{ id: 'mg-grain', kind: 'minigame', game: 'grain', view: () => miniView('grain') },
               { id: 'sample', label: '🌾 Try a free sample', kind: 'daily', pebbles: 4,
-      done: 'Pip scoops a handful into your palm, then presses two Pebbles into it too. "For being a good customer."', already: 'Pip pats the empty sack. "Sold out for today - back tomorrow!"' }] },
+      done: 'Pip scoops a handful into your palm, then presses two Embers into it too. "For being a good customer."', already: 'Pip pats the empty sack. "Sold out for today - back tomorrow!"' }] },
   'stall-thread': { title: "Clover's Thread Stall", who: '🐰', name: 'Clover', theme: 'cool',
     greet: "Ribbons, thread, whatever you're stitching together. And I know a thing or two about decks, if you're curious.",
     actions: [{ id: 'mg-pattern', kind: 'minigame', game: 'pattern', view: () => miniView('pattern') },
@@ -35,14 +35,14 @@ const INTERIORS = {
               { id: 'favs', label: '⭐ Choose favourite cards to frame', kind: 'favs' },
               { id: 'trophies', label: '🏆 Look over the trophy case', kind: 'trophies' },
               { id: 'nap', label: '😴 Nap by the window', kind: 'daily', pebbles: 3,
-                done: 'You doze off in the sunny chair. When you wake, three Pebbles have rolled out of your pocket onto the cushion.', already: 'You are not sleepy yet. Maybe tomorrow.' }] },
+                done: 'You doze off in the sunny chair. When you wake, three Embers have rolled out of your pocket onto the cushion.', already: 'You are not sleepy yet. Maybe tomorrow.' }] },
   lantern: { title: 'The Lantern Market', who: '🦉', name: 'Lumen', theme: 'dark',
     greet: () => `Lanterns sway on strings between the stalls. "Night things, for night folk," Lumen hoots. ${jarLine()}`,
     actions: [{ id: 'nightpack', kind: 'nightpack', view: () => ({ label: `🌙 Night Pack · 🫧 ${NIGHT_PACK_COST} (rare or better, night cards)` }) },
               { id: 'sellbugs', kind: 'sellbugs', view: () => ({ label: jarValue() ? `🫙 Trade your jar of critters for 🫧 ${jarValue()}` : '🫙 Your critter jar is empty', disabled: !jarValue() }) },
               { id: 'nightdeco', label: '🕯️ Night-only decorations', kind: 'nightdeco' },
               { id: 'mg-lanterns', kind: 'minigame', game: 'lanterns', view: () => miniView('lanterns') }] },
-  fortune: { title: "Madame Soot's Tent", who: '🐈‍⬛', name: 'Soot', theme: 'dark',
+  fortune: { title: "Madame Brume's Tent", who: '🐈‍⬛', name: 'Soot', theme: 'dark',
     greet: () => `Beads click, a candle gutters. "Sit, sit," purrs Soot. ${typeof tarotCanDraw === 'function' && tarotCanDraw() ? 'Your daily reading has not been drawn yet.' : 'The cards know you already.'}`,
     actions: [{ id: 'fortune-read', label: '🔮 Daily reading', kind: 'calm', game: 'tarot' },
               { id: 'fortune-redraw', kind: 'fortune', view: () => { const s = fortuneRedrawState(); return { label: `🃏 Draw once more · 🫧 ${FORTUNE_REDRAW_COST}${s === 'used' ? ' (done today)' : ''}`, disabled: s === 'used' }; } },
@@ -60,13 +60,13 @@ const INTERIORS = {
               { id: 'cook', label: '🍳 Cook with Maple', kind: 'cook' },
               { id: 'mg-frost', kind: 'minigame', game: 'frost', view: () => miniView('frost') },
               { id: 'roll', label: '🥐 Taste a warm roll', kind: 'daily', pebbles: 3,
-                done: 'Maple hands you a roll straight off the tray, and three Pebbles "for the jam fund."', already: 'Maple laughs. "One roll a day, or there will be none left for the market!"' }] },
+                done: 'Maple hands you a roll straight off the tray, and three Embers "for the jam fund."', already: 'Maple laughs. "One roll a day, or there will be none left for the market!"' }] },
   house2: { title: "Fern's Cottage", who: '👩‍🌾', name: 'Fern', theme: 'cool',
     greet: () => `Mind the watering cans! I tend the flower boxes in the square. ${seedsGreeting()}`,
     actions: [{ id: 'seeds', label: '🌱 Seeds & planting', kind: 'seeds' },
               { id: 'mg-weeds', kind: 'minigame', game: 'weeds', view: () => miniView('weeds') },
               { id: 'water', label: '💧 Help water the flower boxes', kind: 'daily', pebbles: 3,
-                done: 'You water every box on the lane. Fern beams and tips three Pebbles into your palm.', already: 'Fern points at the dripping boxes. "Already watered today - thank you!"' }] },
+                done: 'You water every box on the lane. Fern beams and tips three Embers into your palm.', already: 'Fern points at the dripping boxes. "Already watered today - thank you!"' }] },
   'stall-spice': { title: "Saffron's Spice Stall", who: '🦔', name: 'Saffron', theme: 'warm',
     greet: () => `One deal a day, and when it's gone, it's gone. ${spiceDealLine()}`,
     actions: [{ id: 'deal', kind: 'deal', view: spiceDealView },
@@ -82,17 +82,17 @@ const INTERIORS = {
     actions: [{ id: 'bait', label: '🎣 Bait counter', kind: 'bait' },
               { id: 'mg-gears', kind: 'minigame', game: 'gears', view: () => miniView('gears') },
               { id: 'sort', label: '🔧 Help sort the spare parts', kind: 'daily', pebbles: 2,
-                done: 'Springs here, cogs there. Tock pays you two Pebbles and a very small screw you did not ask for.', already: 'Tock waves you off. "Parts are sorted! Come back tomorrow."' }] },
+                done: 'Springs here, cogs there. Tock pays you two Embers and a very small screw you did not ask for.', already: 'Tock waves you off. "Parts are sorted! Come back tomorrow."' }] },
   'harbor-hut': { title: 'The Net Loft', who: '🦦', name: 'Tam', theme: 'cool',
     greet: 'Salt in the air, gulls on the roof. Mind the nets drying by the door - I only just finished mending them.',
     actions: [{ id: 'calm-lanterns', kind: 'calm', game: 'lanterns', view: () => ({ label: skyPhase().isNight ? '🏮 Release a lantern' : '🏮 Lanterns (after dark)', disabled: !skyPhase().isNight }) },
               { id: 'mend', label: '🪢 Help mend a net', kind: 'daily', pebbles: 4,
-      done: 'You work a knot loose and tie it back tighter. Tam presses four Pebbles into your hand. "Steady hands, you."', already: 'Tam pats the nets, all mended. "Nothing left to fix today - come back tomorrow."' },
+      done: 'You work a knot loose and tie it back tighter. Tam presses four Embers into your hand. "Steady hands, you."', already: 'Tam pats the nets, all mended. "Nothing left to fix today - come back tomorrow."' },
               { id: 'buoy', label: '🎣 Check the old buoy box', kind: 'chest', done: 'Something washed up in the buoy box, wedged between the floats.', already: 'Tam shrugs. "That box only ever had the one surprise in it."' }] },
   'garden-glass': { title: 'The Glasshouse', who: '🐌', name: 'Iris', theme: 'warm',
     greet: 'Careful of the watering cans! Everything in here grows a little slower than the sun, and a little stranger too.',
     actions: [{ id: 'prune', label: '🌿 Help prune the vines', kind: 'daily', pebbles: 4,
-      done: 'You snip back the wandering vines. Iris slides four Pebbles across a potting bench. "For the help, dear."', already: 'Iris waves a leaf at you. "All pruned for today - the vines will grow back by tomorrow."' },
+      done: 'You snip back the wandering vines. Iris slides four Embers across a potting bench. "For the help, dear."', already: 'Iris waves a leaf at you. "All pruned for today - the vines will grow back by tomorrow."' },
               { id: 'pots', label: '🪴 Dig through the spare pots', kind: 'chest', done: 'Something is tucked under an upturned pot, waiting.', already: 'Iris smiles. "You already found what was hiding under there."' }] },
 };
 
@@ -121,7 +121,7 @@ function ovenAction() {
   if (Date.now() - ov.startedAt < (ov.ms || BAKE_MS)) return 'Not yet. It smells wonderful, though.';
   ov.startedAt = null;
   bumpStat('breadBaked', 1);
-  if (breadCount() >= BREAD_MAX) { addPebbles(4, 'bread'); toast('🫧 +4 Pebbles'); saveState(); return 'Your basket is already full, so Maple buys this loaf back for 4 Pebbles.'; }
+  if (breadCount() >= BREAD_MAX) { addPebbles(4, 'bread'); toast('🫧 +4 Embers'); saveState(); return 'Your basket is already full, so Maple buys this loaf back for 4 Embers.'; }
   state.progress.bread = breadCount() + 1; saveState();
   toast('🍞 +1 loaf'); sfx('claim'); buzz(HAP.found);
   logEvent('🍞', 'Baked a loaf of bread at the bakery.');
@@ -142,10 +142,10 @@ const INGREDIENTS = {
 const PANTRY_MAX = 12;       // per ingredient
 const RECIPES = [
   { id: 'daisy-tea',     name: 'Daisy Tea',      icon: '🍵', needs: { flowers: 2 },              gift: 3,                            desc: 'A calming cup. A lovely gift.' },
-  { id: 'fish-soup',     name: 'Fish Soup',      icon: '🍲', needs: { fish: 2, flowers: 1 },     gift: 2, battle: { spirit: 3 },     desc: 'Eat before a match: start with +3 Spirit.' },
-  { id: 'pumpkin-pie',   name: 'Pumpkin Pie',    icon: '🥧', needs: { pumpkin: 1, bread: 1 },    gift: 5, battle: { spirit: 2 },     desc: 'Everyone loves pie. Or eat it for +2 Spirit.' },
+  { id: 'fish-soup',     name: 'Fish Soup',      icon: '🍲', needs: { fish: 2, flowers: 1 },     gift: 2, battle: { spirit: 3 },     desc: 'Eat before a match: start with +3 Calm.' },
+  { id: 'pumpkin-pie',   name: 'Pumpkin Pie',    icon: '🥧', needs: { pumpkin: 1, bread: 1 },    gift: 5, battle: { spirit: 2 },     desc: 'Everyone loves pie. Or eat it for +2 Calm.' },
   { id: 'sunflower-loaf', name: 'Sunflower Loaf', icon: '🥖', needs: { sunflower: 1, bread: 1 }, gift: 3, battle: { draw: 1 },       desc: 'Eat before a match: draw 1 extra card.' },
-  { id: 'moonlit-stew',  name: 'Moonlit Stew',   icon: '🥘', needs: { moonbean: 1, fish: 1 },    gift: 6, battle: { spirit: 3, draw: 1 }, desc: 'Eat before a match: +3 Spirit and 1 extra card. A treasured gift.' },
+  { id: 'moonlit-stew',  name: 'Moonlit Stew',   icon: '🥘', needs: { moonbean: 1, fish: 1 },    gift: 6, battle: { spirit: 3, draw: 1 }, desc: 'Eat before a match: +3 Calm and 1 extra card. A treasured gift.' },
 ];
 function recipeDef(id) { return RECIPES.find(r => r.id === id); }
 function pantry() { const p = state.progress; if (!p.pantry || typeof p.pantry !== 'object') p.pantry = {}; return p.pantry; }
@@ -229,7 +229,7 @@ function spiceDealAction() {
 /* ---------------- Tock's bait counter (replaced the sleeves, which now live only in Zeph's Card Shop) ----------------
    Bait is bought straight into the pantry, where fishing already reads it (js/fishing.js BAITS: daisies and fish), so the
    fishing code did not change. Night bugs are not sold on purpose: Lumen buys bugs back, so selling them would be a free
-   Pebble loop. The pantry holds PANTRY_MAX of each, which is also the cap on how much you can stock up. */
+   Ember loop. The pantry holds PANTRY_MAX of each, which is also the cap on how much you can stock up. */
 const BAIT_STOCK = [
   { id: 'daisy', icon: '🌼', name: 'Daisy bunch', give: { flowers: 4 }, cost: 8 },
   { id: 'fish',  icon: '🐟', name: 'Fresh fish',  give: { fish: 3 },    cost: 15 },
@@ -274,7 +274,7 @@ function sleeveButtons() {
   return '<div class="sl-grid">' + SLEEVES.map(s => {
     const owned = ch.unlockedSleeves.includes(s.id), worn = ch.sleeve === s.id;
     const status = worn ? '<span class="sl-status worn">✓ Wearing</span>' : owned ? '<span class="sl-status">Wear</span>' : `<span class="sl-status price${peb < s.cost ? ' short' : ''}">🫧 ${s.cost}</span>`;
-    return `<button type="button" class="sl-tile${worn ? ' worn' : ''}${owned ? '' : ' locked'}" data-act="sleeve:${s.id}" aria-label="${s.name}${worn ? ', wearing' : owned ? ', wear' : ', buy for ' + s.cost + ' Pebbles'}" aria-pressed="${worn}">
+    return `<button type="button" class="sl-tile${worn ? ' worn' : ''}${owned ? '' : ' locked'}" data-act="sleeve:${s.id}" aria-label="${s.name}${worn ? ', wearing' : owned ? ', wear' : ', buy for ' + s.cost + ' Embers'}" aria-pressed="${worn}">
       <span class="sl-card"><span class="sleeve-chip${s.id ? ' sleeve-' + s.id : ''}"><span class="sleeve-fx"></span></span><span class="sl-mark">${s.id ? s.icon : ''}</span></span>
       <span class="sl-name">${s.name}</span>${status}</button>`;
   }).join('') + '</div>';
@@ -377,7 +377,7 @@ function deckAdvice() {
   const has = k => d.filter(c => c.kw.includes(k)).length;
   if (cheap < 4) return `Only ${cheap} of your cards cost 1 or 2. Your first turns will feel slow. Try to have at least 5 cheap cards.`;
   if (avg > 3) return `Your average cost is ${avg.toFixed(1)}, which is heavy. Strong cards do nothing sitting in your hand. Swap one expensive card for a cheap one.`;
-  if (has('guard') === 0) return 'Not one Guard in the whole deck. Enemies will hit your Spirit as they please. One or two Guards buy you time.';
+  if (has('guard') === 0) return 'Not one Watch in the whole deck. Enemies will hit your Calm as they please. One or two Watch cards buy you time.';
   if (d.filter(c => c.cost >= 4).length === 0) return 'A tidy, cheap deck, but nothing to finish with. One big card at cost 4 or 5 gives you something to build toward.';
   return `That is a well-shaped deck: ${cheap} cheap cards, average cost ${avg.toFixed(1)}, and ${has('guard') + has('shield')} defenders. I would not change much.`;
 }
@@ -411,12 +411,12 @@ function sceneEnterFx() {
   sceneView.classList.remove('scene-enter'); void sceneView.offsetWidth; sceneView.classList.add('scene-enter');
   setTimeout(() => sceneView.classList.remove('scene-enter'), 900);
 }
-/* The Character > Look "Shop" button: walk the player to the Card Shop (Market Row) and open its Customize counter. Until
-   Market Row is open, the Shop tab does the same job. */
+/* The Character > Look "Shop" button: walk the player to the Card Shop (El Mercado de Susurros) and open its Customize counter. Until
+   El Mercado de Susurros is open, the Shop tab does the same job. */
 function goToCardShop() {
   if (inBattle || doorFading) return;
   sfx('nav'); buzz(HAP.tap);
-  if (!districtUnlocked('market')) { switchTab('shop'); setShopView('customize'); toast("The Card Shop is in Market Row - until it opens, this is its shop window"); return; }
+  if (!districtUnlocked('market')) { switchTab('shop'); setShopView('customize'); toast("The Card Shop is in El Mercado de Susurros - until it opens, this is its shop window"); return; }
   const enter = () => { if (state.currentDistrict !== 'market') travelToDistrictNow('market'); else switchTab('town'); openScene('card-shop'); sceneAction('customize'); };
   if (state.currentDistrict !== 'market') withTravelTransition('market', enter); else withDoorFade(enter);
 }
@@ -441,7 +441,7 @@ function openScene(id) {
 /* The Card Shop's Packs / Customize / Items screens are the same views the Shop panel uses (renderPacks,
    renderCustomize, renderItems draw into #packsView, #customizeView, #itemsView by id). While the Card Shop scene
    is in one of those modes we simply move that element into the scene, so the player never leaves the shop counter;
-   leaving the mode puts them back in #shopPanel, where the profile menu's "Visit shop" and the Pebbles fallback
+   leaving the mode puts them back in #shopPanel, where the profile menu's "Visit shop" and the Embers fallback
    still find them. */
 const CARD_SHOP_MODES = ['packs', 'customize', 'items'];
 function shopModeActive(view) { return !!(inScene && scene && scene.id === 'card-shop' && (view ? scene.mode === view : CARD_SHOP_MODES.includes(scene.mode))); }
@@ -528,7 +528,7 @@ function trophySummary() {
   if (miniGoldCount()) lines.push(`🥇 gold in ${miniGoldCount()} of ${Object.keys(MINIGAMES).length} house games`);
   const pz = state.progress.puzzle; if (pz && pz.solved) lines.push(`🧩 ${pz.solved} puzzle${pz.solved === 1 ? '' : 's'} solved`);
   const foilTotal = Object.values(foils()).reduce((a, b) => a + b, 0); if (foilTotal) lines.push(`✨ ${foilTotal} foil${foilTotal === 1 ? '' : 's'} shimmering in your collection`);
-  return lines.length ? lines.join(' · ') : 'The trophy case is empty for now. Win the Festival Cup, go deep in the cellar, or land a legendary catch.';
+  return lines.length ? lines.join(' · ') : 'The trophy case is empty for now. Win the Dreamers’ Cup, go deep in the cellar, or land a legendary catch.';
 }
 
 /* ---------------- letters: the neighbors write to you ----------------
@@ -538,7 +538,7 @@ const ROOK_LETTERS = [
   'Fine, you won. I have been practising in secret. See you soon - and bring your best cards.',
   'I asked around about you. Everyone says you are "nice". Nice people are the most dangerous.',
   'I traded my lucky coin for a rare card. Worth it? We will find out.',
-  'Your Guard cards are a wall I cannot seem to climb. I am working on it.',
+  'Your Watch cards are a wall I cannot seem to climb. I am working on it.',
   'I caught myself smiling after our last match. Do not tell anyone.',
   'Three decks, three rebuilds, zero sleep. Our next match will be different.',
   'I think I finally understand why I keep losing to you. You play like you are having fun.',
@@ -565,7 +565,7 @@ function sendLetter(key, L) {
 }
 function giftText(g) {
   if (!g) return '';
-  if (g.kind === 'pebbles') return `🫧 ${g.n} Pebbles`;
+  if (g.kind === 'pebbles') return `🫧 ${g.n} Embers`;
   if (g.kind === 'seed') return `${seedDef(g.id).icon} a ${seedDef(g.id).name} seed`;
   if (g.kind === 'ingredient') return `${INGREDIENTS[g.id].icon} ${g.n} × ${INGREDIENTS[g.id].name}`;
   if (g.kind === 'bread') return '🍞 a loaf of bread';
@@ -582,16 +582,16 @@ function checkMail(force) {
   if ((t.breadBaked || 0) >= 1) sendLetter('maple-cook', { from: 'Maple', icon: '🧑‍🍳', subject: 'Cooking lessons', gift: { kind: 'bread', n: 1 },
     body: 'Bread is only the start! Bring me what you grow and what you catch, and we will cook something special together. Pumpkin Pie is my favourite, if you are wondering what to give me.' });
   if ((t.cropsHarvested || 0) >= 1) sendLetter('fern-seeds', { from: 'Fern', icon: '👩‍🌾', subject: 'A little something for the garden', gift: { kind: 'seed', id: 'moonbean' },
-    body: 'Your first harvest! Here is a Moonbean for you - they are hard to come by. You can find more hiding in the Hollow Garden grass, if you look closely.' });
+    body: 'Your first harvest! Here is a Moonbean for you - they are hard to come by. You can find more hiding in El Jardín Lúcido grass, if you look closely.' });
   if ((t.puzzlesSolved || 0) >= 1) sendLetter('olwen-puzzle', { from: 'Olwen', icon: '🧙', subject: 'Well puzzled', gift: { kind: 'pebbles', n: 4 },
     body: 'I watched you work through my puzzle. Most people just attack everything and hope. You thought about it. There will be a new board tomorrow.' });
   const rv = state.progress.rival;
   if (rv) for (let c = 1; c <= Math.min(rv.chapter || 0, RIVAL.chapters); c++)
     sendLetter('rook-' + c, { from: 'Rook', icon: '🎭', subject: c === RIVAL.chapters ? 'Thank you' : `About our match (${c}/${RIVAL.chapters})`, body: ROOK_LETTERS[c - 1], gift: c < RIVAL.chapters ? { kind: 'pebbles', n: 5 } : null });
   if ((t.battlesWon || 0) >= 1) sendLetter('cup-' + cupWeek(), { from: 'The Festival Committee', icon: '🎪', subject: `The ${cupName()} is on!`,
-    body: `This week's ${cupName()} is open at the fountain in Town Square. Three matches, no healing in between, and a trophy for anyone who sweeps them all. Good luck!` });
+    body: `This week's ${cupName()} is open at the fountain in El Umbral. Three matches, no healing in between, and a trophy for anyone who sweeps them all. Good luck!` });
   if ((state.progress.level || 1) >= 2) sendLetter('lumen-night', { from: 'Lumen', icon: '🦉', subject: 'After dark', gift: null,
-    body: 'When the lamps come on, look for my lanterns in Market Row. I trade in night things: rare packs, glowing trinkets, and whatever critters you catch in a jar.' });
+    body: 'When the lamps come on, look for my lanterns in El Mercado de Susurros. I trade in night things: rare packs, glowing trinkets, and whatever critters you catch in a jar.' });
   // a friend's note, at most one a day
   if (ms.friendDay !== todayKey()) {
     ms.friendDay = todayKey();
@@ -705,7 +705,7 @@ function renderSceneBody() {
   if (scene.id === 'cellar') {
     const st = cellarState(), fl = CELLAR.floors, resting = st.resting, deep = isDeepFloor(st.floor);
     sceneView.dataset.theme = 'dark';
-    document.getElementById('scTitle').textContent = deep && !resting ? 'The Deep Cellar' : 'The Old Cellar';
+    document.getElementById('scTitle').textContent = deep && !resting ? 'The Deep Cellar' : 'El Sótano Olvidado';
     const run = cellarRun(st), best = cellarBest();
     cellarDecorateStage(true);
     document.getElementById('scWho').textContent = resting ? '🕯️' : run ? (cellarIsGuardian(st.floor) ? cellarFloor(st.floor).icon : '🚪') : '🪜';
@@ -786,7 +786,7 @@ function renderSceneBody() {
     else acts.innerHTML = it.actions.map(a => { const v = a.view ? a.view(a) : null; return sceneBtn(a.id, v ? v.label : a.label, v && v.disabled); }).join('') + sceneBtn('leave', 'Head back out');
   }
 }
-// `src` names where the Pebbles came from (or went), for the economy ledger (econNote, js/progression.js).
+// `src` names where the Embers came from (or went), for the economy ledger (econNote, js/progression.js).
 function addPebbles(n, src) { state.progress.pebbles += n; econNote(n, src); saveState(); updateHud(); bumpPill('pillPebbles'); }
 function sceneAction(actId) {
   if (!scene) return;
@@ -858,7 +858,7 @@ function sceneAction(actId) {
   else if (a.kind === 'favs') { scene.mode = 'favs'; scene.text = `Frame up to ${FAV_MAX} favourite cards on the wall.`; sfx('tap'); }
   else if (a.kind === 'trophies') { scene.text = trophySummary(); sfx('tap'); }
   else if (a.kind === 'wings') { scene.mode = 'wings'; scene.text = 'Which wing shall we visit? Wings with spare cards ready are marked.'; sfx('tap'); showTipOnce('museum'); }
-  else if (a.kind === 'exped') { scene.mode = 'exped'; scene.text = 'Send spare cards off to explore. They come back with Pebbles, supplies and sometimes a card - and a little mastery.'; sfx('tap'); showTipOnce('expeditions'); }
+  else if (a.kind === 'exped') { scene.mode = 'exped'; scene.text = 'Send spare cards off to explore. They come back with Embers, supplies and sometimes a card - and a little mastery.'; sfx('tap'); showTipOnce('expeditions'); }
   else if (a.kind === 'nightpack') { scene.text = buyNightPack(); }
   else if (a.kind === 'sellbugs') { scene.text = sellJar(); }
   else if (a.kind === 'fortune') { scene.text = fortuneAction(a.id); }
@@ -868,7 +868,7 @@ function sceneAction(actId) {
     if (st[a.id] === todayKey()) { scene.text = a.already; }
     else { st[a.id] = todayKey(); scene.text = a.done;
       const pebbles = a.pebbles + (weatherFx().dailyBonus || 0);
-      addPebbles(pebbles, 'daily-tasks'); toast(`🫧 +${pebbles} Pebbles`); sfx('claim'); }
+      addPebbles(pebbles, 'daily-tasks'); toast(`🫧 +${pebbles} Embers`); sfx('claim'); }
   } else if (a.kind === 'memory') {
     memoryNewGame(); scene.text = `Match all ${memory.pairs} pairs. Olwen watches with quiet interest.`; sfx('tap'); renderScene(); renderMemoryGrid(); return;
   } else if (a.kind === 'advice') {
@@ -893,9 +893,9 @@ setInterval(() => {
   else if (scene.id === 'museum' && scene.mode === 'exped' && !expedState().picking && expedState().active.length) renderScene();
 }, 1000);
 
-/* ---------------- the Festival Cup: three matches at the fountain, no healing in between ----------------
-   A new cup every week, named for the season. Your Spirit carries from one round to the next, a loss ends the run,
-   and a clean sweep wins that week's trophy (shown at home) plus a big prize. Later sweeps that week pay Pebbles. */
+/* ---------------- the Dreamers’ Cup: three matches at the fountain, no healing in between ----------------
+   A new cup every week, named for the season. Your Calm carries from one round to the next, a loss ends the run,
+   and a clean sweep wins that week's trophy (shown at home) plus a big prize. Later sweeps that week pay Embers. */
 const CUP_NAMES = { spring: 'Blossom Cup', summer: 'Sunshine Cup', autumn: 'Harvest Cup', winter: 'Frost Cup' };
 const CUP_ROUNDS = [
   { title: 'Round one', icon: '🥉', level: 'normal', spirit: 16, pebbles: 5 },
@@ -921,15 +921,15 @@ function cupButtons() {
   const cs = cupState();
   const chal = sceneBtn('chal', `🎯 Deck challenges · ${challengeState().list.filter(c => c.won).length}/3 beaten today`);
   const dr = draftState(), draft = sceneBtn('draft', dr.active ? `🎴 Draft Run · in progress` : featureLocked('draft') ? `🎴 Draft Run · 🔒 level ${FEATURE_LEVELS.draft.level}` : `🎴 Draft Run · build a deck, win four`);
-  if (!cs.active) return sceneBtn('cup-enter', cs.trophy ? `🏆 Enter again (for Pebbles)` : `🏆 Enter the ${cupName()}`) + draft + chal + sceneBtn('leave', 'Head back out');
+  if (!cs.active) return sceneBtn('cup-enter', cs.trophy ? `🏆 Enter again (for Embers)` : `🏆 Enter the ${cupName()}`) + draft + chal + sceneBtn('leave', 'Head back out');
   const r = CUP_ROUNDS[cs.round], foe = cs.foes[cs.round];
   return sceneBtn('cup-play', `${r.icon} ${r.title}: ${foe.icon} ${foe.name} · you have ♥${cs.spirit}`) +
     sceneBtn('cup-quit', 'Withdraw (ends this run)') + sceneBtn('leave', 'Step away for now');
 }
 function cupIntro() {
   const cs = cupState();
-  if (cs.active) return `The crowd is waiting for your ${CUP_ROUNDS[cs.round].title.toLowerCase()}. You carry ♥${cs.spirit} Spirit into it - there is no healing between rounds.`;
-  return `The ${cupName()} is on this week! Win three matches in a row and the trophy is yours. Your Spirit carries over between rounds, so every point counts.${cs.trophy ? ' You already won this week\'s trophy - another sweep pays 🫧.' : ''}`;
+  if (cs.active) return `The crowd is waiting for your ${CUP_ROUNDS[cs.round].title.toLowerCase()}. You carry ♥${cs.spirit} Calm into it - there is no healing between rounds.`;
+  return `The ${cupName()} is on this week! Win three matches in a row and the trophy is yours. Your Calm carries over between rounds, so every point counts.${cs.trophy ? ' You already won this week\'s trophy - another sweep pays 🫧.' : ''}`;
 }
 function cupAction(act) {
   const cs = cupState();
@@ -1032,7 +1032,7 @@ function dungeonWin() {
   saveState();
   icon.textContent = f.final || f.guardian ? '🗝️' : '🕯️'; icon.className = 'big-icon reveal-icon';
   battleEndTitle.textContent = f.final ? 'The cellar gives up its chest.' : f.guardian ? `${f.name} sinks back into the dark.` : `${f.name} steps aside.`;
-  battleEndStats.innerHTML = `You won with <b>${Math.max(0, battle.G.p[0].spirit)}</b> Spirit left. <b>+${pay} 🫧</b>${cardLine}` +
+  battleEndStats.innerHTML = `You won with <b>${Math.max(0, battle.G.p[0].spirit)}</b> Calm left. <b>+${pay} 🫧</b>${cardLine}` +
     `<br><small>Floor ${st.floor} cleared · deepest ${cellarBest()}</small>`;
   btGet('battleRetryBtn').classList.add('hidden');
   sparkleBurst(btGet('battleSparkles'), ['✨', '🕯️', '🌿'], f.final || f.guardian ? 18 : 8);
