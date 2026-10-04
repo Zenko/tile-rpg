@@ -431,7 +431,12 @@ function buildWorld(key) {
       el.classList.add('t-path'); el.style.boxShadow = edge(x, y, isPath, 'var(--path-edge)', 3);
       if (c === '#') html = svgUse('s-cobble'); else if (r2 < 0.24) html = svgUse('s-pebbles');
     } else if (c === '~' || c === 'b') {
-      el.classList.add('t-water'); el.style.boxShadow = edge(x, y, isWater, 'var(--shore)', 4);
+      el.classList.add('t-water');
+      // A lake is one sheet: no gap, rounding or outline on a side that touches more water (see the .t-water rules in css/latest.css).
+      const wj = [[0, -1, 't', 'inset 0 1px 0 0'], [1, 0, 'r', 'inset -1px 0 0 0'], [0, 1, 'b', 'inset 0 -1px 0 0'], [-1, 0, 'l', 'inset 1px 0 0 0']];
+      const dark = [];
+      wj.forEach(([dx, dy, k, sh]) => { if (isWater(at(x + dx, y + dy))) el.classList.add('wj-' + k); else dark.push(sh + ' rgba(0,0,0,0.32)'); });
+      el.style.boxShadow = dark.concat(edge(x, y, isWater, 'var(--shore)', 4) || []).join(',');
       if (c === 'b') html = svgUse(at(x + 1, y) === 'b' ? 's-bridge-l' : at(x - 1, y) === 'b' ? 's-bridge-r' : 's-bridge');
       else {
         if (r2 < 0.55) html = svgUse('s-ripple');

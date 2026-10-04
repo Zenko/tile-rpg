@@ -1203,3 +1203,11 @@ html.cozy .cl-cell.rat { animation: none; }
 .atlas-hints { margin: 6px 0 10px; padding: 8px 12px; border-radius: 14px; background: color-mix(in srgb, var(--atlas) 12%, transparent); border: 1px solid color-mix(in srgb, var(--atlas) 35%, transparent); }
 .atlas-hint { font-size: 13px; line-height: 1.4; color: var(--ink-soft); padding: 4px 0; font-style: italic; }
 .atlas-hint.more { opacity: .7; font-style: normal; }
+
+/* Water tiles in the classic (DOM) town: no padding, rounding or outline where a side touches more water, so a lake has no grass lines in it.
+   The WebGL town does the same in its tile atlas (tglBuildAtlas). The dark edge lines on the other sides are box-shadows set in buildWorld. */
+.town-tile.t-water { outline: none; }
+.town-tile.t-water.wj-t { padding-top: 0; border-top-left-radius: 0; border-top-right-radius: 0; }
+.town-tile.t-water.wj-r { padding-right: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.town-tile.t-water.wj-b { padding-bottom: 0; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+.town-tile.t-water.wj-l { padding-left: 0; border-top-left-radius: 0; border-bottom-left-radius: 0; }

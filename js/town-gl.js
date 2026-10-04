@@ -78,10 +78,18 @@ function tglRr(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x 
 function tglBuildAtlas(pal, TEX) {
   const STRIDE = TEX + 4, COLS = 8, ROWS = 5, cv = document.createElement('canvas'); cv.width = COLS * STRIDE; cv.height = ROWS * STRIDE;
   const c = cv.getContext('2d'), k = TEX / 56, pad = 1.5 * k, rad = 6 * k, cells = [];   // 56 = the CSS px a tile is about; the padding, radius and edge widths below are CSS px
-  const cell = (i, fill, edgeColor, edgePx, m) => {
+  // seamless: a water tile has no gap, rounding or outline on a side that touches more water, so a lake reads as one sheet of water
+  // (the old look left a 3px grass line between every two water tiles). Only the sides with a different neighbour (mask bits 1 top, 2 right,
+  // 4 bottom, 8 left) keep the inset, the sand and the outline, and a corner is rounded only where both of its sides are such edges.
+  const cell = (i, fill, edgeColor, edgePx, m, seamless) => {
     const ox = (i % COLS) * STRIDE + 2, oy = Math.floor(i / COLS) * STRIDE + 2;
+    const e = [!seamless || (m & 1), !seamless || (m & 2), !seamless || (m & 4), !seamless || (m & 8)].map(Boolean);   // top, right, bottom, left
+    const x0 = e[3] ? pad : 0, y0 = e[0] ? pad : 0, x1 = TEX - (e[1] ? pad : 0), y1 = TEX - (e[2] ? pad : 0);
+    const rTL = e[0] && e[3] ? rad : 0, rTR = e[0] && e[1] ? rad : 0, rBR = e[1] && e[2] ? rad : 0, rBL = e[2] && e[3] ? rad : 0;
     c.save(); c.translate(ox, oy);
-    c.save(); tglRr(c, pad, pad, TEX - 2 * pad, TEX - 2 * pad, rad); c.clip();
+    c.save();
+    c.beginPath(); c.moveTo(x0 + rTL, y0); c.lineTo(x1 - rTR, y0); c.arcTo(x1, y0, x1, y0 + rTR, rTR); c.lineTo(x1, y1 - rBR); c.arcTo(x1, y1, x1 - rBR, y1, rBR);
+    c.lineTo(x0 + rBL, y1); c.arcTo(x0, y1, x0, y1 - rBL, rBL); c.lineTo(x0, y0 + rTL); c.arcTo(x0, y0, x0 + rTL, y0, rTL); c.closePath(); c.clip();
     c.fillStyle = fill; c.fillRect(0, 0, TEX, TEX);
     if (m) {                                   // the old CSS drew these as inset box-shadows on every side that has a different neighbour
       c.fillStyle = edgeColor; const e = edgePx * k;
@@ -89,11 +97,21 @@ function tglBuildAtlas(pal, TEX) {
       if (m & 4) c.fillRect(0, TEX - pad - e, TEX, pad + e); if (m & 8) c.fillRect(0, 0, pad + e, TEX);
     }
     c.restore();
-    c.strokeStyle = 'rgba(0,0,0,0.32)'; c.lineWidth = k; tglRr(c, k / 2, k / 2, TEX - k, TEX - k, rad); c.stroke();   // outline: 1px solid rgba(0,0,0,.32)
+    c.strokeStyle = 'rgba(0,0,0,0.32)'; c.lineWidth = k;   // outline: 1px solid rgba(0,0,0,.32), on the edge sides only
+    if (!seamless) { tglRr(c, k / 2, k / 2, TEX - k, TEX - k, rad); c.stroke(); }
+    else {
+      const a = k / 2, b = TEX - k / 2, tl = e[0] && e[3] ? rad : 0, tr = e[0] && e[1] ? rad : 0, br = e[1] && e[2] ? rad : 0, bl = e[2] && e[3] ? rad : 0;
+      c.beginPath();
+      if (e[0]) { c.moveTo(a + tl, a); c.lineTo(b - tr, a); if (tr) c.arcTo(b, a, b, a + tr, tr); }
+      if (e[1]) { c.moveTo(b, a + tr); c.lineTo(b, b - br); if (br) c.arcTo(b, b, b - br, b, br); }
+      if (e[2]) { c.moveTo(b - br, b); c.lineTo(a + bl, b); if (bl) c.arcTo(a, b, a, b - bl, bl); }
+      if (e[3]) { c.moveTo(a, b - bl); c.lineTo(a, a + tl); if (tl) c.arcTo(a, a, a + tl, a, tl); }
+      c.stroke();
+    }
     c.restore(); cells[i] = new PIXI.Rectangle(ox, oy, TEX, TEX);
   };
   ['ground', 'ground2', 'ground3'].forEach((g, i) => cell(i, pal[g]));
-  for (let m = 0; m < 16; m++) { cell(3 + m, pal.path, pal['path-edge'], 3, m); cell(19 + m, pal.water, pal.shore, 4, m); }
+  for (let m = 0; m < 16; m++) { cell(3 + m, pal.path, pal['path-edge'], 3, m); cell(19 + m, pal.water, pal.shore, 4, m, true); }
   const base = PIXI.Texture.from(cv); base.source.scaleMode = 'linear';
   const sub = i => new PIXI.Texture({ source: base.source, frame: cells[i] });
   const tile = { g: [0, 1, 2].map(sub), path: [], water: [] };
@@ -164,6 +182,7 @@ function tglChunk(cx, cy) {
     const c = m.rows[y][x], d = tgl.tiles[y * m.w + x];
     const tex = (c === '=' || c === '#') ? tile.path[tglMask(m, x, y, tglIsPath)] : (c === '~' || c === 'b') ? tile.water[tglMask(m, x, y, tglIsWater)] : tile.g[d.tone < 0.34 ? 0 : d.tone < 0.67 ? 1 : 2];
     const s = new PIXI.Sprite(tex); s.position.set(x * T, y * T); s.width = s.height = T; ch.addChild(s);
+    if (c === '~' || c === 'b') { const wm = tglMask(m, x, y, tglIsWater); if (!(wm & 2)) s.width = T + 1; if (!(wm & 4)) s.height = T + 1; }   // water: overlap the next water tile by a pixel, no hairline seams
     if (d.decor && !d.decor.tree) decor.push([x, y, d.decor.id]);
   }
   decor.forEach(([x, y, id]) => { const o = sym[id]; if (!o) return; const s = new PIXI.Sprite(o.tex); s.position.set(x * T, y * T); s.width = s.height = T; ch.addChild(s); });   // flowers, tufts, ripples, bridges: above every ground tile of the chunk
