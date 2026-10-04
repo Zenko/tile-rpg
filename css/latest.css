@@ -4,7 +4,7 @@
 /* ===== Dream map (v1.71.0) =====
    The world map overlay: a night (dark theme) or morning (light theme) sky with islands, and a sheet of details.
    Only tokens are used for colour, so the dark/light switch restyles it by itself. The few island tints that aren't
-   tokens are the --wm-* variables just below. Motion is transform/opacity only, gated by html.calm and reduced-motion. */
+   tokens are the --wm-* variables just below. Motion is transform/opacity only, gated by reduced-motion. */
 .overlay.wm-screen { --wm-body: #33404d; --wm-cloud: #fff; --wm-cloud-o: .10; --wm-top-square: #3c7a5c; --wm-top-market: #7a5a3a; --wm-top-harbor: #3a5f78; --wm-top-garden: #4f6a3c; --wm-leaf: #2f6a4c; --wm-b1: #e8cb88; --wm-b2: #8dbccb; --wm-orb: #f4ecd0;
   --wm-sky: radial-gradient(ellipse at 50% 12%, rgba(154,134,201,.22), transparent 60%), linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
   background: var(--wm-sky); backdrop-filter: none; -webkit-backdrop-filter: none; flex-direction: column; align-items: stretch; justify-content: flex-start; padding-top: env(safe-area-inset-top, 0px); transition: opacity .2s ease; overflow: hidden; }
@@ -55,16 +55,16 @@
 .wm-go:disabled { background: color-mix(in srgb, var(--hl) 8%, transparent); color: var(--ink-soft); font-size: .92rem; cursor: default; }
 .wm-go:not(:disabled):active { transform: scale(.98); }
 @media (prefers-reduced-motion: no-preference) {
-  html:not(.calm) .wm-float { animation: wm-bob 6s ease-in-out infinite; }
-  html:not(.calm) .wm-isle:nth-of-type(2) .wm-float { animation-delay: -2s; } html:not(.calm) .wm-isle:nth-of-type(3) .wm-float { animation-delay: -4s; }
-  html:not(.calm) .wm-pin-halo { animation: wm-pulse 2s ease-in-out infinite; }
+  .wm-float { animation: wm-bob 6s ease-in-out infinite; }
+  .wm-isle:nth-of-type(2) .wm-float { animation-delay: -2s; } .wm-isle:nth-of-type(3) .wm-float { animation-delay: -4s; }
+  .wm-pin-halo { animation: wm-pulse 2s ease-in-out infinite; }
 }
 @keyframes wm-bob { 50% { transform: translateY(-3px); } }
 @keyframes wm-pulse { 50% { opacity: .08; } }
 
 /* ===== Smooth transitions (v1.72.0) =====
    Everything here is opacity/transform only (HANDOFF §9: no layout properties, no blur on moving things), and is
-   switched off by html.calm and reduced-motion. */
+   switched off by reduced-motion. */
 /* Overlays animate each time they open. The card used to run its pop-in only once, at page load, because an overlay
    is hidden with opacity rather than display:none; no animation while hidden means it restarts when shown. */
 .overlay.hidden .overlay-card { animation: none; }
@@ -205,7 +205,7 @@
 #sceneView.scene-leaving.sc-std .sc-actions { animation: sc-sheet-down .24s ease-in both; }
 #sceneView.scene-leaving.sc-std .sc-bubble, #sceneView.scene-leaving.sc-std .sc-head { animation: sc-fade-out .2s ease-in both; }
 @media (prefers-reduced-motion: reduce) { #sceneView.sc-std, #sceneView.sc-std * { animation: none !important; } }
-html.calm #sceneView.sc-std, html.calm #sceneView.sc-std * { animation: none !important; }
+@media (prefers-reduced-motion: reduce) { #sceneView.sc-std, #sceneView.sc-std * { animation: none !important; } }
 
 /* ===== Smoothness (v1.78.0) =====
    backdrop-filter re-blurs whatever is behind it every frame. Over the town map (always animating: water, neighbours,
@@ -271,7 +271,7 @@ html.calm #sceneView.sc-std, html.calm #sceneView.sc-std * { animation: none !im
 .toss-result { min-height: 1.6em; margin: 8px 0 0; font-weight: 700; color: var(--ink); }
 .toss-result.win { color: var(--water-ink); }
 .toss-result.lose { color: var(--ink-soft); }
-html.calm .die.rolling { animation: none; }
+@media (prefers-reduced-motion: reduce) { .die.rolling { animation: none; } }
 
 /* ---------- New battle keywords (v1.82.0) ---------- */
 #battleView .card .badge.lul { top:-7px; left:-4px; font-size:.85rem; }
@@ -349,7 +349,7 @@ body.in-battle .screen { padding: 0; }
 .fs-sw .in { transition: filter .6s ease; }
 .fs-fish.reveal { animation: fsReveal .9s ease-out both; }
 @keyframes fsReveal { 0% { filter: brightness(0) opacity(.7); transform: translate(-50%, -50%) scale(.9); } 60% { filter: none; transform: translate(-50%, -50%) scale(1.15); } 100% { filter: none; transform: translate(-50%, -50%) scale(1); } }
-html.calm .fs-fish.reveal { animation: none; }
+@media (prefers-reduced-motion: reduce) { .fs-fish.reveal { animation: none; } }
 
 /* ============ Journal (v1.89.0) ============ */
 .journal-bar { display: flex; align-items: center; gap: 8px; }
@@ -439,7 +439,7 @@ html.calm .fs-fish.reveal { animation: none; }
 .jsheet-head .seg { flex: 1; margin: 0; }
 .jsheet-body { flex: 1; min-height: 0; overflow-y: auto; padding: 8px 14px calc(24px + env(safe-area-inset-bottom)); }
 @media (prefers-reduced-motion: reduce) { .jsheet, .jscrim, .jundo { transition: none; } }
-html.calm .jsheet, html.calm .jscrim, html.calm .jundo { transition: none; }
+@media (prefers-reduced-motion: reduce) { .jsheet, .jscrim, .jundo { transition: none; } }
 /* Five pages and the ? button share one row on a 400px phone. */
 .journal-bar .seg-btn { padding: 8px 7px; font-size: .74rem; flex: 1 1 auto; }
 .journal-bar .jhelp-btn { width: 40px; height: 40px; }
@@ -696,7 +696,7 @@ body.in-battle .screen { padding-top: 0; }
 @keyframes pk-bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -5px; } }
 .pk-hint { font-weight: 800; color: var(--ink-soft); }
 .rarity-tag.rt-new { background: var(--accent); color: var(--on-accent); }
-html.calm .reveal-card-frame.pk-flip.pk-down .reveal-card { animation: none; }
+@media (prefers-reduced-motion: reduce) { .reveal-card-frame.pk-flip.pk-down .reveal-card { animation: none; } }
 
 /* ===== Next-goal chip (build 101): one pill under the top bar that points at the next useful thing ===== */
 .goal-chip { position: absolute; z-index: 9; left: 12px; top: calc(var(--hud-h) + 10px); max-width: calc(100% - 84px); display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 6px 12px 6px 10px; border-radius: 999px; border: 1px solid var(--stone-edge); background: var(--stone); color: var(--ink); font: inherit; font-size: .78rem; font-weight: 700; text-align: left; box-shadow: 0 6px 18px var(--shadow); cursor: pointer; }
@@ -726,7 +726,7 @@ html.calm .reveal-card-frame.pk-flip.pk-down .reveal-card { animation: none; }
 .seg.has-pill > .seg-btn { position: relative; z-index: 1; transition: color .25s ease; }
 .seg.has-pill > .seg-btn.active { background: transparent; }
 @media (prefers-reduced-motion: reduce) { .seg-pill, .seg.has-pill > .seg-btn { transition: none; } }
-html.calm .seg-pill, html.calm .seg.has-pill > .seg-btn { transition: none; }
+@media (prefers-reduced-motion: reduce) { .seg-pill, .seg.has-pill > .seg-btn { transition: none; } }
 
 /* ===== Calm corner (build 104) ===== */
 .calm { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column; max-width: 460px; margin: 0 auto; background: linear-gradient(180deg, var(--bg-top), var(--bg-bottom)); color: var(--ink); text-align: left; opacity: 1; transition: opacity .3s ease; }
@@ -798,7 +798,7 @@ body.calm-sit .hud, body.calm-sit #bottomNav, body.calm-sit #goalChip, body.calm
 .town-map-wrap { transition: transform 1.5s ease-out; }
 /* Cozy mode (Settings -> Comfort): nothing pulses for attention */
 html.cozy .cr-ready, html.cozy .cr-slot.next, html.cozy .bt-pulse { animation: none !important; }
-html.calm .calm-orb, html.calm .calm-bigstar, html.calm .calm-lantern, html.calm .calm-chime.ring { animation-duration: .01s; }
+@media (prefers-reduced-motion: reduce) { .calm-orb, .calm-bigstar, .calm-lantern, .calm-chime.ring { animation-duration: .01s; } }
 @media (prefers-reduced-motion: reduce) { .calm-orb, body.calm-sit .town-map-wrap { transition: none; } .calm-ripple, .calm-lantern, .calm-chime.ring, .calm-bigstar { animation-duration: .01s; } }
 
 /* Calm corner: stages keep a sensible height so the buttons stay close, and the tea ritual matches the other screens
@@ -855,7 +855,8 @@ html.calm .calm-orb, html.calm .calm-bigstar, html.calm .calm-lantern, html.calm
 .cl-door.boss { min-height: 110px; flex-direction: row; justify-content: center; gap: 14px; border-color: color-mix(in srgb, var(--accent) 55%, var(--stone-edge)); } .cl-door.boss .cl-door-ico { font-size: 2.6rem; }
 .cl-door.fight { border-color: color-mix(in srgb, #e0776a 40%, var(--stone-edge)); } .cl-door.camp { border-color: color-mix(in srgb, #f2b45a 45%, var(--stone-edge)); }
 .cl-door.shrine { border-color: color-mix(in srgb, #c28cf0 40%, var(--stone-edge)); } .cl-door.chest { border-color: color-mix(in srgb, var(--accent) 45%, var(--stone-edge)); }
-html.cozy .cl-torch, html.calm .cl-torch, html.calm .cl-drip { animation: none; }
+html.cozy .cl-torch { animation: none; }
+@media (prefers-reduced-motion: reduce) { .cl-torch, .cl-drip { animation: none; } }
 @media (prefers-reduced-motion: reduce) { .cl-torch, .cl-drip { animation: none; } .cl-heart, .cl-door { transition: none; } }
 
 /* ===== Tarot (build 108) ===== */
@@ -888,7 +889,7 @@ html.cozy .cl-torch, html.calm .cl-torch, html.calm .cl-drip { animation: none; 
 .tr-detail b { font-family: var(--f-display); font-size: 1.1rem; } .tr-detail i { color: var(--ink-soft); } .tr-card-line { color: var(--ink-soft); font-size: .8rem; }
 .tr-perk { font-weight: 800; color: #f6dc9c; font-size: .82rem; } .tr-hint { color: var(--ink-soft); font-size: .78rem; }
 @media (prefers-reduced-motion: reduce) { .tr-in { transition: none; } }
-html.calm .tr-in { transition: none; }
+@media (prefers-reduced-motion: reduce) { .tr-in { transition: none; } }
 #trSeg { width: 100%; max-width: none; flex: none; } #trSeg .seg-btn { white-space: nowrap; }
 
 /* ===== The cellar's dark floors (build 109) ===== */
@@ -901,7 +902,8 @@ html.calm .tr-in { transition: none; }
 .cl-cell:focus-visible { outline: 2px solid var(--water); outline-offset: 1px; }
 .cl-light { min-height: 44px; border-radius: 999px; border: 1px dashed var(--stone-edge); background: transparent; color: var(--ink-soft); font: inherit; font-weight: 700; font-size: .84rem; cursor: pointer; flex: none; }
 @keyframes cl-scurry { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(3px); } }
-html.calm .cl-cell.rat, html.cozy .cl-cell.rat { animation: none; }
+html.cozy .cl-cell.rat { animation: none; }
+@media (prefers-reduced-motion: reduce) { .cl-cell.rat { animation: none; } }
 @media (prefers-reduced-motion: reduce) { .cl-cell { transition: none; } .cl-cell.rat { animation: none; } }
 #sceneView.sc-std.cl-crawl { --sc-stage-h: 225px; }
 

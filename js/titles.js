@@ -387,7 +387,6 @@ function syncToggles() {
   document.getElementById('fastToggle').classList.toggle('on', !!prefs.fast);
   document.getElementById('fishEasyToggle').classList.toggle('on', !!prefs.fishEasy);
   document.getElementById('bigTextToggle').classList.toggle('on', !!prefs.bigText);
-  document.getElementById('calmToggle').classList.toggle('on', !!prefs.calm);
   document.getElementById('notifsToggle').classList.toggle('on', notifsEnabled());
   document.getElementById('presenceToggle').classList.toggle('on', !!prefs.sharePresence);
   document.getElementById('shareDeckToggle').classList.toggle('on', prefs.shareDeck !== false);

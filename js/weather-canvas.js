@@ -9,7 +9,7 @@
    ?renderer=canvas keeps the old tiles but uses this weather. When it is off nothing in this file runs except the
    one-line guards in town-render-weather.js.
    Rules it keeps: nothing is drawn (and no loop runs) while a battle, a building, another tab or a hidden page covers
-   the town, or when Calm mode / reduced motion is on - the CSS version froze in Calm mode too. Fades match the CSS
+   the town, or when reduced motion is on - the CSS version froze then too. Fades match the CSS
    (about 2.2s), a change of weather fades the old one out before the new one in. Lightning, sun and cloud shadows stay
    CSS: each is a single element.
    ===================================================================================================================== */

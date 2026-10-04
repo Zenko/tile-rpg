@@ -168,7 +168,7 @@ body.in-scene .screen { position: relative; overflow: hidden; }
 @keyframes foil-sheen { 0% { background-position: 120% 0; } 100% { background-position: -120% 0; } }
 .foil-tag { font-size: 0.66rem; font-weight: 700; color: #ffd98a; }
 html.big-text { font-size: 112%; }
-html.calm *, html.calm *::before, html.calm *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; } }
 .sc-pips .pip-label { font-size: 0.74rem; color: var(--ink-soft); line-height: 12px; letter-spacing: 0.02em; }
 /* flex-shrink: 0 on both - #sceneView is a flex column with overflow-y:auto, and without this a long
    letter/mail list can force the *bubble* to shrink below its own text (flex's default shrink behavior)

@@ -14,7 +14,7 @@
      postcards - save a small card of this place and moment.
 
    Entry points: the Journal's Today page (Quiet Nook), Wren's tea, your cottage (sand, bonsai), the Net Loft (lanterns), and
-   every bench. Cozy mode (Settings -> Comfort) hides the nudges that ask for your attention. Everything honours Calm motion.
+   every bench. Cozy mode (Settings -> Comfort) hides the nudges that ask for your attention. Everything honours reduced motion.
    Saved in state.progress.calm (created lazily), nothing in it can run out or expire.
    ============================================================ */
 const CALM_ACTIVITIES = [

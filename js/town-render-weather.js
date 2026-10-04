@@ -1319,7 +1319,7 @@ function camEnd(e) {
   try { townView.releasePointerCapture(d.id); } catch (er) { /* ignore */ }
   if (!d.moved) return;
   camSuppressClick = Date.now() + 80; showTipOnce('lookaround');
-  // a little momentum, like flicking a map; skipped for Calm mode / reduced motion and when the finger rested before lifting
+  // a little momentum, like flicking a map; skipped for reduced motion and when the finger rested before lifting
   if (!(btMotionOk && btMotionOk()) || performance.now() - d.lt > 90) return;
   let vx = d.vx * 16, vy = d.vy * 16;     // px per frame
   const run = () => {

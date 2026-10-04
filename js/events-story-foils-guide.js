@@ -273,9 +273,8 @@ function renderGuide() {
 function applyComfortPrefs() {
   document.documentElement.classList.toggle('cozy', !!prefs.cozy);
   document.documentElement.classList.toggle('big-text', !!prefs.bigText);
-  document.documentElement.classList.toggle('calm', !!prefs.calm);
 }
-[['fastToggle', 'fast'], ['fishEasyToggle', 'fishEasy'], ['bigTextToggle', 'bigText'], ['calmToggle', 'calm']].forEach(([id, key]) => {
+[['fastToggle', 'fast'], ['fishEasyToggle', 'fishEasy'], ['bigTextToggle', 'bigText']].forEach(([id, key]) => {
   document.getElementById(id).addEventListener('click', () => {
     prefs[key] = !prefs[key]; savePrefs(); applyComfortPrefs(); syncToggles(); sfx('tap');
     if (key === 'bigText' && !inBattle) renderTown();

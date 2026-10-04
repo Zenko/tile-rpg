@@ -125,11 +125,14 @@ const ATLAS_HELLO = [
 function atlasGreeting() { return atlasPick(ATLAS_HELLO, 'hello'); }
 
 /* ---------- Battles ---------- */
+// Difficulty is set by the deck's rarity floor (the foe deck is built from every card at or above it), not by Calm, which barely
+// moves a match. Simulated (300 smart-vs-smart games each, a mid-game midrange deck): about 59%, 51%, 18% and 18% for the four, so
+// they climb. A slow wall deck does worse (about 27%, 15%, 4%, 8%): the AI's decks are quick. Re-run before changing a row.
 const ATLAS_BATTLES = [
-  { id: 'hand', title: 'The Quiet Hand', twist: 'roots', calm: 24, rarity: 'rare',  pay: 30, line: 'It mends itself as if nothing had happened.' },
-  { id: 'wall', title: 'The Long Wall',  twist: 'wall',  calm: 26, rarity: 'ultra', pay: 45, line: 'Everything it plays is a little sturdier than it should be.' },
+  { id: 'hand', title: 'The Quiet Hand', twist: 'roots', calm: 22, rarity: 'ultra', pay: 30, line: 'It mends itself as if nothing had happened.' },
+  { id: 'wall', title: 'The Long Wall',  twist: 'wall',  calm: 30, rarity: 'ultra', pay: 45, line: 'Everything it plays is a little sturdier than it should be.' },
   { id: 'tide', title: 'The Slow Tide',  twist: 'tide',  calm: 28, rarity: 'ultra', pay: 60, line: 'Your best card keeps being taken back.' },
-  { id: 'bloom', title: 'The Counting',  twist: 'bloom', calm: 30, rarity: 'super', pay: 80, line: 'Small things, everywhere, growing.' }
+  { id: 'bloom', title: 'The Counting',  twist: 'bloom', calm: 34, rarity: 'rare',  pay: 80, line: 'Small things, everywhere, growing.' }
 ];
 function atlasBattleOpen(i) { return i === 0 || !!atlasState().battles[ATLAS_BATTLES[i - 1].id]; }
 function atlasDeck(t) {

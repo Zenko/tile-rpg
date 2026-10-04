@@ -11,7 +11,7 @@ const btAlive = token => battle && battle.token === token && !battle.ended;
 /* ---------- battle intro (v1.73.0) ----------
    startBattle() is now a thin wrapper: it fades out of the town (the same door fade as buildings), sets the battle up
    exactly as before (startBattleNow), then plays a "versus" card - you against them, with a boss's twist spelled out.
-   The opening deal waits for the card (battle.introP, read in btDealOpening), and a tap skips it. With Calm mode on, or
+   The opening deal waits for the card (battle.introP, read in btDealOpening), and a tap skips it. With reduced motion on, or
    when the deck is too short (the old early-return with its message), it goes straight in as it always did. */
 function startBattle(opponent) {
   const deckOk = (opponent.playerDeck || state.deck).filter(id => !!cardDef(id)).length >= DECK_SIZE;
@@ -448,7 +448,7 @@ function btRenderOppHand() {
     box.appendChild(b);
   }
 }
-const btMotionOk = () => !document.documentElement.classList.contains('calm') && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+const btMotionOk = () => !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 // Fly a card back from one element to another over ms milliseconds; resolves when it lands.
 function btFlyBack(fromEl, toEl, ms, mine) {
   return new Promise(res => {
@@ -801,7 +801,7 @@ function btOnBoardCard(side, c) {
 
 /* ---------------- battle effects: attacked, defended and spells ----------------
    Everything here is a short-lived element (or a Web Animations API flight) appended to the battle view or a card;
-   nothing touches the board's own transforms. They are skipped under Calm motion / reduced motion (btMotionOk). */
+   nothing touches the board's own transforms. They are skipped under reduced motion (btMotionOk). */
 const SPELL_FX = { 'chill': ['#bfe6ff', 'bolt'], 'overgrowth': ['#8de0a0', 'rise'], 'stone-skin': ['#d8c9a8', 'rise'], 'undertow': ['#7fd0e8', 'sweep'], 'quickstep': ['#ffe1a8', 'rise'], 'picnic': ['#ffd6a0', 'draw'], 'spark': ['#ffd36b', 'bolt'], 'thunderclap': ['#bcd8ff', 'sweep'], 'moonlit-tide': ['#7fd0e8', 'sweep'], 'starfall': ['#ffe9a8', 'bolt'],
   'rain-shower': ['#8de0a0', 'rise'], 'harvest': ['#c9b6ff', 'draw'], 'gust': ['#bfeaff', 'whoosh'], 'sunbeam': ['#ffd98a', 'rise'], 'second-wind': ['#c9f0ff', 'rise'] };
 function btCenter(el) { if (!el) return null; const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, r }; }

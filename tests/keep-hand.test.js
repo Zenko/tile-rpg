@@ -1,8 +1,9 @@
 // "Keep this hand?": the sheet fits the phone with the buttons pinned in view, the hand is one clean row (no overlap), and the
 // loadout rows open one at a time.
 module.exports = async (page, assert) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });   // no animation to wait for (the old Calm motion setting is gone)
   await page.evaluate(() => { CARD_POOL.slice(0, 30).forEach(c => state.ownedCards.push(c.id, c.id)); state.deck = CARD_POOL.slice(0, 12).map(c => c.id); saveState(); });
-  await page.evaluate(() => { document.getElementById('testHideOverlays').remove(); prefs.tossStyle = 'skip'; prefs.fast = true; prefs.calm = true; startBattle(state.districtData.square.npcs[0]); });
+  await page.evaluate(() => { document.getElementById('testHideOverlays').remove(); prefs.tossStyle = 'skip'; prefs.fast = true; startBattle(state.districtData.square.npcs[0]); });
   await page.waitForFunction(() => { const o = document.getElementById('mulliganOverlay'); return o && !o.classList.contains('hidden'); }, null, { timeout: 10000 });
   await page.waitForTimeout(400);
   const m = await page.evaluate(() => {

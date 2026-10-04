@@ -34,8 +34,9 @@ module.exports = async (page, assert) => {
   await page.evaluate(() => { const st = document.createElement('style'); st.id = 'testHideOverlays'; st.textContent = '.overlay{display:none!important}'; document.head.appendChild(st); });
 
   // battle: hand and board cards share the layout
+  await page.emulateMedia({ reducedMotion: 'reduce' });   // no animation to wait for (the old Calm motion setting is gone)
   await page.evaluate(() => { CARD_POOL.slice(0, 14).forEach(c => state.ownedCards.push(c.id)); state.deck = CARD_POOL.slice(0, 12).map(c => c.id); state.character.sleeve = 'tide'; window.masteryRank = () => 3; saveState(); });   // a sleeve and mastery stars add extra children: the panel must still sit flush with the card bottom
-  await page.evaluate(() => { prefs.tossStyle = 'skip'; prefs.fast = true; prefs.calm = true; startBattle(state.districtData.square.npcs[0]); });
+  await page.evaluate(() => { prefs.tossStyle = 'skip'; prefs.fast = true; startBattle(state.districtData.square.npcs[0]); });
   await page.waitForFunction(() => typeof battle !== 'undefined' && battle && battle.G, null, { timeout: 8000 });
   await page.waitForTimeout(1500);
   await page.evaluate(() => { const G = battle.G, pl = G.p[0], c = pl.hand.find(x => !x.spell) || pl.hand[0]; pl.hand.splice(pl.hand.indexOf(c), 1); c.ready = true; pl.board.push(c); btRender(); });

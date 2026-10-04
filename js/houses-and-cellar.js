@@ -310,7 +310,7 @@ const CELLAR = {
 function themedDeck(theme, floor) {
   const pools = {
     swarm: ['origami-crane', 'origami-crane', 'flintstone', 'flintstone', 'sprout', 'sprout', 'feather', 'feather', 'gale', 'firefly', 'droplet', 'toadstool', 'tide'],
-    wall:  ['pebble', 'pebble', 'geode', 'geode', 'geode', 'geode', 'bubble', 'bubble', 'moonstone', 'moonstone', 'droplet', 'toadstool', 'ember-fox'],
+    wall:  ['pebble', 'pebble', 'geode', 'geode', 'torii-gate', 'torii-gate', 'bubble', 'bubble', 'jade-turtle', 'moonstone', 'droplet', 'toadstool', 'ember-fox'],
     grove: ['firefly', 'firefly', 'blossom', 'blossom', 'foxglove', 'foxglove', 'droplet', 'droplet', 'aurora-stag', 'deep-current', 'mountain-heart', 'dove', 'ember-fox'],
   };
   const counts = {}; pools[theme].forEach(id => { counts[id] = Math.min(MAX_COPIES, (counts[id] || 0) + 1); });
@@ -394,7 +394,7 @@ const SCENE_TIPS = { bakery: 'bakery', house2: 'garden' };
 /* ---------- door fade ----------
    Going into (or out of) a building covers the screen with a quick fade to the page colour, swaps the screens while
    it's covered, then fades back, the same idea as the district travel card but shorter. While it runs, further taps
-   on the same trigger are ignored. With motion off (Calm mode / reduced motion) the swap just happens at once. */
+   on the same trigger are ignored. With motion off (reduced motion) the swap just happens at once. */
 let doorFading = false;
 function withDoorFade(swap, inMs, outMs) {
   inMs = inMs || 190; outMs = outMs || 280;      // a battle's exit passes longer ones (see closeBattle)

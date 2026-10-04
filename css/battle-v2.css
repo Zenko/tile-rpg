@@ -178,7 +178,6 @@
 .fish-scene[data-phase="result"] .fs-bobber, .fish-scene[data-phase="landing"] .fs-bobber { opacity: 0; }
 .fish-scene[data-phase="cast"] .fs-ring, .fish-scene[data-phase="result"] .fs-ring, .fish-scene[data-phase="idle"] .fs-ring { animation: none; }
 .fs-panel .btn:disabled { opacity: .6; }
-html.calm .fs-sw .in, html.calm .fs-fl, html.calm .fs-aim, html.calm .fs-sw.near::after { animation: none; }
 @media (prefers-reduced-motion: reduce) { .fs-sw .in, .fs-fl, .fs-aim, .fs-sw.near::after { animation: none; } }
 
 /* ===== Character tab, v1.64.0: the stage (you + companion on a backdrop) and the drawer of views below it ===== */
@@ -227,7 +226,6 @@ html.calm .fs-sw .in, html.calm .fs-fl, html.calm .fs-aim, html.calm .fs-sw.near
 .stage-swatch { align-items: flex-start; padding-top: 5px; }
 .stage-swatch > span { color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.7); font-size: .62rem; text-align: center; line-height: 1.1; }
 @media (prefers-reduced-motion: reduce) { .ch-d, .ch-pal-f { animation: none; } .ch-stage, .ch-actors, .ch-ground, .ch-top { transition: none; } }
-html.calm .ch-d, html.calm .ch-pal-f { animation: none; }
 
 /* ===== Floating glass top pill, full-bleed town map, floating dock (v1.65.0) ===== */
 :root { --hud-h: 72px; --dock-h: 74px; --glass: color-mix(in srgb, var(--stone) 90%, transparent); }
@@ -282,7 +280,6 @@ body.in-battle .board-wrap { padding: 8px 10px 0; }
 .toast { bottom: calc(env(safe-area-inset-bottom) + var(--dock-h) + 60px); }
 #sceneView { padding-top: calc(var(--hud-h) + 2px); }
 @media (prefers-reduced-motion: reduce) { .bottom-nav::before, #bottomNav .tab-btn, #bottomNav .tab-btn .t-icon { transition: none; } .tab-in, .tab-in-l, .tab-in-r { animation: none; } }
-html.calm .bottom-nav::before, html.calm #bottomNav .tab-btn .t-icon { transition: none; }
 
 /* ===== Level ring (v1.67.0): XP as a ring around the avatar, the level hanging below it, nothing covering the face ===== */
 @property --p { syntax: '<number>'; inherits: false; initial-value: 0; }

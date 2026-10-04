@@ -8,7 +8,7 @@
    element is added to the control, the active button's own fill is made transparent (.has-pill in css/latest.css), and the
    siblings that follow the control (the views it switches between) get the same .tab-in-l/.tab-in-r classes switchTab uses.
    Controls built later (the Character tab's) are picked up by watching the document for new .seg elements.
-   Honours reduced motion and Calm motion through btMotionOk().
+   Honours reduced motion through btMotionOk().
    ============================================================ */
 (function () {
   const motionOk = () => (typeof btMotionOk === 'function' ? btMotionOk() : true);

@@ -6,12 +6,12 @@
    startBattle() (js/battle-ui.js) waits on btTossFirst(), which resolves to 0 (you) or 1 (them), and passes that on as
    startBattleNow(opponent, first) -> BattleEngine.newGame(..., { first }).
    prefs.tossStyle: 'mix' (default: coin or dice at random), 'coin', 'dice' or 'skip' (no ceremony, just a random result).
-   Calm motion keeps the ceremony but drops the animation, so nothing waits on a spinning coin.
+   Reduced motion keeps the ceremony but drops the animation, so nothing waits on a spinning coin.
    ============================================================ */
 const TOSS_STYLES = ['mix', 'coin', 'dice', 'skip'];
 let tossBusy = false;
 const tossEl = id => document.getElementById(id);
-// Pauses shrink with Fast battles and with Calm motion, so the toss never becomes the slow part of a match.
+// Pauses shrink with Fast battles and with reduced motion, so the toss never becomes the slow part of a match.
 const tossWait = ms => new Promise(r => setTimeout(r, !btMotionOk() ? Math.min(ms, 250) : prefs.fast ? ms * 0.55 : ms));
 // Pip positions on a 3x3 grid for each die face.
 const DIE_PIPS = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };

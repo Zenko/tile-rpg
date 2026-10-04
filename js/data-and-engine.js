@@ -196,7 +196,7 @@ const CARD_POOL = [
   // points each, against 0 to +5 for the mythics. Ensueño needs the big numbers because Echo + Bloom is slow. Swift on the Atlas was +20, so it has none.
   { id: 'duermevela', name: 'Duermevela', icon: '🚪', rarity: 'divine', cost: 5, power: 8, grit: 10, kw: ['guard', 'shield'], exclusive: 'summon' },
   { id: 'murmullo', name: 'Murmullo', icon: '🤫', rarity: 'divine', cost: 5, power: 8, grit: 7, kw: ['swift', 'sting'], exclusive: 'summon' },
-  { id: 'marea-lenta', name: 'Marea Lenta', icon: '🌊', rarity: 'divine', cost: 5, power: 8, grit: 9, kw: ['mend', 'lull'], exclusive: 'summon' },
+  { id: 'marea-lenta', name: 'Marea Lenta', icon: '🪸', rarity: 'divine', cost: 5, power: 8, grit: 9, kw: ['mend', 'lull'], exclusive: 'summon' },
   { id: 'ensueno', name: 'Ensueño', icon: '💭', rarity: 'divine', cost: 5, power: 12, grit: 12, kw: ['seed', 'bloom'], exclusive: 'summon' },
   { id: 'the-atlas', name: 'The Atlas', icon: '🗺️', rarity: 'atlas', cost: 5, power: 10, grit: 12, kw: ['guard'], exclusive: 'summon' },
 ];

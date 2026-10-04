@@ -14,7 +14,7 @@
    - Ground sprites live in 8 x 8 chunks made the first time they scroll into view. Trees are added to / removed from a y-sorted layer as
      their tile enters / leaves the view window.
    - The camera is driven from JS (tglCamera): each frame it moves #townWorld (the DOM entity layer), the Pixi world and the front canvas
-     together, so ground and entities can never drift apart. Walking tweens over STEP_MS like the old CSS transition; Calm mode snaps.
+     together, so ground and entities can never drift apart. Walking tweens over STEP_MS like the old CSS transition; reduced motion snaps.
    - Occlusion: entities used to sit behind a tree's overhang by z-index. The Pixi canvas is BEHIND the entity layer, so the top sixth of
      every tree whose north tile is walkable is redrawn on a thin 2D canvas IN FRONT of the entities (.town-front). Buildings are DOM and
      keep their own z-index, exactly as before.
@@ -230,7 +230,7 @@ function tglCamFrame(now) {
   tglApplyCam(cam.from.cx + (cam.to.cx - cam.from.cx) * k, cam.from.cy + (cam.to.cy - cam.from.cy) * k);
   if (k < 1) cam.raf = requestAnimationFrame(tglCamFrame);
 }
-// The one way the camera moves while the canvas is drawing the map. animate = glide over STEP_MS (a walking step); Calm mode never glides.
+// The one way the camera moves while the canvas is drawing the map. animate = glide over STEP_MS (a walking step); reduced motion never glides.
 function tglCamera(cx, cy, animate) {
   const cam = tgl.cam;
   if (cam.raf) { cancelAnimationFrame(cam.raf); cam.raf = 0; }
