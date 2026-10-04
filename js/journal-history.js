@@ -94,7 +94,7 @@ function eventCategory(e) {
   if (/\b(fish|fished|caught|catch|angler)\b/i.test(t) && !/critter|bug/i.test(t)) return 'fishing';
   if (/\b(match|beat|won|cup|cellar|rival|challenge|puzzle|duel|draft|ghost|boss|battle)\b/i.test(t)) return 'battles';
   if (/\b(letter|friend|friendship|gift|neighbo)/i.test(t)) return 'social';
-  if (/\b(card|pack|crafted|released|found|index|donat|trophy|museum wing)\b/i.test(t)) return 'cards';
+  if (/\b(card|pack|crafted|released|found|index|donat|trophy|museum wing|summon)\b/i.test(t)) return 'cards';
   return 'town';
 }
 function logDayLabel(ts) {

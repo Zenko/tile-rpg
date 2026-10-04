@@ -4,10 +4,11 @@
    its turn rather than stacking on top.
    ============================================================ */
 const TIPS = {
+  altar:      { icon: '🕯️', title: 'The altar', text: 'In your cottage. Beat a district god, bring spare cards of their family, and the god can be summoned as a card. Once all four are home, something else may answer.' },
   trials:     { icon: '🔮', title: 'Trials', text: 'In the Tarot screen (Quiet Nook → Tarot → Trials), five foes each bring a Fate and a Spread of their own. Beat one for the first time to take home its Arcana card. They open in order, and they are meant to be hard.' },
   spread:     { icon: '🃏', title: 'Fate Spread', text: 'On the Deck screen, lay three cards as Past, Present and Future. Past is always in your opening hand, Present enters with a Haze, and Future arrives on your 4th turn. Three cards of one family give Harmony (+2 Calm); three different families give Contrast (+1 card).' },
   fate:       { icon: '🔮', title: 'Fate', text: 'Attune a Major Arcana (Quiet Nook → Tarot → The Arcana) and you can take its power into a match. Pick it on the keep-this-hand screen; a purple round button by your bar glows when it is ready. Each one works once per match, from its own turn, and most cost a little.' },
-  fortune:    { icon: '🔮', title: "Madame Brume's tent", text: 'On El Mercado de Susurros from dusk until dawn. Soot gives your daily tarot reading, swaps one card once a day, tells you the story of your deck, and sells Arcana packs.' },
+  fortune:    { icon: '🔮', title: "Madame Brume's tent", text: 'On El Mercado de Susurros from dusk until dawn. Brume gives your daily tarot reading, swaps one card once a day, tells you the story of your deck, and sells Arcana packs.' },
   tarot:      { icon: '🔮', title: 'Tarot', text: 'Once a day, draw three Arcana. Turn them all over and the middle card gives the day a fortune. The 22 Major Arcana are real cards from the game: own the card and you own the Arcana, and you can attune three for a small permanent perk.' },
   cellarRun:  { icon: '🕯️', title: 'The cellar', text: 'Every floor offers a few doors: a fight, a chest, a campfire, a shrine or a peddler, hidden in the dark: walk with your lantern and tap tiles to explore. Barrels hold Embers, a key opens the locked chest, rats dim the light and glowcaps brighten it. You have three hearts; losing a fight costs one, and at zero the run ends. Leaving does not end it.' },
   calm:       { icon: '🧘', title: 'The quiet nook', text: 'A few quiet things to do that score nothing and cost nothing: breathe, rake sand, watch the stars, drink tea, tend a bonsai. Five slow breaths leave you Rested for the day.' },
@@ -64,7 +65,7 @@ document.getElementById('tipOk').addEventListener('click', () => { document.getE
 
 /* ---------------- leveling: XP for basically everything you do, steps included ---------------- */
 const XP_PER_STAT = {
-  steps: 0.25, cardsFound: 15, battlesWon: 40, bossesWon: 150, fishCaught: 18,
+  steps: 0.25, summons: 120, cardsFound: 15, battlesWon: 40, bossesWon: 150, fishCaught: 18,
   favours: 30, spiritsMet: 10, districtsVisited: 60, decorationsPlaced: 12,
   breadBaked: 8, breadShared: 10, spellsCast: 3, seedsPlanted: 3, seedsFound: 5, cropsHarvested: 5, rivalWins: 60,
   minigamesPlayed: 5, minigameGolds: 10, talks: 1, foilsFound: 20,

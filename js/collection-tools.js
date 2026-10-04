@@ -177,7 +177,7 @@ function drawCardSheet() {
       <button class="btn${inDeck ? '' : ' cs-primary'}" data-cs="add" ${inDeck >= cap || state.deck.length >= DECK_SIZE ? 'disabled' : ''}>${state.deck.length >= DECK_SIZE && inDeck < cap ? 'Deck is full' : inDeck ? 'Add another' : 'Add to deck'}</button>
       <button class="btn" data-cs="craft" ${refinable ? '' : 'disabled'}>🔨 ${refinable ? 'Refine in Workshop' : def.spell || def.crafted ? 'Cannot be refined' : 'Refine needs 2 copies'}</button>
       <button class="btn${charmOn ? ' cs-on' : ''}" data-cs="charm">✦ ${charmOn ? 'Remove charm' : 'Use as charm'}</button>
-      <button class="btn" data-cs="release" ${spare > 0 ? '' : 'disabled'}>Release a spare · +🫧 ${RELEASE_VALUE[def.rarity]}</button>
+      <button class="btn" data-cs="release" ${canRelease(id) ? '' : 'disabled'}>${canRelease(id) || n >= RELEASE_MIN_COPIES ? `Release a spare · +🫧 ${RELEASE_VALUE[def.rarity]}` : 'Release needs 3 copies'}</button>
     </div>`;
   box.querySelectorAll('[data-cs]').forEach(b => b.addEventListener('click', () => {
     const act = b.dataset.cs;

@@ -64,8 +64,11 @@ function totalSpareValue() {
   return Object.keys(a).reduce((n, id) => n + a[id] * RELEASE_VALUE[cardDef(id).rarity], 0);
 }
 
+// A card can only be released once the Dreamer owns more than two copies of it (RELEASE_MIN_COPIES): two are always kept.
+const RELEASE_MIN_COPIES = 3;
+function canRelease(id) { return spareCount(id) >= 1 && state.ownedCards.filter(c => c === id).length >= RELEASE_MIN_COPIES; }
 function releaseCard(id) {
-  if (spareCount(id) < 1) return false;            // guard: last copy or deck copy can never be released
+  if (!canRelease(id)) return false;               // guard: last copy, deck copy, or fewer than three copies can never be released
   const idx = state.ownedCards.indexOf(id);
   if (idx < 0) return false;
   state.ownedCards.splice(idx, 1);

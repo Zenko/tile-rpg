@@ -1137,7 +1137,7 @@ function btShowResult(won, yielded) {
     sfx(battle.isBoss || tier >= 3 ? 'mythic' : 'win'); buzz(HAP.win);
     bumpPill('pillWins'); bumpPill('pillCards');
     bumpStat('battlesWon', 1);
-    if (battle.isBoss) { bumpStat('bossesWon', 1); markDistrictCalm(state.currentDistrict); }
+    if (battle.isBoss) { bumpStat('bossesWon', 1); noteGodBeaten(state.currentDistrict); markDistrictCalm(state.currentDistrict); }
     logEvent(battle.isBoss ? '👑' : '⚔️', battle.isBoss ? `Defeated ${npc.name}, boss of ${DISTRICTS[state.currentDistrict].name}.` : `Won a friendly match against ${npc.name}.`);
     if (isNew) setTimeout(() => toast('📖 New entry in your Index'), 900);
   } else if (!won && npc.dungeon && !battle.rewarded) {

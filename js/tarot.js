@@ -181,20 +181,20 @@ function fortuneRedrawButtons() {
 }
 function tarotRedraw(k) {
   const t = tarotState();
-  if (!t.cards || t.redrawn || !t.cards[k]) return '"Nothing to turn over just now," purrs Soot.';
-  if (state.progress.pebbles < FORTUNE_REDRAW_COST) { sfx('tie'); return `"That is 🫧 ${FORTUNE_REDRAW_COST}, dear," says Soot, not unkindly.`; }
+  if (!t.cards || t.redrawn || !t.cards[k]) return '"Nothing to turn over just now," purrs Brume.';
+  if (state.progress.pebbles < FORTUNE_REDRAW_COST) { sfx('tie'); return `"That is 🫧 ${FORTUNE_REDRAW_COST}, dear," says Brume, not unkindly.`; }
   const taken = new Set(t.cards.map(c => c.i)), pool = ARCANA.map((a, i) => ({ i, w: arcanaOwned(i) ? 3 : 1 })).filter(x => !taken.has(x.i));
   const total = pool.reduce((n, x) => n + x.w, 0); let r = Math.random() * total, pick = pool[0];
   for (const x of pool) { r -= x.w; if (r < 0) { pick = x; break; } }
   spendPebbles(FORTUNE_REDRAW_COST, 'fortune');
   const old = ARCANA[t.cards[k].i].name; t.cards[k] = { i: pick.i, rev: Math.random() < TAROT_REVERSED_CHANCE }; t.flipped[k] = false; t.fortune = null; t.redrawn = true;
   saveState(); sfx('flip'); buzz(HAP.tap);
-  return `Soot sweeps ${old} aside and lays a new card face down in the ${TAROT_POS[k].toLowerCase()} place. Turn it over at the Tarot screen.`;
+  return `Brume sweeps ${old} aside and lays a new card face down in the ${TAROT_POS[k].toLowerCase()} place. Turn it over at the Tarot screen.`;
 }
 // A few lines about your deck, and the Arcana it most resembles.
 function fortuneDeckStory() {
   const deck = state.deck.filter(id => cardDef(id));
-  if (deck.length < DECK_SIZE) return `"Your deck has ${deck.length} of ${DECK_SIZE} cards," Soot says. "Fill it, dear, and I will tell you who it is."`;
+  if (deck.length < DECK_SIZE) return `"Your deck has ${deck.length} of ${DECK_SIZE} cards," Brume says. "Fill it, dear, and I will tell you who it is."`;
   const defs = deck.map(cardDef), fam = {}, kw = {};
   defs.forEach(d => { const f = CARD_FAMILY[BattleEngine.baseIdOf(d.id)]; if (f) fam[f] = (fam[f] || 0) + 1; (d.kw || []).forEach(k => { kw[k] = (kw[k] || 0) + 1; }); });
   const fams = Object.keys(fam).sort((a, b) => fam[b] - fam[a]), top = fams[0] || 'stone', second = fams[1];
@@ -206,17 +206,17 @@ function fortuneDeckStory() {
   const key = topKw && KW[topKw] ? ` Its favourite word is ${KW[topKw].icon} ${KW[topKw].name}.` : '';
   const cand = ARCANA.map((a, i) => ({ a, i, f: arcanaFamily(a), c: arcanaCardDef(a).cost })).filter(x => x.f === top).sort((x, y) => Math.abs(x.c - avg) - Math.abs(y.c - avg))[0];
   const like = cand ? ` If it were a card, it would be ${cand.a.name}: ${cand.a.up.charAt(0).toLowerCase() + cand.a.up.slice(1)}` : '';
-  return `"${arch.charAt(0).toUpperCase() + arch.slice(1)}${heart}, ${pace}.${trick}${key}${like}" Soot nods slowly.`;
+  return `"${arch.charAt(0).toUpperCase() + arch.slice(1)}${heart}, ${pace}.${trick}${key}${like}" Brume nods slowly.`;
 }
 function fortuneBuyPack() {
-  if (state.progress.pebbles < FORTUNE_PACK_COST) { sfx('tie'); return `"The Arcana pack is 🫧 ${FORTUNE_PACK_COST}," says Soot. "They do not like to be hurried."`; }
+  if (state.progress.pebbles < FORTUNE_PACK_COST) { sfx('tie'); return `"The Arcana pack is 🫧 ${FORTUNE_PACK_COST}," says Brume. "They do not like to be hurried."`; }
   const disc = discoveredSet(), pool = ARCANA.map(a => ({ id: a.card, w: disc.has(a.card) ? 1 : 3 })), total = pool.reduce((n, x) => n + x.w, 0);
   let r = Math.random() * total, pick = pool[0]; for (const x of pool) { r -= x.w; if (r < 0) { pick = x; break; } }
   const isNew = !disc.has(pick.id); spendPebbles(FORTUNE_PACK_COST, 'fortune');
   state.ownedCards.push(pick.id); noteCardsFound(1); bumpPill('pillCards'); saveState(); updateHud(); if (typeof checkSets === 'function') checkSets(); checkAchievements();
-  setTimeout(() => showCardReveal(pick.id, 'An Arcana from Soot', true, null, 0, { flip: true, isNew }), 250);
+  setTimeout(() => showCardReveal(pick.id, 'An Arcana from Brume', true, null, 0, { flip: true, isNew }), 250);
   if (isNew) setTimeout(() => toast('📖 New entry in your Index'), 900);
-  return `Soot slides a card across the cloth without looking at it. "That one was always yours."`;
+  return `Brume slides a card across the cloth without looking at it. "That one was always yours."`;
 }
 function fortuneAction(id) {
   if (id === 'fortune-story') { sfx('soft'); return fortuneDeckStory(); }

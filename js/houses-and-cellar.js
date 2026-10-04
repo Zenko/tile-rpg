@@ -32,6 +32,7 @@ const INTERIORS = {
               { id: 'calm-sand', label: '🪨 Sand garden', kind: 'calm', game: 'sand' },
               { id: 'calm-bonsai', label: '🪴 Your bonsai', kind: 'calm', game: 'bonsai' },
               { id: 'decorate', label: '🖼️ Decorate the shelves', kind: 'decorate' },
+              { id: 'altar', label: '🕯️ The altar', kind: 'altar' },
               { id: 'favs', label: '⭐ Choose favourite cards to frame', kind: 'favs' },
               { id: 'trophies', label: '🏆 Look over the trophy case', kind: 'trophies' },
               { id: 'nap', label: '😴 Nap by the window', kind: 'daily', pebbles: 3,
@@ -42,8 +43,8 @@ const INTERIORS = {
               { id: 'sellbugs', kind: 'sellbugs', view: () => ({ label: jarValue() ? `🫙 Trade your jar of critters for 🫧 ${jarValue()}` : '🫙 Your critter jar is empty', disabled: !jarValue() }) },
               { id: 'nightdeco', label: '🕯️ Night-only decorations', kind: 'nightdeco' },
               { id: 'mg-lanterns', kind: 'minigame', game: 'lanterns', view: () => miniView('lanterns') }] },
-  fortune: { title: "Madame Brume's Tent", who: '🐈‍⬛', name: 'Soot', theme: 'dark',
-    greet: () => `Beads click, a candle gutters. "Sit, sit," purrs Soot. ${typeof tarotCanDraw === 'function' && tarotCanDraw() ? 'Your daily reading has not been drawn yet.' : 'The cards know you already.'}`,
+  fortune: { title: "Madame Brume's Tent", who: '🐈‍⬛', name: 'Brume', theme: 'dark',
+    greet: () => `Beads click, a candle gutters. "Sit, sit," purrs Brume. ${typeof tarotCanDraw === 'function' && tarotCanDraw() ? 'Your daily reading has not been drawn yet.' : 'The cards know you already.'}`,
     actions: [{ id: 'fortune-read', label: '🔮 Daily reading', kind: 'calm', game: 'tarot' },
               { id: 'fortune-redraw', kind: 'fortune', view: () => { const s = fortuneRedrawState(); return { label: `🃏 Draw once more · 🫧 ${FORTUNE_REDRAW_COST}${s === 'used' ? ' (done today)' : ''}`, disabled: s === 'used' }; } },
               { id: 'fortune-story', label: '📜 Hear your deck\'s story', kind: 'fortune' },
@@ -770,6 +771,7 @@ function renderSceneBody() {
     else if (scene.mode === 'cook') acts.innerHTML = cookButtons() + sceneBtn('back', '← Back to the counter');
     else if (scene.mode === 'decorate') acts.innerHTML = shelfButtons() + sceneBtn('back', '← Done');
     else if (scene.mode === 'favs') acts.innerHTML = favButtons() + sceneBtn('back', '← Done');
+    else if (scene.mode === 'altar') acts.innerHTML = altarButtons();
     else if (scene.mode === 'mail') {
       const ms = mailState(), gifts = ms.list.filter(l => l.gift && !l.claimed).length;
       document.getElementById('scText').textContent = ms.list.length
@@ -819,6 +821,7 @@ function sceneAction(actId) {
     }
     return;
   }
+  if (actId.startsWith('summon:')) { scene.text = summonTap(actId.slice(7)); renderScene(); return; }
   if (actId === 'back') { scene.mode = null; sfx('nav'); renderScene(); return; }
   if (actId === 'mg-again' && mini) { miniStart(mini.id); return; }
   if (actId === 'noop') return;
@@ -855,6 +858,7 @@ function sceneAction(actId) {
   else if (a.kind === 'minigame') { miniStart(a.game); return; }
   else if (a.kind === 'mail') { scene.mode = 'mail'; scene.mailOpen = {}; sfx('tap'); }
   else if (a.kind === 'decorate') { scene.mode = 'decorate'; scene.text = `Put decorations from your collection on the shelves (up to ${SHELF_MAX}). They come back to your decorations if you clear the shelves.`; sfx('tap'); }
+  else if (a.kind === 'altar') { scene.mode = 'altar'; scene.text = altarIntro(); sfx('tap'); showTipOnce('altar'); }
   else if (a.kind === 'favs') { scene.mode = 'favs'; scene.text = `Frame up to ${FAV_MAX} favourite cards on the wall.`; sfx('tap'); }
   else if (a.kind === 'trophies') { scene.text = trophySummary(); sfx('tap'); }
   else if (a.kind === 'wings') { scene.mode = 'wings'; scene.text = 'Which wing shall we visit? Wings with spare cards ready are marked.'; sfx('tap'); showTipOnce('museum'); }
