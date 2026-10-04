@@ -24,7 +24,7 @@ function tradableCount(id) {   // copies not held by the deck
   return state.ownedCards.filter(c => c === id).length - state.deck.filter(c => c === id).length;
 }
 
-function nextRarity(rar) { const i = RARITY_ORDER.indexOf(rar); return (i >= 0 && i < RARITY_ORDER.length - 1) ? RARITY_ORDER[i + 1] : null; }
+function nextRarity(rar) { const i = RARITY_ORDER.indexOf(rar); return (i >= 0 && i < RARITY_ORDER.indexOf(TRADE_TOP)) ? RARITY_ORDER[i + 1] : null; }   // nothing trades up into divine or atlas
 
 function removeCopies(id, n) {
   for (let i = 0; i < n; i++) {

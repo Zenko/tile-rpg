@@ -10,7 +10,7 @@ const NPC_RESPAWN_MS = 180000;
 
 // Embers: earned by releasing spare copies, spent on card packs.
 // A pack costs more than any single release pays, so it can never be looped for profit.
-const RELEASE_VALUE = { common: 1, rare: 3, ultra: 8, super: 20, mythic: 50 };
+const RELEASE_VALUE = { common: 1, rare: 3, ultra: 8, super: 20, mythic: 50, divine: 120, atlas: 250 };   // divine and atlas are summon-only (never spare), the values just keep sorts and charms total
 // Pack odds are flat on purpose: they must NOT scale with wins, or a veteran's packs would
 // out-pay their own cost and release-and-rebuy would become free money (checked by simulation).
 const PACKS = [
@@ -186,6 +186,14 @@ const CARD_POOL = [
   { id: 'undertow', name: 'Undertow', icon: '🌀', rarity: 'rare', cost: 3, power: 0, grit: 0, kw: [], spell: 'undertow' },
   { id: 'quickstep', name: 'Quickstep', icon: '👟', rarity: 'ultra', cost: 3, power: 0, grit: 0, kw: [], spell: 'quickstep' },
   { id: 'picnic', name: 'Picnic', icon: '🧺', rarity: 'rare', cost: 2, power: 0, grit: 0, kw: [], spell: 'picnic' },
+  // The four spirit gods (Divine) and the Atlas (Atlas rarity): earned by summoning, never found. Energy is capped at 5, so they cost 5.
+  // Stats come from a paired simulation (2500 games each, one of these swapped into a random deck, smart AI both sides): +6 to +8 win
+  // points each, against 0 to +5 for the mythics. Ensueño needs the big numbers because Echo + Bloom is slow. Swift on the Atlas was +20, so it has none.
+  { id: 'duermevela', name: 'Duermevela', icon: '🚪', rarity: 'divine', cost: 5, power: 8, grit: 10, kw: ['guard', 'shield'], exclusive: 'summon' },
+  { id: 'murmullo', name: 'Murmullo', icon: '🤫', rarity: 'divine', cost: 5, power: 8, grit: 7, kw: ['swift', 'sting'], exclusive: 'summon' },
+  { id: 'marea-lenta', name: 'Marea Lenta', icon: '🌊', rarity: 'divine', cost: 5, power: 8, grit: 9, kw: ['mend', 'lull'], exclusive: 'summon' },
+  { id: 'ensueno', name: 'Ensueño', icon: '💭', rarity: 'divine', cost: 5, power: 12, grit: 12, kw: ['seed', 'bloom'], exclusive: 'summon' },
+  { id: 'the-atlas', name: 'The Atlas', icon: '🗺️', rarity: 'atlas', cost: 5, power: 10, grit: 12, kw: ['guard'], exclusive: 'summon' },
 ];
 /* Foe cards: unique cards that only opponents carry (neighbors, bosses, cellar floors). They are deliberately NOT in
    CARD_POOL - so they never show up in packs, the Index, deck codes or rewards - but defOf() knows them, so the battle
@@ -214,10 +222,10 @@ const FAMILIES = {
 };
 const CARD_FAMILY = (() => {
   const lists = {
-    grove: 'sprout blossom toadstool cherry-blossom-storm acorn firefly hollow-log foxglove hedgehog storm-lily aurora-stag bramble cactus-keeper bramble-king glowworm seedpod moss-hare dandelion oak-warden world-tree',
-    stone: 'pebble flintstone geode crystal-spire moonstone mountain-heart rice-cake torii-gate stone-lantern old-kettle copper-kettle-spirit jade-turtle thundering-ram echo-cavern deep-wyrm stone-hen cliff-goat badger quarry-bear mossy-titan',
-    tide: 'droplet bubble tide koi-ascending deep-current whirlpool lantern-fish glass-float river-otter void-koi sunken-leviathan wishing-well heron paper-boat hermit-crab puffer harbor-seal moon-jelly tide-caller kraken',
-    wind: 'feather dove gale origami-crane paper-fan folding-screen temple-bell sky-whale moon-dragon lion-dancer morning-bugle dusk-bat village-banner silver-fox ember-fox rooks-ace mist-wraith honeybee market-sparrow kite-runner'
+    grove: 'sprout blossom toadstool cherry-blossom-storm acorn firefly hollow-log foxglove hedgehog storm-lily aurora-stag bramble cactus-keeper bramble-king glowworm seedpod moss-hare dandelion oak-warden world-tree ensueno',
+    stone: 'pebble flintstone geode crystal-spire moonstone mountain-heart rice-cake torii-gate stone-lantern old-kettle copper-kettle-spirit jade-turtle thundering-ram echo-cavern deep-wyrm stone-hen cliff-goat badger quarry-bear mossy-titan duermevela',
+    tide: 'droplet bubble tide koi-ascending deep-current whirlpool lantern-fish glass-float river-otter void-koi sunken-leviathan wishing-well heron paper-boat hermit-crab puffer harbor-seal moon-jelly tide-caller kraken marea-lenta',
+    wind: 'feather dove gale origami-crane paper-fan folding-screen temple-bell sky-whale moon-dragon lion-dancer morning-bugle dusk-bat village-banner silver-fox ember-fox rooks-ace mist-wraith honeybee market-sparrow kite-runner murmullo'
   };
   const m = {};
   Object.keys(lists).forEach(f => lists[f].split(' ').forEach(id => { m[id] = f; }));
@@ -227,9 +235,12 @@ const CARD_FAMILY = (() => {
 const TOKEN_CARDS = [
   { id: 'seedling', name: 'Afterthought', icon: '🌱', rarity: 'common', cost: 0, power: 1, grit: 2, kw: [], token: true }
 ];
-const EXCLUSIVE_HINT = { cellar: 'found deep in the cellar', rival: "a rival's final prize" };
+const EXCLUSIVE_HINT = { cellar: 'found deep in the cellar', rival: "a rival's final prize", summon: 'earned at the altar' };
 
-const RARITY_ORDER = ['common', 'rare', 'ultra', 'super', 'mythic'];
+// Divine (the four gods) and Atlas (the one-of-a-kind top card) sit above mythic. They are never in packs, on the ground or in opponent decks
+// (`exclusive: 'summon'`), and they can't be traded up to or from (see TRADE_TOP): the altar is the only way to get them.
+const RARITY_ORDER = ['common', 'rare', 'ultra', 'super', 'mythic', 'divine', 'atlas'];
+const TRADE_TOP = 'mythic';
 
 // Card art: a CARD_POOL entry may optionally carry `art: 'assets/cards/<id>.png'`. Every place that shows
 // a card's own icon/art (not a keyword icon, recipe icon, etc.) should call this instead of reading
@@ -1057,7 +1068,7 @@ const BattleEngine = (function () {
 
 const KW = BattleEngine.KEYWORDS;
 
-const RARITY_LABEL = { common: 'common', rare: 'rare', ultra: 'ultra rare', super: 'super ultra rare', mythic: 'mythic' };
+const RARITY_LABEL = { common: 'common', rare: 'rare', ultra: 'ultra rare', super: 'super ultra rare', mythic: 'mythic', divine: 'divine', atlas: 'atlas' };
 
 // Each town has its own population - a name pool and a species/face pool - so neighbors read as a
 // different crowd from one district to the next, not just the same people in a different building.

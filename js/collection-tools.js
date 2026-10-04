@@ -4,7 +4,7 @@ let collView = 'grid';       // My Cards: 'grid' (tiles, tap for the detail shee
 let deckView = 'build';     // Deck sub-view: 'build' (tray, chart, keywords) or 'add' (pinned strip + your cards)
 let deckInfoMode = false;    // Deck: tapping a card reads it instead of adding it
 let collFilterOpen = true;   // My Cards' filter starts open (browse-first screen); setCardsView() reads this instead of forcing it open every time the tab is shown
-const FILTER_CHIPS = [['all', 'All'], ['common', 'Common'], ['rare', 'Rare'], ['ultra', 'Ultra'], ['super', 'Super'], ['mythic', 'Mythic'], ['spell', '✨ Spells']];
+const FILTER_CHIPS = [['all', 'All'], ['common', 'Common'], ['rare', 'Rare'], ['ultra', 'Ultra'], ['super', 'Super'], ['mythic', 'Mythic'], ['divine', 'Divine'], ['atlas', 'Atlas'], ['spell', '✨ Spells']];
 const FAM_CHIPS = [['all', 'All families'], ...Object.keys(FAMILIES).map(k => [k, FAMILIES[k].icon + ' ' + FAMILIES[k].name])];
 const SORTS = { rarity: 'Rarity', cost: 'Cost', power: 'Power', name: 'Name' };
 function filterSortCards(ids) {

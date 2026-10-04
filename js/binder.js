@@ -5,10 +5,10 @@
    Index the rest of the game uses), so nothing is lost by trading or releasing a card after you have found it.
    Saved: state.progress.binderDone = { pageId: true }.
    ============================================================ */
-const BINDER_PEBBLES = { common: 20, rare: 30, ultra: 45, super: 60, mythic: 90, grove: 40, stone: 40, tide: 40, wind: 40, tarot: 80 };
+const BINDER_PEBBLES = { common: 20, rare: 30, ultra: 45, super: 60, mythic: 90, divine: 120, atlas: 150, grove: 40, stone: 40, tide: 40, wind: 40, tarot: 80 };
 function binderPages() {
   const real = CARD_POOL.filter(c => !c.foe);
-  return RARITY_ORDER.map(r => ({ id: r, icon: ({ common: '⚪', rare: '🔵', ultra: '🟣', super: '🟠', mythic: '🌸' })[r] || '⚪', name: RARITY_LABEL[r], ids: real.filter(c => c.rarity === r).map(c => c.id) }))
+  return RARITY_ORDER.map(r => ({ id: r, icon: ({ common: '⚪', rare: '🔵', ultra: '🟣', super: '🟠', mythic: '🌸', divine: '✨', atlas: '🗺️' })[r] || '⚪', name: RARITY_LABEL[r], ids: real.filter(c => c.rarity === r).map(c => c.id) }))
     .concat(Object.keys(FAMILIES).map(f => ({ id: f, icon: FAMILIES[f].icon, name: FAMILIES[f].name, ids: real.filter(c => CARD_FAMILY[c.id] === f).map(c => c.id) })))
     .concat(typeof ARCANA !== 'undefined' ? [{ id: 'tarot', icon: '🔮', name: 'Major Arcana', ids: ARCANA.map(a => a.card) }] : [])
     .filter(p => p.ids.length);

@@ -217,7 +217,7 @@ function renderCraft() {
   box.appendChild(ref);
 
   // ----- Trade up -----
-  const steps = RARITY_ORDER.slice(0, -1);
+  const steps = RARITY_ORDER.slice(0, RARITY_ORDER.indexOf(TRADE_TOP));   // mythic is the top of the ladder: divine and atlas are summoned
   if (!steps.includes(craftSel.rarity)) craftSel.rarity = steps[0];
   const tradable = id => Math.max(0, tradableCount(id));
   const picked = id => craftSel.picks.filter(p => p === id).length;
@@ -625,7 +625,7 @@ function renderAlmanac() {
           el.innerHTML = `
             <span class="ac-icon">${cardArtHtml(def)}</span>
             <span class="ac-name">???</span>
-            <span class="ac-rar rt-${def.rarity}" style="background:var(--${def.rarity === 'common' ? 'water' : def.rarity === 'rare' ? 'rare' : def.rarity === 'ultra' ? 'epic' : def.rarity === 'super' ? 'accent' : 'mythic'})">${RARITY_LABEL[def.rarity]}</span>
+            <span class="ac-rar rt-${def.rarity}" style="background:var(--${def.rarity === 'common' ? 'water' : def.rarity === 'rare' ? 'rare' : def.rarity === 'ultra' ? 'epic' : def.rarity === 'super' ? 'accent' : def.rarity === 'divine' ? 'divine' : def.rarity === 'atlas' ? 'atlas' : 'mythic'})">${RARITY_LABEL[def.rarity]}</span>
             <span class="ac-hint">costs ${def.cost} ⚡</span>
             <span class="ac-hint">${def.exclusive ? EXCLUSIVE_HINT[def.exclusive] : def.spell ? 'a spell' : def.kw.length ? (def.kw.length > 1 ? 'has keywords' : 'has a keyword') : 'plain card'}</span>`;
         }

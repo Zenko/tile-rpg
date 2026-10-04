@@ -526,7 +526,7 @@ function challengeWin() {
 }
 
 /* ---------------- giving cards: neighbors love cards with their favourite keyword ---------------- */
-const CARD_GIFT_POINTS = [0, 2, 3, 4, 5, 6];    // by rarity tier
+const CARD_GIFT_POINTS = [0, 2, 3, 4, 5, 6, 7, 8];    // by rarity tier
 function giftableCards(f) {
   const theme = signatureTheme(f);
   return Object.keys(ownedCardCounts()).filter(id => spareCount(id) >= 1)

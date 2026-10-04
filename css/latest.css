@@ -1172,3 +1172,24 @@ html.calm .cl-cell.rat, html.cozy .cl-cell.rat { animation: none; }
 #mulliganOverlay .knack-desc { text-align: left; }
 #mulliganOverlay .controls { display: flex; gap: 10px; padding: 10px 12px 14px; margin: 0; border-top: 1px solid var(--stone-edge); background: var(--stone); }
 #mulliganOverlay .controls .btn { flex: 1; min-height: 46px; margin: 0; padding: 12px 8px; font-size: .9rem; white-space: nowrap; }
+
+
+/* ===== DIVINE AND ATLAS RARITIES (the four gods, and the one-of-a-kind Atlas) =====
+   Above mythic. Divine is warm gold, Atlas is a slow-shifting violet-to-sea-glass sheen. Both are summon-only, see RARITY_ORDER. */
+.rarity-divine { --pc: var(--divine); --rg: linear-gradient(135deg, #f6e6b0, var(--divine)); background: linear-gradient(135deg, #f6e6b0, var(--divine)); box-shadow: 0 0 12px rgba(217,180,90,.6); }
+.rarity-atlas { --pc: var(--atlas); --rg: linear-gradient(135deg, #a8e0ec, var(--atlas) 55%, #f0b8d8); background: linear-gradient(135deg, #a8e0ec, var(--atlas) 55%, #f0b8d8); box-shadow: 0 0 14px rgba(143,122,217,.65); }
+#battleView .rarity-divine { background: linear-gradient(135deg, #f6e6b0, var(--divine)); box-shadow: 0 0 10px rgba(217,180,90,.55); }
+#battleView .rarity-atlas { background: linear-gradient(135deg, #a8e0ec, var(--atlas) 55%, #f0b8d8); box-shadow: 0 0 12px rgba(143,122,217,.6); }
+.reveal-card.rarity-divine { box-shadow: 0 0 18px rgba(217,180,90,.65); }
+.reveal-card.rarity-atlas { box-shadow: 0 0 22px rgba(143,122,217,.7); }
+.rt-divine { background: linear-gradient(90deg, var(--divine), #f6e6b0, var(--divine)); background-size: 200% 100%; animation: shimmer 2s linear infinite; color: #3a2d0e; }
+.rt-atlas { background: linear-gradient(90deg, #a8e0ec, var(--atlas), #f0b8d8, #a8e0ec); background-size: 300% 100%; animation: shimmer 3s linear infinite; color: #1d1740; }
+.overlay-card.glow-divine { box-shadow: 0 0 0 2px var(--divine), 0 0 40px rgba(217,180,90,.6); }
+.overlay-card.glow-atlas { box-shadow: 0 0 0 2px var(--atlas), 0 0 44px rgba(143,122,217,.65); }
+.ins-card.rarity-divine { box-shadow: 0 0 0 2px var(--divine), 0 0 30px rgba(217,180,90,.5); }
+.ins-card.rarity-atlas { box-shadow: 0 0 0 2px var(--atlas), 0 0 32px rgba(143,122,217,.55); }
+.jtile[data-r="divine"] { border-color: var(--divine); } .jtile[data-r="atlas"] { border-color: var(--atlas); }
+.reveal-card-frame.pk-flip.pk-down[data-r="divine"] .reveal-card { box-shadow: 0 0 34px #e8c46a; }
+.reveal-card-frame.pk-flip.pk-down[data-r="atlas"] .reveal-card { box-shadow: 0 0 36px #a58bf0; }
+.cf-chip[data-r="divine"].active { background: var(--divine); color: #3a2d0e; }
+.cf-chip[data-r="atlas"].active { background: var(--atlas); color: #fff; }
