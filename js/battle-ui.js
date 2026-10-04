@@ -26,7 +26,7 @@ function startBattle(opponent) {
 function btIntro(opponent, isBoss, first) {
   return new Promise(resolve => {
     const tw = bossTwistFor(opponent), t = tw ? BattleEngine.TWISTS[tw] : null;
-    const tag = isBoss ? '👑 District boss' : opponent.cup ? '🏆 Dreamers’ Cup' : opponent.draft ? '🎴 Draft Run' : opponent.ghost ? '👻 Ghost duel' : opponent.dungeon ? '🕯️ Cellar' : opponent.isRival ? '⚡ Rival' : '⚔️ Friendly match';
+    const tag = isBoss ? '👑 District boss' : opponent.atlas ? '🗺️ The Atlas' : opponent.cup ? '🏆 Dreamers’ Cup' : opponent.draft ? '🎴 Draft Run' : opponent.ghost ? '👻 Ghost duel' : opponent.dungeon ? '🕯️ Cellar' : opponent.isRival ? '⚡ Rival' : '⚔️ Friendly match';
     const el = document.createElement('div'); el.className = 'bt-intro' + (isBoss ? ' boss' : '');
     el.innerHTML = `<div class="bt-intro-side opp"><span class="bt-intro-av"></span><div><div class="bt-intro-name"></div><div class="bt-intro-tag">${tag}</div></div></div>
       <div class="bt-intro-vs">VS</div>
@@ -1112,6 +1112,8 @@ function btShowResult(won, yielded) {
     cupLoss();
   } else if (won && !battle.rewarded && npc.dungeon) {
     dungeonWin();
+  } else if (won && !battle.rewarded && npc.atlas) {
+    atlasWin();
   } else if (won && !battle.rewarded && npc.isRival) {
     rivalWin();
   } else if (won && !battle.rewarded && npc.signature) {
@@ -1159,7 +1161,7 @@ function btShowResult(won, yielded) {
       battleEndTitle.textContent = 'You stepped away.';
       battleEndStats.textContent = `No cost to you. ${npc.name} will be here whenever you are ready.`;
     } else {
-      battleEndTitle.textContent = battle.isBoss ? `${npc.name} holds firm.` : npc.isRival ? 'Rook grins. "Not bad. Again?"' : 'A close, friendly match.';
+      battleEndTitle.textContent = battle.isBoss ? `${npc.name} holds firm.` : npc.atlas ? 'The Atlas smiles. "Again, if you like."' : npc.isRival ? 'Rook grins. "Not bad. Again?"' : 'A close, friendly match.';
       battleEndStats.textContent = `${npc.name} won this one after ${turns} turns. No cost to you. Try a different card mix, or try again.`;
     }
     btGet('battleRetryBtn').classList.remove('hidden');

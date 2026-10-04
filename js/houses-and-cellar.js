@@ -49,6 +49,12 @@ const INTERIORS = {
               { id: 'fortune-redraw', kind: 'fortune', view: () => { const s = fortuneRedrawState(); return { label: `🃏 Draw once more · 🫧 ${FORTUNE_REDRAW_COST}${s === 'used' ? ' (done today)' : ''}`, disabled: s === 'used' }; } },
               { id: 'fortune-story', label: '📜 Hear your deck\'s story', kind: 'fortune' },
               { id: 'fortune-pack', kind: 'fortune', view: () => ({ label: `🃏 Arcana Pack · 🫧 ${FORTUNE_PACK_COST}`, disabled: state.progress.pebbles < FORTUNE_PACK_COST }) }] },
+  atlas: { title: 'The Atlas', who: '🗺️', name: 'The Atlas', theme: 'dark',
+    greet: () => atlasGreeting(),
+    actions: [{ id: 'atlas-ask', label: '💭 Ask something', kind: 'atlas-ask' },
+              { id: 'atlas-battle', label: '⚔️ Challenge the Atlas', kind: 'atlas-battle' },
+              { id: 'atlas-games', label: '🎲 Play something harder', kind: 'atlas-games' },
+              { id: 'atlas-shop', label: '🛍️ What the Atlas keeps', kind: 'atlas-shop' }] },
   museum: { title: 'The Card Museum', who: '🦚', name: 'Curator Paz', theme: 'cool',
     greet: () => `Welcome! Every card has a story, and we would love to keep one of each. Spare copies only - we never take your last. ${MUSEUM_WINGS.filter(w => museumState().wings[w.id]).length}/${MUSEUM_WINGS.length} wings complete.`,
     actions: [{ id: 'wings', label: '🏛️ Donate to the wings', kind: 'wings' },
@@ -772,6 +778,10 @@ function renderSceneBody() {
     else if (scene.mode === 'decorate') acts.innerHTML = shelfButtons() + sceneBtn('back', '← Done');
     else if (scene.mode === 'favs') acts.innerHTML = favButtons() + sceneBtn('back', '← Done');
     else if (scene.mode === 'altar') acts.innerHTML = altarButtons();
+    else if (scene.mode === 'atlas-ask') acts.innerHTML = atlasAskButtons();
+    else if (scene.mode === 'atlas-battle') acts.innerHTML = atlasBattleButtons();
+    else if (scene.mode === 'atlas-games') acts.innerHTML = atlasGameButtons();
+    else if (scene.mode === 'atlas-shop') acts.innerHTML = atlasShopButtons();
     else if (scene.mode === 'mail') {
       const ms = mailState(), gifts = ms.list.filter(l => l.gift && !l.claimed).length;
       document.getElementById('scText').textContent = ms.list.length
@@ -821,9 +831,13 @@ function sceneAction(actId) {
     }
     return;
   }
+  if (actId.startsWith('atlasq:')) { scene.text = atlasAnswer(actId.slice(7)); sfx('tap'); renderScene(); return; }
+  if (actId.startsWith('atlasb:')) { const i = +actId.slice(7); if (scene.mode === 'atlas-battle' && scene.armed === i) { startAtlasBattle(i); return; } scene.armed = i; scene.text = atlasBattleText(i) + ' Tap again to begin.'; sfx('tap'); renderScene(); return; }
+  if (actId.startsWith('atlasg:')) { miniStart(actId.slice(7), true); return; }
+  if (actId.startsWith('atlasbuy:')) { scene.text = atlasBuy(actId.slice(9)); renderScene(); return; }
   if (actId.startsWith('summon:')) { scene.text = summonTap(actId.slice(7)); renderScene(); return; }
   if (actId === 'back') { scene.mode = null; sfx('nav'); renderScene(); return; }
-  if (actId === 'mg-again' && mini) { miniStart(mini.id); return; }
+  if (actId === 'mg-again' && mini) { miniStart(mini.id, mini.atlas); return; }
   if (actId === 'noop') return;
   if (scene.id === 'trades') { if (actId.startsWith('trade:')) { scene.text = doTrade(+actId.slice(6)); renderScene(); } return; }
   if (actId.startsWith('wing:')) { scene.mode = 'wing'; scene.wing = actId.slice(5); const w = wingDef(scene.wing); scene.text = `${w.icon} ${w.name}: ${wingProgress(w)}/${w.cards.length} donated. Complete it for 🫧 ${WING_PEBBLES} and a keepsake.`; sfx('tap'); renderScene(); return; }
@@ -858,6 +872,10 @@ function sceneAction(actId) {
   else if (a.kind === 'minigame') { miniStart(a.game); return; }
   else if (a.kind === 'mail') { scene.mode = 'mail'; scene.mailOpen = {}; sfx('tap'); }
   else if (a.kind === 'decorate') { scene.mode = 'decorate'; scene.text = `Put decorations from your collection on the shelves (up to ${SHELF_MAX}). They come back to your decorations if you clear the shelves.`; sfx('tap'); }
+  else if (a.kind === 'atlas-ask') { scene.mode = 'atlas-ask'; scene.text = 'Ask whatever you like. I will answer as well as I can, which is not always the same as well.'; sfx('tap'); }
+  else if (a.kind === 'atlas-battle') { scene.mode = 'atlas-battle'; scene.armed = -1; scene.text = 'Four matches, each with a rule bent. Win one to open the next.'; sfx('tap'); }
+  else if (a.kind === 'atlas-games') { scene.mode = 'atlas-games'; scene.text = 'The same little games, with the medal lines higher. Two prizes per game each day.'; sfx('tap'); }
+  else if (a.kind === 'atlas-shop') { scene.mode = 'atlas-shop'; scene.text = `A few things I have kept for dreamers who visit. You have won ${atlasState().wins} time${atlasState().wins === 1 ? '' : 's'}.`; sfx('tap'); }
   else if (a.kind === 'altar') { scene.mode = 'altar'; scene.text = altarIntro(); sfx('tap'); showTipOnce('altar'); }
   else if (a.kind === 'favs') { scene.mode = 'favs'; scene.text = `Frame up to ${FAV_MAX} favourite cards on the wall.`; sfx('tap'); }
   else if (a.kind === 'trophies') { scene.text = trophySummary(); sfx('tap'); }

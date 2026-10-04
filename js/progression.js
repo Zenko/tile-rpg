@@ -4,6 +4,7 @@
    its turn rather than stacking on top.
    ============================================================ */
 const TIPS = {
+  atlas:      { icon: '🗺️', title: 'The Atlas', text: 'It travels with you from district to district. Ask it questions, play its harder games, challenge it to a match, or see what it keeps for sale. It never explains itself.' },
   altar:      { icon: '🕯️', title: 'The altar', text: 'In your cottage. Beat a district god, bring spare cards of their family, and the god can be summoned as a card. Once all four are home, something else may answer.' },
   trials:     { icon: '🔮', title: 'Trials', text: 'In the Tarot screen (Quiet Nook → Tarot → Trials), five foes each bring a Fate and a Spread of their own. Beat one for the first time to take home its Arcana card. They open in order, and they are meant to be hard.' },
   spread:     { icon: '🃏', title: 'Fate Spread', text: 'On the Deck screen, lay three cards as Past, Present and Future. Past is always in your opening hand, Present enters with a Haze, and Future arrives on your 4th turn. Three cards of one family give Harmony (+2 Calm); three different families give Contrast (+1 card).' },
@@ -65,7 +66,7 @@ document.getElementById('tipOk').addEventListener('click', () => { document.getE
 
 /* ---------------- leveling: XP for basically everything you do, steps included ---------------- */
 const XP_PER_STAT = {
-  steps: 0.25, summons: 120, cardsFound: 15, battlesWon: 40, bossesWon: 150, fishCaught: 18,
+  steps: 0.25, summons: 120, atlasWins: 80, atlasGames: 20, cardsFound: 15, battlesWon: 40, bossesWon: 150, fishCaught: 18,
   favours: 30, spiritsMet: 10, districtsVisited: 60, decorationsPlaced: 12,
   breadBaked: 8, breadShared: 10, spellsCast: 3, seedsPlanted: 3, seedsFound: 5, cropsHarvested: 5, rivalWins: 60,
   minigamesPlayed: 5, minigameGolds: 10, talks: 1, foilsFound: 20,
@@ -413,6 +414,7 @@ function rewardFloor(isBoss) { return isBoss ? 'super' : 'rare'; }
 // Each district's boss bends one rule of the match (see BattleEngine.TWISTS).
 const BOSS_TWIST = { square: 'roots', market: 'wall', harbor: 'tide', garden: 'bloom' };
 function bossTwistFor(opponent) {
+  if (opponent && opponent.atlas) return opponent.atlas.twist;     // the Atlas's challenges (js/atlas.js)
   if (!opponent || !opponent.isBoss || opponent.dungeon || !/^boss-/.test(opponent.id || '')) return null;
   return BOSS_TWIST[opponent.id.slice(5)] || null;
 }

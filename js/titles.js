@@ -364,7 +364,7 @@ function townSignature() {
 
 setInterval(() => {
   if (!inBattle) { checkMail(); checkExpeditions(); checkStory(); }
-  const rivalMoved = syncRival();
+  const rivalMoved = syncRival() | syncAtlas();
   const cropsGrew = tickCrops();
   if (!inBattle && !inScene && !townPanel.classList.contains('hidden') && !townPanel.classList.contains('tab-away')) {
     const sig = townSignature();

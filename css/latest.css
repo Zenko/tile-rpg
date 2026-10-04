@@ -1193,3 +1193,6 @@ html.calm .cl-cell.rat, html.cozy .cl-cell.rat { animation: none; }
 .reveal-card-frame.pk-flip.pk-down[data-r="atlas"] .reveal-card { box-shadow: 0 0 36px #a58bf0; }
 .cf-chip[data-r="divine"].active { background: var(--divine); color: #3a2d0e; }
 .cf-chip[data-r="atlas"].active { background: var(--atlas); color: #fff; }
+
+/* The Atlas walking through a district: a soft violet glow so it reads as different from a neighbour (static, no animation). */
+.ent.npc.atlas > span { text-shadow: 0 0 10px #a58bf0, 0 0 3px #fff; }

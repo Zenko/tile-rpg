@@ -627,8 +627,8 @@ function renderEntities(data) {
     if (f.isBoss && !bossVisible()) return;
     liveFighterIds.add(f.id);
     // close friends (3+ hearts) wear a little heart by their name; the rival gets a star
-    const tag = f.isRival ? ' ⭐' : (!f.isBoss && friendHearts(f) >= SIG_HEARTS ? ' 💞' : '');
-    const cls = f.isBoss ? 'boss' : 'npc' + (f.isRival ? ' rival' : '');
+    const tag = f.isRival ? ' ⭐' : f.isAtlas ? ' ✦' : (!f.isBoss && friendHearts(f) >= SIG_HEARTS ? ' 💞' : '');
+    const cls = f.isBoss ? 'boss' : 'npc' + (f.isRival ? ' rival' : '') + (f.isAtlas ? ' atlas' : '');
     let e = oldEntityEls.get(f.id);
     if (e && e.isConnected) {
       // Reused as-is: only sync position/name/rival-status, never recreate, so an in-flight wander
@@ -641,7 +641,7 @@ function renderEntities(data) {
       // the duplicate Rook/boss sightings reported by a player. Toggling just the `rival` class (the only
       // thing about identity that can actually change) instead of gating reuse on the whole className fixes
       // the duplication without also wiping a still-playing one-shot animation class on every render.
-      e.classList.toggle('rival', !!f.isRival);
+      e.classList.toggle('rival', !!f.isRival); e.classList.toggle('atlas', !!f.isAtlas);
       e.dataset.x = f.x; e.dataset.y = f.y;
       e.style.setProperty('--x', f.x); e.style.setProperty('--y', f.y); e.style.zIndex = f.y * 2 + 1;
       const nameEl = e.querySelector('.ent-name'); if (nameEl) nameEl.innerHTML = `${escapeHtml(f.name)}${tag}`;
@@ -659,7 +659,7 @@ function renderEntities(data) {
 
 function renderTown(justMoved) {
   const key = state.currentDistrict, def = DISTRICTS[key], data = ensureDistrictData(key);
-  syncRival();
+  syncRival(); syncAtlas();
   tickItems(data);
   districtNameEl.textContent = def.name;
   const hudDistrictEl = document.getElementById('hudDistrict'); if (hudDistrictEl) hudDistrictEl.textContent = def.name;

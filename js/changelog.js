@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta ${RELEASES[0].n} (build $
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'new', x: 'The Atlas: summon it and it walks with you through every district (look for the violet glow). Tap it to ask a few questions, take on four matches that each bend a rule, play harder versions of the house games for Embers, and buy decorations only it sells.' },
   { t:'new', x: 'The altar, in your cottage: beat a district god, offer three spare cards of their family, and the god is summoned as a card. Summon all four and something else may answer. Releasing a spare now needs three copies of the card, so two are always kept.' },
   { t:'new', x: 'Two new top rarities, Divine and Atlas, and five new cards to go with them: the four spirit gods (Duermevela, Murmullo, Marea Lenta and Ensueño) and The Atlas. They never appear in packs, on the ground or in prizes, and cannot be traded up to: they are earned at the altar, which is coming next. That makes 100 cards in all.' },
   { t:'better', x: 'The card list is cut from 151 to 95 cards (20 creatures per family plus the 15 spells), and every card that stays has its dream name (for example Aurora Stag is Dawn Stag, Pebble is Worry Stone and Deep Current is Slow Current). The 22 Fates now each belong to a kept card, the eight card sets and the Lantern Pack are rebuilt from kept cards, and the Card Museum and Expeditions are gone for now (they come back later as the Hall of Spirits).' },

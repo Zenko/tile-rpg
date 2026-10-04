@@ -66,6 +66,11 @@ const DECORATION_ITEMS = [
   { id: 'crystal-fountain', name: 'Crystal Fountain', icon: '⛲', cost: 160, level: 10, desc: 'Water that chimes as it falls.', cat: 'ornament' },
   { id: 'wishing-tree', name: 'Wishing Tree', icon: '🎋', cost: 220, level: 12, desc: 'Ribbons from every wish ever made.', cat: 'plant' },
   { id: 'golden-keeper', name: 'Golden Keeper', icon: '🏆', cost: 300, level: 15, desc: 'A statue of the Keeper, mid-triumph.', cat: 'ornament' },
+  // sold only by the Atlas (js/atlas.js ATLAS_SHOP), never in the Card Shop
+  { id: 'atlas-compass', name: 'Compass Rose', icon: '🧭', cost: 150, desc: 'It always points at something you meant to find.', cat: 'ornament', atlas: true },
+  { id: 'atlas-lantern', name: 'Map Lantern', icon: '🏮', cost: 180, desc: 'Lights up the parts of the ground nobody has drawn yet.', cat: 'ornament', atlas: true },
+  { id: 'dream-globe', name: 'Dream Globe', icon: '🌐', cost: 240, desc: 'Turn it and a different dream faces you.', cat: 'ornament', atlas: true },
+  { id: 'star-chart', name: 'Star Chart', icon: '🌌', cost: 320, desc: 'Every star on it is a place you almost went.', cat: 'ornament', atlas: true }
 ];
 
 const CARD_POOL = [

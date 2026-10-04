@@ -123,6 +123,7 @@ function talkEls() { return { ov: document.getElementById('talkOverlay'), name: 
   main: document.getElementById('talkMain'), fight: document.getElementById('talkFight'), close: document.getElementById('talkClose'), tag: document.getElementById('talkTag') }; }
 function activeCount() { return Object.values(reqState().list).filter(r => r.state === 'active').length; }
 function openTalk(f) {
+  if (f.isAtlas) { openAtlas(); return; }          // the Atlas has its own scene (js/atlas.js)
   talkTo = f; const e = talkEls();
   bumpStat('talks', 1);
   e.name.textContent = f.name;

@@ -176,6 +176,7 @@ const GUIDE = [
   { section: 'Houses & shops', items: [
     { icon: '🫧', name: 'Embers and soft limits', where: 'Settings → Ember ledger', how: 'Fishing, crops, the Dreamers’ Cup and Draft Runs pay full Embers up to a daily amount, then less, then less again - it resets every morning. The Ember ledger in Settings shows where yours came from. Bigger purchases (premium rings, backdrops and decorations) open up as you level.' },
     { icon: '🏠', name: 'Your cottage', where: 'El Umbral, beside the Reading Nook', how: 'Mailbox, shelves, framed cards, trophies, and the Tidy Up game.' },
+    { icon: '🗺️', name: 'The Atlas', where: 'Wherever you are, once summoned', how: 'It walks with you from district to district. Ask it questions, take on four matches that each bend a rule, play harder versions of the house games, and buy decorations only it sells. It never explains itself.', lock: () => atlasHome() ? '' : 'Summon it at the altar first.' },
     { icon: '🕯️', name: 'The altar', where: 'Your cottage', how: 'Summon the four district gods as cards: beat the god, then offer three spare cards of their family. When all four are home, something else may answer. Divine and Atlas cards are never in packs.' },
     { icon: '🍞', name: "Maple's Bakery", where: 'El Umbral, bottom left', how: 'Bake bread, cook dishes from your pantry, and play Cake Toppings.' },
     { icon: '🌱', name: "Fern's Cottage", where: 'El Umbral, the blue house', how: 'Seeds for your garden, and Weed the Beds.' },

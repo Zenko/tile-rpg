@@ -256,10 +256,10 @@ function miniView(id) {
   const d = MINIGAMES[id], ms = miniState(id), left = Math.max(0, MINI_DAILY_REWARDED - ms.rewarded);
   return { label: `${d.icon} Play: ${d.title}${left ? ` · ${left} prize${left === 1 ? '' : 's'} left today` : ' · just for fun today'}${ms.golds ? ' 🥇' : ''}` };
 }
-function miniStart(id) {
+function miniStart(id, atlas) {
   miniStop();
   const def = MINIGAMES[id];
-  mini = { id, def, st: def.init(), done: false, timers: [], house: scene.id };
+  mini = { id, def, st: def.init(), done: false, timers: [], house: scene.id, atlas: !!atlas };
   const best = miniState(id).best;
   scene.text = def.how + (best !== null ? ` Your best: ${def.scoreText(best)}` : '');
   showTipOnce('minigames');
@@ -287,8 +287,8 @@ function miniLeaveStage() {
 }
 function miniTier(def, score) {
   if (def.tierOf) return def.tierOf(score);
-  const t = def.tiers;
-  return score >= t.gold ? 'gold' : score >= t.silver ? 'silver' : score >= t.bronze ? 'bronze' : null;
+  const t = def.tiers, k = mini && mini.atlas ? ATLAS_HARD : 1;      // the Atlas's versions raise every medal line (js/atlas.js)
+  return score >= Math.ceil(t.gold * k) ? 'gold' : score >= Math.ceil(t.silver * k) ? 'silver' : score >= Math.ceil(t.bronze * k) ? 'bronze' : null;
 }
 // Shared by every mini-game - the scene-modal ones (tea, quiz, ...) and any played live on the map itself
 // (Hide and Seek, see town-render-weather.js) - so tiers, pebbles, the daily reward cap, gold card odds and
@@ -320,7 +320,7 @@ function miniFinish(score) {
   if (!mini || mini.done) return;
   miniClearTimers();
   mini.done = true;
-  const def = mini.def, r = awardMinigameResult(mini.id, score);
+  const def = mini.def, r = mini.atlas ? atlasMiniResult(mini.id, score) : awardMinigameResult(mini.id, score);
   scene.text = `${def.scoreText(score)} ${r.tier ? MEDAL[r.tier] + '!' : ''} ${r.rewardText}${r.better && r.tier ? ' ⭐ New best!' : ''}`;
   sfx(r.tier === 'gold' ? 'win' : r.tier ? 'claim' : 'soft'); if (r.tier) buzz(HAP.found);
   renderScene();

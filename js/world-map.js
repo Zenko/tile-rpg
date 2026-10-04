@@ -96,7 +96,7 @@ function renderWmSheet() {
   const tw = BattleEngine.TWISTS[BOSS_TWIST[key]];
   let rows = '';
   if (st.visited) {
-    const data = state.districtData[key], names = ((data && data.npcs) || []).filter(n => !n.isBoss && !n.isRival).map(n => n.name);
+    const data = state.districtData[key], names = ((data && data.npcs) || []).filter(n => !n.isBoss && !n.isRival && !n.isAtlas).map(n => n.name);
     rows += wmRow('PLACES', `<div class="wm-chips">${wmPlaces(key, st)}</div>`);
     rows += wmRow('NEIGHBOURS', names.length ? wmEsc(names.join(', ')) : 'No one around right now');
   } else if (st.unlocked) {
