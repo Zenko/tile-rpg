@@ -10,7 +10,7 @@ function binderPages() {
   const real = CARD_POOL.filter(c => !c.foe);
   return RARITY_ORDER.map(r => ({ id: r, icon: ({ common: '⚪', rare: '🔵', ultra: '🟣', super: '🟠', mythic: '🌸', divine: '✨', atlas: '🗺️' })[r] || '⚪', name: RARITY_LABEL[r], ids: real.filter(c => c.rarity === r).map(c => c.id) }))
     .concat(Object.keys(FAMILIES).map(f => ({ id: f, icon: FAMILIES[f].icon, name: FAMILIES[f].name, ids: real.filter(c => CARD_FAMILY[c.id] === f).map(c => c.id) })))
-    .concat(typeof ARCANA !== 'undefined' ? [{ id: 'tarot', icon: '🔮', name: 'Major Arcana', ids: ARCANA.map(a => a.card) }] : [])
+    .concat(typeof ARCANA !== 'undefined' ? [{ id: 'tarot', icon: '🔮', name: 'Fates', ids: ARCANA.map(a => a.card) }] : [])
     .filter(p => p.ids.length);
 }
 function binderDone() { const p = state.progress; if (!p.binderDone || typeof p.binderDone !== 'object') p.binderDone = {}; return p.binderDone; }
@@ -31,6 +31,6 @@ function binderHtml() {
   const pages = binderPages(), byRar = pages.filter(p => RARITY_ORDER.includes(p.id)), byFam = pages.filter(p => !RARITY_ORDER.includes(p.id) && p.id !== 'tarot'), byArc = pages.filter(p => p.id === 'tarot');
   const stars = Object.keys(state.progress.mastery || {}).reduce((n, id) => n + masteryRank(id), 0);
   return `<div class="bn-card"><div class="bn-title">Binder</div><div class="bn-sub">Fill a page for a one-time Ember prize.</div>
-    <div class="bn-group">By rarity</div>${byRar.map(row).join('')}<div class="bn-group">By family</div>${byFam.map(row).join('')}${byArc.length ? `<div class="bn-group">Tarot</div>${byArc.map(row).join('')}` : ''}
+    <div class="bn-group">By rarity</div>${byRar.map(row).join('')}<div class="bn-group">By family</div>${byFam.map(row).join('')}${byArc.length ? `<div class="bn-group">Fates</div>${byArc.map(row).join('')}` : ''}
     <div class="bn-foot"><span>★ ${stars} mastery stars</span><span>${Object.keys(done).length} of ${pages.length} pages complete</span></div></div>`;
 }

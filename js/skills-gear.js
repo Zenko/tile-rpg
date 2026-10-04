@@ -25,7 +25,7 @@ const SKILL_BRANCHES = [
     text: r => `Finds +${6 * r}%, chests +${4 * r}%, XP +${2 * r}%` },
 ];
 const GEAR = [
-  { id: 'rod',     icon: '🎣', name: 'Fishing rod',  tiers: [{ cost: 60, level: 3, name: 'Willow rod' }, { cost: 150, level: 8, name: 'Bamboo rod' }, { cost: 320, level: 15, name: 'Silver rod' }],
+  { id: 'rod',     icon: '🎣', name: 'Thought Fishing rod',  tiers: [{ cost: 60, level: 3, name: 'Willow rod' }, { cost: 150, level: 8, name: 'Bamboo rod' }, { cost: 320, level: 15, name: 'Silver rod' }],
     perks: t => [{ kind: 'fish', val: 0.06 * t }], text: t => `Fish bite ${6 * t}% sooner` },
   { id: 'can',     icon: '🚿', name: 'Watering can', tiers: [{ cost: 60, level: 3, name: 'Tin can' }, { cost: 150, level: 8, name: 'Copper can' }, { cost: 320, level: 15, name: 'Rain-glass can' }],
     perks: t => [{ kind: 'crops', val: 0.06 * t }], text: t => `Crops grow ${6 * t}% faster` },

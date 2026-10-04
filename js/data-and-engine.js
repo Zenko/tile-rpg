@@ -14,19 +14,19 @@ const RELEASE_VALUE = { common: 1, rare: 3, ultra: 8, super: 20, mythic: 50, div
 // Pack odds are flat on purpose: they must NOT scale with wins, or a veteran's packs would
 // out-pay their own cost and release-and-rebuy would become free money (checked by simulation).
 const PACKS = [
-  { id: 'puddle', name: 'Puddle Pack', icon: '💦', cost: 4,  floorLabel: 'Any card',           desc: 'A cheap, quick draw - mostly commons, but every card has a shot.',
+  { id: 'puddle', name: 'Nap Pack', icon: '💦', cost: 4,  floorLabel: 'Any card',           desc: 'A cheap, quick draw - mostly commons, but every card has a shot.',
     odds: { common: 0.78, rare: 0.17, ultra: 0.04, super: 0.008, mythic: 0.002 } },
-  { id: 'meadow', name: 'Meadow Pack', icon: '🌾', cost: 8,  floorLabel: 'Any card',           desc: 'Mostly everyday finds, with a chance of something better.',
+  { id: 'meadow', name: 'Daydream Pack', icon: '🌾', cost: 8,  floorLabel: 'Any card',           desc: 'Mostly everyday finds, with a chance of something better.',
     odds: { common: 0.62, rare: 0.27, ultra: 0.08, super: 0.025, mythic: 0.005 } },
-  { id: 'brook',  name: 'Brook Pack',  icon: '💧', cost: 30, floorLabel: 'Rare or better',     desc: 'A rare card is guaranteed.',
+  { id: 'brook',  name: 'Moonlit Pack',  icon: '💧', cost: 30, floorLabel: 'Rare or better',     desc: 'A rare card is guaranteed.',
     odds: { common: 0, rare: 0.70, ultra: 0.22, super: 0.065, mythic: 0.015 } },
-  { id: 'orchard', name: 'Orchard Pack', icon: '🍂', cost: 55, floorLabel: 'Rare or better',   desc: 'Better odds than a Brook Pack for the same guarantee.',
+  { id: 'orchard', name: 'Midnight Pack', icon: '🍂', cost: 55, floorLabel: 'Rare or better',   desc: 'Better odds than a Moonlit Pack for the same guarantee.',
     odds: { common: 0, rare: 0.52, ultra: 0.35, super: 0.10, mythic: 0.03 } },
-  { id: 'aurora', name: 'Aurora Pack', icon: '🌌', cost: 105, floorLabel: 'Ultra rare or better', desc: 'An ultra rare card is guaranteed.',
+  { id: 'aurora', name: 'Lucid Pack', icon: '🌌', cost: 105, floorLabel: 'Ultra rare or better', desc: 'An ultra rare card is guaranteed.',
     odds: { common: 0, rare: 0, ultra: 0.78, super: 0.18, mythic: 0.04 } },
-  { id: 'zenith', name: 'Zenith Pack', icon: '⛰️', cost: 280, floorLabel: 'Super or better', desc: 'A super rare card is guaranteed, with a real shot at mythic.',
+  { id: 'zenith', name: 'Reverie Pack', icon: '⛰️', cost: 280, floorLabel: 'Super or better', desc: 'A super rare card is guaranteed, with a real shot at mythic.',
     odds: { common: 0, rare: 0, ultra: 0, super: 0.82, mythic: 0.18 } },
-  { id: 'spellbook', name: 'Spellbook Pack', icon: '📜', cost: 30, floorLabel: 'Always a spell', only: 'spell', desc: 'A single spell card: instant effects that never take a board slot.',
+  { id: 'spellbook', name: 'Lullaby Pack', icon: '📜', cost: 30, floorLabel: 'Always a spell', only: 'spell', desc: 'A single spell card: instant effects that never take a board slot.',
     odds: { common: 0.45, rare: 0.36, ultra: 0.13, super: 0.045, mythic: 0.015 } }
 ];   // defeated neighbors return after 3 minutes
 
@@ -40,7 +40,7 @@ const DECORATION_ITEMS = [
   { id: 'flag', name: 'Little Flag', icon: '🚩', cost: 10, desc: 'Marks the spot as yours.', cat: 'ornament' },
   { id: 'wildflowers', name: 'Wildflower Patch', icon: '🌼', cost: 12, desc: "A little wild, on purpose.", cat: 'plant' },
   { id: 'basket', name: 'Woven Basket', icon: '🧺', cost: 12, desc: 'Left out, waiting to be filled.', cat: 'ornament' },
-  { id: 'gardenrock', name: 'Garden Stone', icon: '🪨', cost: 14, desc: 'Smooth and cool to the touch.', cat: 'ornament' },
+  { id: 'gardenrock', name: 'Memory Stone', icon: '🪨', cost: 14, desc: 'Smooth and cool to the touch.', cat: 'ornament' },
   { id: 'candle', name: 'Garden Candle', icon: '🕯️', cost: 14, desc: "Flickers even when there's no wind.", cat: 'lighting' },
   { id: 'lantern', name: 'Paper Lantern', icon: '🏮', cost: 15, desc: 'Glows soft even in daylight.', cat: 'lighting' },
   { id: 'tulips', name: 'Tulip Bed', icon: '🌷', cost: 16, desc: 'Planted in a tidy little row.', cat: 'plant' },
@@ -60,12 +60,12 @@ const DECORATION_ITEMS = [
   { id: 'firefly-jar', name: 'Firefly Jar', icon: '🫙', cost: 30, desc: 'A soft, flickering light for dark evenings.', night: true, cat: 'lighting' },
   { id: 'star-garland', name: 'Star Garland', icon: '💫', cost: 35, desc: 'Twinkles like a tiny night sky.', night: true, cat: 'lighting' },
   { id: 'moon-lamp', name: 'Moon Lamp', icon: '🌕', cost: 45, desc: 'A little moon of your own.', night: true, cat: 'lighting' },
-  // Premium decorations (v1.87.0): the big, aspirational Ember sinks. `level` is the Keeper level that opens them in the shop.
+  // Premium decorations (v1.87.0): the big, aspirational Ember sinks. `level` is the Dreamer level that opens them in the shop.
   { id: 'moon-gate', name: 'Moon Gate', icon: '⛩️', cost: 90, level: 6, desc: 'A round stone gate. Walk through it twice for luck.', cat: 'ornament' },
-  { id: 'koi-pond', name: 'Koi Pond', icon: '🐟', cost: 120, level: 8, desc: 'A still pond with a slow, golden visitor.', cat: 'plant' },
+  { id: 'koi-pond', name: 'Dreaming Pond', icon: '🐟', cost: 120, level: 8, desc: 'A still pond with a slow, golden visitor.', cat: 'plant' },
   { id: 'crystal-fountain', name: 'Crystal Fountain', icon: '⛲', cost: 160, level: 10, desc: 'Water that chimes as it falls.', cat: 'ornament' },
   { id: 'wishing-tree', name: 'Wishing Tree', icon: '🎋', cost: 220, level: 12, desc: 'Ribbons from every wish ever made.', cat: 'plant' },
-  { id: 'golden-keeper', name: 'Golden Keeper', icon: '🏆', cost: 300, level: 15, desc: 'A statue of the Keeper, mid-triumph.', cat: 'ornament' },
+  { id: 'golden-keeper', name: 'Golden Dreamer', icon: '🏆', cost: 300, level: 15, desc: 'A statue of the Dreamer, mid-triumph.', cat: 'ornament' },
   // sold only by the Atlas (js/atlas.js ATLAS_SHOP), never in the Card Shop
   { id: 'atlas-compass', name: 'Compass Rose', icon: '🧭', cost: 150, desc: 'It always points at something you meant to find.', cat: 'ornament', atlas: true },
   { id: 'atlas-lantern', name: 'Map Lantern', icon: '🏮', cost: 180, desc: 'Lights up the parts of the ground nobody has drawn yet.', cat: 'ornament', atlas: true },
@@ -316,10 +316,10 @@ const BattleEngine = (function () {
     tide:  { icon: '🌊', text: 'Every 4th turn, the tide washes your strongest card back to your hand.' },
     bloom: { icon: '🌻', text: 'Its 1-cost cards all have Bloom.' }
   };
-  /* ---------- Keeper's Knack (v1.84.0) ----------
+  /* ---------- Dreamer’s Gift (v1.84.0) ----------
      One free, once-per-match ability the player picks before the match (the keep-this-hand screen), unlocked by level. It
      is usable from its own turn number (`from`), takes no energy, and none of them need aiming, so one tap does it. Neighbors don't
-     have one: it is the player's edge. `level` is the Keeper level that unlocks it (progression.js reads it). */
+     have one: it is the player's edge. `level` is the Dreamer level that unlocks it (progression.js reads it). */
   const KNACKS = {
     forage:     { icon: '🧺', name: 'Forage',      level: 1,  from: 2, text: 'Draw 2 cards.' },
     soothe:     { icon: '🌿', name: 'Soothe',      level: 3,  from: 2, text: 'Restore 6 Calm and heal each of your cards by 2.' },
@@ -330,7 +330,7 @@ const BattleEngine = (function () {
   };
   function knackReady(G, who) {
     const pl = G.p[who];
-    if (!pl.knack || !KNACKS[pl.knack]) return { ok: false, why: 'No Knack chosen' };
+    if (!pl.knack || !KNACKS[pl.knack]) return { ok: false, why: 'No Gift chosen' };
     if (G.over || G.active !== who) return { ok: false, why: 'Not your turn' };
     if (pl.knackUsed) return { ok: false, why: 'Already used this match' };
     if (pl.turns < KNACKS[pl.knack].from) return { ok: false, why: `Ready on your turn ${KNACKS[pl.knack].from}` };
@@ -360,9 +360,9 @@ const BattleEngine = (function () {
   }
 
   /* ---------- Fate: the Arcana powers (build 111) ----------
-     A second once-per-match power, taken from one of the Major Arcana the player has attuned (js/tarot.js maps each Arcana to
-     one of these ids). Like the Knack it is free, needs no aiming and is used from the player's own turn `from`; unlike the
-     Knack it is situational and always costs a little (Calm, tempo or a risk), and it comes later (turn 3 to 5). Neighbors
+     A second once-per-match power, taken from one of the Fates the player has attuned (js/tarot.js maps each Arcana to
+     one of these ids). Like the Gift it is free, needs no aiming and is used from the player's own turn `from`; unlike the
+     Gift it is situational and always costs a little (Calm, tempo or a risk), and it comes later (turn 3 to 5). Neighbors
      have none. Balanced by simulation (see HANDOFF §5): each Fate adds roughly one to five points of win rate. */
   const FATES = {
     fool:       { icon: '🃏', name: 'The Fool',           from: 3, text: 'Draw 1 card.' },
@@ -607,7 +607,7 @@ const BattleEngine = (function () {
                    swiftBonus (+power to Flicker), bloomStart (+power to Bloom), shieldHp (+health to Haze), mendBonus (Rest restores
                    more), echoBonus (Startle hits harder) and famHp { family, hp } (a district's "home turf": its family is tougher).
      opts.twist  = { side, kind } - a district boss's rule twist (see TWISTS).
-     opts.knack  = [idForPlayer0, idForPlayer1] - Keeper's Knack choices (see KNACKS); only the player uses one.
+     opts.knack  = [idForPlayer0, idForPlayer1] - Dreamer’s Gift choices (see KNACKS); only the player uses one.
      opts.first  = 0 or 1 - who takes the first turn (the coin/dice toss). The other seat is "second" and gets the catch-up
                    bonus: +1 card and +1 energy on its first turns. Old puzzle snapshots have no G.first, so it reads as 0. */
   function newGame(deckA, deckB, rng, opts) {

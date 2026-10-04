@@ -14,7 +14,7 @@ for (let s = 500; s <= 10000; s += 500) {
 
 const QUEST_POOL = [
   { id: 'draft2',   icon: '🎴', name: 'Win 2 matches in a Draft Run', goal: 2, stat: 'draftWins', reward: 'rare' },
-  { id: 'knack1',   icon: '✨', name: "Use your Keeper's Knack in a match", goal: 1, stat: 'knacksUsed', reward: 'common' },
+  { id: 'knack1',   icon: '✨', name: "Use your Dreamer’s Gift in a match", goal: 1, stat: 'knacksUsed', reward: 'common' },
   { id: 'find2',    icon: '🍂', name: 'Find 2 cards on the ground',   goal: 2,  stat: 'cardsFound',      reward: 'common' },
   { id: 'find3',    icon: '🃏', name: 'Find 3 cards on the ground',   goal: 3,  stat: 'cardsFound',      reward: 'rare' },
   { id: 'find5',    icon: '✨', name: 'Find 5 cards on the ground',   goal: 5,  stat: 'cardsFound',      reward: 'ultra' },
@@ -119,7 +119,7 @@ const ACHIEVEMENTS = [
   { id: 'ghost-5',    icon: '👻', name: 'Beat 5 ghosts of other testers\' decks', test: () => (state.progress.totals.ghostWins || 0) >= 5 },
   { id: 'draft-1',    icon: '🎴', name: 'Cleared a Draft Run', test: () => (state.progress.totals.draftClears || 0) >= 1 },
   { id: 'draft-5',    icon: '🃏', name: 'Cleared 5 Draft Runs', test: () => (state.progress.totals.draftClears || 0) >= 5 },
-  { id: 'knack-10',   icon: '✨', name: 'Used your Knack 10 times', test: () => (state.progress.totals.knacksUsed || 0) >= 10 },
+  { id: 'knack-10',   icon: '✨', name: 'Used your Gift 10 times', test: () => (state.progress.totals.knacksUsed || 0) >= 10 },
   { id: 'toss-10',    icon: '🪙', name: 'Won the first-turn toss 10 times', test: () => (state.progress.totals.tossWins || 0) >= 10 },
   { id: 'acts-25',     icon: '🪑', name: '25 town interactions', test: () => (state.progress.totals.townActs || 0) >= 25 },
   { id: 'acts-100',    icon: '🏘️', name: '100 town interactions', test: () => (state.progress.totals.townActs || 0) >= 100 },

@@ -25,7 +25,7 @@ const CALM_ACTIVITIES = [
   { id: 'stars',    icon: '✨', name: 'Star gazing',     text: 'Join the dots in the night sky.', night: true },
   { id: 'tea',      icon: '🍵', name: 'Tea ritual',      text: 'Pour, steep, sip.' },
   { id: 'bonsai',   icon: '🪴', name: 'Bonsai',          text: 'A tree that grows while you are away.' },
-  { id: 'tarot',    icon: '🔮', name: 'Tarot',           text: 'A daily reading, and the Major Arcana.' },
+  { id: 'tarot',    icon: '🔮', name: 'Fates',           text: 'A daily reading, and the Fates.' },
 ];
 const CALM_SCALE = [392, 440, 523, 587, 659, 784, 880];     // a pentatonic scale: any two notes sound fine together
 const CALM_TEA_LINES = ['The steam curls and lets go.', 'Warm hands, a quiet mind.', 'Nothing needs you for the next minute.', 'The cup is just the right size.', 'Somewhere, rain on a roof.', 'You taste leaves, and a little sunlight.', 'Slow is also a speed.', 'The kettle sings and settles.', 'A good pause is a kind of progress.', 'You do not have to finish anything.'];

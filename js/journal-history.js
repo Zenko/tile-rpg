@@ -86,7 +86,7 @@ function jChips(el, list, current, onPick) {
 }
 
 /* ---------------- the log: grouped by day, filterable, and every entry links to where it lives ---------------- */
-const LOG_FILTERS = [['all', 'All'], ['cards', 'Cards'], ['battles', 'Battles'], ['fishing', 'Fishing'], ['town', 'Town'], ['social', 'Social']];
+const LOG_FILTERS = [['all', 'All'], ['cards', 'Cards'], ['battles', 'Battles'], ['fishing', 'Thought Fishing'], ['town', 'Town'], ['social', 'Social']];
 // Older entries carry no category, so it is worked out from the wording; new code can pass one to logEvent().
 function eventCategory(e) {
   if (e.cat) return e.cat;

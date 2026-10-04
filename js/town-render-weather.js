@@ -72,10 +72,10 @@ function advanceClock() {
 
 const WEATHER_KINDS = {
   clear:  { icon: '', name: 'Clear skies', weight: (n) => n ? 5 : 6 },
-  cloudy: { icon: '☁️', name: 'Cloudy', weight: () => 3 },
-  rain:   { icon: '🌧️', name: 'Rain', weight: (n) => n ? 2 : 2.4 },
-  storm:  { icon: '⛈️', name: 'Storm', weight: (n) => n ? 1.1 : 0.8 },
-  snow:   { icon: '❄️', name: 'Snow', weight: () => 0.9 }
+  cloudy: { icon: '☁️', name: 'Mist', weight: () => 3 },
+  rain:   { icon: '🌧️', name: 'Moonrain', weight: (n) => n ? 2 : 2.4 },
+  storm:  { icon: '⛈️', name: 'Dream storm', weight: (n) => n ? 1.1 : 0.8 },
+  snow:   { icon: '❄️', name: 'Drifting stars', weight: () => 0.9 }
 };
 // TEMPORARY test switch: while set, only these kinds can roll (for chasing the screen-flash report). Set to null to
 // restore normal weather.

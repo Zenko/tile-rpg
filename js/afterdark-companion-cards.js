@@ -62,9 +62,9 @@ function buyNightPack() {
   if (!pool.length) pool = NIGHT_CARDS.map(cardDef).filter(Boolean);
   const cid = seasonalPick(pool).id, isNew = !discoveredSet().has(cid);
   state.ownedCards.push(cid); noteCardsFound(1); state.progress.packsOpened += 1;
-  logEvent('🌙', `Bought a Night Pack from Lumen for 🫧 ${NIGHT_PACK_COST}.`);
+  logEvent('🌙', `Bought a Lantern Pack from Lumen for 🫧 ${NIGHT_PACK_COST}.`);
   saveState(); updateHud(); bumpPill('pillCards'); bumpPill('pillPebbles');
-  showCardReveal(cid, 'Night Pack', true);
+  showCardReveal(cid, 'Lantern Pack', true);
   if (isNew) toast('📖 New entry in your Index');
   return 'Lumen tears the dark paper with one talon. "May it serve you well."';
 }

@@ -4,7 +4,7 @@
    collection - by taking one card from each of twelve offers of three, then take it through four matches of rising
    difficulty. A loss ends the run. It plays on neutral ground: your collection's extras (mastery, charms, snacks, the
    companion) stay home, so a new player and a veteran draft on equal terms (battle.neutral, see startBattleNow).
-   The Keeper's Knack still counts, since that is yours rather than your cards'.
+   The Dreamer’s Gift still counts, since that is yours rather than your cards'.
    Rewards: Embers per round (the first 3 runs a day pay in full, then half), and a super-or-better card for the first
    clear each day. Wins here don't count toward district wins; they have their own stats.
    State lives in state.progress.draft (draftState()); the pick screen is #draftOverlay, the run's buttons are the

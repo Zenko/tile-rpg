@@ -26,7 +26,7 @@ function startBattle(opponent) {
 function btIntro(opponent, isBoss, first) {
   return new Promise(resolve => {
     const tw = bossTwistFor(opponent), t = tw ? BattleEngine.TWISTS[tw] : null;
-    const tag = isBoss ? '👑 District boss' : opponent.atlas ? '🗺️ The Atlas' : opponent.cup ? '🏆 Dreamers’ Cup' : opponent.draft ? '🎴 Draft Run' : opponent.ghost ? '👻 Ghost duel' : opponent.dungeon ? '🕯️ Cellar' : opponent.isRival ? '⚡ Rival' : '⚔️ Friendly match';
+    const tag = isBoss ? '👑 District boss' : opponent.atlas ? '🗺️ The Atlas' : opponent.cup ? '🏆 Dreamers’ Cup' : opponent.draft ? '🎴 Draft Run' : opponent.ghost ? '👻 Lingering duel' : opponent.dungeon ? '🕯️ Cellar' : opponent.isRival ? '⚡ Rival' : '⚔️ Friendly match';
     const el = document.createElement('div'); el.className = 'bt-intro' + (isBoss ? ' boss' : '');
     el.innerHTML = `<div class="bt-intro-side opp"><span class="bt-intro-av"></span><div><div class="bt-intro-name"></div><div class="bt-intro-tag">${tag}</div></div></div>
       <div class="bt-intro-vs">VS</div>
@@ -164,7 +164,7 @@ function startBattleNow(opponent, first) {
     btGet('mulliganOverlay').classList.remove('hidden');
   });
 }
-/* The keep-this-hand loadout (snack, Knack, Fate, Spread) is four rows that share one look: a header showing your current pick
+/* The keep-this-hand loadout (snack, Gift, Fate, Spread) is four rows that share one look: a header showing your current pick
    (tap it to open the row) and the choices underneath. Only one row is open at a time (battle.mullOpen), so the screen never
    grows past the phone and the Keep / Draw buttons stay pinned in view. All four rows are always in the DOM (closed rows are
    hidden by CSS), and a tap on a header only flips the `open` class. */
@@ -223,7 +223,7 @@ function btRenderMulliganHand() {
   });
 }
 
-/* ---------- Keeper's Knack (v1.84.0) ----------
+/* ---------- Dreamer’s Gift (v1.84.0) ----------
    Your once-per-match ability (BattleEngine.KNACKS). Pick it on the keep-this-hand screen (or in Character -> Me); during the
    match a round button by your bar opens a small sheet with what it does and a "Use" button. It needs no aiming. */
 function knackChipsHtml(selectedId, inBattle) {
@@ -235,7 +235,7 @@ function knackChipsHtml(selectedId, inBattle) {
 function knackPickerWire(box, onPick) {
   box.querySelectorAll('[data-knack]').forEach(b => b.addEventListener('click', () => {
     const id = b.dataset.knack, k = BattleEngine.KNACKS[id];
-    if (!knackUnlocked(id)) { toast(`${k.name} unlocks at Keeper level ${k.level}`); return; }
+    if (!knackUnlocked(id)) { toast(`${k.name} unlocks at Dreamer level ${k.level}`); return; }
     chooseKnack(id); sfx('tap'); onPick(id);
   }));
 }
@@ -244,7 +244,7 @@ function btRenderKnackRow() {
   if (battle.puzzle) { row.classList.add('hidden'); return; }
   row.classList.remove('hidden');
   const cur = battle.G.p[0].knack, k = BattleEngine.KNACKS[cur];
-  row.innerHTML = mullRowHtml('knack', k ? k.icon : '✨', 'Knack · once per match', k ? k.name : 'None', `<div class="knack-chips">${knackChipsHtml(cur)}</div><div class="knack-desc">${k ? `${k.icon} <b>${k.name}.</b> ${k.text} <i>From your turn ${k.from}.</i>` : ''}</div>`);
+  row.innerHTML = mullRowHtml('knack', k ? k.icon : '✨', 'Gift · once per match', k ? k.name : 'None', `<div class="knack-chips">${knackChipsHtml(cur)}</div><div class="knack-desc">${k ? `${k.icon} <b>${k.name}.</b> ${k.text} <i>From your turn ${k.from}.</i>` : ''}</div>`);
   mullRowOpen(row, 'knack');
   knackPickerWire(row, id => { BattleEngine.setKnack(battle.G, 0, id); btRenderKnackRow(); btRenderKnack(); });
 }
@@ -264,7 +264,7 @@ function btShowKnackTip() {
   const G = battle.G, pl = G.p[0], k = BattleEngine.KNACKS[pl.knack]; if (!k) return;
   const chk = BattleEngine.knackReady(G, 0), ok = chk.ok && !battle.busy;
   const tip = btGet('btTip');
-  tip.innerHTML = `<div class="t-h"><span class="ic">${k.icon}</span><b>${k.name}</b><small>Your Knack · once per match</small></div>
+  tip.innerHTML = `<div class="t-h"><span class="ic">${k.icon}</span><b>${k.name}</b><small>Your Gift · once per match</small></div>
     <div class="kw">${k.text}</div>
     ${pl.knackUsed ? '<div class="kw" style="color:var(--ink-soft)">Already used this match.</div>' : ok ? '<button class="btn knack-use" id="btKnackUse" type="button">Use it now</button>' : `<div class="hint">${chk.why}.</div>`}`;
   tip.classList.add('show', 'interactive'); battleView.classList.add('tip-open'); btPlaceTip();     // unlike a card sheet this one has a button, so it takes taps
@@ -284,7 +284,7 @@ async function btDoKnack() {
 }
 
 /* ---------- Fate: your attuned Arcana's once-per-match power (build 111) ----------
-   Works like the Knack: pick one of your attuned Arcana on the keep-this-hand screen, then a round button by your bar
+   Works like the Gift: pick one of your attuned Arcana on the keep-this-hand screen, then a round button by your bar
    glows when it can be used (BattleEngine.FATES). Hidden when nothing is attuned, in puzzles and in draft/neutral matches. */
 function btRenderFateRow() {
   const row = btGet('fateRow'); if (!row || !battle) return;
@@ -1240,7 +1240,7 @@ function btShowHelp() {
     <b>✨ Spells</b> are cast from your hand for an instant effect and never take a board slot. Some are aimed: cast it, then tap an enemy card. Watch does not stop a spell.<br><br>
     <b>District bosses</b> each bend one rule: 🌳 Duermevela heals 3 Calm every turn, 🧱 Murmullo's Watch cards are extra sturdy, 🌊 Marea Lenta's tide washes your strongest card back to hand every 4th turn, and 🌻 Ensueño's cheap cards all Bloom.<br><br>
     <b>The world joins in</b> (for both sides): ☀️ clear Bloom +1 power, ☁️ cloud Haze +1 health, 🌧️ rain Rest heals +1, ⛈️ storm Flicker +1 power, 🌙 night Startle +1, and each district is home turf for its card family (+1 health). In ❄️ snow bosses are tougher but pay better.<br><br>
-    <b>✨ Your Knack</b> is a free once-per-match power you pick on the keep-this-hand screen. Tap its round button by your bar when it glows.<br><br>
+    <b>✨ Your Gift</b> is a free once-per-match power you pick on the keep-this-hand screen. Tap its round button by your bar when it glows.<br><br>
     <b>Who goes first</b> comes from a coin call or dice roll before the match. Going second means an extra card and +1 energy on your first two turns.<br><br>
     ${Object.values(KW).map(k => `${k.icon} <b>${k.name}.</b> ${k.text}`).join('<br>')}<br><br>
     <i>Drag a card onto the table to play it, or tap it to read it and tap it again to play it. To attack, tap a glowing card then a target (or the red Attack Calm button), or drag it onto an enemy card or up past their cards.</i>`;
@@ -1278,7 +1278,7 @@ btGet('mulliganSwapBtn').addEventListener('click', () => {
 // Tap outside to deselect. This runs in the CAPTURE phase, before the tapped card's own handler re-renders the board:
 // afterwards the tapped element is detached from the page, and would wrongly look like a tap outside.
 document.addEventListener('click', e => {
-  if (battle && inBattle && btGet('btTip').classList.contains('interactive') && !e.target.closest('#btTip') && !e.target.closest('#btKnack') && !e.target.closest('#btFate')) btHideTip();   // tap away from the Knack sheet
+  if (battle && inBattle && btGet('btTip').classList.contains('interactive') && !e.target.closest('#btTip') && !e.target.closest('#btKnack') && !e.target.closest('#btFate')) btHideTip();   // tap away from the Gift sheet
   if (!battle || !inBattle || !battle.sel) return;
   if (e.target.closest('#battleView .card') || e.target.closest('#btOppBar') || e.target.closest('#btAtkFace') || e.target.closest('#btTip') || e.target.closest('#btEnd')) return;
   battle.sel = null; btHideTip(); btRender();

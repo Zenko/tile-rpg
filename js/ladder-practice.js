@@ -2,7 +2,7 @@
    LADDER, DECK ARCHETYPES AND PRACTICE (build 100)
    The trading-card side. Three small systems that share one file:
 
-   - The ladder: a monthly rank (Pebble, Stone, Moss, Gem, Star) earned from ghost duels, deck challenges, cup trophies,
+   - The ladder: a monthly rank (Pebble, Stone, Moss, Gem, Star) earned from lingering duels, deck challenges, cup trophies,
      bosses, the rival and Draft clears. It only ever goes up inside a season (nothing is lost by losing), and a new
      month halves your points and pays Embers for the best rank you reached. Calm by design: you climb against ghosts and
      the town, never against a live player.
@@ -56,7 +56,7 @@ function renderLadderCard() {
     <div class="lr-bar"><i style="width:${pct}%"></i></div>
     <small>${nx ? `${nx.at - L.pts} to ${nx.name}` : 'Top rank this season'} · season ends in ${left} day${left === 1 ? '' : 's'}</small>
     ${typeof weeklyRule === 'function' ? `<small>📅 ${weeklyRule().icon} ${weeklyRule().name}: ${weeklyRule().text} in every match this week.</small>` : ''}
-    <small>Earn points from ghost duels, deck challenges, the Cup, bosses and Draft Runs. You never lose points.</small></div>`;
+    <small>Earn points from lingering duels, deck challenges, the Cup, bosses and Draft Runs. You never lose points.</small></div>`;
 }
 
 /* ---------- archetypes ---------- */

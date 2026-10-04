@@ -1,12 +1,12 @@
 /* ============================================================
    TAROT (build 108)
    The game's cards already read like a tarot deck: four families are the four suits (Brote = Wands, Recuerdo = Pentacles,
-   Deriva = Cups, Susurro = Swords), and twenty-two of its mythic and super cards stand in for the Major Arcana. Nothing new is
-   printed: an Arcana IS the card, so owning the card collects it.
+   Deriva = Cups, Susurro = Swords), and twenty-two of its mythic and super cards stand in for the Fates. Nothing new is
+   printed: a Fate IS the card, so owning the card collects it.
 
      Daily reading - once a day, three Arcana are drawn (Past, Present, Future), each upright or reversed. Turning all three
                      over gives the day a fortune: the Present card's perk, at half strength when it is reversed.
-     The Arcana    - the collection. Owned cards are readable; ones that have shown up in a reading are readable but locked;
+     The Fates    - the collection. Owned cards are readable; ones that have shown up in a reading are readable but locked;
                      the rest are "???". Up to three owned Arcana can be attuned for a small permanent perk.
 
    Perks use the kinds the game already reads through cardBonus() (js/afterdark-companion-cards.js), added by tarotBonus()
@@ -62,7 +62,7 @@ function tarotPerkText(kind, val) {
     harvestPebbles: `+${val} Ember per harvest`, winPebbles: `+${val} Ember for every match won`, miniPebbles: `+${val} Ember per mini-game medal`, bake: `Bread bakes ${pct}% faster` })[kind] || '';
 }
 const TAROT_FRACTION = { startSpirit: 0, startDraw: 0 };
-// The perk an Arcana gives while attuned (gentler than the day's fortune).
+// The perk a Fate gives while attuned (gentler than the day's fortune).
 function tarotAttunedPerk(a) {
   if (a.kind in TAROT_FRACTION) return { kind: 'xp', val: 0.03 };
   return Number.isInteger(a.val) ? { kind: a.kind, val: a.val } : { kind: a.kind, val: +(a.val / 2).toFixed(3) };
@@ -80,8 +80,8 @@ function tarotBonus(kind) {
 const tarotCanDraw = () => !tarotState().cards;
 
 /* ---------- Fate: the battle power of an attuned Arcana ----------
-   Attune an owned Arcana (above) and it can be taken into a match as a second once-per-match power next to the Keeper's Knack.
-   The choice is saved as an Arcana index in state.progress.fate and only counts while that Arcana is still attuned and owned. */
+   Attune an owned Arcana (above) and it can be taken into a match as a second once-per-match power next to the Dreamer’s Gift.
+   The choice is saved as a Fate index in state.progress.fate and only counts while that Arcana is still attuned and owned. */
 function fateChoices() { return tarotState().attuned.filter(i => ARCANA[i] && arcanaOwned(i)); }
 function currentFateIndex() { const i = state.progress.fate; return Number.isInteger(i) && fateChoices().includes(i) ? i : null; }
 function currentFateId() { const i = currentFateIndex(); return i === null ? null : ARCANA[i].fate; }
@@ -117,7 +117,7 @@ function tarotFaceHtml(i, rev, tag) {
 }
 let tarotView = 'reading';
 function calmTarot(body) {
-  body.innerHTML = `<div class="seg" id="trSeg" role="tablist"><button class="seg-btn${tarotView === 'reading' ? ' active' : ''}" data-tv="reading" role="tab">Reading</button><button class="seg-btn${tarotView === 'arcana' ? ' active' : ''}" data-tv="arcana" role="tab">The Arcana</button><button class="seg-btn${tarotView === 'trials' ? ' active' : ''}" data-tv="trials" role="tab">Trials</button></div><div id="trBody" class="tr-body"></div>`;
+  body.innerHTML = `<div class="seg" id="trSeg" role="tablist"><button class="seg-btn${tarotView === 'reading' ? ' active' : ''}" data-tv="reading" role="tab">Reading</button><button class="seg-btn${tarotView === 'arcana' ? ' active' : ''}" data-tv="arcana" role="tab">The Fates</button><button class="seg-btn${tarotView === 'trials' ? ' active' : ''}" data-tv="trials" role="tab">Trials</button></div><div id="trBody" class="tr-body"></div>`;
   onAll(body, '#trSeg [data-tv]', b => { tarotView = b.dataset.tv; sfx('nav'); tarotDrawBody(); });
   tarotDrawBody();
 }
@@ -150,12 +150,12 @@ let tarotSel = 0;
 function tarotDrawArcana(box) {
   const t = tarotState(), have = ARCANA.filter((_, i) => arcanaOwned(i)).length;
   const tile = (a, i) => { const own = arcanaOwned(i), seen = !!t.seen[i], at = t.attuned.includes(i), d = arcanaCardDef(a);
-    return `<button type="button" class="tr-tile${own ? '' : seen ? ' seen' : ' lock'}${at ? ' att' : ''}${tarotSel === i ? ' sel' : ''}" data-ar="${i}" aria-label="${own || seen ? a.name : 'Unknown Arcana'}${at ? ', attuned' : ''}"><span>${own || seen ? d.icon : '?'}</span><small>${a.n}</small></button>`; };
+    return `<button type="button" class="tr-tile${own ? '' : seen ? ' seen' : ' lock'}${at ? ' att' : ''}${tarotSel === i ? ' sel' : ''}" data-ar="${i}" aria-label="${own || seen ? a.name : 'Unknown Fate'}${at ? ', attuned' : ''}"><span>${own || seen ? d.icon : '?'}</span><small>${a.n}</small></button>`; };
   const a = ARCANA[tarotSel], own = arcanaOwned(tarotSel), seen = !!t.seen[tarotSel], d = arcanaCardDef(a), at = t.attuned.includes(tarotSel), n = t.attuned.length;
   const detail = own || seen
     ? `<b>${a.n} · ${a.name}</b><span class="tr-card-line">${TAROT_FAM[arcanaFamily(a)]} ${d.icon} ${d.name} · ${RARITY_LABEL[d.rarity]}</span><span>${a.up} <i>Reversed: ${a.rev.charAt(0).toLowerCase() + a.rev.slice(1)}</i></span>
        <span class="tr-perk">Fortune: ${tarotPerkText(a.kind, a.val)}</span><span class="tr-perk">Attuned: ${tarotPerkText(tarotAttunedPerk(a).kind, tarotAttunedPerk(a).val)}</span><span class="tr-perk">Fate in battle: ${BattleEngine.FATES[a.fate].text} <i>From your turn ${BattleEngine.FATES[a.fate].from}, once per match, when attuned.</i></span>${own ? '' : `<span class="tr-hint">Not yours yet: find ${d.name} to collect it.</span>`}`
-    : `<b>${a.n} · ???</b><span>This Arcana has not turned up in a reading yet.</span>`;
+    : `<b>${a.n} · ???</b><span>This Fate has not turned up in a reading yet.</span>`;
   box.innerHTML = `<div class="tr-count">${have} of ${ARCANA.length} collected · ${n}/${TAROT_ATTUNE_MAX} attuned</div><div class="tr-grid">${ARCANA.map(tile).join('')}</div><div class="tr-detail">${detail}</div>
     <div class="calm-actions"><button type="button" class="calm-btn pri wide" id="trAtt" ${own && (at || n < TAROT_ATTUNE_MAX) ? '' : 'disabled'}>${!own ? 'Collect it to attune' : at ? 'Remove attunement' : n >= TAROT_ATTUNE_MAX ? 'Three are attuned already' : '✦ Attune'}</button></div>`;
   onAll(box, '[data-ar]', b => { tarotSel = +b.dataset.ar; sfx('tap'); tarotDrawArcana(box); });
@@ -165,10 +165,10 @@ function tarotDrawArcana(box) {
 /* ============================================================
    MADAME SOOT'S TENT (build 110)
    El Mercado de Susurros, from dusk until dawn (the Lantern Market keeps the deep night). A black cat reads cards for travellers:
-     - the daily reading, as the Tarot screen
+     - the daily reading, as the Fates screen
      - Draw once more (🫧 15, once a day): swap one card of today's reading for a new Arcana; it comes down face-down again
      - Hear your deck's story (free): a few lines about your deck, and the Arcana it most resembles
-     - an Arcana Pack (🫧 90): one card from the 22 Major Arcana, three times as likely to be one you do not own yet
+     - a Fate Pack (🫧 90): one card from the 22 Fates, three times as likely to be one you do not own yet
    It is a scene (INTERIORS.fortune in js/houses-and-cellar.js) opened by walking up to the tent, like the Lantern Market.
    ============================================================ */
 const FORTUNE_TILE = { district: 'market', x: 9, y: 4 };
@@ -189,7 +189,7 @@ function tarotRedraw(k) {
   spendPebbles(FORTUNE_REDRAW_COST, 'fortune');
   const old = ARCANA[t.cards[k].i].name; t.cards[k] = { i: pick.i, rev: Math.random() < TAROT_REVERSED_CHANCE }; t.flipped[k] = false; t.fortune = null; t.redrawn = true;
   saveState(); sfx('flip'); buzz(HAP.tap);
-  return `Brume sweeps ${old} aside and lays a new card face down in the ${TAROT_POS[k].toLowerCase()} place. Turn it over at the Tarot screen.`;
+  return `Brume sweeps ${old} aside and lays a new card face down in the ${TAROT_POS[k].toLowerCase()} place. Turn it over at the Fates screen.`;
 }
 // A few lines about your deck, and the Arcana it most resembles.
 function fortuneDeckStory() {
@@ -209,12 +209,12 @@ function fortuneDeckStory() {
   return `"${arch.charAt(0).toUpperCase() + arch.slice(1)}${heart}, ${pace}.${trick}${key}${like}" Brume nods slowly.`;
 }
 function fortuneBuyPack() {
-  if (state.progress.pebbles < FORTUNE_PACK_COST) { sfx('tie'); return `"The Arcana pack is 🫧 ${FORTUNE_PACK_COST}," says Brume. "They do not like to be hurried."`; }
+  if (state.progress.pebbles < FORTUNE_PACK_COST) { sfx('tie'); return `"The Fate pack is 🫧 ${FORTUNE_PACK_COST}," says Brume. "They do not like to be hurried."`; }
   const disc = discoveredSet(), pool = ARCANA.map(a => ({ id: a.card, w: disc.has(a.card) ? 1 : 3 })), total = pool.reduce((n, x) => n + x.w, 0);
   let r = Math.random() * total, pick = pool[0]; for (const x of pool) { r -= x.w; if (r < 0) { pick = x; break; } }
   const isNew = !disc.has(pick.id); spendPebbles(FORTUNE_PACK_COST, 'fortune');
   state.ownedCards.push(pick.id); noteCardsFound(1); bumpPill('pillCards'); saveState(); updateHud(); if (typeof checkSets === 'function') checkSets(); checkAchievements();
-  setTimeout(() => showCardReveal(pick.id, 'An Arcana from Brume', true, null, 0, { flip: true, isNew }), 250);
+  setTimeout(() => showCardReveal(pick.id, 'A Fate from Brume', true, null, 0, { flip: true, isNew }), 250);
   if (isNew) setTimeout(() => toast('📖 New entry in your Index'), 900);
   return `Brume slides a card across the cloth without looking at it. "That one was always yours."`;
 }

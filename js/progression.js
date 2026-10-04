@@ -6,21 +6,21 @@
 const TIPS = {
   atlas:      { icon: '🗺️', title: 'The Atlas', text: 'It travels with you from district to district. Ask it questions, play its harder games, challenge it to a match, or see what it keeps for sale. It never explains itself.' },
   altar:      { icon: '🕯️', title: 'The altar', text: 'In your cottage. Beat a district god, bring spare cards of their family, and the god can be summoned as a card. Once all four are home, something else may answer.' },
-  trials:     { icon: '🔮', title: 'Trials', text: 'In the Tarot screen (Quiet Nook → Tarot → Trials), five foes each bring a Fate and a Spread of their own. Beat one for the first time to take home its Arcana card. They open in order, and they are meant to be hard.' },
+  trials:     { icon: '🔮', title: 'Trials', text: 'In the Fates screen (Quiet Nook → Fates → Trials), five foes each bring a Fate and a Spread of their own. Beat one for the first time to take home its Fate card. They open in order, and they are meant to be hard.' },
   spread:     { icon: '🃏', title: 'Fate Spread', text: 'On the Deck screen, lay three cards as Past, Present and Future. Past is always in your opening hand, Present enters with a Haze, and Future arrives on your 4th turn. Three cards of one family give Harmony (+2 Calm); three different families give Contrast (+1 card).' },
-  fate:       { icon: '🔮', title: 'Fate', text: 'Attune a Major Arcana (Quiet Nook → Tarot → The Arcana) and you can take its power into a match. Pick it on the keep-this-hand screen; a purple round button by your bar glows when it is ready. Each one works once per match, from its own turn, and most cost a little.' },
-  fortune:    { icon: '🔮', title: "Madame Brume's tent", text: 'On El Mercado de Susurros from dusk until dawn. Brume gives your daily tarot reading, swaps one card once a day, tells you the story of your deck, and sells Arcana packs.' },
-  tarot:      { icon: '🔮', title: 'Tarot', text: 'Once a day, draw three Arcana. Turn them all over and the middle card gives the day a fortune. The 22 Major Arcana are real cards from the game: own the card and you own the Arcana, and you can attune three for a small permanent perk.' },
+  fate:       { icon: '🔮', title: 'Fate', text: 'Attune a Fates (Quiet Nook → Fates → The Fates) and you can take its power into a match. Pick it on the keep-this-hand screen; a purple round button by your bar glows when it is ready. Each one works once per match, from its own turn, and most cost a little.' },
+  fortune:    { icon: '🔮', title: "Madame Brume's tent", text: 'On El Mercado de Susurros from dusk until dawn. Brume gives your daily Fate reading, swaps one card once a day, tells you the story of your deck, and sells Fate packs.' },
+  tarot:      { icon: '🔮', title: 'Fates', text: 'Once a day, draw three Fates. Turn them all over and the middle card gives the day a fortune. The 22 Fates are real cards from the game: own the card and you own the Arcana, and you can attune three for a small permanent perk.' },
   cellarRun:  { icon: '🕯️', title: 'The cellar', text: 'Every floor offers a few doors: a fight, a chest, a campfire, a shrine or a peddler, hidden in the dark: walk with your lantern and tap tiles to explore. Barrels hold Embers, a key opens the locked chest, rats dim the light and glowcaps brighten it. You have three hearts; losing a fight costs one, and at zero the run ends. Leaving does not end it.' },
   calm:       { icon: '🧘', title: 'The quiet nook', text: 'A few quiet things to do that score nothing and cost nothing: breathe, rake sand, watch the stars, drink tea, tend a bonsai. Five slow breaths leave you Rested for the day.' },
   path:       { icon: '🧭', title: 'Your path', text: 'Every level gives you a skill point. Spend them on Angler, Gardener, Duelist or Wanderer, and upgrade your rod, watering can and lantern with Embers. You can reset your points for free any time.' },
   bakery:     { icon: '🍞', title: 'The bakery', text: 'Put a loaf in the oven - it bakes in real time. Share bread with neighbors (one gift each per day) to grow your friendship, or cook with it.' },
   cook:       { icon: '🍳', title: 'Cooking', text: 'Harvests and fish land in your pantry. Cook them into dishes: give one as a gift (worth more than bread), eat it on the keep-this-hand screen for a head start, or bring one to a neighbor who asked.' },
-  garden:     { icon: '🌱', title: 'Gardening', text: 'Buy seeds here, then tap a glowing patch of El Umbral to plant. Crops grow in real time (faster in the rain). Card seeds grow a card.' },
+  garden:     { icon: '🌱', title: 'Thought Tending', text: 'Buy seeds here, then tap a glowing patch of El Umbral to plant. Crops grow in real time (faster in the rain). Card seeds grow a card.' },
   puzzle:     { icon: '🧩', title: 'The daily puzzle', text: 'A fixed board: win it this turn. Ending your turn gives up and resets the board, so take your time. The first solve each day pays a card.' },
   cup:        { icon: '🏆', title: 'The Dreamers’ Cup', text: 'Three matches in a row. Your Calm carries over between rounds - there is no healing - and a loss ends the run. Sweep all three for the week\'s trophy.' },
   home:       { icon: '🏠', title: 'Your cottage', text: 'Your own place. Read letters in the mailbox, put decorations on the shelves, frame favourite cards, and see your trophies.' },
-  lantern:    { icon: '🏮', title: 'The Lantern Market', text: 'Lumen only trades after dark: Night Packs full of moonlit cards, glowing decorations, and Embers for the critters in your jar.' },
+  lantern:    { icon: '🏮', title: 'The Lantern Market', text: 'Lumen only trades after dark: Lantern Packs full of moonlit cards, glowing decorations, and Embers for the critters in your jar.' },
   bugs:       { icon: '✨', title: 'Night critters', text: 'Glowing critters come out at night. Tap one to catch it - it goes in your jar for the Lantern Market and in the critter log under Cards → Fish.' },
   companion:  { icon: '👻', title: 'A companion', text: 'You can invite one wandering spirit to follow you. Each brings a small perk depending on its card. Let it go any time from your profile.' },
   companionPlay: { icon: '🙈', title: 'Play with your companion', text: "Tap your companion in town to play Hide and Seek right there on the map - it ducks behind a real spot nearby, so watch closely, then tap where it went from memory. Rounds get quicker and add more hiding spots the longer your streak runs." },
@@ -36,11 +36,11 @@ const TIPS = {
   minigames:  { icon: '🎲', title: 'Mini-games', text: 'Every house has a little game. Earn a bronze, silver or gold medal; the first three medals in each game every day pay Embers, and gold can turn up a card. Play as much as you like after that.' },
   lookaround: { icon: '🖐️', title: 'Look around', text: 'Drag the town map with your finger to look at the rest of the district. Tap the target button to bring the camera back to your character; walking somewhere does it too.' },
   forecast:   { icon: '🪧', title: 'The weather board', text: 'Signs show the forecast. Weather changes play: clear pays a little extra on daily tasks, cloudy doubles spirit XP, rain helps fishing and growing, storms boost Flicker cards, snow toughens bosses for richer prizes.' },
-  events:     { icon: '📅', title: 'Daily town events', text: "One event runs each day, shown next to the district name - a Fishing Derby, Market Day, Harvest Fair and more, each bending the rules a little in your favor." },
+  events:     { icon: '📅', title: 'Daily town events', text: "One event runs each day, shown next to the district name - a Thought Fishing Derby, Market Day, Harvest Fair and more, each bending the rules a little in your favor." },
   foils:      { icon: '✨', title: 'Foil cards', text: 'A shimmering foil is purely a collector\'s chase - the same card, just shinier. Your foil total shows at the top of Cards → Sets and in your cottage trophy case.' },
   townlife:   { icon: '🪑', title: 'Things to do around town', text: 'Props do things now: sit on benches, make a wish at wells, light lamps after dark, haggle, haul nets, water plants or busk for tips. Shake trees, skip stones, splash through puddles in the rain. Everything nudges the district\'s town mood - fill it up and the district dresses itself up for good.' },
   character:  { icon: '🧑', title: 'Your character', text: 'You and your companion stand on a backdrop you choose. Check your stats here, change how you look in Look, and see your bag, milestones and companion. Tap the 🎨 to jump to the backdrops, and tap a milestone with a 🏷️ title to wear it. Settings are behind your avatar at the top.' },
-  fishing:    { icon: '🎣', title: 'Fishing', text: 'Pick a bait that suits the fish you want, then cast and watch the shadow: its size hints at the catch. When it bites, tap to hook it, then hold the button to reel. Keep the marker in the green and ease off when the fish runs. Nothing is lost if it gets away. Prefer simpler? Turn on Easy reeling in Settings.' },
+  fishing:    { icon: '🎣', title: 'Thought Fishing', text: 'Pick a bait that suits the fish you want, then cast and watch the shadow: its size hints at the catch. When it bites, tap to hook it, then hold the button to reel. Keep the marker in the green and ease off when the fish runs. Nothing is lost if it gets away. Prefer simpler? Turn on Easy reeling in Settings.' },
   inventory:  { icon: '🎒', title: 'Your inventory', text: 'Everything you\'re carrying, in one place: pantry ingredients, cooked dishes, seeds and spare decorations. Tap Plant or Place to use one straight from the list.' },
 };
 function tipsSeen() { const p = state.progress; if (!p.tipsSeen || typeof p.tipsSeen !== 'object') p.tipsSeen = {}; return p.tipsSeen; }
@@ -126,7 +126,7 @@ function econTaper(src, n, softCap) {
 // (DISTRICTS[x].unlockLevel, BattleEngine.KNACKS[x].level); upcomingUnlocks() merges all three for the Character tab.
 const FEATURE_LEVELS = {
   draft: { level: 5, icon: '🎴', name: 'Draft Run' },
-  ghost: { level: 8, icon: '👻', name: 'Ghost duels' },
+  ghost: { level: 8, icon: '👻', name: 'Lingering duels' },
   spread: { level: 6, icon: '🃏', name: 'Fate Spread' }
 };
 function featureLocked(id) { return ensureLevel().level < FEATURE_LEVELS[id].level; }
@@ -134,11 +134,11 @@ function featureLockText(id) { const f = FEATURE_LEVELS[id]; return `${f.icon} $
 function unlocksBetween(from, to) {
   const out = [];
   Object.values(FEATURE_LEVELS).forEach(f => { if (f.level > from && f.level <= to) out.push({ level: f.level, icon: f.icon, text: f.name }); });
-  Object.values(BattleEngine.KNACKS).forEach(k => { if (k.level > from && k.level <= to) out.push({ level: k.level, icon: k.icon, text: `Knack: ${k.name}` }); });
+  Object.values(BattleEngine.KNACKS).forEach(k => { if (k.level > from && k.level <= to) out.push({ level: k.level, icon: k.icon, text: `Gift: ${k.name}` }); });
   Object.values(DISTRICTS).forEach(d => { if (d.unlockLevel > from && d.unlockLevel <= to && d.unlockWins > 0) out.push({ level: d.unlockLevel, icon: '🗺️', text: d.name }); });
   return out.sort((a, b) => a.level - b.level);
 }
-// Keeper's Knack (BattleEngine.KNACKS): unlocked by Keeper level, one is picked for each match.
+// Dreamer’s Gift (BattleEngine.KNACKS): unlocked by Dreamer level, one is picked for each match.
 function knackUnlocked(id) { const k = BattleEngine.KNACKS[id]; return !!k && ensureLevel().level >= k.level; }
 function currentKnackId() { const id = state.progress.knack; return id && knackUnlocked(id) ? id : 'forage'; }
 function chooseKnack(id) { if (!knackUnlocked(id)) return false; state.progress.knack = id; saveState(); return true; }
@@ -448,7 +448,7 @@ function sanitizeCards() {
   if (!Array.isArray(state.progress.discovered)) state.progress.discovered = [];
 }
 
-// only: 'spell' limits the draw to spells (the Spellbook Pack). Cards marked `exclusive` (cellar or rival prizes)
+// only: 'spell' limits the draw to spells (the Lullaby Pack). Cards marked `exclusive` (cellar or rival prizes)
 // never come out of the ordinary pools - they are handed out only by the thing that owns them.
 function cardPool(rarity, only) {
   return CARD_POOL.filter(c => c.rarity === rarity && !c.exclusive && (only !== 'spell' || c.spell));

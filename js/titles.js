@@ -9,7 +9,7 @@ const TITLES = [
   { ach: 'favours-10',    name: 'Good Neighbor' },
   { ach: 'chest-5',       name: 'Treasure Hunter' },
   { ach: 'crafted-10',    name: 'Tinkerer' },
-  { ach: 'mythic-find',   name: 'Mythic Keeper' },
+  { ach: 'mythic-find',   name: 'Mythic Dreamer' },
   { ach: 'spells-50',     name: 'Spellweaver' },
   { ach: 'cellar-10',     name: 'Deep Delver' },
   { ach: 'friend-5',      name: 'Beloved' },

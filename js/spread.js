@@ -7,7 +7,7 @@
      Future  - joins your hand at the start of your 4th turn
    Three cards of one family are Harmony (+2 Calm at the start); three different families are Contrast (one extra card).
    A spread names cards by id. If the deck no longer holds all three, the spread waits (it is not erased) and says so.
-   Unlocked at Keeper level 6 (FEATURE_LEVELS.spread in js/progression.js). Neutral (draft) and puzzle matches ignore it.
+   Unlocked at Dreamer level 6 (FEATURE_LEVELS.spread in js/progression.js). Neutral (draft) and puzzle matches ignore it.
    ============================================================ */
 const SPREAD_SLOTS = [
   { pos: 'Past',    icon: '🕰️', fx: 'Starts in your hand' },

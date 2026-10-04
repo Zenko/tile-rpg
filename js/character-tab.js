@@ -2,7 +2,7 @@
    CHARACTER TAB (v1.64.0)
    The fifth bottom tab. Up top, a small stage with you and your companion standing in front of a backdrop the player
    picks (STAGE_OPTIONS in js/world-map.js, bought and equipped like the table mats). Below it, four views:
-   Me (level, title, pinned stats, what unlocks next, Knack), Look, Pantry and Companion. Milestones live only in Rewards. Nothing here owns data of its own - it reads and
+   Me (level, title, pinned stats, what unlocks next, Gift), Look, Pantry and Companion. Milestones live only in Rewards. Nothing here owns data of its own - it reads and
    writes the storage each system already has (pantry, dishes, seeds, decorations, bug jar, achievements, companion),
    so the older screens (player menu, Rewards > Milestones, Shop > Customize) keep working unchanged.
    ============================================================ */
@@ -119,7 +119,7 @@ function charDrawMe(box) {
     up.innerHTML = ahead.map(u => `<div class="unlock-row"><span>${u.icon} ${u.text}</span><b>Lv ${u.level}</b></div>`).join('');
     box.appendChild(up);
   }
-  charSection(box, "Keeper's Knack");
+  charSection(box, "Dreamer’s Gift");
   const kb = document.createElement('div'); kb.className = 'knack-row ch-knack';
   const drawK = () => {
     const cur = currentKnackId(), k = BattleEngine.KNACKS[cur];
@@ -189,7 +189,7 @@ function charDrawBag(box) {
   add('Dishes', RECIPES.filter(r => dishCount(r.id) > 0).map(r => invRow(r.icon, escapeHtml(r.name), dishCount(r.id), escapeHtml(r.desc))));
   add('Seeds', SEEDS.filter(s => seedCount(s.id) > 0).map(s => invRow(s.icon, escapeHtml(s.name), seedCount(s.id), escapeHtml(s.desc), '🌱 Plant', goTown(() => startPlanting(s.id)))));
   const jar = bugState().jar;
-  add('Bug jar', Object.keys(jar).filter(id => jar[id] > 0 && bugDef(id)).map(id => invRow(bugDef(id).icon, escapeHtml(bugDef(id).name), jar[id], 'Caught at night. Also works as fishing bait.')));
+  add('Glow Jar', Object.keys(jar).filter(id => jar[id] > 0 && bugDef(id)).map(id => invRow(bugDef(id).icon, escapeHtml(bugDef(id).name), jar[id], 'Caught at night. Also works as fishing bait.')));
   add('Decorations', DECORATION_ITEMS.filter(d => decorationInventoryCount(d.id) > 0).map(d => invRow(d.icon, escapeHtml(d.name), decorationInventoryCount(d.id), escapeHtml(d.desc), '📍 Place', goTown(() => startPlacingDecoration(d)))));
   if (!any) { const e = document.createElement('div'); e.className = 'panel-desc'; e.style.padding = '10px 4px'; e.textContent = 'Your pantry is empty. Harvest crops, catch fish or bugs, bake bread, and what you gather shows up here.'; box.appendChild(e); }
 }

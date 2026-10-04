@@ -42,7 +42,7 @@ const GUIDE_GO = {
   'The cellar': JPLACES.cellar, 'Letters': JPLACES.home, 'Your cottage': JPLACES.home,
   'Packs & decorations': JPLACES.shop, 'Lantern Market': JPLACES.lantern, 'The Net Loft': JPLACES.net, 'The Glasshouse': JPLACES.glass,
   'Workshop': { tab: 'collection' }, 'Index & sets': { tab: 'collection' }, 'Charms & mastery': { tab: 'collection' },
-  'Embers and soft limits': { menu: 'settings' }, 'Who goes first': { menu: 'settings' }, 'Ghost duels': { menu: 'social' }
+  'Embers and soft limits': { menu: 'settings' }, 'Who goes first': { menu: 'settings' }, 'Lingering duels': { menu: 'social' }
 };
 function guideTarget(name) { return GUIDE_GO[name] || null; }
 
@@ -82,13 +82,13 @@ function todayModel() {
   const ch = challengeState().list || [], chWon = ch.filter(c => c.won).length;
   if (ch.length) daily.push({ icon: '🎯', title: 'Deck challenges', sub: `${chWon} of ${ch.length} beaten today`, done: chWon >= ch.length, frac: chWon / ch.length, bar: [chWon, ch.length], go: JPLACES.cup });
 
-  week.push({ icon: '🧘', title: 'Quiet Nook', sub: typeof tarotCanDraw === 'function' && tarotCanDraw() ? 'Your daily tarot reading is waiting' : calmRested() ? 'Rested today' : 'Breathe, rake sand, look at the stars', done: false, frac: 0, go: { calm: true } });
+  week.push({ icon: '🧘', title: 'Quiet Nook', sub: typeof tarotCanDraw === 'function' && tarotCanDraw() ? 'Your daily Fate reading is waiting' : calmRested() ? 'Rested today' : 'Breathe, rake sand, look at the stars', done: false, frac: 0, go: { calm: true } });
   const cs = cupState();
   week.push({ icon: '🏆', title: cupName(), sub: cs.trophy ? 'Trophy won this week' : cs.active ? `Round ${cs.round + 1} of 3 in progress` : 'Three matches, no healing', done: !!cs.trophy, frac: cs.trophy ? 1 : cs.round / 3, go: JPLACES.cup });
   if (featureLocked('draft')) locked.push({ icon: '🎴', title: featureLockText('draft').replace(/^🎴 /, '') });
   else { const dr = draftState(); week.push({ icon: '🎴', title: 'Draft Run', sub: dr.active ? 'A run is in progress' : dr.clearedToday ? 'Cleared today. More runs pay less.' : 'Build a deck from offers of three', done: !!dr.clearedToday, frac: dr.clearedToday ? 1 : 0, go: JPLACES.cup }); }
   if (featureLocked('ghost')) locked.push({ icon: '👻', title: featureLockText('ghost').replace(/^👻 /, '') });
-  else { const gs = ghostState(); week.push({ icon: '👻', title: 'Ghost duels', sub: `${gs.paid} of 5 paid wins today`, done: gs.paid >= 5, frac: gs.paid / 5, bar: [gs.paid, 5], go: { menu: 'social' } }); }
+  else { const gs = ghostState(); week.push({ icon: '👻', title: 'Lingering duels', sub: `${gs.paid} of 5 paid wins today`, done: gs.paid >= 5, frac: gs.paid / 5, bar: [gs.paid, 5], go: { menu: 'social' } }); }
   return { away, groups: [{ title: 'Daily', items: daily }, { title: 'This week', items: week }], locked, daily };
 }
 function jBar(n, of) { return `<div class="jbar" role="progressbar" aria-valuenow="${n}" aria-valuemax="${of}"><i style="width:${of ? Math.round(n / of * 100) : 0}%"></i></div>`; }

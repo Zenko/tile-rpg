@@ -1,9 +1,9 @@
 /* ============================================================
-   TAROT TRIALS (build 114)  - Quiet Nook -> Tarot -> Trials
+   TAROT TRIALS (build 114)  - Quiet Nook -> Fates -> Trials
    Five themed matches against a foe who brings its own Fate and Fate Spread (the same pieces you can use). They run in order;
    beating a trial the first time gives you its Arcana card, later wins pay a few Embers. A trial foe is a normal opponent
    (battle.npc.trial) that carries `fate` and `spread` into BattleEngine.newGame, and uses its Fate through aiTurn / btOpponentTurn.
-   Needs Keeper level 6 (the Fate Spread unlock). Progress: state.progress.trials = { done: { [fateId]: true } }.
+   Needs Dreamer level 6 (the Fate Spread unlock). Progress: state.progress.trials = { done: { [fateId]: true } }.
    Balance: see HANDOFF. Foes are pre-built decks (not scaled to your wins), so the difficulty is fixed.
    ============================================================ */
 const TRIALS = [
@@ -63,13 +63,13 @@ function trialWin() {
     endCard.classList.add('glow-' + def.rarity);
     battleEndStats.innerHTML = `The trial leaves you<br><b>${cardArtHtml(def)} ${def.name}</b> <span class="rarity-tag rt-${def.rarity}" style="margin:4px 0 0">${RARITY_LABEL[def.rarity]}</span>`;
     logEvent('🔮', `Passed the Trial of ${t.title}.`);
-  } else { addPebbles(TRIAL_REPEAT_PEBBLES, 'trial'); battleEndStats.innerHTML = `<b>+${TRIAL_REPEAT_PEBBLES} 🫧</b>. The Arcana card comes only the first time.`; }
+  } else { addPebbles(TRIAL_REPEAT_PEBBLES, 'trial'); battleEndStats.innerHTML = `<b>+${TRIAL_REPEAT_PEBBLES} 🫧</b>. The Fates card comes only the first time.`; }
   saveState();
   btGet('battleRetryBtn').classList.add('hidden');
   sparkleBurst(btGet('battleSparkles'), ['🔮', '✨'], 12); sfx('win'); buzz(HAP.win); bumpPill('pillWins');
 }
 function tarotDrawTrials(box) {
-  if (featureLocked('spread')) { box.innerHTML = `<div class="tr-detail"><b>🔮 Trials of the Arcana</b><span>${featureLockText('spread')}</span></div>`; return; }
+  if (featureLocked('spread')) { box.innerHTML = `<div class="tr-detail"><b>🔮 Trials of the Fates</b><span>${featureLockText('spread')}</span></div>`; return; }
   const done = TRIALS.filter(trialDone).length;
   const row = (t, k) => {
     const open = trialOpen(k), fin = trialDone(t), F = BattleEngine.FATES[t.fate], a = ARCANA[trialIndex(t)];
@@ -78,6 +78,6 @@ function tarotDrawTrials(box) {
       ${open ? `<small class="tl-fate">${F.icon} ${F.name}: ${F.text}</small><small class="tl-fate">🃏 Spread: ${t.spread === 'harmony' ? 'Harmony (one family)' : 'Contrast (three families)'} · ${['Gentle', 'Fair', 'Sharp'][t.ai === 'normal' ? (k ? 1 : 0) : 2]}</small>` : ''}</div>
       <button type="button" class="calm-btn${open && !fin ? ' pri' : ''}" data-trial="${k}" ${open ? '' : 'disabled'}>${fin ? 'Again' : 'Face it'}</button></div>`;
   };
-  box.innerHTML = `<div class="tr-count">${done} of ${TRIALS.length} trials passed</div><div class="calm-say sm">A foe who brings a Fate and a Spread of their own. Pass one to take home its Arcana card.</div><div class="tl-list">${TRIALS.map(row).join('')}</div>`;
+  box.innerHTML = `<div class="tr-count">${done} of ${TRIALS.length} trials passed</div><div class="calm-say sm">A foe who brings a Fate and a Spread of their own. Pass one to take home its Fate card.</div><div class="tl-list">${TRIALS.map(row).join('')}</div>`;
   onAll(box, '[data-trial]', b => { sfx('tap'); startTrial(+b.dataset.trial); });
 }
