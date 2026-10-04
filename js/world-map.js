@@ -50,10 +50,10 @@ const WM_ART = {
 };
 // Text and the few facts that aren't stored anywhere else. Buildings and neighbour names come from the real maps/save.
 const WM_INFO = {
-  square: { short: 'Square', blurb: 'The heart of town. Everything starts here, and every road leads back to it.', extras: ['Dreamers’ Cup fountain', 'Weather sign'] },
-  market: { short: 'Market', blurb: 'East of the Square. Stalls and a lantern market that only opens after dark.', extras: ['Trading board', "Lumen's Lantern Market (night only)"] },
-  harbor: { short: 'Harbor', blurb: 'Salt air and slow water. The best fishing in town, and a keeper who bends the tide.', extras: ['Thought Fishing spots (they shuffle every 10 minutes)'] },
-  garden: { short: 'Garden', blurb: 'A hush of flowers and hedges, with a glasshouse tucked in the middle.', extras: [] }
+  square: { short: 'Square', blurb: 'The threshold of the dream. Every dreamer arrives here first, and every road leads back to it.', extras: ['Dreamers’ Cup fountain', 'Weather sign'] },
+  market: { short: 'Market', blurb: 'Lantern-lit stalls and voices just below understanding. A lantern market opens after dark.', extras: ['Trading board', "Lumen's Lantern Market (night only)"] },
+  harbor: { short: 'Harbor', blurb: 'A tideless sea under a low moon. The best Thought Fishing around, and a god who breathes the tide in and out.', extras: ['Thought Fishing spots (they shuffle every 10 minutes)'] },
+  garden: { short: 'Garden', blurb: 'A hush of glowing blooms that grow toward whatever you are thinking, with a glasshouse in the middle.', extras: [] }
 };
 const WM_ORDER = ['square', 'market', 'harbor', 'garden'];
 let wmSel = 'square';

@@ -1109,7 +1109,7 @@ function opponentPortrait(opponent) {
 const DISTRICTS = {
   square: { name: 'El Umbral', theme: 'square', unlockWins: 0, unlockLevel: 1, boss: 'Duermevela', bossIcon: '🌳',
     scenery: [{ icon: '🪑', title: 'A quiet bench', desc: 'A good place to sit and watch the town go by.' },
-              { icon: '⛲', title: 'The old fountain', desc: 'Coins glimmer faintly beneath the water.' }] },
+              { icon: '⛲', title: 'La Fuente', desc: 'It hums a half-remembered song.' }] },
   market: { name: 'El Mercado de Susurros', theme: 'market', unlockWins: 1, unlockLevel: 2, boss: 'Murmullo', bossIcon: '🦡',
     scenery: [{ icon: '🏪', title: 'A small stall', desc: 'The vendor is out today, but the awning gives good shade.' },
               { icon: '🧺', title: 'A basket of goods', desc: 'Nothing to take, but it smells like fresh bread.' }] },

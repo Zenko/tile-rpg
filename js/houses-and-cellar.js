@@ -3,7 +3,7 @@
    ============================================================ */
 const INTERIORS = {
   cottage: { title: "Wren's Cottage", who: '🧓', name: 'Wren', theme: 'warm',
-    greet: 'Come in, come in. The kettle is on, and there is always room by the fire.',
+    greet: 'Come in, come in. The kettle is on, and there is always room by the fire. I am not sure how I knew you were coming.',
     actions: [{ id: 'calm-tea', label: '🍵 Tea ritual', kind: 'calm', game: 'tea' },
               { id: 'mg-tea', kind: 'minigame', game: 'tea', view: () => miniView('tea') },
               { id: 'tea', label: '☕ Share a pot of tea', kind: 'daily', pebbles: 4,
@@ -16,17 +16,17 @@ const INTERIORS = {
               { id: 'advice', label: '📖 Ask about my deck', kind: 'advice' },
               { id: 'book', label: '📕 Open the dusty book', kind: 'chest', done: 'Something slips out from between the pages.', already: 'The book is just a book now. Olwen smiles. "It only had the one surprise."' }] },
   'stall-grain': { title: "Pip's Grain Stall", who: '🐭', name: 'Pip', theme: 'warm',
-    greet: 'Fresh grain, still warm from the sack! Try a handful, on the house.',
+    greet: 'Shh - fresh grain, still warm from the sack. Try a handful, on the house, and mind your voice. A loud word breaks a sale.',
     actions: [{ id: 'mg-grain', kind: 'minigame', game: 'grain', view: () => miniView('grain') },
               { id: 'sample', label: '🌾 Try a free sample', kind: 'daily', pebbles: 4,
       done: 'Pip scoops a handful into your palm, then presses two Embers into it too. "For being a good customer."', already: 'Pip pats the empty sack. "Sold out for today - back tomorrow!"' }] },
   'stall-thread': { title: "Clover's Thread Stall", who: '🐰', name: 'Clover', theme: 'cool',
-    greet: "Ribbons, thread, whatever you're stitching together. And I know a thing or two about decks, if you're curious.",
+    greet: `"Ribbons, thread, whatever you're stitching together," Clover says, just above a whisper. "And I know a thing or two about decks, if you're curious."`,
     actions: [{ id: 'mg-pattern', kind: 'minigame', game: 'pattern', view: () => miniView('pattern') },
               { id: 'advice', label: '🧵 Ask about my deck', kind: 'advice' },
               { id: 'basket', label: '🧺 Dig through the remnant basket', kind: 'chest', done: 'Something catches your eye under all the scraps.', already: 'Clover shrugs. "You already found the good one in there."' }] },
   home: { title: 'Your Cottage', who: () => state.character.emoji, name: 'You', theme: 'warm',
-    greet: () => `Home, sweet home. ${unreadMail() ? `📬 ${unreadMail()} unread letter${unreadMail() === 1 ? '' : 's'} in the mailbox.` : 'The mailbox is empty for now.'}`,
+    greet: () => `Your cottage, exactly as you remember it, though you cannot recall arriving. ${unreadMail() ? `📬 ${unreadMail()} unread letter${unreadMail() === 1 ? '' : 's'} in the mailbox.` : 'The mailbox is empty for now.'}`,
     actions: [{ id: 'mail', kind: 'mail', view: () => ({ label: `📬 Mailbox${unreadMail() ? ` (${unreadMail()} new)` : ''}` }) },
               { id: 'mg-tidy', kind: 'minigame', game: 'tidy', view: () => miniView('tidy') },
               { id: 'calm-sand', label: '🪨 Sand garden', kind: 'calm', game: 'sand' },
@@ -38,7 +38,7 @@ const INTERIORS = {
               { id: 'nap', label: '😴 Nap by the window', kind: 'daily', pebbles: 3,
                 done: 'You doze off in the sunny chair. When you wake, three Embers have rolled out of your pocket onto the cushion.', already: 'You are not sleepy yet. Maybe tomorrow.' }] },
   lantern: { title: 'The Lantern Market', who: '🦉', name: 'Lumen', theme: 'dark',
-    greet: () => `Lanterns sway on strings between the stalls. "Night things, for night folk," Lumen hoots. ${jarLine()}`,
+    greet: () => `Lanterns sway on strings between the stalls, and each glows brightest when you look away. "Night things, for night folk," Lumen hoots. ${jarLine()}`,
     actions: [{ id: 'nightpack', kind: 'nightpack', view: () => ({ label: `🌙 Lantern Pack · 🫧 ${NIGHT_PACK_COST} (rare or better, night cards)` }) },
               { id: 'sellbugs', kind: 'sellbugs', view: () => ({ label: jarValue() ? `🫙 Trade your jar of critters for 🫧 ${jarValue()}` : '🫙 Your critter jar is empty', disabled: !jarValue() }) },
               { id: 'nightdeco', label: '🕯️ Night-only decorations', kind: 'nightdeco' },
@@ -62,14 +62,14 @@ const INTERIORS = {
                   return { label: `🧭 Expeditions${home ? ` · ${home} team${home === 1 ? '' : 's'} home!` : es.active.length ? ` · ${es.active.length} away` : ''}` }; } }] },
   // ----- the four buildings that used to be locked -----
   bakery: { title: "Maple's Bakery", who: '🧑‍🍳', name: 'Maple', theme: 'warm',
-    greet: () => `The oven is warm and the dough is rising. Bake a loaf and share it with a neighbor - nothing makes a friend faster. ${breadLine()}`,
+    greet: () => `The oven is warm and the dough is rising. The bread tastes like a memory you cannot quite place, so bake a loaf and share it with a neighbor. ${breadLine()}`,
     actions: [{ id: 'oven', kind: 'oven', view: ovenView },
               { id: 'cook', label: '🍳 Cook with Maple', kind: 'cook' },
               { id: 'mg-frost', kind: 'minigame', game: 'frost', view: () => miniView('frost') },
               { id: 'roll', label: '🥐 Taste a warm roll', kind: 'daily', pebbles: 3,
                 done: 'Maple hands you a roll straight off the tray, and three Embers "for the jam fund."', already: 'Maple laughs. "One roll a day, or there will be none left for the market!"' }] },
   house2: { title: "Fern's Cottage", who: '👩‍🌾', name: 'Fern', theme: 'cool',
-    greet: () => `Mind the watering cans! I tend the flower boxes in the square. ${seedsGreeting()}`,
+    greet: () => `Mind the watering cans! I tend the flower boxes in the square, and the small thoughts that grow in them. ${seedsGreeting()}`,
     actions: [{ id: 'seeds', label: '🌱 Seeds & planting', kind: 'seeds' },
               { id: 'mg-weeds', kind: 'minigame', game: 'weeds', view: () => miniView('weeds') },
               { id: 'water', label: '💧 Help water the flower boxes', kind: 'daily', pebbles: 3,
@@ -91,13 +91,13 @@ const INTERIORS = {
               { id: 'sort', label: '🔧 Help sort the spare parts', kind: 'daily', pebbles: 2,
                 done: 'Springs here, cogs there. Tock pays you two Embers and a very small screw you did not ask for.', already: 'Tock waves you off. "Parts are sorted! Come back tomorrow."' }] },
   'harbor-hut': { title: 'The Net Loft', who: '🦦', name: 'Tam', theme: 'cool',
-    greet: 'Salt in the air, gulls on the roof. Mind the nets drying by the door - I only just finished mending them.',
+    greet: 'Salt in the air, gulls on the roof. Mind the nets drying by the door - I only just finished mending them. (I mend them every day. Nothing ever seems to tear.)',
     actions: [{ id: 'calm-lanterns', kind: 'calm', game: 'lanterns', view: () => ({ label: skyPhase().isNight ? '🏮 Release a lantern' : '🏮 Lanterns (after dark)', disabled: !skyPhase().isNight }) },
               { id: 'mend', label: '🪢 Help mend a net', kind: 'daily', pebbles: 4,
       done: 'You work a knot loose and tie it back tighter. Tam presses four Embers into your hand. "Steady hands, you."', already: 'Tam pats the nets, all mended. "Nothing left to fix today - come back tomorrow."' },
               { id: 'buoy', label: '🎣 Check the old buoy box', kind: 'chest', done: 'Something washed up in the buoy box, wedged between the floats.', already: 'Tam shrugs. "That box only ever had the one surprise in it."' }] },
   'garden-glass': { title: 'The Glasshouse', who: '🐌', name: 'Iris', theme: 'warm',
-    greet: 'Careful of the watering cans! Everything in here grows a little slower than the sun, and a little stranger too.',
+    greet: 'Careful of the watering cans! Everything in here grows a little slower than the sun, and a little stranger too. What are you thinking about?',
     actions: [{ id: 'prune', label: '🌿 Help prune the vines', kind: 'daily', pebbles: 4,
       done: 'You snip back the wandering vines. Iris slides four Embers across a potting bench. "For the help, dear."', already: 'Iris waves a leaf at you. "All pruned for today - the vines will grow back by tomorrow."' },
               { id: 'pots', label: '🪴 Dig through the spare pots', kind: 'chest', done: 'Something is tucked under an upturned pot, waiting.', already: 'Iris smiles. "You already found what was hiding under there."' }] },
@@ -534,7 +534,7 @@ function trophySummary() {
   if (r) lines.push(`⚔️ ${r.won} matches won (best streak ${r.best})`);
   if (miniGoldCount()) lines.push(`🥇 gold in ${miniGoldCount()} of ${Object.keys(MINIGAMES).length} house games`);
   const pz = state.progress.puzzle; if (pz && pz.solved) lines.push(`🧩 ${pz.solved} puzzle${pz.solved === 1 ? '' : 's'} solved`);
-  const foilTotal = Object.values(foils()).reduce((a, b) => a + b, 0); if (foilTotal) lines.push(`✨ ${foilTotal} foil${foilTotal === 1 ? '' : 's'} shimmering in your collection`);
+  const foilTotal = Object.values(foils()).reduce((a, b) => a + b, 0); if (foilTotal) lines.push(`✨ ${foilTotal} Reborn shimmering in your collection`);
   return lines.length ? lines.join(' · ') : 'The trophy case is empty for now. Win the Dreamers’ Cup, go deep in the cellar, or land a legendary catch.';
 }
 

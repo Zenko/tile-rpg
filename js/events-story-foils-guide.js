@@ -14,7 +14,7 @@ const TOWN_EVENTS = [
   { id: 'baking-day',    icon: '🥐', name: 'Baking Day',    text: 'Bread bakes twice as fast.' },
   { id: 'festival-day',  icon: '🎉', name: 'Festival Day',  text: 'Dreamers’ Cup rounds pay double Embers.' },
   // Rare events (build 102): a quarter of the weight of the others, so about one day in a dozen is something special.
-  { id: 'starfall',      icon: '☄️', name: 'Starfall',      text: 'Hidden cards are twice as easy to spot, and new cards are three times as likely to be foils.', rare: true },
+  { id: 'starfall',      icon: '☄️', name: 'Starfall',      text: 'Hidden cards are twice as easy to spot, and new cards are three times as likely to come back Reborn.', rare: true },
   { id: 'friendship-fair', icon: '💞', name: 'Friendship Fair', text: 'Every heart you earn with a neighbor counts double.', rare: true },
   { id: 'tourney',       icon: '🏅', name: 'Tournament Day', text: 'Every match you win pays +3 Embers.', rare: true },
 ];
@@ -50,15 +50,15 @@ function packPrice(pack) { return Math.round(pack.cost * (eventIs('market-day') 
    One step at a time, shown at the top of Rewards → Dailies. Each step pays a little; the last pays a card.
    ============================================================ */
 const STORY = [
-  { icon: '👣', text: 'Take a stroll around the square.',            goal: 'Walk 30 steps',                              done: p => (p.totals.steps || 0) >= 30,        pebbles: 5 },
+  { icon: '👣', text: 'Wander the threshold and get your bearings.',            goal: 'Walk 30 steps',                              done: p => (p.totals.steps || 0) >= 30,        pebbles: 5 },
   { icon: '💬', text: 'Say hello to a neighbor.',                    goal: 'Tap a neighbor and chat',                    done: p => (p.totals.talks || 0) >= 1,         pebbles: 5 },
   { icon: '⚔️', text: 'Try a friendly card match.',                  goal: 'Win a match against a neighbor',             done: p => (p.totals.battlesWon || 0) >= 1,    pebbles: 10 },
   { icon: '🎁', text: 'Open the gift waiting for you.',              goal: 'Claim the daily gift (Rewards → Dailies)',   done: p => !!p.lastGift,                       pebbles: 5 },
   { icon: '🏡', text: 'Drop in on Wren, who welcomed you.',          goal: "Visit Wren's Cottage in El Umbral",        done: p => !!(p.visited && p.visited.cottage), pebbles: 5 },
   { icon: '🍞', text: "Bake something at Maple's.",                  goal: 'Bake a loaf at the bakery',                  done: p => (p.totals.breadBaked || 0) >= 1,    pebbles: 8 },
-  { icon: '🎣', text: 'Cast a line by the river.',                   goal: 'Catch a fish (tap water with a fish in it)', done: p => (p.totals.fishCaught || 0) >= 1,    pebbles: 8 },
+  { icon: '🎣', text: 'Cast a thought into the water.',                   goal: 'Catch a fish (tap water with a fish in it)', done: p => (p.totals.fishCaught || 0) >= 1,    pebbles: 8 },
   { icon: '🎲', text: 'Play a little game in one of the houses.',    goal: 'Finish any house mini-game',                 done: p => (p.totals.minigamesPlayed || 0) >= 1, pebbles: 8 },
-  { icon: '🌱', text: 'Start a garden of your own.',                 goal: "Plant a seed (buy one at Fern's Cottage)",   done: p => (p.totals.seedsPlanted || 0) >= 1,  pebbles: 10 },
+  { icon: '🌱', text: 'Plant a thought in the soil.',                 goal: "Plant a seed (buy one at Fern's Cottage)",   done: p => (p.totals.seedsPlanted || 0) >= 1,  pebbles: 10 },
   { icon: '🛍️', text: 'Treat yourself.',                             goal: 'Open a card pack at the Card Shop',               done: p => (p.packsOpened || 0) >= 1,          pebbles: 10 },
   { icon: '🎴', text: 'Make the deck your own.',                     goal: 'Change a card in Cards → Deck',              done: p => (p.deckEdits || 0) >= 1,            pebbles: 10 },
   { icon: '⭐', text: 'Settle in properly.',                          goal: 'Reach level 5',                              done: p => (p.level || 1) >= 5,                card: 'super' },
@@ -124,7 +124,7 @@ function reconcileFoils() {
   Object.keys(f).forEach(id => { f[id] = Math.min(f[id], counts[id] || 0); if (!f[id]) delete f[id]; });   // a foil you gave away is gone
   p.foilSnap = counts;
   if (found.length) {
-    found.forEach(id => { const d = cardDef(id); setTimeout(() => toast(`✨ Foil! Your new ${d.icon} ${d.name} is a shiny one`), 1400); logEvent('✨', `Found a foil ${d.name}!`); });
+    found.forEach(id => { const d = cardDef(id); setTimeout(() => toast(`✨ Reborn! Your new ${d.icon} ${d.name} is a shimmering one`), 1400); logEvent('✨', `Found a Reborn ${d.name}!`); });
     bumpStat('foilsFound', found.length); sfx('mythic'); showTipOnce('foils');
   }
   saveState();
@@ -192,7 +192,7 @@ const GUIDE = [
     { icon: '🧩', name: 'Index & sets', where: 'Cards → Sets', how: 'Eight themed sets that give lasting bonuses when complete, and an Index of every card in the game.' },
     { icon: '✦', name: 'Charms & mastery', where: 'Cards → My Cards', how: 'Charm cards for town perks; cards you play earn ★ mastery (★★★: +1 health in battle).' },
     { icon: '🤝', name: 'Trading board', where: 'The sign in El Mercado de Susurros', how: 'Three trades a day for spare cards.', lock: () => needs('market') },
-    { icon: '✨', name: 'Foil cards', where: 'Any new card', how: 'Now and then a new card arrives as a shimmering foil. Your running total shows at the top of Cards → Sets and in your cottage trophy case.' },
+    { icon: '✨', name: 'Reborn cards', where: 'Any new card', how: 'Now and then a spirit that faded as an Echo comes back Reborn: the same card, shimmering. Your running total shows at the top of Cards → Sets and in your cottage trophy case.' },
     { icon: '🏅', name: 'Ladder & deck test', where: 'Social (ladder) · Cards → Deck → Your deck', how: 'Lingering duels, deck challenges, the Cup, bosses and Draft Runs earn ladder points. Ranks (Pebble, Stone, Moss, Gem, Star) pay Embers, you never lose points, and the season resets monthly. Your deck gets an archetype label (6+ of a family; 8+ gives +1 Calm at the start), and Test your deck plays practice matches to show a win rate.' },
     { icon: '🧬', name: 'Family passives', where: 'Cards → Deck → Your deck', how: 'Build a full deck with 6 or more cards of one family and it plays with a small once-per-match passive (Seedling: your first Brote card restores 3 Calm. Footing: your first Recuerdo card costing 3+ gets +1 health. Ebb: your first Deriva card costing 3+ refunds 1 Energy. Breeze: your first cheap Flicker Susurro card gets +1 power). At 8 or more it becomes the full one. Brote (Rooted): Brote cards restore 1 Calm when they arrive. Recuerdo (Bedrock): your first Recuerdo card costing 4 or more enters with a Haze. Deriva (Undertow): your first Deriva card each turn draws a card if you hold 4 or fewer. Susurro (Tailwind): Flicker Susurro cards costing 2 or less get +1 power. This replaces the old +1 Calm.' },
     { icon: '📅', name: 'Weekly Rule', where: 'A chip in battle, and the Social ladder card', how: 'A small rule changes for the whole week and applies to both sides, such as Flicker cards +1 power or Haze cards +1 health. It changes by itself every week; puzzles and cellar fights ignore it.' },

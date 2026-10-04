@@ -64,7 +64,7 @@ const QUEST_POOL = [
   { id: 'cardgift1', icon: '🃏', name: 'Give a neighbor a card',      goal: 1,  stat: 'cardsGifted',     reward: 'common' },
   { id: 'chal1',    icon: '🎯', name: 'Beat a deck challenge',        goal: 1,  stat: 'challengesWon',   reward: 'ultra' },
   { id: 'minigold', icon: '🥇', name: 'Win a gold medal in a mini-game', goal: 1, stat: 'minigameGolds', reward: 'rare' },
-  { id: 'foil1',    icon: '✨', name: 'Find a foil card',              goal: 1, stat: 'foilsFound',      reward: 'rare' },
+  { id: 'foil1',    icon: '✨', name: 'Find a Reborn card',              goal: 1, stat: 'foilsFound',      reward: 'rare' },
   { id: 'rainyfish1', icon: '🌧️', name: 'Catch a fish while it rains', goal: 1, stat: 'rainyFish',       reward: 'rare' },
   { id: 'foggyfind1', icon: '🌧️', name: 'Find a card in the rain',     goal: 1, stat: 'foggyFinds',      reward: 'rare' },
   { id: 'acts6',    icon: '🪑', name: 'Interact with 6 things around town', goal: 6,  stat: 'townActs',  reward: 'common' },
@@ -110,7 +110,7 @@ const WEEKLY_QUEST_POOL = [
   { id: 'w_gold8',    icon: '🥇', name: 'Win 8 mini-game gold medals', goal: 8, stat: 'minigameGolds',  reward: 'mythic' },
   { id: 'w_chal6',    icon: '🎯', name: 'Beat 6 deck challenges',    goal: 6,  stat: 'challengesWon',   reward: 'mythic' },
   { id: 'w_trade5',   icon: '🤝', name: 'Make 5 trades',             goal: 5,  stat: 'tradesDone',      reward: 'super' },
-  { id: 'w_foil3',    icon: '✨', name: 'Find 3 foil cards',         goal: 3,  stat: 'foilsFound',      reward: 'mythic' },
+  { id: 'w_foil3',    icon: '✨', name: 'Find 3 Reborn cards',         goal: 3,  stat: 'foilsFound',      reward: 'mythic' },
   { id: 'w_acts60',   icon: '🏘️', name: 'Interact with 60 things around town', goal: 60, stat: 'townActs', reward: 'super' },
   { id: 'w_games8',   icon: '🎸', name: 'Play 8 town activities',    goal: 8,  stat: 'townGames',       reward: 'super' }
 ];
@@ -252,8 +252,8 @@ const ACHIEVEMENTS = [
   { id: 'card-gifts-10', icon: '🃏', name: '10 cards given', test: () => (state.progress.totals.cardsGifted || 0) >= 10 },
   { id: 'settled-in',  icon: '📜', name: 'Settled in',       test: () => !!(state.progress.story && state.progress.story.step >= STORY_ARC_LEN) },
   { id: 'true-local',  icon: '🏘️', name: 'A true local',      test: () => !!(state.progress.story && state.progress.story.step >= STORY.length) },
-  { id: 'first-foil',  icon: '✨', name: 'First foil',        test: () => (state.progress.totals.foilsFound || 0) >= 1 },
-  { id: 'foil-10',     icon: '🌈', name: '10 foils',          test: () => (state.progress.totals.foilsFound || 0) >= 10 },
+  { id: 'first-foil',  icon: '✨', name: 'First Reborn',        test: () => (state.progress.totals.foilsFound || 0) >= 1 },
+  { id: 'foil-10',     icon: '🌈', name: '10 Reborn',          test: () => (state.progress.totals.foilsFound || 0) >= 10 },
   { id: 'packed-bag',  icon: '🎒', name: 'Checked your bag',  test: () => (state.progress.totals.inventoryOpened || 0) >= 1 }
 ];
 

@@ -123,7 +123,7 @@ function profileStatValues() {
     { icon: '⭐', label: 'Level', value: pr.level },
     { icon: '🏆', label: 'Wins', value: state.wins || 0 },
     { icon: '🃏', label: 'Cards', value: state.ownedCards.length },
-    { icon: '✨', label: 'Foils', value: t.foilsFound || 0 },
+    { icon: '✨', label: 'Reborn', value: t.foilsFound || 0 },
     { icon: '🏅', label: 'Milestones', value: `${state.progress.achievements.length}/${ACHIEVEMENTS.length}` },
     { icon: '💞', label: 'Friends', value: friends },
     { icon: '🕳️', label: 'Cellar best', value: cellarBest() },

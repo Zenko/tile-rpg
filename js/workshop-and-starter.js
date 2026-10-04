@@ -582,7 +582,7 @@ function renderAlmanac() {
   document.getElementById('almProgress').innerHTML = (typeof binderHtml === 'function' ? binderHtml() : '') + setsHtml + `
     <div class="ap-top"><span><b>${found}</b> of ${total} discovered</span><span>${Math.round(found / total * 100)}%</span></div>
     <div class="q-bar"><div class="q-fill" style="width:${Math.round(found / total * 100)}%"></div></div>
-    ${foilTotal ? `<div class="alm-season">✨ ${foilTotal} foil${foilTotal === 1 ? '' : 's'} in your collection - look for the shimmer on any card.</div>` : ''}
+    ${foilTotal ? `<div class="alm-season">✨ ${foilTotal} Reborn in your collection - look for the shimmer on any card.</div>` : ''}
     <div class="alm-season">${sd.icon} It's ${sd.name}: cards marked ${sd.icon} turn up more often for ${seasonDaysLeft()} more day${seasonDaysLeft() === 1 ? '' : 's'}.</div>
     <button type="button" class="claim-more" id="almGridToggle">${almGridOpen ? 'Hide' : 'Show'} every card · ${found}/${total}</button>`;
   onAll(document, '#almProgress [data-set]', b => { setOpenId = setOpenId === b.dataset.set ? null : b.dataset.set; sfx('tap'); renderAlmanac(); });
