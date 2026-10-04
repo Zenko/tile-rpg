@@ -31,8 +31,8 @@ module.exports = async (page, assert) => {
   assert.ok(!r.early && r.ready && r.first && !r.second && !r.other, 'gated by turn, once only, only for the side that has one');
   // choosing: only attuned, owned Arcana count
   const c = await page.evaluate(() => {
-    state.progress.tarot = undefined; tarotState(); state.ownedCards = ['starlight', 'lantern', 'world-tree'];
-    const star = ARCANA.findIndex(a => a.card === 'starlight');
+    state.progress.tarot = undefined; tarotState(); state.ownedCards = ['moonstone', 'copper-kettle-spirit', 'world-tree'];
+    const star = ARCANA.findIndex(a => a.card === 'moonstone');
     chooseFate(star); const notAttuned = currentFateId();
     tarotAttune(star); chooseFate(star); const attuned = currentFateId();
     state.ownedCards = []; const notOwned = currentFateId();
@@ -41,8 +41,8 @@ module.exports = async (page, assert) => {
   assert.strictEqual(c.notAttuned, null); assert.strictEqual(c.attuned, 'star'); assert.strictEqual(c.notOwned, null);
   // the battle: the picker shows, the button glows from its turn, and using it works through the UI
   await page.evaluate(() => {
-    prefs.tossStyle = 'skip'; CARD_POOL.slice(0, 40).forEach(x => state.ownedCards.push(x.id, x.id)); state.ownedCards.push('starlight');
-    state.deck = BattleEngine.suggestDeck(ownedCardCounts()); const star = ARCANA.findIndex(a => a.card === 'starlight'); state.progress.tarot.attuned = [star]; chooseFate(star);
+    prefs.tossStyle = 'skip'; CARD_POOL.slice(0, 40).forEach(x => state.ownedCards.push(x.id, x.id)); state.ownedCards.push('moonstone');
+    state.deck = BattleEngine.suggestDeck(ownedCardCounts()); const star = ARCANA.findIndex(a => a.card === 'moonstone'); state.progress.tarot.attuned = [star]; chooseFate(star);
     startBattle({ id: 'fate-test', name: 'Test Foe', icon: '🦊', deck: BattleEngine.suggestDeck(ownedCardCounts()), isBoss: false, rewardCard: null, defeated: false, profile: { level: 'gentle', spirit: 15 } });
   });
   for (let i = 0; i < 40; i++) { await page.waitForTimeout(400); if (await page.evaluate(() => inBattle && battle && battle.G && !battle.busy && !document.getElementById('mulliganOverlay').classList.contains('hidden'))) break; }

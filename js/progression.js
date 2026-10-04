@@ -478,7 +478,7 @@ function weightedTownCardId(rarity) {
 }
 
 // Cheap everyday cards every opponent can draw on, so their decks always have a playable early game.
-const BASE_COMMONS = ['sprout','sprout','sprout','pebble','pebble','pebble','reed','reed','reed','droplet','droplet','toadstool','toadstool','bubble','flintstone','moth'];
+const BASE_COMMONS = ['sprout','sprout','sprout','pebble','pebble','pebble','origami-crane','origami-crane','origami-crane','droplet','droplet','toadstool','toadstool','bubble','flintstone','firefly'];
 
 // Opponent decks are built the same way the Deck's Auto-fill builds yours: from a pool of cards, with a healthy cost curve.
 /* Opponent decks used to be a plain pool of random cards, which made neighbors and the old cellar floors easy.

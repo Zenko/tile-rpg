@@ -5,10 +5,10 @@
    does not win - so every puzzle has a real answer that takes a little thought. Built once, then kept for the day.
    ============================================================ */
 const PUZZLE_CARDS = {
-  theirs: ['pebble', 'toadstool', 'bubble', 'geode', 'boulder', 'rice-cake', 'snail', 'twig-bundle', 'thistle', 'hollow-log', 'hedgehog', 'bramble', 'rosebush', 'folding-screen', 'torii-gate', 'moth', 'reed'],
-  mine:   ['reed', 'flintstone', 'feather', 'moth', 'sprout', 'toadstool', 'gale', 'stray-kitten', 'lucky-cat', 'firefly', 'dusk-bat', 'paper-lantern'],
-  hand:   ['spark', 'gust', 'thunderclap', 'sunbeam', 'second-wind', 'harvest', 'reed', 'flintstone', 'tide', 'temple-bell', 'paper-fan', 'morning-bugle', 'village-banner', 'feather', 'gale', 'windchime', 'autumn-maple'],
-  filler: ['pebble', 'sprout', 'reed', 'moth']
+  theirs: ['pebble', 'toadstool', 'bubble', 'geode', 'geode', 'rice-cake', 'rice-cake', 'bramble', 'feather', 'hollow-log', 'hedgehog', 'bramble', 'hollow-log', 'folding-screen', 'torii-gate', 'firefly', 'origami-crane'],
+  mine:   ['origami-crane', 'flintstone', 'feather', 'firefly', 'sprout', 'toadstool', 'gale', 'feather', 'morning-bugle', 'firefly', 'dusk-bat', 'feather'],
+  hand:   ['spark', 'gust', 'thunderclap', 'sunbeam', 'second-wind', 'harvest', 'origami-crane', 'flintstone', 'tide', 'temple-bell', 'paper-fan', 'morning-bugle', 'village-banner', 'feather', 'gale', 'temple-bell', 'tide'],
+  filler: ['pebble', 'sprout', 'origami-crane', 'firefly']
 };
 function cloneBattle(G) { const c = JSON.parse(JSON.stringify(Object.assign({}, G, { rng: null, events: [], aiMemo: null }))); c.rng = Math.random; return c; }
 function puzzleActions(G) {

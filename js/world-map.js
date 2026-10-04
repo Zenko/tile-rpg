@@ -51,7 +51,7 @@ const WM_ART = {
 // Text and the few facts that aren't stored anywhere else. Buildings and neighbour names come from the real maps/save.
 const WM_INFO = {
   square: { short: 'Square', blurb: 'The heart of town. Everything starts here, and every road leads back to it.', extras: ['Dreamers’ Cup fountain', 'Weather sign'] },
-  market: { short: 'Market', blurb: 'East of the Square. Stalls, a museum, and a lantern market that only opens after dark.', extras: ['Trading board', "Lumen's Lantern Market (night only)"] },
+  market: { short: 'Market', blurb: 'East of the Square. Stalls and a lantern market that only opens after dark.', extras: ['Trading board', "Lumen's Lantern Market (night only)"] },
   harbor: { short: 'Harbor', blurb: 'Salt air and slow water. The best fishing in town, and a keeper who bends the tide.', extras: ['Fishing spots (they shuffle every 10 minutes)'] },
   garden: { short: 'Garden', blurb: 'A hush of flowers and hedges, with a glasshouse tucked in the middle.', extras: [] }
 };

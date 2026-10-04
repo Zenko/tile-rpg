@@ -302,9 +302,9 @@ const CELLAR = {
 // The three shallow floors climb the foe tiers (see buildDeckForOpponent): unique foe cards and enhanced "+" cards, more of them each floor.
 function themedDeck(theme, floor) {
   const pools = {
-    swarm: ['reed', 'reed', 'flintstone', 'flintstone', 'sprout', 'sprout', 'feather', 'feather', 'gale', 'moth', 'droplet', 'toadstool', 'tide'],
-    wall:  ['pebble', 'pebble', 'geode', 'geode', 'boulder', 'boulder', 'bubble', 'bubble', 'lantern', 'moonstone', 'droplet', 'toadstool', 'cloud'],
-    grove: ['moth', 'moth', 'blossom', 'blossom', 'lily', 'lily', 'droplet', 'droplet', 'aurora-stag', 'deep-current', 'mountain-heart', 'dove', 'cloud'],
+    swarm: ['origami-crane', 'origami-crane', 'flintstone', 'flintstone', 'sprout', 'sprout', 'feather', 'feather', 'gale', 'firefly', 'droplet', 'toadstool', 'tide'],
+    wall:  ['pebble', 'pebble', 'geode', 'geode', 'geode', 'geode', 'bubble', 'bubble', 'moonstone', 'moonstone', 'droplet', 'toadstool', 'ember-fox'],
+    grove: ['firefly', 'firefly', 'blossom', 'blossom', 'foxglove', 'foxglove', 'droplet', 'droplet', 'aurora-stag', 'deep-current', 'mountain-heart', 'dove', 'ember-fox'],
   };
   const counts = {}; pools[theme].forEach(id => { counts[id] = Math.min(MAX_COPIES, (counts[id] || 0) + 1); });
   return foeEnhanceDeck(BattleEngine.suggestDeck(counts), Math.max(1, Math.min(2, floor || 0)), 'cellar-' + theme);
@@ -322,7 +322,7 @@ const DEEP_FOES = [
 ];
 const DEEP_GUARDIANS = [
   { name: 'The Watcher Below', icon: '👁️', kw: 'guard', blurb: 'One great eye opens in the rock and follows you.' },
-  { name: 'The Deep Wyrm',     icon: '🐉', kw: 'bloom', blurb: 'The floor trembles. Something very large is breathing.' },
+  { name: 'The Forgotten Wyrm',     icon: '🐉', kw: 'bloom', blurb: 'The floor trembles. Something very large is breathing.' },
 ];
 // The prizes only the deep gives up, handed out by guardians in this order (then at random once you have them all).
 const CELLAR_PRIZES = ['glowworm', 'echo-cavern', 'deep-wyrm'];

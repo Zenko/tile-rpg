@@ -39,7 +39,7 @@ function journalGo(t) {
 const GUIDE_GO = {
   'Districts': { map: 1 }, 'Themes': { menu: 'settings' }, 'Inventory': { tab: 'character' }, 'Character tab': { tab: 'character' },
   'Draft Run': JPLACES.cup, 'Dreamers’ Cup': JPLACES.cup, 'Deck challenges': JPLACES.cup, 'Daily puzzle': JPLACES.nook,
-  'The cellar': JPLACES.cellar, 'Letters': JPLACES.home, 'Your cottage': JPLACES.home, 'Card Museum & expeditions': JPLACES.museum,
+  'The cellar': JPLACES.cellar, 'Letters': JPLACES.home, 'Your cottage': JPLACES.home,
   'Packs & decorations': JPLACES.shop, 'Lantern Market': JPLACES.lantern, 'The Net Loft': JPLACES.net, 'The Glasshouse': JPLACES.glass,
   'Workshop': { tab: 'collection' }, 'Index & sets': { tab: 'collection' }, 'Charms & mastery': { tab: 'collection' },
   'Embers and soft limits': { menu: 'settings' }, 'Who goes first': { menu: 'settings' }, 'Ghost duels': { menu: 'social' }

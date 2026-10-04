@@ -29,8 +29,6 @@ const TITLES = [
   { ach: 'pen-pal',       name: 'Pen Pal' },
   { ach: 'mini-gold-5',   name: 'All-Rounder' },
   { ach: 'mini-all-gold', name: 'Game Master' },
-  { ach: 'museum-full',   name: 'Patron of the Museum' },
-  { ach: 'exped-20',      name: 'Expedition Leader' },
   { ach: 'trade-15',      name: 'Trader' },
   { ach: 'mastery-10',    name: 'Card Master' },
   { ach: 'set-all',       name: 'Completionist' },

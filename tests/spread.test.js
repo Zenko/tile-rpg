@@ -26,9 +26,9 @@ module.exports = async (page, assert) => {
   assert.deepStrictEqual(r.bad, []);
   assert.ok(r.harmony && r.contrast, 'Harmony for one family, Contrast for three');
   const u = await page.evaluate(() => {
-    state.deck = ['starlight', 'lantern', 'world-tree']; state.activeDeckSlot = state.activeDeckSlot || 0;
-    spreadSet(['starlight', 'lantern', 'world-tree']); const ok = spreadValid(spreadIds());
-    const bad = spreadValid(['starlight', 'starlight', 'lantern']);
+    state.deck = ['silver-fox', 'moonstone', 'world-tree']; state.activeDeckSlot = state.activeDeckSlot || 0;
+    spreadSet(['silver-fox', 'moonstone', 'world-tree']); const ok = spreadValid(spreadIds());
+    const bad = spreadValid(['silver-fox', 'silver-fox', 'moonstone']);
     const locked = featureLocked('spread');
     return { ok, bad, locked, cur: !!currentSpread() };
   });

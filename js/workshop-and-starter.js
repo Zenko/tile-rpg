@@ -1,5 +1,5 @@
 /* ---------- Starter cards and the move to the turn-based battle ---------- */
-const STARTER_CARDS = ['sprout','sprout','pebble','pebble','reed','reed','droplet','toadstool','toadstool','bubble','flintstone','moth'];
+const STARTER_CARDS = ['sprout','sprout','pebble','pebble','origami-crane','origami-crane','droplet','toadstool','toadstool','bubble','flintstone','firefly'];
 
 // Adds just enough common cards that a full 12-card deck can be built. Returns the ids that were added.
 function ensurePlayableCollection() {

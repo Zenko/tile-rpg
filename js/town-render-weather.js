@@ -113,13 +113,13 @@ const SEASONS = {
   // rollWeather()'s `tilt[k] || 1` would otherwise leave it at WEATHER_KINDS.snow's ordinary base weight the
   // rest of the year. Winter's own tilt is what makes snow common there instead of merely possible.
   spring: { icon: '🌸', name: 'Spring', weather: { rain: 1.5, cloudy: 1.2, snow: 0 },
-    cards: ['sprout', 'blossom', 'sakura-petal', 'cherry-blossom-storm', 'clover', 'lily', 'foxglove', 'moth', 'dove', 'garden-spirit', 'rain-shower', 'starfall-unicorn'] },
+    cards: ['sprout', 'blossom', 'cherry-blossom-storm', 'foxglove', 'firefly', 'dove', 'storm-lily', 'rain-shower', 'aurora-stag'] },
   summer: { icon: '☀️', name: 'Summer', weather: { clear: 1.4, storm: 1.4, snow: 0 },
-    cards: ['firefly', 'reed', 'feather', 'gale', 'thunderhead', 'storm-lily', 'lucky-cat', 'festival-drum', 'koi', 'paper-fan', 'sunbeam', 'phoenix-ember'] },
+    cards: ['firefly', 'origami-crane', 'feather', 'gale', 'storm-lily', 'morning-bugle', 'droplet', 'paper-fan', 'sunbeam', 'moon-dragon'] },
   autumn: { icon: '🍂', name: 'Autumn', weather: { cloudy: 1.6, rain: 1.2, snow: 0 },
-    cards: ['acorn', 'autumn-maple', 'dew-leaf', 'harvest-lantern', 'hollow-log', 'twig-bundle', 'pinewood-owl', 'moth-queen', 'hedgehog', 'copper-carp', 'harvest', 'ironroot-treant'] },
+    cards: ['acorn', 'tide', 'toadstool', 'storm-lily', 'hollow-log', 'bramble', 'stone-lantern', 'hedgehog', 'paper-boat', 'harvest', 'world-tree'] },
   winter: { icon: '❄️', name: 'Winter', weather: { snow: 3.5, clear: 0.8 },
-    cards: ['winter-hare', 'glacier-spirit', 'crystal-spire', 'quartz-cluster', 'moonstone', 'snail', 'geode', 'northern-lights', 'moonlit-shrine', 'stone-lantern', 'moonlit-tide', 'celestial-owl'] },
+    cards: ['silver-fox', 'mossy-titan', 'crystal-spire', 'quarry-bear', 'moonstone', 'rice-cake', 'geode', 'ember-fox', 'stone-lantern', 'moonlit-tide', 'sky-whale'] },
 };
 const SEASON_ORDER = ['spring', 'summer', 'autumn', 'winter'];
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;

@@ -5,8 +5,10 @@
    ============================================================ */
 const LANTERN_TILE = { district: 'market', x: 4, y: 5 };
 const NIGHT_PACK_COST = 45;
-const NIGHT_CARDS = ['moonlit-shrine', 'moon-viewing', 'nightjar', 'northern-lights', 'celestial-owl', 'moon-dragon', 'moonstone', 'starlight',
-                     'dusk-bat', 'mist-wraith', 'lantern-fish', 'firefly', 'moth-queen', 'eclipse-panther', 'moonlit-tide', 'starfall', 'paper-lantern', 'stone-lantern'];
+const NIGHT_CARDS = ['sunbeam', 'temple-bell', 'folding-screen', 'hollow-log',
+                     'stone-lantern', 'lantern-fish', 'moon-jelly', 'ember-fox', 'heron',
+                     'moonstone', 'mist-wraith', 'silver-fox', 'moonlit-tide',
+                     'moon-dragon', 'sky-whale', 'starfall'];   // the Lantern Pack: night and lantern cards only, rare to mythic
 const BUGS = [
   { id: 'firefly',     name: 'Firefly',     icon: '✨', weight: 50, pebbles: 2, hint: 'Any night' },
   { id: 'cricket',     name: 'Cricket',     icon: '🦗', weight: 26, pebbles: 2, hint: 'Any night' },
@@ -184,14 +186,14 @@ function clearCharm(i) { charms()[i] = null; saveState(); sfx('tap'); }
 
 /* ---------------- set bonuses: own every card of a themed set for a lasting perk ---------------- */
 const CARD_SETS = [
-  { id: 'koi',      name: 'Koi Pond',       icon: '🎏', cards: ['koi', 'copper-carp', 'koi-ascending', 'void-koi'],                      kind: 'fish',        val: 0.10, text: 'Fish bite 10% sooner' },
-  { id: 'moon',     name: 'Moon Phases',    icon: '🌙', cards: ['moonlit-shrine', 'moon-viewing', 'moonstone', 'moon-dragon'],           kind: 'xp',          val: 0.05, text: '+5% XP' },
-  { id: 'garden',   name: 'Garden Party',   icon: '🌷', cards: ['sprout', 'blossom', 'foxglove', 'garden-spirit', 'garden-titan'],       kind: 'crops',       val: 0.10, text: 'Crops grow 10% faster' },
-  { id: 'stones',   name: 'Rock Collection', icon: '🪨', cards: ['pebble', 'flintstone', 'geode', 'boulder', 'quartz-cluster'],          kind: 'startSpirit', val: 1,    text: '+1 Calm at the start of matches' },
-  { id: 'birds',    name: 'Birdwatching',   icon: '🐦', cards: ['feather', 'dove', 'nightjar', 'heron', 'pinewood-owl', 'celestial-owl'], kind: 'finds',      val: 0.15, text: 'Hidden finds +15%' },
-  { id: 'storm',    name: 'Stormchaser',    icon: '⛈️', cards: ['gale', 'thunderhead', 'thunderclap', 'storm-lily'],                     kind: 'chest',       val: 0.15, text: 'Hidden chests +15%' },
-  { id: 'festival', name: 'Festival Night', icon: '🏮', cards: ['paper-fan', 'paper-lantern', 'festival-drum', 'temple-bell', 'lucky-cat'], kind: 'miniPebbles', val: 1, text: '+1 Ember per mini-game medal' },
-  { id: 'spells',   name: 'Spellbook',      icon: '📜', cards: CARD_POOL.filter(c => c.spell).map(c => c.id),                             kind: 'startDraw',   val: 1,    text: 'Draw 1 extra card at the start of matches' },
+  { id: 'koi',      name: 'Drifting Shoal', icon: '🎏', cards: ['koi-ascending', 'void-koi', 'lantern-fish', 'moon-jelly'],                      kind: 'fish',        val: 0.10, text: 'Fish bite 10% sooner' },
+  { id: 'moon',     name: 'Moon Phases',    icon: '🌙', cards: ['moonstone', 'moon-dragon', 'storm-lily', 'sunbeam', 'moonlit-tide'],           kind: 'xp',          val: 0.05, text: '+5% XP' },
+  { id: 'garden',   name: 'Midnight Bloom',  icon: '🌷', cards: ['sprout', 'blossom', 'foxglove', 'cherry-blossom-storm', 'aurora-stag'],       kind: 'crops',       val: 0.10, text: 'Crops grow 10% faster' },
+  { id: 'stones',   name: 'Memory Stones',  icon: '🪨', cards: ['pebble', 'flintstone', 'geode', 'crystal-spire', 'mountain-heart'],          kind: 'startSpirit', val: 1,    text: '+1 Calm at the start of matches' },
+  { id: 'birds',    name: 'Whisper Wings',  icon: '🐦', cards: ['origami-crane', 'feather', 'market-sparrow', 'dove', 'heron'], kind: 'finds',      val: 0.15, text: 'Hidden finds +15%' },
+  { id: 'storm',    name: 'Dream Storms',   icon: '⛈️', cards: ['gale', 'thunderclap', 'thundering-ram', 'whirlpool'],                     kind: 'chest',       val: 0.15, text: 'Hidden chests +15%' },
+  { id: 'festival', name: 'Lantern Night',  icon: '🏮', cards: ['paper-fan', 'temple-bell', 'morning-bugle', 'stone-lantern', 'lion-dancer'], kind: 'miniPebbles', val: 1, text: '+1 Ember per mini-game medal' },
+  { id: 'spells',   name: 'Book of Lullabies', icon: '📜', cards: CARD_POOL.filter(c => c.spell).map(c => c.id),                             kind: 'startDraw',   val: 1,    text: 'Draw 1 extra card at the start of matches' },
 ];
 function setProgress(s) { const own = baseOwnedSet(); return s.cards.filter(id => own.has(id)).length; }
 function setComplete(s) { return setProgress(s) === s.cards.length; }
@@ -240,14 +242,9 @@ function settleMastery(won) {
 }
 
 /* ---------------- the museum: donate spare copies to fill six wings ---------------- */
-const MUSEUM_WINGS = [
-  { id: 'pond',     name: 'Pond Wing',         icon: '🌊', deco: 'pond-diorama',   cards: ['droplet', 'koi', 'lily', 'bubble', 'tide', 'copper-carp', 'koi-ascending', 'lantern-fish'] },
-  { id: 'meadow',   name: 'Meadow Wing',       icon: '🌼', deco: 'meadow-painting', cards: ['sprout', 'clover', 'moth', 'reed', 'blossom', 'feather', 'foxglove', 'dew-leaf'] },
-  { id: 'hearth',   name: 'Stone & Hearth',    icon: '🪨', deco: 'hearth-urn',     cards: ['pebble', 'flintstone', 'geode', 'boulder', 'old-kettle', 'hollow-log', 'twig-bundle', 'stone-lantern'] },
-  { id: 'festival', name: 'Festival Hall',     icon: '🏮', deco: 'festival-mask',  cards: ['paper-fan', 'festival-drum', 'lucky-cat', 'paper-lantern', 'temple-bell', 'torii-gate', 'origami-crane', 'rice-cake'] },
-  { id: 'night',    name: 'Night Sky Gallery', icon: '🌌', deco: 'star-telescope', cards: ['moonstone', 'starlight', 'nightjar', 'northern-lights', 'moonlit-shrine', 'moon-viewing', 'celestial-owl', 'moon-dragon'] },
-  { id: 'legends',  name: 'Hall of Legends',   icon: '🏛️', deco: 'legend-statue',  cards: ['aurora-stag', 'deep-current', 'mountain-heart', 'sky-whale', 'ancient-oak', 'phoenix-ember', 'glacier-spirit', 'void-koi'] },
-];
+// Removed for Beta 1 (the Card Museum is gone from the map, and comes back later as the Hall of Spirits). The wings are rebuilt from
+// the kept cards when it returns; until then the museum code below stays dormant.
+const MUSEUM_WINGS = [];
 const WING_PEBBLES = 30;
 function museumState() { const p = state.progress; if (!p.museum || typeof p.museum !== 'object') p.museum = { donated: {}, wings: {} }; return p.museum; }
 function wingDef(id) { return MUSEUM_WINGS.find(w => w.id === id); }
