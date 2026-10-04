@@ -207,15 +207,15 @@ const CARD_POOL = [
 const FOE_CARDS = [
   { id: 'market-cat',     name: 'Market Cat',     icon: '🐈', rarity: 'rare',   cost: 2, power: 3, grit: 2, kw: ['swift'],           foe: true, tier: 1 },
   { id: 'lamplighter',    name: 'Lamplighter',    icon: '🏮', rarity: 'rare',   cost: 2, power: 2, grit: 3, kw: ['mend'],            foe: true, tier: 1 },
-  { id: 'pebble-golem',   name: 'Pebble Golem',   icon: '🗿', rarity: 'rare',   cost: 3, power: 3, grit: 5, kw: ['guard'],           foe: true, tier: 1 },
-  { id: 'thorn-hare',     name: 'Thorn Hare',     icon: '🐇', rarity: 'ultra',  cost: 3, power: 4, grit: 3, kw: ['swift', 'thorns'], foe: true, tier: 2 },
-  { id: 'wisp-keeper',    name: 'Wisp Keeper',    icon: '🕯️', rarity: 'ultra',  cost: 3, power: 3, grit: 4, kw: ['mend', 'shield'],  foe: true, tier: 2 },
+  { id: 'pebble-golem',   name: 'Worry Golem',    icon: '🗿', rarity: 'rare',   cost: 3, power: 3, grit: 5, kw: ['guard'],           foe: true, tier: 1 },
+  { id: 'thorn-hare',     name: 'Briar Hare',     icon: '🐇', rarity: 'ultra',  cost: 3, power: 4, grit: 3, kw: ['swift', 'thorns'], foe: true, tier: 2 },
+  { id: 'wisp-keeper',    name: 'Wisp Warden',    icon: '🕯️', rarity: 'ultra',  cost: 3, power: 3, grit: 4, kw: ['mend', 'shield'],  foe: true, tier: 2 },
   { id: 'bell-ringer',    name: 'Bell Ringer',    icon: '🛎️', rarity: 'ultra',  cost: 3, power: 3, grit: 4, kw: ['echo', 'rally'],   foe: true, tier: 2 },
-  { id: 'storm-heron',    name: 'Storm Heron',    icon: '🦅', rarity: 'super',  cost: 4, power: 5, grit: 4, kw: ['swift', 'drain'],  foe: true, tier: 3 },
+  { id: 'storm-heron',    name: 'Dream Heron',    icon: '🦅', rarity: 'super',  cost: 4, power: 5, grit: 4, kw: ['swift', 'drain'],  foe: true, tier: 3 },
   { id: 'iron-tortoise',  name: 'Iron Tortoise',  icon: '🐢', rarity: 'super',  cost: 4, power: 4, grit: 7, kw: ['guard', 'thorns'], foe: true, tier: 3 },
   { id: 'cinder-fox',      name: 'Cinder Fox',     icon: '🦊', rarity: 'super',  cost: 4, power: 6, grit: 4, kw: ['swift', 'bloom'],  foe: true, tier: 3 },
-  { id: 'night-regent',   name: 'Night Regent',   icon: '🦉', rarity: 'mythic', cost: 5, power: 7, grit: 7, kw: ['guard', 'drain'],  foe: true, tier: 4 },
-  { id: 'tide-leviathan', name: 'Tide Leviathan', icon: '🐋', rarity: 'mythic', cost: 5, power: 7, grit: 8, kw: ['shield', 'echo'],  foe: true, tier: 4 },
+  { id: 'night-regent',   name: 'Regent of Sleep',   icon: '🦉', rarity: 'mythic', cost: 5, power: 7, grit: 7, kw: ['guard', 'drain'],  foe: true, tier: 4 },
+  { id: 'tide-leviathan', name: 'Slow Leviathan', icon: '🐋', rarity: 'mythic', cost: 5, power: 7, grit: 8, kw: ['shield', 'echo'],  foe: true, tier: 4 },
 ];
 // Families (v1.82.0): each district leans on one. Kin cards grow with the other cards of their family on your board, and a
 // district's neighbors and boss build decks that favour their family (buildDeckForOpponent). Spells and unlisted cards have none.

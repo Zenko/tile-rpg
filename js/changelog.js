@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta ${RELEASES[0].n} (build $
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'better', x: 'The Journal\'s Notes page is now Theories: write down your guesses about the dream, and the Atlas\'s answers are kept above them as hints. Foil cards are now Reborn cards, the characters and districts speak with their dream voices, and the opponent-only cards have dream names too.' },
   { t:'better', x: 'More dream names: the card packs are Nap, Daydream, Moonlit, Midnight, Lucid, Reverie and Lullaby Packs (and Lumen\'s is the Lantern Pack), Tarot is the Fates, Keeper level is Dreamer level, the Keeper\'s Knack is the Dreamer\'s Gift, Fishing and Gardening are Thought Fishing and Thought Tending, the bug jar is the Glow Jar, ghost duels are lingering duels, and the weather has dream names (Mist, Moonrain, Dream storm, Drifting stars).' },
   { t:'new', x: 'The Atlas: summon it and it walks with you through every district (look for the violet glow). Tap it to ask a few questions, take on four matches that each bend a rule, play harder versions of the house games for Embers, and buy decorations only it sells.' },
   { t:'new', x: 'The altar, in your cottage: beat a district god, offer three spare cards of their family, and the god is summoned as a card. Summon all four and something else may answer. Releasing a spare now needs three copies of the card, so two are always kept.' },

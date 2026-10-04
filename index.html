@@ -243,7 +243,7 @@
             <button class="seg-btn" id="segEventLog" role="tab">Log</button>
             <button class="seg-btn" id="segBattles" role="tab">Battles</button>
             <button class="seg-btn" id="segJAlmanac" role="tab">Almanac</button>
-            <button class="seg-btn" id="segNotes" role="tab">Notes</button>
+            <button class="seg-btn" id="segNotes" role="tab">Theories</button>
           </div>
           <button class="jhelp-btn" id="journalHelpBtn" type="button" aria-label="Guide and what's new">?<span class="jhelp-badge hidden" id="journalHelpBadge"></span></button>
         </div>
@@ -266,11 +266,12 @@
         </div>
         <div id="notesView" class="hidden">
           <div id="notesListView">
-            <input type="search" id="notesSearch" class="jsearch" placeholder="Search notes" aria-label="Search notes">
+            <input type="search" id="notesSearch" class="jsearch" placeholder="Search your theories" aria-label="Search notes">
             <div class="notes-list-toolbar">
               <button class="btn" id="newNoteWriteBtn">✏️ New Note</button>
               <button class="btn btn-ghost" id="newNoteDrawBtn">🖌️ New Drawing</button>
             </div>
+            <div class="atlas-hints hidden" id="atlasHints"></div>
             <div class="panel-list" id="notesList"></div>
           </div>
           <div id="notesEditorView" class="hidden">

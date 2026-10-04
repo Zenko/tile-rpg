@@ -1196,3 +1196,8 @@ html.calm .cl-cell.rat, html.cozy .cl-cell.rat { animation: none; }
 
 /* The Atlas walking through a district: a soft violet glow so it reads as different from a neighbour (static, no animation). */
 .ent.npc.atlas > span { text-shadow: 0 0 10px #a58bf0, 0 0 3px #fff; }
+
+/* Journal > Theories: what the Atlas has said, kept as hints. */
+.atlas-hints { margin: 6px 0 10px; padding: 8px 12px; border-radius: 14px; background: color-mix(in srgb, var(--atlas) 12%, transparent); border: 1px solid color-mix(in srgb, var(--atlas) 35%, transparent); }
+.atlas-hint { font-size: 13px; line-height: 1.4; color: var(--ink-soft); padding: 4px 0; font-style: italic; }
+.atlas-hint.more { opacity: .7; font-style: normal; }

@@ -104,7 +104,17 @@ function atlasAskButtons() {
 function atlasAnswer(id) {
   const t = ATLAS_TOPICS.find(x => x.id === id); if (!t) return '';
   atlasState().heard = (atlasState().heard || 0) + 1; saveState();
-  return t.guidance ? atlasGuidance() : atlasPick(t.lines, id);
+  const line = t.guidance ? atlasGuidance() : atlasPick(t.lines, id);
+  if (!t.guidance) { const a = atlasState(); if (!a.hints) a.hints = []; if (!a.hints.includes(line)) { a.hints.push(line); if (a.hints.length > 40) a.hints.shift(); } }
+  return line;
+}
+// The Theories page of the Journal keeps what the Atlas has said, as hints to build guesses on. It never says which guess is right.
+function renderAtlasHints() {
+  const box = document.getElementById('atlasHints'); if (!box) return;
+  const h = (state.progress.atlas && state.progress.atlas.hints) || [];
+  box.classList.toggle('hidden', !h.length);
+  if (!h.length) return;
+  box.innerHTML = `<div class="jgroup-h">Heard from the Atlas</div>` + h.slice(-6).reverse().map(x => `<div class="atlas-hint">“${escapeHtml(x)}”</div>`).join('') + (h.length > 6 ? `<div class="atlas-hint more">…and ${h.length - 6} more</div>` : '');
 }
 const ATLAS_HELLO = [
   'You are here. Good. So am I.',

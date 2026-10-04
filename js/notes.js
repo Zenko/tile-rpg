@@ -14,6 +14,7 @@ function notePreview(n) {
    Swipe a note left (touch or mouse drag), or focus it and press Delete. */
 let notesQuery = '';
 function renderNotesList() {
+  renderAtlasHints();
   const pr = ensureJournal(), listEl = document.getElementById('notesList'), q = notesQuery.trim().toLowerCase();
   listEl.innerHTML = '';
   if (!pr.notesList.length) { listEl.innerHTML = '<div class="notes-empty">No notes yet - write one down or sketch something with New Note / New Drawing above.</div>'; return; }
