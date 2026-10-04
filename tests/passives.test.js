@@ -35,7 +35,7 @@ module.exports = async (page, assert) => {
     return out;
   });
   assert.deepStrictEqual(r.bad, []); assert.ok(r.seen.stone, 'a Stone shield showed up');
-  assert.strictEqual(r.groveHeal, 11, 'a Grove card heals 1 Spirit on arrival');
+  assert.strictEqual(r.groveHeal, 12, 'a Brote card heals 2 Calm on arrival');
   assert.strictEqual(r.windPower[0], r.windPower[1] + 1, 'cheap Swift Wind gets +1 power');
   const d = await page.evaluate(() => {
     const stone = Object.keys(CARD_FAMILY).filter(id => CARD_FAMILY[id] === 'stone' && cardDef(id) && !cardDef(id).spell && !cardDef(id).exclusive).slice(0, 8);

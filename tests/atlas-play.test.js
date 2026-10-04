@@ -8,7 +8,7 @@ module.exports = async (page, assert) => {
   });
   await page.waitForFunction(() => typeof inBattle !== 'undefined' && inBattle && battle && battle.npc && battle.npc.atlas, null, { timeout: 15000 });
   const twist = await page.evaluate(() => battle.G.twist && battle.G.twist.kind);
-  assert.strictEqual(twist, 'roots', 'the first challenge bends the Quiet Hand rule');
+  assert.strictEqual(twist, 'bloom', 'the first challenge bends the Counting rule');
   await page.evaluate(() => { battle.G.over = true; battle.G.winner = 0; battle.G.events = []; btFinish(); });
   await page.waitForFunction(() => !document.getElementById('battleEndOverlay').classList.contains('hidden'), null, { timeout: 15000 });
   const r = await page.evaluate(() => ({ wins: atlasState().wins, embers: state.progress.pebbles, next: atlasBattleOpen(1), title: document.getElementById('battleEndTitle').textContent }));

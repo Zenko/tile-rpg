@@ -14,7 +14,7 @@ module.exports = async (page, assert) => {
     state.deck = [];
     out.guideDeck = /spirits into a match/.test(atlasGuidance());
     // battle opponent and twist
-    const o = atlasOpponent(2);
+    const o = atlasOpponent(3);
     out.opp = [o.deck.length, bossTwistFor(o), o.profile.level];
     out.open = [atlasBattleOpen(0), atlasBattleOpen(1)];
     // shop: needs wins and Embers
