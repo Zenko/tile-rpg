@@ -101,6 +101,27 @@ document.getElementById('textPromptSubmit').addEventListener('click', () => { sf
 document.getElementById('textPromptInput').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('textPromptSubmit').click(); });
 document.getElementById('textPromptOverlay').addEventListener('click', e => { if (e.target.id === 'textPromptOverlay') { sfx('nav'); closeTextPrompt(null); } });
 
+// An in-game yes/no sheet in place of the browser's confirm(), which shows "zenko.github.io says" over the game.
+// askConfirm({ title, text, ok }, onYes): onYes runs only on OK; Cancel, a tap outside or Escape just close it.
+let confirmYes = null;
+function askConfirm(o, onYes) {
+  document.getElementById('confirmTitle').textContent = o.title || 'Are you sure?';
+  document.getElementById('confirmDesc').textContent = o.text || '';
+  document.getElementById('confirmOk').textContent = o.ok || 'OK';
+  confirmYes = onYes;
+  document.getElementById('confirmOverlay').classList.remove('hidden');
+  document.getElementById('confirmCancel').focus();
+}
+function closeConfirm(yes) {
+  const fn = confirmYes; confirmYes = null;
+  document.getElementById('confirmOverlay').classList.add('hidden');
+  sfx('nav'); if (yes && fn) fn();
+}
+document.getElementById('confirmOk').addEventListener('click', () => closeConfirm(true));
+document.getElementById('confirmCancel').addEventListener('click', () => closeConfirm(false));
+document.getElementById('confirmOverlay').addEventListener('click', e => { if (e.target.id === 'confirmOverlay') closeConfirm(false); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && confirmYes) closeConfirm(false); });
+
 async function shareDeck() {
   const code = deckCode(state.deck);
   try { await navigator.clipboard.writeText(code); toast('📋 Deck code copied'); sfx('claim'); return; }

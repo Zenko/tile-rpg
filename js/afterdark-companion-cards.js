@@ -137,7 +137,7 @@ function renderCompanionBox() {
   if (!c) { box.innerHTML = '<div class="panel-desc">Tap a wandering spirit in town and invite it along. Each one brings a small perk.</div>'; return; }
   const perk = COMPANION_PERKS[c.perk];
   box.innerHTML = `<div class="panel-item"><span class="panel-icon">${c.icon}</span><span class="panel-text"><div class="panel-name">${escapeHtml(c.name)}</div><div class="panel-ability">${perk.icon} ${perk.text}</div></span><button class="panel-action" id="companionRelease">Let it go</button></div>`;
-  document.getElementById('companionRelease').addEventListener('click', () => { if (confirm(`Say goodbye to ${c.name}?`)) releaseCompanion(); });
+  document.getElementById('companionRelease').addEventListener('click', () => { askConfirm({ title: `Say goodbye to ${c.name}?`, text: 'They will leave your side.', ok: 'Say goodbye' }, releaseCompanion); });
 }
 
 /* ============================================================

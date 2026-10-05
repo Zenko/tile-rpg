@@ -33,7 +33,6 @@ function charBuild() {
 function charSetView(v) {
   charView = v;
   if (v === 'bag') bumpStat('inventoryOpened', 1);   // the "Checked your bag" milestone
-  if (v === 'bag') bumpStat('inventoryOpened', 1);   // the "Checked your bag" milestone
   if (!document.getElementById('chStage')) return;   // the tab is not built yet: renderCharacterTab() will draw this view
   document.querySelectorAll('#chSeg .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.v === v));
   document.getElementById('chStage').classList.toggle('compact', charCompact());
@@ -206,7 +205,7 @@ function charDrawPals(box) {
     card.innerHTML = `<div class="ch-pal-big">${c.icon}</div><div class="ch-pal-info"><b>${escapeHtml(c.name)}</b><span class="ch-perk">${perk.icon} ${perk.text}</span><span class="panel-desc">${d ? `With you for ${d} day${d === 1 ? '' : 's'}` : 'Joined you today'}</span></div>`;
     box.appendChild(card);
     const bye = document.createElement('button'); bye.className = 'panel-action'; bye.textContent = 'Say goodbye';
-    bye.addEventListener('click', () => { if (confirm(`Say goodbye to ${c.name}?`)) { releaseCompanion(); renderCharacterTab(); } });
+    bye.addEventListener('click', () => { askConfirm({ title: `Say goodbye to ${c.name}?`, text: 'They will leave your side.', ok: 'Say goodbye' }, () => { releaseCompanion(); renderCharacterTab(); }); });
     box.appendChild(bye);
   }
   // charms are cards you carry for a perk; they are chosen from the card screen, so this only shows what is active

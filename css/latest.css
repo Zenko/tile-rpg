@@ -1301,3 +1301,16 @@ body.in-story .toast { opacity: 0; }
 }
 @keyframes ap-burst { from { opacity: 1; transform: translate(-50%, -50%) scale(.4); } to { opacity: 0; transform: translate(-50%, -50%) scale(1); } }
 @media (prefers-reduced-motion: reduce) { .atk-preview .ap-card.strike .fa-hero, .ap-flash, .ap-burst { animation: none; } }
+
+/* ===== BIG HANDS =====
+   With five or more cards in hand (perks add cards) the old fan ran off both screen edges and the bottom, so the outer cards were
+   cut off. btRenderHand sets --hn (card count) and the class .big; here each card is sized so the whole row, plus a little overlap,
+   fits the hand's width, and the fan is flatter (smaller rotation and drop, set in the JS). */
+#battleView .hand.big { padding-left: 18px; padding-right: 18px; padding-bottom: 18px; }
+#battleView .hand.big .hcard { flex: 0 0 auto; max-width: none; margin: 0 -5px; width: min(74px, calc((100% + (var(--hn) - 1) * 10px) / var(--hn))); height: auto; aspect-ratio: 3 / 4; }
+#battleView .hand.big .hcard { transform-origin: 50% 70%; }
+
+/* In-game confirm sheet (askConfirm, js/collection-tools.js). Above every scene and sheet that can ask a question. */
+#confirmOverlay { z-index: 90; }
+#confirmOverlay .overlay-card { text-align: center; }
+#confirmOverlay .controls { display: flex; gap: 10px; justify-content: center; margin-top: 14px; }

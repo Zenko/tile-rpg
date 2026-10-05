@@ -1273,12 +1273,15 @@ function deleteDecoration(uid) {
   const found = findDecoration(uid);
   if (!found) return;
   const item = DECORATION_ITEMS.find(x => x.id === found.list[found.idx].id);
-  if (!confirm(`Remove this ${item ? item.name : 'decoration'} for good? It won't return to your decorations.`)) return;
-  found.list.splice(found.idx, 1);
-  saveState();
-  logEvent(item ? item.icon : '🗑️', `Removed a ${item ? item.name : 'decoration'} from ${DISTRICTS[found.district].name}.`);
-  toast('Removed'); sfx('tie');
-  renderTown(); renderItems();
+  const name = item ? item.name : 'decoration';
+  askConfirm({ title: `Remove this ${name}?`, text: "It won't return to your decorations.", ok: 'Remove' }, () => {
+    const f = findDecoration(uid); if (!f) return;
+    f.list.splice(f.idx, 1);
+    saveState();
+    logEvent(item ? item.icon : '🗑️', `Removed a ${name} from ${DISTRICTS[f.district].name}.`);
+    toast('Removed'); sfx('tie');
+    renderTown(); renderItems();
+  });
 }
 
 townView.addEventListener('click', e => {

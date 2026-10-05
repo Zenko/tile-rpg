@@ -677,11 +677,12 @@ function deleteLetter(id) {
   const ms = mailState(), l = ms.list.find(x => x.id === id);
   if (!l) return;
   if (l.gift && !l.claimed) { toast('Claim the gift first'); return; }
-  if (!confirm("Delete this letter? This can't be undone.")) return;
-  ms.list = ms.list.filter(x => x.id !== id);
-  if (scene.mailOpen) delete scene.mailOpen[id];
-  saveState(); sfx('nav'); buzz(HAP.tap);
-  renderScene();
+  askConfirm({ title: 'Delete this letter?', text: "This can't be undone.", ok: 'Delete' }, () => {
+    ms.list = ms.list.filter(x => x.id !== id);
+    if (scene.mailOpen) delete scene.mailOpen[id];
+    saveState(); buzz(HAP.tap);
+    renderScene();
+  });
 }
 
 // A label like "Play: Catch the Grain · 3 prizes left today" is split at the first " · " so the storefront layout can show the

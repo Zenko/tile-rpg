@@ -271,6 +271,7 @@ function switchTab(key) {
     }));
   } else { renderTabContent(key); }
   updateQuestBadge();
+  if (key === 'town' && typeof refreshGoalChip === 'function') refreshGoalChip(true);   // coming back from Character: the pill may be out of date
 }
 
 Object.entries(tabs).forEach(([key, t]) => {
@@ -303,7 +304,7 @@ document.getElementById('battleRetryBtn').addEventListener('click', () => closeB
 document.getElementById('battleContinueBtn').addEventListener('click', () => closeBattle(false));
 
 document.getElementById('resetTown').addEventListener('click', () => {
-  if (confirm('Start over? This clears your collection, character, and progress.')) resetGame();
+  askConfirm({ title: 'Start over?', text: 'This clears your collection, character, and progress.', ok: 'Start over' }, resetGame);
 });
 document.getElementById('feedbackBtn').addEventListener('click', () => sendFeedback('feedback'));
 

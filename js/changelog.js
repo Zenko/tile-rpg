@@ -18,6 +18,10 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta ${RELEASES[0].n} (build $
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'fixed', x: 'Big hands in battle: with five or more cards the hand ran off both edges and the bottom of the screen. The cards now shrink and the fan flattens so every card stays in view.' },
+  { t:'fixed', x: 'The "1 skill point to spend" pill in town now clears as soon as you spend the point, instead of lingering after you leave the Path screen.' },
+  { t:'better', x: 'Deleting a letter, removing a decoration, saying goodbye to a companion and starting over now ask in a game sheet instead of the browser\'s "zenko.github.io says" popup.' },
+  { t:'fixed', x: 'Opening Pantry counted as two bag checks for the milestone.' },
   { t:'new', x: 'A new look for every card and most icons. All the card pictures and about 240 of the emoji icons used around the game (the tab bar, quests, rewards, the character screen, keywords and more) are now drawn in one clean gradient style, with soft colour, highlights and shadows. A few rarely seen icons still use the old emoji and will follow.' },
   { t:'new', x: 'Full art for the rarest cards. Every mythic card now has a big painted scene with a detailed subject that steps out of the frame, and so do three of the gods (Duermevela, Marea Lenta and Ensue\u00f1o). You see it when you open a card to read it, and in battle: when one of these cards attacks it flies to the middle of the field, strikes, and flies back before the hit lands. Tap to skip it, or switch on Fast battles to turn the preview off.' },
   { t:'new', x: 'A new dreamer now starts with a short, skippable drifting-off scene and wakes in El Umbral, where Wren is waiting.' },

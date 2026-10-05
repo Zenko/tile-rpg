@@ -545,12 +545,14 @@ function btRenderBoards(entering) {
 function btRenderHand(drawnUid, dealAll) {
   const G = battle.G, me = G.p[0], box = btGet('btHand');
   box.innerHTML = '';
-  const n = me.hand.length, step = n <= 4 ? 8 : n <= 6 ? 6 : 5;
+  // Big hands (perks add cards) get a flatter fan and narrower cards so all of them stay on screen (see "BIG HANDS" in css/latest.css).
+  const n = me.hand.length, step = n <= 4 ? 8 : n <= 6 ? 3.5 : 2.5, dyK = n <= 4 ? 1.4 : 0.6;
+  box.style.setProperty('--hn', n); box.classList.toggle('big', n >= 5);
   me.hand.forEach((c, i) => {
     const w = document.createElement('div'); w.className = 'hcard';
     // the hand fans out: each card turns a little further from the middle and sits a touch lower
     const off = i - (n - 1) / 2;
-    w.style.setProperty('--rot', (off * step).toFixed(1) + 'deg'); w.style.setProperty('--dy', Math.round(off * off * 1.4) + 'px');
+    w.style.setProperty('--rot', (off * step).toFixed(1) + 'deg'); w.style.setProperty('--dy', Math.round(off * off * dyK) + 'px');
     const ok = !battle.busy && BattleEngine.canPlay(G, 0, c.uid).ok;
     const el = btCardEl(c, (ok ? 'playable ' : 'unaffordable ') + (c.spread ? 'spread-' + c.spread + ' ' : '') + (battle.sel && battle.sel.uid === c.uid ? 'selected ' : '') + ((drawnUid === c.uid || dealAll) && btMotionOk() ? 'deal-hide' : ''), true);
     el.addEventListener('click', () => btOnHandCard(c));

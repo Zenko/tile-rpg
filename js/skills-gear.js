@@ -65,12 +65,12 @@ function skillBonus(kind) {
 function buySkill(id) {
   const b = SKILL_BRANCHES.find(x => x.id === id);
   if (!b || skillRank(id) >= SKILL_MAX_RANK || skillPointsLeft() < 1) { sfx('tie'); return false; }
-  skillState()[id] = skillRank(id) + 1; saveState(); sfx('skill'); buzz(HAP.found);
+  skillState()[id] = skillRank(id) + 1; saveState(); sfx('skill'); buzz(HAP.found); refreshGoalChip(true);   // the town pill must stop saying "1 skill point" at once
   toast(`${b.icon} ${b.name} rank ${skillRank(id)}: ${b.text(skillRank(id))}`);
   logEvent(b.icon, `${b.name} reached rank ${skillRank(id)}.`);
   return true;
 }
-function resetSkills() { state.progress.skills = {}; saveState(); sfx('nav'); buzz(HAP.tap); toast('Skill points returned. Spend them however you like.'); }
+function resetSkills() { state.progress.skills = {}; saveState(); refreshGoalChip(true); sfx('nav'); buzz(HAP.tap); toast('Skill points returned. Spend them however you like.'); }
 function gearBlock(g) {
   const t = gearTier(g.id), next = g.tiers[t];
   if (!next) return '';
@@ -178,4 +178,5 @@ function refreshGoalChip(force) {
   goalChipTarget = g.run;
   document.getElementById('goalIcon').textContent = g.icon; document.getElementById('goalText').textContent = g.text;
 }
-document.getElementById('goalChip').addEventListener('click', () => { if (goalChipTarget) { sfx('nav'); buzz(HAP.tap); goalChipTarget(); } });
+// The pill is only re-read every 2 seconds, so re-check on tap: if its goal has just been done, say so instead of walking to an empty screen.
+document.getElementById('goalChip').addEventListener('click', () => { const was = document.getElementById('goalText').textContent; refreshGoalChip(true); if (document.getElementById('goalText').textContent !== was) return; if (goalChipTarget) { sfx('nav'); buzz(HAP.tap); goalChipTarget(); } });
