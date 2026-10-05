@@ -38,7 +38,6 @@ h1 { font-size: clamp(1.7rem, 4vw, 2.3rem); line-height: 1.1; margin: 0; letter-
 .kwsheet { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 8px; }
 .kwcell { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 6px 8px; border-radius: 10px; background: var(--surface); border: 1px solid var(--edge); font-size: 0.72rem; color: var(--ink-soft); text-align: center; }
 .kwcell .ico { width: 56px; height: 44px; border-radius: 10px; display: grid; place-items: center; background: linear-gradient(135deg, var(--c-a), var(--c-b)); }
-.st-emoji .kwcell .ico { background: linear-gradient(135deg, var(--c-a), var(--c-b)); }
 .kwlabel { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 8px; }
 .foot { color: var(--ink-soft); font-size: 0.82rem; max-width: 70ch; border-top: 1px solid var(--edge); padding-top: 20px; }
 
@@ -49,14 +48,11 @@ h1 { font-size: clamp(1.7rem, 4vw, 2.3rem); line-height: 1.1; margin: 0; letter-
 .card.r-mythic { background: linear-gradient(135deg, var(--m-a), var(--m-b)); box-shadow: 0 0 10px rgba(217,143,176,.5); }
 .card .cost { position: absolute; top: -7px; left: -7px; width: 24px; height: 24px; border-radius: 50%; background: #e9edf1; color: #232b34; font-size: .78rem; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,.35); z-index: 2; }
 .card .icon { position: relative; width: 56px; height: 56px; margin-top: 8px; display: grid; place-items: center; line-height: 1; }
-.card .icon .em { font-size: 40px; line-height: 1; }
 .card .kws { min-height: 18px; display: flex; gap: 4px; align-items: center; }
-.card .kws .em { font-size: 14px; }
 .card .paper { width: 100%; }
 .card .nm { font-size: .74rem; text-align: left; opacity: .95; line-height: 1.1; padding: 0 3px 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .card .stats { display: flex; justify-content: space-between; padding: 0 5px; font-weight: 800; font-size: .95rem; text-shadow: 0 1px 2px rgba(0,0,0,.35); }
 .card .spell-tag { font-size: .72rem; text-align: left; padding: 0 3px; opacity: .9; }
-.kwcell .em { font-size: 26px; line-height: 1; }
 
 /* ---------- glyph drawing: every shape takes a gradient from the shared defs below ---------- */
 svg.g { overflow: visible; display: block; }
@@ -67,18 +63,26 @@ svg.g path, svg.g circle, svg.g ellipse { stroke-linecap: round; stroke-linejoin
 .fR { fill: url(#gR); } .fO { fill: url(#gO); } .fY { fill: url(#gY); } .fG { fill: url(#gG); }
 .fT { fill: url(#gT); } .fB { fill: url(#gB); } .fP { fill: url(#gP); } .fK { fill: url(#gK); }
 .fN { fill: url(#gN); } .fC { fill: url(#gC); } .fW { fill: url(#gW); } .fS { fill: url(#gS); }
-.fD { fill: url(#gD); } .fA { fill: url(#gA); } .fU { fill: url(#gU); }
+.fD { fill: url(#gD); } .fL { fill: url(#gL); } .fA { fill: url(#gA); } .fU { fill: url(#gU); }
 .sh { fill: rgba(40, 20, 70, .2); }
 .hl { fill: #fff; opacity: .72; }
 .ink { fill: #3a2a33; }
 
 /* ---------- finishes: same drawing, different surface ---------- */
-.st-clean svg.g  { filter: drop-shadow(0 1.5px 1.5px rgba(10,20,40,.4)); }
-.st-clay svg.g   { filter: url(#fClay) drop-shadow(0 2px 2px rgba(10,20,40,.4)); }
-.st-jelly svg.g  { filter: url(#fJelly) drop-shadow(0 2px 3px rgba(10,20,40,.35)); }
-.st-sticker svg.g { filter: url(#fSticker); }
-.st-gouache svg.g { filter: url(#fGouache) drop-shadow(0 1.5px 1.5px rgba(10,20,40,.3)); }
-.st-ink svg.g    { filter: url(#fInk) drop-shadow(0 1.5px 1px rgba(10,20,40,.3)); }
+.st-clean svg.g    { filter: drop-shadow(0 1.5px 1.5px rgba(10,20,40,.4)); }
+.st-outline svg.g  { filter: url(#fOutline) drop-shadow(0 1.5px 1.5px rgba(10,20,40,.35)); }
+.st-gouache svg.g  { filter: url(#fGouache) drop-shadow(0 1.5px 1.5px rgba(10,20,40,.3)); }
+.st-paintsticker svg.g { filter: url(#fPaintSticker); }
+.st-water svg.g    { filter: url(#fWater) drop-shadow(0 1.5px 2px rgba(10,20,40,.25)); }
+.st-chalk svg.g    { filter: url(#fChalk) drop-shadow(0 1.5px 1.5px rgba(10,20,40,.3)); }
+.st-felt svg.g     { filter: url(#fFelt) drop-shadow(0 2px 2px rgba(10,20,40,.35)); }
+.st-oil svg.g      { filter: url(#fOil) drop-shadow(0 1.5px 2px rgba(10,20,40,.35)); }
+.st-dream svg.g    { filter: url(#fDream); }
+
+/* divine cards: the game's gold face, plus a soft halo behind the art */
+.card.r-divine { background: linear-gradient(135deg, #f6e6b0, #d9b45a); box-shadow: 0 0 10px rgba(217,180,90,.55); }
+.card.r-divine .icon::before { content: ''; position: absolute; inset: -8px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,.75), rgba(255,245,205,0) 68%); pointer-events: none; }
+.sublabel { margin: 0; }
 
 @media (max-width: 760px) { .band { grid-template-columns: minmax(0, 1fr); gap: 16px; } }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
@@ -101,38 +105,16 @@ svg.g path, svg.g circle, svg.g ellipse { stroke-linecap: round; stroke-linejoin
     <linearGradient id="gD" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6070b0"/><stop offset="1" stop-color="#262f5c"/></linearGradient>
     <linearGradient id="gA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe680"/><stop offset="1" stop-color="#e3a012"/></linearGradient>
     <linearGradient id="gU" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4d49a"/><stop offset="1" stop-color="#cc9648"/></linearGradient>
+    <linearGradient id="gL" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#d4c8ff"/></linearGradient>
     <radialGradient id="gBubble" cx="0.42" cy="0.38" r="0.65"><stop offset="0" stop-color="#ffffff" stop-opacity=".95"/><stop offset="0.55" stop-color="#bfe6fa" stop-opacity=".7"/><stop offset="1" stop-color="#6cc0ee" stop-opacity=".85"/></radialGradient>
     <radialGradient id="gGlow" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#ffe27a" stop-opacity=".75"/><stop offset="1" stop-color="#ffe27a" stop-opacity="0"/></radialGradient>
 
-    <!-- soft clay: blur the shape's edge into a puffy bevel, shade it, add a highlight -->
-    <filter id="fClay" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="1.1" result="b"/>
-      <feDiffuseLighting in="b" surfaceScale="3" diffuseConstant="1.2" lighting-color="#fff" result="diff"><fePointLight x="4" y="-6" z="18"/></feDiffuseLighting>
-      <feSpecularLighting in="b" surfaceScale="3" specularConstant="0.9" specularExponent="22" lighting-color="#fff" result="spec"><fePointLight x="4" y="-6" z="18"/></feSpecularLighting>
-      <feComposite in="spec" in2="SourceAlpha" operator="in" result="specIn"/>
-      <feComposite in="SourceGraphic" in2="diff" operator="arithmetic" k1="1.9" k2="0" k3="0" k4="0" result="shaded"/>
-      <feComposite in="shaded" in2="specIn" operator="arithmetic" k1="0" k2="1" k3="0.75" k4="0"/>
-    </filter>
-    <!-- glossy jelly: richer colour, tighter and brighter highlight -->
-    <filter id="fJelly" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
-      <feColorMatrix in="SourceGraphic" type="saturate" values="1.35" result="sat"/>
-      <feGaussianBlur in="SourceAlpha" stdDeviation="0.7" result="b"/>
-      <feDiffuseLighting in="b" surfaceScale="5" diffuseConstant="1.35" lighting-color="#fff" result="diff"><fePointLight x="3" y="-8" z="16"/></feDiffuseLighting>
-      <feSpecularLighting in="b" surfaceScale="5" specularConstant="1.4" specularExponent="46" lighting-color="#fff" result="spec"><fePointLight x="3" y="-8" z="16"/></feSpecularLighting>
-      <feComposite in="spec" in2="SourceAlpha" operator="in" result="specIn"/>
-      <feComposite in="sat" in2="diff" operator="arithmetic" k1="2.1" k2="0" k3="0" k4="0" result="shaded"/>
-      <feComposite in="shaded" in2="specIn" operator="arithmetic" k1="0" k2="1" k3="1" k4="0"/>
-    </filter>
-    <!-- sticker: white die-cut border and a drop shadow -->
-    <filter id="fSticker" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
-      <feMorphology in="SourceAlpha" operator="dilate" radius="1.5" result="d"/>
-      <feFlood flood-color="#ffffff" result="w"/>
-      <feComposite in="w" in2="d" operator="in" result="outline"/>
-      <feGaussianBlur in="d" stdDeviation="0.9" result="sb"/>
-      <feOffset in="sb" dy="1.1" result="so"/>
-      <feFlood flood-color="#0a1428" flood-opacity="0.42" result="sf"/>
-      <feComposite in="sf" in2="so" operator="in" result="shadow"/>
-      <feMerge><feMergeNode in="shadow"/><feMergeNode in="outline"/><feMergeNode in="SourceGraphic"/></feMerge>
+    <!-- soft dark outline, no wobble -->
+    <filter id="fOutline" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="0.55" result="d"/>
+      <feFlood flood-color="#2c1e3d" flood-opacity="0.6" result="f"/>
+      <feComposite in="f" in2="d" operator="in" result="line"/>
+      <feMerge><feMergeNode in="line"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
     <!-- gouache: rough painted edges, matte colour, paper grain -->
     <filter id="fGouache" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
@@ -144,14 +126,72 @@ svg.g path, svg.g circle, svg.g ellipse { stroke-linecap: round; stroke-linejoin
       <feComposite in="grain" in2="rough" operator="in" result="grainIn"/>
       <feMerge><feMergeNode in="matte"/><feMergeNode in="grainIn"/></feMerge>
     </filter>
-    <!-- storybook ink: soft brown line around every shape, slightly uneven -->
-    <filter id="fInk" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
-      <feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="2" seed="5" result="n"/>
-      <feDisplacementMap in="SourceGraphic" in2="n" scale="1.1" xChannelSelector="R" yChannelSelector="G" result="rough"/>
-      <feMorphology in="rough" operator="dilate" radius="0.65" result="d"/>
-      <feFlood flood-color="#3b2830" result="f"/>
-      <feComposite in="f" in2="d" operator="in" result="line"/>
-      <feMerge><feMergeNode in="line"/><feMergeNode in="rough"/></feMerge>
+    <!-- gouache plus a white die-cut border -->
+    <filter id="fPaintSticker" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.12" numOctaves="2" seed="7" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="1.6" xChannelSelector="R" yChannelSelector="G" result="rough"/>
+      <feComponentTransfer in="rough" result="matte"><feFuncR type="linear" slope="0.93" intercept="0.05"/><feFuncG type="linear" slope="0.93" intercept="0.05"/><feFuncB type="linear" slope="0.93" intercept="0.05"/></feComponentTransfer>
+      <feTurbulence type="fractalNoise" baseFrequency="1.3" numOctaves="3" seed="2" result="g"/>
+      <feColorMatrix in="g" type="matrix" values="0 0 0 0 0.3  0 0 0 0 0.2  0 0 0 0 0.2  0.8 0 0 0 -0.3" result="grain"/>
+      <feComposite in="grain" in2="rough" operator="in" result="grainIn"/>
+      <feMorphology in="rough" operator="dilate" radius="1.5" result="d"/>
+      <feFlood flood-color="#fffaf0" result="w"/>
+      <feComposite in="w" in2="d" operator="in" result="outline"/>
+      <feGaussianBlur in="d" stdDeviation="0.9" result="sb"/>
+      <feOffset in="sb" dy="1.1" result="so"/>
+      <feFlood flood-color="#0a1428" flood-opacity="0.4" result="sf"/>
+      <feComposite in="sf" in2="so" operator="in" result="shadow"/>
+      <feMerge><feMergeNode in="shadow"/><feMergeNode in="outline"/><feMergeNode in="matte"/><feMergeNode in="grainIn"/></feMerge>
+    </filter>
+    <!-- watercolour: wobbly bleeding edge, pigment pooling at the rim, translucent wash -->
+    <filter id="fWater" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="2" seed="9" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G" result="rough"/>
+      <feGaussianBlur in="rough" stdDeviation="0.3" result="soft"/>
+      <feGaussianBlur in="rough" stdDeviation="1.4" result="wide"/>
+      <feColorMatrix in="wide" type="matrix" values="0 0 0 0 0.28  0 0 0 0 0.16  0 0 0 0 0.36  0 0 0 -0.75 0.75" result="rimRaw"/>
+      <feComposite in="rimRaw" in2="soft" operator="in" result="rim"/>
+      <feComponentTransfer in="soft" result="wash"><feFuncR type="linear" slope="0.88" intercept="0.1"/><feFuncG type="linear" slope="0.88" intercept="0.1"/><feFuncB type="linear" slope="0.88" intercept="0.1"/><feFuncA type="linear" slope="0.9"/></feComponentTransfer>
+      <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" seed="4" result="p"/>
+      <feColorMatrix in="p" type="matrix" values="0 0 0 0 0.3  0 0 0 0 0.2  0 0 0 0 0.35  0.4 0 0 0 -0.12" result="pig"/>
+      <feComposite in="pig" in2="soft" operator="in" result="pigIn"/>
+      <feMerge><feMergeNode in="wash"/><feMergeNode in="rim"/><feMergeNode in="pigIn"/></feMerge>
+    </filter>
+    <!-- chalk pastel: dusty broken edge, speckled gaps, matte -->
+    <filter id="fChalk" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.35" numOctaves="2" seed="11" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.2" xChannelSelector="R" yChannelSelector="G" result="rough"/>
+      <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="3" result="m"/>
+      <feColorMatrix in="m" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  3.4 0 0 0 -0.75" result="holes"/>
+      <feComposite in="rough" in2="holes" operator="in" result="speck"/>
+      <feComponentTransfer in="speck"><feFuncR type="linear" slope="0.84" intercept="0.14"/><feFuncG type="linear" slope="0.84" intercept="0.14"/><feFuncB type="linear" slope="0.84" intercept="0.14"/></feComponentTransfer>
+    </filter>
+    <!-- felt: fuzzy edge and wool fibre texture -->
+    <filter id="fFelt" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" seed="6" result="fz"/>
+      <feDisplacementMap in="SourceGraphic" in2="fz" scale="1.7" xChannelSelector="R" yChannelSelector="G" result="rough"/>
+      <feGaussianBlur in="rough" stdDeviation="0.25" result="soft"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.95" numOctaves="3" seed="8" result="n"/>
+      <feDiffuseLighting in="n" surfaceScale="0.45" diffuseConstant="1.0" lighting-color="#fff" result="fibre"><feDistantLight azimuth="225" elevation="55"/></feDiffuseLighting>
+      <feComposite in="soft" in2="fibre" operator="arithmetic" k1="1.3" k2="0" k3="0" k4="0"/>
+    </filter>
+    <!-- oil paint: brush streaks lit from the top left -->
+    <filter id="fOil" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.07 0.5" numOctaves="2" seed="5" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="1.3" xChannelSelector="R" yChannelSelector="G" result="rough"/>
+      <feDiffuseLighting in="n" surfaceScale="0.8" diffuseConstant="1.0" lighting-color="#fff" result="streak"><feDistantLight azimuth="225" elevation="50"/></feDiffuseLighting>
+      <feSpecularLighting in="n" surfaceScale="0.8" specularConstant="0.35" specularExponent="14" lighting-color="#fff" result="gloss"><feDistantLight azimuth="225" elevation="50"/></feSpecularLighting>
+      <feComposite in="gloss" in2="rough" operator="in" result="glossIn"/>
+      <feComposite in="rough" in2="streak" operator="arithmetic" k1="1.3" k2="0" k3="0" k4="0" result="paint"/>
+      <feComposite in="paint" in2="glossIn" operator="arithmetic" k1="0" k2="1" k3="0.4" k4="0"/>
+    </filter>
+    <!-- dream glow: the drawing's own colours bloom softly around it -->
+    <filter id="fDream" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2.4" result="b"/>
+      <feColorMatrix in="b" type="saturate" values="1.7" result="bs"/>
+      <feComponentTransfer in="bs" result="halo"><feFuncA type="linear" slope="1.5"/></feComponentTransfer>
+      <feGaussianBlur in="SourceGraphic" stdDeviation="0.3" result="soft"/>
+      <feMerge><feMergeNode in="halo"/><feMergeNode in="soft"/></feMerge>
     </filter>
   </defs>
 </svg>
@@ -159,7 +199,7 @@ svg.g path, svg.g circle, svg.g ellipse { stroke-linecap: round; stroke-linejoin
 <div class="wrap">
   <header>
     <h1>Card Art Styles</h1>
-    <p class="lede">The same six cards and thirteen keyword icons, redrawn in full colour. Every style keeps what the emoji do well: colour fills, gradients, highlights and soft shadows. They differ only in the surface finish. The layout is the game’s own. The first row is what you have now.</p>
+    <p class="lede">Nine finishes in total: your two favourites first, then seven new ones. Every row shows six everyday cards and the four divine cards, plus all 13 keyword icons. The layout is the game’s own, and the art is full colour with gradient fills and soft shadows.</p>
   </header>
   <ul class="jump" id="jump"></ul>
   <div id="bands" class="wrap" style="gap:0"></div>
@@ -190,43 +230,54 @@ var G = {
   kin: '<circle class="fO" cx="8.800" cy="12" r="5.800"/><circle class="fT" cx="15.200" cy="12" r="5.800" style="opacity:.92"/><path d="M12 7.200a5.800 5.800 0 0 1 0 9.600 5.800 5.800 0 0 1 0-9.600z" fill="#fff" opacity=".35"/><ellipse class="hl" cx="6.800" cy="9.600" rx="1" ry="1.500" transform="rotate(30 6.800 9.600)"/>',
   sting: '<ellipse class="fW" cx="8.800" cy="7.200" rx="2.600" ry="3.600" transform="rotate(-28 8.800 7.200)" style="opacity:.9"/><ellipse class="fW" cx="14.200" cy="7.200" rx="2.600" ry="3.600" transform="rotate(28 14.200 7.200)" style="opacity:.9"/><ellipse class="fY" cx="11.600" cy="13.500" rx="6.200" ry="4.600"/><path d="M10 9.700v7.600M13.400 9.400v8.200" stroke="#3a2a33" stroke-width="1.600" stroke-linecap="round"/><path class="ink" d="M17.600 13l3.600.5-3.600.9z"/><circle class="ink" cx="7.600" cy="12.700" r=".8"/>'
 };
+G.door = '<path class="fN" d="M3.500 22.500V10a8.500 8.500 0 0 1 17 0v12.500z"/><path class="fY" d="M5.500 22.500V10a6.500 6.500 0 0 1 13 0v12.500z"/><circle cx="15" cy="12" r="5" fill="url(#gGlow)"/><path class="fU" d="M5.500 22.500V10a6.500 6.500 0 0 1 4.500-6.200v18.700z"/><path class="sh" d="M8.200 4.600v17.900H10V3.800z"/><path d="M7.600 9.500h1M7.600 14.500h1" stroke="#a9742f" stroke-width="1" stroke-linecap="round"/><circle class="fA" cx="8.700" cy="13" r=".8"/><path class="fW" d="M15.500 7l.7 1.600 1.600.7-1.600.7-.7 1.600-.7-1.600-1.600-.7 1.600-.7z"/><circle class="hl" cx="13.500" cy="15" r=".6"/><circle class="hl" cx="16.800" cy="14.500" r=".45"/>';
+G.shush = '<circle class="fY" cx="12" cy="12" r="9.500"/><path class="sh" d="M12 2.500a9.500 9.500 0 0 1 0 19 9.500 9.500 0 0 0 0-19z" style="opacity:.6"/><ellipse class="hl" cx="7.500" cy="6.800" rx="2.400" ry="1.100" transform="rotate(-35 7.500 6.800)"/><circle class="fK" cx="5.800" cy="13.200" r="1.700" style="opacity:.55"/><circle class="fK" cx="18.200" cy="13.200" r="1.700" style="opacity:.55"/><path d="M6.800 9.400q1.500-1.500 3 0M14.200 9.400q1.500-1.500 3 0" stroke="#3a2a33" stroke-width="1.100" fill="none"/><rect class="fU" x="10.500" y="10.200" width="3" height="10.500" rx="1.500"/><path d="M11.200 11.500v8" stroke="#fff" stroke-opacity=".5" stroke-width=".6" stroke-linecap="round"/><path d="M9.900 20.200c-1.500.2-3-.5-3.600-2" stroke="#cc9648" stroke-width="2" fill="none"/>';
+G.coral = '<path class="fS" d="M4 22.500c.5-2 1.500-2.800 3-3h10c1.500.2 2.500 1 3 3z"/><g fill="none" stroke="#ff7a8e" stroke-width="3" stroke-linecap="round"><path d="M12 19.500V8"/><path d="M12 15L7 10.500V6"/><path d="M12 12.500l5-4V5"/><path d="M7 10.500L4.200 8.500"/><path d="M17 8.500l2.800-1.600"/></g><g fill="none" stroke="#ffc4cc" stroke-width=".9" stroke-linecap="round"><path d="M11.200 18V9.500"/><path d="M6.300 9.500V7M16.200 7.800V6"/></g><circle class="fO" cx="12" cy="6.800" r="1.900"/><circle class="fO" cx="7" cy="5.200" r="1.800"/><circle class="fO" cx="17" cy="4.300" r="1.800"/><circle class="fO" cx="4" cy="8" r="1.500"/><circle class="fO" cx="20" cy="6.600" r="1.500"/><circle class="hl" cx="19" cy="14" r="1"/><circle class="hl" cx="21" cy="11.500" r=".6"/><circle class="hl" cx="4.500" cy="14.500" r=".7"/>';
+G.dream = '<circle class="fL" cx="7" cy="11.500" r="4.200"/><circle class="fL" cx="12.500" cy="8" r="5.200"/><circle class="fL" cx="17.500" cy="11.800" r="4.200"/><circle class="fL" cx="12" cy="13.500" r="5"/><path class="sh" d="M7 15.700a4.200 4.200 0 0 0 4.500 3.800 5 5 0 0 0 5.800-3.500 4.200 4.200 0 0 0 .2-4.200c-.5 3-3.500 5-6 5.200-2.500.2-4-.6-4.500-1.300z" style="opacity:.55"/><ellipse class="hl" cx="9.500" cy="6.800" rx="2.200" ry="1" transform="rotate(-30 9.500 6.800)"/><circle class="fL" cx="5" cy="19" r="1.900"/><circle class="fL" cx="2.700" cy="22" r="1.100"/><path class="fA" d="M12.500 7.500l1.100 2.600 2.600 1.100-2.600 1.100-1.100 2.600-1.100-2.600-2.600-1.100 2.600-1.100z"/><path class="fY" d="M17.800 14.200l.5 1.200 1.200.5-1.200.5-.5 1.200-.5-1.200-1.200-.5 1.200-.5z"/><circle class="fK" cx="7.500" cy="13.200" r=".9"/>';
 var KW = [
   ['guard','Watch','🛡️'],['swift','Flicker','💨'],['mend','Rest','🌿'],['bloom','Bloom','🌸'],['shield','Haze','🫧'],
   ['echo','Startle','🔔'],['thorns','Briar','🌵'],['rally','Chorus','📯'],['drain','Sip','🌀'],['seed','Echo','🌰'],
   ['lull','Lull','😴'],['kin','Kin','🤝'],['sting','Sting','🐝']
 ];
-var EMO = {}; KW.forEach(function (k) { EMO[k[0]] = k[2]; });
 var CARDS = [
-  { g:'toadstool', e:'🍄', n:'Toadstool',      r:'common', cost:2, pw:4, hp:2,  kw:['guard'] },
-  { g:'droplet',   e:'💧', n:'Droplet',        r:'common', cost:1, pw:1, hp:4,  kw:['mend'] },
-  { g:'fish',      e:'🐠', n:'Lantern Fish',   r:'ultra',  cost:3, pw:3, hp:4,  kw:['echo'] },
-  { g:'candle',    e:'🕯️', n:'Wisp Warden',    r:'ultra',  cost:3, pw:3, hp:4,  kw:['mend','shield'] },
-  { g:'mountain',  e:'🗻', n:'Mossmind Titan', r:'mythic', cost:5, pw:6, hp:10, kw:['guard','kin'] },
-  { g:'moon',      e:'🌙', n:'Lullaby',        r:'common', cost:2, spell:true }
+  { g:'toadstool', n:'Toadstool',      r:'common', cost:2, pw:4, hp:2,  kw:['guard'] },
+  { g:'droplet',   n:'Droplet',        r:'common', cost:1, pw:1, hp:4,  kw:['mend'] },
+  { g:'fish',      n:'Lantern Fish',   r:'ultra',  cost:3, pw:3, hp:4,  kw:['echo'] },
+  { g:'candle',    n:'Wisp Warden',    r:'ultra',  cost:3, pw:3, hp:4,  kw:['mend','shield'] },
+  { g:'mountain',  n:'Mossmind Titan', r:'mythic', cost:5, pw:6, hp:10, kw:['guard','kin'] },
+  { g:'moon',      n:'Lullaby',        r:'common', cost:2, spell:true }
+];
+var DIVINE = [
+  { g:'door',   n:'Duermevela',  r:'divine', cost:5, pw:8,  hp:9,  kw:['guard','shield'] },
+  { g:'shush',  n:'Murmullo',    r:'divine', cost:5, pw:8,  hp:7,  kw:['swift','sting'] },
+  { g:'coral',  n:'Marea Lenta', r:'divine', cost:5, pw:8,  hp:8,  kw:['mend','lull'] },
+  { g:'dream',  n:'Ensueño',     r:'divine', cost:5, pw:14, hp:13, kw:['seed','bloom'] }
 ];
 var STYLES = [
-  { id:'emoji',   name:'Emoji', tag:'Current', note:'What the game uses today. Full colour and instantly readable. The catch is that every phone draws them a little differently, and you can’t change them.' },
-  { id:'clean',   name:'Clean gradient', tag:'Closest to emoji', note:'Gradient fills and a soft shadow, nothing else. The nearest match to the feel you have now, drawn by you so it looks the same everywhere.' },
-  { id:'clay',    name:'Soft clay', tag:'3D bevel', note:'The same art with puffy rounded edges and a soft highlight, like glossy clay or a 3D emoji set. Warm and tactile.' },
-  { id:'jelly',   name:'Glossy jelly', tag:'Candy', note:'Pushed saturation and a tight bright highlight, like gummy candy. The most playful. <b>Watch for:</b> it is the loudest next to the card gradients.' },
-  { id:'sticker', name:'Sticker', tag:'Die-cut', note:'A white cut border and a drop shadow, as if each icon were a sticker on the card. It separates the art from any card colour, which helps on the lighter rarities.' },
-  { id:'gouache', name:'Gouache', tag:'Painted', note:'Rough painted edges, matte colour and a little paper grain. Soft and handmade, and still full of colour.' },
-  { id:'ink',     name:'Storybook ink', tag:'Outlined', note:'A soft brown line around each shape, slightly uneven, over the same gradients. Reads like a picture-book illustration.' }
+  { id:'clean',        name:'Clean gradient', tag:'Kept', note:'Gradient fills and a soft shadow, nothing else. Drawn once, so it looks the same on every device.' },
+  { id:'outline',      name:'Clean + outline', tag:'New', note:'The clean gradient with a thin dark-plum outline. Keeps the shape readable on any card colour, including the pale divine gold.' },
+  { id:'gouache',      name:'Gouache', tag:'Kept', note:'Rough painted edges, matte colour and a little paper grain.' },
+  { id:'paintsticker', name:'Painted sticker', tag:'New', note:'Gouache with a cream die-cut border and shadow. Your two favourite ideas combined: handmade texture, but separated from the card.' },
+  { id:'water',        name:'Watercolour', tag:'New', note:'Wobbly bleeding edges, pigment pooling at the rim and a translucent wash. The softest option.' },
+  { id:'chalk',        name:'Chalk pastel', tag:'New', note:'A dusty broken edge with speckled gaps and a matte finish, like pastel on toned paper.' },
+  { id:'felt',         name:'Felt', tag:'New', note:'A fuzzy edge and wool-fibre texture, like cut felt. Cosy, and good for the sleepy theme.' },
+  { id:'oil',          name:'Oil paint', tag:'New', note:'Visible brush streaks with a little gloss, lit from the top left. The richest texture. <b>Watch for:</b> it is busy at keyword-icon size.' },
+  { id:'dream',        name:'Dream glow', tag:'New', note:'The drawing’s own colours bloom softly around it. Suits the divine and spell cards best, and may be too much on every card.' }
 ];
 
 function svg(g) { return '<svg class="g" viewBox="0 0 24 24" aria-hidden="true">' + G[g] + '</svg>'; }
-function art(style, g, emoji) { return style === 'emoji' ? '<span class="em">' + emoji + '</span>' : svg(g); }
+function art(style, g) { return svg(g); }
 function cardHtml(style, c) {
   var body;
   if (c.spell) {
     body = '<div class="kws"></div><div class="paper"><div class="nm">' + c.n + '</div><div class="spell-tag">✨ Spell</div></div>';
   } else {
-    body = '<div class="kws">' + c.kw.map(function (k) { return '<span>' + art(style, k, EMO[k]) + '</span>'; }).join('') + '</div>' +
+    body = '<div class="kws">' + c.kw.map(function (k) { return '<span>' + art(style, k) + '</span>'; }).join('') + '</div>' +
       '<div class="paper"><div class="nm">' + c.n + '</div><div class="stats"><span>⚔' + c.pw + '</span><span>♥' + c.hp + '</span></div></div>';
   }
-  return '<div class="card r-' + c.r + '"><div class="cost">' + c.cost + '</div><div class="icon">' + art(style, c.g, c.e) + '</div>' + body + '</div>';
+  return '<div class="card r-' + c.r + '"><div class="cost">' + c.cost + '</div><div class="icon">' + art(style, c.g) + '</div>' + body + '</div>';
 }
-function kwCell(style, k) { return '<div class="kwcell"><div class="ico">' + art(style, k[0], k[2]) + '</div>' + k[1] + '</div>'; }
+function kwCell(style, k) { return '<div class="kwcell"><div class="ico">' + art(style, k[0]) + '</div>' + k[1] + '</div>'; }
 
 var bands = document.getElementById('bands'), jump = document.getElementById('jump');
 STYLES.forEach(function (s) {
@@ -237,7 +288,8 @@ STYLES.forEach(function (s) {
   el.className = 'band st-' + s.id; el.id = s.id;
   el.innerHTML =
     '<div><span class="tag">' + s.tag + '</span><h2>' + s.name + '</h2><p class="note">' + s.note + '</p></div>' +
-    '<div class="stage"><div class="hand">' + CARDS.map(function (c) { return cardHtml(s.id, c); }).join('') + '</div>' +
+    '<div class="stage"><div><p class="kwlabel sublabel">Everyday cards</p><div class="hand">' + CARDS.map(function (c) { return cardHtml(s.id, c); }).join('') + '</div></div>' +
+    '<div><p class="kwlabel sublabel">Divine cards</p><div class="hand">' + DIVINE.map(function (c) { return cardHtml(s.id, c); }).join('') + '</div></div>' +
     '<div><p class="kwlabel">Keyword icons</p><div class="kwsheet">' + KW.map(function (k) { return kwCell(s.id, k); }).join('') + '</div></div></div>';
   bands.appendChild(el);
 });
