@@ -1,0 +1,263 @@
+<title>Card Art Styles</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Figtree:wght@400;600;700&display=swap">
+<style>
+/* Layout: one band per art style. Each band has a short note on the left and, on the right, the same six cards plus the full keyword set drawn in that style. */
+:root {
+  --bg: #f3ece0;
+  --surface: #fbf7ef;
+  --edge: #ddd6c5;
+  --ink: #4b4a46;
+  --ink-soft: #6b6a64;
+  --accent: #3f7f78;
+  --font-body: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-px: 'Pixelify Sans', ui-monospace, monospace;
+  /* card faces keep the game's own rarity colours in both themes */
+  --c-a: #5b9fb2; --c-b: #3f7f94;
+  --u-a: #a8cbe8; --u-b: #6a96c2;
+  --m-a: #eaa8c4; --m-b: #c27a9c;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #12161b; --surface: #1b2128; --edge: #333d48; --ink: #e9edf1; --ink-soft: #a6b1bb; --accent: #8dbccb; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #12161b; --surface: #1b2128; --edge: #333d48; --ink: #e9edf1; --ink-soft: #a6b1bb; --accent: #8dbccb; color-scheme: dark; }
+
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.5; padding-inline: 16px; padding-block: 28px 56px; }
+.wrap { max-width: 1180px; margin-inline: auto; display: flex; flex-direction: column; gap: 28px; }
+h1 { font-size: clamp(1.7rem, 4vw, 2.3rem); line-height: 1.1; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+.lede { margin: 8px 0 0; max-width: 62ch; color: var(--ink-soft); }
+.jump { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.jump a { display: block; padding: 6px 12px; border: 1px solid var(--edge); border-radius: 999px; background: var(--surface); color: var(--ink); text-decoration: none; font-size: 0.85rem; font-weight: 600; }
+.jump a:hover, .jump a:focus-visible { border-color: var(--accent); color: var(--accent); outline: none; }
+
+.band { display: grid; grid-template-columns: minmax(0, 200px) minmax(0, 1fr); gap: 28px; padding-top: 28px; border-top: 1px solid var(--edge); scroll-margin-top: 16px; }
+.band h2 { margin: 0 0 6px; font-size: 1.15rem; }
+.band .tag { display: inline-block; margin-bottom: 8px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.band p { margin: 0 0 8px; color: var(--ink-soft); font-size: 0.9rem; }
+.band .note b { color: var(--ink); font-weight: 600; }
+.stage { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+.hand { display: flex; flex-wrap: wrap; gap: 18px 16px; }
+.kwsheet { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 8px; }
+.kwcell { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 6px 8px; border-radius: 10px; background: var(--surface); border: 1px solid var(--edge); font-size: 0.72rem; color: var(--ink-soft); text-align: center; }
+.kwcell .ico { width: 56px; height: 44px; border-radius: 10px; display: grid; place-items: center; }
+.st-solid .kwcell .ico, .st-line .kwcell .ico, .st-paper .kwcell .ico, .st-pixel .kwcell .ico, .st-crayon .kwcell .ico { background: linear-gradient(135deg, var(--c-a), var(--c-b)); }
+.st-riso .kwcell .ico { background: #f4ecd9; box-shadow: inset 0 0 0 2px #23303b; }
+.kwlabel { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 8px; }
+.foot { color: var(--ink-soft); font-size: 0.82rem; max-width: 70ch; border-top: 1px solid var(--edge); padding-top: 20px; }
+
+/* ---------- the card: same structure as #battleView .card ---------- */
+.card { position: relative; width: 132px; height: 176px; flex: none; border-radius: 12px; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 6px 4px 5px; box-shadow: 0 4px 10px rgba(0,0,0,.35); box-sizing: border-box; }
+.card.r-common { background: linear-gradient(135deg, var(--c-a), var(--c-b)); }
+.card.r-ultra  { background: linear-gradient(135deg, var(--u-a), var(--u-b)); }
+.card.r-mythic { background: linear-gradient(135deg, var(--m-a), var(--m-b)); box-shadow: 0 0 10px rgba(217,143,176,.5); }
+.card .cost { position: absolute; top: -7px; left: -7px; width: 24px; height: 24px; border-radius: 50%; background: #e9edf1; color: #232b34; font-size: .78rem; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,.35); z-index: 2; }
+.card .icon { position: relative; width: 52px; height: 52px; margin-top: 10px; display: grid; place-items: center; line-height: 1; }
+.card .icon .em { font-size: 40px; line-height: 1; }
+.card .icon svg, .kwcell svg { width: 44px; height: 44px; overflow: visible; }
+.card .kws { min-height: 18px; display: flex; gap: 4px; align-items: center; }
+.card .kws .em { font-size: 14px; }
+.card .kws svg { width: 17px; height: 17px; overflow: visible; }
+.card .paper { width: 100%; }
+.card .nm { font-size: .74rem; text-align: left; opacity: .95; line-height: 1.1; padding: 0 3px 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card .stats { display: flex; justify-content: space-between; padding: 0 5px; font-weight: 800; font-size: .95rem; text-shadow: 0 1px 2px rgba(0,0,0,.35); }
+.card .spell-tag { font-size: .72rem; text-align: left; padding: 0 3px; opacity: .9; }
+.kwcell .em { font-size: 26px; line-height: 1; }
+.kwcell svg { width: 30px; height: 30px; }
+.st-solid .kwcell svg, .st-line .kwcell svg { filter: none; }
+
+/* ---------- SVG glyph classes (p primary, q secondary, k knock-out detail, d overlay line, l stand-alone line) ---------- */
+svg .p, svg .q, svg .k, svg .d, svg .l { stroke-linecap: round; stroke-linejoin: round; }
+svg .d, svg .l { fill: none; }
+
+/* 2. Solid glyph */
+.st-solid .icon::before { content: ''; position: absolute; inset: 0; border-radius: 50%; background: rgba(12, 22, 34, .24); }
+.st-solid svg { position: relative; width: 34px; height: 34px; }
+.st-solid .p { fill: #fff; }
+.st-solid .q { fill: rgba(255,255,255,.72); }
+.st-solid .k { fill: rgba(16,26,40,.45); }
+.st-solid .d { stroke: rgba(16,26,40,.4); stroke-width: 1.6; }
+.st-solid .l { stroke: #fff; stroke-width: 2.4; }
+.st-solid .card .kws svg { filter: drop-shadow(0 1px 1px rgba(0,0,0,.35)); }
+
+/* 3. Fine line */
+.st-line .icon::before { content: ''; position: absolute; inset: 0; border-radius: 50%; border: 1px solid rgba(255,255,255,.4); background: rgba(12, 22, 34, .18); }
+.st-line svg { position: relative; width: 34px; height: 34px; }
+.st-line .p { fill: none; stroke: #fff; stroke-width: 1.3; }
+.st-line .q { fill: none; stroke: rgba(255,255,255,.8); stroke-width: 1.3; }
+.st-line .k { fill: #fff; }
+.st-line .d { stroke: #fff; stroke-width: 1.1; }
+.st-line .l { stroke: #fff; stroke-width: 1.4; }
+.st-line .card .kws svg .p, .st-line .card .kws svg .q, .st-line .card .kws svg .l, .st-line .card .kws svg .d { stroke-width: 1.7; }
+
+/* 4. Paper cut */
+.st-paper .icon::before { content: ''; position: absolute; inset: 0; border-radius: 50%; background: rgba(255,255,255,.2); box-shadow: inset 0 2px 4px rgba(0,0,0,.18); }
+.st-paper svg { position: relative; width: 36px; height: 36px; filter: drop-shadow(0 2px 0 rgba(30,30,45,.35)); }
+.st-paper .p { fill: #fbf0da; }
+.st-paper .q { fill: #f2a65a; }
+.st-paper .k { fill: #3b3a4a; }
+.st-paper .d { stroke: rgba(59,58,74,.45); stroke-width: 1.3; }
+.st-paper .l { stroke: #fbf0da; stroke-width: 2.4; }
+.st-paper .card.r-ultra .q { fill: #ffd58a; }
+.st-paper .card.r-mythic .q { fill: #ffe9b0; }
+.st-paper .card .kws svg { filter: drop-shadow(0 1px 0 rgba(30,30,45,.4)); }
+
+/* 5. Pixel */
+.st-pixel .card { border-radius: 6px; border: 3px solid #151b22; padding: 4px 2px 3px; box-shadow: inset 0 0 0 2px rgba(255,255,255,.22), 0 4px 0 #0c1015; font-family: var(--font-px); }
+.st-pixel .card .cost { border-radius: 3px; background: #ffd98a; color: #151b22; border: 2px solid #151b22; box-shadow: none; font-family: var(--font-px); }
+.st-pixel .card .icon { width: 48px; height: 48px; margin-top: 8px; }
+.st-pixel canvas { display: block; image-rendering: pixelated; }
+.st-pixel .icon canvas { width: 48px; height: 48px; }
+.st-pixel .kws canvas { width: 24px; height: 24px; }
+.st-pixel .kwcell canvas { width: 36px; height: 36px; }
+.st-pixel .card .nm { font-size: .8rem; font-weight: 500; }
+.st-pixel .card .stats { font-weight: 700; font-size: 1rem; text-shadow: 1px 1px 0 rgba(0,0,0,.45); }
+.st-pixel .card .spell-tag { font-size: .8rem; }
+
+/* 6. Risograph */
+.st-riso .card { background: #f4ecd9; color: #23303b; box-shadow: 0 4px 10px rgba(0,0,0,.3), inset 0 0 0 2px #23303b; }
+.st-riso .card.r-common { border-bottom: 6px solid var(--c-b); }
+.st-riso .card.r-ultra { border-bottom: 6px solid var(--u-b); }
+.st-riso .card.r-mythic { border-bottom: 6px solid var(--m-b); box-shadow: 0 4px 10px rgba(0,0,0,.3), inset 0 0 0 2px #23303b; }
+.st-riso .card .cost { background: #e8576a; color: #f4ecd9; box-shadow: 0 0 0 2px #23303b; }
+.st-riso .card .stats, .st-riso .card .nm, .st-riso .card .spell-tag { color: #23303b; text-shadow: none; }
+.st-riso .icon::before { content: ''; position: absolute; inset: 2px; border-radius: 50%; background: repeating-radial-gradient(circle at 50% 50%, rgba(47,147,166,.22) 0 1px, transparent 1px 4px); }
+.st-riso svg { position: relative; width: 36px; height: 36px; filter: drop-shadow(1.6px 1px 0 rgba(47,147,166,.75)); }
+.st-riso .p { fill: #e8576a; }
+.st-riso .q { fill: #2f93a6; mix-blend-mode: multiply; }
+.st-riso .k { fill: #23303b; }
+.st-riso .d { stroke: #23303b; stroke-width: 1.2; }
+.st-riso .l { stroke: #e8576a; stroke-width: 2.4; }
+
+/* 7. Crayon */
+.st-crayon .icon::before { content: ''; position: absolute; inset: 1px; border-radius: 48% 52% 50% 50% / 52% 48% 52% 48%; background: rgba(255,250,236,.22); }
+.st-crayon svg { position: relative; width: 36px; height: 36px; filter: url(#wobble); }
+.st-crayon .p { fill: #fff9ec; stroke: #2b2f36; stroke-width: 1.1; }
+.st-crayon .q { fill: #f4b24f; stroke: #2b2f36; stroke-width: 1; }
+.st-crayon .k { fill: #2b2f36; }
+.st-crayon .d { stroke: #2b2f36; stroke-width: 1.1; }
+.st-crayon .l { stroke: #2b2f36; stroke-width: 2.2; }
+.st-crayon .card .kws svg .l { stroke: #fff9ec; }
+.st-crayon .card .kws svg { filter: url(#wobble) drop-shadow(0 1px 0 rgba(0,0,0,.35)); }
+
+@media (max-width: 760px) {
+  .band { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+}
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="wobble" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.07" numOctaves="2" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2"/></filter>
+</svg>
+
+<div class="wrap">
+  <header>
+    <h1>Card Art Styles</h1>
+    <p class="lede">The same six cards and thirteen keyword icons, drawn seven ways. The layout is the game's own: cost badge, art, keyword row, name, power and calm. Only the art and the finish change. The first row is what you have now.</p>
+  </header>
+  <ul class="jump" id="jump"></ul>
+  <div id="bands" class="wrap" style="gap:0"></div>
+  <p class="foot">All art here is placeholder vector drawing, made to compare directions. Real card art would be drawn per card, and there are 150+ cards, so the style you pick also decides how much work each new card takes. Glyph, line and paper cut are the cheapest to extend. Pixel and crayon need a hand-drawn pass per card. The ⚔ and ♥ stat marks are left as they are in every row.</p>
+</div>
+
+<script>
+// ---- glyph drawings on a 24x24 grid. classes: p primary, q secondary, k knock-out dot, d overlay line, l stand-alone line
+var G = {
+  toadstool: '<path class="p" d="M3 12a9 8 0 0 1 18 0z"/><path class="p" d="M9 12h6l-1 8.5h-4z"/><circle class="k" cx="8" cy="9" r="1.5"/><circle class="k" cx="13.5" cy="6.5" r="1.3"/><circle class="k" cx="16.5" cy="10" r="1.1"/>',
+  droplet: '<path class="p" d="M12 2.5c3 4.5 6.5 7.5 6.5 11.5a6.5 6.5 0 0 1-13 0c0-4 3.5-7 6.5-11.5z"/><path class="d" d="M8.5 14.5a3.6 3.6 0 0 0 2.6 3.2"/>',
+  fish: '<path class="p" d="M2 13c3-5 9-6.500 14-2.500l5.500-3.500v11l-5.500-3.500c-5 4-11 2.500-14-1.500z"/><circle class="k" cx="7.500" cy="12" r="1.100"/><path class="d" d="M10 15c1.500.8 3 .8 4.200 0"/><path class="l" d="M7 8.500C6.500 4.500 10 3.500 12.500 4.500"/><circle class="q" cx="13" cy="4.800" r="1.900"/>',
+  candle: '<path class="q" d="M12 1.500c2.200 3 3.200 4.300 3.200 6.300a3.200 3.200 0 0 1-6.400 0c0-2 1-3.300 3.200-6.300z"/><path class="p" d="M8 11.500h8V22H8z"/><path class="d" d="M8 15.500h8"/><path class="d" d="M12 10.500v1"/>',
+  mountain: '<path class="p" d="M1.500 21 9 6.500l4.200 6.800 3-4.300L22.500 21z"/><path class="q" d="M9 6.500l2.600 4.300-2.600-1.400-2.600 1.400z"/><path class="d" d="M13.200 13.300l2 3.200M6 21l2.600-3.200"/>',
+  moon: '<path class="p" d="M15.500 2.500a9.500 9.500 0 1 0 6 13.500A8.200 8.200 0 0 1 15.500 2.500z"/><path class="q" d="M19.500 3l.9 1.900 1.900.9-1.900.9-.9 1.900-.9-1.900-1.900-.9 1.900-.9z"/>',
+  // keywords
+  guard: '<path class="p" d="M12 2.500l8 3v6c0 5-3.500 8.800-8 10.500-4.500-1.700-8-5.500-8-10.500v-6z"/><path class="d" d="M8.500 11.500l2.500 2.500 4.500-5"/>',
+  swift: '<path class="l" d="M3 9h11a3 3 0 1 0-3-3"/><path class="l" d="M3 14h15a3 3 0 1 1-3 3"/><path class="l" d="M3 19h6"/>',
+  mend: '<path class="p" d="M5 19.500C3.500 10 9.500 4 20.500 3.500c.5 10-4.500 16.500-12.500 16z"/><path class="d" d="M5 19.500L14 10"/>',
+  bloom: '<circle class="p" cx="12" cy="6.500" r="3.300"/><circle class="p" cx="17.200" cy="10.300" r="3.300"/><circle class="p" cx="15.200" cy="16.400" r="3.300"/><circle class="p" cx="8.800" cy="16.400" r="3.300"/><circle class="p" cx="6.800" cy="10.300" r="3.300"/><circle class="q" cx="12" cy="12" r="2.600"/>',
+  shield: '<circle class="p" cx="12" cy="12" r="8.800"/><path class="d" d="M7 11.500a5 5 0 0 1 4.200-4.300"/><circle class="q" cx="16.500" cy="16.500" r="1.400"/>',
+  echo: '<path class="p" d="M12 3a6 6 0 0 1 6 6v4l2.200 3.500H3.800L6 13V9a6 6 0 0 1 6-6z"/><path class="q" d="M9.500 18.800a2.500 2.500 0 0 0 5 0z"/>',
+  thorns: '<path class="p" d="M9 22V8a3 3 0 0 1 6 0v14z"/><path class="d" d="M9 15H5.500v-4.500M15 13h3.500V8.500"/><path class="d" d="M12 8V6M12 12v-1"/>',
+  rally: '<path class="p" d="M3 9.500l11-5v15l-11-5z"/><path class="q" d="M3 9.500h4v5H3z"/><path class="l" d="M17.500 9a4 4 0 0 1 0 6"/><path class="l" d="M20.500 6a8 8 0 0 1 0 12"/>',
+  drain: '<path class="l" d="M12 12a2 2 0 0 1 4 0 4 4 0 0 1-8 0 6 6 0 0 1 12 0 8 8 0 0 1-16 0"/>',
+  seed: '<path class="q" d="M4.500 11.500a7.500 5.500 0 0 1 15 0z"/><path class="p" d="M6 11.500h12c0 6-3 9.800-6 11-3-1.200-6-5-6-11z"/><path class="d" d="M12 6.500V3"/>',
+  lull: '<path class="p" d="M10.500 3a8.500 8.500 0 1 0 10.500 12A7.500 7.500 0 0 1 10.500 3z"/><path class="l" d="M15 4h4.500L15 9h4.500"/>',
+  kin: '<circle class="p" cx="8.800" cy="12" r="5.800"/><circle class="q" cx="15.200" cy="12" r="5.800"/><path class="d" d="M12 7.200a5.800 5.800 0 0 1 0 9.600"/>',
+  sting: '<path class="p" d="M12 2l3.200 9.500L12 22l-3.200-10.500z"/><path class="d" d="M9.300 10.500h5.400"/>'
+};
+var KW = [
+  ['guard','Watch','🛡️'],['swift','Flicker','💨'],['mend','Rest','🌿'],['bloom','Bloom','🌸'],['shield','Haze','🫧'],
+  ['echo','Startle','🔔'],['thorns','Briar','🌵'],['rally','Chorus','📯'],['drain','Sip','🌀'],['seed','Echo','🌰'],
+  ['lull','Lull','😴'],['kin','Kin','🤝'],['sting','Sting','🐝']
+];
+var EMO = {}; KW.forEach(function (k) { EMO[k[0]] = k[2]; });
+var CARDS = [
+  { g:'toadstool', e:'🍄', n:'Toadstool',      r:'common', cost:2, pw:4, hp:2,  kw:['guard'] },
+  { g:'droplet',   e:'💧', n:'Droplet',        r:'common', cost:1, pw:1, hp:4,  kw:['mend'] },
+  { g:'fish',      e:'🐠', n:'Lantern Fish',   r:'ultra',  cost:3, pw:3, hp:4,  kw:['echo'] },
+  { g:'candle',    e:'🕯️', n:'Wisp Warden',    r:'ultra',  cost:3, pw:3, hp:4,  kw:['mend','shield'] },
+  { g:'mountain',  e:'🗻', n:'Mossmind Titan', r:'mythic', cost:5, pw:6, hp:10, kw:['guard','kin'] },
+  { g:'moon',      e:'🌙', n:'Lullaby',        r:'common', cost:2, spell:true }
+];
+var STYLES = [
+  { id:'emoji',  name:'Emoji', tag:'Current', note:'What the game uses today. Full colour and readable at any size. The catch is that every phone draws them a little differently, and you can’t change them.' },
+  { id:'solid',  name:'Solid glyph', tag:'Silhouette', note:'One-colour icons on a soft disc, in the style of a game icon set. The clearest at small sizes and the easiest to keep consistent across a big collection.' },
+  { id:'line',   name:'Fine line', tag:'Outline', note:'Thin outlines with a ring around the art. Quiet and elegant. <b>Watch for:</b> the keyword icons get fragile at 14px, so they use a heavier line here.' },
+  { id:'paper',  name:'Paper cut', tag:'Layered', note:'Cream shapes with a hard drop shadow and one warm accent, like layered cut paper. Fits the lanterns, origami and moss in your card names.' },
+  { id:'pixel',  name:'Pixel', tag:'Retro', note:'16×16 sprites on a grid with a dark outline, a stepped card frame and a pixel face for the numbers. <b>Watch for:</b> keyword icons are drawn at 24px so they stay legible.' },
+  { id:'riso',   name:'Risograph', tag:'Two-ink print', note:'Coral and teal ink, slightly out of register, on cream card stock. The most distinctive option. It also changes the card face, with rarity shown as a coloured edge.' },
+  { id:'crayon', name:'Crayon', tag:'Hand drawn', note:'A wobbly ink outline with flat fills, like a sketchbook. Soft and homemade, and matches the sleepy tone of the game.' }
+];
+var PXPAL = '.p{fill:#fff}.q{fill:#ffd98a}.k{fill:#2a3440}.d{fill:none;stroke:#2a3440;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.l{fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}';
+
+function svg(g) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + G[g] + '</svg>'; }
+function art(style, g, emoji, res) {
+  if (style === 'emoji') return '<span class="em">' + emoji + '</span>';
+  if (style === 'pixel') return '<canvas data-g="' + g + '" data-res="' + res + '" width="' + res + '" height="' + res + '"></canvas>';
+  return svg(g);
+}
+function cardHtml(style, c) {
+  var body;
+  if (c.spell) {
+    body = '<div class="paper"><div class="nm">' + c.n + '</div><div class="spell-tag">✨ Spell</div></div>';
+  } else {
+    body = '<div class="kws">' + c.kw.map(function (k) { return '<span>' + art(style, k, EMO[k], 12) + '</span>'; }).join('') + '</div>' +
+      '<div class="paper"><div class="nm">' + c.n + '</div><div class="stats"><span>⚔' + c.pw + '</span><span>♥' + c.hp + '</span></div></div>';
+  }
+  if (c.spell) body = '<div class="kws"></div>' + body;
+  return '<div class="card r-' + c.r + '"><div class="cost">' + c.cost + '</div><div class="icon">' + art(style, c.g, c.e, 16) + '</div>' + body + '</div>';
+}
+function kwCell(style, k) {
+  return '<div class="kwcell"><div class="ico">' + art(style, k[0], k[2], 12) + '</div>' + k[1] + '</div>';
+}
+
+var bands = document.getElementById('bands'), jump = document.getElementById('jump');
+STYLES.forEach(function (s, i) {
+  var li = document.createElement('li');
+  li.innerHTML = '<a href="#' + s.id + '">' + s.name + '</a>';
+  jump.appendChild(li);
+  var el = document.createElement('section');
+  el.className = 'band st-' + s.id; el.id = s.id;
+  el.innerHTML =
+    '<div><span class="tag">' + s.tag + '</span><h2>' + s.name + '</h2><p class="note">' + s.note + '</p></div>' +
+    '<div class="stage"><div class="hand">' + CARDS.map(function (c) { return cardHtml(s.id, c); }).join('') + '</div>' +
+    '<div><p class="kwlabel">Keyword icons</p><div class="kwsheet">' + KW.map(function (k) { return kwCell(s.id, k); }).join('') + '</div></div></div>';
+  bands.appendChild(el);
+});
+
+// ---- pixel renderer: draw the vector small, threshold the edges, add a 1px dark outline, scale up with nearest-neighbour
+function paint(c) {
+  var res = +c.dataset.res, inner = res - 2;
+  var markup = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="' + inner + '" height="' + inner + '"><style>' + PXPAL + '</style>' + G[c.dataset.g] + '</svg>';
+  var img = new Image();
+  img.onload = function () {
+    var t = document.createElement('canvas'); t.width = t.height = res;
+    var x = t.getContext('2d'); x.drawImage(img, 1, 1, inner, inner);
+    try { var d = x.getImageData(0, 0, res, res); for (var i = 3; i < d.data.length; i += 4) d.data[i] = d.data[i] > 90 ? 255 : 0; x.putImageData(d, 0, 0); } catch (e) {}
+    var s = document.createElement('canvas'); s.width = s.height = res;
+    var sx = s.getContext('2d'); sx.drawImage(t, 0, 0); sx.globalCompositeOperation = 'source-in'; sx.fillStyle = '#151b22'; sx.fillRect(0, 0, res, res);
+    var o = c.getContext('2d'); o.imageSmoothingEnabled = false;
+    [[1,0],[-1,0],[0,1],[0,-1]].forEach(function (p) { o.drawImage(s, p[0], p[1]); });
+    o.drawImage(t, 0, 0);
+  };
+  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(markup);
+}
+document.querySelectorAll('canvas[data-g]').forEach(paint);
+</script>
