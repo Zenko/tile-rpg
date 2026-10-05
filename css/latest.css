@@ -1259,3 +1259,45 @@ body.in-story .toast { opacity: 0; }
   .scn-blob, .scn-breath, .scn-hint, .bld.story-target::after { animation: none; }
   .scn-stage.scn-in { animation: none; }
 }
+
+/* ==========================================================================================================
+   FULL ART (js/full-art.js)
+   Mythic, divine and Atlas cards with files in assets/cards/full/ get a full bleed face where the card is shown large: the card reveal /
+   Card Details popup and the attack preview in battle. A painted scene (.fa-scene) fills the whole card, the subject (.fa-hero) stands in
+   front of it and is allowed past the card's edge, and the name panel turns translucent so the scene shows through it. Everything sizes from
+   the card's own width (cqw), like the rest of the card face, so one set of rules serves the popup and the preview.
+   ========================================================================================================== */
+.reveal-card.fa { overflow: visible; }
+.reveal-card.fa .icon { position: static; }
+.reveal-card.fa .cost, .reveal-card.fa .kws { z-index: 6; }
+.reveal-card.fa .nm { font-size: calc(var(--u) * .8); }   /* the full art popup is a little narrower per letter than it looks: "Mountain of Memory" must fit */
+.reveal-card.fa .paper {
+  position: relative; z-index: 4;
+  background: linear-gradient(to top, color-mix(in srgb, var(--panel) 94%, transparent), color-mix(in srgb, var(--panel) 60%, transparent));
+  -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px);
+}
+:root[data-theme="light"] .reveal-card.fa .paper { background: linear-gradient(to top, color-mix(in srgb, var(--panel) 97%, transparent), color-mix(in srgb, var(--panel) 82%, transparent)); }
+.fa-scene { position: absolute; inset: 0; z-index: 0; overflow: hidden; border-radius: 16px; pointer-events: none; }
+.fa-scene img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.fa-hero { position: absolute; z-index: 2; left: -6%; top: -4%; width: 112%; aspect-ratio: 1; pointer-events: none; filter: drop-shadow(0 .9cqw 1.1cqw rgba(0, 0, 0, .4)); }
+.fa-hero img { display: block; width: 100%; height: 100%; }
+/* the popup: a little larger than a plain card so the scene has room, and space above for the subject to rise into */
+.reveal-card-frame.has-fa { margin-top: 24px; margin-bottom: 16px; }
+.reveal-card-frame .reveal-card.fa { width: min(220px, 60vw); }
+
+/* the attack preview: the attacking card lifts to the middle of the field, strikes toward its target, then returns (btAttackPreview) */
+.atk-preview { position: absolute; inset: 0; z-index: 60; overflow: hidden; cursor: pointer; --d: -1; background: radial-gradient(circle at 50% 46%, rgba(10, 14, 24, .5), rgba(4, 6, 12, .8)); }
+.atk-preview.down { --d: 1; }
+.atk-preview .ap-card { position: absolute; margin: 0; }
+.atk-preview .ap-card.strike .fa-hero { animation: ap-lunge .34s ease-out; }
+@keyframes ap-lunge { 0% { transform: translateY(0) scale(1); } 45% { transform: translateY(calc(var(--d) * 7cqw)) scale(1.1); } 100% { transform: translateY(0) scale(1); } }
+.ap-flash { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at 50% 46%, rgba(255, 240, 190, .75), rgba(255, 240, 190, 0) 55%); animation: ap-flash .34s ease-out forwards; }
+@keyframes ap-flash { from { opacity: 1; } to { opacity: 0; } }
+.ap-burst {
+  position: absolute; left: 50%; top: 46%; width: 150%; aspect-ratio: 1; pointer-events: none; transform: translate(-50%, -50%) scale(.4);
+  background: repeating-conic-gradient(from 0deg, rgba(255, 246, 200, .5) 0 4deg, transparent 4deg 12deg);
+  -webkit-mask: radial-gradient(circle, transparent 16%, #000 30%, transparent 70%); mask: radial-gradient(circle, transparent 16%, #000 30%, transparent 70%);
+  animation: ap-burst .42s ease-out forwards;
+}
+@keyframes ap-burst { from { opacity: 1; transform: translate(-50%, -50%) scale(.4); } to { opacity: 0; transform: translate(-50%, -50%) scale(1); } }
+@media (prefers-reduced-motion: reduce) { .atk-preview .ap-card.strike .fa-hero, .ap-flash, .ap-burst { animation: none; } }

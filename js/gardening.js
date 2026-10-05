@@ -141,6 +141,7 @@ function showCardReveal(cardId, heading, isGift, note, xpGained, opts) {
   const face = document.getElementById('pickupCardFace');
   face.className = `reveal-card rarity-${def.rarity}` + (def.spell ? ' spell' : '');
   face.innerHTML = cardFaceHtml(def);
+  face.parentElement.classList.toggle('has-fa', fullArtApply(face, def));   // mythic, divine and Atlas cards with full art (js/full-art.js)
   face.classList.remove('reveal-icon'); void face.offsetWidth; face.classList.add('reveal-icon');
 
   pickupTitle.textContent = heading || 'You found a card';

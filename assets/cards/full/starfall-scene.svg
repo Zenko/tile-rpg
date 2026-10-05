@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 108" width="600" height="648"><defs>
+<linearGradient id="gR" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff8277"/><stop offset="1" stop-color="#d12e45"/></linearGradient>
+<linearGradient id="gO" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb862"/><stop offset="1" stop-color="#ec6a2b"/></linearGradient>
+<linearGradient id="gY" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2a0"/><stop offset="1" stop-color="#ffc62e"/></linearGradient>
+<linearGradient id="gG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a4ea72"/><stop offset="1" stop-color="#32a047"/></linearGradient>
+<linearGradient id="gT" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#78e8da"/><stop offset="1" stop-color="#1c9ca6"/></linearGradient>
+<linearGradient id="gB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86ccff"/><stop offset="1" stop-color="#3470de"/></linearGradient>
+<linearGradient id="gP" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfaaff"/><stop offset="1" stop-color="#7348cc"/></linearGradient>
+<linearGradient id="gK" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffa6d0"/><stop offset="1" stop-color="#e5539a"/></linearGradient>
+<linearGradient id="gN" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bf8a5f"/><stop offset="1" stop-color="#6a4125"/></linearGradient>
+<linearGradient id="gC" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffaf0"/><stop offset="1" stop-color="#ecd7b8"/></linearGradient>
+<linearGradient id="gW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dfe9f4"/></linearGradient>
+<linearGradient id="gS" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bccadc"/><stop offset="1" stop-color="#697c96"/></linearGradient>
+<linearGradient id="gD" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6070b0"/><stop offset="1" stop-color="#262f5c"/></linearGradient>
+<linearGradient id="gA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe680"/><stop offset="1" stop-color="#e3a012"/></linearGradient>
+<linearGradient id="gU" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4d49a"/><stop offset="1" stop-color="#cc9648"/></linearGradient>
+<linearGradient id="gL" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#d4c8ff"/></linearGradient>
+<linearGradient id="gSF" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2f6f86"/><stop offset=".55" stop-color="#6cc1a6"/><stop offset="1" stop-color="#c7e8a0"/></linearGradient>
+<linearGradient id="gSW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0f3b7c"/><stop offset=".6" stop-color="#2f86d0"/><stop offset="1" stop-color="#8fe0f0"/></linearGradient>
+<linearGradient id="gSM" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e48fb2"/><stop offset=".55" stop-color="#f7c4b8"/><stop offset="1" stop-color="#fff0cc"/></linearGradient>
+<linearGradient id="gSD" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#241a66"/><stop offset=".55" stop-color="#7a4bc2"/><stop offset="1" stop-color="#f2b0d8"/></linearGradient>
+<linearGradient id="gSN" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#141848"/><stop offset=".6" stop-color="#4f45a6"/><stop offset="1" stop-color="#f3c58a"/></linearGradient>
+<linearGradient id="gSC" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#08507c"/><stop offset=".6" stop-color="#1ca0b6"/><stop offset="1" stop-color="#a4ead8"/></linearGradient>
+<linearGradient id="gRay" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<linearGradient id="gCone" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2a0" stop-opacity=".7"/><stop offset="1" stop-color="#fff2a0" stop-opacity="0"/></linearGradient>
+<linearGradient id="gDoor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffbe0"/><stop offset=".5" stop-color="#ffe27a"/><stop offset="1" stop-color="#ffb938"/></linearGradient>
+<radialGradient id="gGlow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ffe27a" stop-opacity=".8"/><stop offset="1" stop-color="#ffe27a" stop-opacity="0"/></radialGradient>
+<radialGradient id="gMoonGlow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff3c4" stop-opacity=".7"/><stop offset="1" stop-color="#fff3c4" stop-opacity="0"/></radialGradient>
+
+<linearGradient id="gSDeep" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#06193a"/><stop offset=".6" stop-color="#0d4a7a"/><stop offset="1" stop-color="#1b8aa0"/></linearGradient>
+<linearGradient id="gSStorm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b1f45"/><stop offset=".55" stop-color="#4a4f86"/><stop offset="1" stop-color="#8d86b8"/></linearGradient>
+<linearGradient id="gSCave" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1a1330"/><stop offset=".6" stop-color="#2d2a5a"/><stop offset="1" stop-color="#3a7a80"/></linearGradient>
+<linearGradient id="gSDawn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6a7fd0"/><stop offset=".45" stop-color="#f2a8c8"/><stop offset="1" stop-color="#ffe3a8"/></linearGradient>
+<linearGradient id="gSTwi" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3a8a"/><stop offset=".55" stop-color="#a98ad8"/><stop offset="1" stop-color="#ffcfa8"/></linearGradient>
+<linearGradient id="gSRose" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a1230"/><stop offset=".6" stop-color="#6a2a58"/><stop offset="1" stop-color="#e07a8a"/></linearGradient>
+<linearGradient id="gSStage" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a0f2a"/><stop offset=".6" stop-color="#b02a48"/><stop offset="1" stop-color="#f08a5a"/></linearGradient>
+<linearGradient id="gSVoid" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#05061a"/><stop offset=".6" stop-color="#1a1650"/><stop offset="1" stop-color="#5a3a9a"/></linearGradient>
+<linearGradient id="gSMoon" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a1f4a"/><stop offset=".6" stop-color="#1a5a8a"/><stop offset="1" stop-color="#7ad0d8"/></linearGradient>
+<linearGradient id="gSStormSea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#27456a"/><stop offset=".55" stop-color="#3d8a9a"/><stop offset="1" stop-color="#b8e0d0"/></linearGradient>
+</defs><style>.fR{fill:url(#gR)}.fO{fill:url(#gO)}.fY{fill:url(#gY)}.fG{fill:url(#gG)}.fT{fill:url(#gT)}.fB{fill:url(#gB)}.fP{fill:url(#gP)}.fK{fill:url(#gK)} .fN{fill:url(#gN)}.fC{fill:url(#gC)}.fW{fill:url(#gW)}.fS{fill:url(#gS)}.fD{fill:url(#gD)}.fA{fill:url(#gA)}.fU{fill:url(#gU)}.fL{fill:url(#gL)} .sh{fill:rgba(40,20,70,.2)}.hl{fill:#fff;opacity:.72}.ink{fill:#3a2a33} svg{display:block;overflow:visible}svg path,svg circle,svg ellipse{stroke-linecap:round;stroke-linejoin:round}</style><rect width="100" height="108" fill="url(#gSVoid)"/><path class="fW" d="M10 7.6l0.672 1.728 1.728 0.672-1.728 0.672-0.672 1.728-0.672-1.728-1.728-0.672 1.728-0.672z"/><circle cx="30" cy="20" r="1.2" fill="#fff" opacity=".9"/><path class="fW" d="M52 6l0.56 1.44 1.44 0.56-1.44 0.56-0.56 1.44-0.56-1.44-1.44-0.56 1.44-0.56z"/><path class="fW" d="M76 23.6l0.672 1.728 1.728 0.672-1.728 0.672-0.672 1.728-0.672-1.728-1.728-0.672 1.728-0.672z"/><circle cx="90" cy="52" r="1.2" fill="#fff" opacity=".9"/><circle cx="6" cy="48" r="1.2" fill="#fff" opacity=".9"/><circle cx="44" cy="38" r="1.2" fill="#fff" opacity=".9"/><circle cx="66" cy="12" r="1.2" fill="#fff" opacity=".9"/><circle cx="20" cy="60" r="1.2" fill="#fff" opacity=".9"/><path d="M96 0L50 70 44 64z" fill="#fff2a0" opacity=".12"/><path d="M80 0L40 62 36 58z" fill="#fff2a0" opacity=".1"/><path d="M0 84c14-12 28-8 40-14 16 8 30 4 60 14v24H0z" fill="#2a2470"/><path d="M0 96c20-6 40-4 56-8 16 4 30 2 44 4v16H0z" fill="#1a1650"/><circle cx="18" cy="90" r="1.800" fill="#ff9ad0"/><circle cx="30" cy="94" r="1.600" fill="#ffe27a"/><circle cx="74" cy="92" r="1.800" fill="#ff9ad0"/><circle cx="86" cy="96" r="1.600" fill="#7de0ff"/></svg>

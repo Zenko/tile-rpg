@@ -876,6 +876,8 @@ async function btAnimate(evs, token) {
       if (e.who === 0) { sfx('play'); buzz(HAP.play); } else sfx('flip');
       await btWait(e.who === 0 ? 260 : 520);
     } else if (e.type === 'attack') {
+      await btAttackPreview(e, token);               // a full art card steps up to the middle first (js/full-art.js); nothing for any other card
+      if (!btAlive(token)) return;
       const atk = document.querySelector(`#battleView .card[data-uid="${e.attacker.uid}"]`);
       if (atk) atk.classList.add(e.who === 0 ? 'strike-up' : 'strike-down');
       sfx('tap');
