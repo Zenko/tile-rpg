@@ -89,8 +89,7 @@ So `git push` from this folder always goes out as Zenko, even while the work acc
 **Standing instruction from the owner: always publish.** When a batch of changes is finished and tested:
 1. Add player-facing bullets to `PENDING_CHANGES` (see §5), bump `BUILD` in `js/build.js` by one (every publish needs this, even an internal-only change, so returning players' service workers pick up the new files), run `python3 scripts/check.py`, commit, and `git push origin main`.
 2. Wait for Pages: `GH_TOKEN=$(gh auth token --user Zenko) gh api repos/Zenko/tile-rpg/pages/builds/latest --jq '.status + " " + .commit'` until it says `built` with your commit.
-3. Load the live link and confirm the version label and that there are no page errors.
-4. Tell the owner the link.
+3. Tell the owner the link.
 
 Don't publish broken or half-finished work.
 
