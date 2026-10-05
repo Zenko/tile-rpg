@@ -657,6 +657,19 @@
     <button class="btn talk-close" id="talkClose">Not now</button>
   </div>
 </div>
+<div class="overlay hidden" id="sceneOverlay" role="dialog" aria-modal="true" aria-label="Story" data-style="talk">
+  <div class="scn-bg" aria-hidden="true"><span class="scn-blob sb1"></span><span class="scn-blob sb2"></span><span class="scn-blob sb3"></span></div>
+  <div class="scn-pips" id="storyPips" aria-hidden="true"></div>
+  <div class="scn-stage" id="storyStage" tabindex="0">
+    <button type="button" class="scn-skip" id="storySkip">Skip</button>
+    <div class="scn-breath hidden" id="storyBreath" aria-hidden="true"></div>
+    <div class="scn-who hidden" id="storyWho"><span class="scn-portrait" id="storyPortrait" aria-hidden="true"></span><span class="scn-name" id="storyName"></span></div>
+    <p class="scn-text" id="storyText"></p>
+    <p class="scn-sub" id="storySub"></p>
+    <div class="scn-opts" id="storyOpts"></div>
+    <div class="scn-hint hidden" id="storyHint">tap to continue</div>
+  </div>
+</div>
 <div class="overlay hidden" id="sceneryOverlay">
   <div class="overlay-card">
     <div style="font-size: 2.2rem; margin-bottom: 6px;" id="sceneryIcon">🌳</div>
@@ -792,6 +805,7 @@
 <script src="js/town-life.js"></script>
 <script src="js/summoning.js"></script>
 <script src="js/atlas.js"></script>
+<script src="js/scenes.js"></script>
 <script src="js/events-story-foils-guide.js"></script>
 <!-- Cloud save (optional): deliberately loaded last, after the whole game above has already loaded and
      rendered from the local save, so a slow or unreachable connection to Google's CDN can never delay

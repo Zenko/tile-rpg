@@ -74,7 +74,7 @@ STORY.push(
   { icon: '🧩', text: 'Finish what you started.',                     goal: 'Complete any themed card set',               done: () => CARD_SETS.some(setComplete),        pebbles: 15 },
   { icon: '⭐', text: 'Truly settle in.',                             goal: 'Reach level 10',                             done: p => (p.level || 1) >= 10,                card: 'mythic' },
 );
-function storyState() { const p = state.progress; if (!p.story || typeof p.story !== 'object') p.story = { step: 0, notified: -1 }; return p.story; }
+function storyState() { const p = state.progress; if (!p.story || typeof p.story !== 'object') p.story = { step: 0, notified: -1, beat: -1 }; return p.story; }   // beat: the last step whose scene has played (js/scenes.js)
 function storyStep() { const s = storyState(); return s.step < STORY.length ? STORY[s.step] : null; }
 function storyReady() { const st = storyStep(); return !!(st && st.done(state.progress)); }
 function storyArcLabel(step) { return step < STORY_ARC_LEN ? 'Getting started' : 'Making yourself at home'; }
@@ -88,6 +88,7 @@ function claimStory() {
   logEvent(st.icon, `${storyArcLabel(s.step - 1)}: ${st.goal}.`);
   saveState(); sfx('claim'); buzz(HAP.found);
   renderQuests(); checkAchievements();
+  storyHoldUntil(1600);   // let the toast and any card reveal clear before Wren speaks again (js/scenes.js)
 }
 function renderStory() {
   const slot = document.getElementById('storySlot'), s = storyState(), st = storyStep();
@@ -104,6 +105,7 @@ function renderStory() {
 function checkStory() {
   const s = storyState();
   if (storyReady() && s.notified !== s.step) { s.notified = s.step; saveState(); toast('📜 Next step ready - claim it in Rewards'); }
+  storyBeatCheck();
 }
 
 /* ============================================================
@@ -139,6 +141,7 @@ const GUIDE = [
   { section: 'Around town', items: [
     { icon: '📓', name: 'The Journal', where: 'Bottom bar → Journal', how: 'Today lists what is waiting for you with a Go button for each. The Log, Battles and Almanac keep your history and collections, and the ? button holds this Guide and What\'s new.' },
     { icon: '🖐️', name: 'Looking around', where: 'Town map', how: 'Drag the map with your finger to look at the rest of the district; a quick flick glides on. Tap the target button on the right to bring the camera back to you. Dragging never sends your character walking, and walking somewhere brings the camera back by itself.' },
+    { icon: '🧓', name: 'Wren points the way', where: 'The pill under the top bar · gold diamonds in town', how: "A new dreamer starts with a short drifting-off scene, then Wren tells you what to try next. The pill says what she asked: tap it to hear her again or to go there, and look for a small gold diamond over the building to visit. Every scene can be skipped, and Cozy mode in Settings turns the pill, the diamonds and Wren's reminders off." },
     { icon: '🗺️', name: 'Districts', where: 'Walk off the edge of a map, or tap the mini-map', how: 'El Mercado de Susurros, La Orilla del Arrullo and El Jardín Lúcido open as you win matches and level up.' },
     { icon: '🌦️', name: 'Weather & forecast', where: 'Any sign · the sky badge, top right', how: 'Tap the badge for the full picture: clear pays a little extra on daily tasks, cloudy doubles spirit XP, rain helps fishing and gardens, storms power Flicker cards, snow toughens bosses but pays more.' },
     { icon: '🌸', name: 'Seasons', where: 'Everywhere, one real week each', how: "Trees, music and weather change, and each season's cards turn up more often." },
@@ -213,7 +216,7 @@ const GUIDE = [
 // its own details in place, same idiom as mail-item/cl-entry.
 let guideOpen = {}, guideQuery = '', guideSection = 'all';   // guideSection: 'all' or a GUIDE section name
 // Items added in the v1.81-1.89 releases wear a NEW tag until they have been opened once (state.progress.guideSeen).
-const GUIDE_NEW = ['Who goes first', 'Card families', 'New keywords', 'The world in battle', "Dreamer’s Gift", 'Draft Run', 'Lingering duels', 'Embers and soft limits'];
+const GUIDE_NEW = ['Wren points the way', 'Who goes first', 'Card families', 'New keywords', 'The world in battle', "Dreamer’s Gift", 'Draft Run', 'Lingering duels', 'Embers and soft limits'];
 function guideSeen() { const p = state.progress; if (!p.guideSeen || typeof p.guideSeen !== 'object') p.guideSeen = {}; return p.guideSeen; }
 // Redesign (build 93): roomier cards (icon tile, name, a "where" chip, details on tap), a Today card split into
 // labelled rows instead of one paragraph, and section chips pinned under the search box. Searching ignores the chip
@@ -429,3 +432,4 @@ if (__mig && __mig.granted.length) setTimeout(() => toast(__mig.brandNew ? '🌱
 
 
 initTransientNotices();   // js/town-render-weather.js: the ambient line and town log fade in and out
+setTimeout(storyIntroCheck, 500);   // a brand-new save opens with the dream-in scene (js/scenes.js)

@@ -4,6 +4,7 @@
    its turn rather than stacking on top.
    ============================================================ */
 const TIPS = {
+  story:      { icon: '🧓', title: 'Wren points the way', text: 'Wren tells you what to try next. The pill under the top bar says what she asked: tap it to hear her again or to go there. A small gold diamond bobs over the building to visit. Turn it all off with Cozy mode in Settings.' },
   atlas:      { icon: '🗺️', title: 'The Atlas', text: 'It travels with you from district to district. Ask it questions, play its harder games, challenge it to a match, or see what it keeps for sale. It never explains itself.' },
   altar:      { icon: '🕯️', title: 'The altar', text: 'In your cottage. Beat a district god, bring spare cards of their family, and the god can be summoned as a card. Once all four are home, something else may answer.' },
   trials:     { icon: '🔮', title: 'Trials', text: 'In the Fates screen (Quiet Nook → Fates → Trials), five foes each bring a Fate and a Spread of their own. Beat one for the first time to take home its Fate card. They open in order, and they are meant to be hard.' },
@@ -54,7 +55,8 @@ function pumpTips() {
   const ov = document.getElementById('tipOverlay');
   if (!tipQueue.length || !ov.classList.contains('hidden')) return;
   // wait while something else is on screen (a card reveal, a level-up...), except the talk card and the battle
-  if (document.querySelector('#pickupOverlay:not(.hidden), #levelUpOverlay:not(.hidden), #battleEndOverlay:not(.hidden), #mulliganOverlay:not(.hidden)')) { setTimeout(pumpTips, 1200); return; }
+  if (document.querySelector('#pickupOverlay:not(.hidden), #levelUpOverlay:not(.hidden), #battleEndOverlay:not(.hidden), #mulliganOverlay:not(.hidden), #sceneOverlay:not(.hidden)')) { setTimeout(pumpTips, 1200); return; }
+  if (storyFirstBeatPending()) { setTimeout(pumpTips, 1200); return; }   // js/scenes.js: Wren speaks before the first tip
   const id = tipQueue.shift(), t = TIPS[id];
   tipsSeen()[id] = true; saveState();
   document.getElementById('tipIcon').textContent = t.icon;

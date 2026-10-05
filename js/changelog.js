@@ -18,6 +18,8 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta ${RELEASES[0].n} (build $
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'new', x: 'A new dreamer now starts with a short, skippable drifting-off scene and wakes in El Umbral, where Wren is waiting.' },
+  { t:'new', x: 'Wren guides your first hour. Each step of Getting started and Making yourself at home now begins with a few words from her, the goal pill under the top bar says what she asked (tap it to hear her again or go there), and a small gold diamond bobs over the building to visit. Cozy mode turns it all off.' },
   { t:'better', x: 'A balance pass on the cards and decks. The quick cheap Flicker cards no longer win almost every match, the four families now play about evenly (Deriva decks used to lose most of their matches, Recuerdo and Susurro won too many), about 50 creatures got small number changes, Gust costs 3 and Picnic costs 1, Brote\'s Rooted passive restores 2 Calm, the four gods and the Atlas were re-tuned, and the Atlas\'s four matches now get steadily harder.' },
   { t:'fixed', x: 'Older saves load cleanly after the card cut: a companion, charm, foil, framed favourite or trade that named a removed card is tidied away, and cards that were away on an expedition come home. Long card names now wrap to two lines in My Cards and the Deck instead of being cut off, and the weather has its dream wording everywhere (Mist, Moonrain, Dream storm, drifting stars).' },
   { t:'fixed', x: 'Water tiles now fill the whole tile. The sand band that used to sit inside the edge of every shore tile is gone.' },

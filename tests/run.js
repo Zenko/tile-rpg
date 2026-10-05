@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* Browser tests for Tile RPG. Run from the repo root:  node tests/run.js [name-filter]
-   Each tests/*.test.js exports an async function (page, t); it gets a fresh page with first-time tips switched off and
+   Each tests/*.test.js exports an async function (page, t); it gets a fresh page with first-time tips and story scenes switched off and
    overlays that would block clicks hidden. Any page error or console error fails the test. Needs Playwright:
    `npm i -D playwright` (or a global install) and a Chromium (`npx playwright install chromium`, or set PLAYWRIGHT_BROWSERS_PATH). */
 const fs = require('fs'), path = require('path'), assert = require('assert');
@@ -27,7 +27,7 @@ const NOISE = /gstatic|googleapis|firebase|fonts|ERR_|Failed to load resource/;
     const t0 = Date.now();
     try {
       await page.goto('file://' + path.join(root, 'index.html')); await page.waitForTimeout(600);
-      await page.evaluate(() => { Object.keys(TIPS).forEach(k => { tipsSeen()[k] = true; }); saveState(); });
+      await page.evaluate(() => { Object.keys(TIPS).forEach(k => { tipsSeen()[k] = true; }); while (storyCur) storyEnd(); storyScenes().seen.intro = true; storyState().beat = 999; saveState(); });   // no dream-in scene or Wren beat over the test
       await page.evaluate(() => { const st = document.createElement('style'); st.id = 'testHideOverlays'; st.textContent = '.overlay{display:none!important}'; document.head.appendChild(st); });   // level-ups and reveals would intercept clicks; a test that drives an overlay removes #testHideOverlays
       await require(path.join(__dirname, f))(page, assert);
       if (errors.length) throw new Error('page errors:\n  ' + errors.join('\n  '));
