@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta ${RELEASES[0].n} (build $
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'new', x: 'A new look for every card and most icons. All the card pictures and about 240 of the emoji icons used around the game (the tab bar, quests, rewards, the character screen, keywords and more) are now drawn in one clean gradient style, with soft colour, highlights and shadows. A few rarely seen icons still use the old emoji and will follow.' },
   { t:'new', x: 'Full art for the rarest cards. Every mythic card now has a big painted scene with a detailed subject that steps out of the frame, and so do three of the gods (Duermevela, Marea Lenta and Ensue\u00f1o). You see it when you open a card to read it, and in battle: when one of these cards attacks it flies to the middle of the field, strikes, and flies back before the hit lands. Tap to skip it, or switch on Fast battles to turn the preview off.' },
   { t:'new', x: 'A new dreamer now starts with a short, skippable drifting-off scene and wakes in El Umbral, where Wren is waiting.' },
   { t:'new', x: 'Wren guides your first hour. Each step of Getting started and Making yourself at home now begins with a few words from her, the goal pill under the top bar says what she asked (tap it to hear her again or go there), and a small gold diamond bobs over the building to visit. Cozy mode turns it all off.' },

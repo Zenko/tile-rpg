@@ -1037,7 +1037,7 @@ html.cozy .cl-cell.rat { animation: none; }
 #bottomNav .tab-btn .t-icon { filter: drop-shadow(0 .035em .05em var(--art-sh)); }
 
 /* Icon swap (build 128): a replaced icon is an <img> sized like the emoji it stands in for; taps go to whatever is underneath, as they did on the emoji. */
-.ico-swap { width: 1em; height: 1em; object-fit: contain; vertical-align: -.14em; display: inline-block; pointer-events: none; -webkit-user-drag: none; filter: drop-shadow(0 .035em .05em var(--art-sh)); }
+.ico-swap { width: 1em; height: 1em; object-fit: contain; vertical-align: -.14em; margin-inline: .04em; display: inline-block; pointer-events: none; -webkit-user-drag: none; filter: drop-shadow(0 .035em .05em var(--art-sh)); }
 .ico-pill { position: fixed; left: 8px; bottom: calc(env(safe-area-inset-bottom, 0px) + 96px); z-index: 200; display: flex; align-items: center; gap: 10px; padding: 5px 6px 5px 14px; border-radius: 999px; font-size: .72rem; font-weight: 800; background: var(--accent); color: var(--on-accent); box-shadow: 0 4px 14px var(--shadow); }
 .ico-pill button { font: inherit; font-size: .7rem; font-weight: 800; border: 0; border-radius: 999px; padding: 4px 12px; background: color-mix(in srgb, var(--on-accent) 16%, transparent); color: inherit; cursor: pointer; }
 
