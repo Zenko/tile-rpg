@@ -27,13 +27,25 @@ async function buildPrecacheUrls() {
   return [...urls];
 }
 
+// Card pictures and UI icons (about 3 MB) are named inside the game's own scripts, not index.html. Without this they were fetched
+// one by one on first sight, and the activate step below deletes the previous cache - so right after a publish every picture
+// had to come from the network again, and on a slow or dropped connection (or while Pages was still swapping files) the whole
+// game showed broken-image icons. Best effort on purpose: one missing picture must never stop an update installing.
+async function precacheArt(cache, urls) {
+  const art = new Set();
+  await Promise.all(urls.filter(u => u.endsWith('.js')).map(async u => {
+    try { (await (await fetch(u)).text()).replace(/assets\/(?:icons|cards)\/[\w.-]+\.png/g, m => art.add('./' + m)); } catch (e) { /* skip this script */ }
+  }));
+  await Promise.allSettled([...art].map(u => cache.add(new Request(u, { cache: 'reload' }))));
+}
+
 self.addEventListener('install', event => {
   event.waitUntil(
     buildPrecacheUrls()
       // cache: 'reload' skips the browser's own HTTP cache. GitHub Pages sends max-age=600, so without it a new
       // service worker could precache the *previous* publish's CSS/JS if the phone had fetched them in the last
       // ten minutes - the new version would then "install" while still showing the old screens.
-      .then(urls => caches.open(CACHE_NAME).then(cache => cache.addAll(urls.map(u => new Request(u, { cache: 'reload' })))))
+      .then(urls => caches.open(CACHE_NAME).then(cache => cache.addAll(urls.map(u => new Request(u, { cache: 'reload' }))).then(() => precacheArt(cache, urls))))
       .then(() => self.skipWaiting())
   );
 });
@@ -58,7 +70,7 @@ self.addEventListener('fetch', event => {
       return fetch(req).then(res => {
         if (res && res.ok) { const copy = res.clone(); caches.open(CACHE_NAME).then(c => c.put(req, copy)); }
         return res;
-      }).catch(() => cached);
+      }).catch(() => Response.error());
     })
   );
 });

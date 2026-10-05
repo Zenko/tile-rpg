@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta ${RELEASES[0].n} (build $
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'fixed', x: 'Broken pictures after an update: card art and icons are now saved on your phone while the update installs, so they no longer vanish if your connection is slow right then.' },
   { t:'fixed', x: 'Big hands in battle: with five or more cards the hand ran off both edges and the bottom of the screen. The cards now shrink and the fan flattens so every card stays in view.' },
   { t:'fixed', x: 'The "1 skill point to spend" pill in town now clears as soon as you spend the point, instead of lingering after you leave the Path screen.' },
   { t:'better', x: 'Deleting a letter, removing a decoration, saying goodbye to a companion and starting over now ask in a game sheet instead of the browser\'s "zenko.github.io says" popup.' },
