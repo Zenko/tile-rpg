@@ -157,15 +157,18 @@ function charDrawPath(box) {
    Recomputed at most every 2 seconds (updateHud calls this very often) and hidden while a decoration is being placed. */
 let goalChipAt = 0, goalChipTarget = null;
 function nextGoal() {
+  const sg = storyGoal();   // js/scenes.js: Wren's current ask. It leads during the first chain and only fills an empty pill after it.
+  if (sg && sg.first) return sg;
   if (skillPointsLeft() > 0) return { icon: '🧭', text: `${skillPointsLeft()} skill point${skillPointsLeft() === 1 ? '' : 's'} to spend`, run: () => { switchTab('character'); charSetView('path'); } };
   const m = todayModel();
   if (m.away.length) { const a = m.away[0]; return { icon: a.icon, text: a.title, run: () => journalGo(a.go) }; }
   const open = m.daily.find(i => !i.done && i.go && i.title !== 'Daily gift') || m.daily.find(i => !i.done);
   if (open) return { icon: open.icon, text: `${open.title}: ${open.sub}`, run: () => journalGo(open.go) };
-  return null;
+  return sg;
 }
 function refreshGoalChip(force) {
   const chip = document.getElementById('goalChip'); if (!chip) return;
+  storyMark();
   if (prefs.cozy) { chip.classList.add('hidden'); return; }   // Cozy mode: no nudges
   const now = Date.now(); if (!force && now - goalChipAt < 2000) return; goalChipAt = now;
   const placing = !document.getElementById('decorationHint').classList.contains('hidden');
