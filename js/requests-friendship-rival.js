@@ -125,6 +125,7 @@ function activeCount() { return Object.values(reqState().list).filter(r => r.sta
 function openTalk(f) {
   if (f.isAtlas) { openAtlas(); return; }          // the Atlas has its own scene (js/atlas.js)
   talkTo = f; const e = talkEls();
+  noteMet(f);
   bumpStat('talks', 1);
   e.name.textContent = f.name;
   e.ov.classList.remove('hidden'); sfx('tap');
@@ -206,6 +207,7 @@ function renderTalk() {
   renderTalkTopics(f);
   e.fight.classList.remove('hidden'); e.main.classList.remove('hidden'); e.main.disabled = false; e.tag.textContent = '';
   e.fight.textContent = '⚔️ Friendly match'; e.name.textContent = f.name;
+  renderTalkCompanion(f);
   if (f.isRival) { renderRivalTalk(f); return; }
   const gift = document.getElementById('talkGift');
   gift.classList.toggle('hidden', !canShareBread(f));
@@ -315,6 +317,20 @@ function shareBread(f) {
   saveState(); sfx('claim'); buzz(HAP.found);
   renderTalk();
 }
+// "Ask to walk with you": for neighbours only (bosses and Rook are picked from Character → Companion).
+function renderTalkCompanion(f) {
+  const b = document.getElementById('talkCompanion');
+  const ok = !f.isBoss && !f.isRival && !f.isAtlas && !f.signature && /^npc-/.test(f.id || '') && !(state.companion && state.companion.npc === f);
+  b.classList.toggle('hidden', !ok);
+  if (!ok) return;
+  const m = /^npc-([a-z]+)-/.exec(f.id), e = npcEntry({ name: f.name, district: m[1], icon: opponentPortrait(f) }), why = companionBlock(e);
+  b.disabled = !!why; b.textContent = why ? `🔒 ${why}` : '🚶 Ask to walk with you';
+}
+document.getElementById('talkCompanion').addEventListener('click', () => {
+  const f = talkTo; if (!f) return;
+  const m = /^npc-([a-z]+)-/.exec(f.id || ''); if (!m) return;
+  if (chooseCompanion(npcEntry({ name: f.name, district: m[1], icon: opponentPortrait(f) }))) closeTalk();
+});
 document.getElementById('talkFight').addEventListener('click', () => { const f = talkTo; closeTalk(); if (f) interactWith('fight', f); });
 document.getElementById('talkClose').addEventListener('click', closeTalk);
 
@@ -502,7 +518,7 @@ function syncRival() {
   if (inBattle || talkTo) return false;                    // never pull Rook away mid-conversation or mid-match
   const rv = rivalState(), now = Date.now();
   let where = null, changed = false;
-  if (rivalAround() && now >= (rv.awayUntil || 0)) {
+  if (rivalAround() && now >= (rv.awayUntil || 0) && !(state.companion && state.companion.kind === 'rival')) {
     const open = Object.keys(DISTRICTS).filter(districtUnlocked);
     if (!rv.district || !open.includes(rv.district) || now - rv.arrivedAt >= RIVAL.stayMs) {
       const others = open.filter(k => k !== rv.district), from = others.length ? others : open;

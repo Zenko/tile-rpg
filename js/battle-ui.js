@@ -14,6 +14,7 @@ const btAlive = token => battle && battle.token === token && !battle.ended;
    The opening deal waits for the card (battle.introP, read in btDealOpening), and a tap skips it. With reduced motion on, or
    when the deck is too short (the old early-return with its message), it goes straight in as it always did. */
 function startBattle(opponent) {
+  noteMet(opponent);
   const deckOk = (opponent.playerDeck || state.deck).filter(id => !!cardDef(id)).length >= DECK_SIZE;
   if (opponent.puzzle || !deckOk) { startBattleNow(opponent, 0); return; }
   if (tossBusy) return;                                    // a double tap while the toss is up

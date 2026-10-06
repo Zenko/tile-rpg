@@ -92,14 +92,9 @@ function buyGear(id) {
 function companionBond(stat, n) {
   const c = state.companion, per = BOND_FROM[stat];
   if (!c || !per) return;
-  const before = bondLevel(c);
-  c.bond = (c.bond || 0) + per * (n || 1);
-  const after = bondLevel(c);
-  if (after > before) {
-    const bp = BOND_PERK[c.perk];
-    toast(`${c.icon} ${c.name} feels closer to you (bond ${after})${bp ? ': its perk grew' : ''}`);
-    logEvent(c.icon, `${c.name} reached bond level ${after}.`);
-  }
+  if (stat === 'battlesWon' || stat === 'bossesWon') c.wins = (c.wins || 0) + (n || 1);
+  if (stat === 'fishCaught') c.catches = (c.catches || 0) + (n || 1);
+  companionGrow(per * (n || 1));      // js/afterdark-companion-cards.js: also keeps this companion's bond for next time
 }
 
 /* ---------- the Path view (Character tab) ---------- */

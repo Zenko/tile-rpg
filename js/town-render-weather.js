@@ -610,7 +610,7 @@ function renderEntities(data) {
   // Hidden mid-round during Hide and Seek (see HIDESEEK below) rather than shown sitting on its hiding
   // spot - state.companionPos still tracks where it is, renderEntities just skips drawing it.
   if (state.companion && state.companionPos && !(HIDESEEK.active && HIDESEEK.phase === 'seek')) {
-    const ce = add('companion', state.companionPos.x, state.companionPos.y, `<span>${state.companion.icon}</span>`); ce.style.zIndex = state.companionPos.y * 2 + 2;
+    const ce = add('companion', state.companionPos.x, state.companionPos.y, `<span>${companionIconHtml(state.companion)}</span>`); ce.style.zIndex = state.companionPos.y * 2 + 2;
   }
   if (lanternOpen()) { const lv = add('vendor', LANTERN_TILE.x, LANTERN_TILE.y, '<span>🦉</span><div class="ent-name">Lantern Market</div>'); lv.style.zIndex = LANTERN_TILE.y * 2 + 2; }
   if (fortuneOpen()) { const fv = add('vendor', FORTUNE_TILE.x, FORTUNE_TILE.y, '<span>🔮</span><div class="ent-name">Fortune Teller</div>'); fv.style.zIndex = FORTUNE_TILE.y * 2 + 2; }
@@ -868,6 +868,7 @@ function interactWith(kind, t) {
   if (inBattle || inScene) return;
   if (kind === 'talk') { openTalk(t); return; }
   if (kind === 'fight') {
+    if (!companionFightGate(t)) return;                  // a companion who just lost rests first; a boss only duels at home
     const tw = bossTwistFor(t);
     townLog.textContent = t.isBoss ? `${t.name} rises to meet you.${tw ? ' ' + BattleEngine.TWISTS[tw].icon + ' ' + BattleEngine.TWISTS[tw].text : ' This will be a tougher match.'}` : `${t.name} looks up, ready for a friendly match.`;
     sfx('tap'); buzz(HAP.tap); startBattle(t);
@@ -894,11 +895,11 @@ function interactWith(kind, t) {
     const cloudy = weatherIs('cloudy') || eventIs('spirit-parade');   // overcast days (and the Spirit Parade) bring spirits closer: double XP
     if (cloudy) addXP(XP_PER_STAT.spiritsMet);
     showCardReveal(t.cardId, 'A card spirit appears', false, t.story + (cloudy ? ' ☁️ The clouds make it linger.' : ''), XP_PER_STAT.spiritsMet * (cloudy ? 2 : 1));
-    if (!state.companion) {                             // no companion yet: this one could come along
-      const inv = document.getElementById('pickupInvite');
-      inv.dataset.spirit = t.id; inv.classList.remove('hidden');
-      const perk = COMPANION_PERKS[companionPerkFor(t.cardId)];
-      inv.textContent = `✨ Invite it along (${perk.text.toLowerCase()})`;
+    {                                                   // this one could come along, if you own its card and are high enough level
+      const inv = document.getElementById('pickupInvite'), e = cardEntry(t.cardId), why = companionBlock(e);
+      const same = state.companion && companionKey(state.companion) === (e && e.key);
+      inv.dataset.spirit = t.id; inv.classList.toggle('hidden', !!same); inv.disabled = !!why;
+      inv.textContent = why ? `🔒 ${why}` : `✨ ${state.companion ? 'Walk with it instead' : 'Invite it along'} (${COMPANION_PERKS[e.perk].text.toLowerCase()})`;
       showTipOnce('companion');
     }
   } else if (kind === 'crop') {
@@ -914,7 +915,7 @@ function interactWith(kind, t) {
              { label: '🗑️ Remove it', danger: true, run: () => deleteDecoration(t.uid) }] : null);
   } else if (kind === 'companion') {
     if (!state.companion) return;
-    sfx('tap'); buzz(HAP.tap); showTipOnce('companionPlay'); startHideSeek();
+    sfx('tap'); buzz(HAP.tap); showTipOnce('companionPlay'); openCompanionMenu();
   }
 }
 // A rare hidden card, found on the ground or tucked near a prop - mostly common, rarely rare, and

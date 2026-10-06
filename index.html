@@ -634,6 +634,7 @@
     <button class="btn talk-gift hidden" id="talkCardGift">🃏 Give a card</button>
     <div class="talk-cards hidden" id="talkCards"></div>
     <button class="btn talk-sig hidden" id="talkSig">🌟 Signature match</button>
+    <button class="btn talk-gift hidden" id="talkCompanion">🚶 Ask to walk with you</button>
     <button class="btn talk-fight" id="talkFight">⚔️ Friendly match</button>
     <button class="btn talk-close" id="talkClose">Not now</button>
   </div>
@@ -691,6 +692,15 @@
     <h2 id="wxTitle">Clear skies</h2>
     <div class="wx-rows" id="wxRows"></div>
     <button id="weatherOverlayClose" class="btn">Close</button>
+  </div>
+</div>
+
+<div class="overlay sheet hidden" id="companionPicker">
+  <div class="overlay-card coll-sheet cp-sheet">
+    <h2>Choose a companion <button class="coll-clear" id="cpClose">Close</button></h2>
+    <div class="cr-mode" id="cpTabs" role="tablist"></div>
+    <input type="search" class="cf-search" id="cpSearch" placeholder="Search" aria-label="Search companions">
+    <div class="cp-list" id="cpList"></div>
   </div>
 </div>
 

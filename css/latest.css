@@ -1411,3 +1411,45 @@ body.in-story .toast { opacity: 0; }
 
 /* My Cards grid: a little more air between tiles (the cost bubble hangs past each tile's edge, so 8px felt tight) */
 .alm-row.card-grid { column-gap: 14px; row-gap: 26px; }
+
+/* ===== Companion: the page (hero, bond), the picker sheet and the little town reactions ===== */
+.cp-hero { background: var(--stone); border: 1px solid var(--stone-edge); border-radius: 22px; padding: 18px 16px 14px; margin: 0 0 12px; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+.cp-portrait { width: 96px; height: 96px; border-radius: 50%; display: grid; place-items: center; font-size: 3.2rem; background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--accent) 22%, transparent), var(--board-bg)); border: 2px solid var(--stone-edge); }
+.cp-id { display: flex; flex-direction: column; gap: 2px; }
+.cp-id b { font-family: var(--f-display); font-weight: 500; font-size: 1.4rem; }
+.cp-type { font-size: 0.76rem; color: var(--ink-soft); text-transform: capitalize; }
+.cp-perk { color: var(--water-ink); font-weight: 700; font-size: 0.9rem; }
+.cp-say { font-size: 0.84rem; color: var(--ink-soft); font-style: italic; min-height: 2.4em; max-width: 30ch; }
+.cp-bond { display: flex; align-items: center; gap: 10px; width: 100%; }
+.cp-bond-bar { flex: 1; display: flex; gap: 5px; }
+.cp-bond-bar i { flex: 1; height: 8px; border-radius: 99px; background: var(--track); }
+.cp-bond-bar i.on { background: linear-gradient(90deg, var(--water), var(--accent)); }
+.cp-bond-name { font-size: 0.74rem; font-weight: 800; color: var(--ink); min-width: 5.6em; text-align: right; }
+.cp-bond-note { font-size: 0.74rem; color: var(--ink-soft); }
+.cp-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; }
+.cp-stats div { background: var(--board-bg); border-radius: 14px; padding: 8px 4px; font-size: 0.68rem; color: var(--ink-soft); }
+.cp-stats b { display: block; font-size: 1.1rem; color: var(--ink); }
+.cp-acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
+.cp-acts .btn, .cp-bottom .btn { min-height: 46px; }
+.cp-hint { margin: 0; font-size: 0.74rem; }
+.cp-bottom { display: flex; flex-direction: column; gap: 8px; margin: 0 0 14px; }
+.cp-sheet .cr-mode { margin: 6px 0 10px; }
+.cp-sheet .cr-mode button { min-height: 40px; font-size: 0.8rem; }
+.cp-sheet .cr-mode small { opacity: 0.7; font-weight: 600; }
+.cp-sheet .cf-search { width: 100%; height: 44px; margin: 0 0 10px; }
+.cp-list { display: flex; flex-direction: column; gap: 8px; max-height: 52vh; overflow-y: auto; margin: 0 -4px; padding: 0 4px 6px; }
+.cp-row { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: var(--board-bg); border: 1.5px solid transparent; border-radius: 14px; padding: 8px 10px; color: var(--ink); font: inherit; cursor: pointer; min-height: 56px; }
+.cp-row.cur { border-color: var(--water); }
+.cp-row.lock { opacity: 0.6; }
+.cp-ico { flex: 0 0 40px; font-size: 1.7rem; text-align: center; line-height: 1; }
+.cp-t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.cp-t b { font-size: 0.92rem; }
+.cp-t small { font-size: 0.72rem; color: var(--ink-soft); }
+.cp-st { font-size: 0.72rem; font-weight: 800; color: var(--ink-soft); text-align: right; max-width: 7.5em; }
+.cp-row.cur .cp-st { color: var(--water-ink); }
+.cp-empty { padding: 18px 8px; text-align: center; }
+.ent.comp-float { pointer-events: none; }
+.ent.comp-float > span { display: block; font-size: calc(var(--t) * 0.4); animation: comp-rise 1.1s ease-out forwards; }
+@keyframes comp-rise { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-36px); } }
+.ent.companion > span.comp-hop { animation: comp-hop 0.45s ease-out 1; }
+@keyframes comp-hop { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-10px); } }

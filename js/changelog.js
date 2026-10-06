@@ -18,6 +18,10 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'new', x: 'Anyone can be your companion now: any card you own, any neighbour or boss you have met, and Rook. The Atlas is the only one who cannot. Rarer cards, spells, neighbours and especially bosses need a higher Dreamer level, and a card has to be one you own.' },
+  { t:'new', x: 'Character → Companion is a proper page: their perk, a line of personality, bond, and days, wins and catches together. Change companion opens a picker with Cards, Neighbours and Bosses, search, and what each one still needs.' },
+  { t:'new', x: 'Tap your companion in town for a menu: Chat, Pet (up to three a day bring you closer), Look around (they point at something to pick up, and sense farther as your bond grows), Hide and Seek, and Talk or Challenge for a neighbour, boss or Rook. You can still talk to and duel them as normal.' },
+  { t:'better', x: 'Your bond is now kept for each companion, so swapping never loses it. Neighbours can also be asked from their talk card. Bosses start a step closer and only duel on home ground.' },
   { t:'better', x: 'More space between cards in My Cards, so the grid feels less tight.' },
   { t:'better', x: 'Trade up now matches the forge. Your three picks sit in slots next to a mystery card in the next rarity, and your spare cards are the same card tiles as My Cards. Tap a tile to add it, tap a slot to take it back.' },
   { t:'better', x: 'My Cards has a roomier top. Search sits on one row with a Filter button and the grid/list switch. Family, rarity and sort moved into a Filter sheet, and whatever is on shows as a tag you can tap away.' },

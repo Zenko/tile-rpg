@@ -152,7 +152,7 @@ const GUIDE = [
     { icon: '🪑', name: 'Things to do in town', where: 'Benches, wells, lamps, trees, water, puddles', how: 'Sit, wish, light lamps after dark, shake trees, skip stones, splash in the rain, scatter the birds. The Square, Market, Harbor and Garden each have an activity too: busking, haggling, hauling nets and watering plants.' },
     { icon: '🎈', name: 'Town mood', where: 'Shown on signs and prop menus', how: 'Every interaction fills the district\'s mood. At 10, 25 and 50 it dresses up for good: balloons, flower pots, then lamps that glow all night.' },
     { icon: '✨', name: 'Night critters', where: 'Every district, after dark', how: 'Tap a glowing critter to catch it. Trade them at the Lantern Market.' },
-    { icon: '👻', name: 'Companion spirits', where: 'Tap a wandering spirit', how: 'Invite one along; it follows you and lends a small perk. Tap it again any time to play Hide and Seek together.' },
+    { icon: '👻', name: 'Companions', where: 'Character → Companion', how: 'Any card you own, any neighbour or boss you have met, and Rook can walk with you, once you are high enough level (rarer cards, bigger names and bosses need more). Each lends a small perk, and your bond with each is kept. Tap your companion in town to chat, pet, look around, play Hide and Seek, talk or duel.' },
     { icon: '🎒', name: 'Inventory', where: 'Character → Pantry', how: 'Pantry ingredients, cooked dishes, seeds and spare decorations, all in one list - tap Plant or Place to use one right from there.' },
   ] },
   { section: 'Neighbors', items: [

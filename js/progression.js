@@ -23,7 +23,7 @@ const TIPS = {
   home:       { icon: '🏠', title: 'Your cottage', text: 'Your own place. Read letters in the mailbox, put decorations on the shelves, frame favourite cards, and see your trophies.' },
   lantern:    { icon: '🏮', title: 'The Lantern Market', text: 'Lumen only trades after dark: Lantern Packs full of moonlit cards, glowing decorations, and Embers for the critters in your jar.' },
   bugs:       { icon: '✨', title: 'Night critters', text: 'Glowing critters come out at night. Tap one to catch it - it goes in your jar for the Lantern Market and in the critter log under Cards → Fish.' },
-  companion:  { icon: '👻', title: 'A companion', text: 'You can invite one wandering spirit to follow you. Each brings a small perk depending on its card. Let it go any time from your profile.' },
+  companion:  { icon: '👻', title: 'A companion', text: 'A wandering spirit can walk with you if you own its card and are high enough level. Character → Companion lists everyone who could: cards, neighbours, bosses and Rook.' },
   companionPlay: { icon: '🙈', title: 'Play with your companion', text: "Tap your companion in town to play Hide and Seek right there on the map - it ducks behind a real spot nearby, so watch closely, then tap where it went from memory. Rounds get quicker and add more hiding spots the longer your streak runs." },
   cellarDeep: { icon: '🕳️', title: 'The deep cellar', text: 'From here on it is a run: a loss or climbing out ends it and the cellar rests. Every 5th floor is a guardian with a rare prize.' },
   rival:      { icon: '🎭', title: 'A rival', text: 'Rook moves between districts. Every win sends them off to build a stronger deck - eight chapters in all, with a unique final prize.' },
@@ -450,7 +450,11 @@ function sanitizeCards() {
   if (!Array.isArray(state.progress.discovered)) state.progress.discovered = [];
   // Cards that were cut from the game (the 100-card pool) can still be named by an older save in places other than the collection.
   const pr = state.progress, known = id => !!(id && cardDef(id));
-  if (state.companion && !known(state.companion.cardId)) { state.companion = null; state.companionPos = null; }
+  if (state.companion) {                  // old saves hold a card companion with no kind; neighbours and bosses carry their own record
+    const c = state.companion, kind = c.kind || 'card';
+    const bad = typeof c !== 'object' || !['card', 'npc', 'boss', 'rival'].includes(kind) || (kind === 'card' && !known(c.cardId)) || ((kind === 'npc' || kind === 'boss') && (!c.npc || typeof c.npc !== 'object'));
+    if (bad) { state.companion = null; state.companionPos = null; }
+  }
   if (Array.isArray(pr.charms)) pr.charms = pr.charms.map(id => (known(id) ? id : null));
   if (pr.foils && typeof pr.foils === 'object') Object.keys(pr.foils).forEach(k => { if (!known(BattleEngine.baseIdOf(k))) delete pr.foils[k]; });
   if (pr.home && Array.isArray(pr.home.favs)) pr.home.favs = pr.home.favs.filter(known);

@@ -61,14 +61,14 @@ function drawCharStage() {
         <span class="avatar-preview ch-av" id="chAv"><span>${ch.emoji}</span></span>
         <span class="ch-plate">Lv ${pr.level}<i class="ch-xp"><b style="width:${pct}%"></b></i></span>
       </button>
-      ${comp ? `<button class="ch-actor ch-pal" id="chPal" aria-label="${escapeHtml(comp.name)}"><span class="ch-pal-f">${comp.icon}</span><span class="ch-plate">${escapeHtml(comp.name)}</span></button>`
+      ${comp ? `<button class="ch-actor ch-pal" id="chPal" aria-label="${escapeHtml(comp.name)}"><span class="ch-pal-f">${companionIconHtml(comp)}</span><span class="ch-plate">${escapeHtml(comp.name)}</span></button>`
              : `<button class="ch-actor ch-pal empty" id="chPal" aria-label="No companion yet"><span class="ch-pal-f">❔</span><span class="ch-plate">No companion</span></button>`}
     </div>
     <button class="ch-paint" id="chPaint" aria-label="Change backdrop" title="Change backdrop">🎨</button>`;
   applyAvatarStyle(document.getElementById('chAv'), ch);
   const hop = id => { const el = document.getElementById(id); el.classList.remove('hop'); void el.offsetWidth; el.classList.add('hop'); sfx('tap'); buzz(HAP.tap); };
   document.getElementById('chMe').addEventListener('click', () => hop('chMe'));
-  document.getElementById('chPal').addEventListener('click', () => { hop('chPal'); if (!comp) charSetView('pals'); else toast(`${comp.icon} ${comp.name} · ${COMPANION_PERKS[comp.perk].text}`); });
+  document.getElementById('chPal').addEventListener('click', () => { hop('chPal'); if (!comp) charSetView('pals'); else toast(companionLine(comp)); });
   document.getElementById('chPaint').addEventListener('click', () => { sfx('nav'); buzz(HAP.tap); charSetView('look'); const b = document.getElementById('chBackdrops'); if (b) b.scrollIntoView({ behavior: charMotionOk() ? 'smooth' : 'auto', block: 'center' }); });
 }
 const charMotionOk = () => typeof btMotionOk !== 'function' || btMotionOk();
@@ -193,20 +193,44 @@ function charDrawBag(box) {
   if (!any) { const e = document.createElement('div'); e.className = 'panel-desc'; e.style.padding = '10px 4px'; e.textContent = 'Your pantry is empty. Harvest crops, catch fish or bugs, bake bread, and what you gather shows up here.'; box.appendChild(e); }
 }
 
+/* ---------- Companion: who is with you, and the picker for everyone who could be ---------- */
+let cpTab = 'cards', cpQuery = '';
+const CP_TABS = [['cards', 'Cards'], ['neighbours', 'Neighbours'], ['bosses', 'Bosses']];
+const CP_BOND_NAMES = ['', 'Friendly', 'Trusted', 'Inseparable'];
+function companionTypeLabel(c) {
+  const k = companionKind(c);
+  if (k === 'card') { const d = cardDef(c.cardId); return d ? (d.spell ? 'Spell' : `${RARITY_LABEL[d.rarity]} card`) : 'Card'; }
+  if (k === 'rival') return 'Rival';
+  return `${k === 'boss' ? 'Boss' : 'Neighbour'} · ${DISTRICTS[c.district] ? DISTRICTS[c.district].name : 'town'}`;
+}
 function charDrawPals(box) {
   const c = state.companion;
   if (!c) {
     const e = document.createElement('div'); e.className = 'ch-empty';
-    e.innerHTML = `<div class="ch-empty-f">❔</div><b>No companion yet</b><div class="panel-desc">Tap a wandering spirit in town and invite it along. It follows you everywhere and brings a small perk. One companion at a time.</div>`;
+    e.innerHTML = `<div class="ch-empty-f">❔</div><b>No companion yet</b><div class="panel-desc">Any card you own, any neighbour or boss you have met, and Rook can walk with you. Higher levels open rarer cards and bigger names.</div><button class="btn" id="cpChoose">Choose a companion</button>`;
     box.appendChild(e);
+    e.querySelector('#cpChoose').addEventListener('click', () => { sfx('nav'); buzz(HAP.tap); openCompanionPicker(); });
   } else {
-    const perk = COMPANION_PERKS[c.perk], d = charDaysTogether(c);
-    const card = document.createElement('div'); card.className = 'ch-pal-card';
-    card.innerHTML = `<div class="ch-pal-big">${c.icon}</div><div class="ch-pal-info"><b>${escapeHtml(c.name)}</b><span class="ch-perk">${perk.icon} ${perk.text}</span><span class="panel-desc">${d ? `With you for ${d} day${d === 1 ? '' : 's'}` : 'Joined you today'}</span></div>`;
+    const perk = COMPANION_PERKS[c.perk], d = charDaysTogether(c), lv = bondLevel(c), next = BOND_AT[lv];
+    const card = document.createElement('div'); card.className = 'cp-hero';
+    card.innerHTML = `<div class="cp-portrait">${companionIconHtml(c)}</div>
+      <div class="cp-id"><b>${escapeHtml(c.name)}</b><span class="cp-type">${escapeHtml(companionTypeLabel(c))}</span></div>
+      <div class="cp-perk">${perk.icon} ${perk.text}</div>
+      <div class="cp-say" id="cpSay">“${escapeHtml(companionTrait(c))}”</div>
+      <div class="cp-bond"><span class="cp-bond-bar">${[1, 2, 3].map(i => `<i class="${lv >= i ? 'on' : ''}"></i>`).join('')}</span><span class="cp-bond-name">${CP_BOND_NAMES[lv]}</span></div>
+      <div class="cp-bond-note">${next === undefined ? 'As close as it gets.' : `${Math.floor(c.bond || 0)} / ${next} · wins, catches and pats bring you closer. At the next step its perk grows.`}</div>
+      <div class="cp-stats"><div><b>${d}</b>day${d === 1 ? '' : 's'} together</div><div><b>${c.wins || 0}</b>wins together</div><div><b>${c.catches || 0}</b>catches together</div></div>
+      <div class="cp-acts"><button class="btn btn-ghost" id="cpChat">💬 Chat</button><button class="btn btn-ghost" id="cpPet">🤚 Pet</button></div>
+      <div class="panel-desc cp-hint">Tap them in town to play, look around${companionKind(c) === 'npc' || companionKind(c) === 'rival' ? ', talk' : ''}${companionKind(c) === 'boss' || companionKind(c) === 'rival' ? ' or duel' : ''}.</div>`;
     box.appendChild(card);
-    const bye = document.createElement('button'); bye.className = 'panel-action'; bye.textContent = 'Say goodbye';
-    bye.addEventListener('click', () => { askConfirm({ title: `Say goodbye to ${c.name}?`, text: 'They will leave your side.', ok: 'Say goodbye' }, () => { releaseCompanion(); renderCharacterTab(); }); });
-    box.appendChild(bye);
+    const say = card.querySelector('#cpSay');
+    card.querySelector('#cpChat').addEventListener('click', () => { sfx('tap'); buzz(HAP.tap); say.textContent = companionLine(c); });
+    card.querySelector('#cpPet').addEventListener('click', () => { const t = petCompanion(); say.textContent = t; renderCharacterTab(); });
+    const row = document.createElement('div'); row.className = 'cp-bottom';
+    row.innerHTML = `<button class="btn" id="cpChange">Change companion</button><button class="btn btn-ghost" id="cpBye">Say goodbye</button>`;
+    box.appendChild(row);
+    row.querySelector('#cpChange').addEventListener('click', () => { sfx('nav'); buzz(HAP.tap); openCompanionPicker(); });
+    row.querySelector('#cpBye').addEventListener('click', () => { askConfirm({ title: `Say goodbye to ${c.name}?`, text: 'They will leave your side. Your bond is kept for next time.', ok: 'Say goodbye' }, () => { releaseCompanion(); renderCharacterTab(); }); });
   }
   // charms are cards you carry for a perk; they are chosen from the card screen, so this only shows what is active
   charSection(box, `Charms · ${charmSlotsOpen()} of ${CHARM_SLOT_LEVELS.length} slots open`);
@@ -216,6 +240,33 @@ function charDrawPals(box) {
   act.forEach(id => { const d = cardDef(id), info = charmInfo(id); list.appendChild(invRow(d.icon, escapeHtml(d.name), '', escapeHtml(info ? info.text : ''))); });
   if (act.length) box.appendChild(list);
 }
+
+
+function openCompanionPicker() { cpQuery = ''; document.getElementById('cpSearch').value = ''; document.getElementById('companionPicker').classList.remove('hidden'); drawCompanionPicker(); }
+function closeCompanionPicker() { document.getElementById('companionPicker').classList.add('hidden'); }
+function drawCompanionPicker() {
+  const roster = companionRoster(), q = cpQuery.trim().toLowerCase();
+  document.getElementById('cpTabs').innerHTML = CP_TABS.map(([k, l]) => `<button class="${k === cpTab ? 'on' : ''}" data-cptab="${k}" role="tab" aria-selected="${k === cpTab}">${l} <small>${roster[k].length}</small></button>`).join('');
+  const rows = roster[cpTab].filter(e => !q || e.name.toLowerCase().includes(q)).map(e => ({ e, why: companionBlock(e) }));
+  rows.sort((a, b) => (a.why ? 1 : 0) - (b.why ? 1 : 0) || (a.why && b.why ? a.e.level - b.e.level : 0));
+  const empty = { cards: 'You do not own any cards yet.', neighbours: 'Talk to a neighbour in town and they will show up here.', bosses: 'Meet a district boss in town and they will show up here.' }[cpTab];
+  const cur = state.companion ? companionKey(state.companion) : '';
+  document.getElementById('cpList').innerHTML = rows.length ? rows.map(({ e, why }) => {
+    const st = e.key === cur ? '✓ With you' : why ? '🔒 ' + (/^Reach Lv/.test(why) ? `Lv ${e.level}` : why.replace(/^You need to own this card to walk with it$/, 'Not owned')) : '';
+    const bs = bondsStore()[e.key], lv = bs ? bondLevel(bs) : 0;
+    return `<button class="cp-row${e.key === cur ? ' cur' : ''}${why && e.key !== cur ? ' lock' : ''}" data-cpkey="${escapeHtml(e.key)}"><span class="cp-ico">${entryIconHtml(e)}</span><span class="cp-t"><b>${escapeHtml(e.name)}</b><small>${COMPANION_PERKS[e.perk].icon} ${COMPANION_PERKS[e.perk].text}${lv > 1 ? ` · bond ${lv}` : ''}</small><small>${escapeHtml(e.sub)}</small></span><span class="cp-st">${escapeHtml(st)}</span></button>`;
+  }).join('') : `<div class="panel-desc cp-empty">${q ? 'Nobody matches that.' : empty}</div>`;
+}
+document.getElementById('cpTabs').addEventListener('click', e => { const b = e.target.closest('[data-cptab]'); if (!b) return; cpTab = b.dataset.cptab; sfx('tap'); drawCompanionPicker(); });
+document.getElementById('cpSearch').addEventListener('input', e => { cpQuery = e.target.value; drawCompanionPicker(); });
+document.getElementById('cpClose').addEventListener('click', () => { sfx('nav'); closeCompanionPicker(); });
+document.getElementById('companionPicker').addEventListener('click', e => { if (e.target.id === 'companionPicker') closeCompanionPicker(); });
+document.getElementById('cpList').addEventListener('click', e => {
+  const b = e.target.closest('[data-cpkey]'); if (!b) return;
+  const r = companionRoster(), all = [...r.cards, ...r.neighbours, ...r.bosses], en = all.find(x => x.key === b.dataset.cpkey); if (!en) return;
+  if (state.companion && companionKey(state.companion) === en.key) { closeCompanionPicker(); return; }
+  if (chooseCompanion(en)) { closeCompanionPicker(); renderCharacterTab(); }
+});
 
 /* ---------- entry points ---------- */
 function renderCharacterTab() {
