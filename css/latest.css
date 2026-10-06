@@ -1408,3 +1408,6 @@ body.in-story .toast { opacity: 0; }
 .cr-gridcard.chosen { outline: 2px solid var(--water); outline-offset: 2px; opacity: 1; }
 .cr-chosen { position: absolute; left: 50%; bottom: 36%; transform: translateX(-50%); background: var(--water); color: var(--on-water); font-size: 0.74rem; font-weight: 800; border-radius: 999px; padding: 3px 10px; box-shadow: 0 2px 6px var(--shadow); pointer-events: none; }
 @media (max-width: 380px) { .cr-tslot { flex-basis: 54px; width: 54px; } .cr-tresult { flex-basis: 72px; width: 72px; } }
+
+/* My Cards grid: a little more air between tiles (the cost bubble hangs past each tile's edge, so 8px felt tight) */
+.alm-row.card-grid { column-gap: 14px; row-gap: 26px; }
