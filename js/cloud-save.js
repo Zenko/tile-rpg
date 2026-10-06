@@ -200,6 +200,19 @@ function renderSocialYou() {
   el.innerHTML = `<span class="so-you-ico">${on ? '👋' : '🙈'}</span><span class="so-you-text"><b>${on ? "You're visible to other testers" : "You're hidden"}</b><small>${on ? 'They see your name, level and district.' : 'Turn on "Share that I\'m playing" in Settings to appear here.'}</small></span><button type="button" class="btn btn-ghost st-small" id="socialToSettings">Settings</button>`;
   document.getElementById('socialToSettings').addEventListener('click', () => document.getElementById('segPmSettings').click());
 }
+// Every fresh browser profile, cleared site data or reinstall signs in as a NEW anonymous user, and each one leaves its own
+// `players` document behind (nothing deletes them until they go stale after two weeks). One tester switching devices a lot
+// therefore filled Social with copies of themselves. Rows are collapsed to one per name + avatar (newest wins, and the row
+// that is really you always wins), so a copy of yourself from an older sign-in never shows up as another player.
+function presenceDedupe(rows, myUid) {
+  const key = p => String(p.name || '').trim().toLowerCase() + '|' + String(p.emoji || '');
+  const best = new Map();
+  rows.forEach(p => {
+    const k = key(p), cur = best.get(k);
+    if (!cur || (p.id === myUid && cur.id !== myUid) || (cur.id !== myUid && (p.lastSeen || 0) > (cur.lastSeen || 0))) best.set(k, p);
+  });
+  return rows.filter(p => best.get(key(p)) === p);
+}
 async function fetchWhosPlaying() {
   const box = document.getElementById('whosPlayingList');
   if (!box) return;
@@ -209,9 +222,9 @@ async function fetchWhosPlaying() {
   if (!cloudAvailable() || !cloudReady) { box.innerHTML = note('📡', 'Not connected right now', 'Testers show up here when you are online.'); return; }
   box.innerHTML = note('⏳', 'Loading…', '');
   try {
-    const snap = await cloudDb.collection(PRESENCE_COLLECTION).orderBy('lastSeen', 'desc').limit(20).get();
+    const snap = await cloudDb.collection(PRESENCE_COLLECTION).orderBy('lastSeen', 'desc').limit(60).get();
     const now = Date.now();
-    const rows = snap.docs.map(d => Object.assign({ id: d.id }, d.data())).filter(p => now - (p.lastSeen || 0) < PRESENCE_STALE_MS);
+    const rows = presenceDedupe(snap.docs.map(d => Object.assign({ id: d.id }, d.data())).filter(p => now - (p.lastSeen || 0) < PRESENCE_STALE_MS), cloudUser && cloudUser.uid).slice(0, 20);
     ghostRows = rows;
     box.innerHTML = rows.length ? rows.map((p, i) => {
       const me = p.id === (cloudUser && cloudUser.uid), g = !me ? ghostDeckOf(p) : null, live = now - (p.lastSeen || 0) < 10 * 60 * 1000;

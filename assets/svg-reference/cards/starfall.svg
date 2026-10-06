@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0.5 0.25 24 24" width="512" height="512" stroke-linecap="round" stroke-linejoin="round">
+<defs>
+<linearGradient id="gW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dfe9f4"/></linearGradient>
+<linearGradient id="gY" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2a0"/><stop offset="1" stop-color="#ffc62e"/></linearGradient>
+<linearGradient id="gA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe680"/><stop offset="1" stop-color="#e3a012"/></linearGradient>
+<linearGradient id="gCone" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2a0" stop-opacity=".7"/><stop offset="1" stop-color="#fff2a0" stop-opacity="0"/></linearGradient>
+</defs>
+<path d="M1.500 2l14 11" stroke="url(#gCone)" stroke-width="3.200" stroke-linecap="round" opacity=".8"/><path d="M1 8l10 6.500M7 1.500L16 9" stroke="#ffe27a" stroke-width="1.100" stroke-linecap="round" opacity=".7"/><path fill="url(#gA)" d="M17 9l1.9600000000000002 5.04 5.04 1.9600000000000002-5.04 1.9600000000000002-1.9600000000000002 5.04-1.9600000000000002-5.04-5.04-1.9600000000000002 5.04-1.9600000000000002z"/><path fill="url(#gY)" d="M17 12.2l1.064 2.7359999999999998 2.7359999999999998 1.064-2.7359999999999998 1.064-1.064 2.7359999999999998-1.064-2.7359999999999998-2.7359999999999998-1.064 2.7359999999999998-1.064z"/><path fill="url(#gW)" d="M21 5.2l0.5040000000000001 1.296 1.296 0.5040000000000001-1.296 0.5040000000000001-0.5040000000000001 1.296-0.5040000000000001-1.296-1.296-0.5040000000000001 1.296-0.5040000000000001z"/><path fill="url(#gW)" d="M5 16.3l0.47600000000000003 1.224 1.224 0.47600000000000003-1.224 0.47600000000000003-0.47600000000000003 1.224-0.47600000000000003-1.224-1.224-0.47600000000000003 1.224-0.47600000000000003z"/><circle fill="url(#gW)" cx="10" cy="21" r=".7"/>
+</svg>

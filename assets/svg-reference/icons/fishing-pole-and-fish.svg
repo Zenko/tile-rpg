@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="1.4 1.4 23.2 23.2" width="512" height="512" stroke-linecap="round" stroke-linejoin="round">
+<defs>
+<linearGradient id="gT" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#78e8da"/><stop offset="1" stop-color="#1c9ca6"/></linearGradient>
+<linearGradient id="gB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86ccff"/><stop offset="1" stop-color="#3470de"/></linearGradient>
+<linearGradient id="gR" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff8277"/><stop offset="1" stop-color="#d12e45"/></linearGradient>
+</defs>
+<path d="M4 22L17 3" stroke="#a9742f" stroke-width="1.600" stroke-linecap="round"/><path d="M17 3c4 1 5 7 3 12" stroke="#cdd6e2" stroke-width=".8" fill="none" stroke-linecap="round"/><circle fill="url(#gR)" cx="6" cy="19.500" r="1.800"/><path fill="url(#gB)" d="M17.500 17c1.500-2 4-2 5.500-.5-1.500 2.500-4 3.500-6 2.500z"/><path fill="url(#gT)" d="M22.500 16.500l1.500-1.500v4z"/><circle fill="#3a2a33" cx="19" cy="17.500" r=".5"/><path d="M2 23c3-2 5-1 8-2" stroke="#3f9a45" stroke-width=".8" fill="none" opacity="0"/>
+</svg>

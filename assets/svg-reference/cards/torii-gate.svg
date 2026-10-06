@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0.5 0.75 23 23" width="512" height="512" stroke-linecap="round" stroke-linejoin="round">
+<defs>
+<linearGradient id="gR" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff8277"/><stop offset="1" stop-color="#d12e45"/></linearGradient>
+<linearGradient id="gE" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7a8294"/><stop offset="1" stop-color="#2b2f3a"/></linearGradient>
+</defs>
+<path fill="url(#gR)" d="M3 7c3 1.500 6 2 9 2s6-.5 9-2l1.500-3C18 6 6 6 1.500 4z"/><path fill="url(#gE)" d="M1.500 4C6 6 18 6 22.500 4l.5-1.500C18 4.500 6 4.500 1 2.500z"/><rect fill="url(#gR)" x="4" y="9" width="16" height="2.200" rx=".5"/><rect fill="url(#gR)" x="5.500" y="9" width="2.600" height="13"/><rect fill="url(#gR)" x="15.900" y="9" width="2.600" height="13"/><path fill="rgba(40,20,70,.2)" d="M7 9h1.100v13H7zM17.300 9h1.200v13h-1.200z" opacity=".3"/><rect fill="url(#gE)" x="5" y="20.500" width="3.600" height="1.500" rx=".4"/><rect fill="url(#gE)" x="15.400" y="20.500" width="3.600" height="1.500" rx=".4"/><rect fill="url(#gR)" x="11" y="6.500" width="2" height="2.600"/>
+</svg>

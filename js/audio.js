@@ -8,6 +8,7 @@ if (!prefs.presenceChosen) prefs.sharePresence = true;
 // Repair anything a corrupted/edited save could hand us
 ['musicVol', 'sfxVol'].forEach(k => { const v = Number(prefs[k]); prefs[k] = (isFinite(v) ? Math.min(1, Math.max(0, v)) : 0.5); });
 prefs.sound = prefs.sound !== false; prefs.music = prefs.music !== false; prefs.haptics = prefs.haptics !== false; prefs.ambient = prefs.ambient !== false; if (!['dark', 'light', 'auto'].includes(prefs.theme)) prefs.theme = 'dark';   // ambient (town sounds) is on unless the player turned it off
+['fast', 'fishEasy', 'cozy', 'cellarFog', 'tossStyle'].forEach(k => { delete prefs[k]; });   // switches removed from Settings: a saved value must not stay stuck on with no way to turn it off
 /* Colour theme: prefs.theme is 'dark' (the default), 'light' or 'auto' (follows the device). The CSS keys off
    <html data-theme> - see the token block at the top of css/style.css. Applied here, before the first paint of
    anything else, so there is no flash of the wrong theme. */
@@ -63,10 +64,11 @@ function scheduleLocalNotify(key, atMs, title, body) {
 }
 
 let userHasTouched = false;
-let audioCtx = null, masterGain = null, sfxBus = null, musicBus = null;
+let audioCtx = null, masterGain = null, sfxBus = null, musicBus = null, ambBus = null;   // ambBus: town ambience and weather beds, on their own switch (prefs.ambient), not the music one
 
 // Perceptual volume curve: a linear slider feels far too loud at the top and nothing at the bottom.
 function volCurve(v) { return v * v; }
+const AMBIENT_LEVEL = 0.25;   // what ambience used to get at the default music volume (0.5 squared)
 
 function ensureAudio() {
   try {
@@ -77,6 +79,7 @@ function ensureAudio() {
       masterGain = audioCtx.createGain();
       sfxBus = audioCtx.createGain();
       musicBus = audioCtx.createGain();
+      ambBus = audioCtx.createGain();
       // A peak safety limiter, not a "glue" compressor: it should only catch occasional peaks, not sit
       // engaged on ordinary listening levels. The original settings (-14dB threshold, 6:1 ratio, 24dB knee)
       // meant the compressor was almost always doing some gain reduction on the pad's normal level, which
@@ -85,7 +88,7 @@ function ensureAudio() {
       // until something actually gets close to clipping.
       const limiter = audioCtx.createDynamicsCompressor();
       limiter.threshold.value = -4; limiter.knee.value = 4; limiter.ratio.value = 4; limiter.attack.value = 0.003; limiter.release.value = 0.15;
-      sfxBus.connect(masterGain); musicBus.connect(masterGain);
+      sfxBus.connect(masterGain); musicBus.connect(masterGain); ambBus.connect(masterGain);
       masterGain.connect(limiter); limiter.connect(audioCtx.destination);
       applyVolumes(true);
     }
@@ -101,6 +104,7 @@ function applyVolumes(instant) {
   set(masterGain, prefs.sound ? 1 : 0);
   set(sfxBus, volCurve(prefs.sfxVol));
   set(musicBus, prefs.music ? volCurve(prefs.musicVol) : 0);
+  set(ambBus, prefs.ambient ? AMBIENT_LEVEL : 0);   // independent of the Music switch and slider
 }
 
 function tone(freq, start, dur, vol, type) {
@@ -456,7 +460,7 @@ function buildWeatherBed(ctx, kind) {
   }
 
   src.connect(filter); filter.connect(wobbleBase); wobbleBase.connect(out);
-  out.connect(musicBus);
+  out.connect(ambBus);
   src.start();
   return { out, src, filter, wobble, wobbleBase, rumble, rumbleFilter, patter };
 }
@@ -471,7 +475,7 @@ function thunderCrack() {
   gain.gain.setValueAtTime(0.0001, t0);
   gain.gain.exponentialRampToValueAtTime(0.22, t0 + 0.06);
   gain.gain.exponentialRampToValueAtTime(0.0001, t0 + (1.6 + Math.random() * 0.8));
-  src.connect(filter); filter.connect(gain); gain.connect(musicBus);
+  src.connect(filter); filter.connect(gain); gain.connect(ambBus);
   src.start(t0); src.stop(t0 + 2.6);
 }
 function scheduleThunder() {
@@ -479,13 +483,13 @@ function scheduleThunder() {
   const gen = WEATHER_AUDIO.gen;
   WEATHER_AUDIO.thunderTimer = setTimeout(() => {
     if (WEATHER_AUDIO.gen !== gen || WEATHER_AUDIO.running !== 'storm') return;
-    if (prefs.sound && prefs.music) thunderCrack();
+    if (prefs.sound && prefs.ambient) thunderCrack();
     scheduleThunder();
   }, (6 + Math.random() * 12) * 1000);
 }
 
 function startWeatherAudio(kind) {
-  if (!prefs.sound || !prefs.music) return;
+  if (!prefs.sound || !prefs.ambient) return;
   const ctx = ensureAudio(); if (!ctx) return;
   if (WEATHER_AUDIO.running === kind) return;
   stopWeatherAudio(true);
@@ -518,7 +522,7 @@ function stopWeatherAudio(fast) {
 // Single place that decides which weather ambience (if any) should be playing
 function syncWeatherAudio() {
   syncAmbientAudio();   // the district ambience shares this re-check so it follows battles, scenes and district changes
-  const want = prefs.sound && prefs.music && !document.hidden && userHasTouched && !inBattle && !inScene;
+  const want = prefs.sound && prefs.ambient && !document.hidden && userHasTouched && !inBattle && !inScene;
   // Snow stays deliberately silent (real snowfall is famously hushed); clear has no bed either
   const audible = kind => kind === 'rain' || kind === 'storm' || kind === 'cloudy';
   const kind = state.weather.current || 'clear';
@@ -550,11 +554,11 @@ function ambientChirp(ctx, o) {
     osc.frequency.exponentialRampToValueAtTime(f * o.slide, t + o.dur);
     g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(o.vol, t + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t + o.dur);
   }
-  osc.connect(g); g.connect(musicBus);
+  osc.connect(g); g.connect(ambBus);
   osc.start(t0); osc.stop(t0 + n * gap + o.dur + 0.1);
 }
 function ambientOneShot(kind) {
-  const ctx = audioCtx; if (!ctx || !musicBus) return;
+  const ctx = audioCtx; if (!ctx || !ambBus) return;
   const night = skyPhase().isNight;
   if (kind === 'meadow' && !night) ambientChirp(ctx, { f: 3000, slide: 1.25, dur: 0.09, vol: 0.012, notes: 2 + Math.floor(Math.random() * 3), gap: 0.13 });
   else if (kind === 'harbor') ambientChirp(ctx, { f: 1500, slide: 0.6, dur: 0.5, vol: 0.01, notes: 2, gap: 0.45 });
@@ -564,7 +568,7 @@ function ambientOneShot(kind) {
     if (night) {
       const t0 = ctx.currentTime + 0.05, osc = ctx.createOscillator(), g = ctx.createGain(), lfo = ctx.createOscillator(), lg = ctx.createGain();
       osc.type = 'sine'; osc.frequency.value = 4300; lfo.frequency.value = 22; lg.gain.value = 0.004; g.gain.value = 0.004;
-      lfo.connect(lg); lg.connect(g.gain); osc.connect(g); g.connect(musicBus);
+      lfo.connect(lg); lg.connect(g.gain); osc.connect(g); g.connect(ambBus);
       g.gain.setValueAtTime(0.0001, t0); g.gain.linearRampToValueAtTime(0.004, t0 + 0.2); g.gain.linearRampToValueAtTime(0.0001, t0 + 1.6);
       osc.start(t0); lfo.start(t0); osc.stop(t0 + 1.7); lfo.stop(t0 + 1.7);
     } else ambientChirp(ctx, { f: 2600, slide: 1.4, dur: 0.12, vol: 0.01, notes: 2, gap: 0.2 });
@@ -592,7 +596,7 @@ function startAmbientAudio(biome) {
   const lfo = ctx.createOscillator(), lfoDepth = ctx.createGain();
   lfo.type = 'sine'; lfo.frequency.value = cfg[4] + Math.random() * 0.03; lfoDepth.gain.value = cfg[3] * cfg[5] / 2;
   lfo.connect(lfoDepth); lfoDepth.connect(bed.gain);
-  src.connect(filter); filter.connect(bed); bed.connect(out); out.connect(musicBus);
+  src.connect(filter); filter.connect(bed); bed.connect(out); out.connect(ambBus);
   src.start(0, Math.random() * 1.5); lfo.start();
   const t = ctx.currentTime;
   out.gain.setValueAtTime(0.0001, t); out.gain.linearRampToValueAtTime(1, t + 3);
@@ -614,7 +618,7 @@ function stopAmbientAudio(fast) {
   } catch (e) { /* ignore */ }
 }
 function syncAmbientAudio() {
-  const want = prefs.sound && prefs.music && prefs.ambient && !document.hidden && userHasTouched && !inBattle && !inScene;
+  const want = prefs.sound && prefs.ambient && !document.hidden && userHasTouched && !inBattle && !inScene;
   if (!want) { if (AMBIENT_AUDIO.running) stopAmbientAudio(); return; }
   const biome = BIOME_OF[state.currentDistrict] || 'meadow';
   if (AMBIENT_AUDIO.running !== biome) startAmbientAudio(biome);

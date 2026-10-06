@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="1 2.9 22.5 22.5" width="512" height="512" stroke-linecap="round" stroke-linejoin="round">
+<defs>
+<linearGradient id="gS" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bccadc"/><stop offset="1" stop-color="#697c96"/></linearGradient>
+<linearGradient id="gGr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eef1f6"/><stop offset="1" stop-color="#aab4c4"/></linearGradient>
+</defs>
+<path fill="url(#gS)" d="M3 20c0-5 3-9 7.500-9.500C11 7.500 13 6 15.500 6c3 0 5 2 4.500 5-.3 2-2 3-3.500 4 2.500 1 4 3 4 5.500-3 2-13 2-17.500-.5z"/><path fill="url(#gGr)" d="M9 17c2 1.500 6 1.500 9 .3-1.500 2-7 2.800-9 .7z" opacity=".9"/><path fill="rgba(40,20,70,.2)" d="M15.500 6c3 0 5 2 4.500 5-.3 2-2 3-3.500 4 2.500 1 4 3 4 5.500-2 1.200-5 1.800-8 1.800 4-3 4.500-9 3-16.300z" opacity=".25"/><ellipse fill="#3a2a33" cx="19.700" cy="9.200" rx="1" ry=".8"/><circle fill="#3a2a33" cx="16.5" cy="8.8" r="1"/><circle fill="#fff" cx="16.2" cy="8.5" r="0.35"/><path d="M20 10.500l3 .6M20 11.500l3 1.500M19.500 7.600l3-.8" stroke="#fff" stroke-width=".7" stroke-linecap="round"/><path fill="url(#gS)" d="M4 17l-2.500 2.500L4 21z"/><ellipse fill="#fff" opacity=".72" cx="9.5" cy="14" rx="2.5" ry="1" transform="rotate(-30 9.5 14)"/>
+</svg>

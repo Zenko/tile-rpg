@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="1.4 1.9 20.2 20.2" width="512" height="512" stroke-linecap="round" stroke-linejoin="round">
+<defs>
+<linearGradient id="gC" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffaf0"/><stop offset="1" stop-color="#ecd7b8"/></linearGradient>
+<linearGradient id="gA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe680"/><stop offset="1" stop-color="#e3a012"/></linearGradient>
+</defs>
+<circle fill="url(#gA)" cx="7.500" cy="8" r="5.500"/><circle fill="url(#gC)" cx="7.500" cy="8" r="2" opacity="0"/><circle cx="7.500" cy="8" r="2.200" fill="#6a4125"/><path d="M11.500 12l9.500 9.500" stroke="#e3a012" stroke-width="3" stroke-linecap="round"/><path d="M11.500 12l9.500 9.500" stroke="#ffe27a" stroke-width="1" stroke-linecap="round" transform="translate(-.5 -.5)"/><path d="M16.500 17l-2 2M19 19.500l-2 2" stroke="#e3a012" stroke-width="2.600" stroke-linecap="round"/><ellipse fill="#fff" opacity=".72" cx="5.5" cy="5.5" rx="1.8" ry="0.8" transform="rotate(-35 5.5 5.5)"/><path fill="rgba(40,20,70,.2)" d="M7.500 2.500a5.500 5.500 0 0 1 0 11c3-3 3-8 0-11z" opacity=".25"/>
+</svg>

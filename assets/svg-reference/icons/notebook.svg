@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="1.45 1.4 21.2 21.2" width="512" height="512" stroke-linecap="round" stroke-linejoin="round">
+<defs>
+<linearGradient id="gW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dfe9f4"/></linearGradient>
+<linearGradient id="gD" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6070b0"/><stop offset="1" stop-color="#262f5c"/></linearGradient>
+<linearGradient id="gB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86ccff"/><stop offset="1" stop-color="#3470de"/></linearGradient>
+</defs>
+<rect fill="url(#gB)" x="4.500" y="2" width="15" height="20" rx="1.600"/><rect fill="url(#gD)" x="4.500" y="2" width="3" height="20" rx="1"/><path fill="rgba(40,20,70,.2)" d="M12 2h6a1.600 1.600 0 0 1 1.600 1.600v16.800A1.600 1.600 0 0 1 18 22h-6z" opacity=".18"/><rect fill="url(#gW)" x="10" y="6" width="7" height="5" rx=".6"/><path d="M11.200 8h4.600M11.200 9.600h3" stroke="#8aa0b8" stroke-width=".7" stroke-linecap="round"/><g fill="#e8e8e8"><circle cx="6" cy="5" r=".7"/><circle cx="6" cy="9" r=".7"/><circle cx="6" cy="13" r=".7"/><circle cx="6" cy="17" r=".7"/></g>
+</svg>

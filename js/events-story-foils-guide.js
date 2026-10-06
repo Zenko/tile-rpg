@@ -271,13 +271,12 @@ function renderGuide() {
 }
 
 /* ============================================================
-   COMFORT SETTINGS: fast battles, larger text, calmer motion
+   DISPLAY SETTINGS: larger text (the old Fast battles, Easy reeling, Cozy mode, dark cellar and Smooth map switches were removed)
    ============================================================ */
 function applyComfortPrefs() {
-  document.documentElement.classList.toggle('cozy', !!prefs.cozy);
   document.documentElement.classList.toggle('big-text', !!prefs.bigText);
 }
-[['fastToggle', 'fast'], ['fishEasyToggle', 'fishEasy'], ['bigTextToggle', 'bigText']].forEach(([id, key]) => {
+[['bigTextToggle', 'bigText']].forEach(([id, key]) => {
   document.getElementById(id).addEventListener('click', () => {
     prefs[key] = !prefs[key]; savePrefs(); applyComfortPrefs(); syncToggles(); sfx('tap');
     if (key === 'bigText' && !inBattle) renderTown();
@@ -323,16 +322,6 @@ document.getElementById('econToggle').addEventListener('click', () => {
   if (!open) return;
   const r = econReport(), fmt = l => l.slice(0, 8).map(x => `${x.src}: ${x.total} (${Math.round(x.perHour)}/h)`).join('\n') || '-';
   panel.textContent = `Over ${r.hours}h of play\nEarned ${r.earned} (${r.earnedPerHour}/h) · Spent ${r.spent} (${r.spentPerHour}/h)\n\nEARNED\n${fmt(r.earn)}\n\nSPENT\n${fmt(r.spend)}`;
-});
-document.getElementById('cozyToggle').addEventListener('click', () => {
-  sfx('tap'); prefs.cozy = !prefs.cozy; savePrefs(); syncToggles(); document.documentElement.classList.toggle('cozy', !!prefs.cozy);
-  if (typeof refreshGoalChip === 'function') refreshGoalChip(true);
-  toast(prefs.cozy ? '🍃 Cozy mode on' : 'Cozy mode off');
-});
-document.getElementById('cellarFogToggle').addEventListener('click', () => {
-  sfx('tap'); prefs.cellarFog = prefs.cellarFog === false; savePrefs(); syncToggles();
-  if (scene && scene.id === 'cellar') renderScene();
-  toast(prefs.cellarFog === false ? '🔦 The cellar shows plain doors' : '🔦 You explore the dark cellar');
 });
 document.getElementById('statsToggle').addEventListener('click', () => {
   sfx('tap'); prefs.shareStats = prefs.shareStats === false; savePrefs(); syncToggles();

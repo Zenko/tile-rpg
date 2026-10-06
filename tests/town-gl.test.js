@@ -11,7 +11,6 @@ module.exports = async (page, assert) => {
     order: [...townView.children].map(c => c.className.split(' ')[0] || c.tagName).join(',') }));
   assert.strictEqual(a.tiles, 0, 'tile divs should not exist while WebGL draws the ground');
   assert.ok(a.dom < 250, 'the town DOM should be small, got ' + a.dom);
-  assert.ok(await page.evaluate(() => document.getElementById('glMapToggle').classList.contains('on')), 'the Smooth map switch should read on');
   assert.ok(/town-gl,town-world,town-front,town-sky/.test(a.order), 'layer order is wrong: ' + a.order);
 
   // 2. camera sync: after a walk the DOM entity layer and the Pixi world sit at the same place, and the camera follows the player
@@ -69,7 +68,6 @@ module.exports = async (page, assert) => {
   const f = await page.evaluate(async () => { tglFallback(new Error('test')); await new Promise(r => setTimeout(r, 300));
     const m = getMap(state.currentDistrict); return { state: tglState, tiles: document.querySelectorAll('.town-tile:not(.ov)').length, want: m.w * m.h, canvases: townView.querySelectorAll('canvas.town-gl').length }; });
   assert.strictEqual(f.state, 'off'); assert.strictEqual(f.tiles, f.want, 'classic tiles did not come back'); assert.strictEqual(f.canvases, 0);
-  assert.ok(await page.evaluate(() => !document.getElementById('glMapToggle').classList.contains('on')), 'the Smooth map switch should read off after a fallback');
 
   // 8. ?renderer=dom never starts the WebGL path at all
   const classic = await page.context().newPage(), errors = [];

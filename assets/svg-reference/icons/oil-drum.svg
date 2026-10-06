@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="1.25 1.4 21.5 21.5" width="512" height="512" stroke-linecap="round" stroke-linejoin="round">
+<defs>
+<linearGradient id="gS" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bccadc"/><stop offset="1" stop-color="#697c96"/></linearGradient>
+<linearGradient id="gGr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eef1f6"/><stop offset="1" stop-color="#aab4c4"/></linearGradient>
+</defs>
+<ellipse fill="url(#gGr)" cx="12" cy="4.500" rx="7.500" ry="2.500"/><path fill="url(#gS)" d="M4.500 4.500h15v15c0 1.500-3.400 2.800-7.500 2.800s-7.500-1.300-7.500-2.800z"/><path fill="rgba(40,20,70,.2)" d="M12 4.500h7.500v15c0 1.500-3.400 2.800-7.500 2.800 3-5 3-12 0-17.800z" opacity=".28"/><ellipse fill="url(#gGr)" cx="12" cy="4.500" rx="7.500" ry="2.500"/><ellipse fill="url(#gS)" cx="12" cy="4.600" rx="5.800" ry="1.700" opacity=".5"/><path d="M4.500 9.500c2 1.500 13 1.500 15 0M4.500 15c2 1.500 13 1.500 15 0" stroke="#e8b46a" stroke-width="1.700" fill="none" stroke-linecap="round"/><path d="M4.500 9.500c2 1.500 13 1.500 15 0" stroke="#566178" stroke-width=".5" fill="none" opacity="0"/><ellipse fill="#fff" opacity=".72" cx="7.5" cy="12" rx="0.9" ry="4.5" transform="rotate(0 7.5 12)"/>
+</svg>

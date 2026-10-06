@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="1 1.879 21.741 21.741" width="512" height="512" stroke-linecap="round" stroke-linejoin="round">
+<defs>
+<linearGradient id="gU" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4d49a"/><stop offset="1" stop-color="#cc9648"/></linearGradient>
+<linearGradient id="gE" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7a8294"/><stop offset="1" stop-color="#2b2f3a"/></linearGradient>
+<linearGradient id="gN" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bf8a5f"/><stop offset="1" stop-color="#6a4125"/></linearGradient>
+</defs>
+<g fill="url(#gN)"><path d="M3 15c-1-6 4-11 11-11s9 5 8 11z"/></g><path fill="url(#gE)" d="M4 13l-2-1.500 2.500-.5-1-2 2.500.5-.5-2.500 2.200 1.200.8-2.400 1.500 2 1.700-2 1 2.200 1.800-1.800.5 2.400 2-1.500 0 2.400 2.200-.8-.5 2.400 2.300-.5-1 2.200 2 .5z" opacity=".55"/><path fill="rgba(40,20,70,.2)" d="M14 4c6 0 9 5 8 11h-8c4-3 4-8 0-11z" opacity=".3"/><path fill="url(#gU)" d="M2 16c0-3 3-5 6-4.500l2 .5v5c-3 2-8 2-8-1z"/><ellipse fill="#3a2a33" cx="2.500" cy="15.300" rx="1" ry=".8"/><circle fill="#3a2a33" cx="6.2" cy="13.2" r="0.8"/><circle fill="#fff" cx="5.96" cy="12.959999999999999" r="0.27999999999999997"/><path fill="url(#gU)" d="M5 18.500v3h2.200l.5-3zM13 18.500l.5 3H16l.5-3z"/><path d="M8 7l1.500 3M12 5.500l1 3.500M16 6l.5 3.500M19.500 8.500l-1 2.500" stroke="#7a4a2c" stroke-width=".9" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="1.5 2.375 21 21" width="512" height="512" stroke-linecap="round" stroke-linejoin="round">
+<defs>
+<linearGradient id="gN" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bf8a5f"/><stop offset="1" stop-color="#6a4125"/></linearGradient>
+<linearGradient id="gU" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4d49a"/><stop offset="1" stop-color="#cc9648"/></linearGradient>
+<linearGradient id="gO" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb862"/><stop offset="1" stop-color="#ec6a2b"/></linearGradient>
+<linearGradient id="gG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a4ea72"/><stop offset="1" stop-color="#32a047"/></linearGradient>
+<linearGradient id="gR" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff8277"/><stop offset="1" stop-color="#d12e45"/></linearGradient>
+</defs>
+<path d="M5.500 10C5 3 19 3 18.500 10" stroke="#a9742f" stroke-width="1.800" fill="none" stroke-linecap="round"/><path fill="url(#gR)" d="M7 10c0-3 3-4.500 5-3.500 1.500-1.500 5-.5 5 3.500z"/><circle fill="url(#gG)" cx="9.500" cy="8.500" r="2.400"/><circle fill="url(#gO)" cx="14.500" cy="8.800" r="2.400"/><path fill="url(#gU)" d="M2.500 10.500h19l-2 10.500h-15z"/><path fill="rgba(40,20,70,.2)" d="M12 10.500h9.500l-2 10.500H12z" opacity=".25"/><path d="M3.500 14.500h17M4.200 18h15.600M8 10.500l-.8 10.500M12 10.500V21M16 10.500l.8 10.500" stroke="#b9854a" stroke-width=".9" fill="none"/><rect fill="url(#gN)" x="2" y="9.800" width="20" height="1.800" rx=".9"/>
+</svg>

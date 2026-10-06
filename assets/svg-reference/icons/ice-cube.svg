@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="1.9 1.9 20.2 20.2" width="512" height="512" stroke-linecap="round" stroke-linejoin="round">
+<defs>
+<linearGradient id="gW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dfe9f4"/></linearGradient>
+<linearGradient id="gT" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#78e8da"/><stop offset="1" stop-color="#1c9ca6"/></linearGradient>
+</defs>
+<path d="M12 2.500l9 5v9l-9 5-9-5v-9z" fill="#bfe6fa" opacity=".6"/><path fill="url(#gT)" d="M12 2.500l9 5v9l-9 5-9-5v-9z" opacity=".35"/><path fill="url(#gW)" d="M12 2.500l9 5-9 5-9-5z" opacity=".7"/><path fill="rgba(40,20,70,.2)" d="M12 12.500l9-5v9l-9 5z" opacity=".25"/><path d="M12 12.500v9M3 7.500l9 5 9-5" stroke="#fff" stroke-width=".8" fill="none" opacity=".8" stroke-linejoin="round"/><path d="M12 2.500l9 5v9l-9 5-9-5v-9z" fill="none" stroke="#7fc8e8" stroke-width=".9" stroke-linejoin="round"/><path fill="url(#gW)" d="M17 3.7l0.5040000000000001 1.296 1.296 0.5040000000000001-1.296 0.5040000000000001-0.5040000000000001 1.296-0.5040000000000001-1.296-1.296-0.5040000000000001 1.296-0.5040000000000001z"/>
+</svg>

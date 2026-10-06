@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0.837 1.275 22.325 22.325" width="512" height="512" stroke-linecap="round" stroke-linejoin="round">
+<defs>
+<linearGradient id="gR" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff8277"/><stop offset="1" stop-color="#d12e45"/></linearGradient>
+<linearGradient id="gW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dfe9f4"/></linearGradient>
+<linearGradient id="gY" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2a0"/><stop offset="1" stop-color="#ffc62e"/></linearGradient>
+<linearGradient id="gGr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eef1f6"/><stop offset="1" stop-color="#aab4c4"/></linearGradient>
+</defs>
+<path fill="url(#gW)" d="M5.500 8C3 8 2 5.500 3.500 3.500 5 1.500 8 1.500 9.500 3c1-1.500 4-1.500 5 0 1.500-1.500 4.500-1.500 6 .5 1.500 2 .5 4.500-2 4.500z"/><path fill="url(#gGr)" d="M6 7.500h12v2H6z"/><path fill="rgba(40,20,70,.2)" d="M12 3c2.500-.5 4.500 0 6 .5 1.500 2 .5 4.500-2 4.500H12z" opacity=".12"/><circle fill="url(#gY)" cx="12" cy="13" r="5.500"/><path fill="url(#gW)" d="M4 23c0-4.500 3.500-7 8-7s8 2.500 8 7z"/><path fill="url(#gR)" d="M10.500 18.500l1.500 1.500 1.500-1.500z"/><circle fill="#3a2a33" cx="10" cy="12.500" r=".8"/><circle fill="#3a2a33" cx="14" cy="12.500" r=".8"/><path d="M10.200 14.800q1.800 1.500 3.600 0" stroke="#3a2a33" stroke-width=".9" fill="none" stroke-linecap="round"/><path fill="rgba(40,20,70,.2)" d="M12 16c4.500 0 8 2.500 8 7h-8z" opacity=".12"/>
+</svg>

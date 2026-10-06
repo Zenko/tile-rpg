@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="2 1.9 20 20" width="512" height="512" stroke-linecap="round" stroke-linejoin="round">
+<defs>
+<linearGradient id="gW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dfe9f4"/></linearGradient>
+<linearGradient id="gR" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff8277"/><stop offset="1" stop-color="#d12e45"/></linearGradient>
+<linearGradient id="gC" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffaf0"/><stop offset="1" stop-color="#ecd7b8"/></linearGradient>
+</defs>
+<path fill="url(#gC)" d="M8.600 14c.3 3.100.1 5.200-.8 6.800h8.400c-.9-1.600-1.100-3.700-.8-6.800z"/><path fill="rgba(40,20,70,.2)" d="M13.500 14c.3 3.100.3 5.200 1 6.800h1.700c-.9-1.600-1.100-3.700-.8-6.800z"/><path fill="url(#gR)" d="M2.500 13C2.500 7.300 6.700 3 12 3s9.500 4.300 9.500 10c0 .8-1.500 1.600-9.500 1.600S2.500 13.800 2.500 13z"/><circle fill="url(#gW)" cx="8" cy="8.700" r="1.900"/><circle fill="url(#gW)" cx="14.600" cy="6.800" r="1.500"/><circle fill="url(#gW)" cx="17.300" cy="10.800" r="1.200"/><circle fill="url(#gW)" cx="11.600" cy="11" r="1"/><ellipse fill="#fff" opacity=".72" cx="6.200" cy="6.200" rx="1.700" ry=".8" transform="rotate(-35 6.200 6.200)"/>
+</svg>

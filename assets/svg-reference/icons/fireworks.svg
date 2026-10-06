@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0.5 -0.05 23.1 23.1" width="512" height="512" stroke-linecap="round" stroke-linejoin="round">
+<defs>
+<linearGradient id="gG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a4ea72"/><stop offset="1" stop-color="#32a047"/></linearGradient>
+<linearGradient id="gB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86ccff"/><stop offset="1" stop-color="#3470de"/></linearGradient>
+<linearGradient id="gK" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffa6d0"/><stop offset="1" stop-color="#e5539a"/></linearGradient>
+<linearGradient id="gW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dfe9f4"/></linearGradient>
+</defs>
+<g stroke-linecap="round" stroke-width="1.500"><g stroke="#ffd23a"><path d="M8 8v-5M8 8L4.500 4.500M8 8L3 8M8 8l-3.500 3.500M8 8l5-0M8 8l3.500-3.500M8 8l3.500 3.500M8 8v5"/></g><g stroke="#ff6a8a"><path d="M17 15v-5M17 15l-3.500-3.500M17 15h-5M17 15l-3.500 3.500M17 15h5M17 15l3.500-3.500M17 15l3.500 3.500M17 15v5"/></g></g><circle fill="url(#gW)" cx="8" cy="8" r="1.200"/><circle fill="url(#gW)" cx="17" cy="15" r="1.200"/><circle fill="url(#gB)" cx="20" cy="4" r="1.200"/><circle fill="url(#gG)" cx="3.500" cy="17" r="1.200"/><circle fill="url(#gK)" cx="12" cy="21" r="1"/><path fill="url(#gB)" d="M20 1l0.8400000000000001 2.16 2.16 0.8400000000000001-2.16 0.8400000000000001-0.8400000000000001 2.16-0.8400000000000001-2.16-2.16-0.8400000000000001 2.16-0.8400000000000001z"/><path fill="url(#gG)" d="M3.5 14.6l0.672 1.728 1.728 0.672-1.728 0.672-0.672 1.728-0.672-1.728-1.728-0.672 1.728-0.672z"/>
+</svg>

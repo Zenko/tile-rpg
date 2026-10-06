@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="1.4 1.4 21.2 21.2" width="512" height="512" stroke-linecap="round" stroke-linejoin="round">
+<defs>
+<linearGradient id="gY" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2a0"/><stop offset="1" stop-color="#ffc62e"/></linearGradient>
+<linearGradient id="gW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dfe9f4"/></linearGradient>
+<linearGradient id="gD" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6070b0"/><stop offset="1" stop-color="#262f5c"/></linearGradient>
+</defs>
+<rect fill="url(#gD)" x="2" y="2" width="20" height="20" rx="4"/><path d="M2 17C8 16 12 12 22 7v6c-8 2-12 6-20 9z" fill="#b9a4f0" opacity=".55"/><path d="M2 14C8 13 12 10 22 4v4C12 12 8 16 2 17z" fill="#ff9ad0" opacity=".5"/><path fill="url(#gW)" d="M7 4.6l0.672 1.728 1.728 0.672-1.728 0.672-0.672 1.728-0.672-1.728-1.728-0.672 1.728-0.672z"/><path fill="url(#gW)" d="M17 15.2l0.5040000000000001 1.296 1.296 0.5040000000000001-1.296 0.5040000000000001-0.5040000000000001 1.296-0.5040000000000001-1.296-1.296-0.5040000000000001 1.296-0.5040000000000001z"/><path fill="url(#gY)" d="M18 4.5l0.42000000000000004 1.08 1.08 0.42000000000000004-1.08 0.42000000000000004-0.42000000000000004 1.08-0.42000000000000004-1.08-1.08-0.42000000000000004 1.08-0.42000000000000004z"/><circle fill="#fff" cx="10" cy="20" r=".6"/><circle fill="#fff" cx="4.500" cy="11.500" r=".6"/><circle fill="#fff" cx="14" cy="4" r=".6"/><circle fill="#fff" cx="20" cy="12" r=".6"/>
+</svg>

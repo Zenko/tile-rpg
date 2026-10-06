@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0.409 0.5 23.555 23.555" width="512" height="512" stroke-linecap="round" stroke-linejoin="round">
+<defs>
+<linearGradient id="gN" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bf8a5f"/><stop offset="1" stop-color="#6a4125"/></linearGradient>
+</defs>
+<g fill="url(#gN)"><ellipse cx="8" cy="15" rx="3.200" ry="5.500" transform="rotate(-12 8 15)"/><ellipse cx="7.200" cy="21" rx="2.400" ry="2" transform="rotate(-12 7.200 21)"/><circle cx="4.800" cy="9.200" r="1.200"/><circle cx="7" cy="8" r="1.200"/><circle cx="9.200" cy="8.200" r="1.100"/><circle cx="11.200" cy="9" r="1"/></g><g fill="url(#gN)" opacity=".85"><ellipse cx="16.500" cy="9" rx="3.200" ry="5.500" transform="rotate(12 16.500 9)"/><ellipse cx="17.500" cy="15" rx="2.400" ry="2" transform="rotate(12 17.500 15)"/><circle cx="19.500" cy="3.500" r="1.200"/><circle cx="17.300" cy="2.300" r="1.200"/><circle cx="15.100" cy="2.500" r="1.100"/><circle cx="13.200" cy="3.300" r="1"/></g>
+</svg>

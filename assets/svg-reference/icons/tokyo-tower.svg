@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0.9 0.4 22.2 22.2" width="512" height="512" stroke-linecap="round" stroke-linejoin="round">
+<defs>
+<linearGradient id="gW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dfe9f4"/></linearGradient>
+<linearGradient id="gR" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff8277"/><stop offset="1" stop-color="#d12e45"/></linearGradient>
+</defs>
+<path fill="url(#gR)" d="M12 1v5M12 6l-2 6-3 10h10l-3-10z"/><path fill="url(#gR)" d="M12 6l-2 6-3 10h10l-3-10z"/><path d="M12 1v5" stroke="#d12e45" stroke-width="1" stroke-linecap="round"/><path fill="url(#gW)" d="M10.500 9.500h3l.7 2.500H9.800zM8.700 15.500h6.600l.8 2.500H7.900z"/><rect fill="url(#gW)" x="9" y="12" width="6" height="1.200" opacity=".0"/><path d="M10 12L8.700 15.500M14 12l1.300 3.500M7.900 18l-.9 4M16.100 18l.9 4M9.800 12h4.400M7.900 18h8.200" stroke="#7a1d3c" stroke-width=".7" fill="none"/><path fill="rgba(40,20,70,.2)" d="M12 6l3 6 2 10h-5z" opacity=".3"/>
+</svg>

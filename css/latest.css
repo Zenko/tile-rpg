@@ -1314,3 +1314,14 @@ body.in-story .toast { opacity: 0; }
 #confirmOverlay { z-index: 90; }
 #confirmOverlay .overlay-card { text-align: center; }
 #confirmOverlay .controls { display: flex; gap: 10px; justify-content: center; margin-top: 14px; }
+
+/* ==========================================================================================================
+   COST BUBBLE = KEYWORD BADGE SIZE (build 157)
+   The cost circle was a touch larger than the keyword badges under it (2.4 units against 2.19). Both are now
+   the same size on every card face (battle hand and board, reveal popup, collection tiles), all in card units,
+   and the keyword stack starts one gap below the bubble.
+   ========================================================================================================== */
+#battleView .card .cost, #battleView .hand .card .cost, .reveal-card .cost, .alm-card.tile .ac-cost {
+  width: calc(var(--u) * 2.1875); height: calc(var(--u) * 2.1875); top: calc(var(--u) * -.6); left: calc(var(--u) * -.6); font-size: calc(var(--u) * 1.15);
+}
+#battleView .card .kws, .reveal-card .kws, .alm-card.tile .ac-kw { top: calc(var(--u) * 1.9); left: calc(var(--u) * -.6); }

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0.901 0.903 22.197 22.197" width="512" height="512" stroke-linecap="round" stroke-linejoin="round">
+<defs>
+<linearGradient id="gW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dfe9f4"/></linearGradient>
+<linearGradient id="gA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe680"/><stop offset="1" stop-color="#e3a012"/></linearGradient>
+<linearGradient id="gU" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4d49a"/><stop offset="1" stop-color="#cc9648"/></linearGradient>
+<radialGradient id="gGlow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ffe27a" stop-opacity=".8"/><stop offset="1" stop-color="#ffe27a" stop-opacity="0"/></radialGradient>
+<linearGradient id="gY" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2a0"/><stop offset="1" stop-color="#ffc62e"/></linearGradient>
+<linearGradient id="gN" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bf8a5f"/><stop offset="1" stop-color="#6a4125"/></linearGradient>
+</defs>
+<path fill="url(#gN)" d="M3.500 22.500V10a8.500 8.500 0 0 1 17 0v12.500z"/><path fill="url(#gY)" d="M5.500 22.500V10a6.500 6.500 0 0 1 13 0v12.500z"/><circle cx="15" cy="12" r="5" fill="url(#gGlow)"/><path fill="url(#gU)" d="M5.500 22.500V10a6.500 6.500 0 0 1 4.500-6.200v18.700z"/><path fill="rgba(40,20,70,.2)" d="M8.200 4.600v17.900H10V3.800z"/><path d="M7.600 9.500h1M7.600 14.500h1" stroke="#a9742f" stroke-width="1" stroke-linecap="round"/><circle fill="url(#gA)" cx="8.700" cy="13" r=".8"/><path fill="url(#gW)" d="M15.500 7l.7 1.600 1.600.7-1.600.7-.7 1.600-.7-1.600-1.600-.7 1.600-.7z"/><circle fill="#fff" opacity=".72" cx="13.500" cy="15" r=".6"/><circle fill="#fff" opacity=".72" cx="16.800" cy="14.500" r=".45"/>
+</svg>

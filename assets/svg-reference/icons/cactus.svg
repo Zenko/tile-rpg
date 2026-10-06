@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="2.15 2.4 20.2 20.2" width="512" height="512" stroke-linecap="round" stroke-linejoin="round">
+<defs>
+<linearGradient id="gY" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2a0"/><stop offset="1" stop-color="#ffc62e"/></linearGradient>
+<linearGradient id="gK" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffa6d0"/><stop offset="1" stop-color="#e5539a"/></linearGradient>
+<linearGradient id="gG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a4ea72"/><stop offset="1" stop-color="#32a047"/></linearGradient>
+</defs>
+<path fill="url(#gG)" d="M9 22V8a3 3 0 0 1 6 0v14z"/><path fill="url(#gG)" d="M9 16H6a1 1 0 0 1-1-1v-3.500a1 1 0 0 1 2 0V14h2z"/><path fill="url(#gG)" d="M15 14h2.500V9.500a1 1 0 0 1 2 0V14a1 1 0 0 1-1 1H15z"/><path fill="rgba(40,20,70,.2)" d="M12 5v17h3V8a3 3 0 0 0-3-3z"/><path d="M12 8V6.500M12 12v-1.500M12 17v-1.500" stroke="#fff" stroke-width=".9" stroke-linecap="round"/><circle fill="url(#gK)" cx="12" cy="4.800" r="1.800"/><circle fill="url(#gY)" cx="12" cy="4.800" r=".7"/>
+</svg>

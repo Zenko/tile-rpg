@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0.735 1.093 22.507 22.507" width="512" height="512" stroke-linecap="round" stroke-linejoin="round">
+<defs>
+<linearGradient id="gY" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2a0"/><stop offset="1" stop-color="#ffc62e"/></linearGradient>
+<linearGradient id="gK" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffa6d0"/><stop offset="1" stop-color="#e5539a"/></linearGradient>
+<linearGradient id="gE" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7a8294"/><stop offset="1" stop-color="#2b2f3a"/></linearGradient>
+<linearGradient id="gT" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#78e8da"/><stop offset="1" stop-color="#1c9ca6"/></linearGradient>
+<linearGradient id="gB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86ccff"/><stop offset="1" stop-color="#3470de"/></linearGradient>
+<linearGradient id="gS" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bccadc"/><stop offset="1" stop-color="#697c96"/></linearGradient>
+<linearGradient id="gN" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bf8a5f"/><stop offset="1" stop-color="#6a4125"/></linearGradient>
+</defs>
+<g transform="rotate(40 12 12)"><path fill="url(#gN)" d="M10.700 8h2.600l.4 14h-3.400z"/><rect fill="url(#gS)" x="9.800" y="5.500" width="4.400" height="3.500" rx=".6"/><path fill="url(#gB)" d="M9.800 5.500c-.5-2 .5-4 2.200-5 1.700 1 2.700 3 2.200 5z"/><path fill="url(#gT)" d="M12 .5c1.700 1 2.700 3 2.200 5H12z" opacity=".5"/><path fill="url(#gE)" d="M10.700 19h2.700l.2 3H10.600z" opacity=".25"/></g><circle fill="url(#gK)" cx="5" cy="19" r="2.200"/><circle fill="url(#gY)" cx="9.500" cy="21.500" r="1.500"/>
+</svg>

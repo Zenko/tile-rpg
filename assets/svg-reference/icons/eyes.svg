@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="1.4 1.4 21.2 21.2" width="512" height="512" stroke-linecap="round" stroke-linejoin="round">
+<defs>
+<linearGradient id="gB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86ccff"/><stop offset="1" stop-color="#3470de"/></linearGradient>
+<linearGradient id="gW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dfe9f4"/></linearGradient>
+</defs>
+<ellipse fill="url(#gW)" cx="7" cy="12" rx="5" ry="6.800" stroke="#c9d3e0" stroke-width=".7"/><ellipse fill="url(#gW)" cx="17" cy="12" rx="5" ry="6.800" stroke="#c9d3e0" stroke-width=".7"/><ellipse fill="url(#gB)" cx="8.600" cy="13.500" rx="2.500" ry="3.200"/><ellipse fill="url(#gB)" cx="18.600" cy="13.500" rx="2.500" ry="3.200"/><ellipse fill="#3a2a33" cx="8.800" cy="13.800" rx="1.500" ry="2"/><ellipse fill="#3a2a33" cx="18.800" cy="13.800" rx="1.500" ry="2"/><circle fill="#fff" cx="8.200" cy="12.500" r=".8"/><circle fill="#fff" cx="18.200" cy="12.500" r=".8"/>
+</svg>

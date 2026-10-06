@@ -1,5 +1,5 @@
 /* ---------------- releases: "Version 1 Beta" ----------------
-   Players read about BETA UPDATES (Beta 1, Beta 2, ...). A Beta update bundles everything since the previous one into one
+   Players read about BETA UPDATES, all labelled just "Beta" (n is only the internal order; the build number is the exact version). A Beta update bundles everything since the previous one into one
    note with three short sections (new / better / fixed). It is cut on purpose - when the owner asks, or a batch is worth
    announcing - not on every publish. Between releases, finished player-facing changes are logged as bullets in
    PENDING_CHANGES (below; nobody sees it in-game). To cut a release: write the polished note at the TOP of RELEASES from
@@ -11,13 +11,18 @@ function fmtChangelogDate(d) {
 }
 function gameVersionLabel() {
   const latest = RELEASES[0];
-  return latest ? `Beta ${latest.n} · ${fmtChangelogDate(latest.date)}` : '';
+  return latest ? `Beta · ${fmtChangelogDate(latest.date)}` : '';
 }
 // For bug reports and the Settings menu: the Beta update plus the exact build.
-function gameBuildLabel() { return RELEASES[0] ? `Beta ${RELEASES[0].n} (build ${BUILD})` : `build ${BUILD}`; }
+function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `build ${BUILD}`; }
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'fixed', x: 'Town ambience (birds, wind, waves, rain and thunder) now has its own switch and keeps playing when Music is turned off. Only Sound turns it off with everything else.' },
+  { t:'better', x: 'The cost circle on every card is now the same size as the keyword icons under it.' },
+  { t:'better', x: 'Settings is simpler: the Battles section is gone (Who goes first, Fast battles and Easy reeling), and Comfort is now just Larger text under Display. Cozy mode, the dark cellar switch and Smooth map were removed too.' },
+  { t:'fixed', x: 'Social no longer fills up with copies of the same tester. Each new sign-in on a device used to leave another entry behind; now only the newest one per name and avatar is shown.' },
+  { t:'better', x: 'The game is now just called Beta (no number); the build number still tells us the exact version.' },
   { t:'fixed', x: 'Broken pictures after an update: card art and icons are now saved on your phone while the update installs, so they no longer vanish if your connection is slow right then.' },
   { t:'fixed', x: 'Big hands in battle: with five or more cards the hand ran off both edges and the bottom of the screen. The cards now shrink and the fan flattens so every card stays in view.' },
   { t:'fixed', x: 'The "1 skill point to spend" pill in town now clears as soon as you spend the point, instead of lingering after you leave the Path screen.' },
@@ -167,7 +172,7 @@ function renderChangelog() {
   const release = r => {
     const open = !!clOpen[r.id];
     return `<div class="cl-entry${open ? ' open' : ''}" data-toggle-cl="${r.id}"><div class="cl-head">
-        <span class="cl-dot"></span><span class="cl-v">Beta ${r.n}</span><span class="cl-title">${escapeHtml(r.title)}</span>
+        <span class="cl-dot"></span><span class="cl-v">Beta</span><span class="cl-title">${escapeHtml(r.title)}</span>
         ${read[r.id] ? '' : '<i class="jdot" title="Unread"></i>'}<span class="cl-date">${fmtChangelogDate(r.date)}</span><span class="cl-chevron">${open ? '▲' : '▼'}</span></div>
       ${open ? `<div class="cl-body">${r.intro ? `<p class="cl-intro">${escapeHtml(r.intro)}</p>` : ''}${sec('✨ New', r.new)}${sec('🌿 Better', r.better)}${sec('🔧 Fixed', r.fixed)}</div>` : ''}</div>`;
   };

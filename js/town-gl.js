@@ -49,7 +49,7 @@ async function tglInit() {
             vw: 0, vh: 0, tp: 0, cam: { cur: null, from: null, to: null, t0: 0, raf: 0 }, dirty: false };
     app.canvas.addEventListener('webglcontextlost', e => e.preventDefault());           // let the browser restore it; Pixi re-uploads the textures
     app.canvas.addEventListener('webglcontextrestored', () => { tglRender(); });
-    tglState = 'ready'; tglSyncToggle();
+    tglState = 'ready';
     new MutationObserver(() => tglRepaintIfStale()).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     new MutationObserver(() => tglRepaintIfStale()).observe(townView, { attributes: true, attributeFilter: ['data-season', 'data-biome'] });
     tglMount();   // the first town may already be built (PixiJS loads after the game starts), so put the canvases around it now
@@ -58,7 +58,7 @@ async function tglInit() {
 }
 function tglFallback(err) {
   console.warn('Town: WebGL renderer unavailable, using the classic tiles.', err && err.message || err);
-  tglState = 'off'; tglSyncToggle();
+  tglState = 'off';
   if (tgl) { try { tgl.app.destroy(true, { children: true }); } catch (e) { /* ignore */ } if (tgl.front && tgl.front.parentNode) tgl.front.remove(); if (tgl.cam.raf) cancelAnimationFrame(tgl.cam.raf); }
   tgl = null; tglPendingMap = null;
   try { townBuiltFor = null; renderTown(); } catch (e) { /* the next renderTown() will do it */ }
@@ -242,15 +242,5 @@ function tglCamera(cx, cy, animate) {
 }
 function tglCamNow() { return tgl && tgl.cam.cur ? tgl.cam.cur : null; }
 
-// Settings > Comfort > Smooth map. It shows what is really in use (so it reads "off" after a fallback) and changing it reloads the game, because the
-// renderer is chosen once at start-up. The choice is kept in localStorage['tr-renderer'] ('dom' = classic); a ?renderer= in the address is dropped on reload.
-function tglSyncToggle() { const t = document.getElementById('glMapToggle'); if (t) t.classList.toggle('on', tglState !== 'off'); }
-(() => {
-  const t = document.getElementById('glMapToggle'); if (!t) return;
-  t.addEventListener('click', () => {
-    try { if (tglState !== 'off') localStorage.setItem('tr-renderer', 'dom'); else localStorage.removeItem('tr-renderer'); } catch (e) { /* storage blocked: the address option still works */ }
-    const u = new URL(location.href); u.searchParams.delete('renderer'); location.href = u.href;
-  });
-  tglSyncToggle();
-})();
+// There is no Settings switch for this any more: ?renderer=dom (or localStorage['tr-renderer']='dom') still forces the classic tiles, and tglFallback() does it by itself when WebGL fails.
 if (tglState !== 'off') tglInit();   // ?renderer=dom (or canvas) never loads the WebGL path

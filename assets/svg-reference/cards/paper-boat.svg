@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0.5 0.75 23 23" width="512" height="512" stroke-linecap="round" stroke-linejoin="round">
+<defs>
+<linearGradient id="gR" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff8277"/><stop offset="1" stop-color="#d12e45"/></linearGradient>
+<linearGradient id="gC" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffaf0"/><stop offset="1" stop-color="#ecd7b8"/></linearGradient>
+<linearGradient id="gW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dfe9f4"/></linearGradient>
+<linearGradient id="gN" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bf8a5f"/><stop offset="1" stop-color="#6a4125"/></linearGradient>
+<linearGradient id="gB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86ccff"/><stop offset="1" stop-color="#3470de"/></linearGradient>
+</defs>
+<path fill="url(#gB)" d="M1 19c2.500-1.500 4.500-1.500 7 0s4.500 1.500 8 0 4.500-1.500 7 0v3H1z"/><path fill="url(#gN)" d="M3.500 17h17l-3 3.200H6.500z"/><path fill="rgba(40,20,70,.2)" d="M12 17h8.500l-3 3.200H12z" opacity=".3"/><path d="M12 2.500V17" stroke="#8a5a30" stroke-width="1.200" stroke-linecap="round"/><path fill="url(#gW)" d="M11.200 3.500V15.500H4.500z"/><path fill="url(#gC)" d="M13 6.500v9h6.500z"/><path fill="rgba(40,20,70,.2)" d="M13 6.500v9h6.500z" opacity=".15"/><path fill="url(#gR)" d="M12 2.500l3.500 1.200L12 5z"/>
+</svg>

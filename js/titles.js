@@ -385,15 +385,11 @@ function syncToggles() {
   hapticToggle.classList.toggle('on', prefs.haptics);
   document.querySelectorAll('#themeSeg .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.themePick === prefs.theme));
   document.getElementById('ambientToggle').classList.toggle('on', prefs.ambient);
-  document.getElementById('fastToggle').classList.toggle('on', !!prefs.fast);
-  document.getElementById('fishEasyToggle').classList.toggle('on', !!prefs.fishEasy);
   document.getElementById('bigTextToggle').classList.toggle('on', !!prefs.bigText);
   document.getElementById('notifsToggle').classList.toggle('on', notifsEnabled());
   document.getElementById('presenceToggle').classList.toggle('on', !!prefs.sharePresence);
   document.getElementById('shareDeckToggle').classList.toggle('on', prefs.shareDeck !== false);
   document.getElementById('statsToggle').classList.toggle('on', prefs.shareStats !== false);
-  document.getElementById('cozyToggle').classList.toggle('on', !!prefs.cozy);
-  document.getElementById('cellarFogToggle').classList.toggle('on', prefs.cellarFog !== false);
   [['musicVol', 'musicVolNum', prefs.musicVol, !(prefs.sound && prefs.music)], ['sfxVol', 'sfxVolNum', prefs.sfxVol, !prefs.sound]].forEach(([id, numId, v, off]) => {
     const el = document.getElementById(id), pct = Math.round(v * 100);
     el.value = pct; el.style.setProperty('--fill', pct + '%');
@@ -420,9 +416,9 @@ document.querySelectorAll('#themeSeg .seg-btn').forEach(b => b.addEventListener(
 }));
 document.getElementById('ambientToggle').addEventListener('click', () => {
   prefs.ambient = !prefs.ambient; savePrefs();
-  if (prefs.ambient && prefs.sound && prefs.music) ensureAudio();
-  syncToggles(); syncAmbientAudio();
-  if (prefs.ambient && !(prefs.sound && prefs.music)) toast('Turn Sound and Music on to hear ambience');
+  if (prefs.ambient && prefs.sound) ensureAudio();
+  applyVolumes(); syncToggles(); syncWeatherAudio();   // town ambience is its own switch, independent of Music
+  if (prefs.ambient && !prefs.sound) toast('Turn Sound on to hear ambience');
 });
 
 function bindVolume(id, key, onChange) {

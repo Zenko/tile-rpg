@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="1.65 0.9 20.7 20.7" width="512" height="512" stroke-linecap="round" stroke-linejoin="round">
+<defs>
+<linearGradient id="gB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86ccff"/><stop offset="1" stop-color="#3470de"/></linearGradient>
+<linearGradient id="gY" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2a0"/><stop offset="1" stop-color="#ffc62e"/></linearGradient>
+<linearGradient id="gR" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff8277"/><stop offset="1" stop-color="#d12e45"/></linearGradient>
+<linearGradient id="gO" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb862"/><stop offset="1" stop-color="#ec6a2b"/></linearGradient>
+<linearGradient id="gG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a4ea72"/><stop offset="1" stop-color="#32a047"/></linearGradient>
+<linearGradient id="gPk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd0e0"/><stop offset="1" stop-color="#f08ab0"/></linearGradient>
+<linearGradient id="gW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dfe9f4"/></linearGradient>
+<linearGradient id="gK" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffa6d0"/><stop offset="1" stop-color="#e5539a"/></linearGradient>
+</defs>
+<path fill="url(#gK)" d="M2.500 14h19v7h-19z"/><path fill="url(#gW)" d="M2.500 12.500c1.500 2 3 2 4.500 0 1.500 2 3 2 5 0 2 2 3.500 2 5 0 1.500 2 3 2 4.500 0V15h-19z"/><path fill="url(#gPk)" d="M2.500 10h19v3.500c-1.500 1.500-3 1.500-4.500 0-1.500 1.500-3 1.500-5 0-2 1.500-3.500 1.500-5 0-1.500 1.500-3 1.500-4.500 0z"/><path fill="rgba(40,20,70,.2)" d="M12 14h9.500v7H12z" opacity=".15"/><rect fill="url(#gB)" x="7" y="5.500" width="2" height="4.500" rx=".5"/><rect fill="url(#gY)" x="11" y="5.500" width="2" height="4.500" rx=".5"/><rect fill="url(#gG)" x="15" y="5.500" width="2" height="4.500" rx=".5"/><path fill="url(#gO)" d="M8 1.500c1 1 1 2 0 3-1-1-1-2 0-3zM12 1.500c1 1 1 2 0 3-1-1-1-2 0-3zM16 1.500c1 1 1 2 0 3-1-1-1-2 0-3z"/><circle fill="url(#gR)" cx="6" cy="17.500" r=".9"/><circle fill="url(#gY)" cx="12" cy="18.500" r=".9"/><circle fill="url(#gB)" cx="18" cy="17.500" r=".9"/>
+</svg>

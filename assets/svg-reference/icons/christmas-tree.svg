@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0.45 0 23.1 23.1" width="512" height="512" stroke-linecap="round" stroke-linejoin="round">
+<defs>
+<linearGradient id="gY" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2a0"/><stop offset="1" stop-color="#ffc62e"/></linearGradient>
+<linearGradient id="gR" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff8277"/><stop offset="1" stop-color="#d12e45"/></linearGradient>
+<linearGradient id="gB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86ccff"/><stop offset="1" stop-color="#3470de"/></linearGradient>
+<linearGradient id="gA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe680"/><stop offset="1" stop-color="#e3a012"/></linearGradient>
+<linearGradient id="gG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a4ea72"/><stop offset="1" stop-color="#32a047"/></linearGradient>
+<linearGradient id="gN" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bf8a5f"/><stop offset="1" stop-color="#6a4125"/></linearGradient>
+</defs>
+<rect fill="url(#gN)" x="10" y="19" width="4" height="3.500" rx=".6"/><path fill="url(#gG)" d="M12 3.500l5 5.500h-2.500l4.500 5.500h-3L20.500 20H3.500L8 14.500H5L9.500 9H7z"/><path fill="rgba(40,20,70,.2)" d="M12 3.500l5 5.500h-2.500l4.500 5.500h-3L20.500 20H12z" opacity=".3"/><path d="M8.500 9.500q3.500 1.500 7 0M6.500 15q5.500 2 11 0" stroke="#d9f5b8" stroke-width=".7" fill="none" opacity=".7"/><path fill="url(#gA)" d="M12 0.6000000000000001l0.7280000000000001 1.8719999999999999 1.8719999999999999 0.7280000000000001-1.8719999999999999 0.7280000000000001-0.7280000000000001 1.8719999999999999-0.7280000000000001-1.8719999999999999-1.8719999999999999-0.7280000000000001 1.8719999999999999-0.7280000000000001z"/><circle fill="url(#gR)" cx="9.500" cy="12.500" r="1.100"/><circle fill="url(#gY)" cx="14.500" cy="11" r="1"/><circle fill="url(#gB)" cx="8" cy="18" r="1.100"/><circle fill="url(#gR)" cx="15.500" cy="17" r="1.100"/><circle fill="url(#gY)" cx="12" cy="15.500" r="1"/>
+</svg>

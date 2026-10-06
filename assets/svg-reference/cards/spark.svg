@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="1 1 22 22" width="512" height="512" stroke-linecap="round" stroke-linejoin="round">
+<defs>
+<linearGradient id="gY" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2a0"/><stop offset="1" stop-color="#ffc62e"/></linearGradient>
+</defs>
+<path fill="url(#gY)" d="M14 1.500L4.500 13.500h6L8.500 22.500 19.500 9.500h-6.500z" stroke="#e8a317" stroke-width=".8" stroke-linejoin="round"/><path fill="rgba(40,20,70,.2)" d="M14 1.500l-1 8h6.500L8.500 22.500l2-9z" opacity=".25"/><ellipse fill="#fff" opacity=".72" cx="11" cy="8" rx="0.9" ry="2.6" transform="rotate(35 11 8)"/>
+</svg>

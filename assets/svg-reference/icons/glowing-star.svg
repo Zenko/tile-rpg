@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0.7 -0.25 23.7 23.7" width="512" height="512" stroke-linecap="round" stroke-linejoin="round">
+<defs>
+<linearGradient id="gW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dfe9f4"/></linearGradient>
+<linearGradient id="gY" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2a0"/><stop offset="1" stop-color="#ffc62e"/></linearGradient>
+<linearGradient id="gA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe680"/><stop offset="1" stop-color="#e3a012"/></linearGradient>
+</defs>
+<path fill="url(#gA)" stroke-linejoin="round" d="M12.00 2.50L14.59 8.94L21.51 9.41L16.18 13.86L17.88 20.59L12.00 16.90L6.12 20.59L7.82 13.86L2.49 9.41L9.41 8.94z"/><path fill="url(#gY)" stroke-linejoin="round" d="M12.00 6.30L13.65 10.23L17.90 10.58L14.66 13.37L15.64 17.52L12.00 15.30L8.36 17.52L9.34 13.37L6.10 10.58L10.35 10.23z"/><path fill="url(#gY)" d="M21 1.2000000000000002l0.784 2.016 2.016 0.784-2.016 0.784-0.784 2.016-0.784-2.016-2.016-0.784 2.016-0.784z"/><path fill="url(#gW)" d="M3.5 2.8l0.6160000000000001 1.584 1.584 0.6160000000000001-1.584 0.6160000000000001-0.6160000000000001 1.584-0.6160000000000001-1.584-1.584-0.6160000000000001 1.584-0.6160000000000001z"/><path fill="url(#gW)" d="M20 18l0.56 1.44 1.44 0.56-1.44 0.56-0.56 1.44-0.56-1.44-1.44-0.56 1.44-0.56z"/><ellipse fill="#fff" opacity=".72" cx="8.5" cy="8.5" rx="1.4" ry="0.7" transform="rotate(-40 8.5 8.5)"/>
+</svg>
