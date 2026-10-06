@@ -1325,3 +1325,44 @@ body.in-story .toast { opacity: 0; }
   width: calc(var(--u) * 2.1875); height: calc(var(--u) * 2.1875); top: calc(var(--u) * -.6); left: calc(var(--u) * -.6); font-size: calc(var(--u) * 1.15);
 }
 #battleView .card .kws, .reveal-card .kws, .alm-card.tile .ac-kw { top: calc(var(--u) * 1.9); left: calc(var(--u) * -.6); }
+
+/* ===== Workshop: the Forge (Refine) and the mode switch =====
+   Refine is one stage: the two copies go in, the stronger card comes out, and a strip underneath picks which card is on the
+   forge. Trade up keeps its own tray. The cards are the normal My Cards tiles (cardTileHtml), so they scale with the width of
+   their .cr-tile wrapper (see the CARD FACE block above). A tile is a <button>, so the strip items are divs, not buttons. */
+.cr-mode { display: flex; gap: 4px; background: var(--stone); border: 1px solid var(--stone-edge); border-radius: 999px; padding: 4px; margin: 0 0 14px; }
+.cr-mode button { flex: 1; min-height: 44px; border: 0; border-radius: 999px; background: transparent; color: var(--ink-soft); font: inherit; font-weight: 700; font-size: 0.9rem; cursor: pointer; }
+.cr-mode button.on { background: var(--water); color: var(--on-water); }
+.cr-forge { background: radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--accent) 20%, transparent), transparent 70%), var(--stone); border: 1px solid var(--stone-edge); border-radius: 22px; padding: 18px 14px 16px; margin: 0 0 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.cr-forge-row { display: flex; align-items: center; justify-content: center; gap: 12px; }
+.cr-tile { display: block; flex-shrink: 0; pointer-events: none; }
+.cr-tile .alm-card.tile { width: 100%; }
+.cr-pair { display: flex; padding-right: 22px; }
+.cr-pair .cr-tile { width: 84px; }
+.cr-pair .cr-tile + .cr-tile { margin-left: -62px; margin-top: -10px; transform: rotate(7deg); }
+.cr-pair .cr-tile:first-child { transform: rotate(-6deg); margin-top: 10px; }
+.cr-forge-arrow { color: var(--accent); font-size: 1.7rem; }
+.cr-result { width: 124px; filter: drop-shadow(0 0 14px color-mix(in srgb, var(--accent) 55%, transparent)); }
+.cr-forge-name { font-family: var(--f-display); font-size: 1.25rem; text-align: center; }
+.cr-forge-delta { font-size: 0.86rem; color: var(--ink-soft); margin-top: -6px; }
+.cr-forge-delta b { color: var(--water-ink); }
+.cr-stat-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
+.cr-stat-pick button { min-height: 56px; border-radius: 14px; border: 1.5px solid var(--stone-edge); background: var(--board-bg); color: var(--ink); font: inherit; font-weight: 800; font-size: 0.9rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+.cr-stat-pick button small { font-weight: 600; font-size: 0.72rem; color: var(--ink-soft); }
+.cr-stat-pick button.on { border-color: var(--water); background: color-mix(in srgb, var(--water) 18%, transparent); }
+.cr-stat-pick button:disabled { opacity: 0.45; cursor: default; }
+.cr-meter { display: flex; align-items: center; gap: 10px; width: 100%; font-size: 0.8rem; color: var(--ink-soft); }
+.cr-meter b { color: var(--ink); }
+.cr-bar { flex: 1; height: 8px; border-radius: 99px; background: var(--track); overflow: hidden; }
+.cr-bar i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--rare), var(--accent)); }
+.cr-may { font-size: 0.8rem; color: var(--ink-soft); margin-top: -2px; }
+.cr-forge > .btn { width: 100%; min-height: 48px; }
+.cr-forge > .btn:disabled { animation: none; opacity: 0.5; }
+.cr-strip { display: flex; gap: 10px; overflow-x: auto; padding: 8px 4px 12px; margin: 0 -4px; scroll-snap-type: x proximity; scrollbar-width: none; }
+.cr-strip::-webkit-scrollbar { display: none; }
+.cr-pickcard { flex: 0 0 92px; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 4px 8px; border: 2px solid transparent; border-radius: 16px; cursor: pointer; scroll-snap-align: start; text-align: center; }
+.cr-pickcard.on { border-color: var(--water); background: var(--board-bg); }
+.cr-tile-sm { width: 76px; }
+.cr-pc-name { font-size: 0.72rem; font-weight: 700; line-height: 1.2; }
+.cr-pc-own { font-size: 0.68rem; color: var(--ink-soft); }
+@media (max-width: 360px) { .cr-pair .cr-tile { width: 72px; } .cr-pair .cr-tile + .cr-tile { margin-left: -52px; } .cr-result { width: 108px; } }

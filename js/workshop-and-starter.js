@@ -170,7 +170,9 @@ function setShopView(view) {
 }
 
 let craftSel = { rarity: 'common', picks: [] };
-let refineOpenId = null;   // which refinable card's stat-choice row is expanded, if any (accordion - only one at a time)
+let refineOpenId = null;   // the card on the forge (the Refine stage); a card sheet's Refine button sets it before opening the Workshop
+let refineStat = 'p';      // 'p' | 'g': which stat the forge preview and the Refine button use
+let craftMode = 'refine';  // 'refine' | 'trade': the two halves of the Workshop, switched by the buttons under the intro
 
 function aOrAn(label) { return (/^[aeiou]/i.test(label) ? 'an ' : 'a ') + label; }
 
@@ -183,41 +185,50 @@ function renderCraft() {
   const box = document.getElementById('craftView');
   const counts = ownedCardCounts();
   const pct = n => Math.round(n * 100);
-  box.innerHTML = `<div class="cr-intro">Combine cards into something better. <b>Nothing here costs Embers</b>: the cards are the price.</div>`;
+  box.innerHTML = `<div class="cr-intro">Combine cards into something better. <b>Nothing here costs Embers</b>: the cards are the price.</div>
+    <div class="cr-mode" role="tablist">
+      <button class="${craftMode === 'refine' ? 'on' : ''}" data-mode="refine" role="tab" aria-selected="${craftMode === 'refine'}">🔨 Refine</button>
+      <button class="${craftMode === 'trade' ? 'on' : ''}" data-mode="trade" role="tab" aria-selected="${craftMode === 'trade'}">🔁 Trade up</button>
+    </div>`;
 
-  // ----- Refine -----
+  // ----- Refine: "the Forge". One stage shows the two copies going in and the stronger card coming out; a strip below picks the card. -----
   const refinable = Object.keys(counts).filter(id => counts[id] >= 2 && cardDef(id) && !cardDef(id).crafted && !cardDef(id).spell)
     .sort((a, b) => RARITY_ORDER.indexOf(cardDef(b).rarity) - RARITY_ORDER.indexOf(cardDef(a).rarity) || cardDef(a).cost - cardDef(b).cost || (a < b ? -1 : 1));
   const ref = document.createElement('div');
   ref.className = 'cr-section';
-  ref.innerHTML = `<div class="cr-title">🔨 Refine</div>
-    <div class="cr-desc">Combine <b>2 copies</b> of a card into <b>1 stronger version</b>. You pick +1 power or +1 health, and there is a <b>${pct(CRAFT.refineSkillChance)}% chance it also gains a skill</b>.</div>`;
   if (!refinable.length) {
-    ref.innerHTML += `<div class="cr-empty">Get a second copy of any card to refine it.</div>`;
+    ref.innerHTML = `<div class="cr-empty">Get a second copy of any card to refine it.</div>`;
   } else {
-    if (!refinable.includes(refineOpenId)) refineOpenId = null;
-    refinable.forEach(id => {
-      const def = cardDef(id), skills = craftableSkills(id);
-      const why = { p: refineBlockReason(id, 'p'), g: refineBlockReason(id, 'g') };
-      const open = refineOpenId === id;
-      const row = document.createElement('div');
-      row.className = 'panel-item cr-refine-row' + (open ? ' open' : '');
-      row.dataset.toggleRefine = id;
-      row.innerHTML = `${miniCardHtml(def)}
-        <span class="panel-text">
-          <div class="panel-name">${def.name}</div>
-          <div class="panel-desc">${counts[id]} owned · uses 2</div>
-          <div class="panel-desc">${why.p && why.g ? why.p : (skills.length ? `May gain: ${skills.map(k => KW[k].icon).join(' ')}` : 'No skill possible: it already has 2')}</div>
-        </span>
-        <span class="cr-chevron">${open ? '▲' : '▼'}</span>
-        ${open ? `<div class="cr-refine-choice">
-          <button class="panel-action" data-refine="${id}" data-stat="p" ${why.p ? 'disabled' : ''} aria-label="Refine ${def.name} for plus one power">+1 ⚔ Power</button>
-          <button class="panel-action" data-refine="${id}" data-stat="g" ${why.g ? 'disabled' : ''} aria-label="Refine ${def.name} for plus one health">+1 ♥ Health</button>
-        </div>` : ''}`;
-      ref.appendChild(row);
-    });
+    if (!refinable.includes(refineOpenId)) refineOpenId = refinable[0];   // the forge always has a card on it
+    const id = refineOpenId, def = cardDef(id), skills = craftableSkills(id);
+    const why = { p: refineBlockReason(id, 'p'), g: refineBlockReason(id, 'g') };
+    if (why[refineStat] && !why[refineStat === 'p' ? 'g' : 'p']) refineStat = refineStat === 'p' ? 'g' : 'p';   // switch to the stat that is allowed
+    const rid = BattleEngine.variantId(id, refineStat, ''), rdef = cardDef(rid) || def;
+    const block = why[refineStat];
+    ref.innerHTML = `<div class="cr-forge">
+        <div class="cr-forge-row">
+          <div class="cr-pair"><span class="cr-tile">${cardTileHtml(id, 1)}</span><span class="cr-tile">${cardTileHtml(id, 1)}</span></div>
+          <div class="cr-forge-arrow" aria-hidden="true">➜</div>
+          <div class="cr-tile cr-result">${cardTileHtml(rid, 1)}</div>
+        </div>
+        <div class="cr-forge-name">${def.name} +</div>
+        <div class="cr-forge-delta">${refineStat === 'p' ? `Power <b>${def.power} → ${def.power + 1}</b>` : `Health <b>${def.grit} → ${def.grit + 1}</b>`}</div>
+        <div class="cr-stat-pick">
+          <button data-stat="p" class="${refineStat === 'p' ? 'on' : ''}" ${why.p ? 'disabled' : ''} aria-label="Plus one power"><span>+1 ⚔ Power</span><small>${def.power} → ${def.power + 1}</small></button>
+          <button data-stat="g" class="${refineStat === 'g' ? 'on' : ''}" ${why.g ? 'disabled' : ''} aria-label="Plus one health"><span>+1 ♥ Health</span><small>${def.grit} → ${def.grit + 1}</small></button>
+        </div>
+        <div class="cr-meter"><span>✨ Skill chance</span><div class="cr-bar"><i style="width:${pct(CRAFT.refineSkillChance)}%"></i></div><b>${pct(CRAFT.refineSkillChance)}%</b></div>
+        <div class="cr-may">${skills.length ? `May gain: ${skills.map(k => KW[k].icon).join(' ')}` : 'No skill possible: it already has 2'}</div>
+        <button class="btn cr-ready" data-refine="${id}" data-stat="${refineStat}" ${block ? 'disabled' : ''}>Refine 2 into 1</button>
+        ${block ? `<div class="cr-empty">${block}</div>` : ''}
+      </div>
+      <div class="cr-title">Ready to refine</div>
+      <div class="cr-strip">${refinable.map(rid2 => {
+        const d2 = cardDef(rid2);
+        return `<div class="cr-pickcard${rid2 === id ? ' on' : ''}" data-forge-pick="${rid2}"><span class="cr-tile cr-tile-sm">${cardTileHtml(rid2, 1)}</span><span class="cr-pc-name">${d2.name}</span><span class="cr-pc-own">${counts[rid2]} owned</span></div>`;
+      }).join('')}</div>`;
   }
-  box.appendChild(ref);
+  if (craftMode === 'refine') box.appendChild(ref);
 
   // ----- Trade up -----
   const steps = RARITY_ORDER.slice(0, RARITY_ORDER.indexOf(TRADE_TOP));   // mythic is the top of the ladder: divine and atlas are summoned
@@ -273,20 +284,23 @@ function renderCraft() {
   const ready = need === 0 && !whyNot;
   go.innerHTML = `<button class="btn${ready ? ' cr-ready' : ''}" id="craftGo" ${ready ? '' : 'disabled'}>${need === 0 ? `Combine into ${aOrAn(RARITY_LABEL[target])} card` : `Pick ${need} more`}</button>${whyNot ? `<div class="cr-empty">${whyNot}</div>` : ''}`;
   dock.appendChild(go);
-  box.appendChild(trade);
+  if (craftMode === 'trade') box.appendChild(trade);
 
   // ----- events -----
-  box.querySelectorAll('[data-toggle-refine]').forEach(row => row.addEventListener('click', () => {
-    const id = row.dataset.toggleRefine;
-    sfx('nav'); buzz(HAP.tap);
-    refineOpenId = refineOpenId === id ? null : id;
-    renderCraft();
+  box.querySelectorAll('[data-mode]').forEach(btn => btn.addEventListener('click', () => {
+    if (craftMode === btn.dataset.mode) return;
+    sfx('nav'); buzz(HAP.tap); craftMode = btn.dataset.mode; renderCraft();
   }));
-  box.querySelectorAll('[data-refine]').forEach(btn => btn.addEventListener('click', e => {
+  box.querySelectorAll('[data-forge-pick]').forEach(btn => btn.addEventListener('click', () => {
+    sfx('tap'); buzz(HAP.tap); refineOpenId = btn.dataset.forgePick; renderCraft();
+  }));
+  box.querySelectorAll('.cr-stat-pick [data-stat]').forEach(btn => btn.addEventListener('click', () => {
+    sfx('tap'); buzz(HAP.tap); refineStat = btn.dataset.stat; renderCraft();
+  }));
+  box.querySelectorAll('button[data-refine]').forEach(btn => btn.addEventListener('click', e => {
     e.stopPropagation();
     ensureAudio();
     if (!refineCard(btn.dataset.refine, btn.dataset.stat)) { toast('That cannot be refined right now'); sfx('tie'); }
-    else refineOpenId = null;
     renderCraft();
   }));
   box.querySelectorAll('[data-rar]').forEach(btn => btn.addEventListener('click', () => {
