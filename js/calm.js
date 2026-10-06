@@ -81,6 +81,7 @@ function calmRender() {
   back.classList.toggle('hidden', calmCur === 'hub' || calmCur === 'sit');
   body.className = 'calm-body calm-act-' + calmCur;   // not calm-<id>: that is also the stage's own class body.innerHTML = '';
   ({ hub: calmHub, breathe: calmBreathe, sand: calmSand, lanterns: calmLanterns, chimes: calmChimes, stars: calmStars, tea: calmTea, bonsai: calmBonsai, tarot: calmTarot, sit: calmSitView })[calmCur](body);
+  if (typeof calmCompanionPresence === 'function') calmCompanionPresence(body);   // js/companion-activities.js: your companion is there too
 }
 
 /* ---------- hub ---------- */

@@ -73,7 +73,7 @@ function startBattleNow(opponent, first) {
   first = first === 1 ? 1 : 0;                              // 0 = you take the first turn (the toss, js/battle-toss.js)
   // Never let a damaged card id reach the engine: drop anything that is not a real card first.
   // A Draft Run brings its own 12 cards (opponent.playerDeck) and none of your collection's extras: no mastery, charms, snacks or companion.
-  const neutral = !!opponent.playerDeck, myDeck = neutral ? opponent.playerDeck.filter(id => !!cardDef(id)) : state.deck;
+  const neutral = !!opponent.playerDeck || !!opponent.spar, myDeck = opponent.playerDeck ? opponent.playerDeck.filter(id => !!cardDef(id)) : state.deck;   // a spar with your companion is neutral too: nothing counts toward mastery or quests
   const cleaned = myDeck.filter(id => !!cardDef(id));
   if (!neutral && cleaned.length !== state.deck.length) { state.deck = cleaned; saveState(); }
   if (!opponent.puzzle && myDeck.length < DECK_SIZE) {
@@ -89,7 +89,7 @@ function startBattleNow(opponent, first) {
   const companionSpirit = hasPerk('spirit') && !opponent.puzzle && !neutral;
   // Plain neighbors and district bosses get a fresh deck each fight, scaled to how many wins you have (their stored deck
   // predates enhanced and unique foe cards). Every other kind of opponent brings its own deck.
-  const plainFoe = !opponent.dungeon && !opponent.cup && !opponent.draft && !opponent.ghost && !opponent.challenge && !opponent.signature && !opponent.isRival && !opponent.puzzle && !opponent.trial;
+  const plainFoe = !opponent.dungeon && !opponent.cup && !opponent.draft && !opponent.ghost && !opponent.challenge && !opponent.signature && !opponent.isRival && !opponent.puzzle && !opponent.trial && !opponent.spar;
   const oppDeck = plainFoe ? buildDeckForOpponent(DECK_SIZE, isBoss, null, opponent.name, state.currentDistrict)   // a district's folk favour its family
     : (Array.isArray(opponent.deck) && opponent.deck.length === DECK_SIZE) ? opponent.deck : buildDeckForOpponent(DECK_SIZE, isBoss);
   const twistKind = bossTwistFor(opponent);
@@ -1096,6 +1096,8 @@ function btShowResult(won, yielded) {
     battleEndStats.textContent = `There is a way to win this turn${state.progress.puzzle && state.progress.puzzle.steps ? ` in ${state.progress.puzzle.steps} moves` : ''}. Try again - the board resets exactly as it was.`;
     btGet('battleRetryBtn').classList.remove('hidden');
     sfx('soft');
+  } else if (npc.spar && !battle.rewarded) {
+    battle.rewarded = true; sparResult();
   } else if (won && !battle.rewarded && npc.trial) {
     trialWin();
   } else if (won && !battle.rewarded && npc.challenge) {
@@ -1173,7 +1175,7 @@ function btShowResult(won, yielded) {
     sfx('soft');
   }
   btRenderEndStats(G, won, yielded, turns, npc);
-  if (firstShow && !npc.puzzle) { battle.recorded = true; recordBattle(won, yielded, state.ownedCards.slice(ownedBefore)); }
+  if (firstShow && !npc.puzzle && !npc.spar) { battle.recorded = true; recordBattle(won, yielded, state.ownedCards.slice(ownedBefore)); }
   updateHud();
   battleEndOverlay.classList.remove('hidden');
 }

@@ -245,6 +245,7 @@ function switchTab(key) {
   if (inBattle) return;
   if (placingDecoration && key !== 'town') cancelPlacingDecoration(true);
   if (HIDESEEK.active && key !== 'town') cancelHideSeek(true);
+  if (key !== 'town' && typeof companionWalkActive === 'function' && companionWalkActive()) stopCompanionWalk('tab');
   const prev = currentTab, smooth = prev !== key && btMotionOk();
   currentTab = key;
   Object.entries(tabs).forEach(([k, t]) => {

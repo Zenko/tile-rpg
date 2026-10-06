@@ -44,21 +44,33 @@ module.exports = async (page, assert) => {
   assert.strictEqual(swap.b1, 2); assert.strictEqual(swap.b2, 1, 'a new companion starts at the first bond step');
   assert.strictEqual(swap.back, 2, 'the bond comes back when you pick them again'); assert.ok(swap.stored);
 
-  // ----- a neighbour leaves their district and comes back -----
+  // ----- a neighbour: needs a higher level AND all five hearts, brings two perks, leaves their district and comes back -----
   const npc = await page.evaluate(() => {
-    const d = ensureDistrictData('square'), n = d.npcs[0], before = d.npcs.length;
-    noteMet(n);
-    const e = companionRoster().neighbours.find(x => x.kind === 'npc' && x.name === n.name);
-    state.progress.level = 1; const low = companionBlock(e); state.progress.level = 3;
-    const ok = chooseCompanion(e);
-    const during = { inWorld: d.npcs.includes(n), count: d.npcs.length, kind: state.companion.kind, perk: state.companion.perk, stash: state.companion.npc === n };
-    const talk = (() => { openTalk(companionNpcObj()); const shown = !document.getElementById('talkOverlay').classList.contains('hidden'); closeTalk(); return shown; })();
+    const d = ensureDistrictData('square'), n = d.npcs[0], before = d.npcs.length, key = 'square:' + n.name;
+    noteMet(n); delete friendsState()[key];
+    const e0 = () => companionRoster().neighbours.find(x => x.kind === 'npc' && x.name === n.name);
+    const r = { name: n.name, before };
+    state.progress.level = 7; friendsState()[key] = { name: n.name, district: 'square', points: 25, icon: '🙂' }; r.lowLevel = companionBlock(e0());
+    state.progress.level = 8; friendsState()[key].points = 12; r.lowHearts = companionBlock(e0());
+    state.progress.level = 1; r.both = companionBlock(e0());
+    state.progress.level = 8; friendsState()[key].points = 25;
+    r.open = companionBlock(e0());
+    r.ok = chooseCompanion(e0());
+    const c = state.companion;
+    r.during = { inWorld: d.npcs.includes(n), count: d.npcs.length, kind: c.kind, perk: c.perk, perk2: c.perk2, perks: companionPerks(c).length, bond: bondLevel(c), stash: c.npc === n };
+    r.talk = (() => { openTalk(companionNpcObj()); const shown = !document.getElementById('talkOverlay').classList.contains('hidden'); closeTalk(); return shown; })();
     releaseCompanion();
-    return { low, ok, during, talk, back: d.npcs.includes(n), after: d.npcs.length, before, name: n.name };
+    r.back = d.npcs.includes(n); r.after = d.npcs.length;
+    return r;
   });
-  assert.ok(/^Reach Lv 3/.test(npc.low), npc.low); assert.ok(npc.ok);
+  assert.ok(/^Reach Lv 8/.test(npc.lowLevel), npc.lowLevel);
+  assert.ok(/^Needs 5 hearts \(you have 3\)/.test(npc.lowHearts), npc.lowHearts);
+  assert.ok(/Lv 8 and 5 hearts/.test(npc.both), npc.both);
+  assert.strictEqual(npc.open, '', 'Lv 8 and five hearts opens a neighbour'); assert.ok(npc.ok);
   assert.strictEqual(npc.during.inWorld, false, 'a walking neighbour leaves the district list'); assert.strictEqual(npc.during.count, npc.before - 1);
   assert.strictEqual(npc.during.kind, 'npc'); assert.strictEqual(npc.during.perk, 'xp'); assert.ok(npc.during.stash);
+  assert.strictEqual(npc.during.perks, 2, 'a best friend brings a second perk'); assert.notStrictEqual(npc.during.perk2, npc.during.perk);
+  assert.strictEqual(npc.during.bond, 2, 'and starts one bond step closer');
   assert.ok(npc.talk, 'you can still talk to a companion neighbour');
   assert.ok(npc.back && npc.after === npc.before, 'they go home when you part');
 
@@ -96,7 +108,7 @@ module.exports = async (page, assert) => {
   assert.ok(rook.ok); assert.strictEqual(rook.inTown, false, 'Rook is not wandering the town while he walks with you');
   assert.ok(rook.isRival && rook.deck, 'Rook can still be talked to and duelled'); assert.ok(rook.rebuilding, 'and rests after a loss as usual');
 
-  // ----- the town menu: pat up to three times a day, look around, hide and seek -----
+  // ----- the hub: pat up to three times a day, look around, and every activity is offered -----
   const menu = await page.evaluate(() => {
     chooseCompanion(cardEntry('sprout'));
     state.companion.bond = 0; companionDay().pets = 0;
@@ -104,12 +116,13 @@ module.exports = async (page, assert) => {
     const gained = state.companion.bond - before;
     const look = companionLookAround();
     openCompanionMenu();
-    const labels = [...document.querySelectorAll('#sceneryActions button')].map(b => b.textContent);
-    document.getElementById('sceneryOverlay').classList.add('hidden');
-    return { gained, look: typeof look, labels };
+    const labels = [...document.querySelectorAll('#companionHub .chb-act b')].map(b => b.textContent), quick = [...document.querySelectorAll('#companionHub .chb-quick button')].map(b => b.textContent);
+    document.getElementById('companionHub').classList.add('hidden');
+    return { gained, look: typeof look, labels, quick };
   });
   assert.strictEqual(menu.gained, 3, 'only three pats a day count');
-  assert.ok(['Chat', 'Pet', 'Look around', 'Hide and seek', 'Companion screen'].every(l => menu.labels.some(x => x.includes(l))), menu.labels.join('|'));
+  assert.ok(['Go for a walk', 'Calm together', 'Sit together', 'Spar', 'Play a game', 'Hide and seek', 'Companion page'].every(l => menu.labels.includes(l)), menu.labels.join('|'));
+  assert.ok(menu.quick.some(q => /Chat/.test(q)) && menu.quick.some(q => /Pet/.test(q)) && menu.quick.some(q => /Look/.test(q)));
 
   // ----- the Character page and the picker -----
   await page.evaluate(() => { document.getElementById('testHideOverlays') && document.getElementById('testHideOverlays').remove(); document.querySelectorAll('.overlay').forEach(o => o.classList.add('hidden')); switchTab('character'); charSetView('pals'); });
@@ -170,8 +183,8 @@ module.exports = async (page, assert) => {
 
   // ----- asking a neighbour from their talk card -----
   const ask = await page.evaluate(() => {
-    state.progress.level = 3; releaseCompanion(); document.querySelectorAll('.overlay').forEach(o => o.classList.add('hidden'));
-    const d = ensureDistrictData('square'), n = d.npcs.find(x => !x.defeated);
+    state.progress.level = 8; releaseCompanion(); document.querySelectorAll('.overlay').forEach(o => o.classList.add('hidden'));
+    const d = ensureDistrictData('square'), n = d.npcs.find(x => !x.defeated); friendsState()['square:' + n.name] = { name: n.name, district: 'square', points: 25, icon: '🙂' };
     openTalk(n); const b = document.getElementById('talkCompanion'), r = { shown: !b.classList.contains('hidden'), enabled: !b.disabled };
     b.click(); r.joined = !!state.companion && state.companion.name === n.name; r.closed = document.getElementById('talkOverlay').classList.contains('hidden');
     releaseCompanion();

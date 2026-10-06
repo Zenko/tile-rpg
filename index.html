@@ -695,6 +695,17 @@
   </div>
 </div>
 
+<div class="overlay sheet hidden" id="companionHub" role="dialog" aria-modal="true" aria-label="Things to do together"><div class="overlay-card coll-sheet chb-card"></div></div>
+
+<div class="overlay sheet hidden" id="companionGame" role="dialog" aria-modal="true" aria-label="Game">
+  <div class="overlay-card coll-sheet cg-card">
+    <h2><span id="cgTitle">Game</span> <button class="coll-clear" id="cgClose">Close</button></h2>
+    <div id="cgBody"></div>
+  </div>
+</div>
+
+<button type="button" class="comp-walk-pill hidden" id="compWalkPill">🚶 Walking with <b></b> · tap to stop</button>
+
 <div class="overlay sheet hidden" id="companionPicker">
   <div class="overlay-card coll-sheet cp-sheet">
     <h2>Choose a companion <button class="coll-clear" id="cpClose">Close</button></h2>
@@ -787,6 +798,7 @@
 <script src="js/requests-friendship-rival.js"></script>
 <script src="js/puzzle-memory-minigames.js"></script>
 <script src="js/afterdark-companion-cards.js"></script>
+<script src="js/companion-activities.js"></script>
 <script src="js/gardening.js"></script>
 <script src="js/battle-ui.js"></script>
 <script src="js/battle-toss.js"></script>

@@ -82,7 +82,8 @@ function sellJar() {
      card      -> its first keyword (spells and keywordless cards give XP)
      neighbour -> their district     boss -> its twist     Rook -> XP
    Who is allowed depends on your Dreamer level (COMPANION_LEVEL): a card by its rarity (spells a few levels more), a
-   neighbour by their district, Rook at 10, bosses much later. You can only pick a card you own. Bond is kept per
+   neighbour by their district AND full hearts, Rook at 10, bosses much later. A neighbour or boss brings a second perk of
+   their own (companionPerks) and starts one bond step closer, which is what makes five hearts worth the effort. You can only pick a card you own. Bond is kept per
    companion in state.progress.bonds, so swapping never loses it. A neighbour or boss who joins leaves the district's
    list (it is kept inside state.companion.npc) and goes back when you part; you still talk to them or duel them from
    the companion menu, with the same prizes and rest times as before. Rook lives in state.progress.rival, so he is
@@ -103,41 +104,37 @@ const BOSS_PERK = { square: 'spirit', market: 'chest', harbor: 'fish', garden: '
 // Dreamer level needed. Cards by rarity (spells add `spell` levels on top), neighbours by district, bosses much later.
 const COMPANION_LEVEL = {
   card: { common: 1, rare: 3, ultra: 5, super: 8, mythic: 12, divine: 16 }, spell: 3,
-  npc: { square: 3, market: 4, harbor: 6, garden: 8 },
+  npc: { square: 8, market: 10, harbor: 12, garden: 14 },        // and every neighbour also needs all five hearts (COMPANION_HEARTS)
   boss: { square: 12, market: 15, harbor: 18, garden: 21 },
   rival: 10,
 };
+const COMPANION_HEARTS = 5;     // a neighbour has to be a best friend before they will walk with you
 const COMPANION_TRAITS = {
   card: ['Hums quietly when you stop walking.', 'Never goes more than three steps away.', 'Pretends not to notice the puddles, then hops them.', 'Gets a little brighter every time you win.', 'Likes to wait where the light is good.', 'Turns to look whenever you turn a corner.', 'Is secretly very proud to be a card.', 'Rests in your shadow when it rains.'],
   npc: ['Narrates the walk, whether you ask or not.', 'Always has a snack in a pocket.', 'Waves at everyone you pass.', 'Walks a little ahead, then waits with a grin.', 'Hums a tune they never quite finish.', 'Notices small things and mentions them.', 'Says they are only here for the fresh air.', 'Keeps a careful count of your steps.'],
   boss: ['Walks slowly, and the grass leans aside.', 'Looks down at everything, kindly.', 'Has promised to behave. Mostly.', 'Takes up a lot of the path and knows it.', 'Rumbles when something is hidden nearby.', 'Still sizes up every stranger for a match.'],
   rival: ['Claims to be here to keep an eye on you.', 'Practises card shuffles at every bench.', 'Pretends not to be impressed.', 'Keeps score of your wins out loud.'],
 };
-const COMPANION_LINES = {
-  any: ['{n} falls into step beside you.', '{n} looks up and smiles.', '{n} bumps your arm, gently.', 'Quiet roads are the best roads, says {n}.', '{n} is glad to be going somewhere with you.', '{n} stretches and keeps pace.'],
-  clear: ['{n} squints happily at the sky.', '{n} says it is a good day for finding things.'],
-  cloudy: ['{n} likes the soft light today.', '{n} says the mist makes everything feel closer.'],
-  rain: ['{n} tilts their head to listen to the rain.', '{n} walks slower, so as not to splash you.'],
-  storm: ['{n} stays very close.', '{n} says the storm makes the air tingle.'],
-  snow: ['{n} catches a drifting star on a sleeve.', '{n} says the town sounds hushed under the snow.'],
-  night: ['{n} gazes at the lanterns.', '{n} whispers that the night is full of small things.'],
-  spirit: ['{n} stands a little taller, ready for a match.'],
-  finds: ['{n} is sure there is something in the grass over there.'],
-  crops: ['{n} wonders how your garden is getting on.'],
-  harvest: ['{n} would like a basket of something sweet.'],
-  chest: ['{n} sniffs the air and thinks of keys.'],
-  fish: ['{n} keeps glancing at the water.'],
-  xp: ['{n} says you have been getting better, and means it.'],
-  boss: ['{n} says it is odd, being on your side.', '{n} looks out over the town like a landlord.'],
-  rival: ['{n} says the next match will be theirs.', '{n} says do not get comfortable, it is only a truce.'],
-  npc: ['{n} says people in town ask about you.', '{n} says you walk like someone with a plan.'],
-};
 function companionKind(c) { return (c && c.kind) || 'card'; }
 function companionKeyOf(kind, id) { return kind + ':' + id; }
 function companionKey(c) { return companionKeyOf(companionKind(c), companionKind(c) === 'card' ? c.cardId : c.id); }
 function companionPerkFor(cardId) { const d = cardDef(cardId); return (d && !d.spell && d.kw[0] && KW_PERK[d.kw[0]]) || 'xp'; }
 function companionPerk() { return state.companion ? state.companion.perk : null; }
-function hasPerk(p) { return companionPerk() === p; }
+// Every perk a companion lends: its main one, plus a personal second one for a neighbour (their favourite keyword) or a boss.
+function companionSecondPerk(c, main) {
+  const kind = companionKind(c); if (kind !== 'npc' && kind !== 'boss') return null;
+  let p = null;
+  if (kind === 'npc' && c.npc) p = KW_PERK[signatureTheme(c.npc)] || null;
+  const others = Object.keys(COMPANION_PERKS).filter(k => k !== main);
+  if (!p || p === main) p = others[companionHash(companionKey(c)) % others.length];
+  return p;
+}
+function companionPerks(c) {
+  c = c || state.companion; if (!c) return [];
+  if (c.perk2 === undefined) c.perk2 = companionSecondPerk(c, c.perk);      // older saves get theirs the first time it is read
+  return c.perk2 && c.perk2 !== c.perk ? [c.perk, c.perk2] : [c.perk];
+}
+function hasPerk(p) { return companionPerks().includes(p); }
 function companionHash(s) { let h = 0; s = String(s); for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h; }
 function companionTrait(c) { const pool = COMPANION_TRAITS[companionKind(c)] || COMPANION_TRAITS.card; return pool[companionHash(companionKey(c)) % pool.length]; }
 function companionIconHtml(c) { if (companionKind(c) === 'card') { const d = cardDef(c.cardId); if (d) return cardArtHtml(d); } return escapeHtml(c.icon || '❔'); }
@@ -169,12 +166,18 @@ function cardEntry(id) {
 }
 function npcEntry(rec) {
   const dist = DISTRICTS[rec.district]; if (!dist) return null;
-  return { kind: 'npc', id: rec.district + ':' + rec.name, key: companionKeyOf('npc', rec.district + ':' + rec.name), name: rec.name, icon: rec.icon || '🙂', district: rec.district,
-           perk: DISTRICT_PERK[rec.district] || 'xp', level: COMPANION_LEVEL.npc[rec.district] || 3, sub: `Neighbour · ${dist.name}` };
+  const fr = friendsState()[rec.district + ':' + rec.name];
+  const e = { kind: 'npc', id: rec.district + ':' + rec.name, key: companionKeyOf('npc', rec.district + ':' + rec.name), name: rec.name, icon: rec.icon || '🙂', district: rec.district,
+              perk: DISTRICT_PERK[rec.district] || 'xp', level: COMPANION_LEVEL.npc[rec.district] || 8, hearts: heartsFor(fr ? fr.points : 0), needHearts: COMPANION_HEARTS, sub: `Neighbour · ${dist.name}` };
+  const src = companionSource(e);
+  e.perk2 = src ? companionSecondPerk({ kind: 'npc', id: e.id, npc: src }, e.perk) : null;
+  return e;
 }
 function bossEntry(k) {
   const dist = DISTRICTS[k]; if (!dist) return null;
-  return { kind: 'boss', id: k, key: companionKeyOf('boss', k), name: dist.boss, icon: dist.bossIcon, district: k, perk: BOSS_PERK[k] || 'xp', level: COMPANION_LEVEL.boss[k] || 15, sub: `Boss · ${dist.name}` };
+  const e = { kind: 'boss', id: k, key: companionKeyOf('boss', k), name: dist.boss, icon: dist.bossIcon, district: k, perk: BOSS_PERK[k] || 'xp', level: COMPANION_LEVEL.boss[k] || 15, sub: `Boss · ${dist.name}` };
+  e.perk2 = companionSecondPerk({ kind: 'boss', id: k }, e.perk);
+  return e;
 }
 function rivalEntry() { return { kind: 'rival', id: 'rook', key: companionKeyOf('rival', 'rook'), name: RIVAL.name, icon: RIVAL.icon, perk: 'xp', level: COMPANION_LEVEL.rival, sub: 'Rival' }; }
 // The neighbour or boss as it sits in its district right now (or inside the companion record while it walks with you).
@@ -212,8 +215,10 @@ function companionBlock(e) {
   if (!e) return 'Not available';
   if (state.companion && companionKey(state.companion) === e.key) return '';
   if (e.kind === 'card') { if (e.rarity === 'atlas') return 'The Atlas cannot walk with anyone'; if (!e.owned) return 'You need to own this card to walk with it'; }
-  const lv = ensureLevel().level;
-  if (lv < e.level) return `Reach Lv ${e.level} (you are Lv ${lv})`;
+  const lv = ensureLevel().level, needLv = lv < e.level, needHearts = e.kind === 'npc' && e.hearts < e.needHearts;
+  if (needLv && needHearts) return `Needs Lv ${e.level} and ${e.needHearts} hearts (you are Lv ${lv} with ${e.hearts})`;
+  if (needHearts) return `Needs ${e.needHearts} hearts (you have ${e.hearts})`;
+  if (needLv) return `Reach Lv ${e.level} (you are Lv ${lv})`;
   if (e.kind === 'npc' || e.kind === 'boss') {
     const o = companionSource(e);
     if (!o) return 'Not around right now';
@@ -231,7 +236,7 @@ function companionGrow(pts) {
   c.bond = (c.bond || 0) + pts;
   const after = bondLevel(c);
   if (after > before) {
-    toast(`${c.icon} ${c.name} feels closer to you (bond ${after})${BOND_PERK[c.perk] ? ': its perk grew' : ''}`);
+    toast(`${c.icon} ${c.name} feels closer to you (bond ${after}): their perk${companionPerks(c).length > 1 ? 's' : ''} grew`);
     logEvent(c.icon, `${c.name} reached bond level ${after}.`);
   }
   companionSaveBond(c);
@@ -247,7 +252,7 @@ function chooseCompanion(e) {
   const bs = bondsStore()[e.key] || {};
   const c = { kind: e.kind, id: e.id, name: e.name, icon: e.icon, perk: e.perk, since: bs.since || Date.now(), bond: bs.bond || 0, wins: bs.wins || 0, catches: bs.catches || 0 };
   if (e.kind === 'card') c.cardId = e.id;
-  if (e.kind === 'boss') c.bond = Math.max(c.bond, BOND_AT[1]);        // a beaten boss starts one step closer
+  if (e.kind === 'boss' || e.kind === 'npc') { c.bond = Math.max(c.bond, BOND_AT[1]); c.perk2 = e.perk2; }   // a best friend or a beaten boss starts one step closer, with a second perk
   if (src) {
     const data = state.districtData[e.district];
     if (e.kind === 'npc') data.npcs.splice(data.npcs.indexOf(src), 1); else data.boss = null;
@@ -256,7 +261,7 @@ function chooseCompanion(e) {
   state.companion = c; state.companionPos = besidePlayer();
   companionSaveBond(c);
   logEvent(c.icon, `${c.name} decided to walk with you.`);
-  toast(`${c.icon} ${c.name} joins you · ${COMPANION_PERKS[c.perk].text}`);
+  toast(`${c.icon} ${c.name} joins you · ${companionPerks(c).map(k => COMPANION_PERKS[k].text).join(' · ')}`);
   sfx('gift'); buzz(HAP.found); saveState(); renderTown(); checkAchievements();
   if (typeof refreshCharacterTab === 'function') refreshCharacterTab();
   return true;
@@ -312,21 +317,12 @@ function renderCompanionBox() {
   if (!box) return;
   const c = state.companion;
   if (!c) { box.innerHTML = '<div class="panel-desc">Pick a companion in Character → Companion. Each one brings a small perk.</div>'; return; }
-  const perk = COMPANION_PERKS[c.perk];
-  box.innerHTML = `<div class="panel-item"><span class="panel-icon">${companionIconHtml(c)}</span><span class="panel-text"><div class="panel-name">${escapeHtml(c.name)}</div><div class="panel-ability">${perk.icon} ${perk.text}</div></span><button class="panel-action" id="companionRelease">Say goodbye</button></div>`;
+  box.innerHTML = `<div class="panel-item"><span class="panel-icon">${companionIconHtml(c)}</span><span class="panel-text"><div class="panel-name">${escapeHtml(c.name)}</div><div class="panel-ability">${companionPerks(c).map(k => COMPANION_PERKS[k].icon + ' ' + COMPANION_PERKS[k].text).join('<br>')}</div></span><button class="panel-action" id="companionRelease">Say goodbye</button></div>`;
   document.getElementById('companionRelease').addEventListener('click', () => { askConfirm({ title: `Say goodbye to ${c.name}?`, text: 'They will leave your side. Your bond is kept.', ok: 'Say goodbye' }, () => releaseCompanion()); });
 }
 
 /* ---------- things to do with your companion ---------- */
 function companionDay() { const p = state.progress, t = todayKey(); if (!p.companionDay || p.companionDay.day !== t) p.companionDay = { day: t, pets: 0 }; return p.companionDay; }
-function companionLine(c) {
-  c = c || state.companion; if (!c) return '';
-  const kind = companionKind(c), pool = [...COMPANION_LINES.any, ...(COMPANION_LINES[weatherNow()] || []), ...(isNightNow() ? COMPANION_LINES.night : []), ...(COMPANION_LINES[c.perk] || []), ...(COMPANION_LINES[kind] || [])];
-  let line, tries = 0;
-  do { line = pool[Math.floor(Math.random() * pool.length)]; tries++; } while (line === c._lastLine && tries < 6);
-  c._lastLine = line;
-  return line.replace(/\{n\}/g, c.name);
-}
 function companionFloat(emoji) {
   if (!townWorld || !state.companionPos) return;
   const e = document.createElement('div'); e.className = 'ent comp-float'; e.style.setProperty('--x', state.companionPos.x); e.style.setProperty('--y', state.companionPos.y); e.style.zIndex = 900;
@@ -377,19 +373,6 @@ function companionFightGate(t) {
     t.defeated = false; t.grave = null; t.defeatedAt = null;
   }
   return true;
-}
-function openCompanionMenu(line) {
-  const c = state.companion; if (!c) return;
-  const kind = companionKind(c), acts = [];
-  const again = text => () => openCompanionMenu(text());
-  acts.push({ label: '💬 Chat', run: again(() => companionLine(c)) });
-  acts.push({ label: '🤚 Pet', run: again(petCompanion) });
-  acts.push({ label: '👀 Look around', run: again(companionLookAround) });
-  acts.push({ label: '🙈 Hide and seek', run: () => { showTipOnce('companionPlay'); startHideSeek(); } });
-  if (kind === 'npc' || kind === 'rival') acts.push({ label: kind === 'rival' ? '🎭 Talk or duel' : '🗣️ Talk', run: () => { const o = companionNpcObj(c); if (o) openTalk(o); } });
-  if (kind === 'boss') acts.push({ label: '⚔️ Challenge', run: () => { const o = companionNpcObj(c); if (o) interactWith('fight', o); } });
-  acts.push({ label: '🧭 Companion screen', run: () => { switchTab('character'); if (typeof charSetView === 'function') charSetView('pals'); } });
-  showProp(c.icon, c.name, line || `“${companionTrait(c)}”`, acts);
 }
 
 /* ============================================================

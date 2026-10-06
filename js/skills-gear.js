@@ -54,8 +54,8 @@ function skillBonus(kind) {
   let v = 0;
   SKILL_BRANCHES.forEach(b => { const r = skillRank(b.id); if (r) b.perks(r).forEach(p => { if (p.kind === kind) v += p.val; }); });
   GEAR.forEach(g => { const t = gearTier(g.id); if (t) g.perks(t).forEach(p => { if (p.kind === kind) v += p.val; }); });
-  const c = state.companion, bp = c && BOND_PERK[c.perk], bl = bondLevel(c);
-  if (bp && bp[0] === kind && bl >= 2) v += bp[bl - 1];   // bond 2 adds bp[1], bond 3 adds bp[2]
+  const c = state.companion, bl = bondLevel(c);
+  if (c && bl >= 2) companionPerks(c).forEach(pk => { const bp = BOND_PERK[pk]; if (bp && bp[0] === kind) v += bp[bl - 1]; });   // bond 2 adds bp[1], bond 3 adds bp[2], for each of their perks
   if (typeof tarotBonus === 'function') v += tarotBonus(kind);   // the day's fortune and attuned Arcana (js/tarot.js)
   if (typeof cellarRunBonus === 'function') v += cellarRunBonus(kind);   // boons while a cellar fight is on (js/cellar-run.js)
   if (kind === 'xp' && typeof calmRested === 'function' && calmRested()) v += 0.05;   // Rested after five breaths (js/calm.js)

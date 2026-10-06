@@ -2,7 +2,7 @@
    TOWN MAP: drawing, camera, tap-to-walk, houses and the cellar dungeon.
    ============================================================ */
 const townView = document.getElementById('townGrid');
-const VIEW_COLS = 7, STEP_MS = 140;
+const VIEW_COLS = 7; let STEP_MS = 140;   // `let`: a walk with your companion slows it down while it lasts (js/companion-activities.js)
 let viewRows = 7;
 const CAM_PAD_TOP = 70, CAM_PAD_BOTTOM = 96;   // px of the map hidden behind the floating top pill and bottom dock
 let townWorld = null, townBuiltFor = null, tilePx = 48, playerEl = null, walkToken = 0;
@@ -610,7 +610,7 @@ function renderEntities(data) {
   // Hidden mid-round during Hide and Seek (see HIDESEEK below) rather than shown sitting on its hiding
   // spot - state.companionPos still tracks where it is, renderEntities just skips drawing it.
   if (state.companion && state.companionPos && !(HIDESEEK.active && HIDESEEK.phase === 'seek')) {
-    const ce = add('companion', state.companionPos.x, state.companionPos.y, `<span>${companionIconHtml(state.companion)}</span>`); ce.style.zIndex = state.companionPos.y * 2 + 2;
+    const ce = add('companion', state.companionPos.x, state.companionPos.y, `<span>${companionIconHtml(state.companion)}</span>`); ce.style.zIndex = state.companionPos.y * 2 + 2; applyCompBubble();
   }
   if (lanternOpen()) { const lv = add('vendor', LANTERN_TILE.x, LANTERN_TILE.y, '<span>🦉</span><div class="ent-name">Lantern Market</div>'); lv.style.zIndex = LANTERN_TILE.y * 2 + 2; }
   if (fortuneOpen()) { const fv = add('vendor', FORTUNE_TILE.x, FORTUNE_TILE.y, '<span>🔮</span><div class="ent-name">Fortune Teller</div>'); fv.style.zIndex = FORTUNE_TILE.y * 2 + 2; }
@@ -935,6 +935,7 @@ function decorationAt(data, x, y) { return (data.decorations || []).find(d => d.
 function handleMapTap(tx, ty) {
   if (inBattle || inScene) return;
   if (HIDESEEK.active) { handleHideSeekTap(tx, ty); return; }
+  if (companionWalkActive()) { stopCompanionWalk('tap'); return; }      // any tap ends a walk with your companion
   if (placingDecoration) { handleDecorationTap(tx, ty); return; }
   const m = getMap(state.currentDistrict), data = ensureDistrictData(state.currentDistrict);
   if (tx < 0 || ty < 0 || tx >= m.w || ty >= m.h) return;
