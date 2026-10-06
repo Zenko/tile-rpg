@@ -1366,3 +1366,21 @@ body.in-story .toast { opacity: 0; }
 .cr-pc-name { font-size: 0.72rem; font-weight: 700; line-height: 1.2; }
 .cr-pc-own { font-size: 0.68rem; color: var(--ink-soft); }
 @media (max-width: 360px) { .cr-pair .cr-tile { width: 72px; } .cr-pair .cr-tile + .cr-tile { margin-left: -52px; } .cr-result { width: 108px; } }
+
+/* ===== My Cards header: search + Filter button + tags (replaces the two chip rows) ===== */
+.coll-bar { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; }
+.coll-icon-btn { position: relative; flex: 0 0 44px; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--stone-edge); background: var(--stone); color: var(--ink); font-size: 1rem; cursor: pointer; display: grid; place-items: center; font-family: inherit; }
+.coll-icon-btn.active { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 22%, var(--stone)); }
+.coll-icon-btn:active { transform: scale(0.94); }
+.coll-bar .cf-search { height: 44px; }
+.coll-dot { position: absolute; top: -3px; right: -3px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 99px; background: var(--accent); color: var(--on-accent); font-size: 0.68rem; font-weight: 800; display: grid; place-items: center; }
+.coll-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+.coll-tag { display: inline-flex; align-items: center; gap: 6px; background: color-mix(in srgb, var(--water) 18%, transparent); border: 1px solid var(--water); border-radius: 999px; padding: 4px 6px 4px 12px; font-size: 0.78rem; font-weight: 700; }
+.coll-tag button { width: 24px; height: 24px; border: 0; border-radius: 50%; background: var(--board-bg); color: var(--ink); font-size: 0.7rem; cursor: pointer; }
+.coll-sheet h2 { display: flex; justify-content: space-between; align-items: baseline; }
+.coll-clear { border: 0; background: none; color: var(--water-ink); font: inherit; font-size: 0.85rem; font-weight: 700; cursor: pointer; padding: 6px; }
+.coll-lab { font-size: 0.68rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); margin: 14px 0 6px; }
+.cf-chips.cf-wrap { flex-wrap: wrap; overflow: visible; margin: 0; padding: 0; }
+.coll-sheet .btn { width: 100%; margin-top: 18px; min-height: 48px; }
+.coll-sheet .coll-lab { text-align: left; }
+.coll-sheet .cf-chip.active:not([data-r]), .coll-sheet .cf-chip.active[data-r="all"] { background: var(--water); color: var(--on-water); border-color: transparent; }

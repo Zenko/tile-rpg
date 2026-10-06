@@ -299,11 +299,12 @@
           <button class="seg-btn" id="segCraft">Workshop</button>
         </div>
         <div class="alm-progress hidden" id="almProgress"></div>
-        <div class="dk-toolbar" id="collFilterToolbar">
-          <button class="dk-tool-btn active" id="collFilterToggle" aria-expanded="true">🔍 Filter</button>
-          <button class="dk-tool-btn" id="collViewToggle" aria-label="Switch between grid and list">☰ List</button>
+        <div class="coll-bar" id="collFilterToolbar">
+          <input type="search" class="cf-search" id="collSearch" placeholder="Search cards or keywords" aria-label="Search cards">
+          <button class="coll-icon-btn" id="collFilterToggle" aria-label="Filter and sort"><span aria-hidden="true">🎚️</span><span class="coll-dot hidden" id="collFilterCount"></span></button>
+          <button class="coll-icon-btn" id="collViewToggle" aria-label="Switch between grid and list">☰</button>
         </div>
-        <div class="card-filter" id="collFilter"></div>
+        <div class="coll-tags hidden" id="collTags"></div>
         <div class="panel-list" id="collectionList"></div>
         <div class="alm-grid hidden" id="almanacGrid"></div>
         <div class="hidden" id="craftView"></div>
@@ -690,6 +691,16 @@
     <h2 id="wxTitle">Clear skies</h2>
     <div class="wx-rows" id="wxRows"></div>
     <button id="weatherOverlayClose" class="btn">Close</button>
+  </div>
+</div>
+
+<div class="overlay sheet hidden" id="collFilterSheet">
+  <div class="overlay-card coll-sheet">
+    <h2>Filters <button class="coll-clear" id="collClear">Clear all</button></h2>
+    <div class="coll-lab">Family</div><div class="cf-chips cf-wrap" id="csFam"></div>
+    <div class="coll-lab">Rarity</div><div class="cf-chips cf-wrap" id="csRar"></div>
+    <div class="coll-lab">Sort by</div><div class="cf-chips cf-wrap" id="csSort"></div>
+    <button class="btn" id="collSheetDone">Show cards</button>
   </div>
 </div>
 

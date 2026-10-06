@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'better', x: 'My Cards has a roomier top. Search sits on one row with a Filter button and the grid/list switch. Family, rarity and sort moved into a Filter sheet, and whatever is on shows as a tag you can tap away.' },
   { t:'better', x: 'The Workshop is redesigned. Refine is now a forge: pick a card from the strip, choose +1 power or +1 health, and see the stronger card before you commit. Refine and Trade up are two buttons at the top instead of one long scroll.' },
   { t:'fixed', x: 'Town ambience (birds, wind, waves, rain and thunder) now has its own switch and keeps playing when Music is turned off. Only Sound turns it off with everything else.' },
   { t:'better', x: 'The cost circle on every card is now the same size as the keyword icons under it.' },

@@ -3,7 +3,6 @@ const cardFilter = { q: '', rarity: 'all', fam: 'all', sort: 'rarity' };
 let collView = 'grid';       // My Cards: 'grid' (tiles, tap for the detail sheet) or 'list'
 let deckView = 'build';     // Deck sub-view: 'build' (tray, chart, keywords) or 'add' (pinned strip + your cards)
 let deckInfoMode = false;    // Deck: tapping a card reads it instead of adding it
-let collFilterOpen = true;   // My Cards' filter starts open (browse-first screen); setCardsView() reads this instead of forcing it open every time the tab is shown
 const FILTER_CHIPS = [['all', 'All'], ['common', 'Common'], ['rare', 'Rare'], ['ultra', 'Ultra'], ['super', 'Super'], ['mythic', 'Mythic'], ['divine', 'Divine'], ['atlas', 'Atlas'], ['spell', '✨ Spells']];
 const FAM_CHIPS = [['all', 'All families'], ...Object.keys(FAMILIES).map(k => [k, FAMILIES[k].icon + ' ' + FAMILIES[k].name])];
 const SORTS = { rarity: 'Rarity', cost: 'Cost', power: 'Power', name: 'Name' };
@@ -45,6 +44,49 @@ function renderFilterBar(boxId, rerender) {
   box.querySelectorAll('.cf-chip[data-r]').forEach(b => b.classList.toggle('active', b.dataset.r === cardFilter.rarity));
   box.querySelectorAll('.cf-fam').forEach(b => b.classList.toggle('active', b.dataset.f === cardFilter.fam));
 }
+
+/* ---------------- My Cards header: search, one Filter button, active tags ----------------
+   Family, rarity and sort live in a bottom sheet (#collFilterSheet) instead of two rows of chips, so the first cards
+   start near the top. Whatever is switched on shows as a removable tag under the search row. The Deck segment still
+   uses renderFilterBar's open panel. The search field sits outside the redrawn list, so typing never drops the keyboard. */
+function collActiveTags() {
+  const t = [];
+  if (cardFilter.fam !== 'all') t.push(['fam', (FAM_CHIPS.find(c => c[0] === cardFilter.fam) || [0, cardFilter.fam])[1]]);
+  if (cardFilter.rarity !== 'all') t.push(['rarity', (FILTER_CHIPS.find(c => c[0] === cardFilter.rarity) || [0, cardFilter.rarity])[1]]);
+  if (cardFilter.sort !== 'rarity') t.push(['sort', 'Sort: ' + SORTS[cardFilter.sort]]);
+  return t;
+}
+function renderCollBar() {
+  const input = document.getElementById('collSearch');
+  if (input.value !== cardFilter.q) input.value = cardFilter.q;
+  const tags = collActiveTags(), box = document.getElementById('collTags'), dot = document.getElementById('collFilterCount');
+  box.innerHTML = tags.map(([k, l]) => `<span class="coll-tag">${l}<button type="button" data-untag="${k}" aria-label="Remove ${escapeHtml(l)}">✕</button></span>`).join('');
+  box.classList.toggle('hidden', !tags.length);
+  dot.textContent = tags.length; dot.classList.toggle('hidden', !tags.length);
+  document.getElementById('collFilterToggle').classList.toggle('active', tags.length > 0);
+}
+function drawCollSheet() {
+  const chips = (id, list, cur, attr) => { document.getElementById(id).innerHTML = list.map(([k, l]) => `<button class="cf-chip${k === cur ? ' active' : ''}" ${attr}="${k}">${l}</button>`).join(''); };
+  chips('csFam', FAM_CHIPS, cardFilter.fam, 'data-f');
+  chips('csRar', FILTER_CHIPS, cardFilter.rarity, 'data-r');
+  chips('csSort', Object.keys(SORTS).map(k => [k, SORTS[k]]), cardFilter.sort, 'data-s');
+  document.getElementById('collSheetDone').textContent = `Show ${filterSortCards(Object.keys(ownedCardCounts())).length} cards`;
+}
+function setCollSheet(open) { document.getElementById('collFilterSheet').classList.toggle('hidden', !open); if (open) drawCollSheet(); }
+document.getElementById('collSearch').addEventListener('input', e => { cardFilter.q = e.target.value; renderCollection(); });
+document.getElementById('collFilterToggle').addEventListener('click', () => { sfx('nav'); buzz(HAP.tap); setCollSheet(true); });
+document.getElementById('collSheetDone').addEventListener('click', () => { sfx('nav'); setCollSheet(false); });
+document.getElementById('collFilterSheet').addEventListener('click', e => { if (e.target.id === 'collFilterSheet') setCollSheet(false); });
+document.getElementById('collClear').addEventListener('click', () => { cardFilter.fam = 'all'; cardFilter.rarity = 'all'; cardFilter.sort = 'rarity'; sfx('tap'); drawCollSheet(); renderCollection(); });
+document.getElementById('collFilterSheet').addEventListener('click', e => {
+  const b = e.target.closest('.cf-chip'); if (!b) return;
+  if (b.dataset.f) cardFilter.fam = b.dataset.f; else if (b.dataset.r) cardFilter.rarity = b.dataset.r; else if (b.dataset.s) cardFilter.sort = b.dataset.s;
+  sfx('tap'); drawCollSheet(); renderCollection();
+});
+document.getElementById('collTags').addEventListener('click', e => {
+  const b = e.target.closest('[data-untag]'); if (!b) return;
+  const k = b.dataset.untag; cardFilter[k] = k === 'sort' ? 'rarity' : 'all'; sfx('tap'); renderCollection();
+});
 
 // A custom "Sort by" sheet in place of a native <select>, which pops the OS's own picker on mobile and
 // looks out of place in a game that skins every other control itself. Shared by both filter bars (My Cards
@@ -238,14 +280,14 @@ function renderCollection() {
   collectionList.innerHTML = '';
   const counts = ownedCardCounts();
   const ids = Object.keys(counts);
-  document.getElementById('collViewToggle').textContent = collView === 'grid' ? '☰ List' : '▦ Grid';
+  document.getElementById('collViewToggle').textContent = collView === 'grid' ? '☰' : '▦';
 
   if (ids.length === 0) {
     collectionList.innerHTML = '<div class="panel-desc">No cards yet. Find some on the ground or win a friendly match.</div>';
     return;
   }
 
-  renderFilterBar('collFilter', renderCollection);
+  renderCollBar();
   const spares = totalSpares();
   if (spares > 0) {
     const bar = document.createElement('div');
@@ -256,7 +298,7 @@ function renderCollection() {
   const shownIds = filterSortCards(ids);
   if (!shownIds.length) {
     collectionList.insertAdjacentHTML('beforeend', '<div class="panel-desc cards-empty">No cards match that search.<br><button class="panel-action" id="clearCardFilter">Clear filters</button></div>');
-    document.getElementById('clearCardFilter').addEventListener('click', () => { cardFilter.q = ''; cardFilter.rarity = 'all'; cardFilter.fam = 'all'; renderCollection(); });
+    document.getElementById('clearCardFilter').addEventListener('click', () => { cardFilter.q = ''; cardFilter.rarity = 'all'; cardFilter.fam = 'all'; cardFilter.sort = 'rarity'; renderCollection(); });
   } else if (collView === 'grid') {
     const grid = document.createElement('div'); grid.className = 'alm-row card-grid';
     grid.innerHTML = shownIds.map(id => cardTileHtml(id, counts[id])).join('');
@@ -440,7 +482,6 @@ function panelToggleSection(btn, panel) {
 }
 document.getElementById('deckOptionsToggle').addEventListener('click', function () { panelToggleSection(this, document.getElementById('deckOptions')); });
 document.getElementById('deckFilterToggle').addEventListener('click', function () { panelToggleSection(this, document.getElementById('deckFilter')); });
-document.getElementById('collFilterToggle').addEventListener('click', function () { panelToggleSection(this, document.getElementById('collFilter')); collFilterOpen = this.classList.contains('active'); });
 
 document.getElementById('deckHelp').addEventListener('click', () => btShowHelp());
 ['deckInfoToggle', 'deckInfoToggleAdd'].forEach(id => document.getElementById(id).addEventListener('click', () => { deckInfoMode = !deckInfoMode; sfx('nav'); buzz(HAP.tap); renderDeckPanel(); }));
