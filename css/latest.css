@@ -1534,3 +1534,7 @@ body.in-story .toast { opacity: 0; }
 .reveal-card.holo.h4 .holo-foil, .reveal-card.holo.h5 .holo-foil { opacity: .5; }
 .reveal-card.holo .cost, .reveal-card.holo .kws { z-index: 8; }   /* the cost disc and keyword badges stay clean above the foil */
 @media (prefers-reduced-motion: reduce) { .reveal-card.holo { animation-name: reveal-spin; animation-duration: .01s; animation-iteration-count: 1; } }
+
+/* Guide me there (build 173): the goal chip's target building gets the same bobbing diamond as the story's. */
+.bld.goal-target::after { content: ''; position: absolute; left: 50%; top: -6px; width: 14px; height: 14px; margin-left: -7px; background: var(--accent); border-radius: 2px; transform: rotate(45deg); box-shadow: 0 0 14px var(--accent); animation: story-bob 1.4s ease-in-out infinite; pointer-events: none; z-index: 5; }
+@media (prefers-reduced-motion: reduce) { .bld.goal-target::after { animation: none; } }

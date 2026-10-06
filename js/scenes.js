@@ -123,20 +123,20 @@ function storyIntroCheck() {
 
 /* ---------- B. the guided first hour ---------- */
 // who speaks defaults to Wren. ask is what the goal pill says; go (a function, so it is read late) is where the pill's tap
-// takes you, or nothing to hear the beat again; mark is the building id that gets the gold diamond (in district, default square).
+// takes you (see guideTo in js/guide-walk.js: it walks there for you), or nothing to hear the beat again; mark is the building id that gets the gold diamond (in district, default square).
 const WREN_NOT_SURE = 'I could not tell you how I know my way around, only that I do.';
 const STORY_BEATS = [
-  { ask: 'wander the Threshold for a bit', cards: [
+  { ask: 'wander the Threshold for a bit', go: () => ({ wander: 30 }), cards: [
       { text: 'There you are. Come in off the middle of the path, dear.' },
       { text: `I am Wren. I keep the kettle on. ${WREN_NOT_SURE}`, choices: [
         { label: 'Where am I?', reply: 'El Umbral, the Threshold. Every dreamer starts here, though nobody remembers arriving.' },
         { label: 'Is this a dream?', reply: 'It might be. Whose, I could not say. I have heard it called a few things.' },
         { label: 'How do I leave?', reply: 'The doors here only lead deeper in, dear. Have some tea first.' } ] },
       { text: 'Take a slow wander first. El Umbral likes to be looked at. Thirty steps will do.' } ] },
-  { ask: 'say hello to a neighbor', cards: [
+  { ask: 'say hello to a neighbor', go: () => ({ npc: true }), cards: [
       { text: 'Did you notice? Everyone here is a spirit wearing a card.' },
       { text: 'Tap one and say hello. They like being noticed more than they let on.' } ] },
-  { ask: 'win a friendly card match', cards: [
+  { ask: 'win a friendly card match', go: () => ({ npc: true }), cards: [
       { text: 'Cards are how spirits talk. A friendly match is just a very polite way of saying more.' },
       { text: 'Go on. Nobody here plays to hurt.' } ] },
   { ask: 'claim your gift in Rewards', go: () => ({ tab: 'quests' }), cards: [
@@ -147,10 +147,10 @@ const STORY_BEATS = [
   { ask: 'bake a loaf at Maple\'s bakery', mark: 'bakery', go: () => JPLACES.bakery, cards: [
       { text: 'Maple bakes bread that tastes like a memory you cannot place.' },
       { text: 'Bake a loaf at her bakery, bottom left. Tell me what it reminds you of. Nobody ever agrees.' } ] },
-  { ask: 'catch a fish: tap the water', cards: [
+  { ask: 'catch a fish: tap the water', go: () => ({ fish: true }), cards: [
       { text: 'Cast a thought into any water. The fish bite on whatever you are thinking about.' },
       { text: 'The quiet ones bite best. Tap the water where a shadow is swimming.' } ] },
-  { ask: 'finish a game in any house', cards: [
+  { ask: 'finish a game in any house', go: () => ({ minigame: true }), cards: [
       { text: 'Most houses have a little game going. Nobody keeps the score for long.' },
       { text: 'Try one. Mine has tea in it.' } ] },
   { ask: 'plant a seed: Fern sells them', mark: 'house2', go: () => ({ scene: 'house2', district: 'square', name: "Fern's cottage" }), cards: [
@@ -165,16 +165,16 @@ const STORY_BEATS = [
       { text: 'Settle in properly. Do whatever pulls at you and it all counts.' },
       { text: 'When you reach level five, I have something for you.' } ] },
   // After the first chain, "Making yourself at home".
-  { ask: 'meet a district god in battle', cards: [
+  { ask: 'meet a district god in battle', go: () => ({ boss: true }), cards: [
       { text: 'Every district belongs to a spirit god. They do not mean any harm. They only want to be met.' },
       { text: 'Face one when you are ready. They are gentle, in their way.' } ] },
-  { ask: 'visit every district', go: () => ({ map: 1 }), cards: [
+  { ask: 'visit every district', go: () => { const k = Object.keys(DISTRICTS).find(d => !state.visitedDistricts.includes(d) && districtUnlocked(d)); return k ? { travel: k } : { map: 1 }; }, cards: [
       { text: 'There are four districts, and each one dreams a little differently.' },
       { text: 'Open the map and drift somewhere you have not been.' } ] },
-  { ask: 'visit the Net Loft and Glasshouse', go: () => ({ map: 1 }), cards: [
+  { ask: 'visit the Net Loft and Glasshouse', go: () => (state.progress.visited || {})['harbor-hut'] ? JPLACES.glass : JPLACES.net, cards: [
       { text: 'Tam mends nets by the shore, though nothing ever seems to tear.' },
       { text: 'Iris grows the most delicate thoughts under glass. Both would love a visitor.' } ] },
-  { ask: 'beat Rook in a match', cards: [
+  { ask: 'beat Rook in a match', go: () => ({ rival: true }), cards: [
       { text: 'Rook keeps turning up. Another dreamer, like you, with a head full of theories.' },
       { text: 'Play them, and listen. You never know which of their guesses is right. I certainly do not.' } ] },
   { ask: 'complete a themed card set', go: () => ({ tab: 'collection' }), cards: [
@@ -214,7 +214,7 @@ function storyGoal() {
   const first = s.step < STORY_ARC_LEN;
   if (storyReady()) return { icon: '📜', text: 'Wren: that one is done. Claim it in Rewards', run: () => journalGo({ tab: 'quests' }), first };
   const run = () => { if (b.go) journalGo(b.go()); else playStoryScene(storyBeatScript(s.step), { replay: true }); };
-  return { icon: st.icon, text: `Wren: ${b.ask}`, run, first };
+  return { icon: st.icon, text: `Wren: ${b.ask}`, run, first, go: b.go ? b.go() : null };
 }
 // The gold diamond over the building the current step points at, only while you are in that building's district.
 function storyMark() {

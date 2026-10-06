@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'better', x: 'The goal bar at the top now takes you there. Tap it and your character walks to the door and goes in, even if it is in another district. Goals about neighbours, fishing, crops and house tasks walk you to the person, the water or the plot, and a gold diamond marks the building. The Journal\'s Go buttons do the same, and tapping the map stops the walk.' },
   { t:'better', x: 'Settings has one Feedback and bugs button instead of two. Use it for ideas and for anything that broke.' },
   { t:'new', x: 'Settings has an Update game button. If your phone seems stuck on an old version, tap it: it clears the game\'s stored files and reloads the newest copy. Your save is not touched.' },
   { t:'new', x: 'Ultra rare and better cards shine with a rainbow holo foil in the card reveal and Card Details. Touch and drag the card: the light follows your finger and the card tilts toward it. Super ultra rare and above also sparkle. Left alone, the foil sweeps across slowly.' },

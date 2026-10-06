@@ -149,6 +149,7 @@ function charDrawPath(box) {
 /* ---------- the next-goal chip ----------
    One small pill under the top bar that says the single most useful thing to do next, and takes you there when tapped.
    It reads the same model as the Journal's Today page (todayModel), plus unspent skill points, so there is no new state.
+   Tapping it walks you there (js/guide-walk.js): across districts, to the door, and in; or to the neighbour, the water or the plot.
    Recomputed at most every 2 seconds (updateHud calls this very often) and hidden while a decoration is being placed. */
 let goalChipAt = 0, goalChipTarget = null;
 function nextGoal() {
@@ -156,19 +157,20 @@ function nextGoal() {
   if (sg && sg.first) return sg;
   if (skillPointsLeft() > 0) return { icon: '🧭', text: `${skillPointsLeft()} skill point${skillPointsLeft() === 1 ? '' : 's'} to spend`, run: () => { switchTab('character'); charSetView('path'); } };
   const m = todayModel();
-  if (m.away.length) { const a = m.away[0]; return { icon: a.icon, text: a.title, run: () => journalGo(a.go) }; }
+  if (m.away.length) { const a = m.away[0]; return { icon: a.icon, text: a.title, run: () => journalGo(a.go), go: a.go }; }
   const open = m.daily.find(i => !i.done && i.go && i.title !== 'Daily gift') || m.daily.find(i => !i.done);
-  if (open) return { icon: open.icon, text: `${open.title}: ${open.sub}`, run: () => journalGo(open.go) };
+  if (open) return { icon: open.icon, text: `${open.title}: ${open.sub}`, run: () => journalGo(open.go), go: open.go };
   return sg;
 }
 function refreshGoalChip(force) {
   const chip = document.getElementById('goalChip'); if (!chip) return;
   storyMark();
-  if (prefs.cozy) { chip.classList.add('hidden'); return; }   // Cozy mode: no nudges
+  if (prefs.cozy) { chip.classList.add('hidden'); guideMarkApply(null); return; }   // Cozy mode: no nudges
   const now = Date.now(); if (!force && now - goalChipAt < 2000) return; goalChipAt = now;
   const placing = !document.getElementById('decorationHint').classList.contains('hidden');
   const g = inBattle || placing ? null : nextGoal();
   chip.classList.toggle('hidden', !g);
+  guideMarkApply(g && g.go);   // js/guide-walk.js: the gold diamond over the building the goal points at, when it is in this district
   if (!g) { goalChipTarget = null; return; }
   goalChipTarget = g.run;
   document.getElementById('goalIcon').textContent = g.icon; document.getElementById('goalText').textContent = g.text;

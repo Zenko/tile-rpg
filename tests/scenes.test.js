@@ -55,9 +55,12 @@ module.exports = async (page, assert) => {
   // ---- the pill leads during the first chain, and a tap with nothing to go to replays the beat ----
   await page.evaluate(() => { refreshGoalChip(true); });
   assert.ok(/Wren: wander/.test(await page.textContent('#goalText')));
+  await page.click('#goalChip'); await page.waitForTimeout(250);
+  assert.ok(await page.evaluate(() => playerEl.classList.contains('walking')), 'tapping a pill with somewhere to go walks there (js/guide-walk.js)');
+  await page.evaluate(() => { cancelWalk(); state.progress.story.step = 11; refreshGoalChip(true); });   // 'reach level 5' has no place to go
   await page.click('#goalChip'); await page.waitForTimeout(150);
-  assert.ok(await page.evaluate(() => !!storyCur && storyCur.replay), 'tapping the pill replays her words');
-  await page.evaluate(() => { while (storyCur) storyEnd(); });
+  assert.ok(await page.evaluate(() => !!storyCur && storyCur.replay), 'tapping a pill with nothing to go to replays her words');
+  await page.evaluate(() => { while (storyCur) storyEnd(); state.progress.story.step = 0; });
 
   // ---- the gold diamond marks the building for the current step, only in its district, and not in Cozy mode ----
   const mark = await page.evaluate(() => {

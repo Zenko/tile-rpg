@@ -20,7 +20,7 @@ const JPLACES = {
   glass: { scene: 'garden-glass', district: 'garden', name: "Iris's Glasshouse" }
 };
 // Targets: { tab } switches tab, { menu } opens the player menu (settings / social), { map } opens the world map,
-// { scene, district, name } walks into a building when you are already in its district.
+// { scene, district, name } and the other walk-there targets listed in js/guide-walk.js take you there on foot, across districts if needed.
 function journalGo(t) {
   if (!t) return;
   if (inBattle) return;
@@ -28,12 +28,7 @@ function journalGo(t) {
   if (t.calm) { switchTab('town'); setTimeout(() => openCalm(), 200); return; }
   if (t.map) { switchTab('town'); setTimeout(openWorldMap, 200); return; }
   if (t.menu) { switchTab('town'); setTimeout(() => { openPlayerMenu(); document.getElementById(t.menu === 'social' ? 'segPmSocial' : 'segPmSettings').click(); }, 200); return; }
-  if (t.scene) {
-    switchTab('town');
-    if (t.district && state.currentDistrict !== t.district) { toast(`${t.name} is in ${DISTRICTS[t.district].name}. Open the map to travel there.`); return; }
-    setTimeout(() => openSceneFx(t.scene), 260);
-    return;
-  }
+  if (guideWants(t)) { guideTo(t); return; }   // js/guide-walk.js: travels, walks to the door and goes in (or walks to the neighbour, water, plot...)
   switchTab('town');
 }
 const GUIDE_GO = {
@@ -65,7 +60,7 @@ function todayModel() {
   const home = expedState().active.filter(t => t.ends <= now).length;
   if (home) away.push({ icon: '🧭', title: `${home === 1 ? 'An expedition team is' : home + ' expedition teams are'} home`, sub: 'Collect Embers, supplies and maybe a card', go: JPLACES.museum });
   const ripe = cropsIn().filter(c => cropProgress(c) >= 1).length;
-  if (ripe) away.push({ icon: '🌻', title: `${ripe} crop${ripe === 1 ? ' is' : 's are'} ripe`, sub: 'Harvest them in El Umbral', go: { tab: 'town' } });
+  if (ripe) away.push({ icon: '🌻', title: `${ripe} crop${ripe === 1 ? ' is' : 's are'} ripe`, sub: 'Harvest them in El Umbral', go: { crop: true } });
   const mail = unreadMail();
   if (mail) away.push({ icon: '📬', title: `${mail} unread letter${mail === 1 ? '' : 's'}`, sub: 'Read them at your cottage', go: JPLACES.home });
 
@@ -74,9 +69,9 @@ function todayModel() {
   const qs = pr.quests || [], qReady = qs.filter(q => !q.claimed && questProgress(q) >= questDef(q.id).goal).length, qClaimed = qs.filter(q => q.claimed).length;
   if (qs.length) daily.push({ icon: '📜', title: 'Daily quests', sub: qReady ? `${qReady} ready to claim` : qClaimed ? `${qClaimed} claimed today` : 'Pick a few in Rewards', done: qClaimed >= 3 && !qReady, frac: Math.min(1, qClaimed / 3), bar: [Math.min(qClaimed, 3), 3], go: { tab: 'quests' } });
   const dt = dailyTaskCount();
-  daily.push({ icon: '🪑', title: 'Help around town', sub: `${dt.done} of ${dt.total} daily tasks done`, done: dt.done >= dt.total, frac: dt.total ? dt.done / dt.total : 0, bar: [dt.done, dt.total], go: { tab: 'town' } });
+  daily.push({ icon: '🪑', title: 'Help around town', sub: `${dt.done} of ${dt.total} daily tasks done`, done: dt.done >= dt.total, frac: dt.total ? dt.done / dt.total : 0, bar: [dt.done, dt.total], go: { help: true } });
   const mp = minigamePrizesToday();
-  daily.push({ icon: '🎸', title: 'Minigame prizes', sub: mp ? `${mp} prize${mp === 1 ? '' : 's'} earned today` : 'Play a minigame at a house in town', done: mp >= 3, frac: Math.min(1, mp / 3), go: { tab: 'town' } });
+  daily.push({ icon: '🎸', title: 'Minigame prizes', sub: mp ? `${mp} prize${mp === 1 ? '' : 's'} earned today` : 'Play a minigame at a house in town', done: mp >= 3, frac: Math.min(1, mp / 3), go: { minigame: true } });
   const pz = puzzleState(), pzDone = pz.solvedDay === todayKey();
   daily.push({ icon: '🧩', title: 'Daily puzzle', sub: pzDone ? 'Solved today' : 'A new board in the Reading Nook', done: pzDone, frac: pzDone ? 1 : 0, go: JPLACES.nook });
   const ch = challengeState().list || [], chWon = ch.filter(c => c.won).length;

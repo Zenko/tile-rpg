@@ -781,7 +781,7 @@ function migrateMapV2() {
 }
 
 /* ---------------- tap to walk ---------------- */
-function cancelWalk() { walkToken++; if (playerEl) playerEl.classList.remove('walking'); }
+function cancelWalk() { walkToken++; if (playerEl) playerEl.classList.remove('walking'); if (typeof guideCancel === 'function') guideCancel(); }   // a tap ends a guided trip too (js/guide-walk.js)
 
 // actions (optional): [{ label, run, danger }] - extra buttons under the text (used to edit a placed decoration).
 function showProp(icon, title, desc, actions) {
