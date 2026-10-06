@@ -178,8 +178,8 @@
         <section class="st-group st-help">
           <h3 class="st-title">Help</h3>
           <div class="controls st-card st-help-card" id="townControls">
-            <button id="feedbackBtn" class="btn btn-ghost">💬 Feedback</button>
-            <button id="bugBtn" class="btn btn-ghost">🐞 Report a bug</button>
+            <button id="feedbackBtn" class="btn btn-ghost">💬 Feedback &amp; bugs</button>
+            <button id="forceUpdateBtn" class="btn btn-ghost" type="button">🔄 Update game</button>
             <button id="resetTown" class="btn btn-ghost st-danger">Start over</button>
           </div>
         </section>
@@ -880,6 +880,23 @@ function resetPageScroll() {
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 resetPageScroll();
 window.addEventListener('pageshow', resetPageScroll);
+// Settings -> "Update game": a forced refresh for a phone stuck on an old copy (an installed home-screen app can keep serving its cache for a long time).
+// Unregisters the service worker, deletes the game's cached files, re-fetches index.html and every local script / stylesheet bypassing the
+// browser's own HTTP cache (GitHub Pages serves them with max-age=600, so a plain reload could bring back the old files), then reloads.
+// Saves live in localStorage / Firestore, which this never touches.
+async function forceUpdateGame(btn, reload) {      // `reload` is injectable so a test can watch it instead of leaving the page
+  if (btn.disabled) return;
+  btn.disabled = true; btn.textContent = '🔄 Updating…';
+  try { const regs = await navigator.serviceWorker.getRegistrations(); await Promise.all(regs.map(r => r.unregister())); } catch (e) {}
+  try { const keys = await caches.keys(); await Promise.all(keys.map(k => caches.delete(k))); } catch (e) {}
+  try {
+    const html = await (await fetch('index.html', { cache: 'reload' })).text();
+    const urls = ['sw.js', 'manifest.json'].concat([...html.matchAll(/(?:src|href)="([^"#?]+\.(?:js|css|json))"/g)].map(m => m[1]).filter(u => !/^(https?:)?\/\//.test(u)));
+    await Promise.all(urls.map(u => fetch(u, { cache: 'reload' }).catch(() => {})));
+  } catch (e) {}
+  resetPageScroll(); (reload || (() => location.reload()))();
+}
+document.getElementById('forceUpdateBtn').addEventListener('click', e => forceUpdateGame(e.currentTarget));
 document.getElementById('updateBannerBtn').addEventListener('click', e => {
   e.currentTarget.blur();
   resetPageScroll();

@@ -18,6 +18,8 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'better', x: 'Settings has one Feedback and bugs button instead of two. Use it for ideas and for anything that broke.' },
+  { t:'new', x: 'Settings has an Update game button. If your phone seems stuck on an old version, tap it: it clears the game\'s stored files and reloads the newest copy. Your save is not touched.' },
   { t:'new', x: 'Ultra rare and better cards shine with a rainbow holo foil in the card reveal and Card Details. Touch and drag the card: the light follows your finger and the card tilts toward it. Super ultra rare and above also sparkle. Left alone, the foil sweeps across slowly.' },
   { t:'better', x: 'A card that faints in battle now burns away in ragged patches with glowing ember edges instead of just fading.' },
   { t:'better', x: 'The town at night is lit from more than one place: lit lamps, the Lantern Market and every building cast a warm pool of light, with the lamps flickering softly, instead of one glow around you.' },

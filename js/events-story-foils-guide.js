@@ -369,12 +369,9 @@ function testerData() {
 let feedbackModalResolve = null;
 async function sendFeedback(kind) {
   sfx('nav'); buzz(HAP.tap);
-  const bug = kind === 'bug';
-  document.getElementById('feedbackModalTitle').textContent = bug ? 'Report a bug' : 'Send feedback';
-  document.getElementById('feedbackModalDesc').textContent = bug
-    ? 'What happened, and what did you expect to happen? Your name, level, game version and device are added for you.'
-    : "What's on your mind? It's sent straight to the developer, along with your name, level and game version.";
-  document.getElementById('feedbackModalSubmit').textContent = bug ? 'Report' : 'Send';
+  document.getElementById('feedbackModalTitle').textContent = 'Feedback and bugs';
+  document.getElementById('feedbackModalDesc').textContent = "Ideas, thoughts or something that broke? If it is a bug, tell us what happened and what you expected. It's sent straight to the developer, along with your name, level, game version and device.";
+  document.getElementById('feedbackModalSubmit').textContent = 'Send';
   const textEl = document.getElementById('feedbackTextInput');
   textEl.value = '';
   document.getElementById('feedbackOverlay').classList.remove('hidden');
@@ -382,10 +379,10 @@ async function sendFeedback(kind) {
   const msg = await new Promise(resolve => { feedbackModalResolve = resolve; });
   if (!msg || !msg.trim()) return;
   const sent = await pushFeedback(kind, msg.trim(), testerInfo(), testerData());
-  if (sent) { toast(bug ? '🐞 Bug reported - thank you!' : '💬 Feedback sent - thank you!'); sfx('claim'); return; }
+  if (sent) { toast('💬 Sent - thank you!'); sfx('claim'); return; }
   // Firestore unreachable or its security rule isn't set up yet - fall back to the old mailto: link
   // rather than the message just disappearing.
-  const subject = encodeURIComponent(bug ? 'Tile RPG bug report' : 'Tile RPG feedback');
+  const subject = encodeURIComponent('Tile RPG feedback');
   const body = encodeURIComponent((msg.trim() + '\n\n' + testerInfo()).slice(0, 1600));
   window.location.href = `mailto:imzenko@gmail.com?subject=${subject}&body=${body}`;
 }
@@ -399,7 +396,6 @@ document.getElementById('feedbackModalSubmit').addEventListener('click', () => {
   if (!val.trim()) { toast('Type a message first.'); sfx('tie'); return; }
   sfx('claim'); closeFeedbackModal(val);
 });
-document.getElementById('bugBtn').addEventListener('click', () => sendFeedback('bug'));
 
 loadState();
 applyComfortPrefs();
