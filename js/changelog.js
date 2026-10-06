@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'better', x: 'Battle hits and spells have more punch: glowing sparks and a shockwave ring burst from every hit, knockouts send embers rising, and each spell lands in a flash of its own colour. Turned off by reduced motion, and lighter in Fast battles.' },
   { t:'fixed', x: 'The rarity label on a revealed card (rare, ultra rare, super ultra rare, mythic) now has dark text, so it is easy to read on its coloured pill.' },
   { t:'new', x: 'Anyone can be your companion now: any card you own, any neighbour or boss you have met, and Rook. The Atlas is the only one who cannot. Rarer cards, spells and bosses need a higher Dreamer level, and a card has to be one you own.' },
   { t:'new', x: 'A neighbour needs Lv 8 to 14 (by district) and all five hearts to walk with you. In return they bring two perks, their own and one tied to their favourite cards, and start at Trusted bond. Bosses bring two perks as well.' },

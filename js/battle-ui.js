@@ -15,6 +15,7 @@ const btAlive = token => battle && battle.token === token && !battle.ended;
    when the deck is too short (the old early-return with its message), it goes straight in as it always did. */
 function startBattle(opponent) {
   noteMet(opponent);
+  bfxWarm();                                               // start the WebGL effects layer now so it is ready by the first hit (js/battle-fx.js)
   const deckOk = (opponent.playerDeck || state.deck).filter(id => !!cardDef(id)).length >= DECK_SIZE;
   if (opponent.puzzle || !deckOk) { startBattleNow(opponent, 0); return; }
   if (tossBusy) return;                                    // a double tap while the toss is up
@@ -408,8 +409,9 @@ function btFloater(el, text, kind) {
 }
 
 // A small burst of sparks flying outward from an impact point, for extra punch on hits and knockouts.
-function btImpact(el, n) {
+function btImpact(el, n, tint) {
   if (!el) return;
+  if (bfxImpact(el, n || 4, tint)) return;               // the WebGL sparks and shockwave (js/battle-fx.js); the DOM sparks below are the fallback
   for (let i = 0; i < (n || 4); i++) {
     const s = document.createElement('span');
     s.className = 'impact-spark'; s.textContent = '✦';
@@ -845,6 +847,7 @@ function btSpellFx(def, e) {
     const view = battleView.getBoundingClientRect();
     const arrive = () => {
       orb.remove();
+      bfxSpell(to.x, to.y, col, kind);                  // WebGL flash, ring and motes on top of the DOM burst (js/battle-fx.js)
       btFx('fx-burst', to.x, to.y, 600, { '--c': col });
       btFx('fx-wash', 0, 0, 700, { '--c': col, '--x': ((to.x - view.left) / view.width * 100) + '%', '--y': ((to.y - view.top) / view.height * 100) + '%' });
       if (kind === 'sweep' && enemyRow) btFx('fx-sweep', enemyRow.r.left, enemyRow.y, 700, { '--c': col, width: enemyRow.r.width + 'px' });

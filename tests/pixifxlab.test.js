@@ -12,7 +12,7 @@ module.exports = async (page, assert) => {
     assert.ok(await lab.evaluate(() => __fx.night.lights.length) >= 4, 'the yard should start with its lamps');
     await lab.evaluate(() => __fx.show('battle')); await lab.waitForTimeout(300);
     await lab.evaluate(() => { __fx.bat.foes[2].hp = 1; __fx.strike(2); });
-    await lab.waitForTimeout(2500);
+    await lab.waitForFunction(() => !__fx.bat.busy && __fx.particles() === 0, null, { timeout: 12000 }).catch(() => {});   // wait for the condition, not a fixed time: slow machines run the tweens slower
     assert.strictEqual(await lab.evaluate(() => __fx.bat.busy), false, 'a strike should finish and free the table');
     assert.strictEqual(await lab.evaluate(() => __fx.particles()), 0, 'strike particles should all expire');
     assert.deepStrictEqual(errors, [], 'page errors in the fx lab: ' + errors.join('; '));
