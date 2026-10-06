@@ -1453,3 +1453,7 @@ body.in-story .toast { opacity: 0; }
 @keyframes comp-rise { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-36px); } }
 .ent.companion > span.comp-hop { animation: comp-hop 0.45s ease-out 1; }
 @keyframes comp-hop { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-10px); } }
+
+/* Rarity labels: white text on the lighter rarity colours (lavender, sky, gold, rose) was hard to read, so those four use dark text.
+   Common stays white on its deep teal; divine and atlas already set their own. */
+.rarity-tag.rt-rare, .rarity-tag.rt-ultra, .rarity-tag.rt-super, .rarity-tag.rt-mythic { color: #1f1a14; font-weight: 700; }

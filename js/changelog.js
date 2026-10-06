@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'fixed', x: 'The rarity label on a revealed card (rare, ultra rare, super ultra rare, mythic) now has dark text, so it is easy to read on its coloured pill.' },
   { t:'new', x: 'Anyone can be your companion now: any card you own, any neighbour or boss you have met, and Rook. The Atlas is the only one who cannot. Rarer cards, spells, neighbours and especially bosses need a higher Dreamer level, and a card has to be one you own.' },
   { t:'new', x: 'Character → Companion is a proper page: their perk, a line of personality, bond, and days, wins and catches together. Change companion opens a picker with Cards, Neighbours and Bosses, search, and what each one still needs.' },
   { t:'new', x: 'Tap your companion in town for a menu: Chat, Pet (up to three a day bring you closer), Look around (they point at something to pick up, and sense farther as your bond grows), Hide and Seek, and Talk or Challenge for a neighbour, boss or Rook. You can still talk to and duel them as normal.' },
