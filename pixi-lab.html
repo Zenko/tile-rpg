@@ -7,7 +7,10 @@
 <!-- PixiJS lab: the town map drawn with PixiJS (WebGL) instead of one <div> per tile, using the game's own map data, sprites and colour tokens.
      A sandbox like asset-lab.html: it is not linked from index.html, not cached by sw.js, and nothing here is used by the game yet.
      Open it from the repo root or the live site, ideally on a phone, and compare with the real town. PixiJS 8 is vendored in assets/vendor/
-     (MIT licence next to it) so it works offline and from file://, like the rest of the project. -->
+     (MIT licence next to it) so it works offline and from file://, like the rest of the project.
+     PARTICLE PROTOTYPE: the "Particle effects" row of the panel is a hand-rolled, pooled particle system (no extra library) for spell
+     and ambient effects: ember burst, frost nova, healing motes, arcane implosion, leaf swirl, fireflies, a sparkle trail, plus a showcase loop.
+     Particles live in world units above the objects layer, so they scroll with the map. -->
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/screens.css">
 <link rel="stylesheet" href="css/battle-town.css">
@@ -59,6 +62,14 @@ html, body.pl { margin: 0; height: 100%; overflow: hidden; background: #12161b; 
       <label>Season <select id="plSeason"><option value="">summer</option><option>spring</option><option>autumn</option><option>winter</option></select></label>
       <label>Wandering NPCs <select id="plNpcs"><option>6</option><option>60</option><option>300</option></select></label>
       <label>Walking <button class="pl-btn" id="plAuto" type="button">Auto-walk: off</button></label>
+    </div>
+    <div class="pl-head" style="margin-top:10px"><span>Particle effects</span><span class="pl-hint" style="margin:0">keys 1-5 cast on the player</span></div>
+    <div class="pl-grid">
+      <label>Tap does <select id="plTap"><option value="walk">Walk there</option><option value="fire">Ember burst</option><option value="frost">Frost nova</option><option value="heal">Healing motes</option><option value="arcane">Arcane implosion</option><option value="leaves">Leaf swirl</option></select></label>
+      <label>Cast on player <select id="plCast"><option value="">choose...</option><option value="fire">Ember burst</option><option value="frost">Frost nova</option><option value="heal">Healing motes</option><option value="arcane">Arcane implosion</option><option value="leaves">Leaf swirl</option></select></label>
+      <label>Ambient <button class="pl-btn" id="plFlies" type="button">Fireflies: off</button></label>
+      <label>Movement <button class="pl-btn" id="plTrail" type="button">Sparkle trail: off</button></label>
+      <label>Demo <button class="pl-btn" id="plShow" type="button">Showcase: off</button></label>
     </div>
     <div class="pl-hint">Tap the map to walk there. Bigger maps cost almost nothing: only the tiles on screen are ever in the scene.</div>
   </div>
@@ -213,6 +224,7 @@ function resetWorld() {
   groundLayer.removeChildren().forEach(c => c.destroy({ children: true })); ground = new Map();
   objLayer.removeChildren().forEach(c => c.destroy()); live = new Map(); pool = []; range = null; npcSprs = [];
   playerSpr = playerShadow = null;
+  parts.forEach(p => { p.s.visible = false; ppool.push(p.s); }); parts = []; timers = [];
 }
 
 async function buildMapObjects() {
@@ -321,6 +333,97 @@ function buildWeather() {
   }
 }
 
+/* ---------------- particles ----------------
+   One pooled Sprite per particle, drawn with additive blending for light (embers, glows, sparks) and normal blending for matter (smoke, leaves).
+   Positions are in WORLD units (T = 64 per tile) inside fxWorld, so effects scroll with the map and scale with the camera. Hard cap MAXP.
+   Honour prefers-reduced-motion: counts drop to a quarter and the showcase refuses to run on its own. */
+const MAXP = 1800, REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches, K = REDUCE ? 0.25 : 1;
+const fxWorld = new PIXI.Container(); world.addChild(fxWorld);
+let parts = [], ppool = [], timers = [], flies = [];
+const R = (a, b) => a + Math.random() * (b - a), pick = a => a[Math.floor(Math.random() * a.length)], num = c => { try { return new PIXI.Color(c).toNumber(); } catch (e) { return 0x88aa66; } };
+function buildParticleTextures() {
+  const mk = (w, h, draw) => { const cv = document.createElement('canvas'); cv.width = w; cv.height = h; draw(cv.getContext('2d'), w, h); const t = PIXI.Texture.from(cv); t.source.scaleMode = 'linear'; return t; };
+  fxTex.glow = mk(64, 64, (c, w) => { const g = c.createRadialGradient(32, 32, 0, 32, 32, 32); g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(0.25, 'rgba(255,255,255,0.7)'); g.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = g; c.fillRect(0, 0, w, w); });
+  fxTex.spark = mk(48, 48, (c) => { const g = c.createRadialGradient(24, 24, 0, 24, 24, 24); g.addColorStop(0, 'rgba(255,255,255,0.9)'); g.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = g; c.beginPath(); c.moveTo(24, 0); c.quadraticCurveTo(26, 22, 48, 24); c.quadraticCurveTo(26, 26, 24, 48); c.quadraticCurveTo(22, 26, 0, 24); c.quadraticCurveTo(22, 22, 24, 0); c.fill(); });
+  fxTex.shard = mk(16, 48, (c) => { const g = c.createLinearGradient(0, 0, 0, 48); g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(0.5, 'rgba(255,255,255,1)'); g.addColorStop(1, 'rgba(255,255,255,0.1)'); c.fillStyle = g; c.beginPath(); c.moveTo(8, 0); c.lineTo(15, 30); c.lineTo(8, 48); c.lineTo(1, 30); c.closePath(); c.fill(); });
+  fxTex.ring = mk(128, 128, (c) => { c.shadowColor = '#fff'; c.shadowBlur = 8; c.strokeStyle = '#fff'; c.lineWidth = 5; c.beginPath(); c.arc(64, 64, 52, 0, 7); c.stroke(); });
+  fxTex.leaf = mk(32, 32, (c) => { c.fillStyle = '#fff'; c.beginPath(); c.moveTo(3, 29); c.quadraticCurveTo(2, 6, 29, 3); c.quadraticCurveTo(30, 26, 3, 29); c.fill(); c.strokeStyle = 'rgba(0,0,0,0.35)'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(5, 27); c.lineTo(25, 7); c.stroke(); });
+}
+function emit(o) {
+  if (parts.length >= MAXP) return;
+  let s = ppool.pop(); if (!s) { s = new PIXI.Sprite(); s.anchor.set(0.5); fxWorld.addChild(s); }
+  const SZ = 1.7, V = o.raw ? 1 : 1.5, tex = fxTex[o.tex || 'glow']; s.texture = tex; s.visible = true; s.tint = o.tint === undefined ? 0xffffff : o.tint; s.blendMode = o.add === false ? 'normal' : 'add';
+  parts.push({ s, tw: Math.max(tex.width, tex.height), x: o.x, y: o.y, vx: (o.vx || 0) * V, vy: (o.vy || 0) * V, ay: (o.ay || 0) * V, drag: o.drag === undefined ? 1 : o.drag, life: o.life || 1, age: 0,
+    s0: (o.s0 || 16) * SZ, s1: (o.s1 === undefined ? (o.s0 || 16) : o.s1) * SZ, a: o.a === undefined ? 1 : o.a, rot: o.rot || 0, vr: o.vr || 0, face: !!o.face, io: !!o.io, sw: (o.sw || 0) * V, sf: o.sf || 0, sp: o.sp || 0 });
+}
+const later = (sec, fn) => timers.push({ t: sec, fn });
+const burst = (n, f) => { for (let i = 0, c = Math.max(1, Math.round(n * K)); i < c; i++) f(i, c); };
+function ring(x, y, tint, s1, life) { emit({ tex: 'ring', x, y, tint, s0: 10, s1, life, a: 0.9 }); }
+function flash(x, y, tint, size, life) { emit({ tex: 'glow', x, y, tint, s0: size * 0.4, s1: size, life, a: 1 }); }
+
+const EFFECTS = {
+  fire(x, y) {
+    flash(x, y, 0xffb347, 170, 0.3);
+    burst(40, () => { const a = -Math.PI / 2 + R(-1.1, 1.1), v = R(60, 240); emit({ x: x + R(-8, 8), y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, ay: -50, drag: 0.25, life: R(0.6, 1.3), s0: R(14, 26), s1: 2, tint: pick([0xffe08a, 0xff9a2e, 0xff5a1f]), a: 0.95 }); });
+    burst(12, () => { const a = R(0, 6.28), v = R(80, 230); emit({ tex: 'spark', x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 90, ay: 320, drag: 0.4, life: R(0.5, 1), s0: R(10, 18), s1: 3, tint: 0xffd27a, rot: R(0, 6), vr: R(-6, 6) }); });
+    burst(9, () => emit({ x: x + R(-14, 14), y: y - 6, vx: R(-14, 14), vy: R(-50, -90), drag: 0.6, life: R(1.1, 1.7), s0: 22, s1: R(60, 84), tint: 0x3a3430, a: 0.38, add: false, io: true }));
+  },
+  frost(x, y) {
+    flash(x, y, 0xd8f3ff, 150, 0.35); ring(x, y, 0xa6e3ff, 230, 0.55); later(0.1, () => ring(x, y, 0xeaf8ff, 150, 0.45));
+    burst(30, (i, n) => { const a = i / n * 6.283 + R(-0.1, 0.1), v = R(150, 300); emit({ tex: 'shard', x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, drag: 0.03, life: R(0.55, 0.95), s0: R(22, 38), s1: R(6, 12), tint: pick([0xeaf8ff, 0xa6e3ff, 0x7fd0ff]), face: true, a: 0.95 }); });
+    burst(24, () => { const a = R(0, 6.28), v = R(20, 110); emit({ tex: 'spark', x: x + R(-30, 30), y: y + R(-30, 30), vx: Math.cos(a) * v, vy: Math.sin(a) * v, ay: 30, drag: 0.2, life: R(1.1, 1.9), s0: R(8, 16), s1: 2, tint: 0xffffff, io: true, vr: R(-3, 3) }); });
+  },
+  heal(x, y) {
+    flash(x, y + 10, 0x7dffa0, 150, 0.5); ring(x, y + 18, 0x9dffb0, 120, 0.7);
+    burst(30, () => { const a = R(0, 6.28), r = R(8, 40); emit({ tex: pick(['glow', 'spark']), x: x + Math.cos(a) * r, y: y + 22 + Math.sin(a) * r * 0.4, vy: R(-70, -140), drag: 0.55, life: R(1, 1.7), s0: R(9, 17), s1: 3, tint: pick([0x9dffb0, 0xf4ff9a, 0xffffff, 0x6fe8a0]), io: true, sw: R(14, 34), sf: R(3, 6), sp: R(0, 6) }); });
+  },
+  arcane(x, y) {
+    const cols = [0xb28cff, 0xff8cf0, 0x8cd6ff];
+    burst(26, (i, n) => { const a = i / n * 6.283, r = 130, life = 0.55; emit({ tex: 'spark', x: x + Math.cos(a) * r, y: y + Math.sin(a) * r, vx: -Math.cos(a) * r / life, vy: -Math.sin(a) * r / life, raw: true, life, s0: 18, s1: 6, tint: pick(cols), rot: a, vr: 6, a: 0.95 }); });
+    ring(x, y, 0xb28cff, 40, 0.55);
+    later(0.55, () => {
+      flash(x, y, 0xe7d6ff, 190, 0.35); ring(x, y, 0xff8cf0, 240, 0.6);
+      burst(34, () => { const a = R(0, 6.28), v = R(90, 280); emit({ tex: pick(['spark', 'glow']), x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, drag: 0.08, life: R(0.6, 1.2), s0: R(10, 20), s1: 2, tint: pick(cols), rot: R(0, 6), vr: R(-5, 5) }); });
+    });
+  },
+  leaves(x, y) {
+    const cols = [pal.leaf1, pal.leaf2, pal.leaf3, pal.flower1, pal.flower2].filter(Boolean).map(num);
+    burst(26, (i, n) => { const a = i / n * 6.283, r = R(6, 34); emit({ tex: 'leaf', add: false, x: x + Math.cos(a) * r, y: y + 10 + Math.sin(a) * r * 0.5, vx: Math.cos(a) * R(20, 70), vy: R(-130, -230), ay: 150, drag: 0.35, life: R(1.5, 2.5), s0: R(14, 24), s1: R(12, 20), tint: pick(cols), rot: R(0, 6), vr: R(-5, 5), sw: R(30, 70), sf: R(3, 6), sp: R(0, 6), a: 0.95 }); });
+    burst(10, () => emit({ x, y: y + 14, vx: R(-40, 40), vy: R(-20, -50), drag: 0.5, life: R(0.5, 0.9), s0: R(10, 18), s1: R(28, 44), tint: 0xd8c9a0, a: 0.25, add: false }));
+  }
+};
+const cast = (kind, x, y) => { if (EFFECTS[kind]) EFFECTS[kind](x, y); };
+const castOnPlayer = kind => cast(kind, player.rx * T + T / 2, player.ry * T + T * 0.45);
+
+/* ambient: fireflies drift in world space and wrap around whatever the camera currently sees */
+function setFireflies(on) {
+  flies.forEach(f => fxWorld.removeChild(f.s)); flies = [];
+  if (!on) return;
+  for (let i = 0; i < Math.round(30 * Math.max(K, 0.5)); i++) { const s = new PIXI.Sprite(fxTex.glow); s.anchor.set(0.5); s.blendMode = 'add'; s.tint = pick([0xf4ff8a, 0xc8ff7a, 0xffe58a]); fxWorld.addChild(s); flies.push({ s, x: Math.random() * 1000, y: Math.random() * 1000, ph: R(0, 6.28), sp: R(0.6, 1.4), sz: R(10, 18) }); }
+}
+let trailAt = 0;
+function stepParticles(dt, now) {
+  for (let i = timers.length - 1; i >= 0; i--) { const t = timers[i]; t.t -= dt; if (t.t <= 0) { timers.splice(i, 1); t.fn(); } }
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const p = parts[i]; p.age += dt; const u = p.age / p.life;
+    if (u >= 1) { p.s.visible = false; ppool.push(p.s); parts[i] = parts[parts.length - 1]; parts.pop(); continue; }
+    const d = Math.pow(p.drag, dt); p.vx *= d; p.vy = p.vy * d + p.ay * dt;
+    p.x += p.vx * dt + (p.sw ? Math.cos(p.age * p.sf + p.sp) * p.sw * dt : 0); p.y += p.vy * dt;
+    const e = 1 - (1 - u) * (1 - u), size = p.s0 + (p.s1 - p.s0) * e;
+    p.s.position.set(p.x, p.y); p.s.scale.set(size / p.tw); p.s.alpha = p.a * (p.io ? Math.min(1, u * 8) * (1 - u) : 1 - u);
+    p.s.rotation = p.face ? Math.atan2(p.vy, p.vx) + Math.PI / 2 : p.rot + p.vr * p.age;
+  }
+  if (flies.length) {
+    const sc = S.tilePx / T, x0 = -world.x / sc, y0 = -world.y / sc, w = app.screen.width / sc, h = app.screen.height / sc, night = S.time === 'night' ? 1 : S.time === 'dusk' ? 0.75 : 0.5;
+    for (const f of flies) {
+      f.ph += dt * f.sp; f.x += Math.cos(f.ph * 1.7) * 14 * dt; f.y += Math.sin(f.ph * 1.3) * 10 * dt - 3 * dt;
+      f.x = x0 + ((f.x - x0) % w + w) % w; f.y = y0 + ((f.y - y0) % h + h) % h;
+      const blink = Math.max(0, Math.sin(f.ph * 2.2)); f.s.position.set(f.x, f.y); f.s.scale.set(f.sz / 64 * (0.7 + 0.5 * blink)); f.s.alpha = night * (0.25 + 0.75 * blink);
+    }
+  }
+  if ($('plTrail').classList.contains('on') && S.path.length && now - trailAt > 55) { trailAt = now; emit({ x: player.rx * T + T / 2 + R(-10, 10), y: player.ry * T + T * 0.8, vx: R(-14, 14), vy: R(-30, -55), drag: 0.5, life: R(0.5, 0.9), s0: R(10, 15), s1: 2, tint: pick([0xfff2b0, 0xb8f0ff, 0xffd0f0]), io: true }); }
+}
+
 /* ---------------- frame loop ---------------- */
 app.ticker.add(tk => {
   const now = performance.now(), dt = tk.deltaMS / 1000, vw = app.screen.width, vh = app.screen.height;
@@ -347,6 +450,7 @@ app.ticker.add(tk => {
     d.ph += dt; d.s.y += d.vy * dt; if (d.snow) d.s.x += Math.sin(d.ph * 1.3) * 18 * dt; else d.s.x -= d.vy * 0.14 * dt;
     if (d.s.y > vh + 20) { d.s.y = -30; d.s.x = Math.random() * vw; } if (d.s.x < -10) d.s.x = vw + 5;
   }
+  stepParticles(dt, now);
   statsTick(now);
 });
 
@@ -360,6 +464,7 @@ function statsTick(now) {
    <div class="row"><span class="k">map</span><b>${m.w} x ${m.h}</b></div>
    <div class="row"><span class="k">tiles in map</span><b>${tiles.toLocaleString()}</b></div>
    <div class="row"><span class="k">sprites in scene</span><b>${inScene}</b></div>
+   <div class="row"><span class="k">particles</span><b>${parts.length + flies.length}</b></div>
    <div class="row"><span class="k">page DOM nodes</span><b>${document.getElementsByTagName('*').length}</b></div>
    <div class="row" title="The current DOM town draws one div per tile plus an svg and use per decoration"><span class="k">DOM town would need</span><b>~${(tiles + decor * 2).toLocaleString()}</b></div>`;
 }
@@ -390,19 +495,40 @@ $('plAuto').onclick = e => { S.auto = !S.auto; e.target.textContent = 'Auto-walk
 $('plToggle').onclick = e => { const b = $('plBody'), hide = b.style.display !== 'none'; b.style.display = hide ? 'none' : ''; e.target.textContent = hide ? 'Show' : 'Hide'; };
 app.canvas.addEventListener('pointerdown', e => {
   const r = app.canvas.getBoundingClientRect(), tp = S.tilePx, x = Math.floor((e.clientX - r.left - world.x) / tp), y = Math.floor((e.clientY - r.top - world.y) / tp);
+  const tapFx = $('plTap').value;
+  if (tapFx !== 'walk') { cast(tapFx, (e.clientX - r.left - world.x) / tp * T, (e.clientY - r.top - world.y) / tp * T); return; }
   if (x >= 0 && y >= 0 && x < S.map.w && y < S.map.h) { S.auto = false; $('plAuto').textContent = 'Auto-walk: off'; $('plAuto').classList.remove('on'); walkTo(x, y); }
 });
 window.addEventListener('keydown', e => { const d = { ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0], w: [0, -1], s: [0, 1], a: [-1, 0], d: [1, 0] }[e.key]; if (d && !S.path.length) walkTo(S.player.x + d[0], S.player.y + d[1]); });
+$('plCast').onchange = e => { if (e.target.value) castOnPlayer(e.target.value); e.target.value = ''; };
+const toggle = (id, label, on) => { const b = $(id); b.classList.toggle('on', on); b.textContent = label + (on ? 'on' : 'off'); };
+let showTimer = 0;
+function setShowcase(on) {
+  clearInterval(showTimer); toggle('plShow', 'Showcase: ', on); if (!on) return;
+  const kinds = Object.keys(EFFECTS); let i = 0;
+  const go = () => { const k = kinds[i++ % kinds.length]; cast(k, player.rx * T + T / 2 + R(-2.2, 2.2) * T, player.ry * T + T / 2 + R(-1.5, 1.5) * T); };
+  go(); showTimer = setInterval(go, 1100);
+}
+function setFlies(on) { toggle('plFlies', 'Fireflies: ', on); setFireflies(on); }
+$('plFlies').onclick = () => setFlies(!$('plFlies').classList.contains('on'));
+$('plTrail').onclick = () => toggle('plTrail', 'Sparkle trail: ', !$('plTrail').classList.contains('on'));
+$('plShow').onclick = () => setShowcase(!$('plShow').classList.contains('on'));
+window.addEventListener('keydown', e => { const k = ['fire', 'frost', 'heal', 'arcane', 'leaves'][+e.key - 1]; if (k) castOnPlayer(k); });
 app.renderer.on('resize', layout);
 
-buildFxTextures();
+buildFxTextures(); buildParticleTextures();
 const qs = new URLSearchParams(location.search);
 ['map:plMap', 'weather:plWeather', 'time:plTime', 'theme:plTheme', 'biome:plBiome', 'season:plSeason', 'npcs:plNpcs'].forEach(p => { const [k, id] = p.split(':'); if (qs.has(k)) $(id).value = qs.get(k); });
 S.weather = $('plWeather').value; S.time = $('plTime').value;
 await rebuildAll($('plMap').value);
 if (qs.get('auto') === '1') { S.auto = true; $('plAuto').textContent = 'Auto-walk: on'; $('plAuto').classList.add('on'); }
 if (qs.get('panel') === '0') { $('plBody').style.display = 'none'; $('plToggle').textContent = 'Show'; }
-window.__lab = { S, app, world, rebuildAll, ready: true };
+if (qs.has('tap') && EFFECTS[qs.get('tap')]) $('plTap').value = qs.get('tap');
+if (qs.get('fireflies') === '1') setFlies(true);
+if (qs.get('trail') === '1') toggle('plTrail', 'Sparkle trail: ', true);
+if (qs.get('show') === '1') setShowcase(true);
+if (EFFECTS[qs.get('fx')]) castOnPlayer(qs.get('fx'));
+window.__lab = { cast, castOnPlayer, EFFECTS, particles: () => parts.length, S, app, world, rebuildAll, ready: true };
 })();
 </script>
 </body>

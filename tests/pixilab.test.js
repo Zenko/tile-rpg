@@ -15,6 +15,12 @@ module.exports = async (page, assert) => {
     const big = await lab.evaluate(() => ({ w: __lab.S.map.w, objs: __lab.world.children[1].children.length, ground: __lab.world.children[0].children.length }));
     assert.strictEqual(big.w, 200);
     assert.ok(big.objs < 2500 && big.ground <= 80, 'a 200 x 200 map should keep only the tiles near the camera in the scene: ' + JSON.stringify(big));
+    for (const k of Object.keys(await lab.evaluate(() => __lab.EFFECTS))) {
+      await lab.evaluate(k => __lab.castOnPlayer(k), k); await lab.waitForTimeout(150);
+      assert.ok(await lab.evaluate(() => __lab.particles()) > 0, 'effect ' + k + ' made no particles');
+    }
+    await lab.waitForTimeout(3500);
+    assert.strictEqual(await lab.evaluate(() => __lab.particles()), 0, 'particles should all expire and return to the pool');
     for (const m of ['market', 'harbor', 'garden']) await lab.evaluate(k => __lab.rebuildAll(k), m);
     assert.deepStrictEqual(errors, [], 'page errors in the lab: ' + errors.join('; '));
   } finally { await lab.close(); }
