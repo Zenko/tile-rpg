@@ -18,6 +18,9 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'new', x: 'The altar has four candles now. Open it in your cottage, tap a candle and feed it spare cards: the flames grow with the cards\' rarity and the tallest ones call a spirit, a card of that family. 23 spirits to find in a new Spirit Book, and each first find pays Embers.' },
+  { t:'new', x: 'Candles can burn while you explore: an hour pays Embers for every card, and an overnight burn with four or more cards brings a card one rarity higher. Two pillars at a time.' },
+  { t:'better', x: 'The Atlas now answers at the candles: put the four gods on one candle each, with nothing else, and nothing is used up.' },
   { t:'better', x: 'The goal bar at the top now takes you there. Tap it and your character walks to the door and goes in, even if it is in another district. Goals about neighbours, fishing, crops and house tasks walk you to the person, the water or the plot, and a gold diamond marks the building. The Journal\'s Go buttons do the same, and tapping the map stops the walk.' },
   { t:'better', x: 'Settings has one Feedback and bugs button instead of two. Use it for ideas and for anything that broke.' },
   { t:'new', x: 'Settings has an Update game button. If your phone seems stuck on an old version, tap it: it clears the game\'s stored files and reloads the newest copy. Your save is not touched.' },

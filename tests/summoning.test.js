@@ -26,7 +26,7 @@ module.exports = async (page, assert) => {
     out.atlasReady = summonReady(summonDef('the-atlas'));
     const t2 = summonTap('the-atlas'); out.atlasOwned = state.ownedCards.includes('the-atlas'); out.godsKept = ['duermevela', 'murmullo', 'marea-lenta', 'ensueno'].every(id => state.ownedCards.includes(id));
     // the cottage renders the altar
-    openScene('home'); sceneAction('altar'); out.altarBtns = document.querySelectorAll('#scActions [data-act^="summon:"]').length;
+    openScene('home'); sceneAction('altar'); out.altarBtns = document.querySelectorAll('#scActions [data-act^="summon:"]').length; out.candleBtn = !!document.querySelector('#scActions [data-act="alt:open"]');
     return out;
   });
   assert.strictEqual(r.notBeaten, false, 'a god needs a beaten boss'); assert.ok(r.beatenKept);
@@ -36,5 +36,5 @@ module.exports = async (page, assert) => {
   assert.ok(r.deckOk, 'the deck is never offered up');
   assert.strictEqual(r.atlasHidden, true, 'the Atlas row appears once a god is home'); assert.strictEqual(r.atlasReadyEarly, false);
   assert.ok(r.atlasReady && r.atlasOwned && r.godsKept, 'the Atlas needs all four gods and consumes nothing');
-  assert.strictEqual(r.altarBtns, 5, 'the altar lists five summons');
+  assert.strictEqual(r.altarBtns, 4, 'the altar lists the four gods (the Atlas answers at the candles)'); assert.ok(r.candleBtn, 'and a way to light the candles');
 };
