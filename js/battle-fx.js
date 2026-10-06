@@ -88,3 +88,39 @@ function bfxSpell(x, y, color, kind) {
     bfxKick(); return true;
   } catch (e) { return false; }
 }
+
+/* ---------------- card dissolve (SVG filter, no WebGL needed) ----------------
+   A card that faints burns away: a noise map is thresholded with a threshold that sweeps up, so the card disappears in ragged patches, and a
+   thin band just behind the edge is painted ember orange. It is one throwaway <filter> per card (feTurbulence + feComponentTransfer), animated
+   by changing two intercepts from requestAnimationFrame, so it works on the real DOM card as it is (any art, any sleeve, any language) without
+   having to turn the card into a texture first, and it still works when PixiJS is missing. The embers that fly off are the WebGL sparks from
+   btImpact(el, 6). Returns false (caller keeps the old fade) under reduced motion. */
+let bfxDefs = null, bfxDissN = 0;
+function bfxDissolve(el) {
+  try {
+    if (!el || !btMotionOk() || el.style.filter) return false;
+    if (!bfxDefs) { bfxDefs = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); bfxDefs.setAttribute('width', '0'); bfxDefs.setAttribute('height', '0'); bfxDefs.setAttribute('aria-hidden', 'true'); bfxDefs.style.cssText = 'position:absolute;width:0;height:0;pointer-events:none'; document.body.appendChild(bfxDefs); }
+    const id = 'bfxDiss' + (++bfxDissN), ms = 460 * (typeof prefs !== 'undefined' && prefs.fast ? 0.45 : 1);
+    bfxDefs.insertAdjacentHTML('beforeend', `<filter id="${id}" x="-12%" y="-12%" width="124%" height="124%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.07" numOctaves="2" seed="${1 + Math.floor(Math.random() * 90)}" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 0 0 0 0" result="na"/>
+      <feComponentTransfer in="na" result="cut"><feFuncA type="linear" slope="24" intercept="0"/></feComponentTransfer>
+      <feComponentTransfer in="na" result="cutB"><feFuncA type="linear" slope="24" intercept="0"/></feComponentTransfer>
+      <feComposite in="SourceGraphic" in2="cut" operator="in" result="body"/>
+      <feComposite in="cutB" in2="cut" operator="out" result="band"/>
+      <feComposite in="band" in2="SourceAlpha" operator="in" result="band2"/>
+      <feFlood flood-color="#ff8a2e" result="fl"/><feComposite in="fl" in2="band2" operator="in" result="ember"/>
+      <feMerge><feMergeNode in="body"/><feMergeNode in="ember"/></feMerge></filter>`);
+    const f = document.getElementById(id), fa = f.querySelectorAll('feFuncA'), t0 = performance.now();
+    el.style.filter = `url(#${id})`;
+    const done = () => { el.style.visibility = 'hidden'; f.remove(); };      // stay gone: removing the filter would otherwise show the card again until the board re-renders
+    const step = now => {
+      const u = Math.min(1, (now - t0) / ms), th = 0.1 + 0.95 * u * u * (3 - 2 * u);      // smoothstep: slow start, ragged middle, clean finish
+      fa[0].setAttribute('intercept', (-24 * th).toFixed(3)); fa[1].setAttribute('intercept', (-24 * (th - 0.1)).toFixed(3));
+      if (u < 1 && el.isConnected) requestAnimationFrame(step); else done();
+    };
+    requestAnimationFrame(step);
+    if (el.animate) el.animate([{ transform: 'none' }, { transform: 'translateY(6px) scale(.96)' }], { duration: ms, easing: 'ease-in', fill: 'forwards' });
+    return true;
+  } catch (e) { return false; }
+}

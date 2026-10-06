@@ -18,6 +18,9 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'new', x: 'Ultra rare and better cards shine with a rainbow holo foil in the card reveal and Card Details. Touch and drag the card: the light follows your finger and the card tilts toward it. Super ultra rare and above also sparkle. Left alone, the foil sweeps across slowly.' },
+  { t:'better', x: 'A card that faints in battle now burns away in ragged patches with glowing ember edges instead of just fading.' },
+  { t:'better', x: 'The town at night is lit from more than one place: lit lamps, the Lantern Market and every building cast a warm pool of light, with the lamps flickering softly, instead of one glow around you.' },
   { t:'better', x: 'Battle hits and spells have more punch: glowing sparks and a shockwave ring burst from every hit, knockouts send embers rising, and each spell lands in a flash of its own colour. Turned off by reduced motion, and lighter in Fast battles.' },
   { t:'fixed', x: 'The rarity label on a revealed card (rare, ultra rare, super ultra rare, mythic) now has dark text, so it is easy to read on its coloured pill.' },
   { t:'new', x: 'Anyone can be your companion now: any card you own, any neighbour or boss you have met, and Rook. The Atlas is the only one who cannot. Rarer cards, spells and bosses need a higher Dreamer level, and a card has to be one you own.' },

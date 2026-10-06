@@ -969,7 +969,7 @@ async function btAnimate(evs, token) {
       btRenderBars();
     } else if (e.type === 'faint') {
       const el = document.querySelector(`#battleView .card[data-uid="${e.card.uid}"]`);
-      if (el) { el.classList.add('faint'); btImpact(el, 6); }
+      if (el) { if (!bfxDissolve(el)) el.classList.add('faint'); btImpact(el, 6); }   // burns away (js/battle-fx.js); the old fade under reduced motion
       if (e.who === 1) { sfx('round'); buzz(HAP.round); } else sfx('soft');
       await btWait(460);
     } else if (e.type === 'grow') {

@@ -15,4 +15,9 @@ module.exports = async (page, assert) => {
   // reduced motion and a missing layer both fall back to the DOM sparks
   const fb = await page.evaluate(() => { const card = document.querySelector('#battleView .card'); const keep = bfx; bfx = null; btImpact(card, 4); const dom = card.querySelectorAll('.impact-spark').length; bfx = keep; return dom; });
   assert.ok(fb > 0, 'without the WebGL layer the old DOM sparks should run');
+  // the dissolve: a throwaway SVG filter that sweeps away, leaves the card hidden, and cleans up after itself
+  const d = await page.evaluate(() => { const card = document.querySelector('#battleView .card'); prefs.fast = false; const ok = bfxDissolve(card); return { ok, filter: card.style.filter, defs: bfxDefs.querySelectorAll('filter').length }; });
+  assert.ok(d.ok && /url\(["']?#bfxDiss\d+/.test(d.filter) && d.defs >= 1, 'a fainting card should get a dissolve filter: ' + JSON.stringify(d));
+  await page.waitForFunction(() => bfxDefs.querySelectorAll('filter').length === 0, null, { timeout: 5000 });
+  assert.strictEqual(await page.evaluate(() => document.querySelector('#battleView .card').style.visibility), 'hidden', 'a dissolved card should stay gone');
 };

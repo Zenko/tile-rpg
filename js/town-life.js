@@ -234,13 +234,16 @@ function lifeRenderEntities(data, add) {
   townView.dataset.wx = wx;
   const l = lifeState(), lv = moodLevel(data);
   if (!night && Object.keys(l.lit).length) l.lit = {};
+  const nlList = [];
   m.props.forEach(p => {
     if (p.type === 'lamp') {
+      if (night && (l.lit[d + ':' + p.id] || lv >= 3)) nlList.push({ x: p.x, y: p.y });
       if (lv >= 1) add('life-mood balloon', p.x, p.y, '<span>🎈</span>');
       if (night && (l.lit[d + ':' + p.id] || lv >= 3)) add('life-glow', p.x, p.y, '');
     } else if (p.type === 'bench' && lv >= 2) add('life-mood pot', p.x, p.y, '<span>🪴</span>');
     else if ((p.type === 'well' || p.type === 'fountain') && lv >= 3) add('life-mood spark', p.x, p.y, '<span>✨</span>');
   });
+  if (typeof nlSetLamps === 'function') nlSetLamps(nlList);   // the lit lamps also light the night (js/night-lights.js)
   // puddles: a handful of walkable tiles, fixed for the length of one spell of rain
   if (wet) {
     const key = d + ':' + (state.weather.changesAt || 0);

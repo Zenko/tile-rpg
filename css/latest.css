@@ -1511,3 +1511,26 @@ body.in-story .toast { opacity: 0; }
 .calm-comp-say { font-size: 0.74rem; color: var(--ink-soft); background: color-mix(in srgb, var(--stone) 80%, transparent); border-radius: 12px; padding: 4px 10px; transition: opacity 0.5s ease; }
 .calm-comp-say.fade { opacity: 0; }
 .cg-card .ac-in, .cg-card .ac-count { display: none; }   /* the "in deck" and "×2" labels are noise in a card game */
+
+/* NIGHT LIGHTS (js/night-lights.js): the night darkness is a canvas inside .town-sky, so the layer itself paints nothing. */
+.town-sky.has-lights { background: none; }
+.town-sky .town-lights { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+/* HOLO FOIL (js/holo-foil.js): ultra and up in the reveal / Card Details popup. --hx / --hy are the light position; @property lets the idle sweep animate --hx. */
+@property --hx { syntax: '<percentage>'; inherits: true; initial-value: 50%; }
+.reveal-card-frame { touch-action: pan-y; }
+.reveal-card-frame.holo-live { touch-action: none; }
+.reveal-card.holo { --hx: 50%; --hy: 40%; isolation: isolate; animation-name: reveal-spin, holo-sweep; animation-duration: .7s, 4.5s; animation-iteration-count: 1, infinite; animation-timing-function: cubic-bezier(.34,1.56,.64,1), ease-in-out; animation-direction: normal, alternate; }
+.reveal-card-frame.holo-live .reveal-card.holo { animation-name: none; }
+@keyframes holo-sweep { from { --hx: 12%; --hy: 30%; } to { --hx: 88%; --hy: 62%; } }
+.holo-foil, .holo-glare, .holo-spark { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 7; }
+.holo-foil { opacity: .4; mix-blend-mode: hard-light; background-size: 260% 260%; background-position: var(--hx) var(--hy);
+  background-image: linear-gradient(115deg, #ff5fa8 0%, #ffd35f 18%, #5fffa8 36%, #5fc8ff 54%, #a85fff 72%, #ff5fa8 90%); filter: saturate(1.5); }
+.holo-glare { opacity: .5; mix-blend-mode: overlay; background: radial-gradient(circle at var(--hx) var(--hy), rgba(255,255,255,.9) 0%, rgba(255,255,255,0) 58%); }
+.holo-spark { opacity: .9; mix-blend-mode: screen; -webkit-mask-image: radial-gradient(circle at var(--hx) var(--hy), #000 0%, transparent 62%); mask-image: radial-gradient(circle at var(--hx) var(--hy), #000 0%, transparent 62%);
+  background-image: radial-gradient(circle, #fff 0 1px, transparent 1.6px), radial-gradient(circle, #fff 0 1px, transparent 1.6px), radial-gradient(circle, #ffe9a8 0 1.2px, transparent 2px);
+  background-size: 23px 29px, 31px 19px, 41px 37px; background-position: 0 0, 11px 7px, 5px 17px; }
+.reveal-card.holo.h2 .holo-foil { opacity: .3; }
+.reveal-card.holo.h4 .holo-foil, .reveal-card.holo.h5 .holo-foil { opacity: .5; }
+.reveal-card.holo .cost, .reveal-card.holo .kws { z-index: 8; }   /* the cost disc and keyword badges stay clean above the foil */
+@media (prefers-reduced-motion: reduce) { .reveal-card.holo { animation-name: reveal-spin; animation-duration: .01s; animation-iteration-count: 1; } }

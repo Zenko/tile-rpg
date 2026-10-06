@@ -269,6 +269,7 @@ function applySky(instant) {
   if (instant) { skyEl.style.transition = 'none'; if (vignetteEl) vignetteEl.style.transition = 'none';
     requestAnimationFrame(() => { if (skyEl) skyEl.style.transition = ''; if (vignetteEl) vignetteEl.style.transition = ''; }); }
   townView.classList.toggle('is-night', s.isNight);
+  if (typeof nlRefresh === 'function') nlRefresh(skyHoleActive);     // the sky colour may have changed, or night may have ended
   const timeText = document.getElementById('hudTimeText');
   if (timeText) { const t = s.label.replace(/^the /i, ''); timeText.textContent = t.charAt(0).toUpperCase() + t.slice(1); }
   const clockEl = document.getElementById('hudClock');
@@ -476,6 +477,7 @@ function buildSkyLayers() {
   weatherEl.innerHTML = `<div class="rain-layer"></div><div class="lightning"></div><div class="snow-field" id="snowField"></div><div class="sun-burst"></div><div class="cloud-shadow c1"></div><div class="cloud-shadow c2"></div>`;
   vignetteEl = document.createElement('div'); vignetteEl.className = 'town-vignette';
   townView.appendChild(skyEl); townView.appendChild(weatherEl); townView.appendChild(vignetteEl);
+  if (typeof nlMount === 'function') nlMount(skyEl);   // js/night-lights.js: the darkness is painted on a canvas inside .town-sky so lamps can cut holes in it
   snowFieldEl = weatherEl.querySelector('#snowField');
   rainLayerEl = weatherEl.querySelector('.rain-layer');
   lightningEl = weatherEl.querySelector('.lightning');
@@ -531,6 +533,7 @@ function updateCamera(animate) {
 // so the player reads as genuinely lit rather than merely brightened underneath a dark overlay - a CSS filter
 // on the player alone can't out-brighten a layer painted on top of it, so the darkness has to skip that spot instead.
 function updateNightHole(cx, cy, vw, vh) {
+  if (typeof nlDraw === 'function') nlDraw(cx, cy, vw, vh, skyHoleActive);   // lamp / window lights (js/night-lights.js)
   if ((!skyEl && !vignetteEl) || !skyHoleActive) return;   // by day nothing is dimmed, so there is nothing to cut a hole in
   const px = (state.playerPos.x + 0.5) * tilePx + cx, py = (state.playerPos.y + 0.5) * tilePx + cy;
   const xPct = vw ? (px / vw) * 100 : 50, yPct = vh ? (py / vh) * 100 : 50;
