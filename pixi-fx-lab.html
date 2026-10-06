@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tile RPG PixiJS FX Lab</title>
+<!-- PixiJS FX lab: three prototypes of what else PixiJS could do in the game besides drawing the town ground. Like pixi-lab.html and asset-lab.html it is a
+     sandbox: not linked from index.html, not cached by sw.js, nothing in the game uses it yet. PixiJS 8 is vendored in assets/vendor/.
+       1. Holo card   - a foil shader for rare cards: a rainbow sheen and a light sweep that follow the finger, sparkles on the top rarities, parallax art.
+       2. Night lights - a real light map (darkness with soft holes at each lamp, the lantern under your finger, and any lanterns you drop) instead of a flat
+                         tint, plus a water shader with tap ripples and glints.
+       3. Battle hit  - a card strike with lunge, hit flash, screen shake, slash, sparks, floating damage numbers, and a dissolve shader when a card falls.
+     Card art is the game's own assets/cards/<id>.png. Browsers refuse to upload local files to WebGL, so open this page over http (the live site, or
+     `python3 -m http.server`); from file:// the cards fall back to their emoji. -->
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/screens.css">
+<link rel="stylesheet" href="css/battle-town.css">
+<link rel="stylesheet" href="css/buildings.css">
+<link rel="stylesheet" href="css/battle-v2.css">
+<link rel="stylesheet" href="css/latest.css">
+<style>
+/* lab chrome only (.fx-*) */
+html, body.fx { margin: 0; height: 100%; overflow: hidden; background: #12161b; display: block; padding: 0; -webkit-user-select: none; user-select: none; overscroll-behavior: none; font: 13px/1.35 system-ui, -apple-system, "Segoe UI", sans-serif; color: #e8eef2; }
+#fxStage { position: fixed; inset: 0; touch-action: none; }
+#fxStage canvas { display: block; width: 100%; height: 100%; }
+.fx-top { position: fixed; left: 8px; right: 8px; top: calc(8px + env(safe-area-inset-top)); display: flex; gap: 6px; z-index: 5; }
+.fx-card { background: rgba(18, 22, 27, .82); border: 1px solid rgba(255, 255, 255, .14); border-radius: 12px; padding: 8px 10px; }
+.fx-btn { font: inherit; font-size: 13px; color: #e8eef2; background: #232a31; border: 1px solid rgba(255, 255, 255, .2); border-radius: 8px; padding: 7px 10px; min-height: 36px; flex: 1; }
+.fx-btn.on { background: #2f5f57; border-color: #8fc4b8; }
+.fx-bottom { position: fixed; left: 8px; right: 8px; bottom: calc(8px + env(safe-area-inset-bottom)); z-index: 5; }
+.fx-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.fx-row label { display: flex; align-items: center; gap: 8px; font-size: 12px; flex: 1; min-width: 160px; }
+.fx-row input[type=range] { flex: 1; min-width: 90px; }
+.fx-hint { opacity: .72; font-size: 11px; margin-top: 6px; }
+.fx-err { position: fixed; inset: 0; display: none; place-items: center; text-align: center; padding: 24px; z-index: 9; background: #12161b; }
+</style>
+</head>
+<body class="fx">
+<div id="fxStage"></div>
+<div class="fx-top" id="fxTabs">
+  <button class="fx-btn on" data-s="card" type="button">Holo card</button>
+  <button class="fx-btn" data-s="night" type="button">Night lights</button>
+  <button class="fx-btn" data-s="battle" type="button">Battle hit</button>
+</div>
+<div class="fx-bottom fx-card" id="fxPanel"></div>
+<div class="fx-err" id="fxErr"><div><b>WebGL is not available here.</b><br>This lab needs a browser with WebGL.<br><span id="fxErrMsg"></span></div></div>
+
+<script src="assets/sprites.js"></script>
+<script src="assets/vendor/pixi.min.js"></script>
+<script>
+(async () => {
+'use strict';
+/* =====================================================================================================================
+   How this works
+   - One PIXI.Application, three scene containers; only the active one is visible and ticked. Each scene is built once, lazily.
+   - Shaders are PIXI.Filter objects with a hand-written fragment shader (WebGL / GLSL ES 3.0). `uniforms` are updated from the ticker.
+   - Everything is sized from the viewport width so it matches a phone in portrait, like the game.
+   - Respect prefers-reduced-motion: no shake, no auto sweep, fewer particles.
+   ===================================================================================================================== */
+const $ = id => document.getElementById(id), R = (a, b) => a + Math.random() * (b - a), pick = a => a[Math.floor(Math.random() * a.length)];
+const REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const app = new PIXI.Application();
+try { await app.init({ resizeTo: window, background: '#12161b', antialias: true, resolution: Math.min(devicePixelRatio || 1, 2), autoDensity: true, preference: 'webgl' }); }
+catch (e) { $('fxErr').style.display = 'grid'; $('fxErrMsg').textContent = String(e && e.message || e); return; }
+$('fxStage').appendChild(app.canvas);
+const W = () => app.screen.width, H = () => app.screen.height;
+
+/* ---------------- shared helpers ---------------- */
+const FILTER_VERT = `in vec2 aPosition; out vec2 vTextureCoord;
+uniform vec4 uInputSize; uniform vec4 uOutputFrame; uniform vec4 uOutputTexture;
+void main(void) {
+  vec2 position = aPosition * uOutputFrame.zw + uOutputFrame.xy;
+  position.x = position.x * (2.0 / uOutputTexture.x) - 1.0;
+  position.y = position.y * (2.0 * uOutputTexture.z / uOutputTexture.y) - uOutputTexture.z;
+  gl_Position = vec4(position, 0.0, 1.0);
+  vTextureCoord = aPosition * (uOutputFrame.zw * uInputSize.zw);
+}`;
+const GLSL_COMMON = `precision highp float; in vec2 vTextureCoord; out vec4 finalColor; uniform sampler2D uTexture;
+float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+float vnoise(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f); return mix(mix(hash(i), hash(i + vec2(1, 0)), f.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), f.x), f.y); }
+vec3 hue(float h) { return clamp(abs(mod(h * 6.0 + vec3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0); }`;
+function makeFilter(name, frag, uniforms) {
+  return new PIXI.Filter({ glProgram: PIXI.GlProgram.from({ vertex: FILTER_VERT, fragment: GLSL_COMMON + frag, name }), resources: { u: uniforms } });
+}
+const U = f => f.resources.u.uniforms;
+const f32 = v => ({ value: v, type: 'f32' }), v2 = v => ({ value: v, type: 'vec2<f32>' }), v3 = v => ({ value: v, type: 'vec3<f32>' });
+
+/* tweens: tween(seconds, t => ..., done) with t in 0..1; stepped from the one ticker */
+let tweens = [];
+const ease = { out: t => 1 - (1 - t) * (1 - t), in: t => t * t, io: t => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2 };
+const tween = (sec, fn, done) => tweens.push({ sec, t: 0, fn, done });
+const wait = (sec, done) => tween(sec, () => {}, done);
+
+/* tiny particle emitter (the full version, with all the spell effects, is in pixi-lab.html) */
+const glowTex = (() => { const cv = document.createElement('canvas'); cv.width = cv.height = 64; const c = cv.getContext('2d'), g = c.createRadialGradient(32, 32, 0, 32, 32, 32); g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(0.3, 'rgba(255,255,255,0.6)'); g.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = g; c.fillRect(0, 0, 64, 64); return PIXI.Texture.from(cv); })();
+let parts = [];
+function spark(layer, x, y, tint, o = {}) {
+  const s = new PIXI.Sprite(glowTex); s.anchor.set(0.5); s.blendMode = 'add'; s.tint = tint; s.position.set(x, y); layer.addChild(s);
+  parts.push({ s, vx: o.vx || 0, vy: o.vy || 0, ay: o.ay || 0, drag: o.drag || 0.2, life: o.life || 0.6, age: 0, s0: o.s0 || 16, s1: o.s1 === undefined ? 2 : o.s1 });
+}
+function stepParts(dt) {
+  parts = parts.filter(p => {
+    p.age += dt; const u = p.age / p.life; if (u >= 1) { p.s.destroy(); return false; }
+    const d = Math.pow(p.drag, dt); p.vx *= d; p.vy = p.vy * d + p.ay * dt; p.s.x += p.vx * dt; p.s.y += p.vy * dt;
+    p.s.scale.set((p.s0 + (p.s1 - p.s0) * u) / 64); p.s.alpha = 1 - u; return true;
+  });
+}
+
+/* card art: the game's own PNG (needs http), else an emoji drawn into a canvas */
+const artCache = {};
+async function cardArt(def) {
+  if (artCache[def.id]) return artCache[def.id];
+  let tex;
+  try {
+    const img = new Image(); img.crossOrigin = 'anonymous'; img.src = 'assets/cards/' + def.id + '.png'; await img.decode();
+    const probe = document.createElement('canvas'); probe.width = probe.height = 2; const pc = probe.getContext('2d'); pc.drawImage(img, 0, 0, 2, 2); pc.getImageData(0, 0, 1, 1);   // throws on a tainted (file://) image
+    tex = PIXI.Texture.from(img);
+  } catch (e) {
+    const cv = document.createElement('canvas'); cv.width = cv.height = 256; const c = cv.getContext('2d'); const g = c.createLinearGradient(0, 0, 256, 256); g.addColorStop(0, '#41506b'); g.addColorStop(1, '#1d2433'); c.fillStyle = g; c.fillRect(0, 0, 256, 256);
+    c.font = '150px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(def.icon, 128, 138); tex = PIXI.Texture.from(cv);
+  }
+  tex.source.scaleMode = 'linear'; return (artCache[def.id] = tex);
+}
+const RARITY = { common: 0xc9c2b4, rare: 0x9a86c9, ultra: 0x6aa8e0, super: 0xe0a24a, mythic: 0xe0709a };
+/* One card as a Container (design size 200 x 280): frame, art in a rounded window, name, cost and power/grit badges. */
+async function makeCard(def) {
+  const c = new PIXI.Container(), col = RARITY[def.rarity] || 0xc9c2b4, art = await cardArt(def);
+  const frame = new PIXI.Graphics().roundRect(0, 0, 200, 280, 16).fill(0x1c2230).roundRect(0, 0, 200, 280, 16).stroke({ width: 5, color: col });
+  const win = new PIXI.Graphics().roundRect(12, 40, 176, 176, 10).fill(0xffffff);
+  const spr = new PIXI.Sprite(art); spr.anchor.set(0.5); spr.position.set(100, 128); spr.width = spr.height = 196; spr.mask = win;
+  const txt = (t, size, x, y, fill, anchor = 0.5, weight = '800') => { const s = new PIXI.Text({ text: t, style: { fontFamily: 'system-ui, sans-serif', fontSize: size, fontWeight: weight, fill } }); s.anchor.set(anchor, 0.5); s.position.set(x, y); return s; };
+  const badge = (x, y, v, fill) => { const g = new PIXI.Graphics().circle(x, y, 17).fill(fill).circle(x, y, 17).stroke({ width: 2, color: 0x000000, alpha: 0.4 }); return [g, txt(String(v), 20, x, y, 0xffffff)]; };
+  c.addChild(frame, win, spr, txt(def.name, 17, 100, 20, 0xf2efe6), txt(String(def.cost), 17, 20, 20, col, 0.5), ...badge(30, 252, def.power, 0xc0583e), ...badge(170, 252, def.grit, 0x3f8f6a));
+  c.pivot.set(100, 140); c.art = spr; c.frame = frame; c.def = def; return c;
+}
+const CARDS = {
+  common: { id: 'sprout', name: 'Sprout', icon: '🌱', rarity: 'common', cost: 1, power: 2, grit: 2 }, rare: { id: 'blossom', name: 'Blossom', icon: '🌸', rarity: 'rare', cost: 3, power: 4, grit: 4 },
+  ultra: { id: 'ember-fox', name: 'Dusk Fox', icon: '🦊', rarity: 'ultra', cost: 3, power: 4, grit: 5 }, super: { id: 'moonstone', name: 'Moonstone', icon: '🌙', rarity: 'super', cost: 4, power: 4, grit: 7 },
+  mythic: { id: 'bramble-king', name: 'Briar King', icon: '👑', rarity: 'mythic', cost: 5, power: 8, grit: 8 }
+};
+
+/* ==================================================================================================================
+   1. HOLO CARD
+   ================================================================================================================== */
+const sceneCard = new PIXI.Container(), card = { rarity: 'rare', ptr: { x: 0.5, y: 0.5, tx: 0.5, ty: 0.5 }, c: null, filter: null, built: false };
+// strength per rarity: [rainbow, sweep, sparkle]
+const HOLO = { common: [0, 0, 0], rare: [0, 0.35, 0], ultra: [0.28, 0.4, 0], super: [0.34, 0.5, 0.7], mythic: [0.45, 0.6, 1] };
+const holoFrag = `
+uniform vec2 uPtr; uniform float uTime; uniform vec3 uHolo;
+void main(void) {
+  vec4 c = texture(uTexture, vTextureCoord); if (c.a < 0.01) { finalColor = c; return; }
+  vec2 uv = vTextureCoord; float lum = dot(c.rgb / max(c.a, 0.001), vec3(0.3, 0.59, 0.11));
+  vec3 add = vec3(0.0);
+  vec3 rainbow = hue(fract((uv.x * 0.8 + uv.y) * 1.3 + (uPtr.x - 0.5) * 1.2 + (uPtr.y - 0.5) * 0.6 + uTime * 0.03));
+  add += rainbow * uHolo.x * (0.35 + 0.9 * lum) * (0.8 + 0.2 * sin((uv.x + uv.y) * 30.0 + uTime));
+  float diag = (uv.x + uv.y * 0.7) - (uPtr.x + uPtr.y * 0.7) * 1.0 - 0.1;
+  add += vec3(1.0, 0.97, 0.9) * uHolo.y * exp(-pow(diag * 5.5, 2.0));
+  vec2 cellUv = uv * vec2(46.0, 64.0); vec2 g = floor(cellUv); float n = hash(g);
+  float tw = step(0.965, n) * smoothstep(0.5, 0.0, length(fract(cellUv) - 0.5)) * (0.5 + 0.5 * sin(uTime * 4.0 + n * 60.0)) * (0.4 + 0.6 * lum);
+  add += vec3(1.0) * tw * uHolo.z;
+  finalColor = vec4(c.rgb + add * c.a, c.a);
+}`;
+async function buildCard() {
+  card.built = true; card.filter = makeFilter('holo', holoFrag, { uPtr: v2([0.5, 0.5]), uTime: f32(0), uHolo: v3([0, 0, 0]) });
+  await setCardRarity(card.rarity);
+}
+async function setCardRarity(r) {
+  card.rarity = r; const old = card.c; card.c = null;      // null while the new card loads, so the ticker never touches a destroyed one
+  if (old) { sceneCard.removeChild(old); old.destroy({ children: true }); }
+  const nc = await makeCard(CARDS[r]); card.c = nc; card.c.filters = [card.filter]; sceneCard.addChild(card.c); layoutCard();
+}
+function layoutCard() { if (!card.c) return; const k = Math.min(W() * 0.7 / 200, (H() - 230) / 280); card.base = k; card.c.scale.set(k); card.c.position.set(W() / 2, 70 + (H() - 70 - 130) / 2); }
+function tickCard(dt, now) {
+  if (!card.c) return; const p = card.ptr, auto = !card.held && !REDUCE;
+  if (auto) { p.tx = 0.5 + Math.sin(now / 1500) * 0.35; p.ty = 0.5 + Math.cos(now / 1900) * 0.25; }
+  p.x += (p.tx - p.x) * Math.min(1, dt * 8); p.y += (p.ty - p.y) * Math.min(1, dt * 8);
+  const u = U(card.filter); u.uPtr = [p.x, p.y]; u.uTime = now / 1000; u.uHolo = HOLO[card.rarity];
+  const tx = p.x - 0.5, ty = p.y - 0.5; card.c.art.position.set(100 - tx * 14, 128 - ty * 14);    // parallax: the art slides against the frame
+  card.c.skew.set(-ty * 0.12, tx * 0.12); card.c.rotation = tx * 0.08;                              // a cheap tilt (a true perspective tilt would use PIXI.PerspectiveMesh)
+}
+const cardPointer = e => { const k = card.base || 1, c = card.c; if (!c) return; card.held = true; card.ptr.tx = Math.min(1, Math.max(0, (e.clientX - (c.x - 100 * k)) / (200 * k))); card.ptr.ty = Math.min(1, Math.max(0, (e.clientY - (c.y - 140 * k)) / (280 * k))); };
+
+/* ==================================================================================================================
+   2. NIGHT LIGHTS + WATER
+   ================================================================================================================== */
+const sceneNight = new PIXI.Container(), night = { built: false, lights: [], dark: 0.62, ptr: { x: 0, y: 0, on: false }, rt: null, ripples: [], flick: 0 };
+const NC = 9, NR = 11;                                              // yard size in tiles
+const waterFrag = `
+uniform float uTime; uniform vec2 uSize; uniform vec3 uR0; uniform vec3 uR1; uniform vec3 uR2; uniform vec3 uR3; uniform float uShade;
+float ripple(vec3 r, vec2 p) { if (r.z < 0.0) return 0.0; float age = uTime - r.z, d = length(p - r.xy); float front = age * 0.55; float w = exp(-pow((d - front) * 18.0, 2.0)); return w * sin((d - front) * 60.0) * exp(-age * 1.4); }
+void main(void) {
+  vec4 c = texture(uTexture, vTextureCoord); if (c.a < 0.01) { finalColor = c; return; }
+  vec2 p = vTextureCoord * uSize / uSize.x;
+  float h = sin(p.x * 22.0 + uTime * 1.3 + sin(p.y * 9.0 + uTime * 0.7) * 1.5) * 0.5 + sin(p.y * 31.0 - uTime * 1.7 + p.x * 6.0) * 0.5;
+  float rp = ripple(uR0, p) + ripple(uR1, p) + ripple(uR2, p) + ripple(uR3, p);
+  vec3 col = c.rgb / max(c.a, 0.001);
+  col *= 0.9 + 0.1 * h + rp * 0.5;
+  float glint = smoothstep(0.93, 1.0, vnoise(p * 55.0 + vec2(uTime * 0.6, -uTime * 0.4))) * uShade;
+  col += vec3(0.8, 0.92, 1.0) * (glint * 0.7 + max(rp, 0.0) * 0.35);
+  finalColor = vec4(col * c.a, c.a);
+}`;
+let nightPal = {};
+function readPalette() {
+  const probe = document.createElement('div'); probe.className = 'town-view'; probe.dataset.biome = 'meadow'; probe.style.cssText = 'position:absolute;visibility:hidden'; document.body.appendChild(probe);
+  document.documentElement.dataset.theme = 'dark'; const cs = getComputedStyle(probe);
+  ['ground', 'ground2', 'ground3', 'path', 'path-edge', 'water', 'shore', 'trunk', 'leaf1', 'leaf2', 'leaf3', 'pine1', 'pine2', 'flower1', 'flower2', 'flower3', 'tuft', 'path-dot', 'plank', 'plank2', 'stone', 'stone2', 'stone3', 'wall', 'wall2', 'roof', 'roof2', 'door', 'window', 'lamp', 'bread', 'water2', 'tshadow'].forEach(v => { nightPal[v] = cs.getPropertyValue('--' + v).trim() || '#808080'; });
+  probe.remove();
+}
+async function symTex(id) {
+  const sym = document.getElementById(id); if (!sym) return PIXI.Texture.EMPTY;
+  const vb = (sym.getAttribute('viewBox') || '0 0 64 64').split(/\s+/).map(Number), w = vb[2] * 2, h = vb[3] * 2;
+  const inner = sym.innerHTML.replace(/var\((--[a-z0-9-]+)\)/g, (_, n) => nightPal[n.slice(2)] || '#808080');
+  const img = new Image(); img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb.join(' ')}" width="${w}" height="${h}">${inner}</svg>`); await img.decode();
+  const cv = document.createElement('canvas'); cv.width = w; cv.height = h; cv.getContext('2d').drawImage(img, 0, 0, w, h);
+  const t = PIXI.Texture.from(cv); t.source.scaleMode = 'linear'; return t;
+}
+const tilePx = () => Math.floor(Math.min(W() / NC, (H() - 190) / NR));
+async function buildNight() {
+  night.built = true; readPalette();
+  const ground = new PIXI.Graphics(), pond = new PIXI.Graphics(), objs = new PIXI.Container(); objs.sortableChildren = true;
+  const T = 64, tones = [nightPal.ground, nightPal.ground2, nightPal.ground3], POND = { x: 1, y: 6, w: 4, h: 3 };
+  night.pondRect = POND;
+  for (let y = 0; y < NR; y++) for (let x = 0; x < NC; x++) {
+    const inPond = x >= POND.x && x < POND.x + POND.w && y >= POND.y && y < POND.y + POND.h, path = x === 6 || (y === 3 && x > 2);
+    const col = inPond ? nightPal.water : path ? nightPal.path : tones[(x * 7 + y * 13) % 3];
+    (inPond ? pond : ground).roundRect(x * T + 1, y * T + 1, T - 2, T - 2, 6).fill(col);
+  }
+  const place = async (id, x, y, w, h, z) => { const s = new PIXI.Sprite(await symTex(id)); s.position.set(x * T, y * T); s.width = w * T; s.height = h * T; s.zIndex = z === undefined ? y * 2 : z; objs.addChild(s); return s; };
+  await place('b-cottage', 1, 0.2, 2, 2, 4);
+  for (const [x, y] of [[0, 4], [8, 1], [8, 5], [7, 9], [0, 10], [4, 10]]) await place(['s-oak', 's-pine', 's-oak2'][(x + y) % 3], x - 0.1, y - 0.2, 1.2, 1.2);
+  for (const [x, y] of [[5, 5], [3, 2], [7, 7], [2, 4]]) await place('s-flowers', x, y, 1, 1, -1);
+  night.lampTex = await symTex('p-lamp');
+  const lamps = [[5, 2], [7, 4], [5, 8], [3, 3]];
+  for (const [x, y] of lamps) { await place('p-lamp', x, y, 1, 1, y * 2 + 1); night.lights.push({ x: (x + 0.5) * T, y: (y + 0.3) * T, r: 3.4 * T, warm: 1, ph: R(0, 6), fixed: true }); }
+  night.world = new PIXI.Container(); night.world.addChild(ground, pond, objs);
+  night.pond = pond; night.pondFilter = makeFilter('water', waterFrag, { uTime: f32(0), uSize: v2([POND.w * T, POND.h * T]), uR0: v3([0, 0, -1]), uR1: v3([0, 0, -1]), uR2: v3([0, 0, -1]), uR3: v3([0, 0, -1]), uShade: f32(1) });
+  pond.filters = [night.pondFilter];
+  night.lightC = new PIXI.Container(); night.dark_ = new PIXI.Graphics(); night.lightC.addChild(night.dark_);
+  night.glowC = new PIXI.Container();                                                    // coloured additive glow drawn over the lit scene
+  night.lightSprites = [];
+  sceneNight.addChild(night.world, night.glowC);
+  night.rt = PIXI.RenderTexture.create({ width: 16, height: 16 }); night.shade = new PIXI.Sprite(night.rt); sceneNight.addChild(night.shade);
+  const g = new PIXI.Graphics(); sceneNight.addChild(g); night.tip = g;
+  layoutNight();
+}
+function layoutNight() {
+  if (!night.world) return; const k = tilePx() / 64; night.k = k; night.world.scale.set(k); night.glowC.scale.set(k);
+  night.ox = Math.round((W() - NC * 64 * k) / 2); night.oy = 62; night.world.position.set(night.ox, night.oy); night.glowC.position.set(night.ox, night.oy);
+  night.rt.resize(W(), H()); night.shade.position.set(0, 0);
+  night.dark_.clear().rect(0, 0, W(), H()).fill(0xffffff); night.dark_.tint = 0x070b22;
+}
+const lightTex = (() => { const cv = document.createElement('canvas'); cv.width = cv.height = 256; const c = cv.getContext('2d'), g = c.createRadialGradient(128, 128, 0, 128, 128, 128); g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(0.45, 'rgba(255,255,255,0.7)'); g.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = g; c.fillRect(0, 0, 256, 256); return PIXI.Texture.from(cv); })();
+function tickNight(dt, now) {
+  if (!night.world) return; const k = night.k, t = now / 1000, ls = night.lights.slice();
+  if (night.ptr.on) ls.push({ x: (night.ptr.x - night.ox) / k, y: (night.ptr.y - night.oy) / k, r: 4.2 * 64, warm: 0, ph: 0, fixed: false });
+  // the light map: a dark layer with a soft hole at every light (the 'erase' blend mode cuts the hole)
+  while (night.lightSprites.length < ls.length) { const s = new PIXI.Sprite(lightTex); s.anchor.set(0.5); s.blendMode = 'erase'; night.lightC.addChild(s); night.lightSprites.push(s); }
+  night.lightSprites.forEach((s, i) => { const l = ls[i]; s.visible = !!l; if (!l) return; const fl = l.warm ? 1 + Math.sin(t * 9 + l.ph) * 0.03 + Math.sin(t * 23 + l.ph * 2) * 0.025 : 1, r = l.r * k * fl;
+    s.position.set(night.ox + l.x * k, night.oy + l.y * k); s.width = s.height = r * 2; s.alpha = 1; });
+  night.dark_.alpha = night.dark;
+  app.renderer.render({ container: night.lightC, target: night.rt, clear: true, clearColor: [0, 0, 0, 0] });
+  // warm glow over the lit area: additive sprites tinted like the lamp
+  while (night.glowC.children.length < ls.length) { const s = new PIXI.Sprite(lightTex); s.anchor.set(0.5); s.blendMode = 'add'; night.glowC.addChild(s); }
+  night.glowC.children.forEach((s, i) => { const l = ls[i]; s.visible = !!l; if (!l) return; const fl = l.warm ? 1 + Math.sin(t * 9 + l.ph) * 0.05 : 1; s.position.set(l.x, l.y); s.width = s.height = l.r * 1.3 * fl; s.tint = l.warm ? 0xffb255 : 0x9fc4ff; s.alpha = night.dark * (l.warm ? 0.28 : 0.12); });
+  const u = U(night.pondFilter); u.uTime = t; u.uShade = 0.4 + night.dark * 0.8;
+  ['uR0', 'uR1', 'uR2', 'uR3'].forEach((n, i) => { const r = night.ripples[i]; u[n] = r ? [r.x, r.y, r.t] : [0, 0, -1]; });
+}
+function nightPointer(e, down) {
+  if (!night.world) return; night.ptr.x = e.clientX; night.ptr.y = e.clientY; night.ptr.on = true; if (!down) return;
+  const k = night.k, wx = (e.clientX - night.ox) / k, wy = (e.clientY - night.oy) / k, P = night.pondRect, px = wx / 64, py = wy / 64;
+  if (px >= P.x && px < P.x + P.w && py >= P.y && py < P.y + P.h) {                                    // a tap on the pond: ripple in pond-local, width-normalised units
+    night.ripples.unshift({ x: (wx - P.x * 64) / (P.w * 64), y: (wy - P.y * 64) / (P.w * 64), t: performance.now() / 1000 }); night.ripples.length = Math.min(night.ripples.length, 4);
+  } else if (px >= 0 && px < NC && py >= 0 && py < NR) {                                                 // a tap on land: drop a lantern (oldest dropped one goes out)
+    const dropped = night.lights.filter(l => !l.fixed); if (dropped.length >= 6) night.lights.splice(night.lights.indexOf(dropped[0]), 1);
+    night.lights.push({ x: wx, y: wy, r: 3 * 64, warm: 1, ph: R(0, 6), fixed: false });
+  }
+}
+
+/* ==================================================================================================================
+   3. BATTLE HIT
+   ================================================================================================================== */
+const sceneBattle = new PIXI.Container(), bat = { built: false, foes: [], mine: [], shake: 0, busy: false };
+const dissolveFrag = `
+uniform float uT; uniform vec3 uEdge;
+void main(void) {
+  vec4 c = texture(uTexture, vTextureCoord); if (c.a < 0.01) { finalColor = c; return; }
+  float n = vnoise(vTextureCoord * 14.0) * 0.65 + vnoise(vTextureCoord * 40.0) * 0.35, d = n - uT * 1.15 + 0.08;
+  if (d < 0.0) { finalColor = vec4(0.0); return; }
+  float edge = smoothstep(0.1, 0.0, d); vec3 col = mix(c.rgb, uEdge * c.a, edge);
+  finalColor = vec4(col + uEdge * edge * 0.6 * c.a, c.a);
+}`;
+const flashFrag = `uniform float uK; void main(void) { vec4 c = texture(uTexture, vTextureCoord); finalColor = vec4(c.rgb + vec3(uK) * c.a, c.a); }`;
+const FOES = [{ id: 'bramble-king', name: 'Briar King', icon: '👑', rarity: 'mythic', cost: 5, power: 8, grit: 8 }, { id: 'kraken', name: 'Lullaby Kraken', icon: '🐙', rarity: 'mythic', cost: 5, power: 6, grit: 8 }, { id: 'silver-fox', name: 'Whisper Fox', icon: '🦊', rarity: 'super', cost: 4, power: 7, grit: 4 }];
+const MINE = [{ id: 'ember-fox', name: 'Dusk Fox', icon: '🦊', rarity: 'ultra', cost: 3, power: 4, grit: 5 }, { id: 'firefly', name: 'Firefly', icon: '🪲', rarity: 'common', cost: 2, power: 2, grit: 4 }, { id: 'moon-dragon', name: 'Moonwhisper Dragon', icon: '🐉', rarity: 'mythic', cost: 5, power: 7, grit: 6 }];
+async function buildBattle() {
+  bat.bg = new PIXI.Graphics(); bat.table = new PIXI.Container(); bat.fx = new PIXI.Container(); bat.hud = new PIXI.Container();
+  sceneBattle.addChild(bat.bg, bat.table, bat.fx, bat.hud);
+  for (let i = 0; i < 3; i++) {
+    const f = await makeCard(FOES[i]), m = await makeCard(MINE[i]); f.maxHp = f.hp = FOES[i].grit; m.maxHp = m.hp = MINE[i].grit;
+    f.flash = makeFilter('flash', flashFrag, { uK: f32(0) }); f.diss = makeFilter('diss', dissolveFrag, { uT: f32(0), uEdge: v3([1, 0.55, 0.15]) }); f.filters = [f.flash];
+    m.flash = makeFilter('flash', flashFrag, { uK: f32(0) }); m.filters = [m.flash];
+    f.eventMode = 'static'; f.cursor = 'pointer'; f.on('pointerdown', () => strike(i));
+    f.bar = new PIXI.Graphics(); bat.table.addChild(f, m, f.bar); bat.foes.push(f); bat.mine.push(m);
+  }
+  bat.help = new PIXI.Text({ text: 'Tap a card in the top row to hit it', style: { fontFamily: 'system-ui, sans-serif', fontSize: 14, fill: 0xe8eef2 } }); bat.help.anchor.set(0.5); bat.hud.addChild(bat.help);
+  bat.built = true; layoutBattle(); bat.foes.forEach(hpBar);
+}
+function layoutBattle() {
+  if (!bat.built) return; const w = W(), h = H(), k = Math.min(w / 3.5 / 200, (h - 200) / 2 / 280 * 0.95); bat.k = k;
+  bat.bg.clear().rect(0, 0, w, h).fill(0x161b26).ellipse(w / 2, h / 2, w * 0.7, h * 0.28).fill({ color: 0x24402f, alpha: 0.55 });
+  const top = 62 + 140 * k + 6, bot = h - 130 - 140 * k;
+  for (let i = 0; i < 3; i++) {
+    const x = w * (0.2 + 0.3 * i);
+    [bat.foes[i], bat.mine[i]].forEach((c, j) => { c.scale.set(k); c.home = { x, y: j ? bot : top }; if (!c.busy) c.position.set(c.home.x, c.home.y); });
+  }
+  bat.help.position.set(w / 2, h - 148);
+}
+function hpBar(f) { const k = bat.k, g = f.bar; g.clear(); const w = 150 * k, x = f.x - w / 2, y = f.y + 148 * k; g.roundRect(x, y, w, 7, 3).fill(0x000000).roundRect(x, y, Math.max(0, w * f.hp / f.maxHp), 7, 3).fill(f.hp / f.maxHp > 0.4 ? 0x3f8f6a : 0xc0583e); }
+function floatText(text, x, y, color) {
+  const t = new PIXI.Text({ text, style: { fontFamily: 'system-ui, sans-serif', fontSize: 38 * (bat.k || 1) * 1.4, fontWeight: '900', fill: color, stroke: { color: 0x000000, width: 5 } } }); t.anchor.set(0.5); t.position.set(x, y); bat.fx.addChild(t);
+  tween(1, u => { t.y = y - 70 * ease.out(u); t.alpha = u < 0.6 ? 1 : 1 - (u - 0.6) / 0.4; t.scale.set(1 + 0.5 * Math.max(0, 1 - u * 5)); }, () => t.destroy());
+}
+function slash(x, y, k) {
+  const g = new PIXI.Graphics(); bat.fx.addChild(g); const L = 150 * k, a = R(-0.6, 0.6) - 0.8;
+  tween(0.28, u => { g.clear(); const e = ease.out(u), len = L * e, w = 11 * (1 - u); for (const [o, col] of [[1.4, 0xffb26b], [1, 0xffffff]]) g.moveTo(x - Math.cos(a) * len, y - Math.sin(a) * len).lineTo(x + Math.cos(a) * len, y + Math.sin(a) * len).stroke({ width: w * o, color: col, alpha: 1 - u, cap: 'round' }); }, () => g.destroy());
+}
+async function strike(i) {
+  if (bat.busy) return; const foe = bat.foes[i], me = bat.mine[i], k = bat.k; if (foe.hp <= 0) return; bat.busy = true; me.busy = true;
+  const from = { ...me.home }, to = { x: foe.home.x, y: foe.home.y + 120 * k };
+  me.zIndex = 10; bat.table.sortableChildren = true;
+  tween(0.16, u => { me.x = from.x - 0; me.y = from.y + 18 * k * ease.out(u); me.scale.set(k * (1 + 0.08 * u)); }, () =>               // wind-up
+    tween(0.14, u => { const e = ease.in(u); me.x = from.x + (to.x - from.x) * e; me.y = from.y + 18 * k + (to.y - from.y - 18 * k) * e; }, () => impact(foe, me, i)));
+}
+function impact(foe, me, i) {
+  const k = bat.k, dmg = me.def.power, hx = foe.x, hy = foe.y + 80 * k; foe.hp = Math.max(0, foe.hp - dmg); hpBar(foe);
+  slash(hx, hy, k); floatText('-' + dmg, hx, hy - 30 * k, 0xffd27a);
+  for (let n = 0, c = REDUCE ? 8 : 26; n < c; n++) { const a = R(0, 6.28), v = R(120, 420) * k; spark(bat.fx, hx, hy, pick([0xffe08a, 0xff9a2e, 0xffffff]), { vx: Math.cos(a) * v, vy: Math.sin(a) * v, ay: 300 * k, life: R(0.35, 0.8), s0: R(10, 22) * k, drag: 0.15 }); }
+  const ring = new PIXI.Sprite(glowTex); ring.anchor.set(0.5); ring.blendMode = 'add'; ring.position.set(hx, hy); ring.tint = 0xffd9a0; bat.fx.addChild(ring);
+  tween(0.35, u => { ring.scale.set((40 + 260 * ease.out(u)) * k / 64); ring.alpha = 0.9 * (1 - u); }, () => ring.destroy());
+  if (!REDUCE) bat.shake = 14 * k;                                                          // screen shake: decays in the ticker
+  const fk = U(foe.flash); tween(0.22, u => { fk.uK = 0.9 * (1 - u); foe.x = foe.home.x + Math.sin(u * 40) * 7 * k * (1 - u); });
+  tween(0.2, () => {}, () => tween(0.3, u => { const e = ease.io(u); me.x = me.x + (me.home.x - me.x) * e * 0.4; me.y = me.y + (me.home.y - me.y) * e * 0.4; me.scale.set(k * (1.08 - 0.08 * u)); }, () => { me.position.set(me.home.x, me.home.y); me.busy = false; me.zIndex = 0; bat.busy = false; }));
+  if (foe.hp <= 0) wait(0.35, () => dissolve(foe));
+}
+function dissolve(foe) {
+  foe.filters = [foe.diss]; const u = U(foe.diss), k = bat.k;
+  tween(0.9, t => { u.uT = ease.in(t); foe.bar.alpha = 1 - t; if (Math.random() < 0.5 && !REDUCE) spark(bat.fx, foe.x + R(-80, 80) * k, foe.y + R(-100, 100) * k, 0xffa040, { vy: -60 * k, vx: R(-20, 20), life: 0.6, s0: R(8, 16) * k }); },
+    () => { foe.visible = false; wait(1.1, () => { foe.hp = foe.maxHp; hpBar(foe); u.uT = 0; foe.filters = [foe.flash]; foe.visible = true; foe.bar.alpha = 1; foe.alpha = 0; tween(0.4, t => { foe.alpha = t; }); }); });
+}
+function tickBattle(dt, now) {
+  if (!bat.built) return;
+  if (bat.shake > 0.2) { sceneBattle.x = R(-1, 1) * bat.shake; sceneBattle.y = R(-1, 1) * bat.shake; bat.shake *= Math.pow(0.002, dt); } else { sceneBattle.x = sceneBattle.y = 0; bat.shake = 0; }
+  bat.foes.forEach(f => { f.bar.visible = f.visible; });
+}
+
+/* ---------------- scene switching, panel, loop ---------------- */
+const scenes = { card: sceneCard, night: sceneNight, battle: sceneBattle };
+app.stage.addChild(sceneCard, sceneNight, sceneBattle);
+let cur = 'card';
+const PANELS = {
+  card: () => `<div class="fx-row">${Object.keys(CARDS).map(r => `<button class="fx-btn ${r === card.rarity ? 'on' : ''}" data-r="${r}" type="button">${r}</button>`).join('')}</div><div class="fx-hint">Drag over the card to tilt it. Common has no foil, rare a light sweep, ultra a rainbow sheen, super and mythic add sparkles. One fragment shader, five strengths.</div>`,
+  night: () => `<div class="fx-row"><label>Daylight <input id="fxDark" type="range" min="0" max="100" value="${Math.round((1 - night.dark / 0.85) * 100)}"> <span id="fxDarkV"></span></label></div><div class="fx-hint">Move over the yard to carry a lantern. Tap grass to drop a lantern (the oldest goes out after six), tap the pond for ripples. Lamps flicker. The darkness is a real light map, not a flat tint.</div>`,
+  battle: () => `<div class="fx-hint" style="margin:0">Each strike: wind-up, lunge, hit flash shader, screen shake, slash, sparks, damage number and a shockwave. A card at 0 life dissolves with an ember edge, then comes back. The same pieces would sit as a transparent Pixi canvas over the DOM battle.</div>`
+};
+async function show(name) {
+  cur = name; Object.entries(scenes).forEach(([k, s]) => { s.visible = k === name; });
+  document.querySelectorAll('#fxTabs .fx-btn').forEach(b => b.classList.toggle('on', b.dataset.s === name));
+  if (name === 'card' && !card.built) await buildCard(); if (name === 'night' && !night.built) await buildNight(); if (name === 'battle' && !bat.built) await buildBattle();
+  $('fxPanel').innerHTML = PANELS[name](); wirePanel(name);
+}
+function wirePanel(name) {
+  if (name === 'card') $('fxPanel').querySelectorAll('[data-r]').forEach(b => { b.onclick = async () => { await setCardRarity(b.dataset.r); $('fxPanel').innerHTML = PANELS.card(); wirePanel('card'); }; });
+  if (name === 'night') { const r = $('fxDark'), v = $('fxDarkV'), set = () => { night.dark = (1 - r.value / 100) * 0.85; v.textContent = r.value + '%'; }; r.oninput = set; set(); }
+}
+$('fxTabs').onclick = e => { const b = e.target.closest('[data-s]'); if (b) show(b.dataset.s); };
+app.canvas.addEventListener('pointermove', e => { if (cur === 'card' && e.buttons) cardPointer(e); if (cur === 'night') nightPointer(e, false); });
+app.canvas.addEventListener('pointerdown', e => { if (cur === 'card') cardPointer(e); if (cur === 'night') nightPointer(e, true); });
+app.canvas.addEventListener('pointerup', () => { card.held = false; });
+app.canvas.addEventListener('pointerleave', () => { night.ptr.on = false; card.held = false; });
+app.renderer.on('resize', () => { layoutCard(); layoutNight(); layoutBattle(); });
+app.ticker.add(tk => {
+  const dt = Math.min(0.05, tk.deltaMS / 1000), now = performance.now();
+  const run = tweens; tweens = [];                                       // tweens started by a finished tween land in the fresh array
+  run.forEach(tw => { tw.t = Math.min(1, tw.t + dt / tw.sec); tw.fn(tw.t); if (tw.t >= 1) tw.done && tw.done(); else tweens.push(tw); });
+  stepParts(dt);
+  if (cur === 'card') tickCard(dt, now); else if (cur === 'night') tickNight(dt, now); else tickBattle(dt, now);
+});
+
+const qs = new URLSearchParams(location.search);
+await show(['card', 'night', 'battle'].includes(qs.get('scene')) ? qs.get('scene') : 'card');
+if (qs.has('rarity') && CARDS[qs.get('rarity')]) { await setCardRarity(qs.get('rarity')); $('fxPanel').innerHTML = PANELS.card(); wirePanel('card'); }
+window.__fx = { show, setCardRarity, strike, app, card, night, bat, particles: () => parts.length, ready: true };
+})();
+</script>
+</body>
+</html>
