@@ -75,8 +75,10 @@ module.exports = async (page, assert) => {
   // ---- nothing talks over a battle, another sheet or another tab ----
   const guards = await page.evaluate(() => {
     const out = {}; const s = state.progress.story; s.step = 1; s.beat = 0; storyHoldUntil(0);
+    document.querySelectorAll('.overlay').forEach(o => o.classList.add('hidden'));   // a first-time tip can pop up late on a slow runner and would count as another sheet
     document.getElementById('talkOverlay').classList.remove('hidden'); storyBeatCheck(); out.sheet = !storyCur && s.beat === 0;
     document.getElementById('talkOverlay').classList.add('hidden');
+    document.querySelectorAll('.overlay').forEach(o => o.classList.add('hidden'));
     currentTab = 'journal'; storyBeatCheck(); out.tab = !storyCur && s.beat === 0; currentTab = 'town';
     prefs.cozy = true; storyBeatCheck(); out.cozy = !storyCur && s.beat === 0; prefs.cozy = false;
     storyBeatCheck(); out.plays = !!storyCur && s.beat === 1;
