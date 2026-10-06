@@ -1384,3 +1384,27 @@ body.in-story .toast { opacity: 0; }
 .coll-sheet .btn { width: 100%; margin-top: 18px; min-height: 48px; }
 .coll-sheet .coll-lab { text-align: left; }
 .coll-sheet .cf-chip.active:not([data-r]), .coll-sheet .cf-chip.active[data-r="all"] { background: var(--water); color: var(--on-water); border-color: transparent; }
+
+/* ===== Workshop: Trade up in the same forge look =====
+   The sticky .cr-dock is the stage: three slots, an arrow and a rarity-coloured mystery card. Below it the spare cards are
+   the normal My Cards tiles in a grid, so a tap on a tile puts it in the next free slot (the grid cells are divs because
+   a tile is itself a button). */
+.cr-dock { background: radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 70%), var(--stone); }
+.cr-dock .cr-tray { gap: 6px; margin: 2px 0 12px; }
+.cr-tslot { position: relative; flex: 0 0 62px; width: 62px; aspect-ratio: 3 / 4; box-sizing: border-box; border-radius: 12px; border: 1.5px dashed var(--stone-edge); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: var(--ink-soft); font-size: 1.1rem; font-weight: 700; }
+.cr-tslot.next { border-color: var(--water); animation: pulse-dot 1.4s ease-in-out infinite; }
+.cr-tslot.filled { border: 0; cursor: pointer; }
+.cr-tslot.filled .cr-tile { width: 100%; }
+.cr-tslot.filled.just-picked { animation: pop-in 0.25s ease; }
+.cr-tslot.filled::after { content: '✕'; position: absolute; right: -6px; top: -6px; width: 20px; height: 20px; border-radius: 50%; background: var(--stone); border: 1px solid var(--stone-edge); color: var(--ink); font-size: 0.6rem; display: grid; place-items: center; }
+.cr-tresult { flex: 0 0 84px; width: 84px; border: 2px solid var(--accent); color: #fff; box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 45%, transparent); text-shadow: 0 1px 3px rgba(0,0,0,.4); }
+.cr-tresult span { font-size: 1.6rem; }
+.cr-tresult b { font-size: 0.7rem; text-transform: capitalize; }
+.cr-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 4px 0 12px; }
+.cr-gridcard { position: relative; cursor: pointer; border-radius: 14px; transition: transform 0.1s ease; }
+.cr-gridcard:active { transform: scale(0.96); }
+.cr-gridcard .cr-tile { width: 100%; }
+.cr-gridcard.disabled { cursor: default; opacity: 0.55; }
+.cr-gridcard.chosen { outline: 2px solid var(--water); outline-offset: 2px; opacity: 1; }
+.cr-chosen { position: absolute; left: 50%; bottom: 36%; transform: translateX(-50%); background: var(--water); color: var(--on-water); font-size: 0.74rem; font-weight: 800; border-radius: 999px; padding: 3px 10px; box-shadow: 0 2px 6px var(--shadow); pointer-events: none; }
+@media (max-width: 380px) { .cr-tslot { flex-basis: 54px; width: 54px; } .cr-tresult { flex-basis: 72px; width: 72px; } }

@@ -249,10 +249,10 @@ function renderCraft() {
   for (let i = 0; i < CRAFT.tradeCount; i++) {
     const id = craftSel.picks[i];
     tray.innerHTML += id
-      ? `<button class="cr-slot filled${i === craftSel.picks.length - 1 ? ' just-picked' : ''}" data-unpick="${i}" aria-label="Remove ${cardDef(id).name} from the trade">${miniCardHtml(cardDef(id))}</button>`
-      : `<div class="cr-slot${i === craftSel.picks.length ? ' next' : ''}"><span>?</span></div>`;
+      ? `<div class="cr-tslot filled${i === craftSel.picks.length - 1 ? ' just-picked' : ''}" data-unpick="${i}" role="button" aria-label="Remove ${escapeHtml(cardDef(id).name)} from the trade"><span class="cr-tile">${cardTileHtml(id, 1)}</span></div>`
+      : `<div class="cr-tslot${i === craftSel.picks.length ? ' next' : ''}"><span>?</span></div>`;
   }
-  tray.innerHTML += `<div class="cr-arrow">→</div><div class="cr-slot result"><span>${RARITY_LABEL[target]}</span></div>`;
+  tray.innerHTML += `<div class="cr-forge-arrow" aria-hidden="true">➜</div><div class="cr-tslot cr-tresult rarity-${target}"><span>❓</span><b>${RARITY_LABEL[target]}</b></div>`;
   const dock = document.createElement('div');
   dock.className = 'cr-dock';
   dock.appendChild(tray);
@@ -265,17 +265,19 @@ function renderCraft() {
     empty.textContent = `No spare ${RARITY_LABEL[craftSel.rarity].toLowerCase()} cards outside your deck yet. Collect ${CRAFT.tradeCount} spares to trade up.`;
     trade.appendChild(empty);
   } else {
+    const grid = document.createElement('div');
+    grid.className = 'cr-grid';
     list.forEach(id => {
       const def = cardDef(id), left = tradable(id) - picked(id);
       const canPick = left > 0 && craftSel.picks.length < CRAFT.tradeCount;
-      const row = document.createElement('div');
-      row.className = 'panel-item cr-pick-row' + (canPick ? '' : ' disabled');
-      if (canPick) row.dataset.pick = id;
-      row.innerHTML = `${miniCardHtml(def)}
-        <span class="panel-text"><div class="panel-name">${def.name}</div><div class="panel-desc">${tradable(id)} spare${picked(id) ? ` · ${picked(id)} chosen` : ''}</div></span>
-        <span class="cr-pick-hint">${canPick ? '+ Add' : (picked(id) ? '✓' : '')}</span>`;
-      trade.appendChild(row);
+      const cell = document.createElement('div');
+      cell.className = 'cr-gridcard' + (canPick ? '' : ' disabled') + (picked(id) ? ' chosen' : '');
+      if (canPick) { cell.dataset.pick = id; cell.setAttribute('role', 'button'); }
+      cell.setAttribute('aria-label', `${def.name}, ${left} spare${picked(id) ? `, ${picked(id)} chosen` : ''}`);
+      cell.innerHTML = `<span class="cr-tile">${cardTileHtml(id, left > 1 ? left : 0)}</span>${picked(id) ? `<span class="cr-chosen">✓ ${picked(id)}</span>` : ''}`;
+      grid.appendChild(cell);
     });
+    trade.appendChild(grid);
   }
   const need = CRAFT.tradeCount - craftSel.picks.length;
   const whyNot = need === 0 ? tradeBlockReason(craftSel.picks) : '';
