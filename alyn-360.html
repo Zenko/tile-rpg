@@ -57,6 +57,20 @@
   </section>
 
   <section>
+    <h2>Accessory: hat</h2>
+    <p>A sun hat with a ribbon band, or a cap with a bill. Both sit on a ring around her head, so the brim and the bill are drawn in front of or behind the crown depending on the angle. With a hat on, the hair bow is hidden under it.</p>
+    <div class="row"><button id="hatOn">Hat off</button><span id="hatStyles"></span></div>
+    <div class="row" id="hatCols" aria-label="Hat colour"></div>
+  </section>
+
+  <section>
+    <h2>Accessory: glasses</h2>
+    <p>Each lens is placed on the curve of her face and only drawn while it faces you, so from the side you see one narrow lens and the arm, and from behind just the ends of the arms.</p>
+    <div class="row"><button id="glOn">Glasses off</button><span id="glShapes"></span><button id="glShade">Clear lenses</button></div>
+    <div class="row" id="glCols" aria-label="Frame colour"></div>
+  </section>
+
+  <section>
     <h2>1. Turntable</h2>
     <p>Drag the figure sideways, or use the slider. 24 turn angles at 3 camera heights.</p>
     <div class="stage" id="turn"></div>
@@ -125,12 +139,12 @@
       }).filter(v => v.h === h);
       if (!list.length) return;
       const hs = list.map(v => v.t[2] - v.t[1]).sort((p, q) => p - q), Hr = hs[hs.length >> 1];
-      const Wr = Math.max(...list.map(v => v.t[3])) + 40, pad = 34;
+      const Wr = Math.max(...list.map(v => v.t[3])) + 40, pad = 34, padTop = 100;   // extra headroom for hats
       views[h] = {};
       list.forEach(v => {
         const s = (v.t[2] - v.t[1]) / Hr, ax = v.t[0], bot = v.t[2];
         // head: [centre x, centre y, radius, scale] in sheet units, for accessories (eye level only). The head sphere sits under the hair's crown.
-        views[h][v.a] = { id: v.id, box: [ax - s * Wr / 2, bot - s * (Hr + pad), s * Wr, s * (Hr + 2 * pad)], head: [ax, v.t[1] + 146 * s, 148 * s, s] };
+        views[h][v.a] = { id: v.id, box: [ax - s * Wr / 2, bot - s * (Hr + padTop), s * Wr, s * (Hr + padTop + pad)], head: [ax, v.t[1] + 146 * s, 148 * s, s] };
       });
     });
   }
@@ -148,7 +162,7 @@
     s.setAttribute('viewBox', v.box.join(' '));
     const u = s.querySelector('use'); u.setAttributeNS(XLINK, 'href', '#' + v.id); u.setAttribute('href', '#' + v.id);
     const B = s.querySelector('.accB'), F = s.querySelector('.accF');
-    if (bow.on && row === views[0] && v.head) { const g = bowSVG(ang, v.head); B.innerHTML = g.back; F.innerHTML = g.front; }
+    if (row === views[0] && v.head && (bow.on || hat.on || glasses.on)) { const g = accessoriesSVG(ang, v.head); B.innerHTML = g.back; F.innerHTML = g.front; }
     else { B.innerHTML = ''; F.innerHTML = ''; }
   }
 
@@ -174,9 +188,9 @@
     return pts;
   }
   const TAIL = [[0.02, -0.04], [0.11, -0.03], [0.28, -0.42], [0.19, -0.37], [0.15, -0.49], [0.03, -0.10]];
-  function bowSVG(thetaDeg, head) {
-    const sp = BOW_SPOTS[bow.spot], cols = BOW_COLS[bow.col], [cx, cy, R, sc] = head;
-    const th = thetaDeg * Math.PI / 180, yaw = sp.yaw * Math.PI / 180, roll = sp.roll * Math.PI / 180, k = bow.size;
+  function bowSVG(thetaDeg, head, o = {}) {      // o: sp, cols, size, thr override the bow's own settings (the hat band reuses this)
+    const sp = o.sp || BOW_SPOTS[bow.spot], cols = o.cols || BOW_COLS[bow.col], [cx, cy, R, sc] = head;
+    const th = thetaDeg * Math.PI / 180, yaw = sp.yaw * Math.PI / 180, roll = sp.roll * Math.PI / 180, k = o.size || bow.size;
     let w = Math.cos(th + yaw); const wc = (w < 0 ? -1 : 1) * Math.max(Math.abs(w), 0.4), seenBack = w < 0;
     const kx = sp.a * Math.cos(th) + sp.c * Math.sin(th), kz = sp.c * Math.cos(th) - sp.a * Math.sin(th);
     const P = ([p, q]) => {
@@ -193,7 +207,101 @@
     const out = `<g stroke="${INK}" stroke-width="${(4.2 * sc).toFixed(1)}" stroke-linejoin="round" stroke-linecap="round">` +
       poly(TAIL, fold) + poly(mir(TAIL), fold) + poly(lobe[0], base) + poly(lobe[1], base) +
       `<g stroke="none">${poly(fl[0], fold, 'opacity=".55"')}${poly(fl[1], fold, 'opacity=".55"')}</g>` + poly(knot, fold) + '</g>';
-    return kz >= -0.3 ? { front: out, back: '' } : { front: '', back: out };   // a side bow sticks out past the head, so it still shows from behind
+    return kz >= (o.thr === undefined ? -0.3 : o.thr) ? { front: out, back: '' } : { front: '', back: out };   // a side bow sticks out past the head, so it still shows from behind
+  }
+
+  /* ---- ACCESSORIES: a hat and glasses (same idea as the bow: 3D anchors, a few points, one depth rule) ----
+     proj(a, b, c) turns a point in head units (a = her left, b = up, c = forward) into [screen x, screen y, depth] for the view's angle.
+     `pitch` tips the camera down a little (a hat is a flat ring, and straight from the side it would be a line), so the brim shows as an
+     ellipse and things nearer the camera sit lower. Rings that look the same from every side (crown, brim) are projected with theta = 0;
+     anything tied to HER front (the bill, the seams, the ribbon, the lenses) uses the real angle. Draw order inside one accessory
+     is the painter's rule: far parts first, near parts last. The stack is: bow behind her, then glasses, bow, hat in front. */
+  const PITCH = 18 * Math.PI / 180;
+  const hat = { on: false, style: 'sun', col: 'cream' };
+  const glasses = { on: false, shape: 'round', col: 'black', shade: false };
+  const HAT_COLS = { cream: ['#f0d9a4', '#bf9a58', '#fbeccb'], rose: ['#e0587a', '#a8335a', '#f58aa3'], navy: ['#4b6fb8', '#2e4a82', '#86a0dc'], mint: ['#4fc29a', '#2b8a6c', '#9de6c8'], plum: ['#9066cc', '#5d3a97', '#bb9ae8'] };
+  const GLASS_COLS = { black: '#2a2430', tortoise: '#9a5a2a', gold: '#d9a93a', red: '#d23c4e', sky: '#4a8fd0' };
+  function mkProj(thetaDeg, head, pitch) {
+    const th = thetaDeg * Math.PI / 180, [cx, cy, R] = head, ct = Math.cos(th), st = Math.sin(th), cp = Math.cos(pitch), sp = Math.sin(pitch);
+    return (a, b, c) => { const x = a * ct + c * st, z = c * ct - a * st; return [cx + R * x, cy - R * (b * cp - z * sp), z]; };
+  }
+  const ptsStr = arr => arr.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+  function arc3(proj, r, y, a0, a1, n) {                          // points round a horizontal ring of radius r at height y, angle from her front
+    const o = []; for (let i = 0; i <= n; i++) { const al = a0 + (a1 - a0) * i / n; o.push(proj(r * Math.sin(al), y, r * Math.cos(al))); } return o;
+  }
+  function hatSVG(thetaDeg, head) {
+    const cols = HAT_COLS[hat.col], sc = head[3], symProj = mkProj(0, head, PITCH), proj = mkProj(thetaDeg, head, PITCH);
+    const th = thetaDeg * Math.PI / 180, ct = Math.cos(th), sw = `stroke="${INK}" stroke-width="${(4.2 * sc).toFixed(1)}" stroke-linejoin="round" stroke-linecap="round"`;
+    const poly = (p, fill, extra = '') => `<polygon points="${ptsStr(p)}" fill="${fill}" ${sw} ${extra}/>`;
+    const full = (r, y) => arc3(symProj, r, y, 0, 2 * Math.PI, 44), half = (r, y, rev) => arc3(symProj, r, y, rev ? Math.PI / 2 : -Math.PI / 2, rev ? -Math.PI / 2 : Math.PI / 2, 22);
+    const yb = 0.5; let out = '';
+    if (hat.style === 'sun') {
+      const rb = 1.4, rc = 0.88, rt = 0.82, hc = 0.46;
+      out += poly(full(rb, yb - 0.07), cols[1]) + poly(full(rb, yb), cols[0]);                       // brim: its thick edge, then its top
+      // ribbon bow on the band, at 50 degrees round from her front on her left; behind the crown when it is on the far side
+      const psi = 50 * Math.PI / 180, ba = 0.93 * Math.sin(psi), bc = 0.93 * Math.cos(psi), kz = bc * ct - ba * Math.sin(th);
+      const bowPart = bowSVG(thetaDeg, head, { sp: { a: ba, b: (yb + 0.16) * Math.cos(PITCH) - kz * Math.sin(PITCH), c: bc, roll: 12, yaw: 50 }, cols: HAT_COLS.rose.slice(0, 2), size: 0.62, thr: 0 });
+      out += bowPart.back;
+      out += poly(half(rc, yb, false).concat(half(rt, yb + hc, true)), cols[0]);                     // crown side
+      out += poly(half(rc + 0.012, yb + 0.03, false).concat(half(rt + 0.02, yb + 0.20, true)), cols[1], 'stroke-width="2.4"');  // band
+      out += poly(full(rt, yb + hc), cols[2]);                                                      // crown top
+      out += bowPart.front;
+    } else {
+      const rd = 0.9, hd = 0.46, dome = [];
+      for (let i = 0; i <= 24; i++) { const t = Math.PI - Math.PI * i / 24; dome.push(symProj(rd * Math.cos(t), yb + hd * Math.sin(t), 0)); }
+      const domePts = dome.concat(half(rd, yb, true).reverse());
+      const bill = arc3(proj, 1.32, yb - 0.30, -1.0, 1.0, 20).concat(arc3(proj, rd, yb, 1.0, -1.0, 20));   // the outer edge droops below the rim
+      const seams = [0, 60, 120, 180, 240, 300].map(deg => {                                        // panel seams: meridians from the rim to the button
+        const be = deg * Math.PI / 180, pts = []; for (let i = 0; i <= 12; i++) { const t = i / 12 * Math.PI / 2, r = rd * Math.cos(t); pts.push(proj(r * Math.sin(be), yb + hd * Math.sin(t), r * Math.cos(be))); }
+        let seg = [], d = ''; pts.forEach(p => { if (p[2] >= -0.02) seg.push(p); else { if (seg.length > 1) d += `<polyline points="${ptsStr(seg)}" fill="none" stroke="${INK}" stroke-width="${(2.4 * sc).toFixed(1)}" opacity=".55" stroke-linecap="round"/>`; seg = []; } });
+        if (seg.length > 1) d += `<polyline points="${ptsStr(seg)}" fill="none" stroke="${INK}" stroke-width="${(2.4 * sc).toFixed(1)}" opacity=".55" stroke-linecap="round"/>`;
+        return d;
+      }).join('');
+      const button = poly(arc3(symProj, 0.07, yb + hd + 0.01, 0, 2 * Math.PI, 14), cols[1]);
+      const billSvg = poly(bill, cols[1]);
+      out += (ct >= 0 ? poly(domePts, cols[0]) + seams + button + billSvg : billSvg + poly(domePts, cols[0]) + seams + button);
+    }
+    return out;
+  }
+  function glassesSVG(thetaDeg, head) {
+    const [cx, cy, R, sc] = head, th = thetaDeg * Math.PI / 180, ct = Math.cos(th), st = Math.sin(th), frame = GLASS_COLS[glasses.col];
+    const proj = mkProj(thetaDeg, head, 0), line = (pts, w, col, extra = '') => `<polyline points="${ptsStr(pts)}" fill="none" stroke="${col}" stroke-width="${(w * sc).toFixed(1)}" stroke-linecap="round" stroke-linejoin="round" ${extra}/>`;
+    const lensFill = glasses.shade ? 'rgba(24,28,48,.78)' : 'rgba(215,238,255,.13)';
+    let out = '';
+    // temples first (they go behind the lenses), only the part on the side facing you
+    [1, -1].forEach(sd => {
+      const rho = 0.98, pts = []; for (let i = 0; i <= 14; i++) { const ps = (40 + 62 * i / 14) * Math.PI / 180; pts.push(proj(sd * rho * Math.sin(ps), -0.32, rho * Math.cos(ps))); }
+      let seg = []; const flush = () => { if (seg.length > 1) out += line(seg, 7, INK) + line(seg, 3.6, frame); seg = []; };
+      pts.forEach(p => { if (p[2] > 0.62) seg.push(p); else flush(); }); flush();   // wraps round the head: only the part facing you
+    });
+    // lenses: each is a flat shape standing on the face, turned out by its own side's yaw
+    const lenses = [];
+    [1, -1].forEach(sd => {
+      const a0 = sd * 0.36, b0 = -0.35, c0 = 0.86, yaw = sd * 22 * Math.PI / 180, w = Math.cos(th + yaw);
+      if (w < 0.03) return;
+      const kx = a0 * ct + c0 * st, r = 0.225, pts = [];
+      for (let i = 0; i < 30; i++) {
+        const t = i / 30 * 2 * Math.PI; let p = r * Math.cos(t), q = r * Math.sin(t);
+        if (glasses.shape === 'square') { const e = 5, m = Math.pow(Math.abs(Math.cos(t)), 2 / e) * Math.sign(Math.cos(t)), n = Math.pow(Math.abs(Math.sin(t)), 2 / e) * Math.sign(Math.sin(t)); p = r * 1.05 * m; q = r * 0.86 * n; }
+        pts.push([cx + R * (kx + p * w), cy - R * (b0 + q)]);
+      }
+      const hi = []; for (let i = 0; i <= 6; i++) { const t = (205 + 50 * i / 6) * Math.PI / 180; hi.push([cx + R * (kx + 0.76 * r * Math.cos(t) * w), cy - R * (b0 + 0.76 * r * Math.sin(t))]); }
+      lenses.push({ sd, pts, hi, kx, w });
+    });
+    lenses.forEach(l => {
+      out += `<polygon points="${ptsStr(l.pts)}" fill="${lensFill}" stroke="${INK}" stroke-width="${(7.4 * sc).toFixed(1)}" stroke-linejoin="round"/>`;
+      out += `<polygon points="${ptsStr(l.pts)}" fill="none" stroke="${frame}" stroke-width="${(3.8 * sc).toFixed(1)}" stroke-linejoin="round"/>`;
+      if (l.w > 0.25) out += line(l.hi, 2.2, '#fff', 'opacity=".75"');
+    });
+    if (lenses.length === 2) { const br = [proj(0.12, -0.31, 0.93), proj(0, -0.28, 0.97), proj(-0.12, -0.31, 0.93)]; out += line(br, 7, INK) + line(br, 3.6, frame); }
+    return out;
+  }
+  function accessoriesSVG(th, head) {
+    let back = '', front = '';
+    if (glasses.on) front += glassesSVG(th, head);
+    if (bow.on && !hat.on) { const g = bowSVG(th, head); back += g.back; front += g.front; }   // a hat covers the hair bow
+    if (hat.on) front += hatSVG(th, head);
+    return { back, front };
   }
   function bindAccessory() {
     const redraw = () => { drawTurn(); };
@@ -203,6 +311,17 @@
     const cb = $('bowCols'); cb.innerHTML = '';
     Object.keys(BOW_COLS).forEach(k => { const b = document.createElement('button'); b.className = 'swatch' + (k === bow.col ? ' on' : ''); b.style.background = BOW_COLS[k][0]; b.setAttribute('aria-label', k); b.onclick = () => { bow.col = k; [...cb.children].forEach(c => c.classList.toggle('on', c === b)); redraw(); }; cb.appendChild(b); });
     $('bowSize').oninput = e => { bow.size = +e.target.value; redraw(); };
+    const redrawAll = redraw;
+    const swatches = (box, cols, cur, set) => { box.innerHTML = ''; Object.keys(cols).forEach(k => { const b = document.createElement('button'); b.className = 'swatch' + (k === cur ? ' on' : ''); b.style.background = Array.isArray(cols[k]) ? cols[k][0] : cols[k]; b.setAttribute('aria-label', k); b.onclick = () => { set(k); [...box.children].forEach(c => c.classList.toggle('on', c === b)); redrawAll(); }; box.appendChild(b); }); };
+    const choice = (box, opts, cur, set) => { box.innerHTML = ''; opts.forEach(([k, label]) => { const b = document.createElement('button'); b.textContent = label; b.className = k === cur ? 'on' : ''; b.style.marginRight = '6px'; b.onclick = () => { set(k); [...box.children].forEach(c => c.classList.toggle('on', c === b)); redrawAll(); }; box.appendChild(b); }); };
+    const toggle = (btn, obj, onText, offText) => { const paint = () => { btn.classList.toggle('on', obj.on); btn.textContent = obj.on ? onText : offText; }; btn.onclick = () => { obj.on = !obj.on; paint(); redrawAll(); }; paint(); };
+    toggle($('hatOn'), hat, 'Hat on', 'Hat off');
+    choice($('hatStyles'), [['sun', 'Sun hat'], ['cap', 'Cap']], hat.style, k => { hat.style = k; });
+    swatches($('hatCols'), HAT_COLS, hat.col, k => { hat.col = k; });
+    toggle($('glOn'), glasses, 'Glasses on', 'Glasses off');
+    choice($('glShapes'), [['round', 'Round'], ['square', 'Square']], glasses.shape, k => { glasses.shape = k; });
+    swatches($('glCols'), GLASS_COLS, glasses.col, k => { glasses.col = k; });
+    $('glShade').onclick = e => { glasses.shade = !glasses.shade; e.target.classList.toggle('on', glasses.shade); e.target.textContent = glasses.shade ? 'Dark lenses' : 'Clear lenses'; redrawAll(); };
   }
 
   // ---- 1. turntable ----
