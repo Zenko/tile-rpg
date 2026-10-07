@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'new', x: 'A try-out: one neighbour in El Umbral is drawn like your characters instead of an emoji. They turn to face the way they stroll and take little steps.' },
   { t:'new', x: 'Your character is drawn now. In town you see her walking around instead of a round badge: she turns to face the way you go, her body bobs and her feet step. Two drawn characters, Original and Don, are the first choices under Avatar (Character, Look), with their face in your portraits; pick any emoji to go back. Going up, left and right use stand-in drawings for now.' },
   { t:'new', x: 'The altar has four candles now, on a full-screen altar. Open it in your cottage, drag spare cards onto the candles (or tap them), then hold the glowing bowl or tap the big button to call: the flames grow with the cards\' rarity and the tallest ones call a spirit, a card of that family. 23 spirits to find in a new Spirit Book, and each first find pays Embers.' },
   { t:'new', x: 'Candles can burn while you explore: an hour pays Embers for every card, and an overnight burn with four or more cards brings a card one rarity higher. Two pillars at a time.' },

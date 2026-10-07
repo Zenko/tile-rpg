@@ -1637,3 +1637,12 @@ body.in-altar .overlay, body.in-altar .toast { z-index: 70; }   /* the card reve
 .tab-btn .t-icon:has(> .av-face) { width: 1.4em; height: 1.4em; filter: none; }
 .bt-portrait > .av-face, .toss-av > .av-face, .bt-intro-av > .av-face { width: 100%; height: 100%; }
 .ch-av > span:has(> .av-face) { width: 100%; height: 100%; }
+
+/* a neighbour drawn with a character (js/player-sprite.js, NPC_DRAWN_TEST): the same layers, idle breathing and a step while it glides */
+.ent.npc > .pl-sprite { z-index: 1; }
+.ent.npc .pl-body { animation: pl-idle 2.6s ease-in-out infinite; }
+.ent.npc.walking .pl-body { animation: pl-bob calc(var(--pl-step, 260ms) * 2) ease-in-out infinite; }
+.ent.npc.walking .pl-leg.l { animation: pl-lift-l calc(var(--pl-step, 260ms) * 2) ease-in-out infinite; }
+.ent.npc.walking .pl-leg.r { animation: pl-lift-r calc(var(--pl-step, 260ms) * 2) ease-in-out infinite; }
+@keyframes pl-idle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(calc(var(--t) * -0.012)); } }
+@media (prefers-reduced-motion: reduce) { .ent.npc .pl-body, .ent.npc.walking .pl-leg { animation: none; } }

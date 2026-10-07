@@ -19,14 +19,16 @@ function playerCharId() {
 function playerDrawn() { return !!playerCharId(); }
 function playerArt() { const id = playerCharId(); return id ? PLAYER_ART.chars[id] : null; }
 
-function playerSpriteHTML() {
-  const art = playerArt();
-  if (!art) return '<div class="pl-badge"></div>';
-  const views = Object.keys(art.views).map(k => {
+function spriteViewsHTML(art) {
+  return Object.keys(art.views).map(k => {
     const v = art.views[k];
     return `<div class="pl-view" data-v="${k}"><img class="pl-leg l" src="${v.legL}" alt="" draggable="false"><img class="pl-leg r" src="${v.legR}" alt="" draggable="false"><img class="pl-body" src="${v.upper}" alt="" draggable="false"></div>`;
   }).join('');
-  return `<div class="pl-sprite" data-view="down" data-char="${playerCharId()}">${views}</div>`;
+}
+function playerSpriteHTML() {
+  const art = playerArt();
+  if (!art) return '<div class="pl-badge"></div>';
+  return `<div class="pl-sprite" data-view="down" data-char="${playerCharId()}">${spriteViewsHTML(art)}</div>`;
 }
 
 // Turn the character to face where the last step went. Teleports (a new district) are bigger than one tile and keep the old facing.
@@ -76,3 +78,32 @@ function drawnAvatarSwatch(id) {
   return el;
 }
 function drawnAvatarSwatches() { return playerSpriteReady() ? PLAYER_ART.order.filter(id => PLAYER_ART.chars[id]).map(drawnAvatarSwatch) : []; }
+
+/* ---- a neighbour drawn with one of the characters (a try-out: how does a drawn NPC feel in town?) ----
+   NPC_DRAWN_TEST maps a district to the character its FIRST plain neighbour (not a boss, Rook or the Atlas) is drawn as.
+   Only the town sprite changes: talk cards, battles and the Journal still show that neighbour's emoji. The sprite faces the way
+   it last moved (moveFighter in js/neighbors-bosses.js calls npcFace) and steps while it glides to its next tile. */
+const NPC_DRAWN_TEST = { square: 'don' };
+function npcDrawnId(f, data) {
+  const id = NPC_DRAWN_TEST[state.currentDistrict];
+  if (!id || !playerSpriteReady() || !PLAYER_ART.chars[id]) return null;
+  const first = fighters(data).find(n => !n.isBoss && !n.isRival && !n.isAtlas && !n.defeated);
+  return first === f ? id : null;
+}
+function npcSpriteHTML(id) {
+  const art = PLAYER_ART.chars[id];
+  return `<div class="pl-sprite" data-view="down" data-char="${id}" style="--pl-leg-top:${art.meta.legTop}%;--pl-aspect:${art.meta.aspect}">${spriteViewsHTML(art)}</div>`;
+}
+function npcFace(el, dx, dy) {
+  const spr = el && el.querySelector(':scope > .pl-sprite');
+  if (!spr) return false;
+  const art = PLAYER_ART.chars[spr.dataset.char], face = dx ? (dx > 0 ? 'right' : 'left') : dy ? (dy > 0 ? 'down' : 'up') : null;
+  if (face) {
+    const mirrored = face === 'right' && !art.views.right;
+    spr.dataset.view = face === 'right' ? (art.views.right ? 'right' : 'left') : face;
+    spr.dataset.flip = mirrored ? '1' : '';
+  }
+  el.classList.add('walking'); el.style.setProperty('--pl-step', (GRAVE_MOVE_MS / 2) + 'ms');
+  clearTimeout(el._walkTimer); el._walkTimer = setTimeout(() => el.classList.remove('walking'), GRAVE_MOVE_MS);
+  return true;
+}

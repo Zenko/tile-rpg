@@ -655,7 +655,8 @@ function renderEntities(data) {
       e.style.setProperty('--x', f.x); e.style.setProperty('--y', f.y); e.style.zIndex = f.y * 2 + 1;
       const nameEl = e.querySelector('.ent-name'); if (nameEl) nameEl.innerHTML = `${escapeHtml(f.name)}${tag}`;
     } else {
-      const portrait = f.isBoss ? '<span>👹</span>' : `<span>${opponentPortrait(f)}</span>`;
+      const drawn = f.isBoss ? null : npcDrawnId(f, data);   // js/player-sprite.js: a try-out of a drawn neighbour
+      const portrait = f.isBoss ? '<span>👹</span>' : drawn ? npcSpriteHTML(drawn) : `<span>${opponentPortrait(f)}</span>`;
       e = add(cls, f.x, f.y, portrait + `<div class="ent-name">${escapeHtml(f.name)}${tag}</div>`);
       e.dataset.id = f.id;
     }

@@ -132,6 +132,7 @@ function fighterEl(f) {
   return entityElsById.get(f.id) || null;
 }
 function moveFighter(f, to) {
+  const ox = f.x, oy = f.y;
   f.x = to.x; f.y = to.y;
   const el = fighterEl(f);
   if (el) {
@@ -140,7 +141,8 @@ function moveFighter(f, to) {
     el.style.setProperty('--x', to.x); el.style.setProperty('--y', to.y);
     el.style.zIndex = to.y * 2 + 1;
     const span = el.firstChild;
-    if (span && to.dx) span.style.transform = `scaleX(${to.dx < 0 ? -1 : 1})`;
+    if (npcFace(el, to.x - ox, to.y - oy)) { /* a drawn neighbour turns by view instead of flipping */ }
+    else if (span && to.dx) span.style.transform = `scaleX(${to.dx < 0 ? -1 : 1})`;
   }
 }
 const wanderPaused = () => inBattle || inScene || document.hidden || townPanel.classList.contains('hidden') || townPanel.classList.contains('tab-away') ||
