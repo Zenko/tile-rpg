@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alyn 360 Lab</title>
+<style>
+  :root { --bg:#14181f; --panel:#1d2430; --edge:#2e3948; --ink:#e8edf4; --soft:#9aa8ba; --accent:#7fd1c4; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.45 system-ui, sans-serif; padding:16px; max-width:900px; margin-inline:auto; }
+  h1 { font-size:22px; margin:0 0 4px; }
+  h2 { font-size:17px; margin:0 0 8px; }
+  p { color:var(--soft); margin:0 0 12px; }
+  section { background:var(--panel); border:1px solid var(--edge); border-radius:14px; padding:16px; margin:16px 0; }
+  .row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:10px; }
+  button, label.btn { background:#273142; color:var(--ink); border:1px solid var(--edge); border-radius:10px; padding:10px 14px; min-height:44px; font:inherit; cursor:pointer; }
+  button.on { background:var(--accent); color:#0c1a18; border-color:var(--accent); }
+  input[type=range] { flex:1; min-width:160px; min-height:44px; accent-color:var(--accent); }
+  #drop { border:2px dashed var(--edge); border-radius:14px; padding:22px; text-align:center; color:var(--soft); }
+  #drop.over { border-color:var(--accent); color:var(--ink); }
+  #app[hidden] { display:none; }
+  #holder { position:absolute; width:1px; height:1px; overflow:hidden; opacity:0; pointer-events:none; }
+  .stage { background:radial-gradient(circle at 50% 40%, #2a3546, #171d27); border-radius:12px; height:340px; display:flex; align-items:center; justify-content:center; touch-action:none; cursor:grab; user-select:none; }
+  .stage svg { height:90%; width:auto; max-width:100%; }
+  .readout { font-variant-numeric:tabular-nums; color:var(--accent); min-width:90px; }
+  #world { position:relative; height:340px; border-radius:12px; overflow:hidden; background:
+      linear-gradient(#0000 31px, #0003 32px) 0 0/32px 32px, linear-gradient(90deg, #0000 31px, #0003 32px) 0 0/32px 32px, #3e5a3a; touch-action:none; }
+  #alyn { position:absolute; width:0; height:0; }
+  #alyn .shadow { position:absolute; left:-22px; top:-6px; width:44px; height:12px; border-radius:50%; background:#0006; }
+  #alyn svg { position:absolute; height:130px; width:auto; left:50%; bottom:0; transform:translateX(-50%); transform-origin:50% 100%; overflow:visible; }
+  #alyn .fig { position:absolute; bottom:0; left:0; }
+  .hint { font-size:13px; color:var(--soft); margin-top:8px; }
+  code { background:#0003; padding:1px 5px; border-radius:5px; }
+</style>
+</head>
+<body>
+<h1>Alyn 360 Lab</h1>
+<p>A prototype for Alyn's 75 views: a turntable viewer, and a walking test that picks her facing from the movement direction.</p>
+
+<section id="loader">
+  <h2>Load the SVG</h2>
+  <div id="drop">Drop <code>Alyn_360.svg</code> here, or
+    <label class="btn" style="display:inline-block;margin-left:6px">Choose file<input id="file" type="file" accept=".svg,image/svg+xml" hidden></label>
+    <div id="status" class="hint">Looking for assets/Alyn_360.svg ...</div>
+  </div>
+</section>
+
+<div id="app" hidden>
+  <section>
+    <h2>1. Turntable</h2>
+    <p>Drag the figure sideways, or use the slider. 24 turn angles at 3 camera heights.</p>
+    <div class="stage" id="turn"></div>
+    <div class="row">
+      <span class="readout" id="angleOut">0°</span>
+      <input type="range" id="angle" min="0" max="345" step="15" value="0" aria-label="Turn angle">
+    </div>
+    <div class="row" id="heights"></div>
+    <div class="row"><button id="spin">Auto spin</button><button id="mirror">Swap left/right</button></div>
+    <div class="hint">0° is facing you. If she turns the wrong way when you drag, press "Swap left/right" (it also applies to the walking test).</div>
+  </section>
+
+  <section>
+    <h2>2. Walking test</h2>
+    <p>Arrow keys or WASD (diagonals work), or tap anywhere to walk there. Her facing comes from the heading, using the 0° height row.</p>
+    <div id="world"><div id="alyn"><div class="shadow"></div><div class="fig"></div></div></div>
+    <div class="row">
+      <button id="m4">4 directions (what the game does now)</button>
+      <button id="m8">8 directions</button>
+      <button id="m24" class="on">Smooth (15° steps)</button>
+    </div>
+    <div class="row"><span class="readout" id="faceOut">facing 0°</span></div>
+  </section>
+</div>
+
+<div id="holder"></div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const SVGNS = 'http://www.w3.org/2000/svg', XLINK = 'http://www.w3.org/1999/xlink';
+  const ROWS = [-30, 0, 30];
+  let views = {};           // views[height][angle] = { id, box:[x,y,w,h] }
+  let mirror = false, height = 0, spinning = false;
+
+  // ---- loading ----
+  async function tryFetch() {
+    try { const r = await fetch('assets/Alyn_360.svg'); if (!r.ok) throw 0; start(await r.text()); }
+    catch (e) { $('status').textContent = 'Not found next to the game, so pick the file yourself.'; }
+  }
+  function readFile(f) { if (f) f.text().then(start); }
+  $('file').addEventListener('change', e => readFile(e.target.files[0]));
+  const drop = $('drop');
+  ['dragover', 'dragenter'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add('over'); }));
+  ['dragleave', 'drop'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove('over'); }));
+  drop.addEventListener('drop', e => readFile(e.dataTransfer.files[0]));
+
+  function start(text) {
+    const doc = new DOMParser().parseFromString(text, 'image/svg+xml');
+    const svg = document.importNode(doc.documentElement, true);
+    $('holder').innerHTML = ''; $('holder').appendChild(svg);
+    index(svg);
+    $('loader').hidden = true; $('app').hidden = false;
+    buildTurntable(); buildWalker();
+  }
+
+  // Each view is a group named "Generative Object (angle, height)". Crop boxes: all views of a row share one height and width, so
+  // Alyn stays the same size and her feet stay on the same line while she turns; only the centre is taken from each view's own cell.
+  function index(svg) {
+    const groups = [...svg.querySelectorAll('[id^="Generative_Object_"]')];
+    const W = svg.viewBox.baseVal.width, H = svg.viewBox.baseVal.height, colW = W / 25;
+    const raw = {};
+    groups.forEach(g => {
+      const m = /\((-?\d+),\s*(-?\d+)\)/.exec(g.getAttribute('data-name') || '');
+      if (!m) return;
+      const a = +m[1], h = +m[2], b = g.getBBox(), cell = (a + 180) / 15;
+      (raw[h] = raw[h] || []).push({ id: g.id, a, b, off: b.x + b.width / 2 - (cell + 0.5) * colW });
+    });
+    views = {};
+    ROWS.forEach(h => {
+      const list = raw[h] || []; if (!list.length) return;
+      const offs = list.map(v => v.off).sort((p, q) => p - q), med = offs[offs.length >> 1];
+      const top = Math.min(...list.map(v => v.b.y)), bot = Math.max(...list.map(v => v.b.y + v.b.height));
+      const w = Math.max(...list.map(v => v.b.width)) + 30, pad = 15;
+      views[h] = {};
+      list.forEach(v => {
+        const cx = ((v.a + 180) / 15 + 0.5) * colW + med;
+        views[h][v.a] = { id: v.id, box: [cx - w / 2, top - pad, w, bot - top + pad * 2] };
+      });
+    });
+  }
+
+  function viewSvg() {
+    const s = document.createElementNS(SVGNS, 'svg'), u = document.createElementNS(SVGNS, 'use');
+    s.appendChild(u); s.setAttribute('preserveAspectRatio', 'xMidYMax meet'); return s;
+  }
+  function norm(a) { a = ((a % 360) + 360) % 360; return a > 180 ? a - 360 : a; }   // -180..180
+  function setView(s, h, a) {
+    const row = views[h] || views[0]; let ang = norm(mirror ? -a : a);
+    const v = row[ang] || row[ang === -180 ? 180 : ang]; if (!v) return;
+    s.setAttribute('viewBox', v.box.join(' '));
+    s.firstChild.setAttributeNS(XLINK, 'href', '#' + v.id); s.firstChild.setAttribute('href', '#' + v.id);
+  }
+
+  // ---- 1. turntable ----
+  let turnSvg, ang = 0;
+  function buildTurntable() {
+    const stage = $('turn'); stage.innerHTML = ''; turnSvg = viewSvg(); stage.appendChild(turnSvg);
+    const hb = $('heights'); hb.innerHTML = '';
+    ROWS.filter(h => views[h]).forEach(h => {
+      const b = document.createElement('button'); b.textContent = 'Camera ' + (h > 0 ? '+' : '') + h + '°'; if (h === height) b.className = 'on';
+      b.onclick = () => { height = h; [...hb.children].forEach(c => c.classList.toggle('on', c === b)); drawTurn(); };
+      hb.appendChild(b);
+    });
+    let drag = null;
+    stage.addEventListener('pointerdown', e => { drag = { x: e.clientX, a: ang }; stage.setPointerCapture(e.pointerId); stage.style.cursor = 'grabbing'; });
+    stage.addEventListener('pointermove', e => { if (drag) setAng(drag.a - (e.clientX - drag.x) * 0.6); });
+    stage.addEventListener('pointerup', () => { drag = null; stage.style.cursor = 'grab'; });
+    $('angle').oninput = e => setAng(+e.target.value);
+    $('spin').onclick = e => { spinning = !spinning; e.target.classList.toggle('on', spinning); };
+    $('mirror').onclick = e => { mirror = !mirror; e.target.classList.toggle('on', mirror); drawTurn(); };
+    drawTurn();
+    setInterval(() => { if (spinning) setAng(ang + 15); }, 90);
+  }
+  function setAng(a) { ang = ((Math.round(a / 15) * 15) % 360 + 360) % 360; drawTurn(); }
+  function drawTurn() { setView(turnSvg, height, ang); $('angle').value = ang; $('angleOut').textContent = ang + '°'; }
+
+  // ---- 2. walking test ----
+  // Heading: moving down the screen = 0° (towards the camera), right = 90°, up = 180°, left = -90°.
+  // The sprite turns in 15° steps along the shortest way round, like a turntable, rather than snapping.
+  function buildWalker() {
+    const world = $('world'), alyn = $('alyn'), fig = alyn.querySelector('.fig');
+    const s = viewSvg(); fig.innerHTML = ''; fig.appendChild(s);
+    let mode = 24, face = 0, goalFace = 0, x = 200, y = 220, target = null, t0 = performance.now(), lastTurn = 0;
+    const keys = new Set();
+    const bind = (id, m) => $(id).onclick = () => { mode = m; ['m4', 'm8', 'm24'].forEach(k => $(k).classList.toggle('on', k === id)); };
+    bind('m4', 4); bind('m8', 8); bind('m24', 24);
+    addEventListener('keydown', e => { const k = e.key.toLowerCase(); if ('arrowup arrowdown arrowleft arrowright w a s d'.split(' ').includes(k)) { keys.add(k); e.preventDefault(); } });
+    addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
+    world.addEventListener('pointerdown', e => { const r = world.getBoundingClientRect(); target = { x: e.clientX - r.left, y: e.clientY - r.top }; });
+
+    function frame(now) {
+      const dt = Math.min(0.05, (now - t0) / 1000); t0 = now;
+      let dx = (keys.has('arrowright') || keys.has('d') ? 1 : 0) - (keys.has('arrowleft') || keys.has('a') ? 1 : 0);
+      let dy = (keys.has('arrowdown') || keys.has('s') ? 1 : 0) - (keys.has('arrowup') || keys.has('w') ? 1 : 0);
+      if (dx || dy) target = null;
+      else if (target) {
+        const tx = target.x - x, ty = target.y - y, d = Math.hypot(tx, ty);
+        if (d < 4) target = null; else { dx = tx / d; dy = ty / d; }
+      }
+      const moving = !!(dx || dy);
+      if (moving) {
+        const len = Math.hypot(dx, dy); dx /= len; dy /= len;
+        x = Math.max(20, Math.min(world.clientWidth - 20, x + dx * 130 * dt));
+        y = Math.max(140, Math.min(world.clientHeight - 6, y + dy * 130 * dt));
+        let h = Math.atan2(dx, dy) * 180 / Math.PI;                 // 0 = down the screen
+        const q = mode === 4 ? 90 : mode === 8 ? 45 : 15;
+        goalFace = Math.round(h / q) * q;
+      }
+      // turn one 15° step at a time, at most every 35 ms, the short way round
+      if (now - lastTurn > 35) {
+        const diff = norm(goalFace - face);
+        if (diff) { face = norm(face + Math.sign(diff) * Math.min(15, Math.abs(diff))); lastTurn = now; }
+      }
+      const bob = moving ? Math.abs(Math.sin(now / 90)) * 5 : 0;
+      alyn.style.transform = `translate(${x}px, ${y}px)`;
+      fig.style.transform = `translateY(${-bob}px)`;
+      setView(s, 0, face);
+      $('faceOut').textContent = 'facing ' + (face < 0 ? face + 360 : face) + '°';
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  tryFetch();
+})();
+</script>
+</body>
+</html>
