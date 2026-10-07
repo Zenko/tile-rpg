@@ -40,9 +40,17 @@ module.exports = async (page, assert) => {
     give(c1, 3); out.mixed = (altarAdd(c1) === '' && altarRead().mixed); altarFed(); altarDraftNow().feed.stone.pop();
     altarAdd('ensueno'); out.fourGods = altarRead().atlas; altarGo();
     out.atlas = state.ownedCards.includes('the-atlas'); out.godsKept = ['duermevela', 'murmullo', 'marea-lenta', 'ensueno'].every(id => state.ownedCards.includes(id));
-    // the view
+    // the clue puzzle: a god only goes on the candle its riddle points at
+    altarDraft = null; altarDraftNow();
+    out.godWrong = altarPlace('murmullo', 'stone'); out.godRight = altarPlace('murmullo', 'wind'); out.cardWrong = altarPlace(c1, 'tide');
+    out.godWrongFeed = altarDraftNow().feed.stone.length;
+    // the screen
     altarDraft = null; openScene('home'); sceneAction('altar'); sceneAction('alt:open');
-    out.view = document.querySelectorAll('#scActions .alt-c').length; out.book = document.querySelectorAll('#scActions .alt-b').length;
+    out.open = altarOpen(); out.view = document.querySelectorAll('#altarScreen .as-c').length; out.callDisabled = document.getElementById('asCall').disabled;
+    out.clues = [...document.querySelectorAll('#altarScreen .as-clue')].map(e => e.textContent).sort().join('|');
+    altarAdd(c1); altarRender(); out.callReady = !document.getElementById('asCall').disabled; out.bowlReady = document.getElementById('asBowl').classList.contains('ready');
+    out.godTab = !!document.querySelector('#altarScreen [data-tab="gods"]');
+    closeAltarScreen(); out.closed = !altarOpen() && !document.body.classList.contains('in-altar');
     return out;
   });
   assert.ok(r.deckRefused, 'a card the deck needs cannot be fed');
@@ -55,5 +63,9 @@ module.exports = async (page, assert) => {
   assert.strictEqual(r.pillars, 2, 'only two pillars at once'); assert.ok(/Both pillars/.test(r.cap2));
   assert.ok(!r.threeGods, 'three gods are not enough'); assert.ok(r.mixed, 'a god with another card is not the Atlas');
   assert.ok(r.fourGods && r.atlas && r.godsKept, 'four gods on four candles call the Atlas and nothing is used up');
-  assert.strictEqual(r.view, 4, 'the candle view draws four candles'); assert.strictEqual(r.book, 23, 'the Spirit Book has a slot for each of the 23 spirits');
+  assert.ok(!r.godWrong.ok && r.godWrong.fizz && /does not belong where "where the door stays shut"/.test(r.godWrong.msg), 'a god on the wrong candle sputters');
+  assert.ok(r.godRight.ok, 'a god on its own candle is placed'); assert.ok(!r.cardWrong.ok && /belongs to the/.test(r.cardWrong.msg)); assert.strictEqual(r.godWrongFeed, 0);
+  assert.ok(r.open && r.view === 4, 'the altar opens full screen with four candles'); assert.ok(r.callDisabled, 'the call button waits until the flames can speak');
+  assert.strictEqual(r.clues, ['Where the door stays shut', 'Where the water settles', 'Where thoughts take root', 'Where whispers rise'].sort().join('|'));
+  assert.ok(r.callReady && r.bowlReady, 'the button and the bowl light up together'); assert.ok(r.godTab, 'owned gods get their own tab'); assert.ok(r.closed);
 };

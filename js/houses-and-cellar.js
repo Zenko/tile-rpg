@@ -779,7 +779,6 @@ function renderSceneBody() {
     else if (scene.mode === 'decorate') acts.innerHTML = shelfButtons() + sceneBtn('back', '← Done');
     else if (scene.mode === 'favs') acts.innerHTML = favButtons() + sceneBtn('back', '← Done');
     else if (scene.mode === 'altar') acts.innerHTML = altarButtons();
-    else if (scene.mode === 'candles') acts.innerHTML = altarHtml();   // js/summoning.js: the four candles
     else if (scene.mode === 'atlas-ask') acts.innerHTML = atlasAskButtons();
     else if (scene.mode === 'atlas-battle') acts.innerHTML = atlasBattleButtons();
     else if (scene.mode === 'atlas-games') acts.innerHTML = atlasGameButtons();
@@ -837,7 +836,7 @@ function sceneAction(actId) {
   if (actId.startsWith('atlasb:')) { const i = +actId.slice(7); if (scene.mode === 'atlas-battle' && scene.armed === i) { startAtlasBattle(i); return; } scene.armed = i; scene.text = atlasBattleText(i) + ' Tap again to begin.'; sfx('tap'); renderScene(); return; }
   if (actId.startsWith('atlasg:')) { miniStart(actId.slice(7), true); return; }
   if (actId.startsWith('atlasbuy:')) { scene.text = atlasBuy(actId.slice(9)); renderScene(); return; }
-  if (actId.startsWith('alt:')) { altarAct(actId.slice(4)); return; }
+  if (actId === 'alt:open') { openAltarScreen(); return; }   // js/altar-screen.js: the candles, full screen
   if (actId.startsWith('summon:')) { scene.text = summonTap(actId.slice(7)); renderScene(); return; }
   if (actId === 'back') { scene.mode = null; sfx('nav'); renderScene(); return; }
   if (actId === 'mg-again' && mini) { miniStart(mini.id, mini.atlas); return; }
@@ -915,7 +914,6 @@ setInterval(() => {
   if (!inScene || !scene) return;
   if (scene.id === 'cellar' && cellarState().resting) renderScene();
   else if (scene.id === 'bakery' && ovenState().startedAt) renderScene();   // live oven countdown
-  else if (scene.mode === 'candles') altarTick();
   else if (scene.id === 'museum' && scene.mode === 'exped' && !expedState().picking && expedState().active.length) renderScene();
 }, 1000);
 

@@ -94,7 +94,7 @@ function summonDo(s) {
 }
 
 /* ============================================================
-   THE CANDLES (build 174): the altar's second half. Four candles, one per family. Feed a candle a spare card and its flame grows
+   THE CANDLES (build 174; its full-screen view is js/altar-screen.js): the altar's second half. Four candles, one per family. Feed a candle a spare card and its flame grows
    with the card's rarity; the tallest flames decide which spirit answers. The spirit is a real card of the leading family
    (the same rarity as the best card fed), and a Spirit Book remembers every one that has answered: 24 names, 17 families of
    mix (single flame, one leading and one following, two level, all four level).
@@ -228,49 +228,4 @@ function altarSmoke(r) {
   if (r.key.startsWith('twin:')) return tag + 'Two flames burn level.';
   if (r.lit.length === 1) return `${tag}A pure ${FAMILIES[r.lit[0]].name} flame.`;
   return `${tag}${FAMILIES[r.lit[0]].name} leads, ${FAMILIES[r.lit[1]].name} follows.`;
-}
-// The whole candle view, drawn into #scActions (every control is a data-act "alt:..." handled by altarAct).
-function altarHtml() {
-  const d = altarDraftNow(), r = altarRead(), st = altarState(), keys = altarKeys(), got = keys.filter(k => st.found[k]).length;
-  const candles = ALTAR_FAMS.map(f => {
-    const fu = r.fuel[f], hasGod = d.feed[f].some(altarIsGod), s = hasGod ? 1.7 : fu ? Math.min(2.1, 0.55 + fu * 0.17) : 0.3;
-    return `<div class="alt-c${d.sel === f ? ' sel' : ''}" data-fam="${f}"><div class="alt-fw"><i class="alt-flame${hasGod ? ' god' : ''}" style="transform:scale(${s});opacity:${fu || hasGod ? 1 : 0.2}"></i></div><i class="alt-wick"></i>
-      <button type="button" class="alt-wax" data-act="alt:sel:${f}" aria-label="${FAMILIES[f].name} candle, ${d.feed[f].length} cards. Select it to feed it"></button>
-      <div class="alt-fed">${d.feed[f].map((id, i) => `<button type="button" class="alt-x" data-act="alt:rm:${f}:${i}" aria-label="Take ${escapeHtml(cardDef(id).name)} back">${cardDef(id).icon}</button>`).join('') || '<span class="alt-none">·</span>'}</div>
-      <b class="alt-lbl">${FAMILIES[f].icon} ${FAMILIES[f].name}</b></div>`;
-  }).join('');
-  const spares = altarSpares(d.sel), gods = ALTAR_GODS.filter(g => state.ownedCards.includes(g) && !altarFedCount(g));
-  const pick = spares.length ? spares.map(x => `<button type="button" class="alt-card r-${cardDef(x.id).rarity}" data-act="alt:add:${x.id}"><span>${cardDef(x.id).icon}</span><b>${escapeHtml(cardDef(x.id).name)}</b><small>${RARITY_LABEL[cardDef(x.id).rarity]} · ${x.left} spare</small></button>`).join('') : `<p class="alt-empty">No spare ${FAMILIES[d.sel].name} cards. Cards in your deck are never used.</p>`;
-  const godRow = gods.length ? `<div class="alt-h">Gods <small>never used up</small></div><div class="alt-pick">${gods.map(g => `<button type="button" class="alt-card r-divine" data-act="alt:add:${g}"><span>${cardDef(g).icon}</span><b>${escapeHtml(cardDef(g).name)}</b><small>${FAMILIES[CARD_FAMILY[g]].name}</small></button>`).join('')}</div>` : '';
-  const pillars = st.burning.length ? `<div class="alt-h">On the pillars</div>` + st.burning.map((b, i) => altarDone(b)
-    ? `<button type="button" class="btn sc-btn alt-pil done" data-act="alt:collect:${i}"><span class="sb-main">✨ ${escapeHtml(b.name)}</span><span class="sb-meta">ready · tap to collect</span></button>`
-    : `<div class="alt-pil" data-left="${i}"><span class="alt-pil-i">🕯️ ${b.icons.join(' ')}</span><span><b>${escapeHtml(b.name)}</b> <span class="alt-pil-t" data-alt-left="${i}">${altarLeft(b)}</span> left</span></div>`).join('') : '';
-  const burnChips = ALTAR_BURNS.map(b => `<button type="button" class="alt-chip${d.burn === b.id ? ' on' : ''}" data-act="alt:burn:${b.id}"><b>${b.label}</b><small>${b.sub}</small></button>`).join('');
-  const ready = r.atlas || (r.key && !r.mixed);
-  const go = r.atlas ? 'Call the Atlas' : 'Let the flames speak';
-  return `<div class="alt"><div class="alt-smoke" aria-live="polite">${altarSmoke(r)}</div><div class="alt-fours">${candles}</div>
-    <div class="alt-h">Feed the ${FAMILIES[d.sel].name} candle <small>${altarFed().length}/${ALTAR_TOTAL} on the altar</small></div><div class="alt-pick">${pick}</div>${godRow}
-    ${r.atlas ? '' : `<div class="alt-h">Burn</div><div class="alt-burns">${burnChips}</div>`}
-    <button type="button" class="btn sc-btn alt-go" data-act="alt:go" ${ready ? '' : 'disabled'}><span class="sb-main">${go}</span></button>${pillars}
-    <div class="alt-h">Spirit Book <small>${got}/${keys.length}</small></div><div class="alt-book">${keys.map(k => `<span class="alt-b${st.found[k] ? ' got' : ''}">${st.found[k] ? escapeHtml(altarName(k)) : '???'}</span>`).join('')}</div>
-    ${sceneBtn('alt:back', '← Back to the altar')}</div>`;
-}
-function altarAct(a) {
-  const d = altarDraftNow();
-  if (a === 'open') { altarDraft = null; scene.mode = 'candles'; scene.text = 'Four candles, one for each family. Feed them spare cards and see who answers.'; sfx('tap'); showTipOnce('candles'); renderScene(); return; }
-  if (a === 'back') { scene.mode = 'altar'; scene.text = altarIntro(); sfx('nav'); renderScene(); return; }
-  if (a.startsWith('sel:')) { d.sel = a.slice(4); sfx('tap'); }
-  else if (a.startsWith('add:')) { const msg = altarAdd(a.slice(4)); if (msg) scene.text = msg; else d.sel = CARD_FAMILY[a.slice(4)] || d.sel; }
-  else if (a.startsWith('rm:')) { const [, f, i] = a.split(':'); if (d.feed[f]) d.feed[f].splice(+i, 1); sfx('tap'); }
-  else if (a.startsWith('burn:')) { d.burn = a.slice(5); sfx('tap'); }
-  else if (a === 'go') scene.text = altarGo();
-  else if (a.startsWith('collect:')) scene.text = altarCollect(+a.slice(8));
-  renderScene();
-}
-// Called each second while the candle view is open: tick the pillar countdowns without redrawing the whole view.
-function altarTick() {
-  if (!inScene || !scene || scene.mode !== 'candles') return;
-  const b = altarBurning(); if (!b.length) return;
-  if (b.some((x, i) => altarDone(x) && !document.querySelector(`[data-act="alt:collect:${i}"]`))) { renderScene(); return; }
-  document.querySelectorAll('[data-alt-left]').forEach(el => { const x = b[+el.dataset.altLeft]; if (x) el.textContent = altarLeft(x); });
 }
