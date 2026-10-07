@@ -1627,3 +1627,13 @@ body.in-altar .overlay, body.in-altar .toast { z-index: 70; }   /* the card reve
 @keyframes pl-lift-l { 0%, 50%, 100% { transform: translateY(0); } 25% { transform: translateY(calc(var(--t) * -0.06)); } }
 @keyframes pl-lift-r { 0%, 50%, 100% { transform: translateY(0); } 75% { transform: translateY(calc(var(--t) * -0.06)); } }
 @media (prefers-reduced-motion: reduce) { .ent.player.walking .pl-body, .ent.player.walking .pl-leg { animation: none; } }
+/* the drawn character as an avatar: a little smaller in town, and a face crop wherever the avatar is a round portrait */
+.pl-sprite { width: calc(var(--t) * 0.85); }
+.av-face { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; user-select: none; -webkit-user-drag: none; }
+.emoji-swatch.drawn-swatch { padding: 0; overflow: hidden; }
+.shop-swatch-row .emoji-swatch.drawn-swatch .av-face { width: 100%; height: 100%; border-radius: 0; }
+.hud-portrait .a-emoji, .tab-btn .t-icon:has(> .av-face), .bt-portrait:has(> .av-face), .toss-av:has(> .av-face), .ch-av > span { display: inline-flex; }
+.hud-portrait .a-emoji:has(> .av-face) { width: 100%; height: 100%; }
+.tab-btn .t-icon:has(> .av-face) { width: 1.4em; height: 1.4em; filter: none; }
+.bt-portrait > .av-face, .toss-av > .av-face, .bt-intro-av > .av-face { width: 100%; height: 100%; }
+.ch-av > span:has(> .av-face) { width: 100%; height: 100%; }

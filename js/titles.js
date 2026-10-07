@@ -69,7 +69,7 @@ function buyCosmetic(kind, value, cost) {
   spendPebbles(cost, 'cosmetics');
   const key = kind === 'emoji' ? 'unlockedEmojis' : kind === 'accessory' ? 'unlockedAccessories' : kind === 'mat' ? 'unlockedMats' : kind === 'stage' ? 'unlockedStages' : kind === 'border' ? 'unlockedAvBorders' : 'unlockedColors';
   if (!ch[key].includes(value)) ch[key].push(value);
-  if (kind === 'emoji') ch.emoji = value;
+  if (kind === 'emoji') { ch.emoji = value; ch.drawn = false; }
   else if (kind === 'accessory') ch.accessory = value;
   else if (kind === 'mat') ch.mat = value;
   else if (kind === 'stage') ch.stage = value;
@@ -210,8 +210,8 @@ function updateHud() {
   winCountEl.textContent = state.wins;
   if (deckSizeHudEl) deckSizeHudEl.textContent = `${state.deck.length}/${DECK_SIZE}`;
   pebbleCountEl.textContent = state.progress.pebbles;
-  avatarChipEmoji.textContent = state.character.emoji;
-  const tabEmoji = document.getElementById('tabCharEmoji'); if (tabEmoji) tabEmoji.textContent = state.character.emoji;
+  setAvFace(avatarChipEmoji, state.character);
+  const tabEmoji = document.getElementById('tabCharEmoji'); if (tabEmoji) setAvFace(tabEmoji, state.character);
   if (typeof refreshCharacterTab === 'function') refreshCharacterTab();
   avatarChipName.textContent = state.character.name || 'You';
   applyAvatarStyle(document.querySelector('.hud-portrait'), state.character);

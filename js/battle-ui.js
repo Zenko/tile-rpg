@@ -36,7 +36,7 @@ function btIntro(opponent, isBoss, first) {
       ${t ? `<div class="bt-intro-twist"><b>${t.icon} Boss twist</b><span></span></div>` : ''}`;
     el.querySelector('.opp .bt-intro-av').textContent = opponentPortrait(opponent);
     el.querySelector('.opp .bt-intro-name').textContent = opponent.name;
-    const me = el.querySelector('.you-av'); applyAvatarStyle(me, state.character); me.textContent = state.character.emoji;
+    const me = el.querySelector('.you-av'); applyAvatarStyle(me, state.character); setAvFace(me, state.character);
     el.querySelector('.you-name').textContent = state.character.name || 'You';
     if (t) el.querySelector('.bt-intro-twist span').textContent = t.text;
     battleView.appendChild(el);
@@ -141,7 +141,7 @@ function startBattleNow(opponent, first) {
   btGet('btYouName').textContent = state.character.name || 'You';
   btGet('btOppPortrait').textContent = opponentPortrait(opponent);
   applyAvatarStyle(btGet('btYouPortrait'), state.character);
-  btGet('btYouPortrait').textContent = state.character.emoji;
+  setAvFace(btGet('btYouPortrait'), state.character);
   // Your half of the screen carries your avatar's color; the opponent's half always stays the plain,
   // district-driven look, so the two sides read as clearly different - yours personalized, theirs neutral.
   battleView.style.setProperty('--side-accent', state.character.color || 'var(--water-glow)');

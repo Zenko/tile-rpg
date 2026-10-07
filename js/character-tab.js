@@ -58,7 +58,7 @@ function drawCharStage() {
     </div>
     <div class="ch-actors">
       <button class="ch-actor ch-me" id="chMe" aria-label="${escapeHtml(ch.name || 'You')}">
-        <span class="avatar-preview ch-av" id="chAv"><span>${ch.emoji}</span></span>
+        <span class="avatar-preview ch-av" id="chAv"><span>${avFaceHTML(ch)}</span></span>
         <span class="ch-plate">Lv ${pr.level}<i class="ch-xp"><b style="width:${pct}%"></b></i></span>
       </button>
       ${comp ? `<button class="ch-actor ch-pal" id="chPal" aria-label="${escapeHtml(comp.name)}"><span class="ch-pal-f">${companionIconHtml(comp)}</span><span class="ch-plate">${escapeHtml(comp.name)}</span></button>`
@@ -144,7 +144,7 @@ function charDrawLook(box) {
   inp.addEventListener('input', () => { state.character.name = inp.value.slice(0, 16); saveState(); updateHud(); });
   box.appendChild(inp);
   charSection(box, 'Avatar');
-  box.appendChild(row('', EMOJI_OPTIONS.filter(o => ch.unlockedEmojis.includes(o.emoji)).map(o => shopCosmeticSwatch('emoji', o.emoji, '', o.cost, ch.emoji === o.emoji, true))));
+  box.appendChild(row('', (playerSpriteReady() ? [drawnAvatarSwatch()] : []).concat(EMOJI_OPTIONS.filter(o => ch.unlockedEmojis.includes(o.emoji)).map(o => shopCosmeticSwatch('emoji', o.emoji, '', o.cost, !playerDrawn() && ch.emoji === o.emoji, true)))));
   charSection(box, 'Accessory');
   box.appendChild(row('', ACCESSORY_OPTIONS.filter(o => ch.unlockedAccessories.includes(o.icon)).map(o => shopCosmeticSwatch('accessory', o.icon, o.label, o.cost, ch.accessory === o.icon, true))));
   charSection(box, 'Colour');
@@ -317,7 +317,7 @@ function clrSync(from) {
   if (from !== 'hex') document.getElementById('clrHex').value = hex;
   const pv = document.getElementById('clrPreview'), ch = state.character;
   applyAvatarStyle(pv, { color: ch.color, accessory: ch.accessory, avBorder: ch.avBorder, avBorderW: ch.avBorderW, avBorderColor: hex });
-  pv.textContent = ch.emoji;
+  setAvFace(pv, ch);
 }
 ['clrH', 'clrS', 'clrL'].forEach(id => document.getElementById(id).addEventListener('input', () => clrSync('sliders')));
 document.getElementById('clrHex').addEventListener('input', e => {

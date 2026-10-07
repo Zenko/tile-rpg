@@ -31,7 +31,7 @@ function btTossFirst(opponent) {
   return new Promise(resolve => {
     const ov = tossEl('tossOverlay'), stage = tossEl('tossStage'), btns = tossEl('tossBtns'), res = tossEl('tossResult');
     const name = opponent.name || 'They';
-    const me = tossEl('tossYouAv'); applyAvatarStyle(me, state.character); me.textContent = state.character.emoji;
+    const me = tossEl('tossYouAv'); applyAvatarStyle(me, state.character); setAvFace(me, state.character);
     tossEl('tossOppAv').textContent = opponentPortrait(opponent);
     tossEl('tossYouName').textContent = state.character.name || 'You';
     tossEl('tossOppName').textContent = name;

@@ -8,10 +8,13 @@
    A missing right view is the left view mirrored with CSS. If PLAYER_ART is absent the old emoji badge is used instead. */
 let plFace = 'down';
 
+// `state.character.drawn` is the avatar choice: your drawn character (the default, undefined counts as on) or one of the emoji looks.
 function playerSpriteReady() { return typeof PLAYER_ART !== 'undefined' && PLAYER_ART && PLAYER_ART.views && PLAYER_ART.views.down; }
 
+function playerDrawn() { return playerSpriteReady() && state.character.drawn !== false; }
+
 function playerSpriteHTML() {
-  if (!playerSpriteReady()) return '<div class="pl-badge"></div>';
+  if (!playerDrawn()) return '<div class="pl-badge"></div>';
   const views = Object.keys(PLAYER_ART.views).map(k => {
     const v = PLAYER_ART.views[k];
     return `<div class="pl-view" data-v="${k}"><img class="pl-leg l" src="${v.legL}" alt="" draggable="false"><img class="pl-leg r" src="${v.legR}" alt="" draggable="false"><img class="pl-body" src="${v.upper}" alt="" draggable="false"></div>`;
@@ -40,4 +43,28 @@ function applyPlayerSprite(el, character) {
   el.style.setProperty('--pl-leg-top', PLAYER_ART.meta.legTop + '%');
   el.style.setProperty('--pl-aspect', PLAYER_ART.meta.aspect);
   el.style.setProperty('--pl-step', STEP_MS + 'ms');  // a walk with your companion is slower, so the stride is too
+}
+
+// ---- the round avatar portraits (HUD, battle, Character tab, the picker) show the face crop instead of the emoji ----
+function setAvFace(el, character) {
+  if (!el) return;
+  if (!playerDrawn()) { el.textContent = character.emoji; return; }
+  el.textContent = '';
+  const img = document.createElement('img'); img.className = 'av-face'; img.src = PLAYER_ART.face; img.alt = ''; img.draggable = false;
+  el.appendChild(img);
+}
+function avFaceHTML(character) { return playerDrawn() ? `<img class="av-face" src="${PLAYER_ART.face}" alt="" draggable="false">` : escapeHtml(character.emoji); }
+
+// The first swatch in every avatar row: your drawn character, same size as the emoji swatches. Free, always unlocked.
+function drawnAvatarSwatch() {
+  const el = document.createElement('div');
+  el.className = 'emoji-swatch shop-swatch drawn-swatch' + (playerDrawn() ? ' active' : '');
+  el.title = 'Your character'; el.setAttribute('aria-label', 'Your character');
+  el.innerHTML = `<img class="av-face" src="${PLAYER_ART.face}" alt="" draggable="false">`;
+  el.addEventListener('click', () => {
+    ensureAudio(); sfx('nav'); buzz(HAP.tap);
+    state.character.drawn = true;
+    saveState(); updateHud(); renderTown(); renderCustomize(); if (typeof renderCharacterTab === 'function') renderCharacterTab();
+  });
+  return el;
 }

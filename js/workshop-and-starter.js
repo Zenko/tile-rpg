@@ -391,7 +391,8 @@ function renderCustomize() {
   box.appendChild(custNote);
 
   const emojiRow = document.createElement('div'); emojiRow.className = 'swatch-row shop-swatch-row';
-  EMOJI_OPTIONS.forEach(o => emojiRow.appendChild(shopCosmeticSwatch('emoji', o.emoji, '', o.cost, ch.emoji === o.emoji, ch.unlockedEmojis.includes(o.emoji))));
+  if (playerSpriteReady()) emojiRow.appendChild(drawnAvatarSwatch());
+  EMOJI_OPTIONS.forEach(o => emojiRow.appendChild(shopCosmeticSwatch('emoji', o.emoji, '', o.cost, !playerDrawn() && ch.emoji === o.emoji, ch.unlockedEmojis.includes(o.emoji))));
   box.appendChild(emojiRow);
   const accRow = document.createElement('div'); accRow.className = 'swatch-row shop-swatch-row';
   ACCESSORY_OPTIONS.forEach(o => accRow.appendChild(shopCosmeticSwatch('accessory', o.icon, o.label, o.cost, ch.accessory === o.icon, ch.unlockedAccessories.includes(o.icon))));
@@ -562,6 +563,7 @@ function shopCosmeticSwatch(kind, value, label, cost, isEquipped, isUnlocked) {
       sfx('nav'); buzz(HAP.tap);
       const field = kind === 'emoji' ? 'emoji' : kind === 'accessory' ? 'accessory' : kind === 'mat' ? 'mat' : kind === 'stage' ? 'stage' : kind === 'border' ? 'avBorder' : 'color';
       state.character[field] = value;
+      if (kind === 'emoji') state.character.drawn = false;   // picking an emoji look turns the drawn character off
       saveState(); updateHud(); renderTown(); renderCustomize(); if (typeof renderCharacterTab === 'function') renderCharacterTab();
     } else {
       buyCosmetic(kind, value, cost);
