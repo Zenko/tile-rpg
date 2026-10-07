@@ -6,16 +6,14 @@ module.exports = async (page, assert) => {
     const st = document.createElement('style'); st.textContent = '.pl-wet, .pl-frost, .pl-tint, .pl-shd { transition: none !important; }'; document.head.appendChild(st);
     renderTown(); switchTab('town');
   });
-  const vars = () => page.evaluate(() => ({ skew: townView.style.getPropertyValue('--sh-skew'), len: +townView.style.getPropertyValue('--sh-len'), a: +townView.style.getPropertyValue('--sh-a'), tint: townView.style.getPropertyValue('--pl-tint') }));
-  const atPhase = p => page.evaluate(p => { state.sky.elapsedMs = p * DAY_LEN_MS; pfxLast = ''; pfxSync(); }, p);
+  const tintNow = () => page.evaluate(() => townView.style.getPropertyValue('--pl-tint'));
+  const atPhase = p => page.evaluate(p => { state.sky.elapsedMs = p * DAY_LEN_MS; pfxLast = ''; pfxSync(); applySky(true); }, p);
 
-  await atPhase(0.5); const noon = await vars();
-  await atPhase(0.3); const morning = await vars();
-  await atPhase(0.0); const night = await vars();
-  assert.ok(noon.len < morning.len, 'the shadow is shortest at noon: ' + noon.len + ' vs ' + morning.len);
-  assert.ok(noon.a > night.a, 'and strongest by day');
-  assert.notStrictEqual(morning.skew, noon.skew, 'it swings with the sun');
-  assert.ok(/rgba\(0,0,0,0\)/.test(noon.tint) && !/rgba\(0,0,0,0\)/.test(night.tint), 'the light tint is clear at noon and cool at night: ' + noon.tint + ' / ' + night.tint);
+  await atPhase(0.5); const noon = await tintNow();
+  await atPhase(0.0); const night = await tintNow();
+  assert.ok(/rgba\(0,0,0,0\)/.test(noon) && !/rgba\(0,0,0,0\)/.test(night), 'the light tint is clear at noon and cool at night: ' + noon + ' / ' + night);
+  assert.strictEqual(await page.evaluate(() => playerEl.querySelectorAll('.pl-shd').length), 0, 'there is no cast shadow, only the round one under her feet');
+  assert.ok(await page.evaluate(() => /ellipse|circle|radial/.test(getComputedStyle(playerEl, '::before').background) || getComputedStyle(playerEl, '::before').borderRadius === '50%'), 'the round shadow under her feet is still there');
 
   // weather layers
   const op = sel => page.evaluate(sel => getComputedStyle(playerEl.querySelector('.pl-view[data-v="down"] ' + sel)).opacity, sel);
@@ -36,6 +34,9 @@ module.exports = async (page, assert) => {
   await page.evaluate(() => { state.progress.calm = { square: todayKey() }; }); assert.strictEqual((await aura())[0], 'calm');
   await page.evaluate(() => { state.companion = { name: 'Pip', icon: '🐰', bond: 99 }; }); assert.strictEqual((await aura())[0], 'bond');
   await page.evaluate(() => { state.progress.record = Object.assign({ won: 0, lost: 0, best: 0 }, state.progress.record, { streak: 3 }); }); assert.strictEqual((await aura())[0], 'streak');
+  const glow = () => page.evaluate(() => getComputedStyle(playerEl.querySelector('.pl-aura'), '::before').display);
+  await atPhase(0.5); assert.strictEqual(await glow(), 'none', 'the aura has no soft glow by day (only its little hearts, flames or rings)');
+  await atPhase(0.0); assert.strictEqual(await glow(), 'block', 'but it glows at night');
   await page.evaluate(() => { state.companion = null; state.progress.calm = {}; state.progress.record.streak = 0; });
 
   // hop and dissolve

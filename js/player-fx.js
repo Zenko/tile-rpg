@@ -5,8 +5,6 @@
    and over it. One Settings switch (`prefs.charFx`, on by default; `body.no-charfx` hides the CSS layers) turns it all off, and the
    device's reduced-motion setting turns off everything that moves (footsteps, hop, dissolve, motes, aura animation).
 
-   - Shadow: `.pl-shd` is a flattened, skewed silhouette. Its angle, length and strength follow the sun (--sh-skew / --sh-len / --sh-a on
-     the town view, set by pfxSync from the sky clock) and swing away from the nearest lit lamp at night (per-player override).
    - Light: `.pl-tint` is the figure's silhouette (a CSS mask) filled with a colour: cool blue at night, warm at dusk and dawn, and a warm
      glow near a lit lamp. No filters, no blend modes (HANDOFF §9: both caused tearing on phones).
    - Weather: `.pl-wet` (rain, storm) and `.pl-frost` (snow) fade in and out from `.town-view[data-wx]` in CSS alone.
@@ -22,23 +20,17 @@ const pfxOn = () => prefs.charFx !== false;
 const pfxMotion = () => pfxOn() && btMotionOk() && !document.hidden;
 const pfxClamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
-// ---- the sky: shadow, tint and motes follow the clock ----
+// ---- the sky: the light tint follows the clock ----
 let pfxLast = '';
 function pfxSync() {
   if (typeof townView === 'undefined' || !townView) return;
   pfxEnsureMotes();      // the town view can be rebuilt, which drops the layer
   document.body.classList.toggle('no-charfx', !pfxOn());
   if (!pfxOn()) return;
-  const s = skyPhase(), wx = weatherNow(), over = ['cloudy', 'rain', 'storm', 'snow'].includes(wx) ? 0.45 : 1;
-  const th = pfxClamp((s.dayPos - 0.25) / 0.5, 0, 1) * Math.PI, up = Math.sin(th);        // sunrise at 0.25, sunset at 0.75 of the lap
-  const dim = pfxClamp(s.dim / 0.5, 0, 1);
-  let skew = -Math.cos(th) * 38, len = 0.22 + (1 - up) * 1.1, a = 0.34 * Math.pow(up, 0.6) * over;
-  if (up < 0.04) { skew = 0; len = 0.3; a = 0.1 * over; }                                  // moonlight: a short, faint shadow
+  const s = skyPhase(), dim = pfxClamp(s.dim / 0.5, 0, 1);
   const tint = s.tintA > s.dim && s.tintA > 0.1 ? `rgba(${hexRgb(s.tint)},${(s.tintA * 0.55).toFixed(2)})` : dim > 0.04 ? `rgba(40,64,150,${(0.3 * dim).toFixed(2)})` : 'rgba(0,0,0,0)';
-  const key = [skew.toFixed(0), len.toFixed(2), a.toFixed(2), tint].join('|');
-  if (key === pfxLast) return;
-  pfxLast = key;
-  townView.style.setProperty('--sh-skew', skew.toFixed(1) + 'deg'); townView.style.setProperty('--sh-len', len.toFixed(2)); townView.style.setProperty('--sh-a', a.toFixed(2));
+  if (tint === pfxLast) return;
+  pfxLast = tint;
   townView.style.setProperty('--pl-tint', tint);
 }
 function hexRgb(h) { h = String(h || '#000000').replace('#', ''); if (h.length === 3) h = h.replace(/./g, c => c + c); const n = parseInt(h, 16) || 0; return [(n >> 16) & 255, (n >> 8) & 255, n & 255].join(','); }
@@ -48,14 +40,11 @@ function pfxPlayer(prev, now, animate) {
   if (!playerEl) return;
   if (!pfxOn()) { playerEl.removeAttribute('data-aura'); return; }
   pfxSync();
-  // a lit lamp within three tiles: warm light on the figure and a shadow that points away from it
+  // a lit lamp within three tiles: warm light on the figure
   let best = null;
-  if (typeof nlLamps !== 'undefined' && nlLamps && skyPhase().isNight) nlLamps.forEach(l => { const d = Math.hypot(l.x - now.x, l.y - now.y); if (d <= 3.2 && (!best || d < best.d)) best = { d, dx: now.x - l.x }; });
-  if (best) {
-    const k = 1 - best.d / 3.2;
-    playerEl.style.setProperty('--pl-tint', `rgba(255,208,140,${(0.16 + 0.22 * k).toFixed(2)})`);
-    playerEl.style.setProperty('--sh-skew', pfxClamp(-best.dx * 14, -40, 40).toFixed(0) + 'deg'); playerEl.style.setProperty('--sh-len', (0.35 + 0.35 * (1 - k)).toFixed(2)); playerEl.style.setProperty('--sh-a', (0.12 + 0.22 * k).toFixed(2));
-  } else ['--pl-tint', '--sh-skew', '--sh-len', '--sh-a'].forEach(p => playerEl.style.removeProperty(p));
+  if (typeof nlLamps !== 'undefined' && nlLamps && skyPhase().isNight) nlLamps.forEach(l => { const d = Math.hypot(l.x - now.x, l.y - now.y); if (d <= 3.2 && (!best || d < best.d)) best = { d }; });
+  if (best) playerEl.style.setProperty('--pl-tint', `rgba(255,208,140,${(0.16 + 0.22 * (1 - best.d / 3.2)).toFixed(2)})`);
+  else playerEl.style.removeProperty('--pl-tint');
   // the aura
   let aura = '';
   try {
