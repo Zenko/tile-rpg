@@ -157,6 +157,28 @@ def don_left(base):
     return narrow(L.apply(img), 0.88, 600)
 
 
+# The colour wash baked into every drawn character (the owner's pick from the Avatar Overlays prototype: Moonlight, linear 0 degrees,
+# soft-light, 100%). It is applied to the finished pictures here, so the game never blends anything at run time. The gradient runs bottom
+# (first stop) to top (last stop) across the whole figure, and a 10%-of-width margin is allowed around it as in the prototype.
+LOOK = {'stops': ['#0b1b4d', '#4a6bd8', '#bfd4ff'], 'strength': 1.0}
+
+
+def wash(img):
+    a = np.array(img.convert('RGBA')).astype(np.float64) / 255.0
+    H, W = a.shape[:2]
+    stops = np.array([[int(s[i:i+2], 16) for i in (1, 3, 5)] for s in LOOK['stops']], dtype=np.float64) / 255.0
+    m = 0.1 * W
+    t = 1.0 - (np.arange(H) + 0.5 + m) / (H + 2 * m)                    # 0 at the bottom of the padded figure, 1 at the top
+    pos = np.linspace(0, 1, len(stops))
+    cs = np.stack([np.interp(t, pos, stops[:, c]) for c in range(3)], axis=-1)[:, None, :]   # one colour per row
+    cb = a[..., :3]
+    d = np.where(cb <= 0.25, ((16 * cb - 12) * cb + 4) * cb, np.sqrt(cb))
+    soft = np.where(cs <= 0.5, cb - (1 - 2 * cs) * cb * (1 - cb), cb + (2 * cs - 1) * (d - cb))   # W3C soft-light
+    out = cb + (soft - cb) * LOOK['strength']
+    res = np.concatenate([np.clip(out, 0, 1), a[..., 3:4]], axis=-1)
+    return Image.fromarray((res * 255 + 0.5).astype(np.uint8), 'RGBA')
+
+
 STANDIN_NONE = (None, None)
 CHARS = [
     # id, label in the game, where the feet layers start (px down the front drawing), where the body layer ends, the square face crop
@@ -223,13 +245,14 @@ def build(cfg):
     views['up'] = fit(back) if back else (st_back(base) if st_back else base)
     views['left'] = fit(left) if left else (st_left(base) if st_left else base)
     if right: views['right'] = fit(right)
+    views = {k: wash(v) for k, v in views.items()}     # the baked colour wash (LOOK above)
     art = {}
     for k, im in views.items():
         u, l, r = split(im)
         art[k] = {'upper': uri(u, OUT_W), 'legL': uri(l, OUT_W), 'legR': uri(r, OUT_W)}
         art[k].update(effect_layers(im, u))
     fx0, fy0, fx1, fy1 = cfg['face']
-    face = uri(base.crop((fx0, fy0, fx1, fy1)), 128, 48)   # head-and-shoulders crop for the round portraits
+    face = uri(views['down'].crop((fx0, fy0, fx1, fy1)), 128, 48)   # head-and-shoulders crop for the round portraits
     real = ['down'] + [k for k, v in (('up', back), ('left', left), ('right', right)) if v]
     meta = {'legTop': round(cfg['leg_y'] / H * 100, 2), 'aspect': round(W / H, 4), 'real': real}
     return {'name': cfg['name'], 'meta': meta, 'face': face, 'views': art}

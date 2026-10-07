@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'better', x: 'Your drawn characters have a soft moonlit colour wash: deep blue at the feet fading to pale sky blue at the top of the hair, so they sit better in the town.' },
   { t:'better', x: 'On the Character screen your drawn character now stands there in full, with a little breathing, instead of just a face in a circle.' },
   { t:'new', x: 'Your drawn character now lives in the town. Her shadow swings and stretches with the sun, she turns cool at night and warm at dusk or by a lit lamp, rain beads on her and snow frosts her hair, and her footsteps kick up petals on grass, dust on the path and puffs on cobble. Fireflies drift at night and leaves by day. A win streak of 3, a close companion or a calm district gives her a glow of her own, she hops when a card or level-up popup closes, and she burns away in embers when she walks into a building and re-forms when she comes out. Settings has a Character effects switch.' },
   { t:'new', x: 'A try-out: one neighbour in El Umbral is drawn like your characters instead of an emoji. They turn to face the way they stroll and take little steps.' },
