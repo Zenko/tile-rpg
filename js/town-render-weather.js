@@ -561,7 +561,7 @@ function positionPlayer(animate) {
   playerFaceFromMove(playerEl._lastPos, state.playerPos); playerEl._lastPos = { x: state.playerPos.x, y: state.playerPos.y };   // js/player-sprite.js
   const badge = playerEl.querySelector('.pl-badge');
   if (badge) { badge.textContent = state.character.emoji; applyAvatarStyle(badge, state.character); }   // the emoji badge is the fallback when there is no drawn art
-  else applyPlayerSprite(playerEl, state.character);
+  else applyPlayerSprite(playerEl, state.character, animate);
   const nameEl = playerEl.querySelector('.ent-name'); if (nameEl) nameEl.textContent = state.character.name || 'You';
   const titleEl = playerEl.querySelector('.ent-title'), t = currentTitle();
   if (titleEl) { titleEl.textContent = t ? t.name : ''; titleEl.classList.toggle('hidden', !t); }
@@ -878,6 +878,8 @@ const adjacentTo = (t) => (x, y) => Math.abs(x - t.x) + Math.abs(y - t.y) === 1;
 
 function interactWith(kind, t) {
   if (inBattle || inScene) return;
+  if (typeof playerLookAt === 'function') playerLookAt(t);   // js/player-sprite.js: turn to face what she is about to use
+
   if (kind === 'talk') { openTalk(t); return; }
   if (kind === 'fight') {
     if (!companionFightGate(t)) return;                  // a companion who just lost rests first; a boss only duels at home

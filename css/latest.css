@@ -1707,3 +1707,8 @@ body.no-charfx .pl-tint, body.no-charfx .pl-wet, body.no-charfx .pl-frost, body.
 
 /* the aura's soft glow shows at night only; by day just its little hearts, flames or rings stay */
 .town-view.is-night .pl-aura::before { display: block; }
+
+/* TURNING ON THE SPOT (js/player-sprite.js): a character with turn art shows one flat picture per 15 degrees between the walking views */
+.pl-sprite[data-view="turn"] .pl-view[data-v="turn"] { display: block; }
+.pl-view .pl-turn-img { top: 0; z-index: 2; }
+#chMe { cursor: grab; }

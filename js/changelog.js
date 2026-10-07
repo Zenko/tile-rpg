@@ -18,6 +18,8 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'new', x: 'Alyn is a new drawn character, picked from the avatar rows like the others. She is drawn from every angle, so she turns smoothly instead of snapping: when you change direction she swings round through the in-between angles, and when you tap a neighbour, a door or a crop she turns to face it, even diagonally.' },
+  { t:'new', x: 'On the Character screen you can drag Alyn sideways to turn her all the way round (or use the left and right arrow keys). A few seconds after you let go she turns back to face you.' },
   { t:'better', x: 'Your drawn characters have a soft moonlit colour wash: deep blue at the feet fading to pale sky blue at the top of the hair, so they sit better in the town.' },
   { t:'better', x: 'On the Character screen your drawn character now stands there in full, with a little breathing, instead of just a face in a circle.' },
   { t:'new', x: 'Your drawn character now lives in the town. She keeps just the round shadow under her feet, she turns cool at night and warm at dusk or by a lit lamp, rain beads on her and snow frosts her hair, and her footsteps kick up petals on grass, dust on the path and puffs on cobble. Fireflies drift at night and leaves by day. A win streak of 3, a close companion or a calm district gives her a glow of her own at night and a few little hearts, flames or rings by day, she hops when a card or level-up popup closes, and she burns away in embers when she walks into a building and re-forms when she comes out. Settings has a Character effects switch.' },

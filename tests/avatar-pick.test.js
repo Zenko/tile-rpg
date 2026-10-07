@@ -22,9 +22,9 @@ module.exports = async (page, assert) => {
   s = await look();
   assert.ok(s.sprite && !s.badge && s.hud, 'and she comes back with one tap');
 
-  // a second drawn character (Don) is another swatch of the same size; picking it swaps the town sprite and the portraits
+  // more drawn characters (Don, Alyn) are more swatches of the same size; picking it swaps the town sprite and the portraits
   const n = await page.evaluate(() => [...document.querySelectorAll('.drawn-swatch')].filter(e => e.getBoundingClientRect().width > 0).length);
-  assert.strictEqual(n, 2, 'every drawn character has a swatch');
+  assert.strictEqual(n, 3, 'every drawn character has a swatch');
   const faces = () => page.evaluate(() => ({ char: playerEl.querySelector('.pl-sprite').dataset.char, hud: document.querySelector('#avatarChipEmoji .av-face').src, drawn: state.character.drawn }));
   const before = await faces();
   await page.evaluate(() => [...document.querySelectorAll('.drawn-swatch')].find(e => e.title === 'Don').click());

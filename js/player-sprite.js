@@ -5,8 +5,11 @@
    Each view (down, up, left, and right when it has its own drawing) is three stacked layers: the body and the two feet. While
    `.ent.player.walking` is on (js/town-render-weather.js adds and removes it), css/latest.css bobs the body and lifts one foot
    per step. Facing is worked out from the last step in positionPlayer(); it is not saved, a fresh load faces down.
-   A missing right view is the left view mirrored with CSS. If PLAYER_ART is absent the old emoji badge is used instead. */
+   A missing right view is the left view mirrored with CSS. If PLAYER_ART is absent the old emoji badge is used instead.
+   A character with `turn` art (Alyn) can also look in any of 24 directions, 15 degrees apart: she turns through the in-between pictures
+   when her heading changes, looks at whatever she interacts with, and can be dragged round on the Character tab (TURNING ON THE SPOT, below). */
 let plFace = 'down';
+let plDeg = null;   // an exact look direction (degrees, 0 = towards you, 90 = right) set by playerLookAt; null = the cardinal plFace
 
 // `state.character.drawn` is the avatar choice: the id of a drawn character ('first', 'don', ...; PLAYER_ART.order), or false for an emoji look.
 // undefined, true and an id that no longer exists all mean the first drawn character, so older saves keep the look they already had.
@@ -20,6 +23,7 @@ function playerDrawn() { return !!playerCharId(); }
 function playerArt() { const id = playerCharId(); return id ? PLAYER_ART.chars[id] : null; }
 
 function spriteViewsHTML(art) {
+  const turnView = artTurns(art) ? '<div class="pl-view" data-v="turn"><div class="pl-rig"><img class="pl-turn-img" alt="" draggable="false"><div class="pl-tint"></div></div></div>' : '';
   return Object.keys(art.views).map(k => {
     const v = art.views[k];
     // the rig holds everything that bobs, hops and steps; tint, wet and frost are the time-of-day, rain and snow layers from
@@ -28,7 +32,7 @@ function spriteViewsHTML(art) {
     return `<div class="pl-view" data-v="${k}"><div class="pl-rig">` +
       `<img class="pl-leg l" src="${v.legL}" alt="" draggable="false"><img class="pl-leg r" src="${v.legR}" alt="" draggable="false"><img class="pl-body" src="${v.upper}" alt="" draggable="false">` +
       `<div class="pl-tint" style="-webkit-mask-image:url(${v.shd});mask-image:url(${v.shd})"></div><img class="pl-wet" src="${v.wet}" alt="" draggable="false"><img class="pl-frost" src="${v.frost}" alt="" draggable="false"></div></div>`;
-  }).join('');
+  }).join('') + turnView;
 }
 function playerSpriteHTML() {
   const art = playerArt();
@@ -42,21 +46,87 @@ function playerFaceFromMove(from, to) {
   const dx = to.x - from.x, dy = to.y - from.y;
   if (!dx && !dy || Math.abs(dx) + Math.abs(dy) > 2) return;
   plFace = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
+  plDeg = null;
 }
 
-function applyPlayerSprite(el, character) {
+function applyPlayerSprite(el, character, animate) {
   const spr = el && el.querySelector('.pl-sprite');
   if (!spr) return;
   const art = playerArt(), views = art.views;
+  if (artTurns(art)) { sprTurnTo(spr, art, plDeg !== null ? plDeg : FACE_DEG[plFace], !!animate); }
+  else {
   const own = plFace === 'right' && views.right;      // a real right-facing drawing, otherwise left mirrored
   const key = plFace === 'right' ? (views.right ? 'right' : 'left') : plFace;
   if (spr.dataset.view !== key) spr.dataset.view = key;
   const flip = plFace === 'right' && !own ? '1' : '';
   if (spr.dataset.flip !== flip) spr.dataset.flip = flip;
+  }
   spr.dataset.accessory = character.accessory || '';
   el.style.setProperty('--pl-leg-top', art.meta.legTop + '%');
   el.style.setProperty('--pl-aspect', art.meta.aspect);
   el.style.setProperty('--pl-step', STEP_MS + 'ms');  // a walk with your companion is slower, so the stride is too
+}
+
+/* ---- TURNING ON THE SPOT (characters with `turn` art) ----
+   `art.turn[i]` is one flat picture of her looking i * 15 degrees round from the camera (0 = towards you, 90 = to her right / the
+   screen's right, 180 = away, 270 = left). The four walking views are the usual `.pl-view`s (for Alyn each is one whole picture, no feet layers, so a step is a bob of
+   the whole figure); every angle between them is a turn picture shown in `.pl-view[data-v=turn]`. Turning is a few quick frames the short way round, 30 degrees
+   at a time, so a 90 degree change takes about a tenth of a second and a walk never waits for it. Reduced motion snaps instead.
+   `spr.dataset.ang` is where the sprite is looking now, `spr._goal` where it is going (so a repeated call does not restart a turn). */
+const FACE_DEG = { down: 0, right: 90, up: 180, left: 270 };
+const DEG_FACE = { 0: 'down', 90: 'right', 180: 'up', 270: 'left' };
+const normDeg = d => ((Math.round(d / 15) * 15) % 360 + 360) % 360;
+function artTurns(art) { return !!(art && art.turn && art.turn.length === 24 && art.views.right); }
+function sprAngle(spr) { return spr.dataset.ang !== undefined ? +spr.dataset.ang : (FACE_DEG[spr.dataset.view] || 0); }
+function sprShow(spr, art, deg) {
+  deg = normDeg(deg); spr.dataset.ang = deg;
+  if (DEG_FACE[deg]) { spr.dataset.view = DEG_FACE[deg]; spr.dataset.flip = ''; return; }
+  const v = spr.querySelector('.pl-view[data-v="turn"]'); if (!v) return;
+  const uri = art.turn[deg / 15], img = v.querySelector('.pl-turn-img'), tint = v.querySelector('.pl-tint');
+  if (img.getAttribute('src') !== uri) img.src = uri;
+  tint.style.webkitMaskImage = tint.style.maskImage = `url(${uri})`;     // the time-of-day tint follows the picture
+  spr.dataset.view = 'turn'; spr.dataset.flip = '';
+}
+function sprTurnTo(spr, art, goal, animate) {
+  goal = normDeg(goal);
+  if (spr._goal === goal) return;
+  spr._goal = goal; clearTimeout(spr._turnT);
+  let cur = sprAngle(spr);
+  if (!animate || (typeof btMotionOk === 'function' && !btMotionOk())) { sprShow(spr, art, goal); return; }
+  const step = () => {
+    const d = ((goal - cur + 540) % 360) - 180;                        // the signed short way round
+    if (!d) { sprShow(spr, art, goal); return; }
+    cur = normDeg(cur + Math.sign(d) * Math.min(30, Math.abs(d)));
+    sprShow(spr, art, cur);
+    if (cur !== goal) spr._turnT = setTimeout(step, 45);
+  };
+  step();
+}
+// Turn to face a tile (a neighbour, a door, a crop) from where she stands; a diagonal looks diagonally. Characters without turn art keep their facing.
+function playerLookAt(t) {
+  const spr = typeof playerEl !== 'undefined' && playerEl && playerEl.querySelector('.pl-sprite'), art = playerArt();
+  if (!spr || !artTurns(art) || !t || typeof t.x !== 'number' || typeof t.y !== 'number') return;
+  const dx = t.x - state.playerPos.x, dy = t.y - state.playerPos.y;
+  if (!dx && !dy) return;
+  plDeg = normDeg(Math.atan2(dx, dy) * 180 / Math.PI);
+  sprTurnTo(spr, art, plDeg, true);
+}
+// The Character tab: drag the figure sideways to turn her (arrow keys too); a few seconds after you let go she turns back to the front.
+function charFigTurnInit() {
+  const spr = document.querySelector('#chStage .ch-fig'), me = document.getElementById('chMe'), art = playerArt();
+  if (!spr || !me || !artTurns(art)) return;
+  let drag = null, moved = false, back = null;
+  const settle = () => { clearTimeout(back); back = setTimeout(() => { if (spr.isConnected && !drag) sprTurnTo(spr, art, 0, true); }, 3000); };
+  me.style.touchAction = 'pan-y'; me.title = 'Drag to turn';
+  me.addEventListener('pointerdown', e => { clearTimeout(back); clearTimeout(spr._turnT); spr._goal = undefined; drag = { x: e.clientX, a: sprAngle(spr) }; moved = false; try { me.setPointerCapture(e.pointerId); } catch (_) {} });
+  me.addEventListener('pointermove', e => { if (!drag) return; const dx = e.clientX - drag.x; if (Math.abs(dx) > 4) moved = true; if (moved) sprShow(spr, art, drag.a + dx * 0.8); });
+  const up = () => { if (!drag) return; drag = null; if (moved) { spr._goal = sprAngle(spr); settle(); } };
+  me.addEventListener('pointerup', up); me.addEventListener('pointercancel', up);
+  me.addEventListener('click', e => { if (moved) { e.stopImmediatePropagation(); moved = false; } });   // a drag is not a tap (no hop)
+  me.addEventListener('keydown', e => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    e.preventDefault(); spr._goal = undefined; sprShow(spr, art, sprAngle(spr) + (e.key === 'ArrowRight' ? 15 : -15)); spr._goal = sprAngle(spr); settle();
+  });
 }
 
 // The Character tab's stage: the whole drawn character, front view, standing on the ground instead of a face in a circle.

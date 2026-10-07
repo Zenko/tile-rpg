@@ -67,6 +67,7 @@ function drawCharStage() {
     </div>
     <button class="ch-paint" id="chPaint" aria-label="Change backdrop" title="Change backdrop">🎨</button>`;
   if (!fig) applyAvatarStyle(document.getElementById('chAv'), ch);
+  else if (typeof charFigTurnInit === 'function') charFigTurnInit();   // drag her round (js/player-sprite.js); before the click handlers so a drag does not hop
   const hop = id => { const el = document.getElementById(id); el.classList.remove('hop'); void el.offsetWidth; el.classList.add('hop'); sfx('tap'); buzz(HAP.tap); };
   document.getElementById('chMe').addEventListener('click', () => hop('chMe'));
   document.getElementById('chPal').addEventListener('click', () => { hop('chPal'); if (!comp) charSetView('pals'); else toast(companionLine(comp)); });

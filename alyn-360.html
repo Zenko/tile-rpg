@@ -84,7 +84,7 @@
 
   // ---- loading ----
   async function tryFetch() {
-    try { const r = await fetch('assets/Alyn_360.svg'); if (!r.ok) throw 0; start(await r.text()); }
+    try { let r = await fetch('assets/player/alyn/Alyn_360.svg'); if (!r.ok) r = await fetch('assets/Alyn_360.svg'); if (!r.ok) throw 0; start(await r.text()); }
     catch (e) { $('status').textContent = 'Not found next to the game, so pick the file yourself.'; }
   }
   function readFile(f) { if (f) f.text().then(start); }
