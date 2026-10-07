@@ -98,33 +98,28 @@
     const doc = new DOMParser().parseFromString(text, 'image/svg+xml');
     const svg = document.importNode(doc.documentElement, true);
     $('holder').innerHTML = ''; $('holder').appendChild(svg);
-    index(svg);
+    index();
     $('loader').hidden = true; $('app').hidden = false;
     buildTurntable(); buildWalker();
   }
 
-  // Each view is a group named "Generative Object (angle, height)". Crop boxes: all views of a row share one height and width, so
-  // Alyn stays the same size and her feet stay on the same line while she turns; only the centre is taken from each view's own cell.
-  function index(svg) {
-    const groups = [...svg.querySelectorAll('[id^="Generative_Object_"]')];
-    const W = svg.viewBox.baseVal.width, H = svg.viewBox.baseVal.height, colW = W / 25;
-    const raw = {};
-    groups.forEach(g => {
-      const m = /\((-?\d+),\s*(-?\d+)\)/.exec(g.getAttribute('data-name') || '');
-      if (!m) return;
-      const a = +m[1], h = +m[2], b = g.getBBox(), cell = (a + 180) / 15;
-      (raw[h] = raw[h] || []).push({ id: g.id, a, b, off: b.x + b.width / 2 - (cell + 0.5) * colW });
-    });
+  // Alignment: every view is placed by measurement, not by its cell in the sheet. ANCHORS holds, per view, [torso centre x, top of head,
+  // soles of feet, width] in sheet units, measured from a render of the sheet. Each view is cropped so its torso centre sits on the
+  // middle line and its feet on the bottom line, and is scaled to its row's median height, so turning her never makes her drift or pulse.
+  const ANCHORS = {"Generative_Object_-180_-30_":[170.2,8,558,340],"Generative_Object_-165_-30_":[545.1,4,561,335],"Generative_Object_-150_-30_":[926.9,1,565,327],"Generative_Object_-135_-30_":[1306.0,0,566,317],"Generative_Object_-120_-30_":[1669.5,0,566,307],"Generative_Object_-105_-30_":[2037.1,1,565,293],"Generative_Object_-90_-30_":[2392.7,2,563,291],"Generative_Object_-75_-30_":[2749.2,1,565,304],"Generative_Object_-60_-30_":[3112.6,2,564,319],"Generative_Object_-45_-30_":[3486.5,4,562,340],"Generative_Object_-30_-30_":[3867.9,7,559,345],"Generative_Object_-15_-30_":[4260.9,7,559,344],"Generative_Object_0_-30_":[4918.2,8,558,338],"Generative_Object_15_-30_":[5573.4,4,562,344],"Generative_Object_30_-30_":[5969.6,5,561,343],"Generative_Object_45_-30_":[6349.8,4,562,326],"Generative_Object_60_-30_":[6735.3,1,565,320],"Generative_Object_75_-30_":[7113.7,7,559,317],"Generative_Object_90_-30_":[7489.1,5,561,312],"Generative_Object_105_-30_":[7856.7,3,563,310],"Generative_Object_120_-30_":[8221.7,1,565,319],"Generative_Object_135_-30_":[8591.4,1,565,326],"Generative_Object_150_-30_":[8968.5,3,563,331],"Generative_Object_165_-30_":[9345.4,9,557,338],"Generative_Object_180_-30_":[9720.6,8,558,340],"Generative_Object_-180_0_":[169.9,923,1474,340],"Generative_Object_-165_0_":[545.2,922,1475,342],"Generative_Object_-150_0_":[926.4,919,1478,343],"Generative_Object_-135_0_":[1308.4,920,1477,327],"Generative_Object_-120_0_":[1678.1,920,1477,316],"Generative_Object_-105_0_":[2037.4,920,1476,304],"Generative_Object_-90_0_":[2393.8,917,1480,301],"Generative_Object_-75_0_":[2754.2,915,1481,308],"Generative_Object_-60_0_":[3118.8,917,1479,320],"Generative_Object_-45_0_":[3494.3,916,1480,325],"Generative_Object_-30_0_":[3878.0,917,1480,334],"Generative_Object_-15_0_":[4265.2,918,1478,339],"Generative_Object_0_0_":[4917.4,925,1484,341],"Generative_Object_15_0_":[5571.4,919,1478,343],"Generative_Object_30_0_":[5962.3,918,1478,337],"Generative_Object_45_0_":[6349.8,919,1477,332],"Generative_Object_60_0_":[6732.0,920,1477,329],"Generative_Object_75_0_":[7112.6,923,1474,322],"Generative_Object_90_0_":[7487.5,925,1472,319],"Generative_Object_105_0_":[7855.5,924,1472,315],"Generative_Object_120_0_":[8220.1,925,1471,316],"Generative_Object_135_0_":[8589.6,924,1472,325],"Generative_Object_150_0_":[8967.1,924,1473,328],"Generative_Object_165_0_":[9344.6,924,1472,331],"Generative_Object_180_0_":[9720.1,923,1474,340],"Generative_Object_-180_30_":[169.7,1854,2373,339],"Generative_Object_-165_30_":[546.6,1854,2373,348],"Generative_Object_-150_30_":[927.9,1852,2375,351],"Generative_Object_-135_30_":[1308.4,1848,2379,343],"Generative_Object_-120_30_":[1675.6,1850,2377,327],"Generative_Object_-105_30_":[2036.0,1848,2380,323],"Generative_Object_-90_30_":[2390.8,1849,2379,322],"Generative_Object_-75_30_":[2750.9,1851,2377,331],"Generative_Object_-60_30_":[3119.9,1858,2369,338],"Generative_Object_-45_30_":[3494.8,1856,2371,346],"Generative_Object_-30_30_":[3876.8,1856,2371,351],"Generative_Object_-15_30_":[4265.8,1861,2366,355],"Generative_Object_0_30_":[4917.8,1864,2363,355],"Generative_Object_15_30_":[5571.8,1860,2368,358],"Generative_Object_30_30_":[5961.5,1852,2375,353],"Generative_Object_45_30_":[6349.6,1853,2375,353],"Generative_Object_60_30_":[6734.9,1855,2372,350],"Generative_Object_75_30_":[7115.4,1848,2379,345],"Generative_Object_90_30_":[7488.4,1848,2379,338],"Generative_Object_105_30_":[7855.2,1845,2381,331],"Generative_Object_120_30_":[8219.7,1848,2380,330],"Generative_Object_135_30_":[8590.7,1848,2379,344],"Generative_Object_150_30_":[8968.6,1852,2375,345],"Generative_Object_165_30_":[9345.2,1851,2376,344],"Generative_Object_180_30_":[9720.1,1854,2373,339]};
+  function index() {
     views = {};
     ROWS.forEach(h => {
-      const list = raw[h] || []; if (!list.length) return;
-      const offs = list.map(v => v.off).sort((p, q) => p - q), med = offs[offs.length >> 1];
-      const top = Math.min(...list.map(v => v.b.y)), bot = Math.max(...list.map(v => v.b.y + v.b.height));
-      const w = Math.max(...list.map(v => v.b.width)) + 30, pad = 15;
+      const list = Object.keys(ANCHORS).filter(id => id.endsWith('_' + h + '_')).map(id => {
+        const m = /Generative_Object_(-?\d+)_(-?\d+)_/.exec(id); return { id, a: +m[1], h: +m[2], t: ANCHORS[id] };
+      }).filter(v => v.h === h);
+      if (!list.length) return;
+      const hs = list.map(v => v.t[2] - v.t[1]).sort((p, q) => p - q), Hr = hs[hs.length >> 1];
+      const Wr = Math.max(...list.map(v => v.t[3])) + 40, pad = 18;
       views[h] = {};
       list.forEach(v => {
-        const cx = ((v.a + 180) / 15 + 0.5) * colW + med;
-        views[h][v.a] = { id: v.id, box: [cx - w / 2, top - pad, w, bot - top + pad * 2] };
+        const s = (v.t[2] - v.t[1]) / Hr, ax = v.t[0], bot = v.t[2];
+        views[h][v.a] = { id: v.id, box: [ax - s * Wr / 2, bot - s * (Hr + pad), s * Wr, s * (Hr + 2 * pad)] };
       });
     });
   }
