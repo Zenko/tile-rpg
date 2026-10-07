@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* Cuts Alyn's turntable sheet (assets/player/alyn/Alyn_360.svg: 25 turn angles x 3 camera heights, one <g> per view) into the PNGs that
+/* Cuts Alyn's turntable (see HANDOFF.md, "Character system vocabulary") sheet (assets/player/alyn/Alyn_360.svg: 25 turn angles x 3 camera heights, one <g> per view) into the PNGs that
    scripts/build_player_art.py reads:
 
      node scripts/export-alyn-views.js [path/to/Alyn_360.svg]     (needs playwright)

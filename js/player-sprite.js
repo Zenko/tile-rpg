@@ -7,7 +7,8 @@
    per step. Facing is worked out from the last step in positionPlayer(); it is not saved, a fresh load faces down.
    A missing right view is the left view mirrored with CSS. If PLAYER_ART is absent the old emoji badge is used instead.
    A character with `turn` art (Alyn) can also look in any of 24 directions, 15 degrees apart: she turns through the in-between pictures
-   when her heading changes, looks at whatever she interacts with, and can be dragged round on the Character tab (TURNING ON THE SPOT, below). */
+   when her heading changes, looks at whatever she interacts with, and can be dragged round on the Character tab (FACING AND TURNTABLES, below). A character with turn art has a turntable (24 views); the
+   word for where she looks is her facing; see HANDOFF.md, "Character system vocabulary". */
 let plFace = 'down';
 let plDeg = null;   // an exact look direction (degrees, 0 = towards you, 90 = right) set by playerLookAt; null = the cardinal plFace
 
@@ -67,7 +68,7 @@ function applyPlayerSprite(el, character, animate) {
   el.style.setProperty('--pl-step', STEP_MS + 'ms');  // a walk with your companion is slower, so the stride is too
 }
 
-/* ---- TURNING ON THE SPOT (characters with `turn` art) ----
+/* ---- FACING AND TURNTABLES (characters with `turn` art) ----
    `art.turn[i]` is one flat picture of her looking i * 15 degrees round from the camera (0 = towards you, 90 = to her right / the
    screen's right, 180 = away, 270 = left). The four walking views are the usual `.pl-view`s (for Alyn each is one whole picture, no feet layers, so a step is a bob of
    the whole figure); every angle between them is a turn picture shown in `.pl-view[data-v=turn]`. Turning is a few quick frames the short way round, 30 degrees
