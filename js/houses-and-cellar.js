@@ -413,7 +413,7 @@ function withDoorFade(swap, inMs, outMs) {
   }, inMs);
 }
 // Town taps use this: fade in. Code that opens a scene as part of something bigger (travel, the shop button) calls openScene directly.
-function openSceneFx(id) { withDoorFade(() => openScene(id)); }
+function openSceneFx(id) { if (typeof pfxEnter === 'function' && pfxEnter(() => withDoorFade(() => openScene(id)))) return; withDoorFade(() => openScene(id)); }   // pfxEnter (js/player-fx.js) burns the figure away first
 function sceneEnterFx() {
   sceneView.classList.remove('scene-enter'); void sceneView.offsetWidth; sceneView.classList.add('scene-enter');
   setTimeout(() => sceneView.classList.remove('scene-enter'), 900);
@@ -468,6 +468,7 @@ function closeScene() {
   sceneView.classList.add('hidden'); sceneView.classList.remove('scene-leaving', 'scene-enter', 'sc-std');
   townPanel.classList.remove('hidden'); document.getElementById('bottomNav').style.display = '';
   document.body.classList.remove('in-scene');
+  if (typeof pfxReform === 'function') pfxReform();   // the figure re-forms in blue sparks if she burned away on the way in
   townLog.textContent = 'You step back outside.';
   renderTown(); updateHud();
 }

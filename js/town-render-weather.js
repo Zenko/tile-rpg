@@ -275,6 +275,7 @@ function applySky(instant) {
   const clockEl = document.getElementById('hudClock');
   if (clockEl) clockEl.textContent = formatGameClock(s.dayPos);
   updateSkyBadgeIcon();
+  if (typeof pfxSync === 'function') pfxSync();      // js/player-fx.js: shadow angle and light tint follow the clock
 }
 // Maps the day/night cycle (0-1 lap of DAY_LEN_MS) onto a 12-hour clock face, so the HUD clock always
 // agrees with the sky tint and weather - midnight at dayPos 0, noon at dayPos 0.5.
@@ -556,6 +557,7 @@ function positionPlayer(animate) {
   playerEl.style.transition = animate ? `left ${STEP_MS}ms linear, top ${STEP_MS}ms linear` : 'none';
   playerEl.style.setProperty('--x', state.playerPos.x); playerEl.style.setProperty('--y', state.playerPos.y);
   playerEl.style.zIndex = state.playerPos.y * 2 + 2;
+  if (typeof pfxPlayer === 'function') pfxPlayer(playerEl._lastPos, state.playerPos, animate);   // js/player-fx.js: lamp light, aura, footsteps
   playerFaceFromMove(playerEl._lastPos, state.playerPos); playerEl._lastPos = { x: state.playerPos.x, y: state.playerPos.y };   // js/player-sprite.js
   const badge = playerEl.querySelector('.pl-badge');
   if (badge) { badge.textContent = state.character.emoji; applyAvatarStyle(badge, state.character); }   // the emoji badge is the fallback when there is no drawn art

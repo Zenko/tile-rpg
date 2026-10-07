@@ -386,6 +386,7 @@ function syncToggles() {
   hapticToggle.classList.toggle('on', prefs.haptics);
   document.querySelectorAll('#themeSeg .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.themePick === prefs.theme));
   document.getElementById('ambientToggle').classList.toggle('on', prefs.ambient);
+  document.getElementById('charFxToggle').classList.toggle('on', prefs.charFx !== false);
   document.getElementById('bigTextToggle').classList.toggle('on', !!prefs.bigText);
   document.getElementById('notifsToggle').classList.toggle('on', notifsEnabled());
   document.getElementById('presenceToggle').classList.toggle('on', !!prefs.sharePresence);
@@ -415,6 +416,10 @@ musicToggle.addEventListener('click', () => {
 document.querySelectorAll('#themeSeg .seg-btn').forEach(b => b.addEventListener('click', () => {
   prefs.theme = b.dataset.themePick; savePrefs(); applyTheme(); syncToggles(); sfx('tap');
 }));
+document.getElementById('charFxToggle').addEventListener('click', () => {
+  prefs.charFx = prefs.charFx === false; savePrefs(); syncToggles(); sfx('tap');
+  if (typeof pfxSync === 'function') { pfxLast = ''; pfxSync(); } if (typeof renderTown === 'function') renderTown();   // js/player-fx.js
+});
 document.getElementById('ambientToggle').addEventListener('click', () => {
   prefs.ambient = !prefs.ambient; savePrefs();
   if (prefs.ambient && prefs.sound) ensureAudio();

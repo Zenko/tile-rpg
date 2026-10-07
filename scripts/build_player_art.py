@@ -22,7 +22,7 @@ re-tuning (or just supply back.png and left.png).
 """
 import base64, io, json, os
 import numpy as np
-from PIL import Image, ImageDraw
+from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
 HERE = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'assets')
 SRC = os.path.join(HERE, 'player')
@@ -172,6 +172,27 @@ def uri(im, w, colors=64):
     return 'data:image/png;base64,' + base64.b64encode(b.getvalue()).decode()
 
 
+def effect_layers(full, upper):
+    """Small extra pictures per view for the town effects (js/player-fx.js, css/latest.css):
+    shd   a solid black silhouette of the whole figure, flattened and skewed into the cast shadow, and the mask for the time-of-day tint
+    wet   a pale rim light on the upper-left edges and a deep blue one on the lower-right, shown while it rains
+    frost a white cap along the tops of the hair and shoulders, shown while it snows (both only on the body, not the feet)"""
+    W, H = full.size
+    a_full = full.split()[3].point(lambda v: 255 if v > 110 else 0)
+    shd = Image.new('RGBA', (W, H), (0, 0, 0, 255)); shd.putalpha(a_full)
+    a_up = upper.split()[3].point(lambda v: 255 if v > 110 else 0)
+    def shifted(a, dx, dy):
+        out = Image.new('L', a.size, 0); out.paste(a, (dx, dy)); return out
+    def sliver(a, dx, dy, blur):
+        return ImageChops.subtract(a, shifted(a, dx, dy)).filter(ImageFilter.GaussianBlur(blur))
+    wet = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+    light = Image.new('RGBA', (W, H), (236, 248, 255, 255)); light.putalpha(sliver(a_up, 24, 24, 5).point(lambda v: min(255, int(v * 1.1))))
+    deep = Image.new('RGBA', (W, H), (24, 52, 120, 255)); deep.putalpha(sliver(a_up, -22, -22, 6).point(lambda v: int(v * .55)))
+    wet.alpha_composite(deep); wet.alpha_composite(light)
+    frost = Image.new('RGBA', (W, H), (250, 252, 255, 255)); frost.putalpha(sliver(a_up, 0, 44, 4).point(lambda v: min(255, int(v * 1.25))))
+    return {'shd': uri(shd, 120, 4), 'wet': uri(wet, 160, 24), 'frost': uri(frost, 160, 12)}
+
+
 def build(cfg):
     folder = os.path.join(SRC, cfg['id'])
     load = lambda n: Image.open(os.path.join(folder, n)).convert('RGBA') if os.path.exists(os.path.join(folder, n)) else None
@@ -206,6 +227,7 @@ def build(cfg):
     for k, im in views.items():
         u, l, r = split(im)
         art[k] = {'upper': uri(u, OUT_W), 'legL': uri(l, OUT_W), 'legR': uri(r, OUT_W)}
+        art[k].update(effect_layers(im, u))
     fx0, fy0, fx1, fy1 = cfg['face']
     face = uri(base.crop((fx0, fy0, fx1, fy1)), 128, 48)   # head-and-shoulders crop for the round portraits
     real = ['down'] + [k for k, v in (('up', back), ('left', left), ('right', right)) if v]

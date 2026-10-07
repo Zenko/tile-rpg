@@ -22,7 +22,11 @@ function playerArt() { const id = playerCharId(); return id ? PLAYER_ART.chars[i
 function spriteViewsHTML(art) {
   return Object.keys(art.views).map(k => {
     const v = art.views[k];
-    return `<div class="pl-view" data-v="${k}"><img class="pl-leg l" src="${v.legL}" alt="" draggable="false"><img class="pl-leg r" src="${v.legR}" alt="" draggable="false"><img class="pl-body" src="${v.upper}" alt="" draggable="false"></div>`;
+    // shd: the cast shadow (a flattened, skewed silhouette); the rig holds everything that bobs, hops and steps; tint, wet and frost
+    // are the time-of-day, rain and snow layers from js/player-fx.js (they stay invisible until their CSS or variable switches them on)
+    return `<div class="pl-view" data-v="${k}"><img class="pl-shd" src="${v.shd}" alt="" draggable="false"><div class="pl-rig">` +
+      `<img class="pl-leg l" src="${v.legL}" alt="" draggable="false"><img class="pl-leg r" src="${v.legR}" alt="" draggable="false"><img class="pl-body" src="${v.upper}" alt="" draggable="false">` +
+      `<div class="pl-tint" style="-webkit-mask-image:url(${v.shd});mask-image:url(${v.shd})"></div><img class="pl-wet" src="${v.wet}" alt="" draggable="false"><img class="pl-frost" src="${v.frost}" alt="" draggable="false"></div></div>`;
   }).join('');
 }
 function playerSpriteHTML() {

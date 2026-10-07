@@ -1646,3 +1646,58 @@ body.in-altar .overlay, body.in-altar .toast { z-index: 70; }   /* the card reve
 .ent.npc.walking .pl-leg.r { animation: pl-lift-r calc(var(--pl-step, 260ms) * 2) ease-in-out infinite; }
 @keyframes pl-idle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(calc(var(--t) * -0.012)); } }
 @media (prefers-reduced-motion: reduce) { .ent.npc .pl-body, .ent.npc.walking .pl-leg { animation: none; } }
+
+/* ---- Character effects (js/player-fx.js). Transform and opacity only; no filters or blend modes (see HANDOFF section 9). ---- */
+.pl-rig { position: absolute; inset: 0; z-index: 1; transform-origin: 50% 100%; }
+.pl-view .pl-shd { top: 0; z-index: 0; opacity: var(--sh-a, 0.3); transform-origin: 50% 100%; transform: skewX(var(--sh-skew, 0deg)) scaleY(calc(var(--sh-len, 0.3) * -1)); pointer-events: none; transition: opacity 1.5s linear; }
+.pl-tint { position: absolute; inset: 0; z-index: 3; background-color: var(--pl-tint, transparent); -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; pointer-events: none; transition: background-color 1.5s linear; }
+.pl-view .pl-wet, .pl-view .pl-frost { top: 0; z-index: 4; opacity: 0; pointer-events: none; transition: opacity 2.2s ease; }
+.town-view[data-wx="rain"] .pl-wet, .town-view[data-wx="storm"] .pl-wet { opacity: 0.95; }
+.town-view[data-wx="snow"] .pl-frost { opacity: 1; }
+.pl-sprite.pl-gone { visibility: hidden; }
+body.no-charfx .pl-shd, body.no-charfx .pl-tint, body.no-charfx .pl-wet, body.no-charfx .pl-frost, body.no-charfx .pl-aura, body.no-charfx .pfx-motes, body.no-charfx .pfx { display: none; }
+
+.ent.player.walking .pl-rig { animation: pl-squash calc(var(--pl-step, 140ms) * 2) ease-in-out infinite; }
+.ent.player .pl-sprite.hop .pl-rig { animation: pl-hop 0.62s cubic-bezier(0.3, 0.7, 0.4, 1) both; }
+.ent.player .pl-sprite.hop .pl-shd { animation: pl-shd-hop 0.62s ease both; }
+@keyframes pl-squash { 0%, 50%, 100% { transform: scale(1.02, 0.97); } 25%, 75% { transform: scale(1, 1); } }
+@keyframes pl-hop { 0% { transform: scale(1, 1); } 14% { transform: scale(1.1, 0.86); } 42% { transform: translateY(calc(var(--t) * -0.55)) scale(0.94, 1.08); } 72% { transform: translateY(calc(var(--t) * -0.5)) scale(0.96, 1.05); } 88% { transform: scale(1.12, 0.86); } 100% { transform: scale(1, 1); } }
+@keyframes pl-shd-hop { 40%, 72% { opacity: calc(var(--sh-a, 0.3) * 0.35); } }
+
+/* auras: a soft glow and three little rising things, per state */
+.pl-aura { position: absolute; left: 50%; bottom: 2%; width: calc(var(--t) * 2.4); height: calc(var(--t) * 2.4); margin-left: calc(var(--t) * -1.2); pointer-events: none; z-index: 0; --ac: 255, 255, 255; }
+.pl-aura::before { content: ''; position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 50% 58%, rgba(var(--ac), 0.5), rgba(var(--ac), 0) 66%); animation: pl-breathe 3.2s ease-in-out infinite; }
+.ent.player[data-aura="bond"] .pl-aura { --ac: 255, 128, 172; }
+.ent.player[data-aura="streak"] .pl-aura { --ac: 255, 150, 55; }
+.ent.player[data-aura="calm"] .pl-aura { --ac: 140, 200, 255; }
+.pl-aura i { position: absolute; left: 50%; bottom: 30%; opacity: 0; animation: pl-rise 2.8s ease-out infinite; }
+.pl-aura i:nth-child(2) { left: 38%; animation-delay: 0.9s; } .pl-aura i:nth-child(3) { left: 62%; animation-delay: 1.8s; }
+.ent.player[data-aura="bond"] .pl-aura i::before { content: '\2665'; color: #ff7fae; font-style: normal; font-size: calc(var(--t) * 0.26); line-height: 1; }
+.ent.player[data-aura="streak"] .pl-aura i { width: calc(var(--t) * 0.12); height: calc(var(--t) * 0.26); border-radius: 50% 50% 40% 40%; background: linear-gradient(#fff2b0, #ff9a2a 60%, rgba(255, 80, 0, 0)); animation-duration: 1.4s; }
+.ent.player[data-aura="calm"] .pl-aura i { width: calc(var(--t) * 0.3); height: calc(var(--t) * 0.3); border: 1.5px solid rgba(170, 220, 255, 0.85); border-radius: 50%; animation: pl-ring 3.6s ease-out infinite; }
+.ent.player[data-aura="calm"] .pl-aura i:nth-child(2) { animation-delay: 1.2s; } .ent.player[data-aura="calm"] .pl-aura i:nth-child(3) { animation-delay: 2.4s; }
+@keyframes pl-breathe { 0%, 100% { transform: scale(0.9); opacity: 0.7; } 50% { transform: scale(1.05); opacity: 1; } }
+@keyframes pl-rise { 0% { transform: translate(-50%, 0) scale(0.7); opacity: 0; } 15% { opacity: 0.95; } 100% { transform: translate(-50%, calc(var(--t) * -1.3)) scale(1.05); opacity: 0; } }
+@keyframes pl-ring { 0% { transform: translate(-50%, 0) scale(0.3); opacity: 0.9; } 100% { transform: translate(-50%, 0) scale(2.8); opacity: 0; } }
+
+/* bits that fly and fade (footsteps, hop, dissolve) */
+.pfx { position: absolute; pointer-events: none; display: block; will-change: transform, opacity; animation: pfx-fly var(--d, 0.8s) ease-out forwards; }
+.pfx-petal { width: calc(var(--t) * 0.09); height: calc(var(--t) * 0.055); border-radius: 50%; background: var(--c, #f6a9c2); }
+.pfx-dust { width: calc(var(--t) * 0.16); height: calc(var(--t) * 0.16); margin: calc(var(--t) * -0.08); border-radius: 50%; background: var(--c, #d9bf8b); --o: 0.55; }
+.pfx-spark { width: calc(var(--t) * 0.07); height: calc(var(--t) * 0.07); background: #fff3c4; box-shadow: 0 0 6px 1px #ffe08a; transform: rotate(45deg); }
+.pfx-spark.pfx-blue { background: #d9f2ff; box-shadow: 0 0 6px 1px #7fd2ff; }
+.pfx-ember { width: calc(var(--t) * 0.06); height: calc(var(--t) * 0.06); border-radius: 50%; background: #ffb347; box-shadow: 0 0 6px 2px #ff7a1a; }
+@keyframes pfx-fly { 0% { transform: translate(0, 0) rotate(0deg) scale(0.6); opacity: 0; } 15% { opacity: var(--o, 1); } 100% { transform: translate(var(--dx), var(--dy)) rotate(var(--r, 0deg)) scale(var(--s, 1)); opacity: 0; } }
+
+/* motes: one screen-space layer above the sky so fireflies glow in the dark */
+.pfx-motes { position: absolute; inset: 0; z-index: 8; pointer-events: none; overflow: hidden; }
+.pfx-motes .fly, .pfx-motes .leaf { position: absolute; display: none; }
+.pfx-motes .fly { width: 5px; height: 5px; border-radius: 50%; background: #eaffa8; box-shadow: 0 0 8px 3px rgba(190, 255, 110, 0.7); animation: pfx-wander var(--wd, 9s) ease-in-out var(--wl, 0s) infinite alternate, pfx-blink var(--bd, 3s) ease-in-out infinite; }
+.pfx-motes .leaf { top: 0; width: 7px; height: 3.5px; border-radius: 50%; background: var(--lc, #7fb35a); opacity: 0.75; animation: pfx-drift var(--ld, 18s) linear var(--ll, 0s) infinite; }
+.town-view.is-night .pfx-motes .fly { display: block; }
+.town-view:not(.is-night) .pfx-motes .leaf { display: block; }
+.town-view[data-wx="rain"] .pfx-motes, .town-view[data-wx="storm"] .pfx-motes, .town-view[data-wx="snow"] .pfx-motes { display: none; }
+@keyframes pfx-wander { from { transform: translate(0, 0); } to { transform: translate(var(--wx, 30px), var(--wy, -20px)); } }
+@keyframes pfx-blink { 0%, 100% { opacity: 0.15; } 50% { opacity: 1; } }
+@keyframes pfx-drift { 0% { transform: translate(0, -6vh) rotate(0deg); } 100% { transform: translate(22vw, 110vh) rotate(540deg); } }
+@media (prefers-reduced-motion: reduce) { .ent.player.walking .pl-rig, .ent.player .pl-sprite.hop .pl-rig, .pl-aura::before, .pl-aura i, .pfx-motes .fly, .pfx-motes .leaf { animation: none; } .pfx-motes { display: none; } .pl-aura i { display: none; } }
