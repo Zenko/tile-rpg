@@ -58,6 +58,13 @@ function applyPlayerSprite(el, character) {
   el.style.setProperty('--pl-step', STEP_MS + 'ms');  // a walk with your companion is slower, so the stride is too
 }
 
+// The Character tab's stage: the whole drawn character, front view, standing on the ground instead of a face in a circle.
+function charStageFigHTML() {
+  const art = playerArt();
+  if (!art) return '';
+  return `<span class="ch-figbox" id="chAv"><div class="pl-sprite ch-fig" data-view="down" data-char="${playerCharId()}" style="--pl-leg-top:${art.meta.legTop}%;--pl-aspect:${art.meta.aspect}">${spriteViewsHTML(art)}</div></span>`;
+}
+
 // ---- the round avatar portraits (HUD, battle, Character tab, the picker) show the face crop instead of the emoji ----
 function setAvFace(el, character) {
   if (!el) return;

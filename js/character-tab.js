@@ -48,6 +48,7 @@ function drawCharStage() {
   const need = xpToNext(pr.level), pct = Math.max(0, Math.min(100, pr.xp / need * 100));
   st.style.setProperty('--sk-a', c.sky[0]); st.style.setProperty('--sk-b', c.sky[1]); st.style.setProperty('--gr', c.ground);
   st.classList.toggle('dark', !!c.dark); st.classList.toggle('compact', charCompact());
+  const fig = typeof charStageFigHTML === 'function' ? charStageFigHTML() : '';   // a drawn character stands there in full; an emoji look keeps the round portrait
   const deco = charStageDeco(def).map((e, i) => { const s = CHAR_DECO_SLOTS[i % CHAR_DECO_SLOTS.length]; return `<span class="ch-d" style="left:${s[0]}%;top:${s[1]}%;font-size:${s[2]}rem;animation-delay:${-i * 1.7}s">${e}</span>`; }).join('');
   st.innerHTML = `
     <div class="ch-deco" aria-hidden="true">${deco}</div>
@@ -58,14 +59,14 @@ function drawCharStage() {
     </div>
     <div class="ch-actors">
       <button class="ch-actor ch-me" id="chMe" aria-label="${escapeHtml(ch.name || 'You')}">
-        <span class="avatar-preview ch-av" id="chAv"><span>${avFaceHTML(ch)}</span></span>
+        ${fig || `<span class="avatar-preview ch-av" id="chAv"><span>${avFaceHTML(ch)}</span></span>`}
         <span class="ch-plate">Lv ${pr.level}<i class="ch-xp"><b style="width:${pct}%"></b></i></span>
       </button>
       ${comp ? `<button class="ch-actor ch-pal" id="chPal" aria-label="${escapeHtml(comp.name)}"><span class="ch-pal-f">${companionIconHtml(comp)}</span><span class="ch-plate">${escapeHtml(comp.name)}</span></button>`
              : `<button class="ch-actor ch-pal empty" id="chPal" aria-label="No companion yet"><span class="ch-pal-f">❔</span><span class="ch-plate">No companion</span></button>`}
     </div>
     <button class="ch-paint" id="chPaint" aria-label="Change backdrop" title="Change backdrop">🎨</button>`;
-  applyAvatarStyle(document.getElementById('chAv'), ch);
+  if (!fig) applyAvatarStyle(document.getElementById('chAv'), ch);
   const hop = id => { const el = document.getElementById(id); el.classList.remove('hop'); void el.offsetWidth; el.classList.add('hop'); sfx('tap'); buzz(HAP.tap); };
   document.getElementById('chMe').addEventListener('click', () => hop('chMe'));
   document.getElementById('chPal').addEventListener('click', () => { hop('chPal'); if (!comp) charSetView('pals'); else toast(companionLine(comp)); });

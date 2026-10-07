@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'better', x: 'On the Character screen your drawn character now stands there in full, with a little breathing, instead of just a face in a circle.' },
   { t:'new', x: 'Your drawn character now lives in the town. Her shadow swings and stretches with the sun, she turns cool at night and warm at dusk or by a lit lamp, rain beads on her and snow frosts her hair, and her footsteps kick up petals on grass, dust on the path and puffs on cobble. Fireflies drift at night and leaves by day. A win streak of 3, a close companion or a calm district gives her a glow of her own, she hops when a card or level-up popup closes, and she burns away in embers when she walks into a building and re-forms when she comes out. Settings has a Character effects switch.' },
   { t:'new', x: 'A try-out: one neighbour in El Umbral is drawn like your characters instead of an emoji. They turn to face the way they stroll and take little steps.' },
   { t:'new', x: 'Your character is drawn now. In town you see her walking around instead of a round badge: she turns to face the way you go, her body bobs and her feet step. Two drawn characters, Original and Don, are the first choices under Avatar (Character, Look), with their face in your portraits; pick any emoji to go back. Going up, left and right use stand-in drawings for now.' },

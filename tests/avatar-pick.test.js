@@ -36,4 +36,14 @@ module.exports = async (page, assert) => {
   assert.ok(await page.evaluate(() => [...document.querySelectorAll('.drawn-swatch')].filter(e => e.classList.contains('active') && e.getBoundingClientRect().width > 0).length === 1), 'only one is marked');
   await page.evaluate(() => { state.character.drawn = 'gone'; renderTown(); });
   assert.strictEqual((await faces()).char, 'first', 'an unknown id falls back to the first character');
+
+  // the Character tab stage shows a drawn character whole (not a face in a circle), and keeps the round portrait for emoji looks
+  const stage = () => page.evaluate(() => { const st = document.getElementById('chStage').getBoundingClientRect(), f = document.querySelector('#chStage .ch-fig'), r = f && f.getBoundingClientRect(); return { fig: !!f, circle: !!document.querySelector('#chStage .avatar-preview'), inside: !!r && r.top >= st.top && r.bottom <= st.bottom && r.left >= st.left && r.right <= st.right, h: r ? r.height : 0 }; });
+  await page.evaluate(() => { state.character.drawn = 'first'; switchTab('character'); charView = 'me'; renderCharacterTab(); });
+  await page.waitForTimeout(600);   // the stage grows from its compact height
+  let g = await stage();
+  assert.ok(g.fig && !g.circle && g.inside && g.h > 100, 'the drawn character stands in full on the stage: ' + JSON.stringify(g));
+  await page.evaluate(() => { state.character.drawn = false; renderCharacterTab(); });
+  g = await stage();
+  assert.ok(!g.fig && g.circle, 'an emoji look keeps the round portrait');
 };

@@ -1701,3 +1701,9 @@ body.no-charfx .pl-shd, body.no-charfx .pl-tint, body.no-charfx .pl-wet, body.no
 @keyframes pfx-blink { 0%, 100% { opacity: 0.15; } 50% { opacity: 1; } }
 @keyframes pfx-drift { 0% { transform: translate(0, -6vh) rotate(0deg); } 100% { transform: translate(22vw, 110vh) rotate(540deg); } }
 @media (prefers-reduced-motion: reduce) { .ent.player.walking .pl-rig, .ent.player .pl-sprite.hop .pl-rig, .pl-aura::before, .pl-aura i, .pfx-motes .fly, .pfx-motes .leaf { animation: none; } .pfx-motes { display: none; } .pl-aura i { display: none; } }
+
+/* Character tab stage: a drawn character is shown whole, standing on the ground (js/player-sprite.js charStageFigHTML) */
+.ch-figbox { display: block; position: relative; }
+.pl-sprite.ch-fig { position: relative; left: auto; bottom: auto; transform: none; width: auto; height: 132px; aspect-ratio: var(--pl-aspect, 0.614); margin: 0 auto; --t: 64px; --sh-len: 0.14; --sh-a: 0.28; }
+.ch-fig .pl-body { animation: pl-idle 2.8s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .ch-fig .pl-body { animation: none; } }
