@@ -144,7 +144,7 @@ function charDrawLook(box) {
   inp.addEventListener('input', () => { state.character.name = inp.value.slice(0, 16); saveState(); updateHud(); });
   box.appendChild(inp);
   charSection(box, 'Avatar');
-  box.appendChild(row('', (playerSpriteReady() ? [drawnAvatarSwatch()] : []).concat(EMOJI_OPTIONS.filter(o => ch.unlockedEmojis.includes(o.emoji)).map(o => shopCosmeticSwatch('emoji', o.emoji, '', o.cost, !playerDrawn() && ch.emoji === o.emoji, true)))));
+  box.appendChild(row('', drawnAvatarSwatches().concat(EMOJI_OPTIONS.filter(o => ch.unlockedEmojis.includes(o.emoji)).map(o => shopCosmeticSwatch('emoji', o.emoji, '', o.cost, !playerDrawn() && ch.emoji === o.emoji, true)))));
   charSection(box, 'Accessory');
   box.appendChild(row('', ACCESSORY_OPTIONS.filter(o => ch.unlockedAccessories.includes(o.icon)).map(o => shopCosmeticSwatch('accessory', o.icon, o.label, o.cost, ch.accessory === o.icon, true))));
   charSection(box, 'Colour');

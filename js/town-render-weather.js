@@ -549,7 +549,7 @@ function positionPlayer(animate) {
     playerEl = document.createElement('div'); playerEl.className = 'ent player';
     playerEl.innerHTML = '<div class="pl-glow"></div>' + playerSpriteHTML() + '<div class="ent-name"></div><div class="ent-title"></div>';
     townWorld.appendChild(playerEl);
-  } else if (!!playerEl.querySelector('.pl-sprite') !== playerDrawn()) {   // the avatar choice changed (js/player-sprite.js)
+  } else if ((playerEl.querySelector('.pl-sprite') || {dataset: {}}).dataset.char !== (playerCharId() || undefined) || !!playerEl.querySelector('.pl-sprite') !== playerDrawn()) {   // the avatar choice changed (js/player-sprite.js)
     playerEl.querySelectorAll('.pl-sprite, .pl-badge').forEach(e => e.remove());
     playerEl.querySelector('.pl-glow').insertAdjacentHTML('afterend', playerSpriteHTML());
   }

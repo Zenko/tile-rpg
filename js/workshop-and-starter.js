@@ -391,7 +391,7 @@ function renderCustomize() {
   box.appendChild(custNote);
 
   const emojiRow = document.createElement('div'); emojiRow.className = 'swatch-row shop-swatch-row';
-  if (playerSpriteReady()) emojiRow.appendChild(drawnAvatarSwatch());
+  drawnAvatarSwatches().forEach(sw => emojiRow.appendChild(sw));
   EMOJI_OPTIONS.forEach(o => emojiRow.appendChild(shopCosmeticSwatch('emoji', o.emoji, '', o.cost, !playerDrawn() && ch.emoji === o.emoji, ch.unlockedEmojis.includes(o.emoji))));
   box.appendChild(emojiRow);
   const accRow = document.createElement('div'); accRow.className = 'swatch-row shop-swatch-row';

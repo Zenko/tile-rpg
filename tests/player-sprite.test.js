@@ -17,9 +17,9 @@ module.exports = async (page, assert) => {
   await stepTo(8, 8);  assert.deepStrictEqual(await view(), ['down', ''], 'a jump across the map keeps the facing');
 
   // a real right-facing drawing is used as it is, not mirrored
-  await page.evaluate(() => { PLAYER_ART.views.right = PLAYER_ART.views.left; playerEl = null; townBuiltFor = null; renderTown(); plFace = 'right'; positionPlayer(false); });
+  await page.evaluate(() => { playerArt().views.right = playerArt().views.left; playerEl = null; townBuiltFor = null; renderTown(); plFace = 'right'; positionPlayer(false); });
   assert.deepStrictEqual(await view(), ['right', ''], 'a real right view is not flipped');
-  await page.evaluate(() => { delete PLAYER_ART.views.right; playerEl = null; townBuiltFor = null; renderTown(); positionPlayer(false); });
+  await page.evaluate(() => { delete playerArt().views.right; playerEl = null; townBuiltFor = null; renderTown(); positionPlayer(false); });
 
   // walking turns the animation on (and the feet move)
   await page.evaluate(() => playerEl.classList.add('walking'));
@@ -28,6 +28,6 @@ module.exports = async (page, assert) => {
   await page.evaluate(() => playerEl.classList.remove('walking'));
 
   // no art loaded: the old emoji badge comes back instead of an empty spot
-  await page.evaluate(() => { PLAYER_ART.views = {}; playerEl = null; townBuiltFor = null; renderTown(); positionPlayer(false); });
+  await page.evaluate(() => { PLAYER_ART.order = []; playerEl = null; townBuiltFor = null; renderTown(); positionPlayer(false); });
   assert.ok(await page.evaluate(() => !!playerEl.querySelector('.pl-badge')), 'falls back to the badge');
 };

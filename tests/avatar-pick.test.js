@@ -20,5 +20,20 @@ module.exports = async (page, assert) => {
 
   await page.evaluate(() => document.querySelector('.drawn-swatch').click());
   s = await look();
-  assert.ok(s.drawn === true && s.sprite && !s.badge && s.hud, 'and she comes back with one tap');
+  assert.ok(s.sprite && !s.badge && s.hud, 'and she comes back with one tap');
+
+  // a second drawn character (Don) is another swatch of the same size; picking it swaps the town sprite and the portraits
+  const n = await page.evaluate(() => [...document.querySelectorAll('.drawn-swatch')].filter(e => e.getBoundingClientRect().width > 0).length);
+  assert.strictEqual(n, 2, 'every drawn character has a swatch');
+  const faces = () => page.evaluate(() => ({ char: playerEl.querySelector('.pl-sprite').dataset.char, hud: document.querySelector('#avatarChipEmoji .av-face').src, drawn: state.character.drawn }));
+  const before = await faces();
+  await page.evaluate(() => [...document.querySelectorAll('.drawn-swatch')].find(e => e.title === 'Don').click());
+  const after = await faces();
+  assert.deepStrictEqual([after.char, after.drawn], ['don', 'don'], 'Don is the town sprite');
+  assert.notStrictEqual(after.hud, before.hud, 'and his face is in the HUD');
+  const sizes2 = await page.evaluate(() => [...document.querySelectorAll('.drawn-swatch')].map(e => Math.round(e.getBoundingClientRect().width)).filter(w => w > 0));   // the Card Shop's copies are on a hidden tab
+  assert.ok(sizes2.every(w => w === sizes2[0]), 'every drawn swatch is the same size: ' + sizes2);
+  assert.ok(await page.evaluate(() => [...document.querySelectorAll('.drawn-swatch')].filter(e => e.classList.contains('active') && e.getBoundingClientRect().width > 0).length === 1), 'only one is marked');
+  await page.evaluate(() => { state.character.drawn = 'gone'; renderTown(); });
+  assert.strictEqual((await faces()).char, 'first', 'an unknown id falls back to the first character');
 };
