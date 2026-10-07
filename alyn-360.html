@@ -30,6 +30,8 @@
   #alyn svg { position:absolute; height:130px; width:auto; left:50%; bottom:0; transform:translateX(-50%); transform-origin:50% 100%; overflow:visible; }
   #alyn .fig { position:absolute; bottom:0; left:0; }
   .hint { font-size:13px; color:var(--soft); margin-top:8px; }
+  .swatch { width:44px; height:44px; border-radius:50%; border:3px solid transparent; padding:0; box-shadow:inset 0 0 0 2px #0004; }
+  .swatch.on { border-color:var(--ink); }
   code { background:#0003; padding:1px 5px; border-radius:5px; }
 </style>
 </head>
@@ -46,6 +48,14 @@
 </section>
 
 <div id="app" hidden>
+  <section>
+    <h2>Accessory: bow</h2>
+    <p>A first accessory test. The bow is drawn from a small 3D model at each of the 24 angles, so it turns, shrinks edge-on and goes behind her head with her. Shown at eye level (camera 0°); it works in both tests below.</p>
+    <div class="row"><button id="bowOn" class="on">Bow on</button><span id="bowSpots"></span></div>
+    <div class="row" id="bowCols" aria-label="Bow colour"></div>
+    <div class="row"><label for="bowSize" style="color:var(--soft)">Size</label><input type="range" id="bowSize" min="0.6" max="2" step="0.05" value="1.35"></div>
+  </section>
+
   <section>
     <h2>1. Turntable</h2>
     <p>Drag the figure sideways, or use the slider. 24 turn angles at 3 camera heights.</p>
@@ -100,7 +110,7 @@
     $('holder').innerHTML = ''; $('holder').appendChild(svg);
     index();
     $('loader').hidden = true; $('app').hidden = false;
-    buildTurntable(); buildWalker();
+    buildTurntable(); buildWalker(); bindAccessory();
   }
 
   // Alignment: every view is placed by measurement, not by its cell in the sheet. ANCHORS holds, per view, [torso centre x, top of head,
@@ -115,25 +125,84 @@
       }).filter(v => v.h === h);
       if (!list.length) return;
       const hs = list.map(v => v.t[2] - v.t[1]).sort((p, q) => p - q), Hr = hs[hs.length >> 1];
-      const Wr = Math.max(...list.map(v => v.t[3])) + 40, pad = 18;
+      const Wr = Math.max(...list.map(v => v.t[3])) + 40, pad = 34;
       views[h] = {};
       list.forEach(v => {
         const s = (v.t[2] - v.t[1]) / Hr, ax = v.t[0], bot = v.t[2];
-        views[h][v.a] = { id: v.id, box: [ax - s * Wr / 2, bot - s * (Hr + pad), s * Wr, s * (Hr + 2 * pad)] };
+        // head: [centre x, centre y, radius, scale] in sheet units, for accessories (eye level only). The head sphere sits under the hair's crown.
+        views[h][v.a] = { id: v.id, box: [ax - s * Wr / 2, bot - s * (Hr + pad), s * Wr, s * (Hr + 2 * pad)], head: [ax, v.t[1] + 146 * s, 148 * s, s] };
       });
     });
   }
 
   function viewSvg() {
     const s = document.createElementNS(SVGNS, 'svg'), u = document.createElementNS(SVGNS, 'use');
-    s.appendChild(u); s.setAttribute('preserveAspectRatio', 'xMidYMax meet'); return s;
+    const back = document.createElementNS(SVGNS, 'g'), front = document.createElementNS(SVGNS, 'g');
+    back.setAttribute('class', 'accB'); front.setAttribute('class', 'accF');
+    s.appendChild(back); s.appendChild(u); s.appendChild(front); s.setAttribute('preserveAspectRatio', 'xMidYMax meet'); return s;
   }
   function norm(a) { a = ((a % 360) + 360) % 360; return a > 180 ? a - 360 : a; }   // -180..180
   function setView(s, h, a) {
     const row = views[h] || views[0]; let ang = norm(mirror ? -a : a);
     const v = row[ang] || row[ang === -180 ? 180 : ang]; if (!v) return;
     s.setAttribute('viewBox', v.box.join(' '));
-    s.firstChild.setAttributeNS(XLINK, 'href', '#' + v.id); s.firstChild.setAttribute('href', '#' + v.id);
+    const u = s.querySelector('use'); u.setAttributeNS(XLINK, 'href', '#' + v.id); u.setAttribute('href', '#' + v.id);
+    const B = s.querySelector('.accB'), F = s.querySelector('.accF');
+    if (bow.on && row === views[0] && v.head) { const g = bowSVG(ang, v.head); B.innerHTML = g.back; F.innerHTML = g.front; }
+    else { B.innerHTML = ''; F.innerHTML = ''; }
+  }
+
+  /* ---- ACCESSORY: a bow ----
+     The bow is a tiny 3D model, not 24 drawings. It sits on the head sphere (head: centre, radius) at a spot given in head units
+     (a = towards her left, b = up, c = forward), its face turned out by `yaw` and tilted by `roll`. For a view turned `theta` degrees
+     (0 = facing you, 90 = facing the screen's right) a point at plane position (p, q) lands on screen at
+         x = cx + R * (a cos(theta) + c sin(theta) + p cos(theta + yaw)),    y = cy - R * (b + q)
+     so the bow foreshortens by cos(theta + yaw) as she turns (never thinner than 40% so it does not vanish edge-on). Its depth is
+     z = c cos(theta) - a sin(theta): in front of her (drawn over the figure) when z >= -0.3, behind her head (drawn UNDER the figure, so her
+     own outline hides it and only what pokes out shows) when z < 0. The same idea scales to any accessory: a 3D anchor, a few
+     points, one depth test, front or back layer. */
+  const bow = { on: true, spot: 'left', col: 'rose', size: 1.35 };
+  const BOW_COLS = { rose: ['#e0587a', '#a8335a'], sky: ['#5aa7e0', '#33709f'], butter: ['#f2c94c', '#bf931c'], plum: ['#9066cc', '#5d3a97'], mint: ['#4fc29a', '#2b8a6c'] };
+  const BOW_SPOTS = {
+    left:  { name: 'Her left',  a: 0.62,  b: 0.70, c: 0.05, roll: 22,  yaw: 25 },
+    right: { name: 'Her right', a: -0.62, b: 0.70, c: 0.05, roll: -22, yaw: -25 },
+    top:   { name: 'Top',       a: 0,     b: 0.90, c: 0.08, roll: 0,   yaw: 0 }
+  };
+  const INK = '#32110b';
+  function petal(len, hh) {                                   // a loop: pinched at the knot, round at the far end
+    const pts = []; for (let i = 0; i < 28; i++) { const u = i / 28 * 2 * Math.PI, x = len / 2 * (1 - Math.cos(u)); pts.push([x, hh * Math.sin(u) * (0.42 + 0.58 * x / len)]); }
+    return pts;
+  }
+  const TAIL = [[0.02, -0.04], [0.11, -0.03], [0.28, -0.42], [0.19, -0.37], [0.15, -0.49], [0.03, -0.10]];
+  function bowSVG(thetaDeg, head) {
+    const sp = BOW_SPOTS[bow.spot], cols = BOW_COLS[bow.col], [cx, cy, R, sc] = head;
+    const th = thetaDeg * Math.PI / 180, yaw = sp.yaw * Math.PI / 180, roll = sp.roll * Math.PI / 180, k = bow.size;
+    let w = Math.cos(th + yaw); const wc = (w < 0 ? -1 : 1) * Math.max(Math.abs(w), 0.4), seenBack = w < 0;
+    const kx = sp.a * Math.cos(th) + sp.c * Math.sin(th), kz = sp.c * Math.cos(th) - sp.a * Math.sin(th);
+    const P = ([p, q]) => {
+      p *= k; q *= k;
+      const pr = p * Math.cos(roll) - q * Math.sin(roll), qr = p * Math.sin(roll) + q * Math.cos(roll);
+      return [(cx + R * (kx + pr * wc)).toFixed(1), (cy - R * (sp.b + qr)).toFixed(1)];
+    };
+    const poly = (pts, fill, extra = '') => `<polygon points="${pts.map(P).map(p => p.join(',')).join(' ')}" fill="${fill}" ${extra}/>`;
+    const base = seenBack ? cols[1] : cols[0], fold = seenBack ? cols[0] : cols[1];
+    const mir = pts => pts.map(([x, y]) => [-x, y]);
+    const lobe = [petal(0.40, 0.15), petal(0.40, 0.15).map(([x, y]) => [-x, y])];
+    const fl = [petal(0.26, 0.085).map(([x, y]) => [x + 0.07, y]), petal(0.26, 0.085).map(([x, y]) => [-(x + 0.07), y])];
+    const knot = [[-0.065, -0.09], [0.065, -0.09], [0.075, 0], [0.065, 0.09], [-0.065, 0.09], [-0.075, 0]];
+    const out = `<g stroke="${INK}" stroke-width="${(4.2 * sc).toFixed(1)}" stroke-linejoin="round" stroke-linecap="round">` +
+      poly(TAIL, fold) + poly(mir(TAIL), fold) + poly(lobe[0], base) + poly(lobe[1], base) +
+      `<g stroke="none">${poly(fl[0], fold, 'opacity=".55"')}${poly(fl[1], fold, 'opacity=".55"')}</g>` + poly(knot, fold) + '</g>';
+    return kz >= -0.3 ? { front: out, back: '' } : { front: '', back: out };   // a side bow sticks out past the head, so it still shows from behind
+  }
+  function bindAccessory() {
+    const redraw = () => { drawTurn(); };
+    $('bowOn').onclick = e => { bow.on = !bow.on; e.target.classList.toggle('on', bow.on); e.target.textContent = bow.on ? 'Bow on' : 'Bow off'; redraw(); };
+    const sp = $('bowSpots'); sp.innerHTML = '';
+    Object.keys(BOW_SPOTS).forEach(k => { const b = document.createElement('button'); b.textContent = BOW_SPOTS[k].name; b.className = k === bow.spot ? 'on' : ''; b.style.marginRight = '6px'; b.onclick = () => { bow.spot = k; [...sp.children].forEach(c => c.classList.toggle('on', c === b)); redraw(); }; sp.appendChild(b); });
+    const cb = $('bowCols'); cb.innerHTML = '';
+    Object.keys(BOW_COLS).forEach(k => { const b = document.createElement('button'); b.className = 'swatch' + (k === bow.col ? ' on' : ''); b.style.background = BOW_COLS[k][0]; b.setAttribute('aria-label', k); b.onclick = () => { bow.col = k; [...cb.children].forEach(c => c.classList.toggle('on', c === b)); redraw(); }; cb.appendChild(b); });
+    $('bowSize').oninput = e => { bow.size = +e.target.value; redraw(); };
   }
 
   // ---- 1. turntable ----
