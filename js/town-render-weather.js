@@ -547,13 +547,16 @@ function positionPlayer(animate) {
     state.companionPos = besidePlayer();                              // arrived somewhere new: it catches up beside you
   if (!playerEl) {
     playerEl = document.createElement('div'); playerEl.className = 'ent player';
-    playerEl.innerHTML = '<div class="pl-glow"></div><div class="pl-badge"></div><div class="ent-name"></div><div class="ent-title"></div>';
+    playerEl.innerHTML = '<div class="pl-glow"></div>' + playerSpriteHTML() + '<div class="ent-name"></div><div class="ent-title"></div>';
     townWorld.appendChild(playerEl);
   }
   playerEl.style.transition = animate ? `left ${STEP_MS}ms linear, top ${STEP_MS}ms linear` : 'none';
   playerEl.style.setProperty('--x', state.playerPos.x); playerEl.style.setProperty('--y', state.playerPos.y);
   playerEl.style.zIndex = state.playerPos.y * 2 + 2;
-  const badge = playerEl.querySelector('.pl-badge'); badge.textContent = state.character.emoji; applyAvatarStyle(badge, state.character);
+  playerFaceFromMove(playerEl._lastPos, state.playerPos); playerEl._lastPos = { x: state.playerPos.x, y: state.playerPos.y };   // js/player-sprite.js
+  const badge = playerEl.querySelector('.pl-badge');
+  if (badge) { badge.textContent = state.character.emoji; applyAvatarStyle(badge, state.character); }   // the emoji badge is the fallback when there is no drawn art
+  else applyPlayerSprite(playerEl, state.character);
   const nameEl = playerEl.querySelector('.ent-name'); if (nameEl) nameEl.textContent = state.character.name || 'You';
   const titleEl = playerEl.querySelector('.ent-title'), t = currentTitle();
   if (titleEl) { titleEl.textContent = t ? t.name : ''; titleEl.classList.toggle('hidden', !t); }

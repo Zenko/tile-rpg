@@ -20,7 +20,7 @@ ok = True
 def fail(msg):
     global ok; ok = False; print('FAIL  ' + msg)
 
-files = sorted(glob.glob('js/*.js')) + ['assets/sprites.js']
+files = sorted(glob.glob('js/*.js')) + ['assets/sprites.js', 'assets/player-art.js']
 for f in files:
     r = subprocess.run(['node', '--check', f], capture_output=True, text=True)
     if r.returncode: fail(f'syntax error in {f}\n{r.stderr.strip()}')

@@ -1610,3 +1610,20 @@ body.in-altar .overlay, body.in-altar .toast { z-index: 70; }   /* the card reve
 .as-sh-h { display: flex; align-items: center; gap: 10px; } .as-sh-h b { flex: 1; font-size: 1.2em; } .as-sh-h button { width: 36px; height: 36px; border-radius: 50%; border: 1px solid #3a3549; background: #1e1b28; color: inherit; cursor: pointer; }
 .as-sh-b { display: flex; flex-wrap: wrap; gap: 6px; } .as-sh-b span { font-size: 0.8em; padding: 3px 10px; border-radius: 999px; border: 1px solid #3a3549; color: #8a8498; } .as-sh-b span.got { color: #f0eadc; border-color: #ffb454; }
 @media (prefers-reduced-motion: reduce) { .as-embers i, .as-flame, .as-bowl, .as-bowl .as-core i, .as-call, .as-call .fl, .as-pil .rdy { animation: none !important; } }
+
+/* ---- The drawn player (js/player-sprite.js): three layers per view, body + two feet. Only transforms animate. ---- */
+.pl-sprite { position: absolute; left: 50%; bottom: 7%; width: var(--t); aspect-ratio: var(--pl-aspect, 0.614); transform: translateX(-50%); z-index: 1; pointer-events: none; }
+.pl-sprite[data-flip="1"] { transform: translateX(-50%) scaleX(-1); }
+.pl-view { position: absolute; inset: 0; display: none; }
+.pl-sprite[data-view="down"] .pl-view[data-v="down"], .pl-sprite[data-view="up"] .pl-view[data-v="up"],
+.pl-sprite[data-view="left"] .pl-view[data-v="left"], .pl-sprite[data-view="right"] .pl-view[data-v="right"] { display: block; }
+.pl-view img { position: absolute; left: 0; width: 100%; height: auto; display: block; user-select: none; -webkit-user-drag: none; }
+.pl-view .pl-body { top: 0; z-index: 2; }
+.pl-view .pl-leg { top: var(--pl-leg-top, 91.95%); z-index: 1; }
+.ent.player.walking .pl-body { animation: pl-bob calc(var(--pl-step, 140ms) * 2) ease-in-out infinite; }
+.ent.player.walking .pl-leg.l { animation: pl-lift-l calc(var(--pl-step, 140ms) * 2) ease-in-out infinite; }
+.ent.player.walking .pl-leg.r { animation: pl-lift-r calc(var(--pl-step, 140ms) * 2) ease-in-out infinite; }
+@keyframes pl-bob { 0%, 50%, 100% { transform: translateY(0); } 25%, 75% { transform: translateY(calc(var(--t) * -0.025)); } }
+@keyframes pl-lift-l { 0%, 50%, 100% { transform: translateY(0); } 25% { transform: translateY(calc(var(--t) * -0.06)); } }
+@keyframes pl-lift-r { 0%, 50%, 100% { transform: translateY(0); } 75% { transform: translateY(calc(var(--t) * -0.06)); } }
+@media (prefers-reduced-motion: reduce) { .ent.player.walking .pl-body, .ent.player.walking .pl-leg { animation: none; } }

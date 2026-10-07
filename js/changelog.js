@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'new', x: 'Your character is drawn now. In town you see her walking around instead of a round badge: she turns to face the way you go, her body bobs and her feet step. Going up, left and right use stand-in drawings for now.' },
   { t:'new', x: 'The altar has four candles now, on a full-screen altar. Open it in your cottage, drag spare cards onto the candles (or tap them), then hold the glowing bowl or tap the big button to call: the flames grow with the cards\' rarity and the tallest ones call a spirit, a card of that family. 23 spirits to find in a new Spirit Book, and each first find pays Embers.' },
   { t:'new', x: 'Candles can burn while you explore: an hour pays Embers for every card, and an overnight burn with four or more cards brings a card one rarity higher. Two pillars at a time.' },
   { t:'better', x: 'The Atlas now answers at the candles: each god belongs on the candle its riddle points at ("Where whispers rise"). Put all four there, with nothing else, and nothing is used up.' },
