@@ -1712,3 +1712,16 @@ body.no-charfx .pl-tint, body.no-charfx .pl-wet, body.no-charfx .pl-frost, body.
 .pl-sprite[data-view="turn"] .pl-view[data-v="turn"] { display: block; }
 .pl-view .pl-turn-img { top: 0; z-index: 2; }
 #chMe { cursor: grab; }
+
+/* Card details sheet: the card itself is shown large (full art when the card has it), details centred underneath */
+.cs-card { margin: 4px 0 12px; }
+.cs-card .reveal-card { width: min(230px, 62vw); }
+.cs-card.has-fa { margin-top: 26px; }
+.cs-card.has-fa .reveal-card { width: min(230px, 62vw); }
+.cs-info { align-items: center; text-align: center; }
+.cs-name { font-size: 1.3rem; }
+.cs-sub { font-size: 0.78rem; }
+
+/* no character particles: the aura's rising hearts, flames and rings (its soft night glow stays), and no wet sheen on the figure in rain */
+.pl-aura i { display: none !important; }
+.pl-view .pl-wet { display: none !important; }

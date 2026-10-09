@@ -225,14 +225,12 @@ function drawCardSheet() {
   const def = cardDef(id), n = ownedCardCounts()[id] || 0;
   if (!def || !n) { closeCardSheet(); return; }
   const spare = spareCount(id), inDeck = state.deck.filter(d => d === id).length, cap = Math.min(n, MAX_COPIES), fam = CARD_FAMILY[BattleEngine.baseIdOf(id)];
-  const stats = def.spell ? '✨ Spell' : `⚔ ${def.power} · ♥ ${def.grit}`;
   const charmOn = charms().includes(id), refinable = n >= 2 && !def.crafted && !def.spell;
-  box.innerHTML = `<div class="cs-top"><div class="ins-card rarity-${def.rarity}"><span class="ins-cost">${def.cost}</span><div class="ins-icon">${cardArtHtml(def)}</div></div>
+  box.innerHTML = `<div class="reveal-card-frame cs-card"><div class="reveal-card rarity-${def.rarity}${def.spell ? ' spell' : ''}">${cardFaceHtml(def)}</div></div>
     <div class="cs-info"><b class="cs-name">${def.name}${def.crafted ? ' ✦' : ''}</b>
       <span class="cs-sub">${RARITY_LABEL[def.rarity]} · costs ${def.cost}⚡${fam ? ` · ${FAMILIES[fam].icon} ${FAMILIES[fam].name}` : ''}</span>
-      <span class="cs-stats">${stats}</span>
       <span class="cs-sub">Owned ×${n}${foilCount(id) ? ` · ✨ ${foilCount(id)} foil` : ''} · ${inDeck} in deck · ${spare} spare${isDonated(id) ? ' · 🏛️' : ''}</span>
-      <span class="cs-sub">${masteryLine(id)}</span></div></div>
+      <span class="cs-sub">${masteryLine(id)}</span></div>
     ${hasAbility(def) ? `<div class="cs-abil">${cardAbilityHtml(def)}</div>` : ''}
     <p class="cs-story">${cardStory(def)}</p>
     <div class="cs-actions">
@@ -242,6 +240,8 @@ function drawCardSheet() {
       <button class="btn${charmOn ? ' cs-on' : ''}" data-cs="charm">✦ ${charmOn ? 'Remove charm' : 'Use as charm'}</button>
       <button class="btn" data-cs="release" ${canRelease(id) ? '' : 'disabled'}>${canRelease(id) || n >= RELEASE_MIN_COPIES ? `Release a spare · +🫧 ${RELEASE_VALUE[def.rarity]}` : 'Release needs 3 copies'}</button>
     </div>`;
+  const cf = box.querySelector('.cs-card');
+  cf.classList.toggle('has-fa', fullArtApply(cf.querySelector('.reveal-card'), def));   // full art for mythic, divine and Atlas cards that have it
   box.querySelectorAll('[data-cs]').forEach(b => b.addEventListener('click', () => {
     const act = b.dataset.cs;
     if (act === 'add') deckAdd(id);
