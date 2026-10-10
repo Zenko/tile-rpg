@@ -190,4 +190,58 @@ document.write(`<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute
 <symbol id="r-toys" viewBox="0 0 64 64">
   <ellipse cx="18" cy="48" rx="8" ry="2.4" style="fill:var(--tshadow);"/><ellipse cx="44" cy="52" rx="8" ry="2.4" style="fill:var(--tshadow);"/>
   <g transform="rotate(-14 17 41)"><rect x="12" y="36" width="10" height="10" rx="2" style="fill:var(--flower1);"/></g><circle cx="44" cy="46" r="5.4" style="fill:var(--water2);"/>
-  <g transform="rotate(12 36 30)"><rect x="31" y="25" width="10" height="10" rx="2" style="fill:var(--flower2);"/></g></symbol></defs></svg>`);
+  <g transform="rotate(12 36 30)"><rect x="31" y="25" width="10" height="10" rx="2" style="fill:var(--flower2);"/></g></symbol><symbol id="r-lamp" viewBox="0 0 64 96">
+  <ellipse cx="32" cy="90" rx="15" ry="4" style="fill:var(--tshadow);"/>
+  <circle cx="32" cy="34" r="27" style="fill:var(--lamp);opacity:.2"/>
+  <rect x="30" y="40" width="4" height="48" rx="2" style="fill:var(--stone2);"/><rect x="22" y="84" width="20" height="6" rx="3" style="fill:var(--stone2);"/>
+  <path d="M19 42L26 18H38L45 42Z" style="fill:var(--lamp);"/><path d="M19 42L26 18H29L24 42Z" style="fill:#fff;opacity:.28"/><rect x="25" y="13" width="14" height="6" rx="2.5" style="fill:var(--stone2);"/></symbol>
+<symbol id="r-plant" viewBox="0 0 64 64">
+  <ellipse cx="32" cy="58" rx="17" ry="4" style="fill:var(--tshadow);"/>
+  <ellipse cx="21" cy="31" rx="6" ry="14" transform="rotate(-30 21 31)" style="fill:var(--leaf2);"/><ellipse cx="43" cy="31" rx="6" ry="14" transform="rotate(30 43 31)" style="fill:var(--leaf2);"/>
+  <ellipse cx="32" cy="25" rx="7" ry="16" style="fill:var(--leaf1);"/><ellipse cx="27" cy="30" rx="4" ry="10" transform="rotate(-14 27 30)" style="fill:var(--leaf3);"/><ellipse cx="38" cy="30" rx="4" ry="10" transform="rotate(14 38 30)" style="fill:var(--leaf3);"/>
+  <rect x="21" y="40" width="22" height="17" rx="5" style="fill:var(--roof);"/><rect x="19" y="38" width="26" height="6" rx="2.5" style="fill:var(--roof2);"/></symbol>
+<symbol id="r-table" viewBox="0 0 64 64">
+  <ellipse cx="32" cy="58" rx="20" ry="4" style="fill:var(--tshadow);"/>
+  <rect x="13" y="34" width="38" height="8" rx="4" style="fill:var(--plank);"/><rect x="18" y="41" width="5" height="16" rx="2" style="fill:var(--plank2);"/><rect x="41" y="41" width="5" height="16" rx="2" style="fill:var(--plank2);"/>
+  <rect x="28" y="19" width="9" height="15" rx="4" style="fill:var(--water2);"/><circle cx="29" cy="15" r="4" style="fill:var(--flower1);"/><circle cx="36" cy="14" r="4" style="fill:var(--flower2);"/><circle cx="32.5" cy="10" r="3.6" style="fill:var(--flower3);"/></symbol>
+<symbol id="r-stool" viewBox="0 0 64 64">
+  <ellipse cx="32" cy="58" rx="15" ry="3.6" style="fill:var(--tshadow);"/>
+  <rect x="21" y="40" width="4" height="17" rx="1.8" style="fill:var(--plank2);"/><rect x="39" y="40" width="4" height="17" rx="1.8" style="fill:var(--plank2);"/>
+  <rect x="17" y="32" width="30" height="11" rx="5.5" style="fill:var(--bread);"/><rect x="19" y="33" width="26" height="3.6" rx="1.8" style="fill:#fff;opacity:.22"/></symbol>
+<symbol id="r-cot" viewBox="0 0 64 64">
+  <ellipse cx="32" cy="58" rx="26" ry="4" style="fill:var(--tshadow);"/>
+  <rect x="7" y="30" width="50" height="25" rx="6" style="fill:var(--plank2);"/><rect x="10" y="25" width="44" height="22" rx="7" style="fill:var(--wall);"/>
+  <rect x="25" y="25" width="29" height="22" rx="7" style="fill:var(--water2);"/><path d="M25 33H54" style="stroke:#fff;stroke-width:2;opacity:.3"/>
+  <rect x="11" y="27" width="14" height="11" rx="5.5" style="fill:var(--flower3);"/><rect x="6" y="22" width="5" height="34" rx="2" style="fill:var(--plank);"/></symbol>
+<symbol id="r-painting" viewBox="0 0 64 96">
+  <path d="M32 24V32" style="stroke:var(--trunk);stroke-width:1.6;fill:none"/>
+  <rect x="9" y="32" width="46" height="36" rx="3" style="fill:var(--plank);"/><rect x="13" y="36" width="38" height="28" rx="1.5" style="fill:var(--sky);"/>
+  <path d="M13 64V52Q24 44 33 52Q42 46 51 54V64Z" style="fill:var(--leaf2);"/><circle cx="42" cy="44" r="4.6" style="fill:var(--lamp);"/></symbol>
+<symbol id="r-cat" viewBox="0 0 64 64">
+  <ellipse cx="32" cy="57" rx="23" ry="4" style="fill:var(--tshadow);"/>
+  <ellipse cx="32" cy="50" rx="23" ry="8" style="fill:var(--roof);"/><ellipse cx="32" cy="48" rx="19" ry="6" style="fill:var(--roof2);"/>
+  <ellipse cx="34" cy="41" rx="16" ry="10" style="fill:var(--bread);"/><circle cx="21" cy="38" r="8.5" style="fill:var(--bread);"/>
+  <polygon points="14,33 16,23 22,31" style="fill:var(--bread);"/><polygon points="22,31 27,24 29,34" style="fill:var(--bread);"/>
+  <path d="M17 38q2 2 4 0M23 38q2 2 4 0" style="fill:none;stroke:var(--trunk);stroke-width:1.4;stroke-linecap:round"/><path d="M47 44q8-2 7-10" style="fill:none;stroke:var(--bread);stroke-width:4;stroke-linecap:round"/></symbol>
+<symbol id="r-chest" viewBox="0 0 64 64">
+  <ellipse cx="32" cy="58" rx="23" ry="4" style="fill:var(--tshadow);"/>
+  <rect x="9" y="30" width="46" height="26" rx="4" style="fill:var(--plank2);"/><path d="M9 32V28Q9 17 32 17Q55 17 55 28V32Z" style="fill:var(--plank);"/>
+  <rect x="9" y="30" width="46" height="4" style="fill:var(--stone2);"/><rect x="15" y="17" width="4" height="39" style="fill:var(--stone2);opacity:.8"/><rect x="45" y="17" width="4" height="39" style="fill:var(--stone2);opacity:.8"/>
+  <rect x="28" y="30" width="8" height="10" rx="2.5" style="fill:var(--lamp);"/></symbol>
+<symbol id="r-wardrobe" viewBox="0 0 64 96">
+  <ellipse cx="32" cy="91" rx="24" ry="4" style="fill:var(--tshadow);"/>
+  <rect x="11" y="14" width="42" height="76" rx="4" style="fill:var(--plank2);"/><rect x="8" y="10" width="48" height="8" rx="3" style="fill:var(--plank);"/>
+  <rect x="15" y="21" width="16" height="64" rx="2" style="fill:var(--plank);"/><rect x="33" y="21" width="16" height="64" rx="2" style="fill:var(--plank);"/>
+  <circle cx="28" cy="54" r="2" style="fill:var(--lamp);"/><circle cx="36" cy="54" r="2" style="fill:var(--lamp);"/><rect x="14" y="88" width="6" height="4" rx="1.5" style="fill:var(--trunk);"/><rect x="44" y="88" width="6" height="4" rx="1.5" style="fill:var(--trunk);"/></symbol>
+<symbol id="r-fireplace" viewBox="0 0 64 96">
+  <circle cx="32" cy="70" r="30" style="fill:var(--lamp);opacity:.2"/>
+  <ellipse cx="32" cy="92" rx="27" ry="4" style="fill:var(--tshadow);"/>
+  <rect x="7" y="34" width="50" height="58" rx="4" style="fill:var(--stone);"/><rect x="3" y="27" width="58" height="10" rx="3.5" style="fill:var(--stone3);"/>
+  <path d="M17 92V64Q17 52 32 52Q47 52 47 64V92Z" style="fill:var(--cellar-in, #141218);"/>
+  <path d="M24 90Q20 78 28 70Q28 78 33 74Q31 66 38 62Q42 74 41 90Z" style="fill:var(--roof);"/><path d="M28 90Q26 82 32 77Q34 83 37 90Z" style="fill:var(--lamp);"/>
+  <rect x="21" y="88" width="22" height="4" rx="2" style="fill:var(--trunk);"/></symbol>
+<symbol id="r-tree" viewBox="0 0 64 96">
+  <ellipse cx="32" cy="91" rx="19" ry="4" style="fill:var(--tshadow);"/>
+  <rect x="26" y="40" width="12" height="40" rx="4" style="fill:var(--trunk);"/>
+  <circle cx="32" cy="30" r="22" style="fill:var(--leaf1);"/><circle cx="18" cy="44" r="12" style="fill:var(--leaf2);"/><circle cx="46" cy="44" r="12" style="fill:var(--leaf2);"/><circle cx="28" cy="20" r="10" style="fill:var(--leaf3);"/><circle cx="42" cy="32" r="6" style="fill:var(--leaf3);opacity:.8"/>
+  <rect x="19" y="76" width="26" height="15" rx="5" style="fill:var(--roof);"/><rect x="17" y="73" width="30" height="6" rx="2.5" style="fill:var(--roof2);"/></symbol></defs></svg>`);

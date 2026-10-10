@@ -11,13 +11,18 @@ module.exports = async (page, assert) => {
 
   // every piece of furniture is one of the cottage's own actions
   const ids = await page.evaluate(() => INTERIORS.home.actions.map(a => a.id).sort().join());
-  assert.strictEqual(await page.evaluate(() => HR_PROPS.map(p => p.act).sort().join()), ids, 'one piece of furniture per cottage action');
+  assert.strictEqual(await page.evaluate(() => Object.values(HR_CATALOG).filter(d => d.act).map(d => d.act).sort().join()), ids, 'one piece of furniture per cottage action');
 
   // walk to the mailbox: the sheet offers it, the room stays, the old list opens
-  await page.evaluate(() => hrGoTo(HR_PROPS.find(p => p.act === 'mail')));
+  await page.evaluate(() => hrGoTo(hrHome().items.find(i => i.id === 'mail')));
   await until(() => !!document.querySelector('#scActions [data-act="mail"]'));
   assert.ok(await page.evaluate(() => !sceneView.classList.contains('hr-idle')), 'the stage makes room for the sheet');
   assert.ok(await page.evaluate(() => Math.abs(homeRoom.x - 7) + Math.abs(homeRoom.y - 8) === 1), 'stopped beside the mail table');
+  assert.ok(await page.evaluate(() => !!document.querySelector('#scActions [data-act="hr-close"]') && !document.querySelector('#scActions [data-act="leave"]')), 'the sheet ends in Close, not Head back out');
+  await page.click('#scActions [data-act="hr-close"]');
+  assert.ok(await page.evaluate(() => inScene && sceneView.classList.contains('hr-idle') && !!document.querySelector('.hr-room')), 'Close puts the sheet away and stays in the house');
+  await page.evaluate(() => hrGoTo(hrHome().items.find(i => i.id === 'mail')));
+  await until(() => !!document.querySelector('#scActions [data-act="mail"]'));
   await page.click('#scActions [data-act="mail"]');
   assert.strictEqual(await page.evaluate(() => scene.mode), 'mail');
   assert.ok(await page.evaluate(() => !!document.querySelector('.hr-room') && sceneView.classList.contains('room-on')), 'the room stays above the letter list');
@@ -29,7 +34,7 @@ module.exports = async (page, assert) => {
   await until(() => homeRoom.x === 3 && homeRoom.y === 5 && !homeRoom.player.classList.contains('walking'));
 
   // the nap is a daily action that keeps the sheet and shows its result in the bubble
-  await page.evaluate(() => { buildingState('home').nap = null; hrGoTo(HR_PROPS.find(p => p.act === 'nap')); });
+  await page.evaluate(() => { buildingState('home').nap = null; hrGoTo(hrHome().items.find(i => i.id === 'nap')); });
   await until(() => !!document.querySelector('#scActions [data-act="nap"]'));
   const before = await page.evaluate(() => state.progress.pebbles);
   await page.click('#scActions [data-act="nap"]');
@@ -37,7 +42,7 @@ module.exports = async (page, assert) => {
   assert.ok(await page.evaluate(() => !!document.querySelector('#scActions [data-act="nap"]') && document.getElementById('scText').textContent.length > 0), 'the sheet stays and the bubble tells you what happened');
 
   // Tidy: the mini-game owns the stage, then the room comes back
-  await page.evaluate(() => hrGoTo(HR_PROPS.find(p => p.act === 'mg-tidy')));
+  await page.evaluate(() => hrGoTo(hrHome().items.find(i => i.id === 'tidy')));
   await until(() => !!document.querySelector('#scActions [data-act="mg-tidy"]'));
   await page.click('#scActions [data-act="mg-tidy"]');
   await until(() => !!document.querySelector('#scStage .mg'));
@@ -49,7 +54,7 @@ module.exports = async (page, assert) => {
   assert.ok(await page.evaluate(() => sceneView.classList.contains('hr-idle')), 'and the room is free again');
 
   // the door: walk out and the scene closes
-  await page.evaluate(() => { const h = homeRoom; hrWalk(hrBfs(h.x, h.y, (x, y) => x === 4 && y === HR_ROWS - 1), null); });
+  await page.evaluate(() => { const h = homeRoom; hrWalk(hrBfs(h.x, h.y, (x, y) => x === 4 && y === h.rows - 1), null); });
   await until(() => !inScene && !document.querySelector('.hr-room'));
   assert.ok(await page.evaluate(() => !sceneView.classList.contains('room-on')), 'the room is put away');
 

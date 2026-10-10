@@ -696,7 +696,7 @@ function sceneBtn(id, label, disabled) {
   return `<button class="btn sc-btn" data-act="${id}" ${disabled ? 'disabled' : ''}>${inner}</button>`;
 }
 // The top-left arrow is gone, so every scene state must offer its own way out. They all do today; this keeps it true.
-const SCENE_EXIT_ACTS = ['leave', 'back', 'mg-back', 'wings-back', 'exp-cancel'];
+const SCENE_EXIT_ACTS = ['leave', 'back', 'mg-back', 'wings-back', 'exp-cancel', 'hr-close'];   // hr-close: your cottage's Close, which stays in the house (js/home-room.js)
 function renderScene() {
   renderSceneBody();
   hrSync();                                           // js/home-room.js: your cottage is a walkable room (does nothing anywhere else)
@@ -817,6 +817,7 @@ function sceneAction(actId) {
     } else withDoorFade(closeScene);
     return;
   }
+  if (actId === 'hr-close' || actId.startsWith('hr:')) { hrAction(actId); return; }   // js/home-room.js: Close, and the Decorate panel's buttons
   if (scene.id === 'cellar') {
     const st = cellarState(); if (st.resting) return;
     if (actId === 'descend') { if (!cellarRun(st)) { cellarNewRun(st); saveState(); showTipOnce('cellarRun'); } scene.text = `Floor ${st.floor + 1}. ${cellarIsGuardian(st.floor) ? cellarFloor(st.floor).blurb : crawlOn() ? 'It is dark. Walk with your lantern and find a door.' : 'Pick a door.'}`; sfx('creak'); buzz(HAP.tap); renderScene(); return; }

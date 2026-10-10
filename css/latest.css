@@ -1804,7 +1804,7 @@ body.no-charfx .pfx-chip, body.no-charfx .pfx-take { display: none; }
 .hr-prop { position: absolute; left: calc(var(--x) * var(--t)); top: calc(var(--y) * var(--t)); width: var(--t); height: var(--t); pointer-events: none; z-index: calc(var(--y) * 10); }
 .hr-prop .spr { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .hr-prop.tall .spr { inset: auto; left: 0; top: -50%; height: 150%; }
-.hr-prop.deco { z-index: 1; } .hr-prop.deco.tall { z-index: 4; } .hr-prop.deco.door { z-index: 5; }
+.hr-prop.flat { z-index: 3; } .hr-prop.deco.mat { z-index: 4; } .hr-prop.deco.door { z-index: 5; }   /* flat things and the doormat lie under everything that stands */
 .hr-rug { position: absolute; z-index: 2; border-radius: calc(var(--t) * .16); background: var(--rug); box-shadow: inset 0 0 0 calc(var(--t) * .07) var(--rug2); pointer-events: none; }
 .hr-rug::after { content: ''; position: absolute; inset: calc(var(--t) * .16); border-radius: calc(var(--t) * .08); border: 2px dashed rgba(224,197,116,.7); }
 .hr-glow { position: absolute; border-radius: 50%; pointer-events: none; z-index: 400; background: radial-gradient(circle, rgba(255,207,102,.34), rgba(255,207,102,0) 66%); }
@@ -1820,3 +1820,19 @@ body.no-charfx .pfx-chip, body.no-charfx .pfx-take { display: none; }
 #sceneView.room-on.hr-idle .sc-stage { height: auto; flex: 1 1 auto; min-height: 0; box-shadow: none; }
 #sceneView.room-on.hr-idle .sc-actions, #sceneView.room-on.hr-idle .sc-bubble { display: none; }
 @media (prefers-reduced-motion: reduce) { .hr-ring { animation: none; } }
+
+/* Decorating: the Decorate button, the tint on tiles a piece can go on, and the panel's tabs and swatches (the panel is the scene sheet) */
+.hr-edit-btn { position: absolute; z-index: 600; bottom: 14px; right: 12px; min-height: 40px; padding: 0 14px; border-radius: 999px; font: 800 .8rem/1 var(--f-ui); cursor: pointer; color: var(--ink); background: color-mix(in srgb, var(--stone) 92%, transparent); border: 1px solid var(--stone-edge); box-shadow: 0 3px 10px rgba(0,0,0,.3); }
+.hr-edit-btn:active { transform: translateY(1px); }
+.hr-target { position: absolute; z-index: 350; border-radius: 8px; pointer-events: none; background: rgba(140,215,160,.26); outline: 2px dashed rgba(190,235,200,.65); outline-offset: -2px; }
+.hr-tabs { display: flex; gap: 8px; flex: none; }
+#sceneView.sc-std .hr-tabs .sc-btn { flex: 1 1 0; min-height: 44px; justify-content: center; padding: 0 8px; border-radius: 14px; }
+#sceneView.sc-std .hr-tabs .sc-btn.on { background: var(--water); color: var(--on-water); border-color: transparent; }
+.hr-h { flex: none; margin-top: 4px; font-size: .68rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); }
+.hr-sws { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; flex: none; }
+.hr-sw { display: grid; gap: 6px; justify-items: center; padding: 8px 4px; border-radius: 14px; font: 700 .72rem/1.2 var(--f-ui); cursor: pointer; color: var(--ink); background: color-mix(in srgb, var(--hl) 6%, transparent); border: 1px solid var(--stone-edge); min-height: 64px; }
+.hr-sw i { width: 34px; height: 24px; border-radius: 8px; background: linear-gradient(90deg, var(--a) 0 70%, var(--b) 70% 100%); box-shadow: inset 0 0 0 1px rgba(0,0,0,.25); }
+.hr-sw.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.hr-sw:disabled { opacity: .45; cursor: default; }
+.hr-info { flex: none; display: grid; gap: 2px; padding: 10px 14px; border-radius: 14px; background: color-mix(in srgb, var(--hl) 5%, transparent); border: 1px solid var(--stone-edge); font-size: .86rem; }
+.hr-info span { color: var(--ink-soft); font-size: .8rem; }
