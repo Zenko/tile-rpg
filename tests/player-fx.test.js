@@ -39,11 +39,11 @@ module.exports = async (page, assert) => {
   await atPhase(0.0); assert.strictEqual(await glow(), 'block', 'but it glows at night');
   await page.evaluate(() => { state.companion = null; state.progress.calm = {}; state.progress.record.streak = 0; });
 
-  // hop and dissolve
-  await page.evaluate(() => { pfxHop(); });
-  assert.ok(await page.evaluate(() => playerEl.querySelector('.pl-sprite').classList.contains('hop')), 'the figure hops');
-  await page.waitForTimeout(800);
-  assert.ok(!(await page.evaluate(() => playerEl.querySelector('.pl-sprite').classList.contains('hop'))), 'and lands');
+  // emote and dissolve
+  await page.evaluate(() => { pfxLoot = { html: '<span class="card-emoji">X</span>', r: 'mythic' }; pfxEmote(); });
+  assert.ok(await page.evaluate(() => !!playerEl.querySelector('.pl-bubble .card-emoji')), 'a bubble shows the item she got');
+  await page.waitForTimeout(2000);
+  assert.ok(!(await page.evaluate(() => !!playerEl.querySelector('.pl-bubble'))), 'and it goes away');
   const gone = await page.evaluate(() => new Promise(res => { const took = pfxEnter(() => res(playerEl.querySelector('.pl-sprite').classList.contains('pl-gone'))); if (!took) res('not taken'); }));
   assert.strictEqual(gone, true, 'she has burned away when the door opens');
   await page.evaluate(() => { pfxReform(); }); await page.waitForTimeout(1100);
@@ -52,6 +52,6 @@ module.exports = async (page, assert) => {
   // the Settings switch
   await page.evaluate(() => { prefs.charFx = false; pfxSync(); positionPlayer(false); });
   assert.ok(await page.evaluate(() => document.body.classList.contains('no-charfx')), 'switched off');
-  assert.strictEqual(await page.evaluate(() => { townWorld.querySelectorAll('.pfx').forEach(e => e.remove()); pfxHop(); pfxPlayer({ x: 3, y: 3 }, { x: 4, y: 3 }, true); return townWorld.querySelectorAll('.pfx').length + (playerEl.querySelector('.pl-sprite').classList.contains('hop') ? 1 : 0); }), 0, 'nothing is added while it is off');
+  assert.strictEqual(await page.evaluate(() => { townWorld.querySelectorAll('.pfx').forEach(e => e.remove()); pfxEmote(); pfxPlayer({ x: 3, y: 3 }, { x: 4, y: 3 }, true); return townWorld.querySelectorAll('.pfx').length + playerEl.querySelectorAll('.pl-bubble').length; }), 0, 'nothing is added while it is off');
   await page.evaluate(() => { prefs.charFx = true; document.body.classList.remove('no-charfx'); });
 };

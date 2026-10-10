@@ -196,6 +196,7 @@ function showLevelUp(level, pebbles, bonusCardId) {
   const desc = document.getElementById('levelUpDesc');
   desc.innerHTML = `You reached <b>Level ${level}</b>!<br>+${pebbles} 🫧 Embers` + (bonusCardId ? `<br><b>A bonus card is waiting for you.</b>` : '');
   sparkleBurst(document.getElementById('levelUpSparkles'), ['⭐', '✨', '🌟'], 16);
+  if (typeof pfxLoot !== 'undefined') pfxLoot = { html: '\u2B50', r: 'super' };
   document.getElementById('levelUpOverlay').classList.remove('hidden');
   sfx('claim'); buzz(HAP.win);
   document.getElementById('levelUpContinue').onclick = () => {

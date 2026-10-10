@@ -1657,9 +1657,7 @@ body.in-altar .overlay, body.in-altar .toast { z-index: 70; }   /* the card reve
 body.no-charfx .pl-tint, body.no-charfx .pl-wet, body.no-charfx .pl-frost, body.no-charfx .pl-aura, body.no-charfx .pfx-motes, body.no-charfx .pfx { display: none; }
 
 .ent.player.walking .pl-rig { animation: pl-squash calc(var(--pl-step, 140ms) * 2) ease-in-out infinite; }
-.ent.player .pl-sprite.hop .pl-rig { animation: pl-hop 0.62s cubic-bezier(0.3, 0.7, 0.4, 1) both; }
 @keyframes pl-squash { 0%, 50%, 100% { transform: scale(1.02, 0.97); } 25%, 75% { transform: scale(1, 1); } }
-@keyframes pl-hop { 0% { transform: scale(1, 1); } 14% { transform: scale(1.1, 0.86); } 42% { transform: translateY(calc(var(--t) * -0.55)) scale(0.94, 1.08); } 72% { transform: translateY(calc(var(--t) * -0.5)) scale(0.96, 1.05); } 88% { transform: scale(1.12, 0.86); } 100% { transform: scale(1, 1); } }
 
 /* auras: a soft glow and three little rising things, per state */
 .pl-aura { position: absolute; left: 50%; bottom: 2%; width: calc(var(--t) * 2.4); height: calc(var(--t) * 2.4); margin-left: calc(var(--t) * -1.2); pointer-events: none; z-index: 0; --ac: 255, 255, 255; }
@@ -1697,7 +1695,7 @@ body.no-charfx .pl-tint, body.no-charfx .pl-wet, body.no-charfx .pl-frost, body.
 @keyframes pfx-wander { from { transform: translate(0, 0); } to { transform: translate(var(--wx, 30px), var(--wy, -20px)); } }
 @keyframes pfx-blink { 0%, 100% { opacity: 0.15; } 50% { opacity: 1; } }
 @keyframes pfx-drift { 0% { transform: translate(0, -6vh) rotate(0deg); } 100% { transform: translate(22vw, 110vh) rotate(540deg); } }
-@media (prefers-reduced-motion: reduce) { .ent.player.walking .pl-rig, .ent.player .pl-sprite.hop .pl-rig, .pl-aura::before, .pl-aura i, .pfx-motes .fly, .pfx-motes .leaf { animation: none; } .pfx-motes { display: none; } .pl-aura i { display: none; } }
+@media (prefers-reduced-motion: reduce) { .ent.player.walking .pl-rig, .pl-aura::before, .pl-aura i, .pfx-motes .fly, .pfx-motes .leaf { animation: none; } .pfx-motes { display: none; } .pl-aura i { display: none; } }
 
 /* Character tab stage: a drawn character is shown whole, standing on the ground (js/player-sprite.js charStageFigHTML) */
 .ch-figbox { display: block; position: relative; }
@@ -1739,3 +1737,13 @@ body.no-charfx .pl-tint, body.no-charfx .pl-wet, body.no-charfx .pl-frost, body.
 @keyframes pl-bounce { 0% { transform: translate(0, 0) scale(.6); opacity: 0; } 12% { opacity: .75; } 40% { transform: translate(calc(var(--t) * var(--bx) * .6), calc(var(--t) * -.16)) scale(1); opacity: .7; } 100% { transform: translate(calc(var(--t) * var(--bx)), calc(var(--t) * .12)) scale(.5); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .pl-splash { display: none !important; } }
 body.no-charfx .pl-splash { display: none !important; }
+
+/* the pickup emote: a bubble above her head with the card or item she just got (js/player-fx.js pfxEmote) */
+.ent.player.pl-emoting { z-index: 9000 !important; }
+.pl-bubble { position: absolute; left: 50%; bottom: calc(var(--t) * 1.8); width: calc(var(--t) * 0.78); height: calc(var(--t) * 0.64); margin-left: calc(var(--t) * -0.2); border-radius: calc(var(--t) * 0.2); background: #fff; color: #222; display: flex; align-items: center; justify-content: center; font-size: calc(var(--t) * 0.4); line-height: 1; box-shadow: 0 0 0 2px rgba(var(--rc), 0.9), 0 3px 10px rgba(0, 0, 0, 0.3), 0 0 14px rgba(var(--rc), 0.55); transform-origin: 20% 100%; pointer-events: none; animation: pl-pop 1.8s ease-out both; }
+.pl-bubble::after { content: ''; position: absolute; left: calc(var(--t) * 0.14); bottom: calc(var(--t) * -0.1); border: calc(var(--t) * 0.1) solid transparent; border-top-color: #fff; border-bottom: 0; }
+.pl-bubble span { display: flex; align-items: center; justify-content: center; }
+.pl-bubble .card-art-img, .pl-bubble .card-emoji { font-size: 1em; width: 1em; height: 1em; filter: none; }
+@keyframes pl-pop { 0% { opacity: 0; transform: scale(.2); } 12% { opacity: 1; transform: scale(1.15); } 20% { transform: scale(1); } 82% { opacity: 1; transform: translateY(calc(var(--t) * -0.05)); } 100% { opacity: 0; transform: translateY(calc(var(--t) * -0.12)) scale(.9); } }
+@media (prefers-reduced-motion: reduce) { .pl-bubble { animation: none; } }
+body.no-charfx .pl-bubble { display: none; }

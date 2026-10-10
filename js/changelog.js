@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'better', x: 'Instead of hopping when a card or level-up popup closes, your character now shows a little bubble above her head with the card she just found (or a star for a level-up).' },
   { t:'better', x: 'The card details sheet now shows the card large at the top, with its full art when the card has it, and the name, owned counts and story centred underneath.' },
   { t:'new', x: 'A new Town Guide entry, Your glow and sparkles, explains what the flames, hearts and rings around your character mean and how to earn them.' },
   { t:'better', x: 'In rain and storms a few soft drops now bounce off your character instead of the old wet sheen on her side.' },

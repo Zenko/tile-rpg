@@ -13,7 +13,7 @@
    - Motes: fireflies at night and drifting leaves by day in `.pfx-motes`, a screen-space layer above the sky. Hidden in rain and snow.
    - Auras: `.pl-aura` behind the sprite, one per state: a win streak of 3+ (flames), a companion at Trusted or better (hearts), a
      district made calm today (rings). Priority in that order.
-   - Hop: the figure squashes, jumps and lands when a card reveal or level-up screen closes (it would be hidden behind the popup otherwise).
+   - Emote: a small bubble pops up above her head when a card reveal or level-up screen closes, showing the card (or a star) she just got.
    - Dissolve: walking into a building burns the figure away in embers (the same SVG filter trick as a fainting card in js/battle-fx.js);
      coming back out re-forms it in blue sparks. */
 const pfxOn = () => prefs.charFx !== false;
@@ -91,21 +91,24 @@ function pfxEnsureMotes() {
   townView.insertAdjacentHTML('beforeend', h + '</div>');
 }
 
-// ---- hop: when a reveal or level-up popup closes, the figure jumps for joy ----
-function pfxHop() {
-  const spr = playerEl && playerEl.querySelector('.pl-sprite');
-  if (!spr || !pfxMotion() || inBattle || inScene || spr.classList.contains('hop') || spr.classList.contains('pl-gone')) return;
-  spr.classList.add('hop');
-  setTimeout(() => spr.classList.remove('hop'), 700);
-  const x = (state.playerPos.x + 0.5) * tilePx, y = (state.playerPos.y + 0.55) * tilePx;
-  for (let i = 0; i < 7; i++) pfxBit('pfx-spark', x + (Math.random() - 0.5) * tilePx * 0.5, y, { dx: (Math.random() - 0.5) * tilePx * 1.4, dy: -tilePx * (0.5 + Math.random() * 0.7), d: 0.8 + Math.random() * 0.3 });
-  setTimeout(() => { for (let i = 0; i < 6; i++) pfxBit('pfx-dust', x + (Math.random() - 0.5) * tilePx * 0.3, (state.playerPos.y + 0.92) * tilePx, { dx: (Math.random() < 0.5 ? -1 : 1) * tilePx * (0.2 + Math.random() * 0.4), dy: -tilePx * 0.08, s: 2, d: 0.55, c: '#d9d2c0' }); }, 400);
+// ---- emote: when a reveal or level-up popup closes, a little bubble pops up over her head showing what she just got ----
+// `pfxLoot` is set by whatever opened the popup (showCardReveal: the card's own art and rarity; the level-up popup: a star).
+let pfxLoot = null, pfxEmoteTimer = 0;
+const PFX_RARITY_RGB = { common: '200,220,210', rare: '170,150,235', ultra: '120,185,235', super: '240,190,110', mythic: '240,130,175', divine: '235,180,40', atlas: '143,122,217' };
+function pfxEmote() {
+  const loot = pfxLoot || { html: '\u2728' }; pfxLoot = null;
+  if (!playerEl || !pfxMotion() || inBattle || inScene) return;
+  const spr = playerEl.querySelector('.pl-sprite'); if (spr && spr.classList.contains('pl-gone')) return;
+  playerEl.querySelectorAll('.pl-bubble').forEach(e => e.remove()); clearTimeout(pfxEmoteTimer);
+  playerEl.insertAdjacentHTML('beforeend', `<div class="pl-bubble" aria-hidden="true" style="--rc:${PFX_RARITY_RGB[loot.r] || '255,214,120'}"><span>${loot.html}</span></div>`);
+  playerEl.classList.add('pl-emoting');
+  pfxEmoteTimer = setTimeout(() => { playerEl.querySelectorAll('.pl-bubble').forEach(e => e.remove()); playerEl.classList.remove('pl-emoting'); }, 1800);
 }
 function pfxWatchPopups() {
   ['pickupOverlay', 'levelUpOverlay'].forEach(id => {
     const el = document.getElementById(id); if (!el) return;
     let wasOpen = !el.classList.contains('hidden');
-    new MutationObserver(() => { const open = !el.classList.contains('hidden'); if (wasOpen && !open) setTimeout(pfxHop, 260); wasOpen = open; }).observe(el, { attributes: true, attributeFilter: ['class'] });
+    new MutationObserver(() => { const open = !el.classList.contains('hidden'); if (wasOpen && !open) setTimeout(pfxEmote, 260); wasOpen = open; }).observe(el, { attributes: true, attributeFilter: ['class'] });
   });
 }
 
