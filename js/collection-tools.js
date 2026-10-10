@@ -192,7 +192,7 @@ function masteryLine(id) {
    card); everything you can do to one card - deck, craft, charm, release a spare - lives in that one sheet. */
 function cardTileHtml(id, count, opts) {
   const def = cardDef(id), inDeck = state.deck.filter(d => d === id).length, o = opts || {};
-  return `<button type="button" class="alm-card tile${hasFullArt(def) ? ' fa-card' : ''} rarity-${def.rarity}${def.crafted ? ' crafted' : ''}${foilCount(id) ? ' foil' : ''}${o.dim ? ' dim' : ''}" data-tile="${id}" aria-label="${escapeHtml(def.name)}">${fullArtBgHtml(def)}
+  return `<button type="button" class="alm-card tile rarity-${def.rarity}${def.crafted ? ' crafted' : ''}${foilCount(id) ? ' foil' : ''}${o.dim ? ' dim' : ''}" data-tile="${id}" aria-label="${escapeHtml(def.name)}">
     ${count > 1 ? `<span class="ac-count">×${count}</span>` : ''}<span class="ac-cost">${def.cost}</span>
     <span class="ac-icon">${cardArtHtml(def)}</span>${!def.spell && def.kw.length ? `<span class="ac-kw">${def.kw.map(k => `<i>${KW[k].icon}</i>`).join('')}</span>` : ''}
     <span class="ac-paper"><span class="ac-name">${def.name}</span><span class="ac-power">${cardStatsText(def)}</span></span>

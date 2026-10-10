@@ -44,6 +44,11 @@ module.exports = async (page, assert) => {
   assert.ok(await page.evaluate(() => !!document.querySelector('.pfx-chip .card-emoji')), 'the item she got flies to her');
   await page.waitForTimeout(1800);
   assert.ok(!(await page.evaluate(() => !!document.querySelector('.pfx-chip, .pfx-take'))), 'and is gone once she has taken it in');
+  await page.evaluate(() => { pfxLoot = null; pfxEmote(); });
+  assert.ok(!(await page.evaluate(() => !!document.querySelector('.pfx-chip'))), 'nothing flies to her when nothing was gained');
+  await page.evaluate(() => { pfxGainAt = 0; addPebbles(1, 'test'); });
+  assert.ok(await page.evaluate(() => !!document.querySelector('.pfx-chip')), 'Embers she picks up fly to her');
+  await page.waitForTimeout(1800);
   const gone = await page.evaluate(() => new Promise(res => { const took = pfxEnter(() => res(playerEl.querySelector('.pl-sprite').classList.contains('pl-gone'))); if (!took) res('not taken'); }));
   assert.strictEqual(gone, true, 'she has burned away when the door opens');
   await page.evaluate(() => { pfxReform(); }); await page.waitForTimeout(1100);

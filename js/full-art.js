@@ -4,8 +4,8 @@
    subject stands in front of it, breaking out past the card's edge. It is used in two places only, both of them large:
      - the card reveal / Card Details popup (showCardReveal in js/gardening.js)
      - the attack preview in battle (btAnimate in js/battle-ui.js): the attacking card flies to the middle, strikes, then flies back
-   Small cards (board, hand, collection tiles, deck lists, draft offers) keep their normal art, so full art is optional per card: a card that is
-   not listed here looks exactly as it always did.
+   Full art is the only look of a listed card, at every size (board, hand, tiles, deck lists, draft offers): js/data-and-engine.js cardArtHtml
+   returns the subject and the observer below dresses the card around it. A card that is not listed here looks exactly as it always did.
    Each card has two files in assets/cards/full/:
      <id>-scene.svg   the backdrop, 100 x 108, fills the card (cropped to fit)
      <id>-hero.svg    the subject, 100 x 100 on a transparent background; it may reach past the edges of its square
@@ -28,24 +28,27 @@ function hasFullArt(def) {
 }
 
 function fullArtUrl(def, part) { return `assets/cards/full/${BattleEngine.baseIdOf(def.id)}-${part}.${FULL_ART_EXT}`; }
-// The painted scene as a card's backdrop, for the small faces (battle cards, collection tiles). '' for a card without full art.
-function fullArtBgHtml(def) { return hasFullArt(def) ? `<span class="fa-bg" aria-hidden="true"><img src="${fullArtUrl(def, 'scene')}" alt="" draggable="false"></span>` : ''; }
 
-// Full art is the default look everywhere a card is drawn. cardArtHtml (js/data-and-engine.js) already swaps in the detailed subject; this adds the
-// painted scene behind any small card that holds one, wherever it was built (deck tray and strip, Workshop, Almanac, sets, the inspect sheet, draft offers).
-// Battle cards and collection tiles add theirs when they are built. One observer on the page, so no template needs to know.
-const FULL_ART_HOLDERS = '.card-mini, .alm-card, .ins-card, .draft-opt .reveal-card';
-function fullArtDecorate(root) {
-  if (!root || root.nodeType !== 1) return;
-  root.querySelectorAll('img.fa-small').forEach(img => {
-    const card = img.closest(FULL_ART_HOLDERS); if (!card || card.querySelector(':scope > .fa-bg')) return;
-    card.classList.add('fa-card');
-    card.insertAdjacentHTML('afterbegin', `<span class="fa-bg" aria-hidden="true"><img src="${img.getAttribute('src').replace('-hero.', '-scene.')}" alt="" draggable="false"></span>`);
-  });
+// Full art is the ONLY look of a card that has it, at every size. cardArtHtml (js/data-and-engine.js) hands out the detailed subject as
+// img.fa-small; this dresses whatever card face holds one in exactly the face the popup has (scene filling the card, subject standing out of
+// it, translucent name panel, all from the same .fa rules), so battle cards, tiles, deck trays, the Workshop, the Almanac, sets, draft offers and
+// the inspect sheet match the Card Details view. One observer on the page, so no template needs to know.
+const FULL_ART_HOLDERS = '#battleView .card, .alm-card, .card-mini, .ins-card, .draft-opt .reveal-card';
+const FULL_ART_ICONS = '.icon, .ac-icon, .c-icon, .ins-icon';
+function fullArtDress(img) {
+  const card = img.closest(FULL_ART_HOLDERS), icon = img.closest(FULL_ART_ICONS);
+  if (!card || !icon || card.classList.contains('fa')) return;
+  const src = img.getAttribute('src'), alt = img.getAttribute('alt') || '';
+  card.classList.add('fa');
+  card.insertAdjacentHTML('afterbegin', `<div class="fa-scene"><img src="${src.replace('-hero.', '-scene.')}" alt="" draggable="false"></div>`);
+  icon.innerHTML = `<div class="fa-hero"><img src="${src}" alt="${alt}" draggable="false"></div>`;
 }
+function fullArtDecorate(root) { if (root && root.nodeType === 1) root.querySelectorAll('img.fa-small').forEach(fullArtDress); }
 if (typeof MutationObserver === 'function') {
-  new MutationObserver(list => list.forEach(m => m.addedNodes.forEach(n => { if (n.nodeType !== 1) return; if (n.matches('img.fa-small')) fullArtDecorate(n.parentElement); else if (n.querySelector('img.fa-small')) fullArtDecorate(n); })))
-    .observe(document.documentElement, { childList: true, subtree: true });
+  new MutationObserver(list => list.forEach(m => m.addedNodes.forEach(n => {
+    if (n.nodeType !== 1) return;
+    if (n.matches('img.fa-small')) fullArtDress(n); else if (n.querySelector('img.fa-small')) fullArtDecorate(n);
+  }))).observe(document.documentElement, { childList: true, subtree: true });
 }
 
 // Turns a card face (.reveal-card built from cardFaceHtml) into its full art version. Returns true when it did.

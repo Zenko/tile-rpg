@@ -157,7 +157,7 @@ const RECIPES = [
 function recipeDef(id) { return RECIPES.find(r => r.id === id); }
 function pantry() { const p = state.progress; if (!p.pantry || typeof p.pantry !== 'object') p.pantry = {}; return p.pantry; }
 function ingredientCount(k) { return k === 'bread' ? breadCount() : (pantry()[k] || 0); }
-function addIngredient(k, n) { const pt = pantry(); pt[k] = Math.min(PANTRY_MAX, (pt[k] || 0) + (n || 1)); }
+function addIngredient(k, n) { const pt = pantry(); pt[k] = Math.min(PANTRY_MAX, (pt[k] || 0) + (n || 1)); if (typeof pfxGain === 'function' && INGREDIENTS[k]) pfxGain(INGREDIENTS[k].icon); }
 function useIngredient(k, n) { if (k === 'bread') state.progress.bread = breadCount() - n; else pantry()[k] = ingredientCount(k) - n; }
 function dishes() { const p = state.progress; if (!p.dishes || typeof p.dishes !== 'object') p.dishes = {}; return p.dishes; }
 function dishCount(id) { return dishes()[id] || 0; }
@@ -801,7 +801,7 @@ function renderSceneBody() {
   }
 }
 // `src` names where the Embers came from (or went), for the economy ledger (econNote, js/progression.js).
-function addPebbles(n, src) { state.progress.pebbles += n; econNote(n, src); saveState(); updateHud(); bumpPill('pillPebbles'); }
+function addPebbles(n, src) { state.progress.pebbles += n; econNote(n, src); saveState(); updateHud(); bumpPill('pillPebbles'); if (n > 0 && typeof pfxGain === 'function') pfxGain('\uD83E\uDEE7'); }
 function sceneAction(actId) {
   if (!scene) return;
   if (actId === 'leave') {

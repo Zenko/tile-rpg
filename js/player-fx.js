@@ -96,14 +96,15 @@ function pfxEnsureMotes() {
 // fixed element, so nothing in the town is touched; a short squash and a rarity-coloured ring on her when it lands.
 let pfxLoot = null;
 const PFX_RARITY_RGB = { common: '200,220,210', rare: '170,150,235', ultra: '120,185,235', super: '240,190,110', mythic: '240,130,175', divine: '235,180,40', atlas: '143,122,217' };
-function pfxEmote() {
-  const loot = pfxLoot || { html: '\u2728' }; pfxLoot = null;
+function pfxEmote(direct) {
+  const loot = direct || pfxLoot; pfxLoot = null;
+  if (!loot) return;                                                                    // nothing was gained (a card you only looked at, a popup with no reward): nothing happens
   if (!playerEl || !pfxMotion() || inBattle || inScene || typeof playerEl.animate !== 'function') return;
   const spr = playerEl.querySelector('.pl-sprite'); if (spr && spr.classList.contains('pl-gone')) return;
   const pr = playerEl.getBoundingClientRect(); if (!pr.width) return;
   const rgb = PFX_RARITY_RGB[loot.r] || '255,214,120', W = 40, H = 54;
   const tx = pr.left + pr.width / 2 - W / 2, ty = pr.top - pr.height * 0.1 - H / 2;          // her chest
-  const sx = window.innerWidth / 2 - W / 2, sy = window.innerHeight * 0.4 - H / 2;            // where the popup's card was
+  const sx = direct ? tx : window.innerWidth / 2 - W / 2, sy = direct ? ty - 150 : window.innerHeight * 0.4 - H / 2;   // where the popup's card was, or just above her for something she picked up in town
   const chip = document.createElement('div'); chip.className = 'pfx-chip'; chip.setAttribute('aria-hidden', 'true'); chip.style.setProperty('--rc', rgb);
   chip.innerHTML = `<span>${loot.html}</span>`; document.body.appendChild(chip);
   const arc = chip.animate([
@@ -122,6 +123,14 @@ function pfxEmote() {
     ring.animate([{ transform: 'translate(-50%, -50%) scale(.3)', opacity: 0.9 }, { transform: 'translate(-50%, -50%) scale(2.6)', opacity: 0 }], { duration: 650, easing: 'ease-out' }).onfinish = () => ring.remove();
   };
   arc.onfinish = done; arc.oncancel = () => chip.remove();
+}
+// Something she picked up in town without a popup (Embers, an ingredient): the same arc from just above her. One at a time, only on the town screen.
+let pfxGainAt = 0;
+function pfxGain(html, r) {
+  if (!pfxOn() || inBattle || inScene || (typeof currentTab !== 'undefined' && currentTab !== 'town')) return;
+  if (document.querySelector('#pickupOverlay:not(.hidden), #levelUpOverlay:not(.hidden), #battleEndOverlay:not(.hidden)')) return;
+  const now = Date.now(); if (now - pfxGainAt < 900) return; pfxGainAt = now;
+  pfxEmote({ html, r });
 }
 function pfxWatchPopups() {
   ['pickupOverlay', 'levelUpOverlay'].forEach(id => {

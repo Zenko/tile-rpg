@@ -640,7 +640,7 @@ function renderAlmanac() {
             <span class="ac-name">${def.name}</span>
             ${def.kw.length ? `<span class="ac-kw">${kwIcons(def)}</span>` : ''}`;
           el.classList.add('tappable');
-          el.addEventListener('click', () => showCardReveal(def.id, 'Card Details', false, cardStory(def)));
+          el.addEventListener('click', () => showCardReveal(def.id, 'Card Details', false, cardStory(def), 0, { view: true }));
         } else {
           el.className = 'alm-card unknown';
           el.innerHTML = `

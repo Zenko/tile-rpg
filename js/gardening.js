@@ -143,7 +143,7 @@ function showCardReveal(cardId, heading, isGift, note, xpGained, opts) {
   face.innerHTML = cardFaceHtml(def);
   face.parentElement.classList.toggle('has-fa', fullArtApply(face, def));   // mythic, divine and Atlas cards with full art (js/full-art.js)
   if (typeof holoApply === 'function') holoApply(face, tier);   // rainbow foil that follows the finger, ultra and up (js/holo-foil.js)
-  pfxLoot = { html: cardArtHtml(def), r: def.rarity };   // what her emote bubble shows once this popup closes (js/player-fx.js)
+  pfxLoot = opts.view ? null : { html: cardArtHtml(def), r: def.rarity };   // what she pockets once this popup closes; a card you are only looking at gives nothing (js/player-fx.js)
   face.classList.remove('reveal-icon'); void face.offsetWidth; face.classList.add('reveal-icon');
 
   pickupTitle.textContent = heading || 'You found a card';

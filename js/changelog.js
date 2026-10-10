@@ -18,11 +18,11 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
-  { t:'better', x: 'When a card or level-up popup closes, what you got now arcs from the middle of the screen into your character, who takes it in with a little squash and a ring in the card\'s rarity colour. (It replaces the hop.)' },
+  { t:'better', x: 'When a card or level-up popup closes, what you got now arcs from the middle of the screen into your character, who takes it in with a little squash and a ring in the card\'s rarity colour. It only happens when you actually get something, a card or a level-up, or Embers and ingredients you pick up in town, never when you are just looking at a card. (It replaces the hop.)' },
   { t:'better', x: 'Sitting on a bench is calmer and actually keeps you still: taps no longer walk you off, and she settles into a sitting pose while the town eases in and the edges darken. A small card shows who you are resting with, how long you have sat (it says Rested after a minute) and a line that fits the moment: the rain, the hour, the season or your companion. Escape or Stand up gets you going again.' },
   { t:'better', x: 'Rain puddles are now uneven pools that hold a little sky, with rain rings spreading across them.' },
   { t:'fixed', x: 'Sparring or sitting with your companion from the Character screen no longer leaves part of that screen showing behind the match: it takes you to the town first.' },
-  { t:'better', x: 'Full art now shows on every small card that has it, including the deck tray and strip, the Workshop, the Almanac, card sets, draft offers and the inspect sheet, not just in battle and your collection.' },
+  { t:'better', x: 'Cards that have full art now look exactly the same everywhere, and it is the only look they have: the painted scene fills the card, the subject stands out of it and the name sits on a see-through panel. That covers battle cards, your collection, the deck tray and strip, the Workshop, the Almanac, card sets, draft offers and the inspect sheet.' },
   { t:'better', x: 'The card details sheet now shows the card large at the top, with its full art when the card has it, and the name, owned counts and story centred underneath.' },
   { t:'new', x: 'A new Town Guide entry, Your glow and sparkles, explains what the flames, hearts and rings around your character mean and how to earn them.' },
   { t:'better', x: 'In rain and storms a few soft drops now bounce off your character instead of the old wet sheen on her side.' },
