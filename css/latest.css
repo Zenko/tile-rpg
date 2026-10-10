@@ -1841,3 +1841,26 @@ body.no-charfx .pfx-chip, body.no-charfx .pfx-take { display: none; }
 .hr-prop.emoji { display: flex; align-items: center; justify-content: center; }
 .hr-prop.emoji > span { position: relative; font-size: calc(var(--t) * 0.6); line-height: 1; text-shadow: 0 2px 3px rgba(0,0,0,0.3); }
 .hr-room.editing { touch-action: none; cursor: grab; }
+
+/* Spirits at home (js/home-spirits.js): the spirit on a perch, Reborn on the mantel, medals in the cabinet, the companion and a visiting spirit.
+   Everything that moves is transform or opacity; the companion glides on left/top like a neighbor. */
+.hr-prop .hr-fig { position: absolute; left: 50%; top: -42%; width: calc(var(--t) * .75); height: calc(var(--t) * .75); transform: translateX(-50%); display: flex; align-items: center; justify-content: center; font-size: calc(var(--t) * .5); line-height: 1; pointer-events: none; animation: hr-float 3s ease-in-out infinite; }
+.hr-prop .hr-fig::before { content: ''; position: absolute; inset: -14%; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--g, #fff) 55%, transparent), transparent 68%); }
+.hr-prop .hr-fig > * { position: relative; }
+.hr-prop .hr-fig.m { top: -14%; left: calc(28% + var(--i) * 22%); width: calc(var(--t) * .5); height: calc(var(--t) * .5); font-size: calc(var(--t) * .34); animation-delay: calc(var(--i) * -.8s); }
+.hr-prop .hr-fig.reborn::after { content: '\2728'; position: absolute; right: -14%; top: -14%; font-size: .5em; animation: hr-twinkle 2.2s ease-in-out infinite; }
+.hr-prop.resonant .hr-fig::before { animation: hr-pulse 2.4s ease-in-out infinite; }
+.hr-prop .hr-medals { position: absolute; left: 15%; top: -12%; width: 70%; height: 92%; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); align-items: center; justify-items: center; font-size: calc(var(--t) * .2); line-height: 1; pointer-events: none; }
+.hr-prop .hr-medals i { font-style: normal; opacity: .3; }
+.hr-prop .hr-medals i.on { opacity: 1; text-shadow: 0 0 6px rgba(255,210,120,.95); }
+.hr-comp { transition: left 900ms ease-in-out, top 900ms ease-in-out; pointer-events: none; }
+.hr-comp::before { content: ''; position: absolute; bottom: 12%; width: 56%; height: 14%; border-radius: 50%; background: var(--tshadow); }
+.hr-comp > span { animation: idle 2.6s ease-in-out infinite; }
+.hr-visitor { position: absolute; left: calc(var(--x) * var(--t)); top: calc(var(--y) * var(--t)); width: var(--t); height: var(--t); z-index: 380; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.hr-visitor::before { content: ''; position: absolute; inset: -26%; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--g, #fff) 60%, transparent), transparent 66%); animation: hr-pulse 2.4s ease-in-out infinite; }
+.hr-vfig { position: relative; font-size: calc(var(--t) * .7); line-height: 1; animation: hr-float2 2.6s ease-in-out infinite; }
+@keyframes hr-float { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, -7%); } }
+@keyframes hr-float2 { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8%); } }
+@keyframes hr-pulse { 0%, 100% { opacity: .7; transform: scale(.92); } 50% { opacity: 1; transform: scale(1.06); } }
+@keyframes hr-twinkle { 0%, 100% { opacity: .2; transform: scale(.6); } 50% { opacity: 1; transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .hr-prop .hr-fig, .hr-prop .hr-fig::before, .hr-prop .hr-fig::after, .hr-vfig, .hr-visitor::before, .hr-comp > span { animation: none; } .hr-comp { transition: none; } }

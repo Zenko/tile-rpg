@@ -87,8 +87,18 @@ const HR_CATALOG = {
   wardrobe: { name: 'Wardrobe', icon: '🚪', spr: 'r-wardrobe', tall: 1, cost: 70, lvl: 3 },
   chest: { name: 'Chest', icon: '🧰', spr: 'r-chest', cost: 50, lvl: 3 },
   tree: { name: 'Indoor tree', icon: '🌳', spr: 'r-tree', tall: 1, cost: 90, lvl: 4 },
-  rug4: { name: 'Grand rug', icon: '🧶', flat: 1, rug: 1, w: 4, h: 4, cost: 60, lvl: 4 }
+  rug4: { name: 'Grand rug', icon: '🧶', flat: 1, rug: 1, w: 4, h: 4, cost: 60, lvl: 4 },
+  // Spirit pieces (js/home-spirits.js). `uses` marks a piece with a sheet of its own (like the menu pieces, but not one of INTERIORS.home's
+  // actions); `family` marks a family corner, which draws spirits of that family to visit.
+  perch: { name: 'Spirit perch', icon: '🕊️', spr: 'r-perch', tall: 1, uses: 1, cost: 40, lvl: 2, say: () => hsSay('perch') },
+  cabinet: { name: 'Collector\'s cabinet', icon: '🏅', spr: 'r-cabinet', tall: 1, wall: 1, uses: 1, cost: 60, lvl: 2, say: () => hsSay('cabinet') },
+  mantel: { name: 'Reborn mantel', icon: '✨', spr: 'r-mantel', tall: 1, wall: 1, uses: 1, cost: 120, lvl: 3, say: () => hsSay('mantel') },
+  grove: { name: 'Grove nook', icon: '🌿', spr: 'r-grove', family: 'grove', cost: 45, lvl: 2 },
+  cairn: { name: 'Memory cairn', icon: '🪨', spr: 'r-cairn', family: 'stone', cost: 45, lvl: 2 },
+  basin: { name: 'Tide basin', icon: '🌊', spr: 'r-basin', family: 'tide', cost: 45, lvl: 2 },
+  chimes: { name: 'Wind chimes', icon: '🎐', spr: 'r-chimes', family: 'wind', cost: 45, lvl: 2 }
 };
+const hrUses = d => !!(d.act || d.uses);   // a piece you walk up to and use
 // A new home: a plain 6 by 6 room with only the pieces that do something, and nothing to look at (no windows, rug, lamp or toys), so there
 // is something to want. Every piece here can be moved or put away. Homes saved before this keep the layout they were given.
 const HR_DEFAULTS = [
@@ -111,6 +121,7 @@ function hrDefOf(id) {
 function hrDecoGive(id, n) { state.decorationInventory = state.decorationInventory || {}; state.decorationInventory[id] = Math.max(0, decorationInventoryCount(id) + n); }
 function hrHome() {   // your cottage's saved state, filled in (and tidied) the first time it is read
   const h = homeState(), pal = (list, id) => list.some(p => p.id === id) ? id : list[0].id;
+  if (!Array.isArray(h.shelf)) h.shelf = []; if (!Array.isArray(h.favs)) h.favs = [];   // the shelves and framed cards (js/houses-and-cellar.js) expect these
   if (!(h.level >= 1 && h.level <= 5)) h.level = 1;
   h.level = Math.floor(h.level);
   if (!h.style || typeof h.style !== 'object') h.style = {};
@@ -165,7 +176,7 @@ function hrReachOk(items) {
     seen.add(nx + ',' + ny); q.push([nx, ny]);
   }
   if (!seen.has(HR_DOOR_X + ',' + (r.rows - 1))) return false;
-  return items.filter(i => hrDef(i).act).every(i => [[0, 1], [0, -1], [1, 0], [-1, 0]].some(([dx, dy]) => seen.has((i.x + dx) + ',' + (i.y + dy))));
+  return items.filter(i => hrUses(hrDef(i))).every(i => [[0, 1], [0, -1], [1, 0], [-1, 0]].some(([dx, dy]) => seen.has((i.x + dx) + ',' + (i.y + dy))));
 }
 // Why a piece cannot go on that tile (a short sentence), or null when it can. `uid` is the piece being moved (null for a new one).
 function hrPlaceError(id, x, y, uid) {
@@ -207,12 +218,12 @@ function hrWorldHtml() {
   h.items.forEach(i => {
     const d = hrDef(i);
     if (d.rug) s += `<div class="hr-rug" style="left:calc(var(--t)*${i.x});top:calc(var(--t)*${i.y});width:calc(var(--t)*${d.w});height:calc(var(--t)*${d.h})"></div>`;
-    else s += `<div class="hr-prop${d.flat ? ' flat' : ''}${d.tall ? ' tall' : ''}${d.emoji ? ' emoji' : ''}" style="--x:${i.x};--y:${i.y}">${d.emoji ? `<span>${d.icon}</span>` : svgUse(d.spr)}</div>`;
+    else s += `<div class="hr-prop${d.flat ? ' flat' : ''}${d.tall ? ' tall' : ''}${d.emoji ? ' emoji' : ''}${typeof hsClass === 'function' ? hsClass(i) : ''}" style="--x:${i.x};--y:${i.y}">${d.emoji ? `<span>${d.icon}</span>` : svgUse(d.spr)}${typeof hsExtras === 'function' ? hsExtras(i) : ''}</div>`;
     if (d.glow) glows.push({ x: i.x + d.glow.dx, y: i.y + d.glow.dy, r: d.glow.r, day: d.glow.day });
   });
   s += `<div class="hr-prop deco door" style="--x:${HR_DOOR_X};--y:${r.rows - 1}">${svgUse('r-door')}</div><div class="hr-prop deco mat" style="--x:${HR_DOOR_X};--y:${hrMatY()}">${svgUse('r-mat')}</div>`;
   glows.forEach(g => { s += `<div class="hr-glow${g.day ? ' day' : ''}" style="left:calc(var(--t)*${g.x - g.r / 2});top:calc(var(--t)*${g.y - g.r / 2});width:calc(var(--t)*${g.r});height:calc(var(--t)*${g.r})"></div>`; });
-  return s + '<div class="hr-ring hidden"></div><div class="hr-badge hidden"></div><div class="ent player hr-player">' + playerSpriteHTML() + '</div></div>';
+  return s + (typeof hsEntitiesHtml === 'function' ? hsEntitiesHtml() : '') + '<div class="hr-ring hidden"></div><div class="hr-badge hidden"></div><div class="ent player hr-player">' + playerSpriteHTML() + '</div></div>';
 }
 function hrFill() {   // (re)draw everything inside the host
   const h = homeRoom;
@@ -238,9 +249,11 @@ function hrRefresh() { if (homeRoom.host) { hrFill(); hrLayout(); hrSync(); } }
 function hrEnter() {   // a fresh visit starts on the doormat, facing the room
   const h = homeRoom; hrIndex(); h.scene = scene; h.x = HR_DOOR_X; h.y = hrMatY(); h.sel = null; h.edit = null; h.hadModal = false; h.walk++;
   playerFaceFromMove({ x: HR_DOOR_X, y: h.y + 1 }, { x: HR_DOOR_X, y: h.y });
+  if (typeof hsEnter === 'function') hsEnter();   // js/home-spirits.js: a spirit may have come to visit
 }
 function hrLeave() {
   const h = homeRoom; h.walk++;
+  if (typeof hsLeave === 'function') hsLeave();
   if (h.ro) { h.ro.disconnect(); h.ro = null; }
   if (h.host) { h.host.remove(); h.host = null; h.world = h.player = null; }
   h.scene = null; h.sel = null; h.edit = null; h.hadModal = false;
@@ -362,7 +375,8 @@ function hrTap(e) {
   const [tx, ty] = hrTileAt(e);
   if (tx < 0 || ty < 0 || tx >= h.cols || ty >= h.rows) return;
   const item = hrPieceAt(tx, ty);
-  if (item && !hrDef(item).act) return;   // a plant or a lamp does nothing; only the menu pieces are for using
+  if (typeof hsTapVisitor === 'function' && hsTapVisitor(tx, ty)) return;   // a visiting spirit
+  if (item && !hrUses(hrDef(item))) return;   // a plant or a lamp does nothing; only the pieces with something to use are for using
   const path = item ? null : (hrWalkable(tx, ty) ? hrBfs(h.x, h.y, (x, y) => x === tx && y === ty) : null);
   if (!item && !path) return;
   if (h.sel) { h.sel = null; renderScene(); }   // any new tap puts the sheet away
@@ -418,6 +432,7 @@ function hrUnlockText(lvl) {   // what a level reveals, in a line
   if (cols) bits.push(`${cols} new colour${cols === 1 ? '' : 's'}`);
   const items = Object.values(HR_CATALOG).filter(d => d.lvl === lvl).map(d => d.name.toLowerCase());
   if (items.length) bits.push(items.join(', '));
+  if (typeof HS_LEVEL_PERKS !== 'undefined' && HS_LEVEL_PERKS[lvl]) bits.push(HS_LEVEL_PERKS[lvl]);
   return bits.join(' · ');
 }
 function hrEditHtml() {
@@ -506,7 +521,9 @@ function hrSync() {
     acts.innerHTML = hrEditHtml(); scene.text = hrEditHint(); txt.textContent = scene.text; acts.scrollTop = keep;
   } else {
     const it = h.sel && hrHome().items.find(i => i.uid === h.sel), a = it && hrDef(it).act && INTERIORS.home.actions.find(x => x.id === hrDef(it).act);
-    if (a) { const v = a.view ? a.view(a) : null; acts.innerHTML = sceneBtn(a.id, v ? v.label : a.label, v && v.disabled) + sceneBtn('hr-close', 'Close'); txt.textContent = scene.text; }
+    if (h.sel === 'hs-visitor' && typeof hsVisitorSheet === 'function') { acts.innerHTML = hsVisitorSheet() + sceneBtn('hr-close', 'Close'); txt.textContent = scene.text; }
+    else if (it && hrDef(it).uses && typeof hsSheetHtml === 'function') { acts.innerHTML = hsSheetHtml(it) + sceneBtn('hr-close', 'Close'); txt.textContent = scene.text; acts.scrollTop = keep; }
+    else if (a) { const v = a.view ? a.view(a) : null; acts.innerHTML = sceneBtn(a.id, v ? v.label : a.label, v && v.disabled) + sceneBtn('hr-close', 'Close'); txt.textContent = scene.text; }
     else { h.sel = null; acts.innerHTML = ''; scene.text = ''; txt.textContent = ''; }
   }
   sceneView.classList.toggle('hr-idle', !modal && !h.sel && !h.edit);

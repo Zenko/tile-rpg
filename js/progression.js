@@ -22,6 +22,7 @@ const TIPS = {
   puzzle:     { icon: '🧩', title: 'The daily puzzle', text: 'A fixed board: win it this turn. Ending your turn gives up and resets the board, so take your time. The first solve each day pays a card.' },
   cup:        { icon: '🏆', title: 'The Dreamers’ Cup', text: 'Three matches in a row. Your Calm carries over between rounds - there is no healing - and a loss ends the run. Sweep all three for the week\'s trophy.' },
   homeDecor:  { icon: '🎨', title: 'Decorate your home', text: 'Tap a piece to pick it up, then tap where it should go. Everything can move or be put away, even the mailbox and the bonsai. Drag to look around. Buy new furniture in Items, and put the decorations you bought for town in your home too. Change the floor, walls and rug in Colours, and spend Embers in Room to level your home up: each level makes it bigger and reveals more colours and furniture.' },
+  homeSpirits: { icon: '🕊️', title: 'Spirits at home', text: 'Your spirits live in your home. Put a Spirit perch down to show one of your cards, light medals in the Collector\'s cabinet by finishing card sets, and put Reborn cards on the mantel. Family corners (a Grove nook, Memory cairn, Tide basin or Wind chimes) draw spirits of that family. From home level 3, now and then a spirit comes to visit: tap it and it leaves you a rare card.' },
   home:       { icon: '🏠', title: 'Your cottage', text: 'Your own place, and you can walk around it. Tap the floor to move and tap furniture to use it: read letters at the mailbox, put decorations on the shelves, frame favourite cards, look over your trophies, tend the bonsai or take a nap. Close puts a menu away and keeps you here. The door on the bottom wall is the way out, and Decorate (top right) is for making it yours.' },
   lantern:    { icon: '🏮', title: 'The Lantern Market', text: 'Lumen only trades after dark: Lantern Packs full of moonlit cards, glowing decorations, and Embers for the critters in your jar.' },
   bugs:       { icon: '✨', title: 'Night critters', text: 'Glowing critters come out at night. Tap one to catch it - it goes in your jar for the Lantern Market and in the critter log under Cards → Fish.' },
@@ -76,7 +77,7 @@ const XP_PER_STAT = {
   minigamesPlayed: 5, minigameGolds: 10, talks: 1, foilsFound: 20,
   donations: 6, expeditionsDone: 25, tradesDone: 15, cardsGifted: 10, challengesWon: 40, setsCompleted: 60, masteryRanks: 15, charmsSet: 2,
   tossWins: 2, knacksUsed: 3, draftWins: 20, draftClears: 60, ghostWins: 6, townActs: 3, townGames: 8, puddles: 1, stonesSkipped: 1,
-  dishesCooked: 10, dishesGiven: 10, snacksEaten: 2, puzzlesSolved: 40, cupRoundsWon: 30, cupTrophies: 100, bugsCaught: 8, lettersRead: 2,
+  dishesCooked: 10, dishesGiven: 10, snacksEaten: 2, puzzlesSolved: 40, cupRoundsWon: 30, cupTrophies: 100, bugsCaught: 8, lettersRead: 2, homeVisitors: 30,
 };
 /* ============================================================
    PEBBLE LEDGER (v1.87.0)

@@ -475,7 +475,11 @@ function closeScene() {
 }
 /* ---------------- your cottage: shelves, framed cards, trophies and the mailbox ---------------- */
 const SHELF_MAX = 6, FAV_MAX = 3;
-function homeState() { const p = state.progress; if (!p.home || typeof p.home !== 'object') p.home = { shelf: [], favs: [] }; return p.home; }
+function homeState() {
+  const p = state.progress; if (!p.home || typeof p.home !== 'object') p.home = { shelf: [], favs: [] };
+  if (!Array.isArray(p.home.shelf)) p.home.shelf = []; if (!Array.isArray(p.home.favs)) p.home.favs = [];   // however the home was saved, these always exist
+  return p.home;
+}
 // Everything you have earned that deserves a spot on the top shelf.
 function trophyItems() {
   const out = trophies().map(t => ({ icon: '🏆', label: `${t.icon} ${t.name}` }));
@@ -818,6 +822,7 @@ function sceneAction(actId) {
     return;
   }
   if (actId === 'hr-close' || actId.startsWith('hr:')) { hrAction(actId); return; }   // js/home-room.js: Close, and the Decorate panel's buttons
+  if (actId.startsWith('hs:')) { hsAction(actId); return; }   // js/home-spirits.js: perches, the mantel, welcoming a visiting spirit
   if (scene.id === 'cellar') {
     const st = cellarState(); if (st.resting) return;
     if (actId === 'descend') { if (!cellarRun(st)) { cellarNewRun(st); saveState(); showTipOnce('cellarRun'); } scene.text = `Floor ${st.floor + 1}. ${cellarIsGuardian(st.floor) ? cellarFloor(st.floor).blurb : crawlOn() ? 'It is dark. Walk with your lantern and find a door.' : 'Pick a door.'}`; sfx('creak'); buzz(HAP.tap); renderScene(); return; }

@@ -18,6 +18,9 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'new', x: 'Your spirits live in your home. Your companion wanders the room and answers when you tap it. Spirit perches show one of your cards as a glowing figure, the Collector\'s cabinet lights a medal for every card set you finish, and the Reborn mantel shows off up to three Reborn cards.' },
+  { t:'new', x: 'Family corners, a Grove nook, Memory cairn, Tide basin and Wind chimes, draw spirits of their family. A perch showing a spirit whose family has a corner in your home glows in the family\'s colour.' },
+  { t:'new', x: 'From home level 3, spirits visit. Now and then one appears in your home: tap it and welcome it and it leaves you a rare card. Higher levels bring rarer visitors (super ultra rare at level 4, mythic at level 5) and level 5 allows two a day. Corners and glowing perches decide which family calls.' },
   { t:'better', x: 'A new home starts as a small, plain 6 by 6 room with only the pieces that do something and nothing to look at, so there is plenty to make your own. Levelling up now takes it through 7 by 8, 9 by 9, 10 by 11 and 12 by 12. A home you already decorated keeps the room it has.' },
   { t:'better', x: 'Everything in your home can be moved or put away, the mailbox, bonsai, altar and the rest included. Put away pieces wait in Decorate → Items to be placed again, and the Decorate button shows a mailbox if letters are waiting while yours is put away.' },
   { t:'new', x: 'Decorations you bought for the town can go inside your home too. They are listed under Your decorations in Decorate → Items, and putting one away gives it back to your town decorations.' },

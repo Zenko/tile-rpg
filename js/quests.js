@@ -125,6 +125,8 @@ const ACHIEVEMENTS = [
   { id: 'acts-100',    icon: '🏘️', name: '100 town interactions', test: () => (state.progress.totals.townActs || 0) >= 100 },
   { id: 'games-5',     icon: '🎸', name: '5 town activities', test: () => (state.progress.totals.townGames || 0) >= 5 },
   { id: 'puddles-10',  icon: '🌧️', name: '10 puddles splashed', test: () => (state.progress.totals.puddles || 0) >= 10 },
+  { id: 'home-lv3',    icon: '🏠', name: 'A home of level 3', test: () => typeof hrHome === 'function' && hrHome().level >= 3 },
+  { id: 'visitors-5',  icon: '🕊️', name: 'Five spirits welcomed home', test: () => (state.progress.totals.homeVisitors || 0) >= 5 },
   { id: 'mood-1',      icon: '🎈', name: 'A cheerful district', test: () => lifeTopMood() >= 1 },
   { id: 'mood-3',      icon: '🎆', name: 'A festive district', test: () => lifeTopMood() >= 3 },
   { id: 'first-card',  icon: '🌱', name: 'First find',      test: () => state.progress.totals.cardsFound >= 1 },
