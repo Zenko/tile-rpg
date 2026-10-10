@@ -20,7 +20,7 @@ module.exports = async (page, assert) => {
   // it can be moved like anything else, and the rules still apply
   await ev(() => hrEditTap(3, 3)); await ev(() => hrEditTap(5, 4));
   assert.ok(await ev(() => hrHome().items.some(i => i.id === 'deco:planter' && i.x === 5 && i.y === 4)), 'moved');
-  assert.ok(/doormat/.test(await ev(() => hrPlaceError('deco:flag', 4, 9, null))), 'the doormat stays clear');
+  assert.ok(/doormat/.test(await ev(() => hrPlaceError('deco:flag', 4, 7, null))), 'the doormat stays clear');
   assert.ok(/wall/.test(await ev(() => hrPlaceError('window', 3, 4, null))), 'wall pieces still need the wall');
 
   // putting it away sends it back to the town's inventory, not the home's storage

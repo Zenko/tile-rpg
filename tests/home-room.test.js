@@ -4,10 +4,10 @@ module.exports = async (page, assert) => {
   const until = (fn, arg) => page.waitForFunction(fn, arg, { timeout: 8000 });
   await page.evaluate(() => { switchTab('town'); openScene('home'); });
   await until(() => !!document.querySelector('.hr-room .hr-world'));
-  assert.strictEqual(await page.evaluate(() => document.querySelectorAll('.hr-room .town-tile').length), 99, 'a 9 x 11 room of the town\'s own tiles');
+  assert.strictEqual(await page.evaluate(() => document.querySelectorAll('.hr-room .town-tile').length), 8 * 9, 'a plain 6 x 6 room (with its walls) of the town\'s own tiles');
   assert.ok(await page.evaluate(() => !!document.querySelector('.hr-player .pl-sprite, .hr-player .pl-badge')), 'the player stands in the room');
   assert.ok(await page.evaluate(() => sceneView.classList.contains('room-on') && sceneView.classList.contains('hr-idle')), 'the room fills the screen with nothing open');
-  assert.strictEqual(await page.evaluate(() => [homeRoom.x, homeRoom.y].join()), '4,9', 'starts just inside the door');
+  assert.strictEqual(await page.evaluate(() => [homeRoom.x, homeRoom.y].join()), '4,7', 'starts just inside the door');
 
   // every piece of furniture is one of the cottage's own actions
   const ids = await page.evaluate(() => INTERIORS.home.actions.map(a => a.id).sort().join());
@@ -17,7 +17,7 @@ module.exports = async (page, assert) => {
   await page.evaluate(() => hrGoTo(hrHome().items.find(i => i.id === 'mail')));
   await until(() => !!document.querySelector('#scActions [data-act="mail"]'));
   assert.ok(await page.evaluate(() => !sceneView.classList.contains('hr-idle')), 'the stage makes room for the sheet');
-  assert.ok(await page.evaluate(() => Math.abs(homeRoom.x - 7) + Math.abs(homeRoom.y - 8) === 1), 'stopped beside the mail table');
+  assert.ok(await page.evaluate(() => Math.abs(homeRoom.x - 6) + Math.abs(homeRoom.y - 7) === 1), 'stopped beside the mail table');
   assert.ok(await page.evaluate(() => !!document.querySelector('#scActions [data-act="hr-close"]') && !document.querySelector('#scActions [data-act="leave"]')), 'the sheet ends in Close, not Head back out');
   await page.click('#scActions [data-act="hr-close"]');
   assert.ok(await page.evaluate(() => inScene && sceneView.classList.contains('hr-idle') && !!document.querySelector('.hr-room')), 'Close puts the sheet away and stays in the house');

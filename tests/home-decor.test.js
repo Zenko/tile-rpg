@@ -6,9 +6,11 @@ module.exports = async (page, assert) => {
   await until(() => !!document.querySelector('.hr-room .hr-world'));
 
   // an old or brand new cottage is the original layout, level 1
-  assert.deepStrictEqual(await ev(() => { const h = hrHome(); return [h.level, h.items.length, h.style.floor, h.style.wall, h.style.rug]; }), [1, 15, 'oak', 'plaster', 'teal'], 'starts as the original cottage');
+  assert.deepStrictEqual(await ev(() => { const h = hrHome(); return [h.level, h.items.length, h.style.floor, h.style.wall, h.style.rug]; }), [1, 9, 'oak', 'plaster', 'teal'], 'a new home is plain: only the nine pieces that do something');
+  assert.ok(await ev(() => !hrHome().items.some(i => ['window', 'sconce', 'clock', 'toys', 'rug3'].includes(i.id))), 'no windows, rug, lamp, clock or toys to start with');
+  assert.strictEqual(await ev(() => homeRoom.cols + 'x' + homeRoom.rows), '8x9', 'a 6 by 6 floor inside its walls');
   await ev(() => { delete state.progress.home.items; delete state.progress.home.style; delete state.progress.home.level; });
-  assert.strictEqual(await ev(() => hrHome().items.length), 15, 'a save with none of the new fields gets the original layout');
+  assert.strictEqual(await ev(() => hrHome().items.length), 9, 'a save with none of the new fields gets the plain layout');
 
   // Decorate opens the panel; nothing is for using while you do
   await page.click('.hr-edit-btn');
@@ -17,23 +19,23 @@ module.exports = async (page, assert) => {
 
   // even the bonsai can be moved: tap it, then a free tile
   const bonsai = () => ev(() => { const i = hrHome().items.find(x => x.id === 'bonsai'); return i.x + ',' + i.y; });
-  assert.strictEqual(await bonsai(), '7,5');
-  await ev(() => hrEditTap(7, 5)); assert.strictEqual(await ev(() => hrSelected().id), 'bonsai', 'tapping a piece picks it up');
+  assert.strictEqual(await bonsai(), '6,4');
+  await ev(() => hrEditTap(6, 4)); assert.strictEqual(await ev(() => hrSelected().id), 'bonsai', 'tapping a piece picks it up');
   assert.ok(await ev(() => document.querySelectorAll('.hr-target').length > 5), 'the tiles it can go on are tinted');
-  await ev(() => hrEditTap(6, 3));
-  assert.strictEqual(await bonsai(), '6,3', 'tapping a free tile moves it there');
-  assert.strictEqual(await ev(() => state.progress.home.items.find(i => i.id === 'bonsai').x), 6, 'and the move is saved');
-  assert.ok(await ev(() => homeRoom.solid.has('6,3') && !homeRoom.solid.has('7,5')), 'the blocked tiles follow it');
+  await ev(() => hrEditTap(5, 3));
+  assert.strictEqual(await bonsai(), '5,3', 'tapping a free tile moves it there');
+  assert.strictEqual(await ev(() => state.progress.home.items.find(i => i.id === 'bonsai').x), 5, 'and the move is saved');
+  assert.ok(await ev(() => homeRoom.solid.has('5,3') && !homeRoom.solid.has('6,4')), 'the blocked tiles follow it');
 
   // the rules
   const err = (id, x, y) => ev(([id, x, y]) => hrPlaceError(id, x, y, null), [id, x, y]);
-  assert.ok(/doormat/.test(await err('plant', 4, 9)), 'the doormat stays clear');
+  assert.ok(/doormat/.test(await err('plant', 4, 7)), 'the doormat stays clear');
   assert.ok(/wall/.test(await err('window', 3, 4)), 'a window hangs on the wall');
   assert.ok(/floor/.test(await err('plant', 3, 1)), 'a plant stands on the floor');
-  assert.ok(/taken/.test(await err('plant', 2, 5)), 'a taken tile is refused');
+  assert.ok(/taken/.test(await err('plant', 1, 5)), 'a taken tile is refused');
   // wall the doormat in with two stools, then the third would trap you
-  await ev(() => { const h = hrHome(); h.items.push({ uid: 's1', id: 'stool', x: 3, y: 9 }, { uid: 's2', id: 'stool', x: 5, y: 9 }); hrIndex(); });
-  assert.ok(/block/.test(await err('stool', 4, 8)), 'a piece that would shut you off from the door is refused');
+  await ev(() => { const h = hrHome(); h.items.push({ uid: 's1', id: 'stool', x: 3, y: 7 }, { uid: 's2', id: 'stool', x: 5, y: 7 }); hrIndex(); });
+  assert.ok(/block/.test(await err('stool', 4, 6)), 'a piece that would shut you off from the door is refused');
   await ev(() => { const h = hrHome(); h.items = h.items.filter(i => i.uid !== 's1' && i.uid !== 's2'); hrIndex(); homeRoom.edit.sel = null; });
 
   // buy a lamp: Embers go, it is ready to place, and it goes where you tap
@@ -47,11 +49,20 @@ module.exports = async (page, assert) => {
   await ev(() => sceneAction('hr:buy:fireplace'));
   assert.strictEqual(await pebbles(), 470, 'a piece from a higher home level cannot be bought yet');
 
-  // put it away, and the mailbox cannot be put away
+  // put it away: a lamp, and also a piece that does something. Both come back from storage.
   await ev(() => hrEditTap(4, 4)); await ev(() => sceneAction('hr:store'));
   assert.ok(await ev(() => !hrHome().items.some(i => i.id === 'lamp') && hrHome().storage.lamp === 1), 'put away goes to storage');
-  await ev(() => hrEditTap(7, 8)); await ev(() => sceneAction('hr:store'));
-  assert.ok(await ev(() => hrHome().items.some(i => i.id === 'mail')), 'a menu piece stays in the house');
+  await ev(() => hrEditTap(6, 7)); assert.strictEqual(await ev(() => hrSelected().id), 'mail');
+  await ev(() => sceneAction('hr:store'));
+  assert.ok(await ev(() => !hrHome().items.some(i => i.id === 'mail') && hrHome().storage.mail === 1), 'even the mailbox can be put away');
+  await ev(() => { checkMail(true); });
+  await ev(() => sceneAction('hr-close'));   // out of decorating, to see the button as it is the rest of the time
+  assert.ok(await ev(() => unreadMail() === 0 || /·/.test(document.querySelector('.hr-edit-btn').textContent)), 'the button says so when letters are waiting and the mailbox is put away');
+  await page.click('.hr-edit-btn');
+  await ev(() => sceneAction('hr:place:mail')); await ev(() => hrEditTap(5, 6));
+  assert.ok(await ev(() => hrHome().items.some(i => i.id === 'mail' && i.x === 5 && i.y === 6) && !hrHome().storage.mail), 'and it can be put back anywhere');
+  await ev(() => { hrHome().items = hrHome().items.filter(i => i.id !== 'mail'); delete hrHome().storage.mail; });
+  assert.strictEqual(await ev(() => hrHome().storage.mail), 1, 'a piece that is neither in the room nor in storage is never lost');
   await ev(() => sceneAction('hr:desel'));
 
   // colours: unlocked ones apply, locked ones do not
@@ -64,13 +75,17 @@ module.exports = async (page, assert) => {
   const before = await ev(() => hrHome().items.map(i => i.uid + i.x + i.y).join());
   await ev(() => sceneAction('hr:up'));
   assert.strictEqual(await ev(() => hrHome().level), 2); assert.strictEqual(await pebbles(), 410, 'level 2 costs 60 Embers');
-  assert.strictEqual(await ev(() => document.querySelectorAll('.hr-room .town-tile').length), 9 * 13, 'the room is two rows deeper');
+  assert.strictEqual(await ev(() => document.querySelectorAll('.hr-room .town-tile').length), 9 * 11, 'level 2 is a 7 by 8 floor');
   assert.strictEqual(await ev(() => hrHome().items.map(i => i.uid + i.x + i.y).join()), before, 'every piece stays where it was');
   await ev(() => sceneAction('hr:floor:birch'));
   assert.strictEqual(await ev(() => hrHome().style.floor), 'birch', 'the new colour is unlocked');
-  assert.strictEqual(await ev(() => hrMatY()), 11);
+  assert.strictEqual(await ev(() => hrMatY()), 9);
 
   // Done leaves decorating, not the house
   await ev(() => sceneAction('hr-close'));
   assert.ok(await ev(() => !homeRoom.edit && inScene && sceneView.classList.contains('hr-idle')), 'Done closes the panel and stays inside');
+
+  // a home saved at an older, bigger size keeps every piece inside its walls
+  await ev(() => { state.progress.home = { level: 1, items: [{ uid: 'mail', id: 'mail', x: 7, y: 9 }, { uid: 'win', id: 'window', x: 1, y: 1 }] }; hrIndex(); });
+  assert.strictEqual(await ev(() => homeRoom.cols + 'x' + homeRoom.rows), '9x11', 'a level 1 home with furniture out at the old edge is not shrunk');
 };

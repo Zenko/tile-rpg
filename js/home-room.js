@@ -19,15 +19,16 @@
    MAKING IT YOURS (the Decorate button, top right of the room)
    - The layout is saved in state.progress.home: `items` (each { uid, id, x, y }; `id` is a key of HR_CATALOG), `storage` (owned
      pieces that are not placed, id -> count), `style` (floor / wall / rug palette ids) and `level` (1 to 5). Old saves have none of
-     these and get the original layout (HR_DEFAULTS), so nothing about an old cottage changes until the player edits it.
+     these and get the plain starting layout (HR_DEFAULTS); a home that was already saved keeps what it was given.
    - Town decorations (Shop -> Items) can be placed too: they are items with id 'deco:<id>' (hrDefOf), drawn as their emoji. Placing takes one
      from state.decorationInventory and putting it away gives it back, so the town and the home share one stock.
-   - Every piece can be moved, the menu pieces included. Menu pieces cannot be put away (the mailbox would be lost with its letters);
-     everything else can go to storage and come back. A move is refused if it would cover the doormat, the player, or shut the door or
-     any menu piece off from the player (hrPlaceError / hrReachOk). Wall pieces hang on the back wall (row 1), floor pieces stand on
+   - Every piece can be moved or put away, the menu pieces included (a piece that does something is never lost: if it is neither in the room
+     nor in storage, hrHome() puts it in storage). A new home is a plain 6 by 6 room with only those pieces. A move is refused if it would
+     cover the doormat, the player, or shut the door or any piece in the room that does something off from the player (hrPlaceError / hrReachOk). Wall pieces hang on the back wall (row 1), floor pieces stand on
      the floor, flat pieces (rugs, toys) lie under everything and may overlap other pieces.
    - Home level (HR_LEVELS) is bought with Embers, one step at a time. Each level makes the floor bigger (hrIndex: the room is the
-     level's floor plus walls; the door stays in column 4 so saved positions never move) and reveals more floor, wall and rug colours
+     level's floor plus walls, but never smaller than the furniture already placed, so a home saved at an older size keeps its room; the door
+     stays in column 4 so saved positions never move) and reveals more floor, wall and rug colours
      (HR_FLOORS / HR_WALLS / HR_RUGS, `lvl`) and more furniture to buy (HR_CATALOG, `lvl`). Nothing is ever taken away.
    - While decorating you cannot walk, so a drag pans the camera (hrDragMove) and a tap, decided when the finger lifts, picks up or puts down.
    - The Decorate panel is the scene's bottom sheet, with three tabs (Items, Colours, Room). Its buttons use the same `data-act`
@@ -38,8 +39,8 @@
    hrAction(), and SCENE_EXIT_ACTS lists 'hr-close'. The room is built lazily into #scStage (a mini-game rebuilds that element, so
    hrMount() rebuilds the room when it finds it gone). */
 const HR_LEVELS = [null,
-  { name: 'Cosy', fw: 7, fh: 8, cost: 0 }, { name: 'Comfy', fw: 7, fh: 10, cost: 60 }, { name: 'Homely', fw: 9, fh: 10, cost: 120 },
-  { name: 'Spacious', fw: 9, fh: 12, cost: 200 }, { name: 'Grand', fw: 11, fh: 12, cost: 320 }];
+  { name: 'Cosy', fw: 6, fh: 6, cost: 0 }, { name: 'Comfy', fw: 7, fh: 8, cost: 60 }, { name: 'Homely', fw: 9, fh: 9, cost: 120 },
+  { name: 'Spacious', fw: 10, fh: 11, cost: 200 }, { name: 'Grand', fw: 12, fh: 12, cost: 320 }];
 const HR_DOOR_X = 4;
 // Palettes. `lvl` is the home level that reveals it; `c` is the tones the room uses (floor: three boards; wall: upper wall, wainscot,
 // side and front walls; rug: the rug and its edge).
@@ -88,12 +89,12 @@ const HR_CATALOG = {
   tree: { name: 'Indoor tree', icon: '🌳', spr: 'r-tree', tall: 1, cost: 90, lvl: 4 },
   rug4: { name: 'Grand rug', icon: '🧶', flat: 1, rug: 1, w: 4, h: 4, cost: 60, lvl: 4 }
 };
-// The cottage as it always was: what an old save, or a brand new home, starts with.
+// A new home: a plain 6 by 6 room with only the pieces that do something, and nothing to look at (no windows, rug, lamp or toys), so there
+// is something to want. Every piece here can be moved or put away. Homes saved before this keep the layout they were given.
 const HR_DEFAULTS = [
-  { uid: 'nap', id: 'nap', x: 1, y: 2 }, { uid: 'decorate', id: 'decorate', x: 3, y: 1 }, { uid: 'favs', id: 'favs', x: 4, y: 1 }, { uid: 'trophies', id: 'trophies', x: 6, y: 1 },
-  { uid: 'altar', id: 'altar', x: 7, y: 2 }, { uid: 'sand', id: 'sand', x: 2, y: 5 }, { uid: 'bonsai', id: 'bonsai', x: 7, y: 5 }, { uid: 'tidy', id: 'tidy', x: 1, y: 8 },
-  { uid: 'mail', id: 'mail', x: 7, y: 8 }, { uid: 'win1', id: 'window', x: 1, y: 1 }, { uid: 'win2', id: 'window', x: 7, y: 1 }, { uid: 'lamp1', id: 'sconce', x: 2, y: 1 },
-  { uid: 'clock1', id: 'clock', x: 5, y: 1 }, { uid: 'toys1', id: 'toys', x: 2, y: 8 }, { uid: 'rug1', id: 'rug3', x: 3, y: 5 }];
+  { uid: 'nap', id: 'nap', x: 1, y: 2 }, { uid: 'decorate', id: 'decorate', x: 2, y: 1 }, { uid: 'favs', id: 'favs', x: 3, y: 1 }, { uid: 'trophies', id: 'trophies', x: 5, y: 1 },
+  { uid: 'altar', id: 'altar', x: 6, y: 2 }, { uid: 'bonsai', id: 'bonsai', x: 6, y: 4 }, { uid: 'sand', id: 'sand', x: 1, y: 5 }, { uid: 'tidy', id: 'tidy', x: 1, y: 7 },
+  { uid: 'mail', id: 'mail', x: 6, y: 7 }];
 const homeRoom = { focus: null, drag: null, scene: null, host: null, world: null, player: null, ring: null, badge: null, ro: null, edit: null,
   t: 58, vw: 400, vh: 600, cx: 0, cy: 0, x: 4, y: 9, sel: null, walk: 0, hadModal: false,
   cols: 9, rows: 11, solid: new Map() };
@@ -118,13 +119,15 @@ function hrHome() {   // your cottage's saved state, filled in (and tidied) the 
   Object.keys(h.storage).forEach(k => { if (!HR_CATALOG[k] || !(h.storage[k] > 0)) delete h.storage[k]; });
   if (!Array.isArray(h.items)) h.items = HR_DEFAULTS.map(d => Object.assign({}, d));
   h.items = h.items.filter(i => i && hrDefOf(i.id) && Number.isFinite(i.x) && Number.isFinite(i.y) && typeof i.uid === 'string');
-  HR_DEFAULTS.forEach(d => { if (HR_CATALOG[d.id].act && !h.items.some(i => i.id === d.id)) h.items.push(Object.assign({}, d)); });   // a menu piece can never go missing
+  Object.keys(HR_CATALOG).forEach(id => { if (HR_CATALOG[id].act && !h.storage[id] && !h.items.some(i => i.id === id)) h.storage[id] = 1; });   // a piece that does something is never lost: if it is not in the room it is in storage
   if (!(h.nextUid > 0)) h.nextUid = 1;
   return h;
 }
 function hrIndex() {   // room size, and which tiles are blocked, from the saved layout
   const h = hrHome(), L = HR_LEVELS[h.level], r = homeRoom;
-  r.cols = L.fw + 2; r.rows = L.fh + 3; r.solid = new Map();
+  let fw = L.fw, fh = L.fh;
+  h.items.forEach(i => { const d = hrDefOf(i.id); fw = Math.max(fw, i.x + (d.w || 1) - 1); if (!d.wall) fh = Math.max(fh, i.y + (d.h || 1) - 2); });   // a home saved at an older, bigger size keeps every piece inside its walls
+  r.cols = fw + 2; r.rows = fh + 3; r.solid = new Map();
   h.items.forEach(i => { if (!hrDefOf(i.id).flat) r.solid.set(i.x + ',' + i.y, i); });
 }
 function hrMatY() { return homeRoom.rows - 2; }
@@ -423,7 +426,7 @@ function hrEditHtml() {
   if (e.tab === 'items') {
     if (it) {
       const d = hrDef(it);
-      s += `<div class="hr-h">${d.icon} ${d.name}</div>` + (d.act ? sceneBtn('hr:noop', 'It does something, so it stays in the house', true) : sceneBtn('hr:store', d.deco ? '📦 Put it back in your decorations' : '📦 Put it away')) + sceneBtn('hr:desel', 'Let go of it');
+      s += `<div class="hr-h">${d.icon} ${d.name}</div>` + sceneBtn('hr:store', d.deco ? '📦 Put it back in your decorations' : '📦 Put it away') + sceneBtn('hr:desel', 'Let go of it');
     } else if (e.pick) s += `<div class="hr-h">Placing</div>` + sceneBtn('hr:desel', `Cancel · ${hrDefOf(e.pick).name}`);
     else {
       const owned = Object.keys(home.storage);
@@ -456,7 +459,7 @@ function hrAction(act) {
   else if (what === 'place') { const d = hrDefOf(which); if (d && (d.deco ? decorationInventoryCount(d.deco) > 0 : home.storage[which])) { e.pick = which; e.sel = null; sfx('tap'); } }
   else if (what === 'store') {
     const it = hrSelected();
-    if (it && !hrDef(it).act) {
+    if (it) {
       home.items = home.items.filter(i => i.uid !== it.uid);
       if (hrDef(it).deco) hrDecoGive(hrDef(it).deco, 1); else home.storage[it.id] = (home.storage[it.id] || 0) + 1;   // a town decoration goes back to the town's inventory
       e.sel = null; sfx('tap'); hrCommit();
@@ -509,6 +512,8 @@ function hrSync() {
   sceneView.classList.toggle('hr-idle', !modal && !h.sel && !h.edit);
   h.host.classList.toggle('editing', !!h.edit);   // no browser panning while a drag moves the camera
   const btn = h.host.querySelector('.hr-edit-btn');
-  btn.classList.toggle('hidden', modal); btn.textContent = h.edit ? '✓ Done' : '🎨 Decorate';
+  btn.classList.toggle('hidden', modal);
+  const lost = unreadMail() && !hrHome().items.some(i => i.id === 'mail');   // letters are waiting but the mailbox is put away: say so on the button
+  btn.textContent = h.edit ? '✓ Done' : '🎨 Decorate' + (lost ? ' · 📬' : '');
   hrBadge(); hrMarks();
 }

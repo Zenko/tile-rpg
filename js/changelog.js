@@ -18,6 +18,8 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'better', x: 'A new home starts as a small, plain 6 by 6 room with only the pieces that do something and nothing to look at, so there is plenty to make your own. Levelling up now takes it through 7 by 8, 9 by 9, 10 by 11 and 12 by 12. A home you already decorated keeps the room it has.' },
+  { t:'better', x: 'Everything in your home can be moved or put away, the mailbox, bonsai, altar and the rest included. Put away pieces wait in Decorate → Items to be placed again, and the Decorate button shows a mailbox if letters are waiting while yours is put away.' },
   { t:'new', x: 'Decorations you bought for the town can go inside your home too. They are listed under Your decorations in Decorate → Items, and putting one away gives it back to your town decorations.' },
   { t:'better', x: 'While you decorate, drag the room to look around it, and tap to pick things up or put them down.' },
   { t:'new', x: 'Make your cottage your own. Tap Decorate in your cottage, then tap any piece to pick it up and tap where it should go, the mailbox, bonsai and altar included. Buy new furniture, put pieces away, and pick colours for the floor, walls and rug.' },
