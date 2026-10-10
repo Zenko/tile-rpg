@@ -18,6 +18,8 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'new', x: 'Decorations you bought for the town can go inside your home too. They are listed under Your decorations in Decorate → Items, and putting one away gives it back to your town decorations.' },
+  { t:'better', x: 'While you decorate, drag the room to look around it, and tap to pick things up or put them down.' },
   { t:'new', x: 'Make your cottage your own. Tap Decorate in your cottage, then tap any piece to pick it up and tap where it should go, the mailbox, bonsai and altar included. Buy new furniture, put pieces away, and pick colours for the floor, walls and rug.' },
   { t:'new', x: 'Your home has levels now. Spend Embers in Decorate → Room to level it up from 1 to 5: each level makes the floor bigger and reveals more colours and more furniture, from a cat and a cot to a fireplace and an indoor tree.' },
   { t:'better', x: 'The last button on a piece of furniture\'s menu in your cottage is now Close, which keeps you inside. The door is the way out.' },

@@ -1836,3 +1836,8 @@ body.no-charfx .pfx-chip, body.no-charfx .pfx-take { display: none; }
 .hr-sw:disabled { opacity: .45; cursor: default; }
 .hr-info { flex: none; display: grid; gap: 2px; padding: 10px 14px; border-radius: 14px; background: color-mix(in srgb, var(--hl) 5%, transparent); border: 1px solid var(--stone-edge); font-size: .86rem; }
 .hr-info span { color: var(--ink-soft); font-size: .8rem; }
+/* a town decoration placed in the home: its emoji on a soft shadow, like in town */
+.hr-prop.emoji::before { content: ''; position: absolute; left: 22%; bottom: 12%; width: 56%; height: 14%; border-radius: 50%; background: var(--tshadow); }
+.hr-prop.emoji { display: flex; align-items: center; justify-content: center; }
+.hr-prop.emoji > span { position: relative; font-size: calc(var(--t) * 0.6); line-height: 1; text-shadow: 0 2px 3px rgba(0,0,0,0.3); }
+.hr-room.editing { touch-action: none; cursor: grab; }

@@ -20,6 +20,8 @@
    - The layout is saved in state.progress.home: `items` (each { uid, id, x, y }; `id` is a key of HR_CATALOG), `storage` (owned
      pieces that are not placed, id -> count), `style` (floor / wall / rug palette ids) and `level` (1 to 5). Old saves have none of
      these and get the original layout (HR_DEFAULTS), so nothing about an old cottage changes until the player edits it.
+   - Town decorations (Shop -> Items) can be placed too: they are items with id 'deco:<id>' (hrDefOf), drawn as their emoji. Placing takes one
+     from state.decorationInventory and putting it away gives it back, so the town and the home share one stock.
    - Every piece can be moved, the menu pieces included. Menu pieces cannot be put away (the mailbox would be lost with its letters);
      everything else can go to storage and come back. A move is refused if it would cover the doormat, the player, or shut the door or
      any menu piece off from the player (hrPlaceError / hrReachOk). Wall pieces hang on the back wall (row 1), floor pieces stand on
@@ -27,6 +29,7 @@
    - Home level (HR_LEVELS) is bought with Embers, one step at a time. Each level makes the floor bigger (hrIndex: the room is the
      level's floor plus walls; the door stays in column 4 so saved positions never move) and reveals more floor, wall and rug colours
      (HR_FLOORS / HR_WALLS / HR_RUGS, `lvl`) and more furniture to buy (HR_CATALOG, `lvl`). Nothing is ever taken away.
+   - While decorating you cannot walk, so a drag pans the camera (hrDragMove) and a tap, decided when the finger lifts, picks up or puts down.
    - The Decorate panel is the scene's bottom sheet, with three tabs (Items, Colours, Room). Its buttons use the same `data-act`
      route as every other scene button: sceneAction() hands anything starting 'hr:' (or 'hr-close') to hrAction().
    Indoors has no seasons or weather: the colours are the .hr-room tokens in css/latest.css, overridden only by the chosen palette.
@@ -91,11 +94,20 @@ const HR_DEFAULTS = [
   { uid: 'altar', id: 'altar', x: 7, y: 2 }, { uid: 'sand', id: 'sand', x: 2, y: 5 }, { uid: 'bonsai', id: 'bonsai', x: 7, y: 5 }, { uid: 'tidy', id: 'tidy', x: 1, y: 8 },
   { uid: 'mail', id: 'mail', x: 7, y: 8 }, { uid: 'win1', id: 'window', x: 1, y: 1 }, { uid: 'win2', id: 'window', x: 7, y: 1 }, { uid: 'lamp1', id: 'sconce', x: 2, y: 1 },
   { uid: 'clock1', id: 'clock', x: 5, y: 1 }, { uid: 'toys1', id: 'toys', x: 2, y: 8 }, { uid: 'rug1', id: 'rug3', x: 3, y: 5 }];
-const homeRoom = { scene: null, host: null, world: null, player: null, ring: null, badge: null, ro: null, edit: null,
+const homeRoom = { focus: null, drag: null, scene: null, host: null, world: null, player: null, ring: null, badge: null, ro: null, edit: null,
   t: 58, vw: 400, vh: 600, cx: 0, cy: 0, x: 4, y: 9, sel: null, walk: 0, hadModal: false,
   cols: 9, rows: 11, solid: new Map() };
 
 /* ---------------- the saved layout ---------------- */
+// A town decoration (bought in Shop -> Items, counted in state.decorationInventory) placed in the home is an item whose id is
+// 'deco:<decoration id>'. It is drawn as its emoji, stands on the floor like any other piece and does nothing. Placing it takes one from
+// the same inventory the town uses and putting it away gives it back, so it can go out into town again. No home level is needed.
+function hrDefOf(id) {
+  if (HR_CATALOG[id]) return HR_CATALOG[id];
+  const d = typeof id === 'string' && id.startsWith('deco:') && DECORATION_ITEMS.find(x => x.id === id.slice(5));
+  return d ? { name: d.name, icon: d.icon, emoji: 1, deco: d.id } : null;
+}
+function hrDecoGive(id, n) { state.decorationInventory = state.decorationInventory || {}; state.decorationInventory[id] = Math.max(0, decorationInventoryCount(id) + n); }
 function hrHome() {   // your cottage's saved state, filled in (and tidied) the first time it is read
   const h = homeState(), pal = (list, id) => list.some(p => p.id === id) ? id : list[0].id;
   if (!(h.level >= 1 && h.level <= 5)) h.level = 1;
@@ -105,7 +117,7 @@ function hrHome() {   // your cottage's saved state, filled in (and tidied) the 
   if (!h.storage || typeof h.storage !== 'object') h.storage = {};
   Object.keys(h.storage).forEach(k => { if (!HR_CATALOG[k] || !(h.storage[k] > 0)) delete h.storage[k]; });
   if (!Array.isArray(h.items)) h.items = HR_DEFAULTS.map(d => Object.assign({}, d));
-  h.items = h.items.filter(i => i && HR_CATALOG[i.id] && Number.isFinite(i.x) && Number.isFinite(i.y) && typeof i.uid === 'string');
+  h.items = h.items.filter(i => i && hrDefOf(i.id) && Number.isFinite(i.x) && Number.isFinite(i.y) && typeof i.uid === 'string');
   HR_DEFAULTS.forEach(d => { if (HR_CATALOG[d.id].act && !h.items.some(i => i.id === d.id)) h.items.push(Object.assign({}, d)); });   // a menu piece can never go missing
   if (!(h.nextUid > 0)) h.nextUid = 1;
   return h;
@@ -113,11 +125,11 @@ function hrHome() {   // your cottage's saved state, filled in (and tidied) the 
 function hrIndex() {   // room size, and which tiles are blocked, from the saved layout
   const h = hrHome(), L = HR_LEVELS[h.level], r = homeRoom;
   r.cols = L.fw + 2; r.rows = L.fh + 3; r.solid = new Map();
-  h.items.forEach(i => { if (!HR_CATALOG[i.id].flat) r.solid.set(i.x + ',' + i.y, i); });
+  h.items.forEach(i => { if (!hrDefOf(i.id).flat) r.solid.set(i.x + ',' + i.y, i); });
 }
 function hrMatY() { return homeRoom.rows - 2; }
 function hrKind(x, y) { const r = homeRoom; return y === 0 ? 'wt' : y === 1 ? 'wb' : y === r.rows - 1 ? (x === HR_DOOR_X ? 'door' : 'ws') : (x === 0 || x === r.cols - 1) ? 'ws' : 'floor'; }
-function hrDef(it) { return HR_CATALOG[it.id]; }
+function hrDef(it) { return hrDefOf(it.id); }
 function hrItemAt(x, y) { return homeRoom.solid.get(x + ',' + y) || null; }
 function hrFlatAt(x, y) { return hrHome().items.find(i => { const d = hrDef(i); return d.flat && x >= i.x && x < i.x + (d.w || 1) && y >= i.y && y < i.y + (d.h || 1); }) || null; }
 function hrWalkable(x, y, solid) {
@@ -154,7 +166,7 @@ function hrReachOk(items) {
 }
 // Why a piece cannot go on that tile (a short sentence), or null when it can. `uid` is the piece being moved (null for a new one).
 function hrPlaceError(id, x, y, uid) {
-  const r = homeRoom, d = HR_CATALOG[id], h = hrHome(), w = d.w || 1, hh = d.h || 1;
+  const r = homeRoom, d = hrDefOf(id), h = hrHome(), w = d.w || 1, hh = d.h || 1;
   if (d.flat) {
     for (let dx = 0; dx < w; dx++) for (let dy = 0; dy < hh; dy++) if (hrKind(x + dx, y + dy) !== 'floor') return 'That has to lie on the floor.';
     const clash = h.items.some(i => i.uid !== uid && hrDef(i).flat && hrDef(i).rug && d.rug && x < i.x + (hrDef(i).w || 1) && i.x < x + w && y < i.y + (hrDef(i).h || 1) && i.y < y + hh);
@@ -192,7 +204,7 @@ function hrWorldHtml() {
   h.items.forEach(i => {
     const d = hrDef(i);
     if (d.rug) s += `<div class="hr-rug" style="left:calc(var(--t)*${i.x});top:calc(var(--t)*${i.y});width:calc(var(--t)*${d.w});height:calc(var(--t)*${d.h})"></div>`;
-    else s += `<div class="hr-prop${d.flat ? ' flat' : ''}${d.tall ? ' tall' : ''}" style="--x:${i.x};--y:${i.y}">${svgUse(d.spr)}</div>`;
+    else s += `<div class="hr-prop${d.flat ? ' flat' : ''}${d.tall ? ' tall' : ''}${d.emoji ? ' emoji' : ''}" style="--x:${i.x};--y:${i.y}">${d.emoji ? `<span>${d.icon}</span>` : svgUse(d.spr)}</div>`;
     if (d.glow) glows.push({ x: i.x + d.glow.dx, y: i.y + d.glow.dy, r: d.glow.r, day: d.glow.day });
   });
   s += `<div class="hr-prop deco door" style="--x:${HR_DOOR_X};--y:${r.rows - 1}">${svgUse('r-door')}</div><div class="hr-prop deco mat" style="--x:${HR_DOOR_X};--y:${hrMatY()}">${svgUse('r-mat')}</div>`;
@@ -214,6 +226,7 @@ function hrMount() {
   h.host = document.createElement('div'); h.host.className = 'hr-room'; stage.appendChild(h.host);
   hrFill();
   h.host.addEventListener('pointerdown', hrTap);
+  h.host.addEventListener('pointermove', hrDragMove); h.host.addEventListener('pointerup', hrDragEnd); h.host.addEventListener('pointercancel', () => { homeRoom.drag = null; });
   h.host.addEventListener('click', e => { if (e.target.closest('.hr-edit-btn')) hrToggleEdit(); });
   h.ro = new ResizeObserver(() => hrLayout()); h.ro.observe(h.host);
   hrLayout();
@@ -245,7 +258,8 @@ function hrLayout() {
 function hrCamera(snap) {
   const h = homeRoom; if (!h.world) return;
   const hud = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hud-h')) || 72, top = hud + 6, bottom = 8, avail = h.vh - top - bottom;
-  const px = (h.x + .5) * h.t, py = (h.y + .5) * h.t, rw = h.cols * h.t, rh = h.rows * h.t;
+  const f = h.edit && h.focus ? h.focus : { x: h.x + .5, y: h.y + .5 };   // decorating: the camera goes where you dragged it, not after the player
+  const px = f.x * h.t, py = f.y * h.t, rw = h.cols * h.t, rh = h.rows * h.t;
   h.cx = rw <= h.vw ? (h.vw - rw) / 2 : Math.max(h.vw - rw, Math.min(0, h.vw / 2 - px));
   h.cy = rh <= avail ? top + (avail - rh) / 2 : Math.max(h.vh - bottom - rh, Math.min(top, top + avail / 2 - py));
   h.world.classList.toggle('snap', !!snap || !btMotionOk());
@@ -279,7 +293,7 @@ function hrMarks() {
   }
   const e = h.edit, id = e && (e.pick || (it && it.id));
   if (!e || !id) return;
-  const def = HR_CATALOG[id], uid = e.pick ? null : it.uid; let html = '';
+  const def = hrDefOf(id), uid = e.pick ? null : it.uid; let html = '';
   for (let y = 0; y < h.rows; y++) for (let x = 0; x < h.cols; x++) {
     const [ox, oy] = def.flat ? hrAnchor(def, x, y) : [x, y];   // a rug is put down by its middle, so the tint marks the middle tile
     if (!hrPlaceError(id, ox, oy, uid) && !(it && it.x === ox && it.y === oy)) html += `<div class="hr-target" style="left:${x * h.t + 4}px;top:${y * h.t + 4}px;width:${h.t - 8}px;height:${h.t - 8}px"></div>`;
@@ -320,14 +334,30 @@ function hrGoTo(it) {
   if (!path) { toast('Something is in the way.'); return; }
   hrWalk(path, it);
 }
+function hrTileAt(e) { const h = homeRoom, r = h.host.getBoundingClientRect(); return [Math.floor((e.clientX - r.left - h.cx) / h.t), Math.floor((e.clientY - r.top - h.cy) / h.t)]; }
+function hrDragMove(e) {
+  const h = homeRoom, d = h.drag; if (!d || !h.edit) return;
+  const dx = e.clientX - d.x, dy = e.clientY - d.y;
+  if (!d.moved && Math.hypot(dx, dy) < 8) return;
+  d.moved = true; h.focus = { x: d.fx - dx / h.t, y: d.fy - dy / h.t }; hrCamera(true);
+}
+function hrDragEnd(e) {
+  const h = homeRoom, d = h.drag; h.drag = null;
+  if (!d || d.moved || !h.edit || !h.world) return;
+  const [tx, ty] = hrTileAt(e);
+  if (tx >= 0 && ty >= 0 && tx < h.cols && ty < h.rows) hrEditTap(tx, ty);
+}
 function hrPieceAt(tx, ty) { return hrItemAt(tx, ty) || (() => { const below = hrItemAt(tx, ty + 1); return below && hrDef(below).tall ? below : null; })(); }   // a tall piece's top half counts too
 function hrTap(e) {
   const h = homeRoom;
   if (!h.world || doorFading || !scene || scene.mode || scene.leaving || (e.target && e.target.closest && e.target.closest('.hr-edit-btn'))) return;   // a letter list or the shelves are open: the sheet is in charge
-  const r = h.host.getBoundingClientRect();
-  const tx = Math.floor((e.clientX - r.left - h.cx) / h.t), ty = Math.floor((e.clientY - r.top - h.cy) / h.t);
+  if (h.edit) {   // decorating: a drag moves the camera, a tap picks up or puts down (decided when the finger lifts)
+    h.drag = { x: e.clientX, y: e.clientY, fx: h.focus.x, fy: h.focus.y, moved: false };
+    try { h.host.setPointerCapture(e.pointerId); } catch (err) { /* a synthetic event has no pointer */ }
+    return;
+  }
+  const [tx, ty] = hrTileAt(e);
   if (tx < 0 || ty < 0 || tx >= h.cols || ty >= h.rows) return;
-  if (h.edit) { hrEditTap(tx, ty); return; }
   const item = hrPieceAt(tx, ty);
   if (item && !hrDef(item).act) return;   // a plant or a lamp does nothing; only the menu pieces are for using
   const path = item ? null : (hrWalkable(tx, ty) ? hrBfs(h.x, h.y, (x, y) => x === tx && y === ty) : null);
@@ -341,8 +371,9 @@ function hrToggleEdit() {
   const h = homeRoom; if (!scene || scene.id !== 'home' || scene.mode || doorFading) return;
   h.walk++; h.player.classList.remove('walking'); h.sel = null;
   h.edit = h.edit ? null : { tab: 'items', sel: null, pick: null };
+  h.focus = { x: h.x + .5, y: h.y + .5 }; h.drag = null;
   sfx('nav'); if (h.edit) showTipOnce('homeDecor');
-  renderScene();
+  renderScene(); hrCamera(true);
 }
 function hrEditTap(tx, ty) {
   const h = homeRoom, e = h.edit, home = hrHome();
@@ -354,17 +385,20 @@ function hrEditTap(tx, ty) {
   if (cur) hrPutDown(cur.id, cur, tx, ty);
 }
 function hrPutDown(id, cur, tx, ty) {   // a new piece from storage (cur null) or a move of `cur`, to the tile that was tapped
-  const h = homeRoom, e = h.edit, home = hrHome(), d = HR_CATALOG[id], [x, y] = d.flat ? hrAnchor(d, tx, ty) : [tx, ty];
+  const h = homeRoom, e = h.edit, home = hrHome(), d = hrDefOf(id), [x, y] = d.flat ? hrAnchor(d, tx, ty) : [tx, ty];
   const err = hrPlaceError(id, x, y, cur ? cur.uid : null);
   if (err) { toast(err); sfx('tie'); return; }
   if (cur) { cur.x = x; cur.y = y; }
-  else { home.storage[id]--; if (home.storage[id] <= 0) delete home.storage[id]; home.items.push({ uid: 'u' + home.nextUid++, id, x, y }); e.pick = null; }
+  else {
+    if (d.deco) { if (decorationInventoryCount(d.deco) < 1) { toast('You have none of those left.'); return; } hrDecoGive(d.deco, -1); }
+    else { home.storage[id]--; if (home.storage[id] <= 0) delete home.storage[id]; }
+    home.items.push({ uid: 'u' + home.nextUid++, id, x, y }); e.pick = null; }
   sfx('claim'); buzz(HAP.tap); hrCommit(); renderScene();
 }
 function hrEditHint() {
   const e = homeRoom.edit, it = hrSelected();
   const noun = n => n.replace(/^(the|your) /i, '').toLowerCase();   // 'Your bonsai' reads as 'the bonsai'
-  if (e.pick) return `Tap a spot to put the ${noun(HR_CATALOG[e.pick].name)} down.`;
+  if (e.pick) return `Tap a spot to put the ${noun(hrDefOf(e.pick).name)} down.`;
   if (it) return `Tap a spot to move the ${noun(hrDef(it).name)}, or use the buttons below.`;
   return { items: 'Tap a piece to move it, or pick something below to place.', colors: 'Choose the colours of your floor, walls and rug.', room: 'Make your home bigger and unlock more.' }[e.tab];
 }
@@ -389,11 +423,13 @@ function hrEditHtml() {
   if (e.tab === 'items') {
     if (it) {
       const d = hrDef(it);
-      s += `<div class="hr-h">${d.icon} ${d.name}</div>` + (d.act ? sceneBtn('hr:noop', 'It does something, so it stays in the house', true) : sceneBtn('hr:store', '📦 Put it away')) + sceneBtn('hr:desel', 'Let go of it');
-    } else if (e.pick) s += `<div class="hr-h">Placing</div>` + sceneBtn('hr:desel', `Cancel · ${HR_CATALOG[e.pick].name}`);
+      s += `<div class="hr-h">${d.icon} ${d.name}</div>` + (d.act ? sceneBtn('hr:noop', 'It does something, so it stays in the house', true) : sceneBtn('hr:store', d.deco ? '📦 Put it back in your decorations' : '📦 Put it away')) + sceneBtn('hr:desel', 'Let go of it');
+    } else if (e.pick) s += `<div class="hr-h">Placing</div>` + sceneBtn('hr:desel', `Cancel · ${hrDefOf(e.pick).name}`);
     else {
       const owned = Object.keys(home.storage);
       if (owned.length) s += '<div class="hr-h">In storage</div>' + owned.map(id => sceneBtn('hr:place:' + id, `${HR_CATALOG[id].icon} ${HR_CATALOG[id].name} · ×${home.storage[id]}`)).join('');
+      const decos = DECORATION_ITEMS.filter(d => decorationInventoryCount(d.id) > 0);
+      if (decos.length) s += '<div class="hr-h">Your decorations</div>' + decos.map(d => sceneBtn('hr:place:deco:' + d.id, `${d.icon} ${d.name} · ×${decorationInventoryCount(d.id)}`)).join('');
       const buy = Object.entries(HR_CATALOG).filter(([, d]) => d.cost).sort((a, b) => a[1].lvl - b[1].lvl || a[1].cost - b[1].cost);
       s += '<div class="hr-h">Buy</div>' + buy.map(([id, d]) => hrLocked(d.lvl)
         ? sceneBtn('hr:noop', `🔒 ${d.name} · Home Lv ${d.lvl}`, true) : sceneBtn('hr:buy:' + id, `${d.icon} ${d.name} · 🫧 ${d.cost}`, state.progress.pebbles < d.cost)).join('');
@@ -410,17 +446,21 @@ function hrEditHtml() {
 // Every button the room adds goes through here: 'hr-close' and 'hr:<what>:<which>'.
 function hrAction(act) {
   const h = homeRoom, home = hrHome(); if (!scene || scene.id !== 'home') return;
-  const [, what, which] = act === 'hr-close' ? ['hr', 'close'] : act.split(':');
+  const parts = act === 'hr-close' ? ['hr', 'close'] : act.split(':'), what = parts[1], which = parts.slice(2).join(':');   // 'hr:place:deco:planter' -> place, deco:planter
   const e = h.edit;
-  if (what === 'close') { if (e) { h.edit = null; } else { scene.mode = null; } h.sel = null; sfx('nav'); renderScene(); return; }
+  if (what === 'close') { if (e) { h.edit = null; h.drag = null; } else { scene.mode = null; } h.sel = null; sfx('nav'); renderScene(); hrCamera(true); return; }
   if (what === 'noop') return;
   if (!e) return;
   if (what === 'tab') { e.tab = which; e.sel = null; e.pick = null; sfx('nav'); }
   else if (what === 'desel') { e.sel = null; e.pick = null; sfx('nav'); }
-  else if (what === 'place') { if (home.storage[which]) { e.pick = which; e.sel = null; sfx('tap'); } }
+  else if (what === 'place') { const d = hrDefOf(which); if (d && (d.deco ? decorationInventoryCount(d.deco) > 0 : home.storage[which])) { e.pick = which; e.sel = null; sfx('tap'); } }
   else if (what === 'store') {
     const it = hrSelected();
-    if (it && !hrDef(it).act) { home.items = home.items.filter(i => i.uid !== it.uid); home.storage[it.id] = (home.storage[it.id] || 0) + 1; e.sel = null; sfx('tap'); hrCommit(); }
+    if (it && !hrDef(it).act) {
+      home.items = home.items.filter(i => i.uid !== it.uid);
+      if (hrDef(it).deco) hrDecoGive(hrDef(it).deco, 1); else home.storage[it.id] = (home.storage[it.id] || 0) + 1;   // a town decoration goes back to the town's inventory
+      e.sel = null; sfx('tap'); hrCommit();
+    }
   } else if (what === 'buy') {
     const d = HR_CATALOG[which];
     if (!d || !d.cost || hrLocked(d.lvl)) return;
@@ -467,6 +507,7 @@ function hrSync() {
     else { h.sel = null; acts.innerHTML = ''; scene.text = ''; txt.textContent = ''; }
   }
   sceneView.classList.toggle('hr-idle', !modal && !h.sel && !h.edit);
+  h.host.classList.toggle('editing', !!h.edit);   // no browser panning while a drag moves the camera
   const btn = h.host.querySelector('.hr-edit-btn');
   btn.classList.toggle('hidden', modal); btn.textContent = h.edit ? '✓ Done' : '🎨 Decorate';
   hrBadge(); hrMarks();
