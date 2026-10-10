@@ -153,6 +153,7 @@ const GUIDE = [
     { icon: '🎈', name: 'Town mood', where: 'Shown on signs and prop menus', how: 'Every interaction fills the district\'s mood. At 10, 25 and 50 it dresses up for good: balloons, flower pots, then lamps that glow all night.' },
     { icon: '✨', name: 'Night critters', where: 'Every district, after dark', how: 'Tap a glowing critter to catch it. Trade them at the Lantern Market.' },
     { icon: '👻', name: 'Companions', where: 'Character → Companion', how: 'Any card you own, any neighbour (at full hearts) or boss you have met, and Rook can walk with you, once you are high enough level. Each lends small perks and your bond with each is kept. Tap your companion to go for a walk, calm down, spar, play tic-tac-toe or Spirit Trumps, play Hide and Seek, chat, pet, talk or duel.' },
+    { icon: '✨', name: 'Your glow and sparkles', where: 'Around your character in town', how: 'The little things floating around you are earned. Flames: a win streak of 3 or more. Hearts: a companion you are close with (Trusted bond or better). Rings: a district you have calmed today. If you qualify for more than one you see flames first, then hearts, then rings; at night they also get a soft glow. In rain and storms a few drops bounce off you. Settings → Character effects turns them all off.' },
     { icon: '🎒', name: 'Inventory', where: 'Character → Pantry', how: 'Pantry ingredients, cooked dishes, seeds and spare decorations, all in one list - tap Plant or Place to use one right from there.' },
   ] },
   { section: 'Neighbors', items: [
@@ -216,7 +217,7 @@ const GUIDE = [
 // its own details in place, same idiom as mail-item/cl-entry.
 let guideOpen = {}, guideQuery = '', guideSection = 'all';   // guideSection: 'all' or a GUIDE section name
 // Items added in the v1.81-1.89 releases wear a NEW tag until they have been opened once (state.progress.guideSeen).
-const GUIDE_NEW = ['Wren points the way', 'Who goes first', 'Card families', 'New keywords', 'The world in battle', "Dreamer’s Gift", 'Draft Run', 'Lingering duels', 'Embers and soft limits'];
+const GUIDE_NEW = ['Your glow and sparkles', 'Wren points the way', 'Who goes first', 'Card families', 'New keywords', 'The world in battle', "Dreamer’s Gift", 'Draft Run', 'Lingering duels', 'Embers and soft limits'];
 function guideSeen() { const p = state.progress; if (!p.guideSeen || typeof p.guideSeen !== 'object') p.guideSeen = {}; return p.guideSeen; }
 // Redesign (build 93): roomier cards (icon tile, name, a "where" chip, details on tap), a Today card split into
 // labelled rows instead of one paragraph, and section chips pinned under the search box. Searching ignores the chip

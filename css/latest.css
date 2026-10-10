@@ -1722,6 +1722,20 @@ body.no-charfx .pl-tint, body.no-charfx .pl-wet, body.no-charfx .pl-frost, body.
 .cs-name { font-size: 1.3rem; }
 .cs-sub { font-size: 0.78rem; }
 
-/* no character particles: the aura's rising hearts, flames and rings (its soft night glow stays), and no wet sheen on the figure in rain */
-.pl-aura i { display: none !important; }
+/* full art is the default look: small cards (battle, collection tiles) get the painted scene behind a larger hero */
+.fa-card { isolation: isolate; }
+.fa-bg { position: absolute; inset: 0; z-index: -1; overflow: hidden; border-radius: inherit; pointer-events: none; }
+.fa-bg img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+/* rain on the figure: no sheen layer, just a few drops that bounce off her shoulders and hat (only in rain and storm) */
 .pl-view .pl-wet { display: none !important; }
+.pl-splash { position: absolute; left: 0; right: 0; top: 14%; height: 30%; pointer-events: none; z-index: 5; display: none; }
+.town-view[data-wx="rain"] .pl-splash, .town-view[data-wx="storm"] .pl-splash { display: block; }
+.pl-splash i { position: absolute; top: 0; width: calc(var(--t) * 0.05); height: calc(var(--t) * 0.05); border-radius: 50%; background: rgba(214, 238, 255, 0.85); opacity: 0; animation: pl-bounce 1.7s ease-out infinite; }
+.pl-splash i:nth-child(1) { left: 30%; --bx: -0.2; animation-delay: 0s; }
+.pl-splash i:nth-child(2) { left: 66%; --bx: 0.22; animation-delay: .55s; }
+.pl-splash i:nth-child(3) { left: 46%; --bx: -0.1; animation-delay: 1.05s; }
+.pl-splash i:nth-child(4) { left: 54%; --bx: 0.12; animation-delay: 1.4s; }
+@keyframes pl-bounce { 0% { transform: translate(0, 0) scale(.6); opacity: 0; } 12% { opacity: .75; } 40% { transform: translate(calc(var(--t) * var(--bx) * .6), calc(var(--t) * -.16)) scale(1); opacity: .7; } 100% { transform: translate(calc(var(--t) * var(--bx)), calc(var(--t) * .12)) scale(.5); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .pl-splash { display: none !important; } }
+body.no-charfx .pl-splash { display: none !important; }

@@ -373,6 +373,7 @@ const CARD_ART = [
 ];
 CARD_POOL.concat(FOE_CARDS, TOKEN_CARDS).forEach(c => { if (CARD_ART.includes(c.id) && !c.art) c.art = 'assets/cards/' + c.id + '.png'; });
 function cardArtHtml(def, cls) {
+  if (typeof hasFullArt === 'function' && hasFullArt(def)) return `<img class="card-art-img fa-small${cls ? ' ' + cls : ''}" src="${fullArtUrl(def, 'hero')}" alt="${escapeHtml(def.name)}">`;   // full art is the default look (js/full-art.js)
   return def.art
     ? `<img class="card-art-img${cls ? ' ' + cls : ''}" src="${def.art}" alt="${escapeHtml(def.name)}">`
     : `<span class="card-emoji${cls ? ' ' + cls : ''}">${def.icon}</span>`;

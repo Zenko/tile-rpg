@@ -27,6 +27,10 @@ function hasFullArt(def) {
   return !!def && FULL_ART_RARITIES.includes(def.rarity) && FULL_ART.includes(BattleEngine.baseIdOf(def.id));
 }
 
+function fullArtUrl(def, part) { return `assets/cards/full/${BattleEngine.baseIdOf(def.id)}-${part}.${FULL_ART_EXT}`; }
+// The painted scene as a card's backdrop, for the small faces (battle cards, collection tiles). '' for a card without full art.
+function fullArtBgHtml(def) { return hasFullArt(def) ? `<span class="fa-bg" aria-hidden="true"><img src="${fullArtUrl(def, 'scene')}" alt="" draggable="false"></span>` : ''; }
+
 // Turns a card face (.reveal-card built from cardFaceHtml) into its full art version. Returns true when it did.
 function fullArtApply(face, def) {
   if (!face || !hasFullArt(def)) return false;

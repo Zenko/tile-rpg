@@ -19,7 +19,9 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
   { t:'better', x: 'The card details sheet now shows the card large at the top, with its full art when the card has it, and the name, owned counts and story centred underneath.' },
-  { t:'better', x: 'Your drawn character no longer has little hearts, flames or rings floating around her, and no wet highlight on her side in the rain.' },
+  { t:'new', x: 'A new Town Guide entry, Your glow and sparkles, explains what the flames, hearts and rings around your character mean and how to earn them.' },
+  { t:'better', x: 'In rain and storms a few soft drops now bounce off your character instead of the old wet sheen on her side.' },
+  { t:'better', x: 'Every card that has full art now shows it by default: the painted scene sits behind the card and the detailed subject replaces the plain icon, in battle, in your collection and in the deck builder.' },
   { t:'new', x: 'Alyn is a new drawn character, picked from the avatar rows like the others. She is drawn from every angle, so she turns smoothly instead of snapping: when you change direction she swings round through the in-between angles, and when you tap a neighbour, a door or a crop she turns to face it, even diagonally.' },
   { t:'new', x: 'On the Character screen you can drag Alyn sideways to turn her all the way round (or use the left and right arrow keys). A few seconds after you let go she turns back to face you.' },
   { t:'better', x: 'Your drawn characters have a soft moonlit colour wash: deep blue at the feet fading to pale sky blue at the top of the hair, so they sit better in the town.' },

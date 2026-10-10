@@ -386,6 +386,7 @@ function btCardEl(c, cls, mine) {
     ? `<div class="cost">${c.cost}</div><div class="icon">${cardArtHtml(def)}</div><div class="paper"><div class="nm">${def.name}</div><div class="spell-tag">✨ Spell</div></div>`
     : `<div class="cost">${c.cost}</div><div class="icon">${cardArtHtml(def)}</div>${c.kw.length ? `<div class="kws">${c.kw.map(k => `<span>${KW[k].icon}</span>`).join('')}</div>` : ''}
     <div class="paper"><div class="nm">${def.name}</div><div class="stats"><span class="pw">⚔${c.power}</span><span class="hp ${c.hp < c.grit ? 'hurt' : ''}">♥${c.hp}</span></div></div>`;
+  if (hasFullArt(def)) { el.classList.add('fa-card'); el.insertAdjacentHTML('afterbegin', fullArtBgHtml(def)); }
   const sleeve = mine ? currentSleeve() : null;
   const mr = mine && !(battle && battle.neutral) ? masteryRank(c.id) : 0;
   if (mine && hasFoil(c.id)) el.classList.add('foil');

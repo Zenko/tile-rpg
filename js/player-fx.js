@@ -45,6 +45,7 @@ function pfxPlayer(prev, now, animate) {
   if (typeof nlLamps !== 'undefined' && nlLamps && skyPhase().isNight) nlLamps.forEach(l => { const d = Math.hypot(l.x - now.x, l.y - now.y); if (d <= 3.2 && (!best || d < best.d)) best = { d }; });
   if (best) playerEl.style.setProperty('--pl-tint', `rgba(255,208,140,${(0.16 + 0.22 * (1 - best.d / 3.2)).toFixed(2)})`);
   else playerEl.style.removeProperty('--pl-tint');
+  if (!playerEl.querySelector('.pl-splash')) playerEl.insertAdjacentHTML('beforeend', '<div class="pl-splash" aria-hidden="true"><i></i><i></i><i></i><i></i></div>');
   // the aura
   let aura = '';
   try {
