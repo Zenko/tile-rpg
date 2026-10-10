@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pickup reaction lab</title>
+<!-- Sandbox like pixi-lab.html: not linked from index.html, not cached by sw.js, nothing in the game uses it yet.
+     Seven ideas for how the character reacts after a card or item popup closes (instead of the hop). Pick the loot with the chips. -->
+<style>
+  :root { --bg: #14202b; --panel: #1d2c3a; --ink: #eef3f6; --soft: #9db0be; --edge: #2f4456; --accent: #8fd0c0; --grass: #5b8f58; --grass2: #6fa56a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.4 system-ui, sans-serif; padding: 16px 16px 40px; max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 1.25rem; margin: 6px 0 4px; }
+  p.sub { margin: 0 0 14px; color: var(--soft); font-size: .85rem; }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 14px; position: sticky; top: 0; background: var(--bg); padding: 8px 0; z-index: 5; }
+  .chip, .play { border: 1px solid var(--edge); background: var(--panel); color: var(--ink); border-radius: 999px; padding: 8px 14px; font: inherit; cursor: pointer; }
+  .chip[aria-pressed="true"] { background: var(--accent); color: #10211c; border-color: transparent; font-weight: 700; }
+  .play { background: var(--accent); color: #10211c; font-weight: 700; border-color: transparent; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+  .card { background: var(--panel); border: 1px solid var(--edge); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; }
+  .card h2 { font-size: .95rem; margin: 12px 14px 2px; }
+  .card small { color: var(--soft); margin: 0 14px 8px; font-size: .78rem; }
+  .stage { position: relative; height: 230px; margin: 0 10px; border-radius: 14px; overflow: hidden; background: linear-gradient(#27465a, #31566a 55%, var(--grass) 55%, var(--grass2)); cursor: pointer; }
+  .card .play { margin: 10px 14px 14px; }
+
+  /* the figure: 100px tile, like --t in the game */
+  .ent { --t: 100px; position: absolute; left: 50%; bottom: 26px; width: 82px; height: 126px; margin-left: -41px; }
+  .ent::before { content: ''; position: absolute; left: 12%; right: 12%; bottom: -4px; height: 10px; border-radius: 50%; background: rgba(0,0,0,.28); }
+  .rig { position: absolute; inset: 0; transform-origin: 50% 100%; }
+  .rig img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; user-select: none; -webkit-user-drag: none; }
+  .fx { position: absolute; pointer-events: none; }
+  :root { --rc: 255, 214, 120; }
+  [data-r="common"] { --rc: 200, 220, 210; } [data-r="rare"] { --rc: 170, 150, 235; } [data-r="mythic"] { --rc: 240, 130, 175; } [data-r="divine"] { --rc: 255, 214, 110; }
+
+  /* 1 glow ring */
+  .ring { left: 50%; bottom: 0; width: 20px; height: 20px; margin-left: -10px; border-radius: 50%; border: 3px solid rgba(var(--rc), .9); box-shadow: 0 0 18px 4px rgba(var(--rc), .55), inset 0 0 14px rgba(var(--rc), .5); opacity: 0; transform-origin: 50% 50%; transform: scale(.4) scaleY(.4); }
+  .go-ring .ring { animation: ring 1.1s ease-out; }
+  .go-ring .ring.r2 { animation-delay: .22s; }
+  @keyframes ring { 0% { opacity: .95; transform: scale(.4) scaleY(.4); } 100% { opacity: 0; transform: scale(7) scaleY(2.4); } }
+  .go-ring .rig { animation: lift .9s ease-out; }
+  @keyframes lift { 0%,100% { filter: none; } 25% { filter: drop-shadow(0 0 10px rgba(var(--rc), .9)) brightness(1.12); } }
+
+  /* 2 look at the loot: she dips and tilts, pauses, rises */
+  .go-look .rig { animation: look 1.5s ease-in-out; }
+  @keyframes look { 0%,100% { transform: none; } 20%,70% { transform: translateY(3px) rotate(-5deg) scale(1, .975); } 85% { transform: translateY(-3px) scale(1.01, 1.02); } }
+  .glint { left: 54%; bottom: 52px; width: 22px; height: 22px; margin-left: -11px; opacity: 0; }
+  .glint::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle, #fff 0 12%, rgba(var(--rc), .9) 14%, rgba(var(--rc), 0) 60%); }
+  .go-look .glint { animation: glint 1.5s ease-in-out; }
+  @keyframes glint { 0%,10% { opacity: 0; transform: translate(-30px, 10px) scale(.4); } 30%,70% { opacity: 1; transform: translate(0, 0) scale(1); } 100% { opacity: 0; transform: translate(0, -10px) scale(.6); } }
+
+  /* 3 sparkle shower */
+  .spk { top: -10px; width: 8px; height: 8px; background: rgb(var(--rc)); box-shadow: 0 0 8px 2px rgba(var(--rc), .8); transform: rotate(45deg); opacity: 0; }
+  .go-shower .spk { animation: fall var(--d) ease-in var(--l) forwards; }
+  @keyframes fall { 0% { opacity: 0; transform: translate(0, -10px) rotate(45deg) scale(.6); } 15% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--x), 150px) rotate(225deg) scale(.9); } }
+
+  /* 4 pocket it */
+  .orb { left: 50%; top: 18px; width: 30px; height: 40px; margin-left: -15px; border-radius: 6px; background: linear-gradient(135deg, rgb(var(--rc)), #fff); border: 2px solid #fff; box-shadow: 0 0 14px rgba(var(--rc), .9); opacity: 0; }
+  .go-pocket .orb { animation: pocket 1s cubic-bezier(.5, 0, .7, .4) forwards; }
+  @keyframes pocket { 0% { opacity: 0; transform: translate(-40px, 20px) scale(1.5) rotate(-12deg); } 15% { opacity: 1; } 85% { opacity: 1; transform: translate(0, 90px) scale(.5) rotate(6deg); } 100% { opacity: 0; transform: translate(0, 100px) scale(.2); } }
+  .go-pocket .rig { animation: absorb .5s ease-out .85s; }
+  @keyframes absorb { 0%,100% { transform: none; } 35% { transform: scale(1.08, .92); } 70% { transform: scale(.98, 1.04); } }
+
+  /* 5 bubble emote */
+  .bubble { left: 50%; top: 14px; width: 54px; height: 44px; margin-left: -4px; border-radius: 14px; background: #fff; color: #222; display: flex; align-items: center; justify-content: center; font-size: 24px; opacity: 0; transform-origin: 20% 100%; box-shadow: 0 3px 8px rgba(0,0,0,.3); }
+  .bubble::after { content: ''; position: absolute; left: 10px; bottom: -8px; border: 8px solid transparent; border-top-color: #fff; border-bottom: 0; }
+  .go-bubble .bubble { animation: pop 1.6s ease-out; }
+  @keyframes pop { 0% { opacity: 0; transform: scale(.2); } 14% { opacity: 1; transform: scale(1.15); } 22% { transform: scale(1); } 80% { opacity: 1; transform: translateY(-3px); } 100% { opacity: 0; transform: translateY(-8px) scale(.9); } }
+
+  /* 6 breathing beat */
+  .go-breath .rig { animation: breath 1.8s ease-in-out; }
+  @keyframes breath { 0%,100% { transform: none; filter: none; } 35%,60% { transform: scale(1.025, 1.045); filter: brightness(1.12) saturate(1.1) drop-shadow(0 0 6px rgba(var(--rc), .6)); } }
+
+  /* 7 scale by rarity: ring + glow for rare and up, a tiny sparkle for common */
+  .mini { left: 58%; bottom: 100px; width: 6px; height: 6px; background: #fff; box-shadow: 0 0 6px 2px rgba(var(--rc), .8); transform: rotate(45deg); opacity: 0; }
+  .go-tiered .mini { animation: mini .9s ease-out; }
+  .go-tiered[data-tier="big"] .mini { display: none; }
+  .go-tiered[data-tier="small"] .ring, .go-tiered[data-tier="small"] .big { display: none; }
+  .go-tiered[data-tier="big"] .ring { animation: ring 1.1s ease-out; }
+  .go-tiered[data-tier="big"] .rig { animation: lift .9s ease-out; }
+  @keyframes mini { 0% { opacity: 0; transform: translateY(6px) rotate(45deg) scale(.4); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-16px) rotate(45deg) scale(.9); } }
+
+  @media (prefers-reduced-motion: reduce) { .fx, .rig { animation: none !important; } }
+  .note { color: var(--soft); font-size: .78rem; margin-top: 18px; }
+</style>
+</head>
+<body>
+<h1>Pickup reaction lab</h1>
+<p class="sub">Seven ways she could react once a card or item popup closes. Tap a stage (or its button) to replay. The chips change the loot's rarity, which tints the effect.</p>
+<div class="bar" id="bar">
+  <span id="chips"></span>
+  <button class="play" id="all">Play all</button>
+</div>
+<div class="grid" id="grid"></div>
+<p class="note">The prototype uses Alyn's front view. In the game these would hook in where <code>pfxHop()</code> is called (js/player-fx.js), and honour the Character effects switch and reduced motion.</p>
+
+<script>
+const IDEAS = [
+  ['ring',    '1 · Glow ring',        'A warm ring expands from her feet, tinted by rarity.'],
+  ['look',    '2 · Look at the loot', 'She dips her head toward the item, a glint, then straightens.'],
+  ['shower',  '3 · Sparkle shower',   'A short drift of sparkles falls over her.'],
+  ['pocket',  '4 · Pocket it',        'A little card arcs from the popup into her, she takes it in.'],
+  ['bubble',  '5 · Bubble emote',     'A small ✨ bubble above her head for a second.'],
+  ['breath',  '6 · Breathing beat',   'A slow chest rise with a warm tint. Very subtle.'],
+  ['tiered',  '7 · Scale by rarity',  'Common: one tiny sparkle. Rare and up: the glow ring.'],
+];
+const RARITIES = ['common', 'rare', 'mythic', 'divine'];
+let rarity = 'mythic';
+const $ = s => document.querySelector(s);
+const SRC = 'assets/player/alyn/front.png';
+
+$('#chips').innerHTML = RARITIES.map(r => `<button class="chip" data-r="${r}" aria-pressed="${r === rarity}">${r}</button>`).join(' ');
+$('#chips').addEventListener('click', e => {
+  const b = e.target.closest('.chip'); if (!b) return;
+  rarity = b.dataset.r;
+  document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', c.dataset.r === rarity));
+  document.querySelectorAll('.stage').forEach(s => s.dataset.r = rarity);
+});
+
+function extras(id) {
+  if (id === 'ring') return '<i class="fx ring"></i><i class="fx ring r2"></i>';
+  if (id === 'look') return '<i class="fx glint"></i>';
+  if (id === 'shower') return Array.from({ length: 16 }, () => `<i class="fx spk" style="left:${(Math.random() * 90 - 5).toFixed(0)}%;--x:${(Math.random() * 40 - 20).toFixed(0)}px;--d:${(0.8 + Math.random() * 0.7).toFixed(2)}s;--l:${(Math.random() * 0.7).toFixed(2)}s"></i>`).join('');
+  if (id === 'pocket') return '<i class="fx orb"></i>';
+  if (id === 'bubble') return '<i class="fx bubble">✨</i>';
+  if (id === 'tiered') return '<i class="fx ring"></i><i class="fx mini"></i>';
+  return '';
+}
+$('#grid').innerHTML = IDEAS.map(([id, name, desc]) => `
+  <div class="card"><h2>${name}</h2><small>${desc}</small>
+    <div class="stage" data-id="${id}" data-r="${rarity}"><div class="ent"><div class="rig"><img src="${SRC}" alt="" draggable="false"></div>${extras(id)}</div></div>
+    <button class="play" data-id="${id}">Replay</button></div>`).join('');
+
+function play(id) {
+  const st = document.querySelector(`.stage[data-id="${id}"]`), cls = 'go-' + id;
+  if (id === 'shower') st.querySelectorAll('.spk').forEach(s => { s.style.left = (Math.random() * 90 - 5).toFixed(0) + '%'; s.style.setProperty('--x', (Math.random() * 40 - 20).toFixed(0) + 'px'); });
+  if (id === 'tiered') st.dataset.tier = rarity === 'common' ? 'small' : 'big';
+  st.classList.remove(cls); void st.offsetWidth; st.classList.add(cls);
+  clearTimeout(st._t); st._t = setTimeout(() => st.classList.remove(cls), 2200);
+}
+$('#grid').addEventListener('click', e => { const t = e.target.closest('[data-id]'); if (t) play(t.dataset.id); });
+$('#all').addEventListener('click', () => IDEAS.forEach(([id], i) => setTimeout(() => play(id), i * 150)));
+setTimeout(() => $('#all').click(), 400);
+</script>
+</body>
+</html>
