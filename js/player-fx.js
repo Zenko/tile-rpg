@@ -13,7 +13,7 @@
    - Motes: fireflies at night and drifting leaves by day in `.pfx-motes`, a screen-space layer above the sky. Hidden in rain and snow.
    - Auras: `.pl-aura` behind the sprite, one per state: a win streak of 3+ (flames), a companion at Trusted or better (hearts), a
      district made calm today (rings). Priority in that order.
-   - Emote: a small bubble pops up above her head when a card reveal or level-up screen closes, showing the card (or a star) she just got.
+   - Pocket it: when a card reveal or level-up screen closes, the card (or a star) arcs from the middle of the screen into her and she takes it in.
    - Dissolve: walking into a building burns the figure away in embers (the same SVG filter trick as a fainting card in js/battle-fx.js);
      coming back out re-forms it in blue sparks. */
 const pfxOn = () => prefs.charFx !== false;
@@ -91,18 +91,37 @@ function pfxEnsureMotes() {
   townView.insertAdjacentHTML('beforeend', h + '</div>');
 }
 
-// ---- emote: when a reveal or level-up popup closes, a little bubble pops up over her head showing what she just got ----
-// `pfxLoot` is set by whatever opened the popup (showCardReveal: the card's own art and rarity; the level-up popup: a star).
-let pfxLoot = null, pfxEmoteTimer = 0;
+// ---- pocket it: when a reveal or level-up popup closes, what she got (the card, or a star) arcs from the middle of the screen into her and she takes it in ----
+// `pfxLoot` is set by whatever opened the popup (showCardReveal: the card's own art and rarity; the level-up popup: a star). Web Animations on a throwaway
+// fixed element, so nothing in the town is touched; a short squash and a rarity-coloured ring on her when it lands.
+let pfxLoot = null;
 const PFX_RARITY_RGB = { common: '200,220,210', rare: '170,150,235', ultra: '120,185,235', super: '240,190,110', mythic: '240,130,175', divine: '235,180,40', atlas: '143,122,217' };
 function pfxEmote() {
   const loot = pfxLoot || { html: '\u2728' }; pfxLoot = null;
-  if (!playerEl || !pfxMotion() || inBattle || inScene) return;
+  if (!playerEl || !pfxMotion() || inBattle || inScene || typeof playerEl.animate !== 'function') return;
   const spr = playerEl.querySelector('.pl-sprite'); if (spr && spr.classList.contains('pl-gone')) return;
-  playerEl.querySelectorAll('.pl-bubble').forEach(e => e.remove()); clearTimeout(pfxEmoteTimer);
-  playerEl.insertAdjacentHTML('beforeend', `<div class="pl-bubble" aria-hidden="true" style="--rc:${PFX_RARITY_RGB[loot.r] || '255,214,120'}"><span>${loot.html}</span></div>`);
-  playerEl.classList.add('pl-emoting');
-  pfxEmoteTimer = setTimeout(() => { playerEl.querySelectorAll('.pl-bubble').forEach(e => e.remove()); playerEl.classList.remove('pl-emoting'); }, 1800);
+  const pr = playerEl.getBoundingClientRect(); if (!pr.width) return;
+  const rgb = PFX_RARITY_RGB[loot.r] || '255,214,120', W = 40, H = 54;
+  const tx = pr.left + pr.width / 2 - W / 2, ty = pr.top - pr.height * 0.1 - H / 2;          // her chest
+  const sx = window.innerWidth / 2 - W / 2, sy = window.innerHeight * 0.4 - H / 2;            // where the popup's card was
+  const chip = document.createElement('div'); chip.className = 'pfx-chip'; chip.setAttribute('aria-hidden', 'true'); chip.style.setProperty('--rc', rgb);
+  chip.innerHTML = `<span>${loot.html}</span>`; document.body.appendChild(chip);
+  const arc = chip.animate([
+    { transform: `translate(${sx}px, ${sy}px) scale(1.7) rotate(-10deg)`, opacity: 0 },
+    { transform: `translate(${sx}px, ${sy}px) scale(1.7) rotate(-10deg)`, opacity: 1, offset: 0.15 },
+    { transform: `translate(${(sx + tx) / 2 + (tx > sx ? -30 : 30)}px, ${Math.min(sy, ty) - 36}px) scale(1.1) rotate(8deg)`, opacity: 1, offset: 0.55 },
+    { transform: `translate(${tx}px, ${ty}px) scale(0.35) rotate(0deg)`, opacity: 1, offset: 0.93 },
+    { transform: `translate(${tx}px, ${ty}px) scale(0.2)`, opacity: 0 }
+  ], { duration: 950, easing: 'cubic-bezier(.45, 0, .7, .5)', fill: 'forwards' });
+  const done = () => {
+    chip.remove();
+    const rig = spr && spr.querySelector('.pl-rig');
+    if (rig) rig.animate([{ transform: 'none' }, { transform: 'scale(1.09, .92)', offset: 0.35 }, { transform: 'scale(.98, 1.04)', offset: 0.7 }, { transform: 'none' }], { duration: 480, easing: 'ease-out' });
+    const ring = document.createElement('div'); ring.className = 'pfx-take'; ring.style.setProperty('--rc', rgb);
+    ring.style.left = (pr.left + pr.width / 2) + 'px'; ring.style.top = (pr.top + pr.height * 0.6) + 'px'; document.body.appendChild(ring);
+    ring.animate([{ transform: 'translate(-50%, -50%) scale(.3)', opacity: 0.9 }, { transform: 'translate(-50%, -50%) scale(2.6)', opacity: 0 }], { duration: 650, easing: 'ease-out' }).onfinish = () => ring.remove();
+  };
+  arc.onfinish = done; arc.oncancel = () => chip.remove();
 }
 function pfxWatchPopups() {
   ['pickupOverlay', 'levelUpOverlay'].forEach(id => {

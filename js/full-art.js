@@ -31,6 +31,23 @@ function fullArtUrl(def, part) { return `assets/cards/full/${BattleEngine.baseId
 // The painted scene as a card's backdrop, for the small faces (battle cards, collection tiles). '' for a card without full art.
 function fullArtBgHtml(def) { return hasFullArt(def) ? `<span class="fa-bg" aria-hidden="true"><img src="${fullArtUrl(def, 'scene')}" alt="" draggable="false"></span>` : ''; }
 
+// Full art is the default look everywhere a card is drawn. cardArtHtml (js/data-and-engine.js) already swaps in the detailed subject; this adds the
+// painted scene behind any small card that holds one, wherever it was built (deck tray and strip, Workshop, Almanac, sets, the inspect sheet, draft offers).
+// Battle cards and collection tiles add theirs when they are built. One observer on the page, so no template needs to know.
+const FULL_ART_HOLDERS = '.card-mini, .alm-card, .ins-card, .draft-opt .reveal-card';
+function fullArtDecorate(root) {
+  if (!root || root.nodeType !== 1) return;
+  root.querySelectorAll('img.fa-small').forEach(img => {
+    const card = img.closest(FULL_ART_HOLDERS); if (!card || card.querySelector(':scope > .fa-bg')) return;
+    card.classList.add('fa-card');
+    card.insertAdjacentHTML('afterbegin', `<span class="fa-bg" aria-hidden="true"><img src="${img.getAttribute('src').replace('-hero.', '-scene.')}" alt="" draggable="false"></span>`);
+  });
+}
+if (typeof MutationObserver === 'function') {
+  new MutationObserver(list => list.forEach(m => m.addedNodes.forEach(n => { if (n.nodeType !== 1) return; if (n.matches('img.fa-small')) fullArtDecorate(n.parentElement); else if (n.querySelector('img.fa-small')) fullArtDecorate(n); })))
+    .observe(document.documentElement, { childList: true, subtree: true });
+}
+
 // Turns a card face (.reveal-card built from cardFaceHtml) into its full art version. Returns true when it did.
 function fullArtApply(face, def) {
   if (!face || !hasFullArt(def)) return false;

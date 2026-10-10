@@ -153,12 +153,12 @@ hubEl().addEventListener('click', e => {
   else if (act === 'back') drawCompanionHub();
   else if (act === 'walk') { closeCompanionHub(); whenInTown(startCompanionWalk); }
   else if (act === 'calm') { closeCompanionHub(); openCalm(); }
-  else if (act === 'sit') { closeCompanionHub(); calmSit(c.name); }
+  else if (act === 'sit') { closeCompanionHub(); whenInTown(() => calmSit(c.name)); }
   else if (act === 'hide') { closeCompanionHub(); whenInTown(() => { showTipOnce('companionPlay'); startHideSeek(); }); }
   else if (act === 'spar') companionHubBody(`<p class="chb-note">A friendly match. You earn XP win or lose, and there are no prizes.</p>
     <button class="chb-act" data-chb="spar-mirror"><span class="chb-ai">🪞</span><b>Mirror match</b><small>They play a copy of your deck.</small></button>
     <button class="chb-act" data-chb="spar-own"><span class="chb-ai">🃏</span><b>Their own deck</b><small>${companionKind(c) === 'card' || companionKind(c) === 'npc' ? 'Built around who they are.' : 'The deck they are known for.'}</small></button>`);
-  else if (act === 'spar-mirror' || act === 'spar-own') { closeCompanionHub(); startCompanionSpar(act === 'spar-own' ? 'own' : 'mirror'); }
+  else if (act === 'spar-mirror' || act === 'spar-own') { closeCompanionHub(); whenInTown(() => startCompanionSpar(act === 'spar-own' ? 'own' : 'mirror')); }   // from Character -> Companion the battle needs the town screen under it, or part of the tab shows through
   else if (act === 'games') companionHubBody(`<p class="chb-note">Small rewards for playing, and a little more bond the first time each day.</p>
     <button class="chb-act" data-chb="game-ttt"><span class="chb-ai">⭕</span><b>Tic-tac-toe</b><small>Your spirit against theirs.</small></button>
     <button class="chb-act" data-chb="game-trumps"><span class="chb-ai">🂠</span><b>Spirit Trumps</b><small>Five rounds, five of your cards.</small></button>`);

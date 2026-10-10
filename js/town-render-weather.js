@@ -948,6 +948,7 @@ function grantHiddenCard(label) {
 function decorationAt(data, x, y) { return (data.decorations || []).find(d => d.x === x && d.y === y) || null; }
 function handleMapTap(tx, ty) {
   if (inBattle || inScene) return;
+  if (typeof calmSitting !== 'undefined' && calmSitting) return;   // sitting on a bench: she stays put until you stand up (js/calm.js)
   if (HIDESEEK.active) { handleHideSeekTap(tx, ty); return; }
   if (companionWalkActive()) { stopCompanionWalk('tap'); return; }      // any tap ends a walk with your companion
   if (placingDecoration) { handleDecorationTap(tx, ty); return; }

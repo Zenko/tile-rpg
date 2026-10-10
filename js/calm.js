@@ -62,14 +62,14 @@ function calmNote(freq, vol, dur) { if (prefs.sound && typeof bell === 'function
 function openCalm(act) {
   if (inBattle) return;
   ensureAudio && ensureAudio();
-  calmReset(); calmSitting = false; document.body.classList.remove('calm-sit');
+  calmReset(); calmSitting = false; document.body.classList.remove('calm-sit'); if (typeof playerEl !== 'undefined' && playerEl) playerEl.classList.remove('sitting');
   const el = calmEl(); el.classList.remove('hidden', 'sit'); calmCur = act || 'hub'; sfx('nav'); buzz(HAP.tap);
   showTipOnce('calm');
   calmRender();
 }
 function closeCalm(toHub) {
   calmReset();
-  if (calmSitting) { calmSitting = false; document.body.classList.remove('calm-sit'); }
+  if (calmSitting) { calmSitting = false; document.body.classList.remove('calm-sit'); if (typeof playerEl !== 'undefined' && playerEl) playerEl.classList.remove('sitting'); }
   if (toHub && calmCur && calmCur !== 'hub') { calmCur = 'hub'; calmRender(); return; }
   calmEl().classList.add('hidden'); calmCur = null; sfx('tap');
 }
@@ -260,19 +260,47 @@ function calmBonsai(body) {
   draw();
 }
 
-/* ---------- sitting on a bench ---------- */
+/* ---------- sitting on a bench ----------
+   She stays put (taps, drags and walks are ignored in js/town-render-weather.js) and settles into a sitting pose; the town eases in a little
+   and the edges darken. A small card at the bottom says who you are resting with, how long you have sat, and a line that fits the moment:
+   the weather, the hour, the season or your companion. After a minute it says you are rested. Nothing is earned or lost by staying. */
+function calmSitLines(company) {
+  const L = CALM_SIT_LINES.slice();
+  const wx = typeof townView !== 'undefined' && townView && townView.dataset.wx, ph = typeof skyPhase === 'function' ? skyPhase() : null;
+  if (wx === 'rain' || wx === 'storm') L.push('Rain taps the roofs, one house at a time.', 'A puddle catches a lamp and keeps it.', 'The rain is in no hurry, and neither are you.');
+  else if (wx === 'snow') L.push('Snow settles on the bench rail.', 'Everything sounds softer under the snow.');
+  else if (wx === 'cloudy') L.push('The clouds are taking their time today.');
+  if (ph && ph.isNight) L.push('The lamps hum. Somewhere a window goes dark.', 'The stars come out one at a time, as if asked.');
+  else L.push('Warm light on the cobbles, slowly moving.');
+  if (typeof seasonNow === 'function' && seasonNow() === 'autumn') L.push('A leaf lands on your sleeve and stays.');
+  if (company && state.companion && typeof companionTalk === 'function') { try { L.push(companionTalk(state.companion), companionTalk(state.companion)); } catch (e) { /* no line */ } }
+  return L;
+}
 function calmSit(company) {
   if (inBattle) return;
+  if (typeof cancelWalk === 'function') cancelWalk();
+  if (typeof setChase === 'function') setChase(null);
+  if (typeof companionWalkActive === 'function' && companionWalkActive()) stopCompanionWalk('sit');
+  if (typeof pendingWalk !== 'undefined') pendingWalk = null;
   calmReset(); calmCur = 'sit'; calmSitting = true; const el = calmEl(); el.classList.remove('hidden'); el.classList.add('sit'); document.body.classList.add('calm-sit');
+  if (typeof playerEl !== 'undefined' && playerEl) { playerEl.classList.remove('walking'); playerEl.classList.add('sitting'); }
+  calmSitCompany = company || '';
   calmRender();
-  if (company) document.getElementById('calmSitSay').textContent = `${company} settles in beside you.`;
 }
+let calmSitCompany = '';
 function calmSitView(body) {
-  body.innerHTML = `<div class="calm-sit-say" id="calmSitSay">You sit for a while.</div><button type="button" class="calm-btn" id="cStand">Stand up</button>`;
-  const say = document.getElementById('calmSitSay'); let i = 0;
-  calmEvery(() => { say.classList.add('fade'); setTimeout(() => { say.textContent = CALM_SIT_LINES[i++ % CALM_SIT_LINES.length]; say.classList.remove('fade'); }, 600); }, 8000);
+  const who = calmSitCompany;
+  body.innerHTML = `<div class="calm-sit-card">
+      <div class="calm-sit-top"><span class="calm-sit-dot" aria-hidden="true"></span><span id="calmSitWho">${who ? `Resting with ${who}` : 'Resting on the bench'}</span><span id="calmSitTime">0:00</span></div>
+      <div class="calm-sit-say" id="calmSitSay">${who ? `${who} settles in beside you.` : 'You sit for a while.'}</div>
+      <button type="button" class="calm-btn" id="cStand">Stand up</button></div>`;
+  const say = document.getElementById('calmSitSay'), time = document.getElementById('calmSitTime'), t0 = Date.now(); let last = '';
+  const next = () => { const L = calmSitLines(who).filter(x => x !== last); last = L[Math.floor(Math.random() * L.length)]; return last; };
+  calmEvery(() => { say.classList.add('fade'); setTimeout(() => { say.textContent = next(); say.classList.remove('fade'); }, 600); }, 9000);
+  calmEvery(() => { const s = Math.floor((Date.now() - t0) / 1000); time.textContent = s >= 60 ? 'Rested ✓' : `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; time.classList.toggle('rested', s >= 60); }, 1000);
   document.getElementById('cStand').addEventListener('click', () => closeCalm());
 }
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && calmSitting) closeCalm(); });
 
 document.getElementById('calmClose').addEventListener('click', () => closeCalm());
 document.getElementById('calmBack').addEventListener('click', () => closeCalm(true));
