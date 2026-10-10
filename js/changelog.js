@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'fixed', x: 'A flash of the town behind the card popup (most noticeable when you meet a wandering spirit) should be gone: the dimmed background no longer drops out for a moment right after the popup opens.' },
   { t:'better', x: 'When a card or level-up popup closes, what you got now arcs from the middle of the screen into your character, who takes it in with a little squash and a ring in the card\'s rarity colour. It only happens when you actually get something, a card or a level-up, or Embers and ingredients you pick up in town, never when you are just looking at a card or meeting a wandering spirit. (It replaces the hop.)' },
   { t:'better', x: 'Sitting on a bench is calmer and actually keeps you still: taps no longer walk you off, and she settles into a sitting pose while the town eases in and the edges darken. A small card shows who you are resting with, how long you have sat (it says Rested after a minute) and a line that fits the moment: the rain, the hour, the season or your companion. Escape or Stand up gets you going again.' },
   { t:'better', x: 'Rain puddles are now uneven pools that hold a little sky, with rain rings spreading across them.' },
