@@ -31,9 +31,11 @@ module.exports = async (page, assert) => {
     const start = Object.assign({}, state.playerPos), r = {};
     startCompanionWalk();
     r.on = companionWalkActive(); r.slow = STEP_MS; r.pill = !document.getElementById('compWalkPill').classList.contains('hidden');
-    await new Promise(res => setTimeout(res, 3400));
-    r.moved = Math.abs(state.playerPos.x - start.x) + Math.abs(state.playerPos.y - start.y) > 0 || CWALK.steps > 0;
-    r.bubble = !!document.querySelector('.ent.companion .comp-bubble');
+    // each leg picks a random target and can come up empty for a couple of seconds (it retries), so wait for the first step and the chat bubble instead of a fixed 3.4s
+    const t0 = Date.now(), moved = () => Math.abs(state.playerPos.x - start.x) + Math.abs(state.playerPos.y - start.y) > 0 || CWALK.steps > 0, bubble = () => !!document.querySelector('.ent.companion .comp-bubble');
+    while (Date.now() - t0 < 9000 && !(moved() && bubble())) await new Promise(res => setTimeout(res, 100));
+    r.moved = moved();
+    r.bubble = bubble();
     CWALK.started -= 70000; CWALK.steps = Math.max(CWALK.steps, 25);       // pretend it has been a proper walk
     const bond0 = state.companion.bond || 0;
     handleMapTap(0, 0);
