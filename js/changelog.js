@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'fixed', x: 'Rain puddles now stay on the ground: neighbours, items, crops, decorations and your character are drawn over a puddle instead of it covering them.' },
 ];
 
 const RELEASES = [

@@ -255,7 +255,9 @@ function lifeRenderEntities(data, add) {
       }
       LIFE.puddles[d] = { key, tiles }; LIFE.splashed.clear();
     }
-    LIFE.puddles[d].tiles.forEach(t => add('life-puddle', t.x, t.y, ''));
+    // A puddle is part of the ground, so it sits under everything that stands or walks on its tile (neighbors, items, crops, decorations,
+    // you). Every other entity is at row * 2 + 1, and a puddle added later would paint over them.
+    LIFE.puddles[d].tiles.forEach(t => { add('life-puddle', t.x, t.y, '').style.zIndex = 0; });
   } else delete LIFE.puddles[d];
   // birds: by day, in dry weather only
   if (!night && !wet) {
