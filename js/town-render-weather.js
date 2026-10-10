@@ -908,7 +908,7 @@ function interactWith(kind, t) {
     bumpStat('spiritsMet', 1);
     const cloudy = weatherIs('cloudy') || eventIs('spirit-parade');   // overcast days (and the Spirit Parade) bring spirits closer: double XP
     if (cloudy) addXP(XP_PER_STAT.spiritsMet);
-    showCardReveal(t.cardId, 'A card spirit appears', false, t.story + (cloudy ? ' ☁️ The clouds make it linger.' : ''), XP_PER_STAT.spiritsMet * (cloudy ? 2 : 1));
+    showCardReveal(t.cardId, 'A card spirit appears', false, t.story + (cloudy ? ' ☁️ The clouds make it linger.' : ''), XP_PER_STAT.spiritsMet * (cloudy ? 2 : 1), { view: true });   // meeting a spirit gives you nothing to carry, so no pocket-it effect
     {                                                   // this one could come along, if you own its card and are high enough level
       const inv = document.getElementById('pickupInvite'), e = cardEntry(t.cardId), why = companionBlock(e);
       const same = state.companion && companionKey(state.companion) === (e && e.key);
