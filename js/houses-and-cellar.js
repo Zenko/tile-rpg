@@ -462,6 +462,7 @@ function mountShopView(view) {
   setShopView(view);
 }
 function closeScene() {
+  hrLeave();                                          // js/home-room.js: put the cottage room away
   mountShopView(null);
   miniStop();
   inScene = false; scene = null; if (typeof memory !== 'undefined') { memory = null; memoryLeaveStage(); }
@@ -698,6 +699,7 @@ function sceneBtn(id, label, disabled) {
 const SCENE_EXIT_ACTS = ['leave', 'back', 'mg-back', 'wings-back', 'exp-cancel'];
 function renderScene() {
   renderSceneBody();
+  hrSync();                                           // js/home-room.js: your cottage is a walkable room (does nothing anywhere else)
   // The storefront layout (v1.77.0) is for the ordinary "talk to the owner" screens; mini-games, the memory game and the
   // Card Shop counter keep the compact layout because they fill the stage with their own content.
   sceneView.classList.toggle('sc-std', !!scene && !['memory-mode', 'mini-mode', 'shop-mode'].some(c => sceneView.classList.contains(c)));

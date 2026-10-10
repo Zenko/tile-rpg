@@ -1782,3 +1782,41 @@ body.no-charfx .pfx-chip, body.no-charfx .pfx-take { display: none; }
    block in the flow, which pushed the art and name panel down a whole card height, so the subject hung out below the card. */
 #battleView .card.sleeved.fa > .fa-scene { position: absolute !important; z-index: 0 !important; }
 #battleView .card.sleeved.fa > .icon { position: static !important; }
+
+/* ===== Your cottage as a room (js/home-room.js) =====
+   Inside your own cottage the stage is a small tile map you walk around, drawn with the town's own tile recipe (.town-tile), props
+   from assets/sprites.js (the r-* symbols) and the same drawn character. The scene's own bubble and bottom sheet still carry what
+   a piece of furniture does, so every cottage action works exactly as before. Interiors have no seasons or weather: these tokens are
+   fixed, in the same muted range as the meadow biome the town uses. Everything that moves is transform (the camera) or left/top
+   on one entity, like the town. */
+.hr-room {
+  --plank:#8e7148; --plank2:#6f5836; --trunk:#5b4632; --door:#4f3624; --window:#e0c574; --wall:#c9bda6; --wall2:#a89b83;
+  --roof:#a5503d; --roof2:#8a4231; --stone:#76756f; --stone2:#5c5b56; --stone3:#8d8c85; --flower1:#d97896; --flower2:#dcbd58; --flower3:#dedede;
+  --lamp:#ffcf66; --tshadow:rgba(0,0,0,.32); --leaf1:#2f6a48; --leaf2:#3c8058; --leaf3:#57a274; --water:#2d5b70; --water2:#4a86a0; --bread:#c08a4c;
+  --cloth:#7d6bb0; --sky:#a9d3de; --day:#d6e6d8;
+  --floor1:#7f6542; --floor2:#7a6140; --floor3:#846a46; --wall-up:#a39278; --wainscot:#5a452d; --wall-side:#43341f; --rug:#2f6068; --rug2:#244a52;
+  position: absolute; inset: 0; overflow: hidden; background: #12161b; cursor: pointer; touch-action: manipulation;
+}
+.hr-world { position: absolute; left: 0; top: 0; will-change: transform; }
+.hr-world.snap { transition: none !important; }
+.town-tile.hr-f1 { background: var(--floor1); } .town-tile.hr-f2 { background: var(--floor2); } .town-tile.hr-f3 { background: var(--floor3); }
+.town-tile.hr-wt { background: var(--wall-up); } .town-tile.hr-wb { background: var(--wainscot); } .town-tile.hr-ws { background: var(--wall-side); }
+.hr-prop { position: absolute; left: calc(var(--x) * var(--t)); top: calc(var(--y) * var(--t)); width: var(--t); height: var(--t); pointer-events: none; z-index: calc(var(--y) * 10); }
+.hr-prop .spr { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.hr-prop.tall .spr { inset: auto; left: 0; top: -50%; height: 150%; }
+.hr-prop.deco { z-index: 1; } .hr-prop.deco.tall { z-index: 4; } .hr-prop.deco.door { z-index: 5; }
+.hr-rug { position: absolute; z-index: 2; border-radius: calc(var(--t) * .16); background: var(--rug); box-shadow: inset 0 0 0 calc(var(--t) * .07) var(--rug2); pointer-events: none; }
+.hr-rug::after { content: ''; position: absolute; inset: calc(var(--t) * .16); border-radius: calc(var(--t) * .08); border: 2px dashed rgba(224,197,116,.7); }
+.hr-glow { position: absolute; border-radius: 50%; pointer-events: none; z-index: 400; background: radial-gradient(circle, rgba(255,207,102,.34), rgba(255,207,102,0) 66%); }
+.hr-glow.day { background: radial-gradient(circle, rgba(214,230,216,.30), rgba(214,230,216,0) 66%); }
+.hr-ring { position: absolute; z-index: 300; border: 2px solid var(--accent, #e8cb88); border-radius: 8px; pointer-events: none; animation: hr-ring 1.1s ease-in-out infinite; }
+@keyframes hr-ring { 50% { opacity: .45; } }
+.hr-badge { position: absolute; z-index: 450; min-width: calc(var(--t) * .3); height: calc(var(--t) * .3); padding: 0 3px; border-radius: 999px; background: #c8534a; color: #fff; font-size: calc(var(--t) * .2); font-weight: 800; line-height: 1; display: grid; place-items: center; pointer-events: none; box-shadow: 0 1px 3px rgba(0,0,0,.5); }
+.hr-vignette { position: absolute; inset: 0; pointer-events: none; z-index: 5; background: radial-gradient(ellipse at 50% 55%, rgba(0,0,0,0) 55%, rgba(8,6,3,.42) 100%); }
+.hr-player { position: absolute; }
+/* the scene around the room: the title sign, rug and old shelf belong to the emoji stage, which the room replaces */
+#sceneView.room-on .sc-rug, #sceneView.room-on .sc-who, #sceneView.room-on .home-shelf, #sceneView.room-on .sc-head { display: none; }
+#sceneView.room-on .sc-stage { background: #12161b; }
+#sceneView.room-on.hr-idle .sc-stage { height: auto; flex: 1 1 auto; min-height: 0; box-shadow: none; }
+#sceneView.room-on.hr-idle .sc-actions, #sceneView.room-on.hr-idle .sc-bubble { display: none; }
+@media (prefers-reduced-motion: reduce) { .hr-ring { animation: none; } }

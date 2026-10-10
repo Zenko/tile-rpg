@@ -117,4 +117,77 @@ document.write(`<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute
   <path d="M40 120 V84 Q40 60 64 60 Q88 60 88 84 V120 Z" style="fill:var(--stone3);"/>
   <path d="M46 120 V86 Q46 66 64 66 Q82 66 82 86 V120 Z" style="fill:var(--cellar-in);"/>
   <rect x="26" y="70" width="4" height="22" rx="1.5" style="fill:var(--trunk);"/><circle cx="28" cy="96" r="7" style="fill:var(--lamp);opacity:.3"/><rect x="24" y="90" width="8" height="10" rx="2.5" style="fill:var(--lamp);"/>
-  <circle cx="20" cy="98" r="5" style="fill:var(--leaf1);"/><circle cx="106" cy="100" r="6" style="fill:var(--leaf1);"/><circle cx="102" cy="96" r="2.4" style="fill:var(--flower1);"/></symbol></defs></svg>`);
+  <circle cx="20" cy="98" r="5" style="fill:var(--leaf1);"/><circle cx="106" cy="100" r="6" style="fill:var(--leaf1);"/><circle cx="102" cy="96" r="2.4" style="fill:var(--flower1);"/></symbol>
+/* ---- your cottage as a room (js/home-room.js): furniture and floor grain, drawn like the props above. Colours come from the .hr-room tokens in css/latest.css. ---- */
+<symbol id="r-plank-a" viewBox="0 0 64 64"><g style="fill:none;stroke:#000;stroke-width:1.5;opacity:.16"><path d="M0 21H64M0 42H64"/></g><ellipse cx="14" cy="10" rx="3" ry="1.6" style="fill:#000;opacity:.12"/><ellipse cx="46" cy="52" rx="2.6" ry="1.4" style="fill:#000;opacity:.12"/></symbol>
+<symbol id="r-plank-b" viewBox="0 0 64 64"><g style="fill:none;stroke:#000;stroke-width:1.5;opacity:.16"><path d="M0 21H64M0 42H64"/></g><ellipse cx="48" cy="30" rx="3" ry="1.6" style="fill:#000;opacity:.12"/><ellipse cx="18" cy="54" rx="2.6" ry="1.4" style="fill:#000;opacity:.12"/></symbol>
+<symbol id="r-window" viewBox="0 0 64 96">
+  <rect x="12" y="20" width="40" height="52" rx="4" style="fill:var(--plank2);"/><rect x="16" y="24" width="32" height="44" rx="2" style="fill:var(--sky);"/>
+  <path d="M32 24V68M16 46H48" style="stroke:var(--plank2);stroke-width:3"/><circle cx="24" cy="34" r="3.2" style="fill:#fff;opacity:.55"/>
+  <rect x="7" y="18" width="12" height="32" rx="5" style="fill:var(--roof);"/><rect x="45" y="18" width="12" height="32" rx="5" style="fill:var(--roof);"/>
+  <rect x="9" y="72" width="46" height="6" rx="2.5" style="fill:var(--plank);"/></symbol>
+<symbol id="r-sconce" viewBox="0 0 64 96">
+  <circle cx="32" cy="46" r="20" style="fill:var(--lamp);opacity:.22"/>
+  <rect x="26" y="52" width="12" height="4" rx="2" style="fill:var(--stone2);"/><rect x="22" y="56" width="20" height="5" rx="2" style="fill:var(--stone2);"/>
+  <rect x="26" y="36" width="12" height="16" rx="4" style="fill:var(--lamp);"/><polygon points="24,37 32,29 40,37" style="fill:var(--stone2);"/></symbol>
+<symbol id="r-clock" viewBox="0 0 64 96">
+  <circle cx="32" cy="52" r="15" style="fill:var(--wall);"/><circle cx="32" cy="52" r="15" style="fill:none;stroke:var(--plank2);stroke-width:3.4"/>
+  <path d="M32 52V43M32 52L38 56" style="fill:none;stroke:var(--trunk);stroke-width:2.2;stroke-linecap:round"/><circle cx="32" cy="52" r="1.8" style="fill:var(--trunk);"/></symbol>
+<symbol id="r-shelf" viewBox="0 0 64 96">
+  <ellipse cx="32" cy="90" rx="25" ry="4" style="fill:var(--tshadow);"/>
+  <rect x="9" y="18" width="46" height="72" rx="4" style="fill:var(--plank);"/><rect x="13" y="22" width="38" height="64" rx="2" style="fill:var(--door);"/>
+  <rect x="13" y="43" width="38" height="4" style="fill:var(--plank);"/><rect x="13" y="65" width="38" height="4" style="fill:var(--plank);"/>
+  <g><rect x="15" y="28" width="5" height="15" rx="1" style="fill:var(--flower1);"/><rect x="21" y="30" width="5" height="13" rx="1" style="fill:var(--water2);"/><rect x="27" y="27" width="6" height="16" rx="1" style="fill:var(--flower2);"/><rect x="34" y="31" width="5" height="12" rx="1" style="fill:var(--leaf3);"/><rect x="40" y="28" width="6" height="15" rx="1" style="fill:var(--roof);"/></g>
+  <circle cx="22" cy="58" r="6" style="fill:var(--wall);"/><rect x="31" y="50" width="9" height="15" rx="1.5" style="fill:var(--leaf2);"/><rect x="41" y="55" width="6" height="10" rx="1.5" style="fill:var(--flower3);"/>
+  <g><rect x="15" y="74" width="9" height="12" rx="1" style="fill:var(--water2);"/><rect x="25" y="72" width="6" height="14" rx="1" style="fill:var(--flower1);"/><rect x="32" y="75" width="7" height="11" rx="1" style="fill:var(--flower2);"/><rect x="40" y="73" width="6" height="13" rx="1" style="fill:var(--leaf3);"/></g></symbol>
+<symbol id="r-frames" viewBox="0 0 64 96">
+  <path d="M24 28V34M43 40V46" style="stroke:var(--trunk);stroke-width:1.6;fill:none"/>
+  <rect x="12" y="34" width="22" height="30" rx="3" style="fill:var(--lamp);"/><rect x="15" y="37" width="16" height="24" rx="1.5" style="fill:var(--flower1);"/><circle cx="23" cy="47" r="4.4" style="fill:#fff;opacity:.75"/><rect x="18" y="54" width="10" height="3" rx="1.5" style="fill:#fff;opacity:.55"/>
+  <rect x="35" y="46" width="19" height="26" rx="3" style="fill:var(--lamp);"/><rect x="38" y="49" width="13" height="20" rx="1.5" style="fill:var(--water2);"/><circle cx="44.5" cy="57" r="3.6" style="fill:#fff;opacity:.75"/></symbol>
+<symbol id="r-trophy" viewBox="0 0 64 96">
+  <ellipse cx="32" cy="90" rx="25" ry="4" style="fill:var(--tshadow);"/>
+  <rect x="10" y="18" width="44" height="72" rx="4" style="fill:var(--plank);"/><rect x="14" y="22" width="36" height="64" rx="2" style="fill:var(--door);"/>
+  <rect x="14" y="22" width="36" height="64" rx="2" style="fill:#bfe0e6;opacity:.22"/>
+  <rect x="14" y="43" width="36" height="3.5" style="fill:var(--plank);"/><rect x="14" y="65" width="36" height="3.5" style="fill:var(--plank);"/>
+  <path d="M24 29H40L38 37H26Z" style="fill:var(--lamp);"/><rect x="30.5" y="37" width="3" height="4" style="fill:var(--lamp);"/><rect x="26" y="40" width="12" height="3" rx="1" style="fill:var(--lamp);"/>
+  <circle cx="24" cy="57" r="5" style="fill:var(--lamp);"/><rect x="22" y="60" width="4" height="5" style="fill:var(--roof);"/><circle cx="39" cy="57" r="5" style="fill:var(--wall);"/>
+  <path d="M18 72H29L28 80H19Z M35 74H46L45 82H36Z" style="fill:var(--lamp);"/><rect x="16" y="24" width="4" height="58" rx="2" style="fill:#fff;opacity:.12"/></symbol>
+<symbol id="r-armchair" viewBox="0 0 64 64">
+  <ellipse cx="32" cy="57" rx="24" ry="4" style="fill:var(--tshadow);"/>
+  <rect x="12" y="18" width="40" height="34" rx="11" style="fill:var(--roof2);"/>
+  <rect x="7" y="32" width="12" height="23" rx="6" style="fill:var(--roof);"/><rect x="45" y="32" width="12" height="23" rx="6" style="fill:var(--roof);"/>
+  <rect x="16" y="36" width="32" height="17" rx="7" style="fill:var(--roof);"/><rect x="19" y="22" width="26" height="16" rx="7" style="fill:var(--roof);"/>
+  <rect x="21" y="39" width="22" height="9" rx="4.5" style="fill:var(--bread);"/>
+  <rect x="13" y="54" width="5" height="5" rx="1.5" style="fill:var(--trunk);"/><rect x="46" y="54" width="5" height="5" rx="1.5" style="fill:var(--trunk);"/></symbol>
+<symbol id="r-altar" viewBox="0 0 64 64">
+  <circle cx="32" cy="14" r="20" style="fill:var(--lamp);opacity:.22"/>
+  <ellipse cx="32" cy="58" rx="22" ry="4" style="fill:var(--tshadow);"/>
+  <rect x="14" y="30" width="36" height="27" rx="5" style="fill:var(--stone);"/><rect x="10" y="26" width="44" height="10" rx="4" style="fill:var(--cloth);"/>
+  <rect x="29" y="12" width="6" height="15" rx="2" style="fill:var(--flower3);"/><ellipse cx="32" cy="8" rx="3.2" ry="5.5" style="fill:var(--lamp);"/>
+  <circle cx="19" cy="24" r="3.2" style="fill:var(--flower1);"/><ellipse cx="45" cy="25" rx="3.6" ry="2.6" style="fill:var(--stone3);"/></symbol>
+<symbol id="r-sand" viewBox="0 0 64 64">
+  <ellipse cx="32" cy="57" rx="26" ry="4" style="fill:var(--tshadow);"/>
+  <rect x="7" y="28" width="50" height="27" rx="7" style="fill:var(--plank2);"/><rect x="11" y="32" width="42" height="19" rx="4.5" style="fill:var(--wall);"/>
+  <path d="M19 42q13-9 26 0M17 47q15-12 30 0" style="fill:none;stroke:var(--wall2);stroke-width:1.8;stroke-linecap:round"/>
+  <ellipse cx="32" cy="41" rx="5.4" ry="3.6" style="fill:var(--stone);"/><ellipse cx="21" cy="37" rx="3" ry="2" style="fill:var(--stone3);"/></symbol>
+<symbol id="r-bonsai" viewBox="0 0 64 64">
+  <ellipse cx="32" cy="58" rx="19" ry="4" style="fill:var(--tshadow);"/>
+  <rect x="21" y="40" width="22" height="16" rx="4" style="fill:var(--roof);"/><rect x="19" y="37" width="26" height="6" rx="2.5" style="fill:var(--roof2);"/>
+  <path d="M32 39q-7-10 1-20" style="fill:none;stroke:var(--trunk);stroke-width:3.6;stroke-linecap:round"/>
+  <circle cx="33" cy="19" r="11" style="fill:var(--leaf1);"/><circle cx="22" cy="28" r="7.5" style="fill:var(--leaf2);"/><circle cx="44" cy="28" r="7.5" style="fill:var(--leaf2);"/><circle cx="30" cy="12" r="6.5" style="fill:var(--leaf3);"/></symbol>
+<symbol id="r-basket" viewBox="0 0 64 64">
+  <ellipse cx="32" cy="57" rx="22" ry="4" style="fill:var(--tshadow);"/>
+  <rect x="13" y="29" width="38" height="26" rx="9" style="fill:var(--plank);"/><rect x="13" y="29" width="38" height="8" rx="4" style="fill:var(--bread);"/>
+  <path d="M22 38V54M32 38V54M42 38V54" style="stroke:var(--plank2);stroke-width:1.6;opacity:.6"/>
+  <circle cx="24" cy="27" r="6.5" style="fill:var(--flower1);"/><rect x="33" y="17" width="12" height="12" rx="2.4" style="fill:var(--water2);"/></symbol>
+<symbol id="r-mail" viewBox="0 0 64 64">
+  <ellipse cx="32" cy="58" rx="24" ry="4" style="fill:var(--tshadow);"/>
+  <rect x="11" y="29" width="42" height="9" rx="3.5" style="fill:var(--plank);"/><rect x="14" y="36" width="36" height="20" rx="4" style="fill:var(--plank2);"/>
+  <g transform="rotate(-9 26 24)"><rect x="17" y="17" width="17" height="12" rx="2" style="fill:var(--wall);"/><circle cx="25.5" cy="23" r="2.2" style="fill:var(--flower1);"/></g>
+  <g transform="rotate(8 41 22)"><rect x="32" y="15" width="18" height="12" rx="2" style="fill:var(--flower3);"/><path d="M33 17l8 5 8-5" style="fill:none;stroke:var(--wall2);stroke-width:1.4"/></g></symbol>
+<symbol id="r-door" viewBox="0 0 64 64"><rect x="8" y="4" width="48" height="60" rx="16" style="fill:var(--door);"/><rect x="13" y="9" width="38" height="55" rx="12" style="fill:var(--day);"/><path d="M13 44q19-9 38 0V64H13Z" style="fill:var(--leaf3);opacity:.55"/><rect x="13" y="9" width="10" height="55" rx="5" style="fill:#fff;opacity:.25"/></symbol>
+<symbol id="r-mat" viewBox="0 0 64 64"><rect x="10" y="22" width="44" height="26" rx="7" style="fill:var(--roof2);"/><rect x="14" y="26" width="36" height="18" rx="5" style="fill:var(--roof);"/><path d="M20 32H44M20 38H44" style="stroke:var(--bread);stroke-width:2;stroke-linecap:round;opacity:.8"/></symbol>
+<symbol id="r-toys" viewBox="0 0 64 64">
+  <ellipse cx="18" cy="48" rx="8" ry="2.4" style="fill:var(--tshadow);"/><ellipse cx="44" cy="52" rx="8" ry="2.4" style="fill:var(--tshadow);"/>
+  <g transform="rotate(-14 17 41)"><rect x="12" y="36" width="10" height="10" rx="2" style="fill:var(--flower1);"/></g><circle cx="44" cy="46" r="5.4" style="fill:var(--water2);"/>
+  <g transform="rotate(12 36 30)"><rect x="31" y="25" width="10" height="10" rx="2" style="fill:var(--flower2);"/></g></symbol></defs></svg>`);

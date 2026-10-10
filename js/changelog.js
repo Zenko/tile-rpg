@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'new', x: 'Your cottage is now a room you can walk around. Tap the floor to move and tap the furniture to use it: the mailbox, the shelves, your framed cards, the trophy case, the altar, the sand garden, the bonsai, the basket for Tidy Up and the armchair for a nap. Everything works as it did, you just walk up to it. Walk out of the door on the bottom wall to head back out.' },
   { t:'fixed', x: 'Full art cards wearing a card sleeve no longer have their artwork slip down and hang out below the card in battle.' },
   { t:'fixed', x: 'A flash of the town behind the card popup (most noticeable when you meet a wandering spirit) should be gone: the dimmed background no longer drops out for a moment right after the popup opens.' },
   { t:'better', x: 'When a card or level-up popup closes, what you got now arcs from the middle of the screen into your character, who takes it in with a little squash and a ring in the card\'s rarity colour. It only happens when you actually get something, a card or a level-up, or Embers and ingredients you pick up in town, never when you are just looking at a card or meeting a wandering spirit. (It replaces the hop.)' },
