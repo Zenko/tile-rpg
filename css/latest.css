@@ -1777,3 +1777,8 @@ body.no-charfx .pfx-chip, body.no-charfx .pfx-take { display: none; }
    animations finish; keeping the layer promoted while the popup is open means there is nothing to tear down. */
 #pickupOverlay:not(.hidden), #levelUpOverlay:not(.hidden) { will-change: opacity; transform: translateZ(0); }
 #pickupOverlay:not(.hidden) .overlay-card, #levelUpOverlay:not(.hidden) .overlay-card { will-change: transform; }
+
+/* Card sleeves (battle-town.css) lift every direct child of a sleeved card to position: relative. For a full art card that turned the scene into a
+   block in the flow, which pushed the art and name panel down a whole card height, so the subject hung out below the card. */
+#battleView .card.sleeved.fa > .fa-scene { position: absolute !important; z-index: 0 !important; }
+#battleView .card.sleeved.fa > .icon { position: static !important; }
