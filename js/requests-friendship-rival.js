@@ -128,7 +128,7 @@ function openTalk(f) {
   noteMet(f);
   bumpStat('talks', 1);
   e.name.textContent = f.name;
-  talkTheme(); talkHistoryPush();
+  talkHistoryPush();
   e.ov.classList.remove('hidden'); sfx('tap');
   renderTalk();
 }
@@ -250,8 +250,9 @@ function renderTalkBody() {
 /* The neighbour screen (build 208; prototype: npc-screen-variants-lab.html, option B). The card takes over the screen: the
    neighbour (their drawn bust when the game has one, else their emoji) stands on a name and hearts bar with the speech bubble
    just above their head, and below it a grid of Chat / Play / Gift cards. A card opens its own list of choices with a Back.
+   The live town shows through behind a soft scrim.
    Every button inside keeps its id and its own show/hide logic; this only decides which are on screen. The way out is the
-   Exit pill, the Android back gesture (one history entry while the screen is open) and Escape. */
+   "Head back out" footer (as on the building screens), the Android back gesture (one history entry while the screen is open) and Escape. */
 let talkView = 'home', talkPushed = false, talkPopIgnore = 0, talkCatsSig = '';
 function talkVisible(id) { return !document.getElementById(id).classList.contains('hidden'); }
 function talkFigure(pt, f) {
@@ -260,11 +261,6 @@ function talkFigure(pt, f) {
   if (art) { pt.innerHTML = npcBustHTML(id); pt.style.setProperty('--ar', npcBustRatio(id)); }
   else pt.textContent = opponentPortrait(f);
   pt.classList.toggle('tk-emoji', !art); bust.classList.toggle('emoji', !art);
-}
-// the town's own colours, softly, behind the screen (a real blur would cost the town its smoothness, see the backdrop-filter note)
-function talkTheme() {
-  const tv = document.querySelector('.town-view'), cs = tv && getComputedStyle(tv), ov = talkEls().ov;
-  ['ground', 'leaf2', 'water', 'path'].forEach((k, i) => { const v = cs && cs.getPropertyValue('--' + k).trim(); if (v) ov.style.setProperty('--tk-' + (i + 1), v); });
 }
 function renderTalkView() {
   const f = talkTo; if (!f) return;

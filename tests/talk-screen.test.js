@@ -1,5 +1,5 @@
 // The neighbour screen: a grid of Chat / Play / Gift cards, each opening its own list with a Back, a thank-you spoken over the grid,
-// and three ways out: the Exit pill, the Android back gesture (a history entry; Back inside a list goes to the grid first) and Escape.
+// and three ways out: the "Head back out" footer, the Android back gesture (a history entry; Back inside a list goes to the grid first) and Escape.
 module.exports = async (page, assert) => {
   const ev = (fn, arg) => page.evaluate(fn, arg);
   const shown = sel => ev(s => { const e = document.querySelector(s); return !!e && e.offsetParent !== null; }, sel);
@@ -33,9 +33,10 @@ module.exports = async (page, assert) => {
   assert.strictEqual(await view(), 'home', 'the thank-you comes back to the grid');
   assert.ok(/\+3/.test(await ev(() => document.getElementById('talkText').textContent + talkSaid)), 'and is spoken in the bubble');
 
-  // the way out: Exit pill
+  // the way out: the footer at the bottom (the last thing on the card, like the building screens)
+  assert.ok(await ev(() => { const c = document.getElementById('talkCard'); return c.lastElementChild.id === 'talkClose' && /Head back out/.test(c.lastElementChild.textContent); }), 'the way out is the last row');
   await ev(() => document.getElementById('talkClose').click());
-  assert.ok(!(await isOpen()), 'Exit closes the screen');
+  assert.ok(!(await isOpen()), 'Head back out closes the screen');
   await page.waitForFunction(() => talkPopIgnore === 0, null, { timeout: 4000 });
 
   // the Android back gesture: one entry; Back inside a list goes to the grid first
