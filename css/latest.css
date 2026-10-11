@@ -1899,3 +1899,7 @@ svg.hr-th { display: block; position: relative; box-sizing: border-box; overflow
 .hr-flag { position: absolute; left: 47%; top: -12%; font-size: calc(var(--t) * .42); line-height: 1; transform-origin: 20% 100%; animation: hr-wave 3s ease-in-out infinite; }
 @keyframes hr-wave { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(5deg); } }
 @media (prefers-reduced-motion: reduce) { .hr-smoke i, .hr-lantern, .hr-flag { animation: none; } .hr-smoke { display: none; } }
+
+/* Home room: the Decorate/Done button (z 600) must not float over menus. #sceneView was not a stacking context, so the
+   button painted above Settings and every other overlay (z 50+). Isolating the scene keeps 600 inside it. */
+#sceneView.room-on { isolation: isolate; }
