@@ -163,7 +163,7 @@ function hsMaybeVisit(force) {
     if (Date.now() < v.nextAt) return false;
     v.nextAt = Date.now() + HS_COOLDOWN;
     const resonant = hrHome().items.filter(hsResonant).length;
-    if (Math.random() > Math.min(.85, .55 + .05 * resonant)) { saveState(); return false; }
+    if (Math.random() > Math.min(.9, .55 + .05 * resonant + hrCosyVisitBonus())) { saveState(); return false; }
   }
   v.cur = hsRoll(home.level); hs.vis = null; saveState();
   if (homeRoom.world) { hrRefresh(); toast('✨ A spirit has come to visit your home'); showTipOnce('homeSpirits'); }

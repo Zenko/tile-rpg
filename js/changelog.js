@@ -18,6 +18,11 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'new', x: 'Cosiness. Your home scores up to 100 for how lived-in it feels, from decorations, variety, light, plants, spirit perches and family corners. Open Decorate → Room to see it and what it earns: more Embers for a nap, a bigger daily bonus and a better chance a spirit calls.' },
+  { t:'new', x: 'Your cottage shows in town. A glow in the window, smoke, a lantern, flower pots, a flag and a bird appear on the outside as your home levels up and gets cosier.' },
+  { t:'better', x: 'Frames, shelves and the trophy case show what is really in them: your favourite cards, the decorations on your shelf and your trophies.' },
+  { t:'new', x: 'Sell a piece for half its price, undo your last change, flip a piece to face the other way, and drag a piece to carry it across the room.' },
+  { t:'better', x: 'The buy list has little pictures and categories: Furniture, Light, Plants, Walls, Floor and Spirits.' },
   { t:'new', x: 'Your spirits live in your home. Your companion wanders the room and answers when you tap it. Spirit perches show one of your cards as a glowing figure, the Collector\'s cabinet lights a medal for every card set you finish, and the Reborn mantel shows off up to three Reborn cards.' },
   { t:'new', x: 'Family corners, a Grove nook, Memory cairn, Tide basin and Wind chimes, draw spirits of their family. A perch showing a spirit whose family has a corner in your home glows in the family\'s colour.' },
   { t:'new', x: 'From home level 3, spirits visit. Now and then one appears in your home: tap it and welcome it and it leaves you a rare card. Higher levels bring rarer visitors (super ultra rare at level 4, mythic at level 5) and level 5 allows two a day. Corners and glowing perches decide which family calls.' },

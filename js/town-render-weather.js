@@ -461,6 +461,7 @@ function buildWorld(key) {
     el.style.zIndex = (b.y + b.h - 1) * 2 + 1;
     if (b.roof) { el.style.setProperty('--roof', b.roof); el.style.setProperty('--roof2', b.roof2 || b.roof); }
     el.innerHTML = `<svg aria-hidden="true"><use href="#${b.sprite}"/></svg>`;
+    if (b.enter === 'home' && typeof hrExterior === 'function') hrExterior(el, b);   // js/home-room.js: your cottage shows your colours and your home's level
     frag.appendChild(el);
   });
   townWorld.appendChild(frag);

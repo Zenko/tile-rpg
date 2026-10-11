@@ -61,7 +61,7 @@ const HR_RUGS = [
    everything (w x h tiles), tall = drawn one and a half tiles high, glow = light it gives off (dx, dy in tiles from its tile). */
 const HR_CATALOG = {
   nap: { name: 'Armchair', icon: '🛋️', spr: 'r-armchair', act: 'nap', say: () => 'A sunny chair by the window. The cushion is still warm.' },
-  decorate: { name: 'The shelves', icon: '📚', spr: 'r-shelf', tall: 1, wall: 1, act: 'decorate', say: () => 'Room for a few more things.' },
+  decorate: { name: 'The shelves', icon: '📚', spr: 'r-shelves', tall: 1, wall: 1, act: 'decorate', say: () => 'Room for a few more things.' },
   favs: { name: 'Framed cards', icon: '⭐', spr: 'r-frames', tall: 1, wall: 1, act: 'favs', say: () => 'Your favourite cards, framed on the wall.' },
   trophies: { name: 'Trophy case', icon: '🏆', spr: 'r-trophy', tall: 1, wall: 1, act: 'trophies', say: () => 'Everything you have won so far.' },
   altar: { name: 'The altar', icon: '🕯️', spr: 'r-altar', act: 'altar', glow: { dx: .5, dy: .2, r: 3.2 }, say: () => 'A small flame, always lit.' },
@@ -207,6 +207,20 @@ function hrApplyStyle() {
   s.setProperty('--wall-up', w[0]); s.setProperty('--wainscot', w[1]); s.setProperty('--wall-side', w[2]);
   s.setProperty('--rug', g[0]); s.setProperty('--rug2', g[1]);
 }
+// What a piece shows of your own things: the favourite cards in the frames, the decorations on the shelves, the trophies in the case.
+// Positions are percentages of the piece's tile (the sprite is drawn one and a half tiles tall, so the top compartment sits near the tile's top).
+const HR_FRAME_SPOTS = [[28, 17], [72, 17], [50, 67]], HR_SHELF_SPOTS = [[36, 2], [64, 2], [36, 36], [64, 36], [36, 70], [64, 70]];
+function hrExtras(it) {
+  const home = hrHome(), spot = (a, i) => `left:${a[i][0]}%;top:${a[i][1]}%`;
+  if (it.id === 'favs') return home.favs.slice(0, 3).map((id, i) => cardDef(id) ? `<span class="hr-frame" style="${spot(HR_FRAME_SPOTS, i)}">${cardArtHtml(cardDef(id))}</span>` : '').join('');
+  if (it.id === 'decorate') return home.shelf.slice(0, 6).map((id, i) => { const d = DECORATION_ITEMS.find(x => x.id === id); return d ? `<span class="hr-thing" style="${spot(HR_SHELF_SPOTS, i)}">${d.icon}</span>` : ''; }).join('');
+  if (it.id === 'trophies') return trophyItems().slice(0, 6).map((t, i) => `<span class="hr-thing" style="${spot(HR_SHELF_SPOTS, i)}">${t.icon}</span>`).join('');
+  return '';
+}
+function hrSig() {   // everything the drawn room shows that can change outside the room: the room is redrawn when this does
+  const h = hrHome();
+  return JSON.stringify([h.favs, h.shelf, trophyItems().map(t => t.label), CARD_SETS.map(s => setComplete(s) ? 1 : 0).join(''), state.ownedCards.length, Object.keys(foils()).length, !!state.companion]);
+}
 function hrWorldHtml() {
   const r = homeRoom, h = hrHome(); let s = '<div class="hr-world snap">';
   for (let y = 0; y < r.rows; y++) for (let x = 0; x < r.cols; x++) {
@@ -217,8 +231,8 @@ function hrWorldHtml() {
   const glows = [{ x: HR_DOOR_X + .5, y: r.rows - 1.6, r: 3.4, day: 1 }];
   h.items.forEach(i => {
     const d = hrDef(i);
-    if (d.rug) s += `<div class="hr-rug" style="left:calc(var(--t)*${i.x});top:calc(var(--t)*${i.y});width:calc(var(--t)*${d.w});height:calc(var(--t)*${d.h})"></div>`;
-    else s += `<div class="hr-prop${d.flat ? ' flat' : ''}${d.tall ? ' tall' : ''}${d.emoji ? ' emoji' : ''}${typeof hsClass === 'function' ? hsClass(i) : ''}" style="--x:${i.x};--y:${i.y}">${d.emoji ? `<span>${d.icon}</span>` : svgUse(d.spr)}${typeof hsExtras === 'function' ? hsExtras(i) : ''}</div>`;
+    if (d.rug) s += `<div class="hr-rug" data-uid="${i.uid}" style="left:calc(var(--t)*${i.x});top:calc(var(--t)*${i.y});width:calc(var(--t)*${d.w});height:calc(var(--t)*${d.h})"></div>`;
+    else s += `<div class="hr-prop${d.flat ? ' flat' : ''}${d.tall ? ' tall' : ''}${d.emoji ? ' emoji' : ''}${typeof hsClass === 'function' ? hsClass(i) : ''}${i.flip ? ' flip' : ''}" data-uid="${i.uid}" style="--x:${i.x};--y:${i.y}">${d.emoji ? `<span>${d.icon}</span>` : svgUse(d.spr)}${hrExtras(i)}${typeof hsExtras === 'function' ? hsExtras(i) : ''}</div>`;
     if (d.glow) glows.push({ x: i.x + d.glow.dx, y: i.y + d.glow.dy, r: d.glow.r, day: d.glow.day });
   });
   s += `<div class="hr-prop deco door" style="--x:${HR_DOOR_X};--y:${r.rows - 1}">${svgUse('r-door')}</div><div class="hr-prop deco mat" style="--x:${HR_DOOR_X};--y:${hrMatY()}">${svgUse('r-mat')}</div>`;
@@ -228,7 +242,7 @@ function hrWorldHtml() {
 function hrFill() {   // (re)draw everything inside the host
   const h = homeRoom;
   h.host.innerHTML = hrWorldHtml() + '<div class="hr-vignette"></div><button class="hr-edit-btn" type="button"></button>';
-  hrApplyStyle();
+  hrApplyStyle(); h.sig = hrSig();
   h.world = h.host.querySelector('.hr-world'); h.player = h.host.querySelector('.hr-player'); h.ring = h.host.querySelector('.hr-ring'); h.badge = h.host.querySelector('.hr-badge');
 }
 function hrMount() {
@@ -240,7 +254,7 @@ function hrMount() {
   h.host = document.createElement('div'); h.host.className = 'hr-room'; stage.appendChild(h.host);
   hrFill();
   h.host.addEventListener('pointerdown', hrTap);
-  h.host.addEventListener('pointermove', hrDragMove); h.host.addEventListener('pointerup', hrDragEnd); h.host.addEventListener('pointercancel', () => { homeRoom.drag = null; });
+  h.host.addEventListener('pointermove', hrDragMove); h.host.addEventListener('pointerup', hrDragEnd); h.host.addEventListener('pointercancel', () => { homeRoom.drag = null; hrDragClean(); });
   h.host.addEventListener('click', e => { if (e.target.closest('.hr-edit-btn')) hrToggleEdit(); });
   h.ro = new ResizeObserver(() => hrLayout()); h.ro.observe(h.host);
   hrLayout();
@@ -251,6 +265,32 @@ function hrEnter() {   // a fresh visit starts on the doormat, facing the room
   playerFaceFromMove({ x: HR_DOOR_X, y: h.y + 1 }, { x: HR_DOOR_X, y: h.y });
   if (typeof hsEnter === 'function') hsEnter();   // js/home-spirits.js: a spirit may have come to visit
 }
+/* ---------------- the cottage from outside ----------------
+   Your cottage in town shows what you have done to it: once you pick a wall, rug or floor colour other than the starting ones, the walls,
+   roof and door take them (walls from the wall colour, roof from the rug, door from the floor), and the level adds to it: chimney smoke
+   from level 2, a lit lantern by the door at 3, flowers at 4 and a flag on the roof at 5. hrExterior() runs when the town is built;
+   hrLeave() runs it again when you step back out, so the street is up to date the moment you are. */
+function hrMix(a, b, t) {
+  const p = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16)), A = p(a), B = p(b);
+  return '#' + A.map((v, i) => Math.round(v + (B[i] - v) * t).toString(16).padStart(2, '0')).join('');
+}
+function hrExterior(el, b) {
+  const h = hrHome(), st = h.style, w = hrPalette(HR_WALLS, st.wall).c, g = hrPalette(HR_RUGS, st.rug).c, f = hrPalette(HR_FLOORS, st.floor).c;
+  const set = (k, v) => v ? el.style.setProperty(k, v) : el.style.removeProperty(k);
+  set('--wall', st.wall !== HR_WALLS[0].id ? hrMix(w[0], '#ffffff', .35) : ''); set('--wall2', st.wall !== HR_WALLS[0].id ? hrMix(w[0], '#000000', .08) : '');
+  set('--roof', st.rug !== HR_RUGS[0].id ? g[0] : b.roof); set('--roof2', st.rug !== HR_RUGS[0].id ? g[1] : (b.roof2 || b.roof));
+  set('--door', st.floor !== HR_FLOORS[0].id ? hrMix(f[1], '#000000', .35) : '');
+  let ext = el.querySelector('.hr-ext'); if (ext) ext.remove();
+  const L = h.level; if (L < 2) return;
+  ext = document.createElement('div'); ext.className = 'hr-ext';
+  ext.innerHTML = '<span class="hr-smoke"><i></i><i></i><i></i></span>' + (L >= 3 ? '<span class="hr-lantern"></span>' : '')
+    + (L >= 4 ? '<span class="hr-pot" style="left:4%">🌼</span><span class="hr-pot" style="left:40%">🪴</span>' : '') + (L >= 5 ? '<span class="hr-flag">🚩</span>' : '');
+  el.appendChild(ext);
+}
+function hrExteriorRefresh() {   // the cottage is already drawn in town: bring it up to date
+  const el = document.querySelector('.bld[data-building="home"]'); if (!el || typeof getMap !== 'function') return;
+  const b = getMap(state.currentDistrict).buildings.find(x => x.enter === 'home'); if (b) hrExterior(el, b);
+}
 function hrLeave() {
   const h = homeRoom; h.walk++;
   if (typeof hsLeave === 'function') hsLeave();
@@ -258,6 +298,7 @@ function hrLeave() {
   if (h.host) { h.host.remove(); h.host = null; h.world = h.player = null; }
   h.scene = null; h.sel = null; h.edit = null; h.hadModal = false;
   if (typeof sceneView !== 'undefined') sceneView.classList.remove('room-on', 'hr-idle');
+  hrExteriorRefresh();
 }
 
 /* ---------------- camera, layout, the player ---------------- */
@@ -355,11 +396,34 @@ function hrDragMove(e) {
   const h = homeRoom, d = h.drag; if (!d || !h.edit) return;
   const dx = e.clientX - d.x, dy = e.clientY - d.y;
   if (!d.moved && Math.hypot(dx, dy) < 8) return;
-  d.moved = true; h.focus = { x: d.fx - dx / h.t, y: d.fy - dy / h.t }; hrCamera(true);
+  if (!d.moved) { d.moved = true; d.mode = d.piece && !h.edit.pick ? 'piece' : 'pan'; if (d.mode === 'piece') { h.edit.sel = d.piece; hrMarks(); } }
+  if (d.mode === 'piece') hrGhost(e); else { h.focus = { x: d.fx - dx / h.t, y: d.fy - dy / h.t }; hrCamera(true); }
 }
+// While a piece is dragged a see-through copy follows the finger, snapped to the tile it would land on: green where it can go, red where it cannot.
+function hrGhost(e) {
+  const h = homeRoom, d = h.drag, it = hrHome().items.find(i => i.uid === d.piece); if (!it) return;
+  const def = hrDef(it), [tx, ty] = hrTileAt(e), [x, y] = def.flat ? hrAnchor(def, tx, ty) : [tx, ty];
+  let g = h.world.querySelector('.hr-ghost');
+  if (!g) {
+    const src = h.world.querySelector(`[data-uid="${it.uid}"]`); if (!src) return;
+    g = src.cloneNode(true); g.classList.add('hr-ghost'); g.removeAttribute('data-uid'); h.world.appendChild(g); src.classList.add('hr-lifted');
+  }
+  if (d.key === x + ',' + y) return;
+  d.key = x + ',' + y; d.tile = [tx, ty];
+  if (def.rug) { g.style.left = `calc(var(--t)*${x})`; g.style.top = `calc(var(--t)*${y})`; } else { g.style.setProperty('--x', x); g.style.setProperty('--y', y); }
+  d.err = hrPlaceError(it.id, x, y, it.uid); g.classList.toggle('ok', !d.err); g.classList.toggle('bad', !!d.err);
+}
+function hrDragClean() { const h = homeRoom; if (!h.world) return; h.world.querySelectorAll('.hr-ghost').forEach(g => g.remove()); h.world.querySelectorAll('.hr-lifted').forEach(g => g.classList.remove('hr-lifted')); }
 function hrDragEnd(e) {
   const h = homeRoom, d = h.drag; h.drag = null;
-  if (!d || d.moved || !h.edit || !h.world) return;
+  if (!d || !h.edit || !h.world) return;
+  if (d.moved && d.mode === 'piece') {
+    hrDragClean();
+    const it = hrHome().items.find(i => i.uid === d.piece);
+    if (it && d.tile && d.key !== it.x + ',' + it.y) { if (d.err) { toast(d.err); sfx('tie'); } else { hrPutDown(it.id, it, d.tile[0], d.tile[1]); return; } }
+    renderScene(); return;
+  }
+  if (d.moved) return;
   const [tx, ty] = hrTileAt(e);
   if (tx >= 0 && ty >= 0 && tx < h.cols && ty < h.rows) hrEditTap(tx, ty);
 }
@@ -368,7 +432,8 @@ function hrTap(e) {
   const h = homeRoom;
   if (!h.world || doorFading || !scene || scene.mode || scene.leaving || (e.target && e.target.closest && e.target.closest('.hr-edit-btn'))) return;   // a letter list or the shelves are open: the sheet is in charge
   if (h.edit) {   // decorating: a drag moves the camera, a tap picks up or puts down (decided when the finger lifts)
-    h.drag = { x: e.clientX, y: e.clientY, fx: h.focus.x, fy: h.focus.y, moved: false };
+    const [tx0, ty0] = hrTileAt(e), hit = tx0 >= 0 && ty0 >= 0 && tx0 < h.cols && ty0 < h.rows ? (hrPieceAt(tx0, ty0) || hrFlatAt(tx0, ty0)) : null;
+    h.drag = { x: e.clientX, y: e.clientY, fx: h.focus.x, fy: h.focus.y, moved: false, piece: hit ? hit.uid : null, mode: null };   // a drag that starts on a piece carries it; anywhere else it moves the camera
     try { h.host.setPointerCapture(e.pointerId); } catch (err) { /* a synthetic event has no pointer */ }
     return;
   }
@@ -384,10 +449,24 @@ function hrTap(e) {
 }
 
 /* ---------------- decorating ---------------- */
+// Undo: every change to the layout, the colours or your Embers while decorating is kept as a snapshot taken just before it, and Undo
+// takes the last one back, Embers included, so buying something to see how it looks costs nothing if you change your mind. It lasts
+// for one decorating session. `dp` is how many Embers the change added (a sale) or took (a purchase).
+function hrSnap() {
+  const h = hrHome();
+  return { items: JSON.parse(JSON.stringify(h.items)), storage: Object.assign({}, h.storage), style: Object.assign({}, h.style), inv: Object.assign({}, state.decorationInventory || {}) };
+}
+function hrDo(dp, fn) { const e = homeRoom.edit, snap = hrSnap(); fn(); snap.dp = dp || 0; e.undo.push(snap); if (e.undo.length > 30) e.undo.shift(); }
+function hrUndo() {
+  const e = homeRoom.edit, home = hrHome(), snap = e && e.undo.pop(); if (!snap) return;
+  home.items = snap.items; home.storage = snap.storage; home.style = snap.style; state.decorationInventory = snap.inv;
+  if (snap.dp) { spendPebbles(snap.dp, 'home'); updateHud(); bumpPill('pillPebbles'); }   // a purchase (dp < 0) gives the Embers back, a sale takes them back
+  e.sel = null; e.pick = null; sfx('tap'); toast('Undone'); hrApplyStyle(); hrCommit();
+}
 function hrToggleEdit() {
   const h = homeRoom; if (!scene || scene.id !== 'home' || scene.mode || doorFading) return;
   h.walk++; h.player.classList.remove('walking'); h.sel = null;
-  h.edit = h.edit ? null : { tab: 'items', sel: null, pick: null };
+  h.edit = h.edit ? null : { tab: 'items', sel: null, pick: null, undo: [], cat: 'all' };
   h.focus = { x: h.x + .5, y: h.y + .5 }; h.drag = null;
   sfx('nav'); if (h.edit) showTipOnce('homeDecor');
   renderScene(); hrCamera(true);
@@ -405,11 +484,14 @@ function hrPutDown(id, cur, tx, ty) {   // a new piece from storage (cur null) o
   const h = homeRoom, e = h.edit, home = hrHome(), d = hrDefOf(id), [x, y] = d.flat ? hrAnchor(d, tx, ty) : [tx, ty];
   const err = hrPlaceError(id, x, y, cur ? cur.uid : null);
   if (err) { toast(err); sfx('tie'); return; }
-  if (cur) { cur.x = x; cur.y = y; }
-  else {
-    if (d.deco) { if (decorationInventoryCount(d.deco) < 1) { toast('You have none of those left.'); return; } hrDecoGive(d.deco, -1); }
-    else { home.storage[id]--; if (home.storage[id] <= 0) delete home.storage[id]; }
-    home.items.push({ uid: 'u' + home.nextUid++, id, x, y }); e.pick = null; }
+  if (!cur && d.deco && decorationInventoryCount(d.deco) < 1) { toast('You have none of those left.'); return; }
+  hrDo(0, () => {
+    if (cur) { cur.x = x; cur.y = y; }
+    else {
+      if (d.deco) hrDecoGive(d.deco, -1); else { home.storage[id]--; if (home.storage[id] <= 0) delete home.storage[id]; }
+      home.items.push({ uid: 'u' + home.nextUid++, id, x, y }); e.pick = null;
+    }
+  });
   sfx('claim'); buzz(HAP.tap); hrCommit(); renderScene();
 }
 function hrEditHint() {
@@ -418,6 +500,19 @@ function hrEditHint() {
   if (e.pick) return `Tap a spot to put the ${noun(hrDefOf(e.pick).name)} down.`;
   if (it) return `Tap a spot to move the ${noun(hrDef(it).name)}, or use the buttons below.`;
   return { items: 'Tap a piece to move it, or pick something below to place.', colors: 'Choose the colours of your floor, walls and rug.', room: 'Make your home bigger and unlock more.' }[e.tab];
+}
+// Shop categories for the buy list, and what a piece sells back for (half, rounded down; the pieces that do something are never sold).
+const HR_CATS = [['all', 'All'], ['furniture', 'Furniture'], ['light', 'Light'], ['green', 'Plants'], ['walls', 'Walls'], ['floor', 'Floor'], ['spirits', 'Spirits']];
+const HR_CAT_OF = { stool: 'furniture', table: 'furniture', cot: 'furniture', bookcase: 'furniture', wardrobe: 'furniture', chest: 'furniture', sconce: 'light', lamp: 'light', fireplace: 'light',
+  plant: 'green', tree: 'green', window: 'walls', clock: 'walls', painting: 'walls', toys: 'floor', rug2: 'floor', rug3: 'floor', rug4: 'floor',
+  perch: 'spirits', cabinet: 'spirits', mantel: 'spirits', grove: 'spirits', cairn: 'spirits', basin: 'spirits', chimes: 'spirits', cat: 'spirits' };
+function hrSellFor(d) { return d && d.cost && !d.act ? Math.floor(d.cost / 2) : 0; }
+function hrThumb(d) {   // a small picture of a piece: its own sprite, a swatch for a rug, or its emoji
+  if (d.rug) { const g = hrPalette(HR_RUGS, hrHome().style.rug).c; return `<i class="hr-th" style="background:${g[0]};box-shadow:inset 0 0 0 3px ${g[1]}"></i>`; }
+  return d.spr ? `<svg class="hr-th" aria-hidden="true"><use href="#${d.spr}"/></svg>` : `<span class="hr-th">${d.icon}</span>`;
+}
+function hrRow(id, d, act, meta, disabled, locked) {
+  return `<button class="btn sc-btn hr-buy" data-act="${act}" ${disabled ? 'disabled' : ''}>${hrThumb(d)}<span class="sb-main">${locked ? '🔒 ' : ''}${d.name}</span>${meta ? `<span class="sb-meta">${meta}</span>` : ''}</button>`;
 }
 function hrLocked(lvl) { return (lvl || 1) > hrHome().level; }
 function hrSwatches(title, list, key) {
@@ -435,27 +530,69 @@ function hrUnlockText(lvl) {   // what a level reveals, in a line
   if (typeof HS_LEVEL_PERKS !== 'undefined' && HS_LEVEL_PERKS[lvl]) bits.push(HS_LEVEL_PERKS[lvl]);
   return bits.join(' · ');
 }
+/* ---------------- how cosy it is ----------------
+   A score out of 100 for how lived-in the home feels, so decorating has a goal and a reward. Points come from the pieces beyond the ones
+   that do something (2 each, up to 24), how many different kinds there are (up to 16), light (windows, lamps, the fireplace: 3 each, up to
+   12), greenery (plants, trees, a Grove nook, plant decorations: 3 each, up to 12), comfort (rugs, a cot, a cat, the armchair: up to 14),
+   spirits (a spirit on a perch, Reborn on the mantel, lit set medals, family corners: up to 34 between them) and your own colours (2 each
+   for a floor, wall and rug other than the starting ones, up to 6). The tier it reaches pays: a few more Embers for a nap, and a better
+   chance of a visiting spirit (js/home-spirits.js). The numbers are first guesses, like the visit odds. */
+const HR_COSY_TIERS = [[0, 'Bare'], [10, 'Settled'], [25, 'Cosy'], [45, 'Snug'], [70, 'Enchanting']];
+function hrCosyParts() {
+  const items = hrHome().items, extras = items.filter(i => !hrDef(i).act), deco = i => hrDef(i).deco && (DECORATION_ITEMS.find(x => x.id === hrDef(i).deco) || {}).cat === 'plant';
+  const n = fn => extras.filter(fn).length, st = hrHome().style, spirit = typeof hsCardOf === 'function';
+  const p = {
+    pieces: [Math.min(24, extras.length * 2), 24, 'Add more pieces'],
+    variety: [Math.min(16, new Set(extras.map(i => i.id)).size * 2), 16, 'Try a few different kinds of furniture'],
+    light: [Math.min(12, n(i => hrDef(i).glow) * 3), 12, 'Add lamps, windows or a fireplace'],
+    greenery: [Math.min(12, n(i => ['plant', 'tree', 'grove'].includes(i.id) || deco(i)) * 3), 12, 'Plants and trees make a home feel alive'],
+    comfort: [Math.min(14, n(i => hrDef(i).rug) * 4 + n(i => i.id === 'cot') * 4 + n(i => i.id === 'cat') * 3 + (items.some(i => i.id === 'nap') ? 2 : 0)), 14, 'A rug, a cot or a cat makes it snug'],
+    spirits: [spirit ? Math.min(34, items.filter(i => i.id === 'perch' && hsCardOf(i)).length * 3 + items.filter(i => i.id === 'mantel').reduce((a, i) => a + 2 * (i.cards || []).length, 0)
+      + (items.some(i => i.id === 'cabinet') ? CARD_SETS.filter(setComplete).length : 0) + Math.min(8, n(i => hrDef(i).family) * 2)) : 0, 34, 'Put spirits on perches and set out a family corner'],
+    style: [['floor', 'wall', 'rug'].filter((k, j) => st[k] !== [HR_FLOORS, HR_WALLS, HR_RUGS][j][0].id).length * 2, 6, 'Pick your own floor, wall and rug colours']
+  };
+  return p;
+}
+function hrCosy() {
+  const parts = hrCosyParts(), score = Math.min(100, Object.values(parts).reduce((a, v) => a + v[0], 0));
+  let tier = HR_COSY_TIERS[0]; HR_COSY_TIERS.forEach(t => { if (score >= t[0]) tier = t; });
+  return { score, tier: tier[1], parts };
+}
+function hrCosyBonus() { const s = hrCosy().score; return s >= 70 ? 2 : s >= 25 ? 1 : 0; }   // extra Embers for a nap
+function hrCosyVisitBonus() { return Math.min(.15, hrCosy().score * .0015); }   // added to the chance a spirit calls
+function hrCosyHtml() {
+  const c = hrCosy(), bonus = hrCosyBonus(), visit = Math.round(hrCosyVisitBonus() * 100);
+  const room = Object.values(c.parts).filter(v => v[0] < v[1]).sort((a, b) => (b[1] - b[0]) / b[1] - (a[1] - a[0]) / a[1]).slice(0, 2).map(v => v[2]);
+  return `<div class="hr-h">Cosiness</div><div class="hr-info"><b>${c.score} · ${c.tier}</b><span>${bonus ? `+${bonus} Ember${bonus > 1 ? 's' : ''} for a nap` : 'Gets cosier with more in it'}${hrHome().level >= 3 && visit ? ` · +${visit}% a spirit calls` : ''}</span><div class="hr-bar"><i style="width:${c.score}%"></i></div></div>`
+    + (room.length && c.score < 100 ? `<div class="hr-note">To raise it: ${room.join('. ').replace(/\.$/, '')}.</div>` : '');
+}
 function hrEditHtml() {
   const e = homeRoom.edit, home = hrHome(), it = hrSelected(), tabs = [['items', 'Items'], ['colors', 'Colours'], ['room', 'Room']];
   let s = '<div class="hr-tabs">' + tabs.map(([k, n]) => `<button class="btn sc-btn${e.tab === k ? ' on' : ''}" data-act="hr:tab:${k}">${n}</button>`).join('') + '</div>';
+  if (e.undo.length) s += `<button class="btn sc-btn hr-undo" data-act="hr:undo">↩ Undo · ${e.undo.length}</button>`;
   if (e.tab === 'items') {
     if (it) {
-      const d = hrDef(it);
-      s += `<div class="hr-h">${d.icon} ${d.name}</div>` + sceneBtn('hr:store', d.deco ? '📦 Put it back in your decorations' : '📦 Put it away') + sceneBtn('hr:desel', 'Let go of it');
+      const d = hrDef(it), sell = hrSellFor(d);
+      s += `<div class="hr-h">${d.icon} ${d.name}</div>` + sceneBtn('hr:store', d.deco ? '📦 Put it back in your decorations' : '📦 Put it away')
+        + (d.spr && !d.rug ? sceneBtn('hr:flip', '↔ Flip it') : '') + (sell ? sceneBtn('hr:sell', `💰 Sell it · 🫧 ${sell}`) : '') + sceneBtn('hr:desel', 'Let go of it');
     } else if (e.pick) s += `<div class="hr-h">Placing</div>` + sceneBtn('hr:desel', `Cancel · ${hrDefOf(e.pick).name}`);
     else {
       const owned = Object.keys(home.storage);
-      if (owned.length) s += '<div class="hr-h">In storage</div>' + owned.map(id => sceneBtn('hr:place:' + id, `${HR_CATALOG[id].icon} ${HR_CATALOG[id].name} · ×${home.storage[id]}`)).join('');
+      if (owned.length) s += '<div class="hr-h">In storage</div>' + owned.map(id => {
+        const d = HR_CATALOG[id], sell = hrSellFor(d);
+        return `<div class="hr-row2">${hrRow(id, d, 'hr:place:' + id, home.storage[id] > 1 ? '×' + home.storage[id] : '')}${sell ? `<button class="btn sc-btn hr-sell" data-act="hr:sellst:${id}" aria-label="Sell one for ${sell} Embers">💰 ${sell}</button>` : ''}</div>`;
+      }).join('');
       const decos = DECORATION_ITEMS.filter(d => decorationInventoryCount(d.id) > 0);
-      if (decos.length) s += '<div class="hr-h">Your decorations</div>' + decos.map(d => sceneBtn('hr:place:deco:' + d.id, `${d.icon} ${d.name} · ×${decorationInventoryCount(d.id)}`)).join('');
-      const buy = Object.entries(HR_CATALOG).filter(([, d]) => d.cost).sort((a, b) => a[1].lvl - b[1].lvl || a[1].cost - b[1].cost);
-      s += '<div class="hr-h">Buy</div>' + buy.map(([id, d]) => hrLocked(d.lvl)
-        ? sceneBtn('hr:noop', `🔒 ${d.name} · Home Lv ${d.lvl}`, true) : sceneBtn('hr:buy:' + id, `${d.icon} ${d.name} · 🫧 ${d.cost}`, state.progress.pebbles < d.cost)).join('');
+      if (decos.length) s += '<div class="hr-h">Your decorations</div>' + decos.map(d => hrRow(d.id, { icon: d.icon, name: d.name }, 'hr:place:deco:' + d.id, '×' + decorationInventoryCount(d.id))).join('');
+      s += '<div class="hr-h">Buy</div><div class="hr-cats">' + HR_CATS.map(([k, n]) => `<button class="hr-cat${e.cat === k ? ' on' : ''}" data-act="hr:cat:${k}">${n}</button>`).join('') + '</div>';
+      const buy = Object.entries(HR_CATALOG).filter(([id, d]) => d.cost && (e.cat === 'all' || HR_CAT_OF[id] === e.cat)).sort((a, b) => a[1].lvl - b[1].lvl || a[1].cost - b[1].cost);
+      s += buy.map(([id, d]) => hrLocked(d.lvl) ? hrRow(id, d, 'hr:noop', `Home Lv ${d.lvl}`, true, true) : hrRow(id, d, 'hr:buy:' + id, `🫧 ${d.cost}`, state.progress.pebbles < d.cost)).join('')
+        + '<div class="hr-note">Bought something you do not like? Undo gives your Embers back.</div>';
     }
   } else if (e.tab === 'colors') s += hrSwatches('Floor', HR_FLOORS, 'floor') + hrSwatches('Walls', HR_WALLS, 'wall') + hrSwatches('Rug', HR_RUGS, 'rug');
   else {
     const L = HR_LEVELS[home.level], N = HR_LEVELS[home.level + 1];
-    s += `<div class="hr-h">Your home</div><div class="hr-info"><b>Level ${home.level} · ${L.name}</b><span>Floor ${L.fw} by ${L.fh}</span></div>`;
+    s += hrCosyHtml() + `<div class="hr-h">Your home</div><div class="hr-info"><b>Level ${home.level} · ${L.name}</b><span>Floor ${L.fw} by ${L.fh}</span></div>`;
     if (N) s += `<div class="hr-info"><b>Next: Level ${home.level + 1} · ${N.name}</b><span>Reveals ${hrUnlockText(home.level + 1)}</span></div>` + sceneBtn('hr:up', `⬆️ Upgrade your home · 🫧 ${N.cost}`, state.progress.pebbles < N.cost);
     else s += '<div class="hr-info"><b>Your home is as grand as it gets</b><span>Every colour and piece is yours.</span></div>';
   }
@@ -472,28 +609,43 @@ function hrAction(act) {
   if (what === 'tab') { e.tab = which; e.sel = null; e.pick = null; sfx('nav'); }
   else if (what === 'desel') { e.sel = null; e.pick = null; sfx('nav'); }
   else if (what === 'place') { const d = hrDefOf(which); if (d && (d.deco ? decorationInventoryCount(d.deco) > 0 : home.storage[which])) { e.pick = which; e.sel = null; sfx('tap'); } }
+  else if (what === 'undo') { hrUndo(); return; }
+  else if (what === 'cat') { e.cat = which; sfx('nav'); }
+  else if (what === 'flip') { const it = hrSelected(); if (it) { hrDo(0, () => { it.flip = !it.flip; }); sfx('tap'); hrCommit(); } }
   else if (what === 'store') {
     const it = hrSelected();
     if (it) {
-      home.items = home.items.filter(i => i.uid !== it.uid);
-      if (hrDef(it).deco) hrDecoGive(hrDef(it).deco, 1); else home.storage[it.id] = (home.storage[it.id] || 0) + 1;   // a town decoration goes back to the town's inventory
+      hrDo(0, () => {
+        home.items = home.items.filter(i => i.uid !== it.uid);
+        if (hrDef(it).deco) hrDecoGive(hrDef(it).deco, 1); else home.storage[it.id] = (home.storage[it.id] || 0) + 1;   // a town decoration goes back to the town's inventory
+      });
       e.sel = null; sfx('tap'); hrCommit();
     }
+  } else if (what === 'sell' || what === 'sellst') {   // half price back, from the room or from storage
+    const it = what === 'sell' ? hrSelected() : null, id = it ? it.id : which, d = hrDefOf(id), pay = hrSellFor(d);
+    if (!pay || (it ? false : !home.storage[id])) return;
+    hrDo(pay, () => {
+      if (it) home.items = home.items.filter(i => i.uid !== it.uid); else { home.storage[id]--; if (home.storage[id] <= 0) delete home.storage[id]; }
+      spendPebbles(-pay, 'home-sale');
+    });
+    e.sel = null; saveState(); updateHud(); bumpPill('pillPebbles'); sfx('claim'); toast(`${d.icon} Sold for 🫧 ${pay}`); hrCommit();
   } else if (what === 'buy') {
     const d = HR_CATALOG[which];
     if (!d || !d.cost || hrLocked(d.lvl)) return;
     if (state.progress.pebbles < d.cost) { toast('Not enough Embers yet'); sfx('tie'); return; }
-    spendPebbles(d.cost, 'home'); home.storage[which] = (home.storage[which] || 0) + 1; e.pick = which; e.sel = null;
+    hrDo(-d.cost, () => { spendPebbles(d.cost, 'home'); home.storage[which] = (home.storage[which] || 0) + 1; });
+    e.pick = which; e.sel = null;
     saveState(); updateHud(); bumpPill('pillPebbles'); sfx('claim'); buzz(HAP.found); toast(`${d.icon} Bought. Tap a spot to put it down.`);
   } else if (what === 'floor' || what === 'wall' || what === 'rug') {
     const list = { floor: HR_FLOORS, wall: HR_WALLS, rug: HR_RUGS }[what], p = list.find(q => q.id === which);
-    if (p && !hrLocked(p.lvl)) { home.style[what] = p.id; saveState(); hrApplyStyle(); sfx('tap'); }
+    if (p && !hrLocked(p.lvl) && home.style[what] !== p.id) { hrDo(0, () => { home.style[what] = p.id; }); saveState(); hrApplyStyle(); sfx('tap'); }
   } else if (what === 'up') {
     const N = HR_LEVELS[home.level + 1];
     if (!N) return;
     if (state.progress.pebbles < N.cost) { toast('Not enough Embers yet'); sfx('tie'); return; }
     spendPebbles(N.cost, 'home'); home.level++; saveState(); updateHud(); bumpPill('pillPebbles'); sfx('claim'); buzz(HAP.found);
     toast(`🏠 Your home is now level ${home.level}: ${N.name}`); logEvent('🏠', `Your home grew to level ${home.level}, ${N.name}.`);
+    e.undo = [];   // a bigger home is not taken back
     hrIndex(); hrRefresh(); return;   // hrRefresh redraws the bigger room and runs the sheet
   }
   renderScene();
@@ -513,6 +665,7 @@ function hrSync() {
   sceneView.classList.toggle('room-on', !miniHome);
   if (miniHome) { sceneView.classList.remove('hr-idle'); return; }   // a mini-game owns the stage until it ends
   hrMount();
+  if (h.sig !== hrSig()) { hrFill(); hrLayout(); }   // your frames, shelves or trophies changed since the room was drawn
   const acts = document.getElementById('scActions'), txt = document.getElementById('scText'), keep = acts.scrollTop;
   if (modal) {
     // the cottage's own screens end in their own way back; make sure one always does, and that it is not the door

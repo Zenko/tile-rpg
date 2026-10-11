@@ -900,7 +900,7 @@ function sceneAction(actId) {
   else if (a.kind === 'daily') {
     if (st[a.id] === todayKey()) { scene.text = a.already; }
     else { st[a.id] = todayKey(); scene.text = a.done;
-      const pebbles = a.pebbles + (weatherFx().dailyBonus || 0);
+      const pebbles = a.pebbles + (weatherFx().dailyBonus || 0) + (scene.id === 'home' && typeof hrCosyBonus === 'function' ? hrCosyBonus() : 0);   // a cosy home pays a little more for its naps
       addPebbles(pebbles, 'daily-tasks'); toast(`🫧 +${pebbles} Embers`); sfx('claim'); }
   } else if (a.kind === 'memory') {
     memoryNewGame(); scene.text = `Match all ${memory.pairs} pairs. Olwen watches with quiet interest.`; sfx('tap'); renderScene(); renderMemoryGrid(); return;

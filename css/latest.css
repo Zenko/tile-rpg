@@ -1789,7 +1789,7 @@ body.no-charfx .pfx-chip, body.no-charfx .pfx-take { display: none; }
    a piece of furniture does, so every cottage action works exactly as before. Interiors have no seasons or weather: these tokens are
    fixed, in the same muted range as the meadow biome the town uses. Everything that moves is transform (the camera) or left/top
    on one entity, like the town. */
-.hr-room {
+.hr-room, .hr-th {
   --plank:#8e7148; --plank2:#6f5836; --trunk:#5b4632; --door:#4f3624; --window:#e0c574; --wall:#c9bda6; --wall2:#a89b83;
   --roof:#a5503d; --roof2:#8a4231; --stone:#76756f; --stone2:#5c5b56; --stone3:#8d8c85; --flower1:#d97896; --flower2:#dcbd58; --flower3:#dedede;
   --lamp:#ffcf66; --tshadow:rgba(0,0,0,.32); --leaf1:#2f6a48; --leaf2:#3c8058; --leaf3:#57a274; --water:#2d5b70; --water2:#4a86a0; --bread:#c08a4c;
@@ -1864,3 +1864,38 @@ body.no-charfx .pfx-chip, body.no-charfx .pfx-take { display: none; }
 @keyframes hr-pulse { 0%, 100% { opacity: .7; transform: scale(.92); } 50% { opacity: 1; transform: scale(1.06); } }
 @keyframes hr-twinkle { 0%, 100% { opacity: .2; transform: scale(.6); } 50% { opacity: 1; transform: scale(1); } }
 @media (prefers-reduced-motion: reduce) { .hr-prop .hr-fig, .hr-prop .hr-fig::before, .hr-prop .hr-fig::after, .hr-vfig, .hr-visitor::before, .hr-comp > span { animation: none; } .hr-comp { transition: none; } }
+/* what the frames, shelves and trophy case hold: your own favourite cards, decorations and trophies */
+.hr-prop .hr-frame, .hr-prop .hr-thing { position: absolute; transform: translate(-50%, -50%); line-height: 1; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,.45); }
+.hr-prop .hr-frame { font-size: calc(var(--t) * .29); }
+.hr-prop .hr-thing { font-size: calc(var(--t) * .22); }
+.hr-prop.flip > .spr { transform: scaleX(-1); }
+/* the buy list: a picture of each piece, category chips, a sell button beside each stored piece, a ghost while dragging */
+.hr-th { width: 44px; height: 44px; flex: none; border-radius: 10px; background: rgba(255,255,255,.06); display: grid; place-items: center; font-size: 24px; line-height: 1; padding: 3px; }
+i.hr-th { padding: 0; position: relative !important; inset: auto !important; }
+svg.hr-th { display: block; position: relative; box-sizing: border-box; overflow: hidden; padding: 3px; }
+#sceneView.sc-std .sc-btn.hr-buy { gap: 12px; min-height: 56px; padding: 0 12px; }
+.hr-row2 { display: flex; gap: 8px; flex: none; }
+.hr-row2 .hr-buy { flex: 1 1 auto; min-width: 0; }
+#sceneView.sc-std .sc-btn.hr-sell { flex: none; width: auto; min-height: 56px; justify-content: center; padding: 0 14px; }
+#sceneView.sc-std .sc-btn.hr-undo { min-height: 44px; justify-content: center; flex: none; border-radius: 14px; }
+.hr-cats { display: flex; flex-wrap: wrap; gap: 6px; flex: none; }
+.hr-cat { font: 700 .76rem/1 var(--f-ui); cursor: pointer; padding: 9px 12px; min-height: 36px; border-radius: 999px; color: var(--ink); background: color-mix(in srgb, var(--hl) 6%, transparent); border: 1px solid var(--stone-edge); }
+.hr-cat.on { background: var(--water); color: var(--on-water); border-color: transparent; }
+.hr-note { flex: none; text-align: center; font-size: .78rem; color: var(--ink-soft); padding: 2px 6px 6px; }
+.hr-ghost { opacity: .8; z-index: 650 !important; pointer-events: none; }
+.hr-ghost::after { content: ''; position: absolute; inset: 4%; border-radius: 8px; border: 2px dashed rgba(140,215,160,.95); background: rgba(140,215,160,.16); }
+.hr-ghost.bad::after { border-color: rgba(235,120,110,.95); background: rgba(235,120,110,.2); }
+.hr-rug.hr-ghost::after { inset: 0; border-radius: inherit; }
+.hr-lifted { opacity: .3; }
+.hr-bar { height: 6px; border-radius: 3px; background: var(--track); overflow: hidden; margin-top: 6px; }
+.hr-bar i { display: block; height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--water), var(--water-glow, var(--water))); }
+/* the cottage from outside (js/home-room.js hrExterior): smoke, a lantern, flowers and a flag as the home levels up */
+.hr-ext { position: absolute; inset: 0; pointer-events: none; }
+.hr-smoke i { position: absolute; left: 74%; top: 6%; width: 8%; height: 8%; border-radius: 50%; background: rgba(235,235,235,.55); opacity: 0; animation: hr-smoke 4.2s ease-out infinite; }
+.hr-smoke i:nth-child(2) { animation-delay: 1.4s; } .hr-smoke i:nth-child(3) { animation-delay: 2.8s; }
+@keyframes hr-smoke { 0% { opacity: 0; transform: translate(0, 0) scale(.6); } 15% { opacity: .6; } 100% { opacity: 0; transform: translate(-40%, -380%) scale(1.9); } }
+.hr-lantern { position: absolute; left: 34%; top: 58%; width: 10%; height: 10%; border-radius: 50%; background: radial-gradient(circle, #ffe9b0, #ffcf66 50%, rgba(255,207,102,0) 72%); box-shadow: 0 0 10px 4px rgba(255,207,102,.4); animation: hr-pulse 2.8s ease-in-out infinite; }
+.hr-pot { position: absolute; top: 80%; font-size: calc(var(--t) * .36); line-height: 1; text-shadow: 0 2px 2px rgba(0,0,0,.3); }
+.hr-flag { position: absolute; left: 47%; top: -12%; font-size: calc(var(--t) * .42); line-height: 1; transform-origin: 20% 100%; animation: hr-wave 3s ease-in-out infinite; }
+@keyframes hr-wave { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(5deg); } }
+@media (prefers-reduced-motion: reduce) { .hr-smoke i, .hr-lantern, .hr-flag { animation: none; } .hr-smoke { display: none; } }

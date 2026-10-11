@@ -126,6 +126,7 @@ const ACHIEVEMENTS = [
   { id: 'games-5',     icon: '🎸', name: '5 town activities', test: () => (state.progress.totals.townGames || 0) >= 5 },
   { id: 'puddles-10',  icon: '🌧️', name: '10 puddles splashed', test: () => (state.progress.totals.puddles || 0) >= 10 },
   { id: 'home-lv3',    icon: '🏠', name: 'A home of level 3', test: () => typeof hrHome === 'function' && hrHome().level >= 3 },
+  { id: 'cosy-45',     icon: '🛋️', name: 'A snug home', test: () => typeof hrCosy === 'function' && hrCosy().score >= 45 },
   { id: 'visitors-5',  icon: '🕊️', name: 'Five spirits welcomed home', test: () => (state.progress.totals.homeVisitors || 0) >= 5 },
   { id: 'mood-1',      icon: '🎈', name: 'A cheerful district', test: () => lifeTopMood() >= 1 },
   { id: 'mood-3',      icon: '🎆', name: 'A festive district', test: () => lifeTopMood() >= 3 },
