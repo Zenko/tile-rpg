@@ -628,7 +628,7 @@ function renderRivalTalk(f) {
   const e = talkEls(), rv = rivalState(), done = rv.chapter >= RIVAL.chapters;
   showTipOnce('rival');
   e.name.textContent = `🎭 Rook · ${done ? 'rival and friend' : `rivalry ${rv.chapter}/${RIVAL.chapters}`}`;
-  talkSay(`"${rivalLine().hello}"`);
+  talkSay(`"${rivalLine().hello}${typeof rookTalkHint === 'function' ? rookTalkHint() : ''}"`);
   e.sub.textContent = done ? 'The rivalry is settled, but Rook still loves a match.' : 'Every time you win, Rook comes back with a stronger deck.';
   e.tag.textContent = done ? 'Prize: a rare card or better, and 🫧 10' : rv.chapter === RIVAL.chapters - 1 ? "Prize: Rook's finale card, found nowhere else" : `Prize: ${rivalPrizeLabel(rv.chapter + 1)}`;
   e.main.classList.add('hidden');

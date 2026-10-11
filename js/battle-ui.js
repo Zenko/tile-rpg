@@ -98,8 +98,12 @@ function startBattleNow(opponent, first) {
   opponent.aiStyle = plainFoe && typeof npcAiStyle === 'function' ? npcAiStyle(opponent) : null;   // a habit of play: aggressive, defensive, tricky or greedy
   const plan = plainFoe && !isBoss && typeof npcDeckPlan === 'function' ? npcDeckPlan(opponent) : null;   // what this neighbour wants in their deck today (js/npc-brain.js)
   opponent.deckNote = [plan ? plan.note : '', mood].filter(Boolean).join(' ');
-  const oppDeck = plainFoe ? buildDeckForOpponent(DECK_SIZE, isBoss, null, opponent.name, state.currentDistrict, null, plan)   // a district's folk favour its family
+  let oppDeck = plainFoe ? buildDeckForOpponent(DECK_SIZE, isBoss, null, opponent.name, state.currentDistrict, null, plan)   // a district's folk favour its family
     : (Array.isArray(opponent.deck) && opponent.deck.length === DECK_SIZE) ? opponent.deck : buildDeckForOpponent(DECK_SIZE, isBoss);
+  if (opponent.isRival && typeof rookAdaptDeck === 'function') {   // Rook has been watching how you play (js/rival-learns.js)
+    const ad = rookAdaptDeck(oppDeck, rivalState().chapter);
+    oppDeck = ad.deck; opponent.deckNote = ad.notes.join(' ');
+  }
   const twistKind = bossTwistFor(opponent);
   const world = battleWorld(opponent, weather);
   let G;
@@ -1094,6 +1098,7 @@ function btFinish() {
   if (!battle || battle.ended) return;
   battle.ended = true; battle.busy = false;
   const G = battle.G, won = G.winner === 0, yielded = G.why === 'yield';
+  if (battle.npc && battle.npc.isRival && !yielded && !battle.neutral && typeof rookNoteDuel === 'function') rookNoteDuel(state.deck);   // Rook studies the deck you brought
   if (battle.npc && battle.npc.adaptive && !yielded && !battle.neutral && typeof adaptRecord === 'function') adaptRecord(won);   // your recent form (js/adaptive.js)
   if (battle.npc && battle.npc.adaptive && !battle.npc.isBoss && !yielded && !battle.neutral && typeof npcMemBattle === 'function') npcMemBattle(battle.npc, won);   // what this neighbour remembers (js/npc-memory.js)
   if (won && !yielded && !battle.dungeon && !battle.neutral) noteBattleResult(true, battle.playedKw || []);
