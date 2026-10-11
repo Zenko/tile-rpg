@@ -157,6 +157,7 @@ function wanderTick() {
     const cfg = WANDER[kindOf(f)];
     if (typeof f.nextMoveAt !== 'number') f.nextMoveAt = now + cfg.minMs + Math.random() * (cfg.maxMs - cfg.minMs);
     if (now < f.nextMoveAt) return;
+    if (typeof npcBrained === 'function' && npcBrained(f)) { npcWanderTick(m, data, f, now); return; }   // js/npc-brain.js: goals instead of a random shuffle
     f.nextMoveAt = now + cfg.minMs + Math.random() * (cfg.maxMs - cfg.minMs);
     if (Math.random() > cfg.moveChance) return;
     const to = wanderStep(m, data, f);

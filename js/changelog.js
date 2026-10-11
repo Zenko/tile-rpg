@@ -18,6 +18,8 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'new', x: 'Neighbours now have somewhere to be. They walk to benches, wells, doorways, home and each other, linger for a while, then head somewhere new.' },
+  { t:'better', x: 'Daily rhythm: in fine weather neighbours roam and sit outside, in rain, storms and snow they shelter near doorways and home, and at night they go home to rest. Chatty neighbours drift towards friends.' },
   { t:'new', x: 'Neighbours now plan their own decks. They pack cards that suit the weather and the season, a favourite family of their own, and the versus screen tells you what they brought.' },
   { t:'new', x: 'Chat -> Suggest a deck: ask a neighbour to build around a family, a tougher or gentler deck, or the season. The more hearts they have for you, the more of your idea they use.' },
   { t:'better', x: 'Cards you can play in battle now glow with an animated gold ring and a shimmer, and the cost circles are bright glowing gems again.' },
