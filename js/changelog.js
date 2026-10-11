@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'better', x: 'The daily town event is paced like a story now: it rarely repeats a recent one, usually suits something you actually do (fishing, crops, baking, trading, the Cup), and a Friendship Fair is more likely while you are still making friends.' },
   { t:'new', x: 'Neighbours have daily routines. Each has their own favourite way to spend the morning, afternoon and evening (a bakery visit, a bench, the fountain, a friend) and you can learn them, or just ask. They show a little sign when they arrive, like bread at the bakery.' },
   { t:'new', x: 'Neighbours remember you. They keep track of your matches (who is ahead), the favours you did and gifts you gave, and when you walked past them. They mention it when you talk, and Chat -> "What do you remember?" gives you the score.' },
   { t:'better', x: 'A neighbour you have beaten twice running comes back having practised, with an extra tough card in their deck.' },

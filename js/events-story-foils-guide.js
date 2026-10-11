@@ -20,6 +20,8 @@ const TOWN_EVENTS = [
 ];
 const EVENT_WEIGHT = e => e.rare ? 0.25 : 1;
 function eventNow() {
+  const directed = typeof directorEvent === 'function' ? directorEvent() : null;   // js/director.js: paced by your recent days
+  if (directed) return directed;
   const total = TOWN_EVENTS.reduce((n, e) => n + EVENT_WEIGHT(e), 0);
   let r = seeded('event-' + todayKey())() * total;
   for (const e of TOWN_EVENTS) { r -= EVENT_WEIGHT(e); if (r < 0) return e; }
