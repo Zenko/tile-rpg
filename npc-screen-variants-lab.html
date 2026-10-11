@@ -193,6 +193,9 @@ button { font:inherit; color:inherit; cursor:pointer; border:0; background:none;
 .v-above .stage { margin-top:82px; }
 /* B, round 6: character 30% smaller, still standing on the name bar */
 .v-above .bust img { height:70%; }
+/* B, round 7: the bubble sits just above the character's head (inside the character's column, 70% = the picture's height) */
+.v-above .bust { position:relative; overflow:visible; }
+.v-above .bubble { position:absolute; left:0; right:0; bottom:calc(70% + 12px); margin:0; z-index:5; }
 </style>
 </head>
 <body>
@@ -235,7 +238,7 @@ const EXTRA = { chat: '<div class="meter"><i style="width:60%"></i></div><div cl
 const TOPICS = [['🌤️ The weather', 'weather'], ['🏘️ Around town', 'town'], ['🃏 Favourite cards', 'cards']];
 function build(v) {
   const stage = v === 'above'
-    ? `<div class="stage"><div class="bubble"><span class="say">${SAY.hello}</span><span class="next">▾</span></div><div class="bust"><img alt="" src="${ARTT[CHAR]}"></div><div class="plate"><span>Fenn</span>${HEARTS}</div></div>`
+    ? `<div class="stage"><div class="bust"><img alt="" src="${ARTT[CHAR]}"><div class="bubble"><span class="say">${SAY.hello}</span><span class="next">▾</span></div></div><div class="plate"><span>Fenn</span>${HEARTS}</div></div>`
     : `<div class="stage"><div class="bust"><img alt="" src="${ART[CHAR]}"><div class="plate"><span>Fenn</span>${HEARTS}</div></div><div class="bubble"><span class="say">${SAY.hello}</span><span class="next">▾</span></div></div>`;
   const d = el(`<div class="dev phone"><div class="scr v-${v}"><div class="bg blur"></div><div class="scrim"></div><button class="exit" data-t="Closed">Exit <b>✕</b></button>${stage}<div class="body"></div></div><div class="toast"></div></div>`);
   const body = $('.body', d); body.style.display = 'contents';
