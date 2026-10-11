@@ -18,6 +18,8 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'new', x: 'Neighbours meet each other. When two stand side by side they chat, swap small gifts, trade deck tips or play a friendly game, with little speech bubbles over their heads. Friends seek each other out more.' },
+  { t:'better', x: 'Talk to a neighbour soon after and they may mention who they were just with. A deck tip from a friend can find its way into their next deck.' },
   { t:'new', x: 'Neighbours now have somewhere to be. They walk to benches, wells, doorways, home and each other, linger for a while, then head somewhere new.' },
   { t:'better', x: 'Daily rhythm: in fine weather neighbours roam and sit outside, in rain, storms and snow they shelter near doorways and home, and at night they go home to rest. Chatty neighbours drift towards friends.' },
   { t:'new', x: 'Neighbours now plan their own decks. They pack cards that suit the weather and the season, a favourite family of their own, and the versus screen tells you what they brought.' },

@@ -76,6 +76,8 @@ function npcDeckPlan(f, tier) {
   add(npcFamilyPicks(wFam, 2, tier), `${FAMILIES[wFam].name} cards for ${NPC_WEATHER_WORDS[weather] || 'the day'}`);
   add(npcSeasonPicks(2, tier), `${seasonDef().name.toLowerCase()} cards`);
   add(npcFamilyPicks(taste.family, 1, tier), `a favourite ${FAMILIES[taste.family].name} card`);
+  const tip = f.mind && f.mind.tip;                      // learned from a friend (stage 3): one card of their favourite family
+  if (tip && FAMILIES[tip.family]) add(npcFamilyPicks(tip.family, 1, tier), `a tip from ${tip.from}`);
   if (!hint && taste.bold) add(npcStylePicks('tough', 1, tier), '');
   const note = why.length ? `${f.name} packed ${why.slice(0, 2).join(' and ')}.` : '';
   return { keep, note };
@@ -145,7 +147,7 @@ function npcScoreGoals(ctx) {
     let s = Math.random() * 0.35 - dist * 0.04;
     if (c.kind === 'home') s += (ctx.night ? 1.4 : 0) + (wet ? 0.6 : 0) + (ctx.bold ? 0 : 0.25) + (dist > radius ? 0.5 : 0) - 0.35;
     else if (c.kind === 'door') s += (wet ? 0.7 : 0.15) + (ctx.night ? 0.1 : 0) + (ctx.bold ? 0.25 : 0);
-    else if (c.kind === 'friend') s += ctx.social * 1.5 + (ctx.night ? -0.5 : 0) - (wet ? 0.2 : 0);
+    else if (c.kind === 'friend') s += ctx.social * 1.5 + Math.min(1, (c.bond || 0) * 0.12) + (ctx.night ? -0.5 : 0) - (wet ? 0.2 : 0);
     else s += (fine ? 0.5 : wet ? -0.7 : 0) + (ctx.night ? -0.5 : 0) + (c.kind === 'bench' ? 0.25 : 0);
     if (ctx.recent.includes(c.id)) s -= 0.9;
     out.push({ c, s });
@@ -166,7 +168,7 @@ function npcChooseGoal(m, data, f, now) {
   if (typeof f.homeX !== 'number') { f.homeX = f.x; f.homeY = f.y; }
   const cands = [{ id: 'home', kind: 'home', x: f.homeX, y: f.homeY }];
   npcLandmarks(m).forEach(lm => { const t = npcStandTile(m, data, f, lm); if (t) cands.push({ id: lm.id, kind: lm.kind, x: t.x, y: t.y }); });
-  data.npcs.forEach(o => { if (o !== f && npcBrained(o) && !o.defeated) cands.push({ id: 'friend:' + o.id, kind: 'friend', x: o.x, y: o.y, who: o }); });
+  data.npcs.forEach(o => { if (o !== f && npcBrained(o) && !o.defeated) cands.push({ id: 'friend:' + o.id, kind: 'friend', x: o.x, y: o.y, who: o, bond: npcBond(f, o) }); });
   const ctx = { night: !!skyPhase().isNight, weather: weatherNow(), bold: taste.bold, social: mind.social, home: { x: f.homeX, y: f.homeY }, pos: { x: f.x, y: f.y }, recent: mind.recent, cands };
   const pick = npcPickScored(npcScoreGoals(ctx));
   if (!pick) return null;
@@ -209,4 +211,99 @@ function npcWanderTick(m, data, f, now) {
   moveFighter(f, { x: next.x, y: next.y, dx: next.x - f.x, dy: next.y - f.y });
   f.nextMoveAt = now + npcRand(NPC_WALK.stepMs[0], NPC_WALK.stepMs[1]);
   if (f.x === g.x && f.y === g.y) f.nextMoveAt = now + 300;     // arrive on the next tick
+}
+
+/* ============================================================
+   NPC BRAIN, STAGE 3: NEIGHBOURS MEET EACH OTHER (build 218)
+   When two neighbours stand next to each other (usually because one walked over to chat, see 'friend' goals above) they may have an
+   encounter, at most once every NPC_MEET.cooldownMs per pair:
+     chat      a little speech bubble each; builds their bond. The topic (the weather, the season, decks, you) is remembered.
+     gift      once they are friends, a small present passes between them (hearts over their heads); a bigger bond bump.
+     tip       friends swap deck know-how: the listener learns the speaker's favourite family and will keep one card of it in
+               their next deck ("a tip from Rowan", see npcDeckPlan above).
+     match     a friendly game: swords, then smiles. No one is ever defeated by it.
+   What you see: bubbles over their heads (lifeFx). What you get: when you talk to a neighbour they may mention who they were just
+   with (npcGreeting), friends keep seeking each other out (bond raises a friend goal's score), and tips change their decks.
+   Bonds are saved in state.progress.bonds as "District:NameA|NameB" (names sorted) -> { pts, last } and capped, because neighbours
+   come back under new names after a defeat and the list must not grow for ever.
+   ============================================================ */
+const NPC_MEET = { cooldownMs: 120000, incidentalChance: 0.1, intendedChance: 0.5, maxBonds: 40, giftBond: 3, tipBond: 4, fresh: 5 * 60 * 1000 };
+function npcBonds() { const p = state.progress; if (!p.bonds || typeof p.bonds !== 'object') p.bonds = {}; return p.bonds; }
+function npcBondKey(a, b) { return state.currentDistrict + ':' + [a.name, b.name].sort().join('|'); }
+function npcBond(a, b) { const e = npcBonds()[npcBondKey(a, b)]; return e ? e.pts : 0; }
+function npcBondAdd(a, b, pts, now) {
+  const bonds = npcBonds(), k = npcBondKey(a, b), e = bonds[k] || (bonds[k] = { pts: 0, last: 0 });
+  e.pts += pts; e.last = now;
+  const keys = Object.keys(bonds);
+  if (keys.length > NPC_MEET.maxBonds) keys.sort((x, y) => bonds[x].last - bonds[y].last).slice(0, keys.length - NPC_MEET.maxBonds).forEach(x => delete bonds[x]);
+  return e;
+}
+// The neighbour this one is closest to (bond points, at least `min`), among those in the district. Used for deck tips and gossip.
+function npcBestFriend(f, data, min) {
+  let best = null, bp = (min || 1) - 1;
+  (data.npcs || []).forEach(o => { if (o !== f && npcBrained(o)) { const p = npcBond(f, o); if (p > bp) { bp = p; best = o; } } });
+  return best;
+}
+function npcTopicFor(f) {
+  const t = [`the ${NPC_WEATHER_WORDS[weatherNow()] || 'weather'}`, `the ${seasonDef().name.toLowerCase()}`, 'their decks', 'a card they once found', friendHearts(f) >= 1 ? 'a certain dreamer in town' : 'the town'];
+  return t[Math.floor(Math.random() * t.length)];
+}
+function npcBubble(f, emoji, delay) {
+  setTimeout(() => { if (typeof lifeFx === 'function') lifeFx('npc-bubble', f.x, f.y, `<span>${emoji}</span>`, 2300); }, delay || 0);
+}
+// Make the encounter happen between a and b. Returns what happened (also used by the tests).
+function npcMeet(a, b, now, forceKind) {
+  const bond = npcBond(a, b);
+  let kind = forceKind;
+  if (!kind) {
+    const w = { chat: 6, match: 1.5 + (npcTaste(a).bold ? 1 : 0) + (npcTaste(b).bold ? 1 : 0), gift: bond >= NPC_MEET.giftBond ? 2 : 0, tip: bond >= NPC_MEET.tipBond ? 3 : 0 };
+    let r = Math.random() * Object.values(w).reduce((x, y) => x + y, 0);
+    kind = 'chat'; for (const k of Object.keys(w)) { r -= w[k]; if (r <= 0) { kind = k; break; } }
+  }
+  const topic = npcTopicFor(a);
+  const bump = kind === 'gift' ? 2 : 1;
+  npcBondAdd(a, b, bump, now);
+  const res = { kind, topic, tip: null };
+  if (kind === 'tip') {                                         // the one with the stronger taste teaches the other
+    const teacher = Math.random() < 0.5 ? a : b, learner = teacher === a ? b : a;
+    npcMind(learner).tip = { from: teacher.name, family: npcTaste(teacher).family, at: now };
+    res.tip = { teacher: teacher.name, learner: learner.name, family: npcTaste(teacher).family };
+  }
+  [[a, b], [b, a]].forEach(([x, y], i) => {
+    const mind = npcMind(x);
+    x.lastMeet = { with: y.name, kind, topic, at: now };
+    mind.social = Math.max(0, mind.social - (kind === 'chat' || kind === 'match' ? 0.5 : 0.7));
+    mind.dwellUntil = Math.max(mind.dwellUntil || 0, now + npcRand(5000, 9000));
+    mind.goal = null;
+    x.intent = kind === 'match' ? 'playing a friendly game' : `chatting with ${y.name}`;
+    npcBubble(x, kind === 'gift' ? '🎁' : kind === 'tip' ? '🃏' : kind === 'match' ? '⚔️' : '💬', i * 700);
+    if (kind === 'gift') npcBubble(x, '💞', 1500 + i * 400);
+    else if (kind === 'match') npcBubble(x, i ? '😄' : '😤', 1600);
+  });
+  saveState();
+  return res;
+}
+// Called once per wander tick. Looks for neighbours standing side by side and rolls for an encounter.
+function npcMeetTick(data, now) {
+  const ns = (data.npcs || []).filter(n => npcBrained(n) && !n.defeated);
+  for (let i = 0; i < ns.length; i++) for (let j = i + 1; j < ns.length; j++) {
+    const a = ns[i], b = ns[j];
+    if (Math.abs(a.x - b.x) + Math.abs(a.y - b.y) !== 1) continue;
+    const e = npcBonds()[npcBondKey(a, b)];
+    if (e && now - e.last < NPC_MEET.cooldownMs) continue;
+    const ma = npcMind(a), mb = npcMind(b);
+    const intended = (ma.goal && ma.goal.who === b.id) || (mb.goal && mb.goal.who === a.id);
+    if (Math.random() < (intended ? NPC_MEET.intendedChance : NPC_MEET.incidentalChance)) npcMeet(a, b, now);
+  }
+}
+// What a neighbour says when you walk up: a hint of who they were just with, if it was recent.
+function npcGreeting(f, fallback) {
+  const lm = f && f.lastMeet;
+  if (lm && Date.now() - lm.at < NPC_MEET.fresh) {
+    if (lm.kind === 'match') return `Hello there. ${lm.with} and I were just playing a friendly game. Fancy one yourself?`;
+    if (lm.kind === 'gift') return `Hello there. ${lm.with} just gave me the nicest little present.`;
+    if (lm.kind === 'tip') return `Hello there. ${lm.with} and I were swapping deck tips. Care for a match?`;
+    return `Hello there. I was just chatting with ${lm.with} about ${lm.topic}.`;
+  }
+  return fallback;
 }

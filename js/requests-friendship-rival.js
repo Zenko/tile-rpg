@@ -243,7 +243,7 @@ function renderTalkBody() {
     return;
   }
   if (!r) {
-    talkSay('Hello there. Fancy a chat, or a friendly match?');
+    talkSay(typeof npcGreeting === 'function' ? npcGreeting(f, 'Hello there. Fancy a chat, or a friendly match?') : 'Hello there. Fancy a chat, or a friendly match?');
     e.sub.textContent = 'I might have a small favour to ask.';
     e.main.textContent = '🤝 Ask if they need a hand'; e.main.dataset.act = 'ask';
   } else if (r.state === 'open') {
