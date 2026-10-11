@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neighbour Card Options</title>
+<!-- Prototype only: four directions for the neighbour talk card (#talkCard). Self-contained, does not touch the game.
+     Same tokens as css/base.css and the sheet kit in sheet-lab.html. Pick one and it becomes new rules in css/latest.css
+     plus a small change to openTalk()/renderTalk() in js/requests-friendship-rival.js. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@400;500&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: dark;
+  --bg-top:#1b2128; --bg-bottom:#12161b; --stone:#232b34; --stone-edge:#333d48;
+  --water:#8dbccb; --water-glow:#a6cfdb; --on-water:#0f2a35;
+  --ink:#e9edf1; --ink-soft:#a6b1bb; --shadow:rgba(0,0,0,.35); --hl:#fff; --track:rgba(0,0,0,.3);
+  --accent:#e8cb88; --on-accent:#3a2a08; --heart:#e0566a; --good:#7fc79a;
+  --f-display:'Newsreader',Georgia,serif; --f-ui:'Nunito',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --glass:rgba(35,43,52,.9); --g1:#2c4a3a; --g2:#233c2f;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg-top:#f3ece0; --bg-bottom:#e4eee9; --stone:#fbf7ef; --stone-edge:#ddd6c5;
+  --water:#8fc4b8; --water-glow:#a6d3c9; --on-water:#1f4540;
+  --ink:#4b4a46; --ink-soft:#6b6a64; --shadow:rgba(75,74,70,.2); --hl:#4b4a46; --track:rgba(75,74,70,.14);
+  --accent:#b5832a; --on-accent:#fff; --heart:#d2475c; --good:#3f8a5c;
+  --glass:rgba(251,247,239,.92); --g1:#8db27a; --g2:#7ba468;
+}
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) {
+  color-scheme: light;
+  --bg-top:#f3ece0; --bg-bottom:#e4eee9; --stone:#fbf7ef; --stone-edge:#ddd6c5;
+  --water:#8fc4b8; --water-glow:#a6d3c9; --on-water:#1f4540;
+  --ink:#4b4a46; --ink-soft:#6b6a64; --shadow:rgba(75,74,70,.2); --hl:#4b4a46; --track:rgba(75,74,70,.14);
+  --accent:#b5832a; --on-accent:#fff; --heart:#d2475c; --good:#3f8a5c;
+  --glass:rgba(251,247,239,.92); --g1:#8db27a; --g2:#7ba468;
+} }
+* { box-sizing:border-box; }
+body { margin:0; font-family:var(--f-ui); background:var(--bg-bottom); color:var(--ink); line-height:1.4; -webkit-font-smoothing:antialiased; }
+button { font:inherit; color:inherit; cursor:pointer; border:0; background:none; }
+.bar { position:sticky; top:0; z-index:20; display:flex; gap:12px; align-items:center; flex-wrap:wrap; padding:10px 20px; background:color-mix(in srgb,var(--bg-top) 94%,transparent); border-bottom:1px solid var(--stone-edge); }
+.bar h1 { font:500 1.15rem var(--f-display); margin:0 auto 0 0; }
+.bar button { padding:7px 14px; border-radius:999px; border:1px solid var(--stone-edge); font-weight:700; font-size:.8rem; color:var(--ink-soft); }
+.wrap { max-width:1500px; margin:0 auto; padding:24px 20px 80px; }
+.intro { max-width:760px; color:var(--ink-soft); margin:0 0 24px; }
+.intro b { color:var(--ink); }
+.grid { display:flex; gap:28px; overflow-x:auto; padding:6px 4px 20px; scroll-snap-type:x proximity; }
+.col { flex:none; width:360px; scroll-snap-align:start; }
+.col h2 { font:800 .78rem var(--f-ui); letter-spacing:.1em; text-transform:uppercase; color:var(--accent); margin:0 0 4px; }
+.col h3 { font:500 1.15rem var(--f-display); margin:0 0 4px; }
+.col p { font-size:.82rem; color:var(--ink-soft); margin:0 0 12px; min-height:5.2em; }
+.col ul { font-size:.78rem; color:var(--ink-soft); margin:12px 0 0; padding-left:18px; } .col li { margin:3px 0; }
+.col ul b { color:var(--ink); }
+
+/* phone + the town behind the card */
+.phone { position:relative; width:360px; height:740px; border-radius:36px; overflow:hidden; background:var(--bg-top); border:1px solid var(--stone-edge); box-shadow:0 20px 50px var(--shadow); isolation:isolate; }
+.town { position:absolute; inset:0; background:
+  repeating-linear-gradient(0deg,#0003 0 1px,#0000 1px 60px), repeating-linear-gradient(90deg,#0003 0 1px,#0000 1px 60px), linear-gradient(170deg,var(--g1),var(--g2)); }
+.town i { position:absolute; font-style:normal; font-size:2.2rem; filter:drop-shadow(0 4px 4px #0005); }
+.hud { position:absolute; z-index:6; left:12px; right:12px; top:14px; height:52px; border-radius:999px; background:var(--glass); border:1px solid var(--stone-edge); display:flex; align-items:center; padding:0 6px; box-shadow:0 4px 14px var(--shadow); opacity:.85; }
+.hud .av { width:40px; height:40px; border-radius:50%; background:radial-gradient(circle at 50% 40%,#e9d3f0 0 28%,#a53bc0 30%); border:2px solid var(--accent); flex:none; }
+.hud .mid { flex:1; text-align:center; line-height:1.15; } .hud .mid b { display:block; font:500 1.05rem var(--f-display); } .hud .mid small { font-size:.7rem; color:var(--ink-soft); }
+.hud .em { font-weight:800; padding:0 14px; font-size:.9rem; }
+
+/* shared kit pieces */
+.sheet { position:absolute; z-index:7; left:0; right:0; bottom:0; display:flex; flex-direction:column; background:var(--stone); border-top:1px solid var(--stone-edge); border-radius:28px 28px 0 0; box-shadow:0 -10px 30px var(--shadow); animation:up .42s cubic-bezier(.2,.9,.25,1) both; }
+@keyframes up { from { transform:translateY(105%); } to { transform:none; } }
+@keyframes rise { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+@keyframes bob { 50% { transform:translateY(-4px); } }
+.grab { width:40px; height:4px; border-radius:2px; background:var(--stone-edge); margin:8px auto 0; flex:none; }
+.body { padding:12px 16px calc(16px + env(safe-area-inset-bottom,0px)); display:flex; flex-direction:column; gap:10px; }
+.x { position:absolute; right:12px; top:12px; width:36px; height:36px; border-radius:50%; background:color-mix(in srgb,var(--hl) 8%,transparent); color:var(--ink-soft); display:grid; place-items:center; font-weight:800; z-index:3; }
+.portrait { flex:none; border-radius:50%; background:radial-gradient(circle at 35% 30%,#b9d1de,#5d7f93); display:grid; place-items:center; box-shadow:0 6px 16px var(--shadow); border:2px solid var(--stone-edge); animation:bob 3s ease-in-out infinite; }
+.name { font:500 1.4rem var(--f-display); color:var(--accent); line-height:1.1; }
+.hearts { display:flex; gap:3px; font-size:1rem; } .hearts i { font-style:normal; filter:grayscale(1) opacity(.3); } .hearts i.on { filter:none; }
+.meter { height:6px; border-radius:6px; background:var(--track); overflow:hidden; } .meter > i { display:block; height:100%; border-radius:6px; background:var(--heart); }
+.sub { color:var(--ink-soft); font-size:.76rem; font-weight:600; }
+.speech { padding:12px 16px; border-radius:6px 20px 20px 20px; background:color-mix(in srgb,var(--hl) 7%,transparent); font-size:.98rem; line-height:1.45; min-height:3.9em; }
+.chips { display:flex; gap:8px; flex-wrap:wrap; }
+.chip { padding:8px 14px; border-radius:999px; font-size:.85rem; font-weight:700; background:color-mix(in srgb,var(--hl) 6%,transparent); border:1px solid var(--stone-edge); transition:transform .12s; }
+.chip:active { transform:scale(.95); } .chip.used { opacity:.55; } .chip.on { background:var(--water); color:var(--on-water); border-color:transparent; }
+.favour { display:flex; gap:10px; align-items:center; padding:10px 14px; border-radius:16px; background:color-mix(in srgb,var(--accent) 13%,transparent); border:1px dashed color-mix(in srgb,var(--accent) 55%,transparent); font-size:.84rem; font-weight:700; text-align:left; width:100%; }
+.favour::before { content:'✨'; } .favour::after { content:'›'; margin-left:auto; font-size:1.3rem; opacity:.6; }
+.tile { display:flex; flex-direction:column; align-items:flex-start; gap:4px; padding:14px; border-radius:20px; text-align:left; background:color-mix(in srgb,var(--hl) 6%,transparent); border:1px solid var(--stone-edge); animation:rise .34s calc(.2s + var(--n,0)*.05s) both; min-width:0; }
+.tile:active { transform:scale(.97); } .tile .ico { font-size:1.5rem; line-height:1.2; } .tile b { font-weight:800; } .tile small { color:var(--ink-soft); font-size:.74rem; font-weight:600; }
+.tile.primary { background:var(--water); color:var(--on-water); border-color:transparent; box-shadow:0 6px 18px color-mix(in srgb,var(--water) 35%,transparent); } .tile.primary small { color:color-mix(in srgb,var(--on-water) 75%,transparent); }
+.tile.locked { opacity:.7; cursor:default; } .tile.locked .ico { filter:grayscale(1); }
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; } .span2 { grid-column:1 / -1; }
+.row { display:flex; align-items:center; gap:14px; width:100%; min-height:62px; padding:10px 14px 10px 10px; border-radius:20px; text-align:left; background:color-mix(in srgb,var(--hl) 6%,transparent); border:1px solid var(--stone-edge); animation:rise .34s calc(.2s + var(--n,0)*.05s) both; }
+.row:active { transform:scale(.98); }
+.row .ico { flex:none; width:44px; height:44px; border-radius:14px; display:grid; place-items:center; font-size:1.4rem; background:color-mix(in srgb,var(--water) 22%,transparent); }
+.row .tx { flex:1; min-width:0; } .row .tx b { display:block; font-weight:800; } .row .tx small { display:block; color:var(--ink-soft); font-size:.76rem; font-weight:600; }
+.row .go { color:var(--ink-soft); font-size:1.3rem; font-weight:800; opacity:.6; }
+.row.primary { background:var(--water); color:var(--on-water); border-color:transparent; min-height:72px; box-shadow:0 6px 18px color-mix(in srgb,var(--water) 35%,transparent); } .row.primary .ico { background:color-mix(in srgb,var(--on-water) 12%,transparent); } .row.primary .tx small, .row.primary .go { color:color-mix(in srgb,var(--on-water) 75%,transparent); }
+.row.locked { opacity:.7; cursor:default; } .row.locked .ico { filter:grayscale(1); background:color-mix(in srgb,var(--hl) 8%,transparent); }
+.toast { position:absolute; z-index:9; left:50%; top:80px; transform:translate(-50%,-8px); background:var(--ink); color:var(--bg-bottom); font-weight:800; font-size:.8rem; padding:8px 14px; border-radius:999px; opacity:0; pointer-events:none; transition:.25s; white-space:nowrap; } .toast.show { opacity:1; transform:translate(-50%,0); }
+.who { position:absolute; z-index:1; left:50%; transform:translateX(-50%); font-size:4rem; filter:drop-shadow(0 6px 6px #0006); }
+
+/* B: dialogue */
+.dlg { position:absolute; z-index:7; left:12px; right:12px; bottom:12px; display:flex; flex-direction:column; gap:10px; }
+.box { position:relative; padding:22px 18px 16px; border-radius:22px; background:var(--glass); border:1px solid var(--stone-edge); box-shadow:0 10px 30px var(--shadow); font-size:1.02rem; line-height:1.45; min-height:104px; animation:up .4s cubic-bezier(.2,.9,.25,1) both; }
+.plate { position:absolute; left:14px; top:-16px; display:flex; align-items:center; gap:8px; padding:6px 14px 6px 8px; border-radius:999px; background:var(--accent); color:var(--on-accent); font:500 1.05rem var(--f-display); box-shadow:0 4px 12px var(--shadow); }
+.plate .mini { font-size:.7rem; letter-spacing:1px; font-family:var(--f-ui); }
+.box .next { position:absolute; right:14px; bottom:10px; color:var(--ink-soft); animation:bob 1.2s ease-in-out infinite; }
+.opts { display:flex; flex-direction:column; gap:8px; }
+.opt { display:flex; align-items:center; gap:12px; padding:13px 16px; border-radius:16px; text-align:left; font-weight:700; background:var(--glass); border:1px solid var(--stone-edge); border-left:4px solid var(--water); animation:rise .3s calc(.25s + var(--n,0)*.05s) both; box-shadow:0 4px 12px var(--shadow); }
+.opt:active { transform:scale(.98); } .opt.main { background:var(--water); color:var(--on-water); border-color:transparent; font-weight:800; }
+.opt.dim { opacity:.75; border-left-color:var(--stone-edge); } .opt small { margin-left:auto; color:var(--ink-soft); font-weight:600; font-size:.74rem; }
+.opt.main small { color:color-mix(in srgb,var(--on-water) 70%,transparent); }
+
+/* C: tabs */
+.hero { display:flex; gap:14px; align-items:center; padding:6px 52px 0 2px; }
+.seg { display:flex; padding:4px; border-radius:999px; background:var(--track); gap:2px; position:relative; }
+.seg button { flex:1; min-height:40px; border-radius:999px; font-weight:800; font-size:.88rem; color:var(--ink-soft); position:relative; transition:.2s; }
+.seg button.on { background:var(--water); color:var(--on-water); box-shadow:0 2px 8px var(--shadow); }
+.seg .dot { position:absolute; right:14px; top:8px; width:8px; height:8px; border-radius:50%; background:var(--accent); }
+.pane { display:flex; flex-direction:column; gap:10px; animation:rise .25s both; min-height:262px; }
+.loves { box-shadow:0 0 0 2px var(--accent) inset; }
+.tag { display:inline-block; padding:2px 8px; border-radius:999px; font-size:.66rem; font-weight:800; background:color-mix(in srgb,var(--accent) 24%,transparent); color:var(--accent); margin-left:6px; vertical-align:middle; }
+
+/* D: peek */
+.peek { padding-top:6px; }
+.peekline { display:flex; align-items:center; gap:12px; padding-right:44px; }
+.quick { display:grid; grid-template-columns:1.5fr 1fr 1fr 1fr; gap:8px; align-items:stretch; }
+.qb { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; padding:10px 4px; border-radius:20px; min-height:76px; font-weight:800; font-size:.76rem; background:color-mix(in srgb,var(--hl) 6%,transparent); border:1px solid var(--stone-edge); }
+.qb .ico { font-size:1.5rem; line-height:1; } .qb:active { transform:scale(.95); }
+.qb.main { background:var(--water); color:var(--on-water); border-color:transparent; box-shadow:0 6px 18px color-mix(in srgb,var(--water) 35%,transparent); font-size:.9rem; }
+.qb.locked { opacity:.6; } .qb.locked .ico { filter:grayscale(1); }
+.more { display:grid; grid-template-rows:0fr; transition:grid-template-rows .35s ease; } .more.open { grid-template-rows:1fr; } .more > div { overflow:hidden; display:flex; flex-direction:column; gap:10px; }
+.expander { align-self:center; color:var(--ink-soft); font-size:.78rem; font-weight:800; padding:4px 12px; }
+@media (prefers-reduced-motion:reduce) { *, *::before, *::after { animation:none !important; transition:none !important; } }
+</style>
+</head>
+<body>
+<div class="bar"><h1>Neighbour Card Options</h1><button id="replay">↻ Replay</button><button id="theme">☀︎ Light / dark</button></div>
+<div class="wrap">
+  <p class="intro">Four directions for what opens when you tap a neighbour. Same content in each (Fenn, 2 of 5 hearts, loves Bloom cards, a small favour waiting, ranked and walking-together locked). <b>Everything is tappable:</b> topics, tabs, the expander and the ✕.</p>
+  <div class="grid" id="grid"></div>
+</div>
+<script>
+const $ = (s, r = document) => r.querySelector(s);
+const el = (h) => { const t = document.createElement('template'); t.innerHTML = h.trim(); return t.content.firstChild; };
+const REPLIES = { weather: 'Frost by Friday, I think. The rain should ease by dusk.', town: 'Fern says the flower boxes are thirsty again. Olwen has a new puzzle board.', cards: 'Bloom cards are my weakness. Bring one by and I will remember it.', chat: 'Oh, you know. Quiet week. The leaves have turned early.', hello: 'Hello there. Fancy a chat, or a friendly match?' };
+const heartsHtml = (n) => `<div class="hearts">${[0,1,2,3,4].map(i => `<i class="${i < n ? 'on' : ''}">❤️</i>`).join('')}</div>`;
+const townHtml = (extra = '') => `<div class="town"><i style="left:20px;top:150px">🍂</i><i style="left:290px;top:120px">🌲</i><i style="left:60px;top:260px">⛲</i><i style="left:300px;top:230px">🌳</i><i style="left:150px;top:60px">🌲</i>${extra}</div><div class="hud"><div class="av"></div><div class="mid"><b>El Umbral</b><small>Afternoon · Moonrain</small></div><div class="em">49</div></div>`;
+const toast = (ph, m) => { const t = $('.toast', ph); t.textContent = m; t.classList.add('show'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 1500); };
+function type(node, text) { clearInterval(node._i); node.textContent = ''; let i = 0; node._i = setInterval(() => { node.textContent = text.slice(0, ++i); if (i >= text.length) clearInterval(node._i); }, 16); }
+document.addEventListener('click', (e) => { const b = e.target.closest('[data-t]'); if (b) toast(b.closest('.phone'), b.dataset.t); });
+
+/* A: action grid */
+function optA() {
+  const ph = el(`<div class="phone">${townHtml('<i class="who" style="top:330px">🧑‍🦳</i>')}<div class="sheet"><div class="grab"></div><button class="x" data-t="Closed">✕</button>
+    <div class="body" style="padding-top:14px">
+      <div style="display:flex;gap:14px;align-items:center;padding-right:44px"><span class="portrait" style="width:64px;height:64px;font-size:2.2rem">🧑‍🦳</span><div style="flex:1;min-width:0"><div class="name">Fenn</div>${heartsHtml(2)}<div class="meter" style="margin-top:5px"><i style="width:60%"></i></div><div class="sub" style="margin-top:3px">1 more to the next heart · loves 🌸 Bloom cards</div></div></div>
+      <div class="speech">Hello there. Fancy a chat, or a friendly match?</div>
+      <div class="chips"><button class="chip" data-k="weather">🌤️ The weather</button><button class="chip" data-k="town">🏘️ Around town</button><button class="chip" data-k="cards">🃏 Favourite cards</button></div>
+      <button class="favour" data-t="Fenn's favour">Fenn might have a small favour to ask</button>
+      <div class="grid2">
+        <button class="tile primary span2" style="--n:0;flex-direction:row;align-items:center;gap:12px" data-t="Chatting with Fenn"><span class="ico">💬</span><span><b>Chat</b><br><small>Earns friendship</small></span></button>
+        <button class="tile" style="--n:1" data-t="Friendly match"><span class="ico">⚔️</span><b>Friendly match</b><small>No stakes</small></button>
+        <button class="tile" style="--n:2" data-t="Share a loaf"><span class="ico">🍞</span><b>Share a loaf</b><small>A small gift</small></button>
+        <div class="tile locked span2" style="--n:3;flex-direction:row;align-items:center;gap:12px"><span class="ico">🔒</span><span style="flex:1"><b>Walk with you</b><br><small>Needs 5 hearts · you have 2</small><div class="meter" style="margin-top:6px"><i style="width:40%;background:var(--accent)"></i></div></span></div>
+      </div>
+    </div></div><div class="toast"></div></div>`);
+  ph.addEventListener('click', (e) => { const c = e.target.closest('.chip'); if (!c) return; c.classList.add('used'); type($('.speech', ph), REPLIES[c.dataset.k]); });
+  return ph;
+}
+
+/* B: dialogue */
+function optB() {
+  const ph = el(`<div class="phone">${townHtml('<i class="who" style="top:100px;font-size:8.5rem;left:50%">🧑‍🦳</i>')}
+    <div class="dlg"><div class="box"><div class="plate">Fenn <span class="mini">❤️❤️🤍🤍🤍</span></div><span class="txt">Hello there. Fancy a chat, or a friendly match?</span><span class="next">▾</span></div>
+    <div class="opts">
+      <button class="opt main" style="--n:0" data-t="Chatting with Fenn">💬 Chat<small>+friendship</small></button>
+      <button class="opt" style="--n:1" data-k="weather">🌤️ Ask about the weather</button>
+      <button class="opt" style="--n:2" data-k="town">🏘️ Ask what's happening around town</button>
+      <button class="opt" style="--n:3" data-k="cards">🃏 Talk about favourite cards<small>loves 🌸</small></button>
+      <button class="opt" style="--n:4" data-t="Friendly match">⚔️ A friendly match?</button>
+      <button class="opt dim" style="--n:5" data-t="Fenn's favour">✨ "You look like you have something to ask..."</button>
+      <button class="opt dim" style="--n:6" data-t="Goodbye">👋 Not now</button>
+    </div></div><div class="toast"></div></div>`);
+  ph.addEventListener('click', (e) => { const c = e.target.closest('[data-k]'); if (!c) return; type($('.txt', ph), REPLIES[c.dataset.k]); });
+  return ph;
+}
+
+/* C: tabs */
+function optC() {
+  const ph = el(`<div class="phone">${townHtml('<i class="who" style="top:250px">🧑‍🦳</i>')}<div class="sheet"><div class="grab"></div><button class="x" data-t="Closed">✕</button>
+    <div class="body" style="padding-top:14px">
+      <div class="hero"><span class="portrait" style="width:72px;height:72px;font-size:2.5rem">🧑‍🦳</span><div style="flex:1;min-width:0"><div class="name">Fenn</div>${heartsHtml(2)}<div class="meter" style="margin:5px 0 3px"><i style="width:60%"></i></div><div class="sub">1 more to the next heart</div></div></div>
+      <div class="seg"><button class="on" data-p="talk">Talk</button><button data-p="play">Play</button><button data-p="gift">Gift</button><i class="dot"></i></div>
+      <div class="pane"></div>
+    </div><div class="toast"></div></div></div>`);
+  const panes = {
+    talk: `<div class="speech">Hello there. Fancy a chat, or a friendly match?</div><div class="chips"><button class="chip" data-k="weather">🌤️ The weather</button><button class="chip" data-k="town">🏘️ Around town</button><button class="chip" data-k="cards">🃏 Favourite cards</button></div><button class="favour" data-t="Fenn's favour">Fenn might have a small favour to ask</button><button class="row primary" data-t="Chatting with Fenn" style="margin-top:auto"><span class="ico">💬</span><span class="tx"><b>Chat</b><small>Earns friendship</small></span><span class="go">›</span></button>`,
+    play: `<button class="row primary" data-t="Friendly match"><span class="ico">⚔️</span><span class="tx"><b>Friendly match</b><small>No stakes, just practice</small></span><span class="go">›</span></button><button class="row" data-t="Signature match"><span class="ico">🌟</span><span class="tx"><b>Signature match</b><small>Fenn's favourite deck</small></span><span class="go">›</span></button><div class="row locked"><span class="ico">🔒</span><span class="tx"><b>Walk with you</b><small>Needs 5 hearts · you have 2</small><div class="meter" style="margin-top:6px"><i style="width:40%;background:var(--accent)"></i></div></span></div>`,
+    gift: `<div class="sub" style="padding:0 4px">Fenn loves <b style="color:var(--accent)">🌸 Bloom cards</b>: a gift of one earns the most.</div><button class="row primary" data-t="Gave a card"><span class="ico">🃏</span><span class="tx"><b>Give a card<span class="tag">LOVES</span></b><small>Choose from your spares</small></span><span class="go">›</span></button><button class="row" data-t="Shared a loaf"><span class="ico">🍞</span><span class="tx"><b>Share a loaf</b><small>You have 2</small></span><span class="go">›</span></button><button class="row" data-t="Gave a dish"><span class="ico">🍲</span><span class="tx"><b>Give a dish</b><small>None cooked yet</small></span><span class="go">›</span></button>`,
+  };
+  const show = (k) => { const p = $('.pane', ph); p.style.animation = 'none'; p.offsetWidth; p.style.animation = ''; p.innerHTML = panes[k]; ph.querySelectorAll('.seg button').forEach(b => b.classList.toggle('on', b.dataset.p === k)); if (k === 'talk') $('.dot', ph).style.display = 'block'; };
+  ph.addEventListener('click', (e) => { const t = e.target.closest('.seg button'); if (t) return show(t.dataset.p);
+    const c = e.target.closest('.chip'); if (c) { c.classList.add('used'); type($('.speech', ph), REPLIES[c.dataset.k]); }
+    if (e.target.closest('.favour')) $('.dot', ph).style.display = 'none'; });
+  show('talk'); return ph;
+}
+
+/* D: peek */
+function optD() {
+  const ph = el(`<div class="phone">${townHtml('<i class="who" style="top:300px">🧑‍🦳</i>')}<div class="sheet"><div class="grab"></div><button class="x" data-t="Closed">✕</button>
+    <div class="body peek">
+      <div class="peekline"><span class="portrait" style="width:52px;height:52px;font-size:1.8rem">🧑‍🦳</span><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:8px"><span class="name" style="font-size:1.2rem">Fenn</span>${heartsHtml(2).replace('1rem','.8rem')}</div><div class="sub">1 more to the next heart</div></div></div>
+      <div class="speech" style="min-height:0">Hello there. Fancy a chat, or a friendly match?</div>
+      <div class="quick"><button class="qb main" data-t="Chatting with Fenn"><span class="ico">💬</span>Chat</button><button class="qb" data-t="Friendly match"><span class="ico">⚔️</span>Match</button><button class="qb" data-t="Gift menu"><span class="ico">🎁</span>Gift</button><div class="qb locked"><span class="ico">🔒</span>Walk</div></div>
+      <div class="more"><div>
+        <div class="sub" style="padding:2px 4px 0">Ask about</div>
+        <div class="chips"><button class="chip" data-k="weather">🌤️ The weather</button><button class="chip" data-k="town">🏘️ Around town</button><button class="chip" data-k="cards">🃏 Favourite cards</button></div>
+        <button class="favour" data-t="Fenn's favour">Fenn might have a small favour to ask</button>
+        <div class="sub" style="padding:0 4px">🔒 Walking together needs 5 hearts · you have 2 · loves 🌸 Bloom cards</div>
+      </div></div>
+      <button class="expander">More about Fenn ▾</button>
+    </div><div class="toast"></div></div></div>`);
+  ph.addEventListener('click', (e) => { const x = e.target.closest('.expander'); if (x) { const m = $('.more', ph); m.classList.toggle('open'); x.textContent = m.classList.contains('open') ? 'Less ▴' : 'More about Fenn ▾'; return; }
+    const c = e.target.closest('.chip'); if (c) { c.classList.add('used'); type($('.speech', ph), REPLIES[c.dataset.k]); } });
+  return ph;
+}
+
+const OPTS = [
+  ['Option A', 'Action grid', 'Everything on one sheet, but organised: identity on top, conversation in the middle, actions as tiles. Chat is the wide filled tile.', optA,
+   ['<b>Keeps</b> the sheet people know; smallest change to the code.', '<b>Heart meter</b> shows progress to the next heart.', '<b>Locked</b> tile carries its own progress bar.', '<b>Cost:</b> still the tallest option once gifts are added.']],
+  ['Option B', 'Dialogue', 'Fenn stands large in the town and talks in a dialogue box with a name plate. Everything you can do is a reply option, like a visual novel.', optB,
+   ['<b>Feels like talking</b> to a person, not using a menu.', 'Topics, chat and match are all just replies.', 'The town stays visible behind.', '<b>Cost:</b> more taps to reach gifts; needs a "more" reply for those.']],
+  ['Option C', 'Tabs', 'A relationship header, then Talk / Play / Gift tabs. Each pane holds only what it needs, so the sheet never grows.', optC,
+   ['<b>Constant height</b>, any number of actions.', 'Gift tab can lead with what Fenn loves.', 'A dot on the Talk tab flags a pending favour.', '<b>Cost:</b> one extra tap to reach Play or Gift.']],
+  ['Option D', 'Peek and expand', 'A low peek card with four round actions, and a "More about Fenn" expander for topics and details. The town stays almost fully visible.', optD,
+   ['<b>Fastest path</b> to Chat or a match: one tap.', 'Least screen covered; good for walking by.', 'Detail on demand.', '<b>Cost:</b> topics and favour are hidden until expanded.']],
+];
+function mount() {
+  const g = $('#grid'); g.innerHTML = '';
+  OPTS.forEach(([k, t, d, f, pros]) => { const c = el(`<div class="col"><h2>${k}</h2><h3>${t}</h3><p>${d}</p></div>`); c.appendChild(f()); c.appendChild(el(`<ul>${pros.map(x => `<li>${x}</li>`).join('')}</ul>`)); g.appendChild(c); });
+}
+$('#replay').onclick = mount;
+$('#theme').onclick = () => { const r = document.documentElement; r.dataset.theme = r.dataset.theme === 'dark' ? 'light' : 'dark'; };
+mount();
+</script>
+</body>
+</html>
