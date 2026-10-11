@@ -232,6 +232,8 @@ function renderTalkBody() {
   const mood = (!f.isBoss && !f.isRival && friendHearts(f) >= 3) ? '😊' : '';
   pt.dataset.mood = mood;
   renderTalkTopics(f);
+  const doing = document.getElementById('talkDoing');
+  if (doing) doing.textContent = (!f.isBoss && !f.isRival && !f._thanks && typeof npcDoingLine === 'function' && npcDoingLine(f)) || '';   // what they are up to (js/neighbour-lives.js)
   e.fight.classList.remove('hidden'); e.main.classList.remove('hidden'); e.main.disabled = false; e.tag.textContent = '';
   e.fight.textContent = '⚔️ Friendly match'; e.name.textContent = f.name;
   renderTalkCompanion(f);

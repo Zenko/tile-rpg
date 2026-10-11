@@ -69,6 +69,7 @@ const JOURNAL_SEGMENTS = {
   eventlog: { btn: 'segEventLog', view: 'eventLogView' },
   battles: { btn: 'segBattles', view: 'battlesView' },
   almanac: { btn: 'segJAlmanac', view: 'almanacView' },
+  people: { btn: 'segPeople', view: 'peopleView' },
   notes: { btn: 'segNotes', view: 'notesView' },
 };
 function renderJournal() {
@@ -77,6 +78,7 @@ function renderJournal() {
   else if (jSeg === 'eventlog') renderLog();
   else if (jSeg === 'battles') renderBattleLog();
   else if (jSeg === 'almanac') renderJournalAlmanac();
+  else if (jSeg === 'people') renderPeople();
   else if (jSeg === 'notes') renderNotesList();
   updateJournalBadge();
 }

@@ -242,6 +242,7 @@
             <button class="seg-btn" id="segEventLog" role="tab">Log</button>
             <button class="seg-btn" id="segBattles" role="tab">Battles</button>
             <button class="seg-btn" id="segJAlmanac" role="tab">Almanac</button>
+            <button class="seg-btn" id="segPeople" role="tab">Neighbours</button>
             <button class="seg-btn" id="segNotes" role="tab">Theories</button>
           </div>
           <button class="jhelp-btn" id="journalHelpBtn" type="button" aria-label="Guide and what's new">?<span class="jhelp-badge hidden" id="journalHelpBadge"></span></button>
@@ -252,6 +253,9 @@
         <div id="eventLogView" class="hidden">
           <div class="jchips" id="logChips" role="group" aria-label="Filter the log"></div>
           <div id="eventLogList"></div>
+        </div>
+        <div id="peopleView" class="hidden">
+          <div id="peopleList"></div>
         </div>
         <div id="battlesView" class="hidden">
           <div class="bl-stats" id="battleStats"></div>
@@ -651,6 +655,7 @@
           <p class="talk-text" id="talkText"></p>
           <p class="talk-sub" id="talkSub"></p>
           <div class="talk-tag" id="talkTag"></div>
+          <div class="talk-doing" id="talkDoing"></div>
         </div>
       </div>
       <div class="tk-plate">
@@ -858,6 +863,7 @@
 <script src="js/rival-learns.js"></script>
 <script src="js/npc-stories.js"></script>
 <script src="js/telemetry.js"></script>
+<script src="js/neighbour-lives.js"></script>
 <script src="js/puzzle-memory-minigames.js"></script>
 <script src="js/afterdark-companion-cards.js"></script>
 <script src="js/companion-activities.js"></script>
