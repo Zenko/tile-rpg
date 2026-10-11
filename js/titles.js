@@ -364,7 +364,8 @@ function townSignature() {
   return itemSig + '#' + npcSig + '#' + bossSig + '#' + nightSig + '#' + fishSig;
 }
 
-setInterval(() => {
+function worldTick() {
+  if (document.hidden) return;   // nothing to show in a hidden tab; the visibilitychange listener below runs it once on return
   if (!inBattle) { checkMail(); checkExpeditions(); checkStory(); }
   const rivalMoved = syncRival() | syncAtlas();
   const cropsGrew = tickCrops();
@@ -373,7 +374,9 @@ setInterval(() => {
     if (sig !== lastTownSig || rivalMoved || (cropsGrew && state.currentDistrict === 'square')) { lastTownSig = sig; renderTown(); }
   }
   if (!inBattle) updateQuestBadge();
-}, 2000);
+}
+setInterval(worldTick, 2000);
+document.addEventListener('visibilitychange', worldTick);
 
 const soundToggle = document.getElementById('soundToggle');
 const musicToggle = document.getElementById('musicToggle');

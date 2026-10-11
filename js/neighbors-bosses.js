@@ -195,6 +195,7 @@ document.addEventListener('visibilitychange', () => {
   if (document.hidden) return;
   const data = ensureDistrictData(state.currentDistrict);
   fighters(data).forEach(f => { f.nextMoveAt = Date.now() + 800 + Math.random() * 1500; });   // no sudden jump on return
+  if (typeof checkBossCycle === 'function') checkBossCycle();
 });
 
 /* ---------- district bosses come and go on a clock: up for 30 minutes, gone for 30, in sync everywhere,
@@ -239,7 +240,7 @@ function checkBossCycle() {
     }
   }
 }
-setInterval(checkBossCycle, 5000);
+setInterval(() => { if (!document.hidden) checkBossCycle(); }, 5000);   // paused in a hidden tab; the visibilitychange handler above catches up
 
 /* ---------- graves ---------- */
 function buryFighter(f) {

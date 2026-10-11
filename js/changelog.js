@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'better', x: 'Lighter on your battery: the game stops its background checks (weather, mail, the boss clock) while the app is hidden and catches up the moment you come back. Start-up also carries less: the old Before Beta notes now load only when you open them.' },
   { t:'better', x: 'Battle: the energy circles are bright glowing gold like the cost on a card, and dark when spent, so you can see how much you have to spend. Playable cards have a clean gold outline inside their edge (no glow or shine), and it no longer overlaps the card beside it.' },
   { t:'better', x: 'Neighbours turn to face each other when they stop to chat. The coach notices when the same tip keeps coming up across your losses and says so. When Rook comes back he tells you what he has worked out about your deck.' },
   { t:'new', x: 'Journal -> Neighbours: everyone you have met, with hearts, the score between you, how they play, their favourite family, their daily routine, and who they are closest to. If they are nearby it says what they are doing right now.' },
@@ -168,6 +169,21 @@ let clOpen = null;
    release id), cleared by opening it or by "Mark all as read". A save that never opened Updates starts fully read. */
 const CL_SHOWN = 3;
 let clEarlier = false, clHistory = false;
+/* The pre-Beta notes (js/changelog-archive.js, about 56 KB) are not a <script> tag any more: index.html only <link rel=prefetch>es it,
+   so it is fetched at idle time and precached for offline, and the first time this screen draws it is added here. Until it
+   arrives the "Before Beta" button is simply absent, then the list re-draws. */
+let clArchiveLoading = false;
+function clArchive() {
+  if (typeof CHANGELOG_ARCHIVE !== 'undefined') return CHANGELOG_ARCHIVE;
+  if (!clArchiveLoading) {
+    clArchiveLoading = true;
+    const sc = document.createElement('script'); sc.src = 'js/changelog-archive.js';
+    sc.onload = () => { if (typeof renderChangelog === 'function' && document.getElementById('clHistoryBtn') === null) renderChangelog(); };
+    sc.onerror = () => { clArchiveLoading = false; };
+    document.head.appendChild(sc);
+  }
+  return null;
+}
 function clReadMap() {
   const pr = state.progress;
   if (!pr.clRead || typeof pr.clRead !== 'object') {
@@ -180,7 +196,7 @@ function clReadMap() {
 function clUnreadCount() { const r = clReadMap(); return RELEASES.filter(e => !r[e.id]).length; }
 function renderChangelog() {
   if (!clOpen) { clOpen = {}; if (RELEASES[0]) clOpen[RELEASES[0].id] = true; }
-  const read = clReadMap(), listEl = document.getElementById('changelogList'), unread = clUnreadCount();
+  const read = clReadMap(), listEl = document.getElementById('changelogList'), unread = clUnreadCount(), arch = clArchive();
   const versionLine = document.getElementById('clVersionLine');
   if (versionLine) versionLine.textContent = 'You\'re on ' + gameVersionLabel();
   const sec = (label, list) => list && list.length ? `<div class="cl-sec">${label}</div><ul class="cl-list">${list.map(c => `<li>${escapeHtml(c)}</li>`).join('')}</ul>` : '';
@@ -198,7 +214,7 @@ function renderChangelog() {
   const shown = RELEASES.slice(0, CL_SHOWN), earlier = RELEASES.slice(CL_SHOWN);
   listEl.innerHTML = `<div class="jgroup-h">Beta updates<small>${unread ? unread + ' unread' : 'all read'}</small></div>` + shown.map(release).join('') +
     (earlier.length ? `<button type="button" class="jchip jearlier" id="clEarlierBtn" aria-expanded="${clEarlier}">${clEarlier ? 'Hide earlier Beta updates' : `Earlier Beta updates · ${earlier.length}`}</button>${clEarlier ? earlier.map(release).join('') : ''}` : '') +
-    (CHANGELOG_ARCHIVE.length ? `<button type="button" class="jchip jearlier" id="clHistoryBtn" aria-expanded="${clHistory}">${clHistory ? 'Hide history' : `Before Beta · ${CHANGELOG_ARCHIVE.length} earlier notes`}</button>${clHistory ? CHANGELOG_ARCHIVE.map(old).join('') : ''}` : '') +
+    (arch && arch.length ? `<button type="button" class="jchip jearlier" id="clHistoryBtn" aria-expanded="${clHistory}">${clHistory ? 'Hide history' : `Before Beta · ${arch.length} earlier notes`}</button>${clHistory ? arch.map(old).join('') : ''}` : '') +
     (unread ? '<div class="jmarkall"><button type="button" class="jgo" id="clMarkAll">Mark all as read</button></div>' : '');
   listEl.querySelectorAll('[data-toggle-cl]').forEach(el => el.addEventListener('click', () => {
     const v = el.dataset.toggleCl;

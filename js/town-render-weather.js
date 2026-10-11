@@ -375,8 +375,8 @@ function tickSkyAndWeather() {
   syncWeatherAudio();   // cheap re-check: catches battle/scene entry+exit without hooking every transition
   if (++skyTicks % 6 === 0) saveState();   // persist the clock every ~30s so a refresh doesn't lose time-of-day
 }
-setInterval(tickSkyAndWeather, 5000);
-document.addEventListener('visibilitychange', () => { if (!document.hidden) state.sky.lastTickAt = Date.now(); });
+setInterval(() => { if (!document.hidden) tickSkyAndWeather(); }, 5000);   // a hidden tab has nothing to draw or hear, and advanceClock ignores hidden time anyway
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { state.sky.lastTickAt = Date.now(); tickSkyAndWeather(); } });   // catch up the moment the tab is back
 
 /* ---------------- static world (ground, trees, water, buildings) ---------------- */
 let tileOv = new Map();   // 'x,y' -> transparent overlay <div class="town-tile ov"> (fish hints, and the glow in placement / Hide and Seek) while js/town-gl.js draws the ground

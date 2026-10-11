@@ -49,7 +49,7 @@ async function hglWarm() {
   if (hgl || hglBusy || hglFailed) return;
   hglBusy = true;
   try {
-    if (typeof PIXI === 'undefined') await new Promise((res, rej) => { let n = 0; const t = setInterval(() => { if (typeof PIXI !== 'undefined') { clearInterval(t); res(); } else if (++n > 240) { clearInterval(t); rej(new Error('PixiJS did not load')); } }, 50); });
+    if (typeof PIXI === 'undefined') await pixiReady;
     const app = new PIXI.Application();
     await app.init({ width: 64, height: 64, backgroundAlpha: 0, antialias: false, resolution: Math.min(window.devicePixelRatio || 1, 2), autoDensity: true, preference: 'webgl', autoStart: false });
     app.ticker.stop();

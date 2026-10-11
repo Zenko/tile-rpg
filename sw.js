@@ -31,8 +31,14 @@ async function buildPrecacheUrls() {
 // one by one on first sight, and the activate step below deletes the previous cache - so right after a publish every picture
 // had to come from the network again, and on a slow or dropped connection (or while Pages was still swapping files) the whole
 // game showed broken-image icons. Best effort on purpose: one missing picture must never stop an update installing.
+// scripts/check.py writes art-manifest.json (the same list, found by the same pattern) so install does not have to download
+// and scan every script a second time; the scan below is only the fallback for a publish made without running check.py.
 async function precacheArt(cache, urls) {
   const art = new Set();
+  try {
+    const listed = await (await fetch('./art-manifest.json', { cache: 'reload' })).json();
+    if (Array.isArray(listed) && listed.length) { listed.forEach(u => art.add('./' + u)); urls = []; }
+  } catch (e) { /* no manifest: scan the scripts instead */ }
   await Promise.all(urls.filter(u => u.endsWith('.js')).map(async u => {
     try { (await (await fetch(u)).text()).replace(/assets\/(?:icons|cards)\/[\w.-]+\.png/g, m => art.add('./' + m)); } catch (e) { /* skip this script */ }
   }));

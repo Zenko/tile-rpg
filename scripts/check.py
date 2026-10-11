@@ -62,6 +62,14 @@ else:
     bad = [t for t in d['p'] if t not in ('new', 'better', 'fixed')]
     if bad: fail('PENDING_CHANGES has invalid tags: ' + ', '.join(map(str, bad)))
 
+# art-manifest.json: every card picture / icon the scripts name, so sw.js can precache them without re-downloading and
+# scanning every script at install time. Same pattern sw.js used; only files that exist are listed. Rewritten when it changes.
+import json
+art = sorted({m for src in list(allsrc.values()) + [html] for m in re.findall(r'assets/(?:icons|cards)/[\w.-]+\.png', src) if os.path.exists(m)})
+new = json.dumps(art, indent=0) + '\n'
+if not os.path.exists('art-manifest.json') or open('art-manifest.json').read() != new:
+    open('art-manifest.json', 'w').write(new); print(f'wrote art-manifest.json ({len(art)} pictures)')
+
 BIG = 1500   # a nudge, not a failure: past this a file is usually doing several jobs and wants splitting (see HANDOFF)
 for f in files + sorted(glob.glob('css/*.css')):
     n = sum(1 for _ in open(f, encoding='utf-8'))

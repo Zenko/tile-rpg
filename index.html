@@ -835,7 +835,20 @@
 <script src="js/progression.js"></script>
 <script src="js/quests.js"></script>
 <script src="js/maps.js"></script>
-<script src="assets/vendor/pixi.min.js" async></script>
+<script>
+// One shared "PixiJS has loaded" promise for every WebGL layer (town-gl, battle-fx, reveal-fx, holo-gl, home-gl), instead of
+// each one polling for the PIXI global on its own timer. Rejects if the script errors or has not arrived after 12 s.
+var pixiReady = (function () {
+  var t, done = function () { clearTimeout(t); };
+  return new Promise(function (res, rej) {
+    window.__pixiLoaded = function () { done(); res(); };
+    window.__pixiFailed = function () { done(); rej(new Error('PixiJS did not load')); };
+    t = setTimeout(window.__pixiFailed, 12000);
+  });
+})();
+pixiReady.catch(function () {});
+</script>
+<script src="assets/vendor/pixi.min.js" async onload="__pixiLoaded()" onerror="__pixiFailed()"></script>
 <script src="js/town-render-weather.js"></script>
 <script src="js/player-sprite.js"></script>
 <script src="js/player-fx.js"></script>
@@ -876,7 +889,7 @@
 <script src="js/collection-tools.js"></script>
 <script src="js/journal-history.js"></script>
 <script src="js/build.js"></script>
-<script src="js/changelog-archive.js"></script>
+<link rel="prefetch" href="js/changelog-archive.js" as="script">
 <script src="js/changelog.js"></script>
 <script src="js/journal-pages.js"></script>
 <script src="js/notes.js"></script>
