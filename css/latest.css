@@ -1939,46 +1939,71 @@ svg.hr-th { display: block; position: relative; box-sizing: border-box; overflow
 #sceneView.room-on.hr-peek .sc-actions { flex: 0 1 auto; max-height: 62%; margin-top: -24px; }
 #sceneView.room-on.hr-peek .sc-bubble { top: calc(var(--hud-h, 70px) + 14px); }
 
-/* neighbour talk card (build 207): hero (portrait, name, hearts), Talk / Play / Gift tabs, one pane at a time, round close.
-   The panes share one grid cell so the sheet keeps its height when you switch tabs. */
-#talkCard { text-align: left; padding-top: 22px; }
-#talkCard .sheet-handle { margin: -10px auto 10px; }
-#talkCard .talk-hero { display: flex; align-items: center; gap: 14px; padding-right: 48px; margin-bottom: 12px; }
-#talkCard .talk-id { flex: 1; min-width: 0; }
-#talkCard .talk-portrait { flex: none; width: 72px; height: 72px; margin: 0; font-size: 2.5rem; }
-#talkCard .talk-name { margin: 0; font: 500 1.4rem/1.15 var(--f-display); letter-spacing: 0; }
-#talkCard .talk-hearts { margin: 3px 0 0; text-align: left; }
-#talkCard .talk-hearts.hidden { display: none; }
-#talkCard .talk-tabs { display: flex; gap: 2px; padding: 4px; border-radius: 999px; background: var(--track); margin-bottom: 12px; }
-#talkCard .talk-tabs button { position: relative; flex: 1; min-height: 40px; border: 0; border-radius: 999px; background: none; color: var(--ink-soft); font: 800 .88rem var(--f-ui); cursor: pointer; transition: background .2s, color .2s; }
-#talkCard .talk-tabs button.on { background: var(--water); color: var(--on-water); box-shadow: 0 2px 8px var(--shadow); }
-#talkCard .talk-tabs button.hidden { display: none; }
-#talkCard .talk-dot { position: absolute; right: 18%; top: 8px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
-#talkCard .talk-dot.hidden { display: none; }
-#talkCard .talk-panes { display: grid; }
-#talkCard .talk-pane { grid-area: 1 / 1; display: flex; flex-direction: column; gap: 10px; visibility: hidden; opacity: 0; pointer-events: none; }
-#talkCard .talk-pane.on { visibility: visible; opacity: 1; pointer-events: auto; animation: sc-rise .25s both; }
-#talkCard .talk-pane > * { margin: 0; }
-#talkCard .talk-bubble { margin: 0; border-radius: 6px 20px 20px 20px; text-align: left; background: color-mix(in srgb, var(--hl) 7%, transparent); border: 0; padding: 12px 16px; }
-#talkCard .talk-bubble::before { display: none; }
-#talkCard .talk-topics { justify-content: flex-start; }
-#talkCard .talk-topic { flex: none; font-weight: 700; font-size: .85rem; padding: 8px 14px; }
-#talkCard .talk-sub, #talkCard .talk-tag { text-align: left; min-height: 0; }
+/* ===== Neighbour screen (build 208; prototype: npc-screen-variants-lab.html, option B) =====
+   A full screen over the town: the town's own colours softly behind (no backdrop blur, see the smoothness note above), the
+   neighbour standing on a name and hearts bar with the speech bubble just above their head, a grid of Chat / Play / Gift cards
+   below, and Exit top right. A card opens a list of choices with a Back; the list's buttons keep their ids. */
+#talkOverlay { align-items: stretch; justify-content: center; background: color-mix(in srgb, var(--bg-top) 96%, #000); }
+#talkOverlay .tk-bg { position: absolute; inset: 0; pointer-events: none; background:
+  radial-gradient(circle at 20% 24%, color-mix(in srgb, var(--tk-4, #c58a3c) 80%, transparent) 0 9%, transparent 30%),
+  radial-gradient(circle at 84% 16%, color-mix(in srgb, var(--tk-2, #3f8f5c) 85%, transparent) 0 12%, transparent 34%),
+  radial-gradient(circle at 74% 60%, color-mix(in srgb, var(--tk-3, #5d8fb0) 75%, transparent) 0 13%, transparent 38%),
+  linear-gradient(170deg, var(--tk-1, #2c4a3a), color-mix(in srgb, var(--tk-1, #233c2f) 55%, #000)); }
+#talkOverlay .tk-bg::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, color-mix(in srgb, var(--bg-top) 14%, transparent), color-mix(in srgb, var(--bg-top) 48%, transparent) 55%, color-mix(in srgb, var(--bg-top) 86%, transparent)); }
+#talkCard { position: relative; display: flex; flex-direction: column; width: min(100vw, 560px); max-width: none; height: 100%; max-height: none; margin: 0 auto; padding: calc(env(safe-area-inset-top, 0px) + 60px) 14px 0; border-radius: 0; background: none; box-shadow: none; overflow: hidden; text-align: left; animation: sc-rise .3s both; }
+#talkCard .talk-close { position: absolute; z-index: 6; right: 14px; top: calc(env(safe-area-inset-top, 0px) + 14px); display: flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 16px 0 18px; border: 1px solid var(--stone-edge); border-radius: 999px; background: color-mix(in srgb, var(--stone) 90%, transparent); color: var(--ink); font: 800 .88rem var(--f-ui); box-shadow: 0 4px 14px var(--shadow); cursor: pointer; }
+#talkCard .talk-close b { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: color-mix(in srgb, var(--hl) 12%, transparent); font-size: .8rem; }
+#talkCard .talk-close:active { transform: scale(.95); }
+#talkCard .tk-stage { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; margin-top: 22px; }
+#talkCard .tk-bust { position: relative; flex: 1 1 0; min-height: 0; display: flex; align-items: flex-end; justify-content: center; container-type: size; --fig-h: 70%; }
+#talkCard .tk-bust.emoji { --fig-h: 46%; }
+#talkCard .tk-bust::before { content: ''; position: absolute; left: 50%; bottom: 0; width: min(100%, 90cqh); aspect-ratio: 1; transform: translateX(-50%); border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--accent) 34%, transparent), transparent 66%); pointer-events: none; }
+#talkCard .talk-portrait { position: relative; z-index: 1; height: var(--fig-h); width: auto; aspect-ratio: var(--ar, 0.66); margin: 0; border-radius: 0; background: none; box-shadow: none; overflow: hidden; display: block; animation: talk-idle 4s ease-in-out infinite; }
+#talkCard .talk-portrait .tk-img { display: block; width: 100%; height: auto; filter: drop-shadow(0 10px 14px var(--shadow)); }
+#talkCard .talk-portrait.tk-emoji { aspect-ratio: auto; height: auto; overflow: visible; font-size: 40cqh; line-height: 1.1; filter: drop-shadow(0 10px 14px var(--shadow)); }
+#talkCard .talk-portrait[data-mood]:not([data-mood=""])::after { right: -14px; bottom: 6px; }
+#talkCard .talk-bubble { position: absolute; z-index: 5; left: 0; right: 0; bottom: calc(var(--fig-h) + 12px); max-height: 34vh; overflow-y: auto; margin: 0; padding: 12px 16px; min-height: 0; border: 1px solid var(--stone-edge); border-radius: 20px; background: color-mix(in srgb, var(--stone) 88%, transparent); box-shadow: 0 8px 24px var(--shadow); text-align: center; }
+#talkCard .talk-bubble::before { content: ''; display: block; position: absolute; top: auto; bottom: -8px; left: 50%; width: 16px; height: 16px; margin-left: -8px; transform: rotate(45deg); background: color-mix(in srgb, var(--stone) 88%, transparent); border: 0; border-right: 1px solid var(--stone-edge); border-bottom: 1px solid var(--stone-edge); }
+#talkCard .talk-bubble .talk-text { margin: 0; font-size: 1rem !important; }
+#talkCard .talk-sub, #talkCard .talk-tag { min-height: 0; margin: 4px 0 0; font-size: .78rem; color: var(--ink-soft); }
 #talkCard .talk-sub:empty, #talkCard .talk-tag:empty { display: none; }
-#talkCard .btn { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 52px; font-weight: 800; border-radius: 999px; }
-#talkCard #talkMain { margin-top: auto; box-shadow: 0 6px 18px color-mix(in srgb, var(--water) 35%, transparent); }
-#talkCard #talkMain.hidden, #talkCard .btn.hidden { display: none; }
-/* Play and Gift hold rows: left-aligned, a chevron, and the first one in a pane is the filled call to action */
-#talkCard .talk-pane[data-pane="play"] .btn, #talkCard .talk-pane[data-pane="gift"] .btn { display: block; position: relative; line-height: 58px; min-height: 60px; padding: 0 40px 0 18px; word-spacing: .1em; border-radius: 20px; text-align: left; background: color-mix(in srgb, var(--hl) 6%, transparent); color: var(--ink); border: 1px solid var(--stone-edge); box-shadow: none; }
-#talkCard .talk-pane[data-pane="play"] .btn:not(:disabled)::after, #talkCard .talk-pane[data-pane="gift"] .btn:not(:disabled)::after { content: '›'; position: absolute; right: 18px; top: 0; font-size: 1.4rem; opacity: .55; }
-#talkCard .talk-pane[data-pane="play"] #talkFight { background: var(--water); color: var(--on-water); border-color: transparent; box-shadow: 0 6px 18px color-mix(in srgb, var(--water) 35%, transparent); }
-#talkCard .talk-pane[data-pane="play"] .btn:disabled { opacity: .65; }
-#talkCard .talk-pane[data-pane="gift"] .btn:not(.hidden) ~ .btn:not(.hidden) { background: color-mix(in srgb, var(--hl) 6%, transparent); }
-#talkCard .talk-pane[data-pane="gift"] > .btn:not(.hidden):first-of-type { background: var(--water); color: var(--on-water); border-color: transparent; }
-#talkCard .talk-sig { background: linear-gradient(135deg, #f0cf94, var(--accent)) !important; color: #3a2a10 !important; border-color: transparent !important; }
-#talkCard .talk-close { position: absolute; right: 12px; top: 12px; width: 36px; height: 36px; min-height: 0 !important; margin: 0 !important; padding: 0; font-size: 0; border-radius: 50%; background: color-mix(in srgb, var(--hl) 8%, transparent); color: var(--ink-soft); box-shadow: none; justify-content: center; }
-#talkCard .talk-close::before { content: '✕'; font-size: 1rem; font-weight: 800; }
-@media (prefers-reduced-motion: reduce) { #talkCard .talk-pane.on { animation: none; } }
+#talkCard .tk-plate { position: relative; z-index: 4; flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: -16px 0 10px; padding: 9px 16px; border-radius: 18px; background: var(--accent); color: var(--on-accent); box-shadow: 0 4px 12px var(--shadow); }
+#talkCard .talk-name { min-width: 0; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: inherit; font: 500 1.1rem var(--f-display); letter-spacing: 0; }
+#talkCard .talk-hearts { flex: none; margin: 0; font-size: .82rem; letter-spacing: 2px; }
+#talkCard .talk-hearts.hidden { display: none; }
+#talkCard .talk-hearts small { display: none; }
+/* home: the category cards. Two columns; an odd last card spans the row and lays itself out sideways. */
+#talkCard .tk-cats { flex: none; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px)); }
+#talkCard .tk-cat { position: relative; display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; min-width: 0; min-height: 96px; padding: 10px 14px; border: 1px solid var(--stone-edge); border-radius: 20px; background: color-mix(in srgb, var(--stone) 88%, transparent); color: var(--ink); text-align: left; box-shadow: 0 8px 22px var(--shadow); cursor: pointer; animation: sc-rise .35s calc(.1s + var(--n, 0) * .06s) both; transition: transform .15s; }
+#talkCard .tk-cat:active { transform: scale(.97); }
+#talkCard .tk-cat.main { background: var(--water); color: var(--on-water); border-color: transparent; }
+#talkCard .tk-cat .ico { font-size: 1.6rem; line-height: 1; }
+#talkCard .tk-cat .lb { display: block; font: 800 1.15rem/1.1 var(--f-ui); }
+#talkCard .tk-cat small { display: block; margin-top: 2px; font-size: .68rem; font-weight: 700; color: var(--ink-soft); }
+#talkCard .tk-cat.main small { color: color-mix(in srgb, var(--on-water) 70%, transparent); }
+#talkCard .tk-cat .badge { position: absolute; right: 10px; top: 10px; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; display: grid; place-items: center; background: var(--accent); color: var(--on-accent); font-size: .66rem; font-weight: 800; }
+#talkCard .tk-cat:last-child:nth-child(odd) { grid-column: 1 / -1; flex-direction: row; align-items: center; justify-content: flex-start; gap: 12px; min-height: 68px; }
+/* a card opened: Back, a title and that card's choices */
+#talkCard .tk-sub { display: none; flex: none; flex-direction: column; gap: 10px; max-height: 50%; overflow-y: auto; padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px)); scrollbar-width: none; }
+#talkCard .tk-sub::-webkit-scrollbar { display: none; }
+#talkCard:not([data-view="home"]) .tk-sub { display: flex; }
+#talkCard:not([data-view="home"]) .tk-cats { display: none; }
+#talkCard .tk-subhead { display: flex; align-items: center; gap: 10px; }
+#talkCard .tk-back { min-height: 44px; padding: 0 14px 0 10px; border: 1px solid var(--stone-edge); border-radius: 999px; background: color-mix(in srgb, var(--stone) 90%, transparent); color: var(--ink); font: 800 .85rem var(--f-ui); cursor: pointer; }
+#talkCard .tk-subhead h3 { margin: 0; font: 500 1.2rem var(--f-display); }
+#talkCard .tk-pane { display: none; flex-direction: column; gap: 10px; }
+#talkCard .tk-pane.on { display: flex; }
+#talkCard .tk-pane .btn, #talkCard .tk-pane .talk-topic { position: relative; display: flex; align-items: center; gap: 12px; width: 100%; min-height: 60px; margin: 0; padding: 12px 40px 12px 16px; border: 1px solid var(--stone-edge); border-radius: 20px; background: color-mix(in srgb, var(--stone) 88%, transparent); color: var(--ink); box-shadow: 0 6px 16px var(--shadow); font: 800 1rem/1.3 var(--f-ui); text-align: left; animation: sc-rise .3s both; }
+#talkCard .tk-pane .ico-swap { flex: none; width: 1.7em; height: 1.7em; margin: 0; }
+#talkCard .tk-pane .btn:not(:disabled)::after, #talkCard .tk-pane .talk-topic::after { content: '›'; position: absolute; right: 16px; top: 50%; transform: translateY(-52%); font-size: 1.4rem; opacity: .55; }
+#talkCard .tk-pane .btn:disabled { opacity: .65; box-shadow: none; }
+#talkCard .tk-pane .btn.hidden { display: none; }
+#talkCard .tk-pane .btn.tk-primary { background: var(--water); color: var(--on-water); border-color: transparent; box-shadow: 0 6px 18px color-mix(in srgb, var(--water) 35%, transparent); }
+#talkCard .tk-pane .talk-sig { background: linear-gradient(135deg, #f0cf94, var(--accent)); color: #3a2a10; border-color: transparent; }
+#talkCard .tk-pane .talk-topics { display: flex; flex-direction: column; gap: 10px; margin: 0; }
+#talkCard .tk-pane .talk-topics.hidden { display: none; }
+#talkCard .tk-pane .talk-topic.used { opacity: .6; }
+@media (prefers-reduced-motion: reduce) { #talkCard, #talkCard .tk-cat, #talkCard .tk-pane .btn, #talkCard .talk-portrait { animation: none; } }
 
 /* letters: the gift is the highlighted attachment, the delete is quiet */
 .mail-item.open .mail-claim-btn { min-height: 48px; border-radius: 999px; font-weight: 800; box-shadow: 0 4px 14px color-mix(in srgb, var(--water) 30%, transparent); }

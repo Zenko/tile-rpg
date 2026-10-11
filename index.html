@@ -621,41 +621,42 @@
 </div>
 
 <div class="overlay sheet hidden" id="talkOverlay">
-  <div class="overlay-card" id="talkCard">
-    <div class="sheet-handle" data-sheet-handle></div>
-    <div class="talk-hero">
-      <div class="talk-portrait" id="talkPortrait" aria-hidden="true"></div>
-      <div class="talk-id">
+  <div class="tk-bg" aria-hidden="true"></div>
+  <div class="overlay-card" id="talkCard" data-view="home">
+    <button type="button" class="talk-close" id="talkClose" aria-label="Exit">Exit <b>✕</b></button>
+    <div class="tk-stage">
+      <div class="tk-bust">
+        <div class="talk-portrait" id="talkPortrait" aria-hidden="true"></div>
+        <div class="talk-bubble" id="talkBubble">
+          <p class="talk-text" id="talkText"></p>
+          <p class="talk-sub" id="talkSub"></p>
+          <div class="talk-tag" id="talkTag"></div>
+        </div>
+      </div>
+      <div class="tk-plate">
         <div class="talk-name" id="talkName">Neighbor</div>
         <div class="talk-hearts hidden" id="talkHearts"></div>
       </div>
     </div>
-    <div class="talk-tabs" id="talkTabs" role="tablist">
-      <button type="button" role="tab" data-tab="talk" class="on">Talk<i class="talk-dot hidden"></i></button>
-      <button type="button" role="tab" data-tab="play">Play</button>
-      <button type="button" role="tab" data-tab="gift" class="hidden">Gift</button>
-    </div>
-    <div class="talk-panes">
-      <div class="talk-pane on" data-pane="talk" role="tabpanel">
-        <div class="talk-bubble" id="talkBubble"><p class="talk-text" id="talkText"></p></div>
+    <div class="tk-cats" id="talkCats"></div>
+    <div class="tk-sub">
+      <div class="tk-subhead"><button type="button" class="tk-back" id="talkBack">‹ Back</button><h3 id="talkSubTitle"></h3></div>
+      <div class="tk-pane" data-pane="chat">
         <div class="talk-topics hidden" id="talkTopics"></div>
-        <p class="talk-sub" id="talkSub"></p>
-        <div class="talk-tag" id="talkTag"></div>
         <button class="btn" id="talkMain">Chat</button>
       </div>
-      <div class="talk-pane" data-pane="play" role="tabpanel">
+      <div class="tk-pane" data-pane="play">
         <button class="btn talk-fight" id="talkFight">⚔️ Friendly match</button>
         <button class="btn talk-sig hidden" id="talkSig">🌟 Signature match</button>
         <button class="btn talk-gift hidden" id="talkCompanion">🚶 Ask to walk with you</button>
       </div>
-      <div class="talk-pane" data-pane="gift" role="tabpanel">
+      <div class="tk-pane" data-pane="gift">
         <button class="btn talk-gift hidden" id="talkGift">🍞 Share a loaf</button>
         <button class="btn talk-gift hidden" id="talkDish">🎁 Give a dish</button>
         <button class="btn talk-gift hidden" id="talkCardGift">🃏 Give a card</button>
         <div class="talk-cards hidden" id="talkCards"></div>
       </div>
     </div>
-    <button class="btn talk-close" id="talkClose" aria-label="Close">Not now</button>
   </div>
 </div>
 <div class="overlay hidden" id="sceneOverlay" role="dialog" aria-modal="true" aria-label="Story" data-style="talk">

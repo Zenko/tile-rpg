@@ -98,7 +98,7 @@ function flyToHud(icon, pillId) {
 
 /* ---------- bottom sheets: drag the handle down to dismiss ---------- */
 (function sheetDrag() {
-  const closers = { talkOverlay: () => closeTalk(), inspectOverlay: () => closeCardInspect() };
+  const closers = { inspectOverlay: () => closeCardInspect() };
   let card = null, startY = 0, dy = 0, closeFn = null;
   document.addEventListener('pointerdown', e => {
     const h = e.target.closest && e.target.closest('[data-sheet-handle]'); if (!h) return;
@@ -113,6 +113,4 @@ function flyToHud(icon, pillId) {
     if (dy > 90) fn();
   };
   document.addEventListener('pointerup', end); document.addEventListener('pointercancel', end);
-  // tapping the dim backdrop dismisses the talk card too
-  document.getElementById('talkOverlay').addEventListener('click', e => { if (e.target.id === 'talkOverlay') closeTalk(); });
 })();

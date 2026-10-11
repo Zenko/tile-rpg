@@ -173,6 +173,12 @@ function npcDrawnId(f, data) {
   const first = fighters(data).find(n => !n.isBoss && !n.isRival && !n.isAtlas && !n.defeated);
   return first === f ? id : null;
 }
+// The neighbour screen (js/requests-friendship-rival.js) shows a drawn neighbour as a big bust: the upper-body picture, cropped at the
+// hem (meta.legTop, where the legs begin). The town notes which fighters it drew so the screen can find them again.
+const NPC_DRAWN_SEEN = {};
+function npcDrawnNote(f, id) { if (id) NPC_DRAWN_SEEN[f.id] = id; }
+function npcBustHTML(id) { return `<img class="tk-img" alt="" draggable="false" src="${PLAYER_ART.chars[id].views.down.upper}">`; }
+function npcBustRatio(id) { const m = PLAYER_ART.chars[id].meta; return (m.aspect / (m.legTop / 100)).toFixed(4); }
 function npcSpriteHTML(id) {
   const art = PLAYER_ART.chars[id];
   return `<div class="pl-sprite" data-view="down" data-char="${id}" style="--pl-leg-top:${art.meta.legTop}%;--pl-aspect:${art.meta.aspect}">${spriteViewsHTML(art)}</div>`;

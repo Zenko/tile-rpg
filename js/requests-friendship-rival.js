@@ -124,10 +124,11 @@ function talkEls() { return { ov: document.getElementById('talkOverlay'), name: 
 function activeCount() { return Object.values(reqState().list).filter(r => r.state === 'active').length; }
 function openTalk(f) {
   if (f.isAtlas) { openAtlas(); return; }          // the Atlas has its own scene (js/atlas.js)
-  talkTo = f; talkTab = 'talk'; const e = talkEls();
+  talkTo = f; talkView = 'home'; const e = talkEls();
   noteMet(f);
   bumpStat('talks', 1);
   e.name.textContent = f.name;
+  talkTheme(); talkHistoryPush();
   e.ov.classList.remove('hidden'); sfx('tap');
   renderTalk();
 }
@@ -197,12 +198,12 @@ function renderTalkTopics(f) {
     b.classList.add('used');
   }));
 }
-function renderTalk() { renderTalkBody(); renderTalkTabs(); }
+function renderTalk() { renderTalkBody(); renderTalkView(); }
 function renderTalkBody() {
   if (!talkTo) return;
   const f = talkTo, e = talkEls(), rs = reqState(), r = rs.list[f.id];
   const pt = document.getElementById('talkPortrait');
-  if (!pt.firstChild || pt.dataset.for !== f.id) { pt.dataset.for = f.id; pt.textContent = opponentPortrait(f); talkSaid = ''; }
+  if (!pt.firstChild || pt.dataset.for !== f.id) { pt.dataset.for = f.id; talkFigure(pt, f); talkSaid = ''; }
   const mood = (!f.isBoss && !f.isRival && friendHearts(f) >= 3) ? '😊' : '';
   pt.dataset.mood = mood;
   renderTalkTopics(f);
@@ -228,7 +229,7 @@ function renderTalkBody() {
   if (!r) {
     talkSay('Hello there. Fancy a chat, or a friendly match?');
     e.sub.textContent = 'I might have a small favour to ask.';
-    e.main.textContent = '💬 Chat'; e.main.dataset.act = 'ask';
+    e.main.textContent = '🤝 Ask if they need a hand'; e.main.dataset.act = 'ask';
   } else if (r.state === 'open') {
     talkSay(r.text); e.sub.textContent = r.hint;
     e.tag.textContent = r.reward ? `Reward: a ${REQ_WIN_RARITY} card or better` : `Reward: 🫧 ${r.pebbles} Embers`;
@@ -246,25 +247,61 @@ function renderTalkBody() {
     e.main.classList.add('hidden');
   }
 }
-/* Talk / Play / Gift tabs (build 207; prototype in npc-lab.html, option C). The three panes sit in one grid cell so the sheet
-   keeps one height whichever tab is open. Every button inside keeps its id and its own show/hide logic; the tabs only decide
-   which pane is visible. Gift is hidden when there is nothing to give, and a dot on Talk says a favour is waiting. */
-let talkTab = 'talk';
-function renderTalkTabs() {
-  const f = talkTo; if (!f) return;
-  const card = document.getElementById('talkCard'), tabs = document.getElementById('talkTabs');
-  const giftOn = ['talkGift', 'talkDish', 'talkCardGift'].some(id => !document.getElementById(id).classList.contains('hidden'));
-  if (f._thanks || (talkTab === 'gift' && !giftOn)) talkTab = 'talk';   // a thank-you is spoken on the Talk tab
-  tabs.querySelector('[data-tab="gift"]').classList.toggle('hidden', !giftOn);
-  tabs.querySelectorAll('[data-tab]').forEach(b => { const on = b.dataset.tab === talkTab; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
-  card.querySelectorAll('[data-pane]').forEach(p => p.classList.toggle('on', p.dataset.pane === talkTab));
-  const r = reqState().list[f.id], waiting = !f.isRival && !f._thanks && !!r && (r.state === 'open' || (r.state === 'active' && requestDone(r)));
-  tabs.querySelector('.talk-dot').classList.toggle('hidden', !(waiting && talkTab !== 'talk'));
+/* The neighbour screen (build 208; prototype: npc-screen-variants-lab.html, option B). The card takes over the screen: the
+   neighbour (their drawn bust when the game has one, else their emoji) stands on a name and hearts bar with the speech bubble
+   just above their head, and below it a grid of Chat / Play / Gift cards. A card opens its own list of choices with a Back.
+   Every button inside keeps its id and its own show/hide logic; this only decides which are on screen. The way out is the
+   Exit pill, the Android back gesture (one history entry while the screen is open) and Escape. */
+let talkView = 'home', talkPushed = false, talkPopIgnore = 0, talkCatsSig = '';
+function talkVisible(id) { return !document.getElementById(id).classList.contains('hidden'); }
+function talkFigure(pt, f) {
+  const id = typeof NPC_DRAWN_SEEN !== 'undefined' ? NPC_DRAWN_SEEN[f.id] : null;
+  const art = id && typeof playerSpriteReady === 'function' && playerSpriteReady() && PLAYER_ART.chars[id], bust = pt.parentElement;
+  if (art) { pt.innerHTML = npcBustHTML(id); pt.style.setProperty('--ar', npcBustRatio(id)); }
+  else pt.textContent = opponentPortrait(f);
+  pt.classList.toggle('tk-emoji', !art); bust.classList.toggle('emoji', !art);
 }
-document.getElementById('talkTabs').addEventListener('click', e => {
-  const b = e.target.closest('[data-tab]'); if (!b || !talkTo) return;
-  talkTab = b.dataset.tab; sfx('nav'); renderTalkTabs();
+// the town's own colours, softly, behind the screen (a real blur would cost the town its smoothness, see the backdrop-filter note)
+function talkTheme() {
+  const tv = document.querySelector('.town-view'), cs = tv && getComputedStyle(tv), ov = talkEls().ov;
+  ['ground', 'leaf2', 'water', 'path'].forEach((k, i) => { const v = cs && cs.getPropertyValue('--' + k).trim(); if (v) ov.style.setProperty('--tk-' + (i + 1), v); });
+}
+function renderTalkView() {
+  const f = talkTo; if (!f) return;
+  const card = document.getElementById('talkCard');
+  const chatOn = talkVisible('talkTopics') || talkVisible('talkMain'), giftOn = ['talkGift', 'talkDish', 'talkCardGift'].some(talkVisible);
+  if (f._thanks || (talkView === 'chat' && !chatOn) || (talkView === 'gift' && !giftOn)) talkView = 'home';   // a thank-you is spoken over the grid
+  card.dataset.view = talkView;
+  const r = reqState().list[f.id], waiting = !f.isRival && !f._thanks && !!r && (r.state === 'open' || (r.state === 'active' && requestDone(r)));
+  const cats = [];
+  if (chatOn) cats.push({ go: 'chat', ico: '💬', lb: 'Chat', sub: f._tk ? f._tk.next : 'Have a word', main: true, badge: waiting ? '1' : '' });
+  cats.push({ go: 'play', ico: '⚔️', lb: 'Play', sub: f.isRival ? 'A duel' : 'Matches' });
+  if (giftOn) cats.push({ go: 'gift', ico: '🎁', lb: 'Gift', sub: f._tk ? `Loves ${f._tk.loves}` : 'Something small' });
+  const html = cats.map((c, i) => `<button type="button" class="tk-cat${c.main ? ' main' : ''}" style="--n:${i}" data-go="${c.go}">${c.badge ? `<span class="badge">${c.badge}</span>` : ''}<span class="ico">${c.ico}</span><span><span class="lb">${c.lb}</span><small>${escapeHtml(c.sub)}</small></span></button>`).join('');
+  if (html !== talkCatsSig) { talkCatsSig = html; document.getElementById('talkCats').innerHTML = html; }
+  card.querySelectorAll('.tk-pane').forEach(p => {
+    const on = p.dataset.pane === talkView; p.classList.toggle('on', on);
+    p.querySelectorAll('.btn').forEach(b => b.classList.remove('tk-primary'));
+    const first = on && [...p.querySelectorAll('.btn')].find(b => !b.classList.contains('hidden'));
+    if (first && !first.disabled) first.classList.add('tk-primary');
+  });
+  document.getElementById('talkSubTitle').textContent = { chat: 'Chat', play: 'Play', gift: 'Gift' }[talkView] || '';
+}
+function talkGo(view) { if (!talkTo) return; talkView = view; sfx('nav'); renderTalkView(); }
+document.getElementById('talkCard').addEventListener('click', e => {
+  const g = e.target.closest('[data-go]'); if (g) { talkGo(g.dataset.go); return; }
+  if (e.target.closest('#talkBack')) talkGo('home');
 });
+// Android's back gesture: one history entry while the screen is open. Back inside a list goes to the grid first.
+function talkHistoryPush() { if (talkPushed || talkPopIgnore > 0) return; try { history.pushState({ talk: 1 }, ''); talkPushed = true; } catch (err) { /* no history here */ } }
+function talkHistoryPop() { if (!talkPushed) return; talkPushed = false; talkPopIgnore++; try { history.back(); } catch (err) { talkPopIgnore--; } }
+window.addEventListener('popstate', () => {
+  if (talkPopIgnore > 0) { talkPopIgnore--; if (!talkPopIgnore && talkTo) talkHistoryPush(); return; }   // our own back: if the screen was reopened meanwhile, it gets its entry now
+  if (!talkTo) return;
+  talkPushed = false;                                                      // the browser has already taken our entry
+  if (talkView !== 'home') { talkGo('home'); talkHistoryPush(); } else closeTalk();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && talkTo) closeTalk(); });
 function talkAct(act) {
   if (!talkTo) return;
   const f = talkTo, rs = reqState();
@@ -292,7 +329,7 @@ function completeRequest(f) {
   toast(rewardCard ? '🎁 A card, as thanks' : `🫧 +${r.pebbles} Embers`);
   if (rewardCard) setTimeout(() => showCardReveal(rewardCard, `A gift from ${f.name}`, true), 300);
 }
-function closeTalk() { document.getElementById('talkCards').classList.add('hidden'); clearInterval(talkTypeTimer); talkSaid = ''; document.getElementById('talkPortrait').dataset.for = ''; if (talkTo) { delete talkTo._thanks; delete talkTo._topics; delete talkTo._reacted; } talkTo = null; talkEls().ov.classList.add('hidden'); }
+function closeTalk() { document.getElementById('talkCards').classList.add('hidden'); clearInterval(talkTypeTimer); talkSaid = ''; document.getElementById('talkPortrait').dataset.for = ''; if (talkTo) { delete talkTo._thanks; delete talkTo._topics; delete talkTo._reacted; delete talkTo._tk; } talkTo = null; talkView = 'home'; talkEls().ov.classList.add('hidden'); talkHistoryPop(); }
 document.getElementById('talkBubble').addEventListener('click', talkFinishTyping);
 document.getElementById('talkMain').addEventListener('click', e => { const a = e.currentTarget.dataset.act; if (a) talkAct(a); });
 document.getElementById('talkGift').addEventListener('click', () => { if (talkTo) shareBread(talkTo); });
@@ -433,10 +470,11 @@ function renderTalkFriendship(f) {
   const show = !f.isBoss && !f.isRival;
   el.classList.toggle('hidden', !show);
   sig.classList.add('hidden');
-  if (!show) return;
+  if (!show) { delete f._tk; return; }
   const fr = friendOf(f), pts = fr ? fr.points : 0, h = heartsFor(pts);
   const next = HEART_AT[h];
   const fav = KW[signatureTheme(f)];
+  f._tk = { next: h >= 5 ? 'Best friends' : `${next - pts} more to the next heart`, loves: `${fav.icon} ${fav.name}` };   // the Chat and Gift cards say it
   el.innerHTML = `${heartRow(h)}<small>${h >= 5 ? 'Best friends' : `${next - pts} more to the next heart`} · loves ${fav.icon} ${fav.name} cards</small>`;
   if (h >= SIG_HEARTS) {
     sig.classList.remove('hidden');
