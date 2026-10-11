@@ -36,4 +36,18 @@ module.exports = async (page, assert) => {
     return out;
   });
   Object.keys(r).forEach(k => assert.ok(r[k], 'Rook learns: ' + k));
+  // a real duel start: after studying a Watch-heavy deck his deck carries counters and the versus note says so; finishing records the duel
+  const d = await page.evaluate(() => {
+    const out = {}, guards = CARD_POOL.filter(c => !c.spell && c.kw.includes('guard') && !c.exclusive).map(c => c.id);
+    state.deck = Array.from({ length: 12 }, (_, i) => guards[i % guards.length]); CARD_POOL.slice(0, 30).forEach(c => state.ownedCards.push(c.id, c.id)); state.deck.forEach(id => state.ownedCards.push(id, id)); prefs.tossStyle = 'skip';
+    state.progress.rival = { chapter: 3, district: null, arrivedAt: 0, awayUntil: 0, met: false, losses: 0, study: { duels: 3, avgCost: 2.8, guards: 8, swifts: 0, spells: 0, fam: null } };
+    const opp = { id: 'rival-rook', name: 'Rook', icon: '🎭', isRival: true, x: 1, y: 1, deck: rivalDeck(3), profile: rivalProfile(3) };
+    startBattleNow(opp, 0);
+    out.note = /spells/.test(opp.deckNote || '');
+    out.started = !!battle && battle.G.p[1].deck.length + battle.G.p[1].hand.length === 12;
+    const before = rookStudy().duels; battle.G.over = true; battle.G.winner = 0; battle.G.events = []; btFinish();
+    out.recorded = rookStudy().duels === before + 1;
+    return out;
+  });
+  assert.ok(d.note, 'the versus note says what he brought'); assert.ok(d.started, 'the duel starts with a full deck'); assert.ok(d.recorded, 'the duel is studied');
 };

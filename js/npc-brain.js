@@ -345,6 +345,7 @@ function npcGreeting(f, fallback) {
   if (ap) return ap;
   const lm = f && f.lastMeet;
   if (lm && Date.now() - lm.at < NPC_MEET.fresh) {
+    if (lm.kind === 'message') return `Hello there. ${lm.with} just sent me a message, ${lm.topic}. How kind.`;
     if (lm.kind === 'match') return `Hello there. ${lm.with} and I were just playing a friendly game. Fancy one yourself?`;
     if (lm.kind === 'gift') return `Hello there. ${lm.with} just gave me the nicest little present.`;
     if (lm.kind === 'tip') return `Hello there. ${lm.with} and I were swapping deck tips. Care for a match?`;

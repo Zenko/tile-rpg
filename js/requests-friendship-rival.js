@@ -43,8 +43,10 @@ function makeRequest(f, m) {
   const visits = REQ_VISITS.filter(v => visitableHere(m, v.building) && v.who !== f.name);
   const shortOn = REQ_KEYWORDS.some(k => copiesWithKw(k) < 2);
   const options = kinds.filter(k => k !== 'fetch' || shortOn).filter(k => k !== 'walk' || landmarks.length).filter(k => k !== 'deck' || bigCount() < 3).filter(k => k !== 'fish' || hasFishableWater(m)).filter(k => k !== 'visit' || visits.length).filter(k => k !== 'dish' || (state.progress.totals.dishesCooked || 0) > 0);
+  if (typeof npcStoryKinds === 'function') npcStoryKinds(f, m).forEach(k => options.push(k, k));   // neighbour stories (js/npc-stories.js), weighted a little up
   const kind = options[Math.floor(Math.random() * options.length)];
   const base = { id: f.id, giver: f.name, kind, state: 'open', made: Date.now() };
+  if (kind === 'message') return npcStoryRequest(base, f, m);
   if (kind === 'fetch') {
     // One step beyond what you have, never more than 2 cards: a keyword you own none of, else one you own exactly one of.
     const none = REQ_KEYWORDS.filter(k => copiesWithKw(k) === 0), few = REQ_KEYWORDS.filter(k => copiesWithKw(k) === 1);
@@ -83,6 +85,7 @@ function requestDone(r) {
   if (r.kind === 'win') return !!r.wonClean;
   if (r.kind === 'visit') return !!r.visited;
   if (r.kind === 'dish') return dishCount(r.dish) > 0;
+  if (r.kind === 'message') return npcStoryDone(r);
   return false;
 }
 function requestProgressText(r) {
@@ -93,6 +96,7 @@ function requestProgressText(r) {
   if (r.kind === 'win') return r.wonClean ? 'A clean win. Tell them.' : 'No clean win yet.';
   if (r.kind === 'visit') return r.visited ? `You said hello to ${r.who}. Report back.` : `Not yet.`;
   if (r.kind === 'dish') return dishCount(r.dish) ? 'You have one ready.' : 'Not cooked yet.';
+  if (r.kind === 'message') return npcStoryProgress(r);
   return '';
 }
 
@@ -257,7 +261,7 @@ function renderTalkBody() {
     if (activeCount() >= REQ_MAX_ACTIVE) { e.main.textContent = 'You have two favours open already'; e.main.disabled = true; e.main.dataset.act = ''; }
     else { e.main.textContent = '✅ Happy to help'; e.main.dataset.act = 'accept'; }
   } else if (r.state === 'active') {
-    talkSay(requestDone(r) ? 'You did it? Wonderful!' : r.text);
+    talkSay(requestDone(r) ? (r.replyText || 'You did it? Wonderful!') : r.text);
     e.sub.textContent = requestDone(r) ? 'Thank you, truly.' : `${r.hint}  (${requestProgressText(r)})`;
     e.tag.textContent = r.reward ? `Reward: a ${REQ_WIN_RARITY} card or better` : `Reward: 🫧 ${r.pebbles} Embers`;
     if (requestDone(r)) { e.main.textContent = '🎁 Hand it in'; e.main.dataset.act = 'complete'; }
