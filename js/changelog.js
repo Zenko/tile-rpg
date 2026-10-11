@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'fixed', x: 'Neighbour friendships with each other no longer share storage with your companion bonds, so a busy town can never push a companion bond out.' },
   { t:'new', x: 'After a lost match your coach offers a kind, specific tip: turns where you left energy unspent, cards that stayed home without attacking, a top-heavy deck, or spells sitting outside it. At most two, and never after a win.' },
   { t:'better', x: 'The daily town event is paced like a story now: it rarely repeats a recent one, usually suits something you actually do (fishing, crops, baking, trading, the Cup), and a Friendship Fair is more likely while you are still making friends.' },
   { t:'new', x: 'Neighbours have daily routines. Each has their own favourite way to spend the morning, afternoon and evening (a bakery visit, a bench, the fountain, a friend) and you can learn them, or just ask. They show a little sign when they arrive, like bread at the bakery.' },

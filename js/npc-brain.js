@@ -259,11 +259,18 @@ function npcWanderTick(m, data, f, now) {
      match     a friendly game: swords, then smiles. No one is ever defeated by it.
    What you see: bubbles over their heads (lifeFx). What you get: when you talk to a neighbour they may mention who they were just
    with (npcGreeting), friends keep seeking each other out (bond raises a friend goal's score), and tips change their decks.
-   Bonds are saved in state.progress.bonds as "District:NameA|NameB" (names sorted) -> { pts, last } and capped, because neighbours
+   Bonds are saved in state.progress.npcBonds as "District:NameA|NameB" (names sorted) -> { pts, last } and capped, because neighbours
    come back under new names after a defeat and the list must not grow for ever.
    ============================================================ */
 const NPC_MEET = { cooldownMs: 120000, incidentalChance: 0.1, intendedChance: 0.5, maxBonds: 40, giftBond: 3, tipBond: 4, fresh: 5 * 60 * 1000 };
-function npcBonds() { const p = state.progress; if (!p.bonds || typeof p.bonds !== 'object') p.bonds = {}; return p.bonds; }
+// Neighbour-to-neighbour bonds live in their own store (state.progress.npcBonds). Builds 218-225 wrongly kept them in state.progress.bonds, which is the
+// COMPANION bond store (bondsStore in js/afterdark-companion-cards.js); their trimming could have dropped companion bonds. Move any such entries over once.
+function npcBonds() {
+  const p = state.progress;
+  if (!p.npcBonds || typeof p.npcBonds !== 'object') p.npcBonds = {};
+  if (p.bonds && typeof p.bonds === 'object') Object.keys(p.bonds).forEach(k => { if (k.includes('|') && p.bonds[k] && typeof p.bonds[k].pts === 'number') { if (!p.npcBonds[k]) p.npcBonds[k] = p.bonds[k]; delete p.bonds[k]; } });
+  return p.npcBonds;
+}
 function npcBondKey(a, b) { return state.currentDistrict + ':' + [a.name, b.name].sort().join('|'); }
 function npcBond(a, b) { const e = npcBonds()[npcBondKey(a, b)]; return e ? e.pts : 0; }
 function npcBondAdd(a, b, pts, now) {

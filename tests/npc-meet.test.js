@@ -4,7 +4,7 @@ module.exports = async (page, assert) => {
     WANDER.enabled = false;
     const out = {}, m = getMap('square'), data = ensureDistrictData('square');
     data.npcs.length = 0; data.boss = null; data.items = []; data.spirits = [];
-    state.progress.bonds = {};
+    state.progress.bonds = {}; state.progress.npcBonds = {};
     const a = { id: 'npc-square-0', name: 'Aster', x: 5, y: 8, homeX: 5, homeY: 8, icon: '🙂' }, b = { id: 'npc-square-1', name: 'Briar', x: 6, y: 8, homeX: 6, homeY: 8, icon: '🙂' };
     data.npcs.push(a, b);
     const t0 = Date.now();
@@ -42,6 +42,11 @@ module.exports = async (page, assert) => {
     // bonds stay capped
     for (let i = 0; i < 80; i++) npcBondAdd({ name: 'N' + i }, { name: 'M' + i }, 1, t0 + i);
     out.capped = Object.keys(npcBonds()).length <= NPC_MEET.maxBonds;
+    // the companion bond store is never touched: bonds saved there stay, and old-format neighbour bonds found there move across
+    state.progress.bonds = { 'card:sprout': { bond: 4, wins: 2, catches: 1, since: 1 }, 'square:Old|Pair': { pts: 5, last: 10 } };
+    for (let i = 0; i < 80; i++) npcBondAdd({ name: 'P' + i }, { name: 'Q' + i }, 1, t0 + 100 + i);
+    out.companionKept = !!state.progress.bonds['card:sprout'] && state.progress.bonds['card:sprout'].bond === 4;
+    out.migrated = !state.progress.bonds['square:Old|Pair'] && !!(state.progress.npcBonds['square:Old|Pair'] || Object.keys(state.progress.npcBonds).length <= NPC_MEET.maxBonds);
     return out;
   });
   assert.strictEqual(r.chatKind, 'chat'); assert.strictEqual(r.bond1, 1); assert.ok(r.same, 'a bond is mutual');
