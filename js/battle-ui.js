@@ -94,7 +94,9 @@ function startBattleNow(opponent, first) {
   // predates enhanced and unique foe cards). Every other kind of opponent brings its own deck.
   const plainFoe = !opponent.dungeon && !opponent.cup && !opponent.draft && !opponent.ghost && !opponent.challenge && !opponent.signature && !opponent.isRival && !opponent.puzzle && !opponent.trial && !opponent.spar;
   opponent.adaptive = !!plainFoe;                       // a plain neighbour or boss: its result counts towards, and is shaped by, your recent form (js/adaptive.js)
+  opponent.tilt = plainFoe && typeof adaptTilt === 'function' ? adaptTilt() : null;   // for the playtest counters (js/telemetry.js)
   const mood = plainFoe && typeof adaptApply === 'function' ? adaptApply(profile, opponent, isBoss) : '';
+  if (mood) teleInc(opponent.tilt < 0 ? 'adapt.eased' : 'adapt.pushed');
   opponent.aiStyle = plainFoe && typeof npcAiStyle === 'function' ? npcAiStyle(opponent) : null;   // a habit of play: aggressive, defensive, tricky or greedy
   const plan = plainFoe && !isBoss && typeof npcDeckPlan === 'function' ? npcDeckPlan(opponent) : null;   // what this neighbour wants in their deck today (js/npc-brain.js)
   opponent.deckNote = [plan ? plan.note : '', mood].filter(Boolean).join(' ');
@@ -102,7 +104,7 @@ function startBattleNow(opponent, first) {
     : (Array.isArray(opponent.deck) && opponent.deck.length === DECK_SIZE) ? opponent.deck : buildDeckForOpponent(DECK_SIZE, isBoss);
   if (opponent.isRival && typeof rookAdaptDeck === 'function') {   // Rook has been watching how you play (js/rival-learns.js)
     const ad = rookAdaptDeck(oppDeck, rivalState().chapter);
-    oppDeck = ad.deck; opponent.deckNote = ad.notes.join(' ');
+    oppDeck = ad.deck; opponent.deckNote = ad.notes.join(' '); if (ad.notes.length) teleInc('rook.counters');
   }
   const twistKind = bossTwistFor(opponent);
   const world = battleWorld(opponent, weather);
@@ -1098,6 +1100,7 @@ function btFinish() {
   if (!battle || battle.ended) return;
   battle.ended = true; battle.busy = false;
   const G = battle.G, won = G.winner === 0, yielded = G.why === 'yield';
+  if (!yielded && typeof teleBattle === 'function') teleBattle(battle, won);   // playtest counters (js/telemetry.js)
   if (battle.npc && battle.npc.isRival && !yielded && !battle.neutral && typeof rookNoteDuel === 'function') rookNoteDuel(state.deck);   // Rook studies the deck you brought
   if (battle.npc && battle.npc.adaptive && !yielded && !battle.neutral && typeof adaptRecord === 'function') adaptRecord(won);   // your recent form (js/adaptive.js)
   if (battle.npc && battle.npc.adaptive && !battle.npc.isBoss && !yielded && !battle.neutral && typeof npcMemBattle === 'function') npcMemBattle(battle.npc, won);   // what this neighbour remembers (js/npc-memory.js)

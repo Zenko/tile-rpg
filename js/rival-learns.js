@@ -30,7 +30,7 @@ function rookStudyFrom(deck) {
 function rookNoteDuel(deck) {
   const s = rookStudy(), d = rookStudyFrom(deck), w = s.duels ? 0.5 : 1;
   ['avgCost', 'guards', 'swifts', 'spells'].forEach(k => { s[k] = s[k] * (1 - w) + d[k] * w; });
-  s.fam = d.fam || s.fam; s.duels++; saveState();
+  s.fam = d.fam || s.fam; s.duels++; if (typeof teleInc === 'function') teleInc('rook.duels'); saveState();
 }
 // Which themes of counter would this study call for? A list of { id, why }.
 function rookThemes(s) {

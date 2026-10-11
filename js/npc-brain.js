@@ -305,6 +305,7 @@ function npcMeet(a, b, now, forceKind) {
   const topic = npcTopicFor(a);
   const bump = kind === 'gift' ? 2 : 1;
   npcBondAdd(a, b, bump, now);
+  teleInc('meet.' + kind);
   const res = { kind, topic, tip: null };
   if (kind === 'tip') {                                         // the one with the stronger taste teaches the other
     const teacher = Math.random() < 0.5 ? a : b, learner = teacher === a ? b : a;
@@ -434,14 +435,14 @@ function npcApproachEnd(f, now, polite) {
     mind.goal = null; mind.dwellUntil = now + 4000; mind.approachAt = now + (polite ? NPC_APPROACH.ignoredMs : NPC_APPROACH.perNpcMs);
     f.intent = polite ? 'a little disappointed, but fine' : 'pausing';
     npcApproachMarker(f, false);
-    if (polite) { npcBubble(f, '👋', 0); if (typeof npcMemNote === 'function') npcMemNote(f, 'ignored'); }
+    if (polite) { npcBubble(f, '👋', 0); if (typeof npcMemNote === 'function') npcMemNote(f, 'ignored'); teleInc('approach.ignored'); }
   }
   NPC_APP.cur = null;
 }
 function npcApproachStart(o, now) {
   const f = o.f, mind = npcMind(f);
   NPC_APP.cur = { id: f.id, kind: o.kind, phase: 'walking', since: now, fails: 0 };
-  NPC_APP.last = now; npcApproachToday().n++;
+  NPC_APP.last = now; npcApproachToday().n++; teleInc('approach.started');
   f.approach = { kind: o.kind, at: now };
   mind.goal = { id: 'player', kind: 'player', x: state.playerPos.x, y: state.playerPos.y, at: now }; mind.dwellUntil = 0;
   f.intent = 'coming over to see you'; f.nextMoveAt = 0;
@@ -497,6 +498,7 @@ function npcApproachAccepted(f) {
   if (kind === 'help' && !reqState().list[f.id] && activeCount() < REQ_MAX_ACTIVE) { reqState().list[f.id] = makeRequest(f, getMap(state.currentDistrict)); saveState(); }
   npcMind(f).social = Math.max(0, npcMind(f).social - 0.4);
   if (typeof npcMemNote === 'function') npcMemNote(f, 'answered');
+  teleInc('approach.accepted'); teleInc('approach.' + kind);
   npcApproachEnd(f, now, false);
 }
 function npcApproachGreeting(f) {

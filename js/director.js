@@ -39,7 +39,7 @@ function directorEvent() {
   const ws = TOWN_EVENTS.map(e => directorWeight(e, ctx)), total = ws.reduce((a, b) => a + b, 0);
   let r = seeded('event-' + day)() * total, pick = TOWN_EVENTS[0];
   for (let i = 0; i < TOWN_EVENTS.length; i++) { r -= ws[i]; if (r < 0) { pick = TOWN_EVENTS[i]; break; } }
-  d.day = day; d.id = pick.id; d.hist.push(pick.id);
+  d.day = day; d.id = pick.id; d.hist.push(pick.id); if (typeof teleInc === 'function') teleInc('events.' + pick.id);
   if (d.hist.length > DIRECTOR.histLen) d.hist.splice(0, d.hist.length - DIRECTOR.histLen);
   return pick;
 }

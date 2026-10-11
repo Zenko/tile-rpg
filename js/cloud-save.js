@@ -79,7 +79,8 @@ function statsSummary() {
   const p = state.progress, fam = {};
   (state.deck || []).forEach(id => { const f = CARD_FAMILY[BattleEngine.baseIdOf(id)] || 'none'; fam[f] = (fam[f] || 0) + 1; });
   let econ = null; try { const r = econReport(); econ = { hours: r.hours, earned: r.earned, spent: r.spent, earn: Object.fromEntries(r.earn.map(x => [x.src, x.total])), spend: Object.fromEntries(r.spend.map(x => [x.src, x.total])) }; } catch (e) { /* no ledger yet */ }
-  return { build: typeof BUILD === 'number' ? BUILD : 0, at: Date.now(), level: (p.level || 1), wins: state.wins || 0, cards: (state.ownedCards || []).length, totals: Object.assign({}, p.totals || {}),
+  const ai = typeof teleSummary === 'function' ? teleSummary() : null;   // counters from the AI systems (js/telemetry.js)
+  return { ai, build: typeof BUILD === 'number' ? BUILD : 0, at: Date.now(), level: (p.level || 1), wins: state.wins || 0, cards: (state.ownedCards || []).length, totals: Object.assign({}, p.totals || {}),
     skills: Object.assign({}, p.skills || {}), gear: Object.assign({}, p.gear || {}), ladder: (p.ladder && p.ladder.pts) || 0, deckFamilies: fam, binderPages: Object.keys(p.binderDone || {}).length, econ };
 }
 function pushStats() {

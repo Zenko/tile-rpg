@@ -1,0 +1,779 @@
+{
+ "uid0": {
+  "build": 230,
+  "ai": {
+   "kinds": {
+    "neighbour": {
+     "w": 30,
+     "l": 18
+    },
+    "boss": {
+     "w": 8,
+     "l": 9
+    },
+    "rival": {
+     "w": 3,
+     "l": 4
+    }
+   },
+   "styles": {
+    "plain": {
+     "w": 14,
+     "l": 10
+    },
+    "aggressive": {
+     "w": 9,
+     "l": 12
+    },
+    "defensive": {
+     "w": 12,
+     "l": 9
+    },
+    "tricky": {
+     "w": 10,
+     "l": 9
+    },
+    "greedy": {
+     "w": 11,
+     "l": 8
+    }
+   },
+   "tilt": {
+    "-2": {
+     "w": 12,
+     "l": 4
+    },
+    "-1": {
+     "w": 10,
+     "l": 6
+    },
+    "0": {
+     "w": 14,
+     "l": 12
+    },
+    "1": {
+     "w": 9,
+     "l": 12
+    },
+    "2": {
+     "w": 6,
+     "l": 12
+    }
+   },
+   "cards": {
+    "sprout": {
+     "p": 20,
+     "w": 11
+    },
+    "pebble": {
+     "p": 20,
+     "w": 4
+    },
+    "dove": {
+     "p": 20,
+     "w": 11
+    },
+    "toadstool": {
+     "p": 20,
+     "w": 11
+    },
+    "gale": {
+     "p": 20,
+     "w": 11
+    },
+    "mossy-titan": {
+     "p": 20,
+     "w": 11
+    },
+    "silver-fox": {
+     "p": 20,
+     "w": 11
+    },
+    "sky-whale": {
+     "p": 20,
+     "w": 18
+    }
+   },
+   "approach": {
+    "started": 10,
+    "accepted": 6,
+    "ignored": 4,
+    "help": 3,
+    "social": 2,
+    "match": 1
+   },
+   "coach": {
+    "shown": 5,
+    "unspent": 3,
+    "heavy": 2
+   },
+   "adapt": {
+    "eased": 4,
+    "pushed": 3
+   },
+   "meet": {
+    "chat": 9,
+    "tip": 2
+   },
+   "stories": {
+    "delivered": 2
+   },
+   "rook": {
+    "duels": 3,
+    "counters": 2
+   },
+   "events": {
+    "market-day": 2,
+    "fishing-derby": 1
+   }
+  }
+ },
+ "uid1": {
+  "build": 230,
+  "ai": {
+   "kinds": {
+    "neighbour": {
+     "w": 31,
+     "l": 18
+    },
+    "boss": {
+     "w": 8,
+     "l": 9
+    },
+    "rival": {
+     "w": 3,
+     "l": 4
+    }
+   },
+   "styles": {
+    "plain": {
+     "w": 14,
+     "l": 10
+    },
+    "aggressive": {
+     "w": 9,
+     "l": 12
+    },
+    "defensive": {
+     "w": 12,
+     "l": 9
+    },
+    "tricky": {
+     "w": 10,
+     "l": 9
+    },
+    "greedy": {
+     "w": 11,
+     "l": 8
+    }
+   },
+   "tilt": {
+    "-2": {
+     "w": 12,
+     "l": 4
+    },
+    "-1": {
+     "w": 10,
+     "l": 6
+    },
+    "0": {
+     "w": 14,
+     "l": 12
+    },
+    "1": {
+     "w": 9,
+     "l": 12
+    },
+    "2": {
+     "w": 6,
+     "l": 12
+    }
+   },
+   "cards": {
+    "sprout": {
+     "p": 21,
+     "w": 12
+    },
+    "pebble": {
+     "p": 21,
+     "w": 4
+    },
+    "dove": {
+     "p": 21,
+     "w": 12
+    },
+    "toadstool": {
+     "p": 21,
+     "w": 12
+    },
+    "gale": {
+     "p": 21,
+     "w": 12
+    },
+    "mossy-titan": {
+     "p": 21,
+     "w": 12
+    },
+    "silver-fox": {
+     "p": 21,
+     "w": 12
+    },
+    "sky-whale": {
+     "p": 21,
+     "w": 19
+    }
+   },
+   "approach": {
+    "started": 10,
+    "accepted": 6,
+    "ignored": 4,
+    "help": 3,
+    "social": 2,
+    "match": 1
+   },
+   "coach": {
+    "shown": 5,
+    "unspent": 3,
+    "heavy": 2
+   },
+   "adapt": {
+    "eased": 4,
+    "pushed": 3
+   },
+   "meet": {
+    "chat": 9,
+    "tip": 2
+   },
+   "stories": {
+    "delivered": 2
+   },
+   "rook": {
+    "duels": 3,
+    "counters": 2
+   },
+   "events": {
+    "market-day": 2,
+    "fishing-derby": 1
+   }
+  }
+ },
+ "uid2": {
+  "build": 230,
+  "ai": {
+   "kinds": {
+    "neighbour": {
+     "w": 32,
+     "l": 18
+    },
+    "boss": {
+     "w": 8,
+     "l": 9
+    },
+    "rival": {
+     "w": 3,
+     "l": 4
+    }
+   },
+   "styles": {
+    "plain": {
+     "w": 14,
+     "l": 10
+    },
+    "aggressive": {
+     "w": 9,
+     "l": 12
+    },
+    "defensive": {
+     "w": 12,
+     "l": 9
+    },
+    "tricky": {
+     "w": 10,
+     "l": 9
+    },
+    "greedy": {
+     "w": 11,
+     "l": 8
+    }
+   },
+   "tilt": {
+    "-2": {
+     "w": 12,
+     "l": 4
+    },
+    "-1": {
+     "w": 10,
+     "l": 6
+    },
+    "0": {
+     "w": 14,
+     "l": 12
+    },
+    "1": {
+     "w": 9,
+     "l": 12
+    },
+    "2": {
+     "w": 6,
+     "l": 12
+    }
+   },
+   "cards": {
+    "sprout": {
+     "p": 22,
+     "w": 12
+    },
+    "pebble": {
+     "p": 22,
+     "w": 4
+    },
+    "dove": {
+     "p": 22,
+     "w": 12
+    },
+    "toadstool": {
+     "p": 22,
+     "w": 12
+    },
+    "gale": {
+     "p": 22,
+     "w": 12
+    },
+    "mossy-titan": {
+     "p": 22,
+     "w": 12
+    },
+    "silver-fox": {
+     "p": 22,
+     "w": 12
+    },
+    "sky-whale": {
+     "p": 22,
+     "w": 20
+    }
+   },
+   "approach": {
+    "started": 10,
+    "accepted": 6,
+    "ignored": 4,
+    "help": 3,
+    "social": 2,
+    "match": 1
+   },
+   "coach": {
+    "shown": 5,
+    "unspent": 3,
+    "heavy": 2
+   },
+   "adapt": {
+    "eased": 4,
+    "pushed": 3
+   },
+   "meet": {
+    "chat": 9,
+    "tip": 2
+   },
+   "stories": {
+    "delivered": 2
+   },
+   "rook": {
+    "duels": 3,
+    "counters": 2
+   },
+   "events": {
+    "market-day": 2,
+    "fishing-derby": 1
+   }
+  }
+ },
+ "uid3": {
+  "build": 230,
+  "ai": {
+   "kinds": {
+    "neighbour": {
+     "w": 33,
+     "l": 18
+    },
+    "boss": {
+     "w": 8,
+     "l": 9
+    },
+    "rival": {
+     "w": 3,
+     "l": 4
+    }
+   },
+   "styles": {
+    "plain": {
+     "w": 14,
+     "l": 10
+    },
+    "aggressive": {
+     "w": 9,
+     "l": 12
+    },
+    "defensive": {
+     "w": 12,
+     "l": 9
+    },
+    "tricky": {
+     "w": 10,
+     "l": 9
+    },
+    "greedy": {
+     "w": 11,
+     "l": 8
+    }
+   },
+   "tilt": {
+    "-2": {
+     "w": 12,
+     "l": 4
+    },
+    "-1": {
+     "w": 10,
+     "l": 6
+    },
+    "0": {
+     "w": 14,
+     "l": 12
+    },
+    "1": {
+     "w": 9,
+     "l": 12
+    },
+    "2": {
+     "w": 6,
+     "l": 12
+    }
+   },
+   "cards": {
+    "sprout": {
+     "p": 23,
+     "w": 13
+    },
+    "pebble": {
+     "p": 23,
+     "w": 5
+    },
+    "dove": {
+     "p": 23,
+     "w": 13
+    },
+    "toadstool": {
+     "p": 23,
+     "w": 13
+    },
+    "gale": {
+     "p": 23,
+     "w": 13
+    },
+    "mossy-titan": {
+     "p": 23,
+     "w": 13
+    },
+    "silver-fox": {
+     "p": 23,
+     "w": 13
+    },
+    "sky-whale": {
+     "p": 23,
+     "w": 21
+    }
+   },
+   "approach": {
+    "started": 10,
+    "accepted": 6,
+    "ignored": 4,
+    "help": 3,
+    "social": 2,
+    "match": 1
+   },
+   "coach": {
+    "shown": 5,
+    "unspent": 3,
+    "heavy": 2
+   },
+   "adapt": {
+    "eased": 4,
+    "pushed": 3
+   },
+   "meet": {
+    "chat": 9,
+    "tip": 2
+   },
+   "stories": {
+    "delivered": 2
+   },
+   "rook": {
+    "duels": 3,
+    "counters": 2
+   },
+   "events": {
+    "market-day": 2,
+    "fishing-derby": 1
+   }
+  }
+ },
+ "uid4": {
+  "build": 230,
+  "ai": {
+   "kinds": {
+    "neighbour": {
+     "w": 34,
+     "l": 18
+    },
+    "boss": {
+     "w": 8,
+     "l": 9
+    },
+    "rival": {
+     "w": 3,
+     "l": 4
+    }
+   },
+   "styles": {
+    "plain": {
+     "w": 14,
+     "l": 10
+    },
+    "aggressive": {
+     "w": 9,
+     "l": 12
+    },
+    "defensive": {
+     "w": 12,
+     "l": 9
+    },
+    "tricky": {
+     "w": 10,
+     "l": 9
+    },
+    "greedy": {
+     "w": 11,
+     "l": 8
+    }
+   },
+   "tilt": {
+    "-2": {
+     "w": 12,
+     "l": 4
+    },
+    "-1": {
+     "w": 10,
+     "l": 6
+    },
+    "0": {
+     "w": 14,
+     "l": 12
+    },
+    "1": {
+     "w": 9,
+     "l": 12
+    },
+    "2": {
+     "w": 6,
+     "l": 12
+    }
+   },
+   "cards": {
+    "sprout": {
+     "p": 24,
+     "w": 13
+    },
+    "pebble": {
+     "p": 24,
+     "w": 5
+    },
+    "dove": {
+     "p": 24,
+     "w": 13
+    },
+    "toadstool": {
+     "p": 24,
+     "w": 13
+    },
+    "gale": {
+     "p": 24,
+     "w": 13
+    },
+    "mossy-titan": {
+     "p": 24,
+     "w": 13
+    },
+    "silver-fox": {
+     "p": 24,
+     "w": 13
+    },
+    "sky-whale": {
+     "p": 24,
+     "w": 22
+    }
+   },
+   "approach": {
+    "started": 10,
+    "accepted": 6,
+    "ignored": 4,
+    "help": 3,
+    "social": 2,
+    "match": 1
+   },
+   "coach": {
+    "shown": 5,
+    "unspent": 3,
+    "heavy": 2
+   },
+   "adapt": {
+    "eased": 4,
+    "pushed": 3
+   },
+   "meet": {
+    "chat": 9,
+    "tip": 2
+   },
+   "stories": {
+    "delivered": 2
+   },
+   "rook": {
+    "duels": 3,
+    "counters": 2
+   },
+   "events": {
+    "market-day": 2,
+    "fishing-derby": 1
+   }
+  }
+ },
+ "uid5": {
+  "build": 230,
+  "ai": {
+   "kinds": {
+    "neighbour": {
+     "w": 35,
+     "l": 18
+    },
+    "boss": {
+     "w": 8,
+     "l": 9
+    },
+    "rival": {
+     "w": 3,
+     "l": 4
+    }
+   },
+   "styles": {
+    "plain": {
+     "w": 14,
+     "l": 10
+    },
+    "aggressive": {
+     "w": 9,
+     "l": 12
+    },
+    "defensive": {
+     "w": 12,
+     "l": 9
+    },
+    "tricky": {
+     "w": 10,
+     "l": 9
+    },
+    "greedy": {
+     "w": 11,
+     "l": 8
+    }
+   },
+   "tilt": {
+    "-2": {
+     "w": 12,
+     "l": 4
+    },
+    "-1": {
+     "w": 10,
+     "l": 6
+    },
+    "0": {
+     "w": 14,
+     "l": 12
+    },
+    "1": {
+     "w": 9,
+     "l": 12
+    },
+    "2": {
+     "w": 6,
+     "l": 12
+    }
+   },
+   "cards": {
+    "sprout": {
+     "p": 25,
+     "w": 14
+    },
+    "pebble": {
+     "p": 25,
+     "w": 5
+    },
+    "dove": {
+     "p": 25,
+     "w": 14
+    },
+    "toadstool": {
+     "p": 25,
+     "w": 14
+    },
+    "gale": {
+     "p": 25,
+     "w": 14
+    },
+    "mossy-titan": {
+     "p": 25,
+     "w": 14
+    },
+    "silver-fox": {
+     "p": 25,
+     "w": 14
+    },
+    "sky-whale": {
+     "p": 25,
+     "w": 22
+    }
+   },
+   "approach": {
+    "started": 10,
+    "accepted": 6,
+    "ignored": 4,
+    "help": 3,
+    "social": 2,
+    "match": 1
+   },
+   "coach": {
+    "shown": 5,
+    "unspent": 3,
+    "heavy": 2
+   },
+   "adapt": {
+    "eased": 4,
+    "pushed": 3
+   },
+   "meet": {
+    "chat": 9,
+    "tip": 2
+   },
+   "stories": {
+    "delivered": 2
+   },
+   "rook": {
+    "duels": 3,
+    "counters": 2
+   },
+   "events": {
+    "market-day": 2,
+    "fishing-derby": 1
+   }
+  }
+ },
+ "old": {
+  "build": 150
+ }
+}

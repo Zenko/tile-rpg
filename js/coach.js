@@ -26,16 +26,19 @@ function coachDeckShape(deck, ownedCards) {
   return { heavy, spells, ownsSpell, size: defs.length };
 }
 // The tips for a lost match, most useful first (at most two). `c` is battle.coach, `shape` is coachDeckShape().
-function coachTips(c, shape) {
-  const t = [];
-  if (c && c.unspent >= COACH.unspent) t.push(c.spellHeld >= 1 ? `You ended ${c.unspent} turns with energy to spare and a playable card in hand, including a spell. Spending your energy each turn is the quickest way to get ahead.` : `You ended ${c.unspent} turns with energy to spare and a playable card in hand. Spending your energy each turn is the quickest way to get ahead.`);
-  if (c && c.firstIdle) t.push('Your first turn passed with nothing on the board. A cheap card early gives you something to attack with next turn.');
-  if (c && c.idle >= COACH.idle) t.push(`Cards stayed home without attacking ${c.idle} times. Attacking each turn wears them down faster than they can rebuild.`);
-  if (shape && shape.size && shape.heavy >= COACH.heavy) t.push(`Your deck has ${shape.heavy} cards that cost 4 or more. That is top-heavy. Cards -> Deck -> Auto-fill rebuilds it with a good mix of cheap cards.`);
-  if (shape && shape.ownsSpell && shape.spells === 0) t.push('You own spells but none are in your deck. One or two can swing a close match.');
+function coachTipsWithIds(c, shape) {
+  const t = [], P = (id, text) => t.push({ id, text });
+  if (c && c.unspent >= COACH.unspent) P('unspent', c.spellHeld >= 1 ? `You ended ${c.unspent} turns with energy to spare and a playable card in hand, including a spell. Spending your energy each turn is the quickest way to get ahead.` : `You ended ${c.unspent} turns with energy to spare and a playable card in hand. Spending your energy each turn is the quickest way to get ahead.`);
+  if (c && c.firstIdle) P('firstIdle', 'Your first turn passed with nothing on the board. A cheap card early gives you something to attack with next turn.');
+  if (c && c.idle >= COACH.idle) P('idle', `Cards stayed home without attacking ${c.idle} times. Attacking each turn wears them down faster than they can rebuild.`);
+  if (shape && shape.size && shape.heavy >= COACH.heavy) P('heavy', `Your deck has ${shape.heavy} cards that cost 4 or more. That is top-heavy. Cards -> Deck -> Auto-fill rebuilds it with a good mix of cheap cards.`);
+  if (shape && shape.ownsSpell && shape.spells === 0) P('noSpells', 'You own spells but none are in your deck. One or two can swing a close match.');
   return t.slice(0, 2);
 }
+// The tips for a lost match as plain text, most useful first (at most two). `c` is battle.coach, `shape` is coachDeckShape().
+function coachTips(c, shape) { return coachTipsWithIds(c, shape).map(x => x.text); }
 function coachNote(b, deck, ownedCards) {
-  const tips = coachTips(b && b.coach, coachDeckShape(deck, ownedCards));
-  return tips.length ? '💡 ' + tips.join(' ') : '';
+  const tips = coachTipsWithIds(b && b.coach, coachDeckShape(deck, ownedCards));
+  if (tips.length && typeof teleInc === 'function') { teleInc('coach.shown'); tips.forEach(t => teleInc('coach.' + t.id)); }
+  return tips.length ? '💡 ' + tips.map(t => t.text).join(' ') : '';
 }

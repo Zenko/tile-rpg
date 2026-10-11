@@ -52,6 +52,6 @@ function npcStoryTalked(t) {
     const data = ensureDistrictData(state.currentDistrict), giver = data.npcs.find(n => n.id === r.id);
     if (giver) { npcBondAdd(giver, t, 2, Date.now()); t.lastMeet = { with: giver.name, kind: 'message', topic: r.note, at: Date.now() }; }
   });
-  if (hit) { saveState(); toast('📝 Message delivered. Report back.'); }
+  if (hit) { teleInc('stories.delivered'); saveState(); toast('📝 Message delivered. Report back.'); }
   return hit;
 }
