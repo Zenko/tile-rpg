@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'new', x: 'Opponents adjust to how you have been doing. After a rough patch they ease off a little (and say they are feeling gentle), after a winning streak they push back (in a competitive mood). It is always small, never touches special matches, and can be switched off in Settings -> Battles.' },
   { t:'new', x: 'Opponents have a play style you can learn: Aggressive ones go for your Calm, Defensive ones play it safe, Tricky ones save their spells, and Greedy ones spend all their energy. It shows on the versus screen next to their name.' },
   { t:'new', x: 'Neighbours come to you. Now and then one walks over while you stand still and waits beside you with a marker: an exclamation mark for a favour, a speech bubble for a chat, crossed swords for a friendly game. Tap them and they say why they came.' },
   { t:'new', x: 'Settings -> Neighbours come to you: Never, Sometimes or Often. Visits are rationed (one at a time, a pause between them, a daily limit) and a neighbour you ignore simply waves and rests for a while.' },

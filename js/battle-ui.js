@@ -93,9 +93,11 @@ function startBattleNow(opponent, first) {
   // Plain neighbors and district bosses get a fresh deck each fight, scaled to how many wins you have (their stored deck
   // predates enhanced and unique foe cards). Every other kind of opponent brings its own deck.
   const plainFoe = !opponent.dungeon && !opponent.cup && !opponent.draft && !opponent.ghost && !opponent.challenge && !opponent.signature && !opponent.isRival && !opponent.puzzle && !opponent.trial && !opponent.spar;
+  opponent.adaptive = !!plainFoe;                       // a plain neighbour or boss: its result counts towards, and is shaped by, your recent form (js/adaptive.js)
+  const mood = plainFoe && typeof adaptApply === 'function' ? adaptApply(profile, opponent, isBoss) : '';
   opponent.aiStyle = plainFoe && typeof npcAiStyle === 'function' ? npcAiStyle(opponent) : null;   // a habit of play: aggressive, defensive, tricky or greedy
   const plan = plainFoe && !isBoss && typeof npcDeckPlan === 'function' ? npcDeckPlan(opponent) : null;   // what this neighbour wants in their deck today (js/npc-brain.js)
-  opponent.deckNote = plan ? plan.note : '';
+  opponent.deckNote = [plan ? plan.note : '', mood].filter(Boolean).join(' ');
   const oppDeck = plainFoe ? buildDeckForOpponent(DECK_SIZE, isBoss, null, opponent.name, state.currentDistrict, null, plan)   // a district's folk favour its family
     : (Array.isArray(opponent.deck) && opponent.deck.length === DECK_SIZE) ? opponent.deck : buildDeckForOpponent(DECK_SIZE, isBoss);
   const twistKind = bossTwistFor(opponent);
@@ -1091,6 +1093,7 @@ function btFinish() {
   if (!battle || battle.ended) return;
   battle.ended = true; battle.busy = false;
   const G = battle.G, won = G.winner === 0, yielded = G.why === 'yield';
+  if (battle.npc && battle.npc.adaptive && !yielded && !battle.neutral && typeof adaptRecord === 'function') adaptRecord(won);   // your recent form (js/adaptive.js)
   if (won && !yielded && !battle.dungeon && !battle.neutral) noteBattleResult(true, battle.playedKw || []);
   if (battle.spellsCast) bumpStat('spellsCast', battle.spellsCast);
   if (!battle.puzzle && !battle.neutral) settleMastery(won && !yielded);
