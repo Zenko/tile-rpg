@@ -135,14 +135,16 @@ button { font:inherit; color:inherit; cursor:pointer; border:0; background:none;
 .v-glass .cat.main { background:color-mix(in srgb,var(--water) 86%,transparent); }
 .v-glass .cats .cat { min-height:140px; }
 
-.v-above .stage { flex-direction:column; align-items:stretch; height:auto; margin-top:62px; padding:0 14px; gap:0; }
+.v-above .stage { flex-direction:column; align-items:stretch; height:auto; margin-top:58px; padding:0 14px; gap:0; }
 .v-above .bubble { order:1; flex:none; margin:0 0 14px; align-self:stretch; border-radius:20px; text-align:center; min-height:78px; }
 .v-above .bubble::before { left:50%; bottom:-8px; margin-left:-8px; border:0; border-right:1px solid var(--stone-edge); border-bottom:1px solid var(--stone-edge); }
-.v-above .bust { order:2; width:100%; align-self:center; display:flex; justify-content:center; margin-bottom:0; height:176px; overflow:hidden; }
-.v-above .bust img { width:200px; margin-left:0; align-self:flex-start; }
+.v-above .bust { order:2; width:100%; align-self:center; display:flex; justify-content:center; margin-bottom:0; height:228px; overflow:hidden; }
+.v-above .bust img { width:222px; margin-left:0; align-self:flex-start; }
 .v-above .bust::before { display:none; }
-.v-above .plate { position:static; order:3; flex-direction:row; justify-content:space-between; align-items:center; border-radius:18px; width:100%; margin:-30px 0 12px; padding:9px 16px; z-index:3; }
-.v-above .cats { margin-top:0; grid-auto-rows:auto; } .v-above .cat { min-height:112px; }
+.v-above .plate { position:static; order:3; flex-direction:row; justify-content:space-between; align-items:center; border-radius:18px; width:100%; margin:-4px 0 14px; padding:9px 16px; z-index:3; }
+.v-above .cats { margin-top:0; flex:1; grid-auto-rows:minmax(92px,1fr); align-content:stretch; } .v-above .cat, .v-above .cats .cat:last-child:nth-child(odd) { min-height:0; }
+.v-above .cats .cat:last-child:nth-child(odd) .ico { font-size:2.3rem; } .v-above .cats .cat:last-child:nth-child(odd) .lb { font-size:1.6rem; }
+.v-above .cat .ico { font-size:2.1rem; } .v-above .cat .lb { font-size:1.45rem; }
 
 .v-status .cat { min-height:158px; }
 .v-status .cat .chips2 { display:flex; flex-wrap:wrap; gap:4px; margin-top:6px; }
