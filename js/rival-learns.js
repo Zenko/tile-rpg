@@ -81,3 +81,9 @@ function rookTalkHint() {
   const t = rookThemes(s)[0];
   return t ? ' ' + t.say : '';
 }
+// What the toast says when Rook turns up again: that he has been working on how you play (or just practising, before he has studied you).
+function rookComebackLine() {
+  const s = rookStudy(), t = s.duels ? rookThemes(s)[0] : null;
+  if (!s.duels) return ', practising';
+  return t ? ` with a plan: ${t.why.charAt(0).toLowerCase() + t.why.slice(1)}` : ', still studying how you play';
+}

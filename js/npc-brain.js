@@ -290,6 +290,13 @@ function npcTopicFor(f) {
   const t = [`the ${NPC_WEATHER_WORDS[weatherNow()] || 'weather'}`, `the ${seasonDef().name.toLowerCase()}`, 'their decks', 'a card they once found', friendHearts(f) >= 1 ? 'a certain dreamer in town' : 'the town'];
   return t[Math.floor(Math.random() * t.length)];
 }
+// Turn a neighbour in place to face another (a drawn character turns by view, an emoji one flips).
+function npcTurnToward(f, to) {
+  const el = typeof entityElsById !== 'undefined' ? entityElsById.get(f.id) : null; if (!el) return;
+  const dx = Math.sign(to.x - f.x), dy = Math.sign(to.y - f.y);
+  if (typeof npcFace === 'function' && npcFace(el, dx, dy)) { clearTimeout(el._walkTimer); el.classList.remove('walking'); return; }   // no stepping on the spot
+  const sp = el.firstChild; if (sp && sp.style && dx) sp.style.transform = `scaleX(${dx < 0 ? -1 : 1})`;
+}
 function npcBubble(f, emoji, delay) {
   setTimeout(() => { if (typeof lifeFx === 'function') lifeFx('npc-bubble', f.x, f.y, `<span>${emoji}</span>`, 2300); }, delay || 0);
 }
@@ -313,6 +320,7 @@ function npcMeet(a, b, now, forceKind) {
     res.tip = { teacher: teacher.name, learner: learner.name, family: npcTaste(teacher).family };
   }
   [[a, b], [b, a]].forEach(([x, y], i) => {
+    npcTurnToward(x, y);                                        // they face each other while they talk
     const mind = npcMind(x);
     x.lastMeet = { with: y.name, kind, topic, at: now };
     mind.social = Math.max(0, mind.social - (kind === 'chat' || kind === 'match' ? 0.5 : 0.7));

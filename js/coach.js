@@ -6,9 +6,10 @@
      unspent      turns you ended with energy left AND a card you could have played          spellHeld  of those, ones where it was a spell
      idle         cards that could attack but stayed home when you ended your turn          firstIdle  an empty board after your first turn although you could play
    plus the shape of your deck (coachDeckShape): how top-heavy it is, and whether you own spells but run none.
+   Across losses (state.progress.coachHist, the tips of your last few lost matches) a tip that keeps coming up is said first and says so.
    It never judges a win, never lectures (at most two tips, the most useful first), and costs nothing to ignore.
    ============================================================ */
-const COACH = { unspent: 2, idle: 3, heavy: 4 };
+const COACH = { unspent: 2, idle: 3, heavy: 4, recurring: 2 };
 function coachNew() { return { turns: 0, unspent: 0, spellHeld: 0, wasted: 0, idle: 0, firstIdle: false }; }
 function coachTrackEnd(b) {
   if (!b || !b.G || b.puzzle) return;
@@ -39,6 +40,12 @@ function coachTipsWithIds(c, shape) {
 function coachTips(c, shape) { return coachTipsWithIds(c, shape).map(x => x.text); }
 function coachNote(b, deck, ownedCards) {
   const tips = coachTipsWithIds(b && b.coach, coachDeckShape(deck, ownedCards));
-  if (tips.length && typeof teleInc === 'function') { teleInc('coach.shown'); tips.forEach(t => teleInc('coach.' + t.id)); }
-  return tips.length ? '💡 ' + tips.map(t => t.text).join(' ') : '';
+  // Across losses: a tip that came up in 2 or more of your last 5 lost matches is said first, and says that it keeps coming up.
+  const p = state.progress, hist = Array.isArray(p.coachHist) ? p.coachHist : (p.coachHist = []);
+  const count = id => hist.slice(-5).filter(h => h.includes(id)).length;
+  tips.forEach(t => { t.recurring = count(t.id) >= COACH.recurring; });
+  tips.sort((x, y) => (y.recurring ? 1 : 0) - (x.recurring ? 1 : 0));
+  hist.push(tips.map(t => t.id)); if (hist.length > 8) hist.splice(0, hist.length - 8);
+  if (tips.length && typeof teleInc === 'function') { teleInc('coach.shown'); tips.forEach(t => { teleInc('coach.' + t.id); if (t.recurring) teleInc('coach.recurring'); }); }
+  return tips.length ? '💡 ' + tips.map(t => (t.recurring ? 'This keeps coming up. ' : '') + t.text).join(' ') : '';
 }

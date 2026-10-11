@@ -57,4 +57,14 @@ module.exports = async (page, assert) => {
   assert.ok(r.tipSaved && r.tipInPlan, 'a tip reaches the next deck');
   assert.ok(r.bondPull, 'friends seek each other out more'); assert.ok(r.best);
   assert.ok(r.capped, 'the bond list stays small');
+  // they turn to face each other: real neighbours on the map, one standing to the right of the other
+  const turned = await page.evaluate(() => {
+    const data = ensureDistrictData('square'), ns = data.npcs.filter(npcBrained); if (ns.length < 2) return { skip: true };
+    const a = ns[0], b = ns[1]; b.x = a.x + 1; b.y = a.y; renderEntities(data);
+    const ea = entityElsById.get(a.id), eb = entityElsById.get(b.id);
+    npcMeet(a, b, Date.now(), 'chat');
+    const facing = (el, want) => { const spr = el.querySelector(':scope > .pl-sprite'); if (spr) return spr.dataset.view === want || (want === 'right' && spr.dataset.flip === '1'); const sp = el.firstChild; return !!sp && sp.style.transform === `scaleX(${want === 'right' ? 1 : -1})`; };
+    return { ok: facing(ea, 'right') && facing(eb, 'left'), walking: ea.classList.contains('walking') };
+  });
+  if (!turned.skip) { assert.ok(turned.ok, 'neighbours face each other when they meet'); assert.ok(!turned.walking, 'and do not step on the spot'); }
 };

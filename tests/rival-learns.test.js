@@ -30,6 +30,11 @@ module.exports = async (page, assert) => {
     }
     out.sized = sized; out.cap = capOk; out.rarity = rarityOk; out.swapped = added > 0 && added / 40 <= ROOK_LEARN.swaps; out.noted = notes > 30;
     out.hint = /^ I noticed you lean on Watch cards/.test(rookTalkHint());
+    // his comeback line: plain before he has studied you, specific after
+    const keepStudy = state.progress.rival.study;
+    state.progress.rival.study = { duels: 0, avgCost: 0, guards: 0, swifts: 0, spells: 0, fam: null }; out.comebackPlain = rookComebackLine() === ', practising';
+    state.progress.rival.study = { duels: 3, avgCost: 2.8, guards: 8, swifts: 0, spells: 0, fam: null }; out.comebackPlan = /^ with a plan: you lean on Watch cards/.test(rookComebackLine());
+    state.progress.rival.study = keepStudy;
     // no study yet: his deck is left alone
     state.progress.rival.study = { duels: 0, avgCost: 0, guards: 0, swifts: 0, spells: 0, fam: null };
     out.untouched = JSON.stringify(rookAdaptDeck(base, 2).deck) === JSON.stringify(base) && rookTalkHint() === '';

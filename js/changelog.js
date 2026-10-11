@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'better', x: 'Neighbours turn to face each other when they stop to chat. The coach notices when the same tip keeps coming up across your losses and says so. When Rook comes back he tells you what he has worked out about your deck.' },
   { t:'new', x: 'Journal -> Neighbours: everyone you have met, with hearts, the score between you, how they play, their favourite family, their daily routine, and who they are closest to. If they are nearby it says what they are doing right now.' },
   { t:'better', x: 'When you talk to a neighbour it now shows what they are up to ("Wren is off to sit for a while").' },
   { t:'better', x: 'Tuning pass from simulated matches: adaptive difficulty now changes in smooth steps (opponents make a few more or fewer mistakes) instead of jumping a whole difficulty level, aggressive opponents are a little less fierce, and neighbours come over less often (at most one visit every five minutes and four a day on the default setting).' },

@@ -26,6 +26,17 @@ module.exports = async (page, assert) => {
   await page.waitForFunction(() => !document.getElementById('battleCoachNote').classList.contains('hidden'), null, { timeout: 5000 });
   const txt = await page.evaluate(() => document.getElementById('battleCoachNote').textContent);
   assert.ok(txt.length > 40 && /energy to spare/.test(txt) && txt.split(' ')[0].length <= 3, 'the loss card carries the tip: ' + txt);
+  // a tip that keeps coming up across losses is said first, and says so
+  const rec = await page.evaluate(() => {
+    state.progress.coachHist = [['idle'], [], ['idle']];
+    const b = { coach: { turns: 5, unspent: 3, spellHeld: 0, wasted: 4, idle: 4, firstIdle: false } };
+    const first = coachNote(b, [], []);
+    state.progress.coachHist = [];
+    const fresh = coachNote(b, [], []);
+    return { first, fresh, hist: state.progress.coachHist.length };
+  });
+  assert.ok(/^\S+ This keeps coming up\. Cards stayed home/.test(rec.first), 'a recurring tip comes first and says so: ' + rec.first.slice(0, 120));
+  assert.ok(!/keeps coming up/.test(rec.fresh), 'a first-time tip does not'); assert.strictEqual(rec.hist, 1, 'each loss is remembered');
   const win = await page.evaluate(() => { closeBattle && closeBattle(); startBattleNow(state.districtData.square.npcs[0], 0); battle.coach = { turns: 5, unspent: 5, spellHeld: 0, wasted: 9, idle: 5, firstIdle: true }; battle.G.over = true; battle.G.winner = 0; battle.G.events = []; btFinish(); return true; });
   await page.waitForTimeout(1200);
   assert.ok(await page.evaluate(() => document.getElementById('battleCoachNote').classList.contains('hidden')), 'no tip after a win');

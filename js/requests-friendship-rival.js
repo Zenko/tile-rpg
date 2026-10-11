@@ -623,7 +623,7 @@ function syncRival() {
       if (where === state.currentDistrict) {
         changed = true;
         if (!rv.met) { rv.met = true; toast('🎭 Someone with a deck of cards is watching you…'); logEvent('🎭', `A rival named Rook turned up in ${DISTRICTS[where].name}.`); }
-        else toast(`🎭 Rook is practising in ${DISTRICTS[where].name}`);
+        else toast(`🎭 Rook is back in ${DISTRICTS[where].name}${typeof rookComebackLine === 'function' ? rookComebackLine() : ', practising'}`);
       }
     }
   }
