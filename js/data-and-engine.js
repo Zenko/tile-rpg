@@ -1055,7 +1055,8 @@ const BattleEngine = (function () {
 
   function aiNextAction(G, who, level) {
     const me = G.p[who], op = G.p[1 - who], rng = G.aiRng || G.rng;
-    const r = RANDOMNESS[level] != null ? RANDOMNESS[level] : 0.25;
+    // G.aiShift[who] nudges how often this side plays a random move (adaptive difficulty's fine step: + eases, - sharpens); clamped to 0..0.7
+    const r = Math.max(0, Math.min(0.7, (RANDOMNESS[level] != null ? RANDOMNESS[level] : 0.25) + ((G.aiShift && G.aiShift[who]) || 0)));
     const style = (G.aiStyles && AI_STYLES[G.aiStyles[who]]) ? G.aiStyles[who] : null;
     if (!G.aiMemo || G.aiMemo.turn !== G.turn) G.aiMemo = { turn: G.turn, stopPlaying: false };
     const memo = G.aiMemo;
@@ -1077,7 +1078,7 @@ const BattleEngine = (function () {
           if (threat > mine + 2 && (c.kw.includes('guard') || c.kw.includes('shield'))) s += 1.5;
           if (op.spirit <= 8 && (c.kw.includes('swift') || c.kw.includes('echo'))) s += 2;
           if (me.spirit <= 8 && c.kw.includes('mend')) s += 1.5;
-          if (style === 'aggressive') s += c.power * 0.35 + (c.kw.includes('swift') || c.kw.includes('echo') || c.kw.includes('bloom') ? 1 : 0) - (c.kw.includes('guard') ? 0.8 : 0);
+          if (style === 'aggressive') s += c.power * 0.2 + (c.kw.includes('swift') || c.kw.includes('echo') || c.kw.includes('bloom') ? 1 : 0) - (c.kw.includes('guard') ? 0.8 : 0);
           else if (style === 'defensive') s += (c.kw.includes('guard') || c.kw.includes('shield') || c.kw.includes('mend') || c.kw.includes('thorns') ? 1.5 : 0) - c.power * 0.15;
           else if (style === 'greedy') s += c.cost * 0.45;
           return s;
@@ -1098,7 +1099,7 @@ const BattleEngine = (function () {
       const faceOk = targets.some(t => t.kind === 'spirit');
       if (style === 'defensive' && rng() >= r && a.kw.includes('guard') && !op.board.some(c => !c.shield && a.power >= c.hp) && !(faceOk && a.power >= op.spirit)) continue;   // a Watch card stays home unless it can kill or finish
       if (rng() < r) choice = targets[Math.floor(rng() * targets.length)];
-      else if (style === 'aggressive' && faceOk && (op.spirit <= 12 || a.power >= 3)) choice = { kind: 'spirit' };
+      else if (style === 'aggressive' && faceOk && (op.spirit <= 10 || a.power >= 4)) choice = { kind: 'spirit' };
       else if (style === 'tricky' && !guards(op).length && op.board.some(c => c.shield) && !op.board.some(c => !c.shield && a.power >= c.hp)) choice = { kind: 'card', uid: op.board.find(c => c.shield).uid };   // pops a shield when nothing can be killed
       else {
         const guardT = targets.filter(t => t.kind === 'card' && op.board.find(c => c.uid === t.uid && c.kw.includes('guard')));

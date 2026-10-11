@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'better', x: 'Tuning pass from simulated matches: adaptive difficulty now changes in smooth steps (opponents make a few more or fewer mistakes) instead of jumping a whole difficulty level, aggressive opponents are a little less fierce, and neighbours come over less often (at most one visit every five minutes and four a day on the default setting).' },
   { t:'better', x: 'Playtest stats now include small anonymous counters about how the new neighbour and battle systems are doing (numbers only, same Settings switch as before), so they can be tuned from real play.' },
   { t:'new', x: 'A new kind of favour: carry a message from one neighbour to another. They reply, and the two grow closer, so the friendships in town come from what you carry.' },
   { t:'new', x: 'Rook learns. After each duel he studies the deck you brought and swaps a few cards for counters: spells if you lean on Watch cards, shields if you carry plenty of spells, and so on. He tells you what he noticed on the versus screen and in his greeting.' },

@@ -128,6 +128,7 @@ function startBattleNow(opponent, first) {
       twist: twistKind ? { side: 1, kind: twistKind } : null, startSpirit: opponent.startSpirit ? [opponent.startSpirit, null] : null, first, knack: [currentKnackId(), null], fate: [neutral ? null : currentFateId(), opponent.fate || null], spread: [neutral ? null : currentSpread(), opponent.spread || null], passive: [neutral || opponent.puzzle ? null : archetypePassive(), null], passiveTier: [archetypeTier(), null] });
     BattleEngine.startTurn(G);
     if (opponent.aiStyle) G.aiStyles = [null, opponent.aiStyle];
+    if (profile.shift) G.aiShift = [0, profile.shift];     // adaptive difficulty's fine step (js/adaptive.js)
   }
   if (companionSpirit) BattleEngine.boost(G, 0, { spirit: 2 });      // a Watch-type companion stands with you
   if (!opponent.puzzle && !neutral) {

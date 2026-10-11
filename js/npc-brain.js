@@ -370,13 +370,15 @@ function npcGreeting(f, fallback) {
      - only while you are standing still (so nobody chases you down the street), in the open town, after the opening scene,
      - they give up after a while and wave goodbye (👋), and are never put out about it.
    Tapping the neighbour (or their marker) accepts: their talk screen opens with a line that fits why they came.
+   Tuning (build 231, measured by simulating a player who never moves): the first numbers gave a visit every ~3 minutes until the daily cap, which felt like nagging,
+   so Sometimes is now at most one visit every 5 minutes and 4 a day, Often every 2 minutes and 10 a day.
    Nothing here is saved except a per-day count in state.progress.approaches.
    ============================================================ */
 const NPC_APPROACH = {
   modes: ['off', 'sometimes', 'often'],
-  every: { sometimes: 150000, often: 70000 },      // ms between one visit starting and the next being considered
+  every: { sometimes: 300000, often: 120000 },      // ms between one visit starting and the next being considered
   chance: { sometimes: 0.5, often: 0.8 },          // each time it is considered (every checkMs)
-  daily: { sometimes: 6, often: 14 },
+  daily: { sometimes: 4, often: 10 },
   checkMs: 8000, radius: 14, idleMs: 3500, walkMs: 30000, waitMs: 22000, perNpcMs: 360000, ignoredMs: 720000, stepMs: [560, 760],
   icons: { help: '❗', social: '💬', match: '⚔️' }
 };
