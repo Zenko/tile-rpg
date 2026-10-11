@@ -124,7 +124,7 @@ function talkEls() { return { ov: document.getElementById('talkOverlay'), name: 
 function activeCount() { return Object.values(reqState().list).filter(r => r.state === 'active').length; }
 function openTalk(f) {
   if (f.isAtlas) { openAtlas(); return; }          // the Atlas has its own scene (js/atlas.js)
-  talkTo = f; const e = talkEls();
+  talkTo = f; talkTab = 'talk'; const e = talkEls();
   noteMet(f);
   bumpStat('talks', 1);
   e.name.textContent = f.name;
@@ -197,7 +197,8 @@ function renderTalkTopics(f) {
     b.classList.add('used');
   }));
 }
-function renderTalk() {
+function renderTalk() { renderTalkBody(); renderTalkTabs(); }
+function renderTalkBody() {
   if (!talkTo) return;
   const f = talkTo, e = talkEls(), rs = reqState(), r = rs.list[f.id];
   const pt = document.getElementById('talkPortrait');
@@ -245,6 +246,25 @@ function renderTalk() {
     e.main.classList.add('hidden');
   }
 }
+/* Talk / Play / Gift tabs (build 207; prototype in npc-lab.html, option C). The three panes sit in one grid cell so the sheet
+   keeps one height whichever tab is open. Every button inside keeps its id and its own show/hide logic; the tabs only decide
+   which pane is visible. Gift is hidden when there is nothing to give, and a dot on Talk says a favour is waiting. */
+let talkTab = 'talk';
+function renderTalkTabs() {
+  const f = talkTo; if (!f) return;
+  const card = document.getElementById('talkCard'), tabs = document.getElementById('talkTabs');
+  const giftOn = ['talkGift', 'talkDish', 'talkCardGift'].some(id => !document.getElementById(id).classList.contains('hidden'));
+  if (f._thanks || (talkTab === 'gift' && !giftOn)) talkTab = 'talk';   // a thank-you is spoken on the Talk tab
+  tabs.querySelector('[data-tab="gift"]').classList.toggle('hidden', !giftOn);
+  tabs.querySelectorAll('[data-tab]').forEach(b => { const on = b.dataset.tab === talkTab; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
+  card.querySelectorAll('[data-pane]').forEach(p => p.classList.toggle('on', p.dataset.pane === talkTab));
+  const r = reqState().list[f.id], waiting = !f.isRival && !f._thanks && !!r && (r.state === 'open' || (r.state === 'active' && requestDone(r)));
+  tabs.querySelector('.talk-dot').classList.toggle('hidden', !(waiting && talkTab !== 'talk'));
+}
+document.getElementById('talkTabs').addEventListener('click', e => {
+  const b = e.target.closest('[data-tab]'); if (!b || !talkTo) return;
+  talkTab = b.dataset.tab; sfx('nav'); renderTalkTabs();
+});
 function talkAct(act) {
   if (!talkTo) return;
   const f = talkTo, rs = reqState();
