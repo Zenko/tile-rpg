@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'new', x: 'Your companion has moods. When you stand still it dozes at night, shivers in snow, cosies up in rain, plays on clear days, greets friends who walk up, and shuffles about beside you. From bond level 2 it quietly points out items lying close by. Pet it to hear how it feels.' },
   { t:'fixed', x: 'Neighbour friendships with each other no longer share storage with your companion bonds, so a busy town can never push a companion bond out.' },
   { t:'new', x: 'After a lost match your coach offers a kind, specific tip: turns where you left energy unspent, cards that stayed home without attacking, a top-heavy deck, or spells sitting outside it. At most two, and never after a win.' },
   { t:'better', x: 'The daily town event is paced like a story now: it rarely repeats a recent one, usually suits something you actually do (fishing, crops, baking, trading, the Cup), and a Friendship Fair is more likely while you are still making friends.' },

@@ -336,7 +336,7 @@ function petCompanion() {
   const d = companionDay(), gain = d.pets < 3;
   d.pets++;
   sfx('gift'); buzz(HAP.tap); companionFloat('💞');
-  if (gain) { companionGrow(1); saveState(); return `${c.name} leans into it. You feel a little closer.`; }
+  if (gain) { companionGrow(1); saveState(); return `${c.name} leans into it. You feel a little closer. ${typeof companionMoodLine === 'function' ? companionMoodLine() : ''}`.trim(); }
   saveState();
   return `${c.name} has had plenty of attention today, and loves it.`;
 }
