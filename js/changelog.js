@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'better', x: 'The neighbour screen softly blurs the town behind it, and in the light theme the backdrop is now a darker, stronger shade so everything on it stands out.' },
   { t:'better', x: 'Your hand in battle is now a stack of bigger cards that overlap like cards held in your hand, so a full hand is easier to read. Cards you can play are raised and outlined, and cards you cannot afford yet stay at full strength instead of fading.' },
   { t:'better', x: 'Light theme: the neighbour screen background is a little darker, and battles have stronger contrast - a darker End turn button, name plates for you and your opponent, deeper action buttons and message pills, and sand-coloured card text panels.' },
   { t:'fixed', x: 'The Watch shield under an enemy card is no longer covered by your row of cards.' },

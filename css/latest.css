@@ -2053,3 +2053,10 @@ svg.hr-th { display: block; position: relative; box-sizing: border-box; overflow
 
 /* The Watch badge hangs below its card, and the player's row is drawn after (so over) the opponent's: lift the opponent's row. */
 #battleView #btOppRow { position: relative; z-index: 2; }
+
+/* ===== Build 214: neighbour screen blur + black veil in the light theme =====
+   The town behind the neighbour screen is blurred just enough to read as the town. This is the one deliberate exception to the
+   global backdrop-filter ban in "Smoothness" above (the id selector beats its universal !important); if it tears on a phone, delete
+   the two blur lines. The light theme's veil is black and more opaque instead of the pale sand. */
+#talkOverlay .tk-bg { -webkit-backdrop-filter: blur(3px) !important; backdrop-filter: blur(3px) !important; }
+:root[data-theme="light"] #talkOverlay .tk-bg { background: linear-gradient(180deg, rgba(0, 0, 0, .86) 0, rgba(0, 0, 0, .8) calc(env(safe-area-inset-top, 0px) + 92px), rgba(0, 0, 0, .4) calc(env(safe-area-inset-top, 0px) + 200px), rgba(0, 0, 0, .44) 45%, rgba(0, 0, 0, .8) 70%, rgba(0, 0, 0, .9)); }
