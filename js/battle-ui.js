@@ -1069,6 +1069,7 @@ async function btOpponentTurn(token) {
 async function btPlayerEnd() {
   const token = battle.token, G = battle.G;
   if (battle.puzzle) { BattleEngine.forfeit(G, 0); G.why = 'puzzle'; btFinish(); return; }
+  if (typeof coachTrackEnd === 'function') coachTrackEnd(battle);   // how this turn ended (js/coach.js)
   battle.busy = true; battle.sel = null; btHideTip(); btRender();
   BattleEngine.endTurn(G, 0);
   await btAnimate(btFlush(G), token); if (!btAlive(token)) return;
@@ -1111,6 +1112,7 @@ function btShowResult(won, yielded) {
   endCard.className = 'overlay-card end-card';
   const turns = Math.ceil(G.turn / 2) + 1;
   btGet('battleEndGrid').classList.add('hidden');
+  btGet('battleCoachNote').classList.add('hidden');
 
   if (won && !battle.rewarded && npc.puzzle) {
     puzzleWin();
@@ -1195,6 +1197,10 @@ function btShowResult(won, yielded) {
     } else {
       battleEndTitle.textContent = battle.isBoss ? `${npc.name} holds firm.` : npc.atlas ? 'The Atlas smiles. "Again, if you like."' : npc.isRival ? 'Rook grins. "Not bad. Again?"' : 'A close, friendly match.';
       battleEndStats.textContent = `${npc.name} won this one after ${turns} turns. No cost to you. Try a different card mix, or try again.`;
+    }
+    if (!yielded && typeof coachNote === 'function') {   // a kind, specific tip after a loss (js/coach.js)
+      const tip = coachNote(battle, state.deck, state.ownedCards), el = btGet('battleCoachNote');
+      el.textContent = tip; el.classList.toggle('hidden', !tip);
     }
     btGet('battleRetryBtn').classList.remove('hidden');
     sfx('soft');

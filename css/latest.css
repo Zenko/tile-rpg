@@ -2134,3 +2134,7 @@ svg.hr-th { display: block; position: relative; box-sizing: border-box; overflow
 .ent .ent-ask::after { content: ''; position: absolute; left: 50%; bottom: -5px; width: 8px; height: 8px; margin-left: -4px; background: var(--accent); transform: rotate(45deg); }
 @keyframes ent-ask { 50% { transform: translate(-50%, -5px); } }
 @media (prefers-reduced-motion: reduce) { .ent .ent-ask { animation: none; } }
+
+/* Build 225: the coach's tip on the match-lost card */
+.end-coach { margin: 8px 0 0; padding: 8px 12px; border-radius: 12px; background: color-mix(in srgb, var(--accent) 14%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); font-size: .8rem; line-height: 1.4; color: var(--ink); text-align: left; }
+.end-coach.hidden { display: none; }
