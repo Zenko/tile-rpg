@@ -1094,6 +1094,7 @@ function btFinish() {
   battle.ended = true; battle.busy = false;
   const G = battle.G, won = G.winner === 0, yielded = G.why === 'yield';
   if (battle.npc && battle.npc.adaptive && !yielded && !battle.neutral && typeof adaptRecord === 'function') adaptRecord(won);   // your recent form (js/adaptive.js)
+  if (battle.npc && battle.npc.adaptive && !battle.npc.isBoss && !yielded && !battle.neutral && typeof npcMemBattle === 'function') npcMemBattle(battle.npc, won);   // what this neighbour remembers (js/npc-memory.js)
   if (won && !yielded && !battle.dungeon && !battle.neutral) noteBattleResult(true, battle.playedKw || []);
   if (battle.spellsCast) bumpStat('spellsCast', battle.spellsCast);
   if (!battle.puzzle && !battle.neutral) settleMastery(won && !yielded);

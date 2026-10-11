@@ -61,7 +61,10 @@ function npcMemSummary(f) {
   const m = npcMemOf(f, false);
   if (!m || !(m.won + m.lost + m.helped + m.gifts + m.chats)) return 'We have only just met. Give it time.';
   const bits = [];
-  if (m.won + m.lost) bits.push(`We have played ${m.won + m.lost} ${m.won + m.lost === 1 ? 'match' : 'matches'}, and you lead ${m.won} to ${m.lost}.`.replace('you lead ' + m.won + ' to ' + m.lost, m.won > m.lost ? `you lead ${m.won} to ${m.lost}` : m.won < m.lost ? `I lead ${m.lost} to ${m.won}` : `we are level at ${m.won} each`));
+  if (m.won + m.lost) {
+    const n = m.won + m.lost, score = m.won > m.lost ? `you lead ${m.won} to ${m.lost}` : m.won < m.lost ? `I lead ${m.lost} to ${m.won}` : `we are level at ${m.won} each`;
+    bits.push(`We have played ${n} ${n === 1 ? 'match' : 'matches'}, and ${score}.`);
+  }
   if (m.helped) bits.push(`You have helped me ${npcMemWord(m.helped)}.`);
   if (m.gifts) bits.push(`${m.gifts === 1 ? 'A gift' : m.gifts + ' gifts'} from you, which I have kept in mind.`);
   if (m.chats) bits.push(`And we have chatted on ${m.chats} ${m.chats === 1 ? 'day' : 'days'}.`);

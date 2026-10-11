@@ -208,6 +208,11 @@ function renderTalkTopics(f) {
     else talkReact('💬');
     b.classList.add('used');
   }));
+  if (typeof npcMemSummary === 'function' && npcMemOf(f, false)) {
+    const mb = document.createElement('button'); mb.className = 'talk-topic'; mb.textContent = '🗒️ What do you remember?';
+    mb.addEventListener('click', () => { if (!talkTo) return; talkSay(npcMemSummary(talkTo)); talkReact('💭'); sfx('tap'); });
+    box.appendChild(mb);
+  }
   if (typeof npcAcceptHint === 'function') {
     const sb = document.createElement('button'); sb.className = 'talk-topic'; sb.textContent = '🃏 Suggest a deck';
     sb.addEventListener('click', () => { if (!talkTo) return; talkTo._suggest = true; talkSay('A deck? What would you like me to build?'); sfx('tap'); renderTalkTopics(talkTo); });
@@ -456,6 +461,7 @@ function friendHearts(f) { const fr = friendOf(f); return fr ? heartsFor(fr.poin
 function heartRow(h) { return '❤️'.repeat(h) + '🤍'.repeat(5 - h); }
 function addFriendship(f, pts, why) {
   if (!f || f.isBoss || f.isRival || f.signature) return;
+  if (typeof npcMemNote === 'function') npcMemNote(f, why);   // js/npc-memory.js
   const k = neighborKey(f), fs = friendsState();
   const fr = fs[k] || (fs[k] = { name: f.name, district: k.split(':')[0], points: 0, icon: opponentPortrait(f), sigDay: null, sigWins: 0, gift: false });
   const before = heartsFor(fr.points);

@@ -80,6 +80,7 @@ function npcDeckPlan(f, tier) {
     else if (hint.id === 'seasonal') add(npcSeasonPicks(n, tier), `${seasonDef().name.toLowerCase()} cards (as you suggested)`);
     else add(npcStylePicks(hint.id, n, tier), hint.id === 'tough' ? 'their sturdiest cards (as you suggested)' : 'a gentler deck (as you suggested)');
   }
+  if (typeof npcMemPractising === 'function' && npcMemPractising(f)) add(npcStylePicks('tough', 1, tier), 'a few new tricks (they have been practising)');   // beaten twice running
   add(npcFamilyPicks(wFam, 2, tier), `${FAMILIES[wFam].name} cards for ${NPC_WEATHER_WORDS[weather] || 'the day'}`);
   add(npcSeasonPicks(2, tier), `${seasonDef().name.toLowerCase()} cards`);
   add(npcFamilyPicks(taste.family, 1, tier), `a favourite ${FAMILIES[taste.family].name} card`);
@@ -316,7 +317,8 @@ function npcGreeting(f, fallback) {
     if (lm.kind === 'tip') return `Hello there. ${lm.with} and I were swapping deck tips. Care for a match?`;
     return `Hello there. I was just chatting with ${lm.with} about ${lm.topic}.`;
   }
-  return fallback;
+  const mem = typeof npcMemGreeting === 'function' ? npcMemGreeting(f) : null;   // what they remember of you (js/npc-memory.js)
+  return mem || fallback;
 }
 
 /* ============================================================
@@ -396,7 +398,7 @@ function npcApproachEnd(f, now, polite) {
     mind.goal = null; mind.dwellUntil = now + 4000; mind.approachAt = now + (polite ? NPC_APPROACH.ignoredMs : NPC_APPROACH.perNpcMs);
     f.intent = polite ? 'a little disappointed, but fine' : 'pausing';
     npcApproachMarker(f, false);
-    if (polite) npcBubble(f, '👋', 0);
+    if (polite) { npcBubble(f, '👋', 0); if (typeof npcMemNote === 'function') npcMemNote(f, 'ignored'); }
   }
   NPC_APP.cur = null;
 }
@@ -458,6 +460,7 @@ function npcApproachAccepted(f) {
   const kind = NPC_APP.cur.kind, now = Date.now();
   if (kind === 'help' && !reqState().list[f.id] && activeCount() < REQ_MAX_ACTIVE) { reqState().list[f.id] = makeRequest(f, getMap(state.currentDistrict)); saveState(); }
   npcMind(f).social = Math.max(0, npcMind(f).social - 0.4);
+  if (typeof npcMemNote === 'function') npcMemNote(f, 'answered');
   npcApproachEnd(f, now, false);
 }
 function npcApproachGreeting(f) {
