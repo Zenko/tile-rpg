@@ -41,6 +41,9 @@ module.exports = async (page, assert) => {
   assert.ok(r.tier1, 'a gentle neighbour keeps only commons');
   assert.ok(r.rain, 'rain turns them to Deriva');
   assert.ok(r.stable);
+  // each neighbour has one fixed play style, drawn from the engine's list
+  const styles = await page.evaluate(() => ['Testa', 'Wren', 'Rowan', 'Sable', 'Tansy', 'Fenn'].map(n => ({ n, a: npcAiStyle({ name: n }), b: npcAiStyle({ name: n }), ok: !!BattleEngine.AI_STYLES[npcAiStyle({ name: n })], bold: npcTaste({ name: n }).bold })));
+  styles.forEach(x => { assert.strictEqual(x.a, x.b, 'a style is stable'); assert.ok(x.ok, 'a real style'); assert.strictEqual(['aggressive', 'greedy'].includes(x.a), x.bold, 'bold neighbours lean aggressive or greedy'); });
   // the Chat menu offers it and a pick is saved
   await page.evaluate(() => { document.getElementById('testHideOverlays').remove(); const n = state.districtData.square.npcs[0]; friendsState()[neighborKey(n)] = { name: n.name, district: 'square', points: 7, icon: '🙂', sigDay: null, sigWins: 0, gift: false }; openTalk(n); });
   const click = sel => page.evaluate(q => document.querySelector(q).click(), sel);

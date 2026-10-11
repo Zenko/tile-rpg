@@ -30,6 +30,13 @@ function npcTaste(f) {
   const fams = Object.keys(FAMILIES);
   return { family: fams[h % fams.length], bold: ((h >> 5) & 1) === 1 };
 }
+// A neighbour's habit in a battle (BattleEngine.AI_STYLES). Fixed by their name, so you can learn it: bold ones lean aggressive or greedy,
+// steady ones defensive or tricky. Their district boss shares the same rule.
+function npcAiStyle(f) {
+  const h = foeSeedHash('style:' + (f && f.name)), t = npcTaste(f);
+  const pair = t.bold ? ['aggressive', 'greedy'] : ['defensive', 'tricky'];
+  return pair[(h >> 3) & 1];
+}
 function npcDeckHint(f) {
   const fr = f && friendOf(f), hint = fr && fr.deckHint;
   return hint && npcHintDef(hint.id) ? hint : null;

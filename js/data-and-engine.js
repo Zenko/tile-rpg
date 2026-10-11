@@ -1040,10 +1040,23 @@ const BattleEngine = (function () {
      level: 'gentle' (often plays at random and forgets to attack sensibly), 'normal', 'smart'. */
   function valueOf(c) { return c.power + c.hp * 0.8 + (c.kw.length ? 2 : 0) + (c.lull ? -1 : 0); }
   const RANDOMNESS = { gentle: 0.55, normal: 0.25, smart: 0 };
+  /* Play styles (build 220). An opponent can have a habit on top of its level: G.aiStyles[who] is one of these keys (or empty for the plain AI).
+     They only nudge the same scores the AI already uses, so a styled opponent is about as strong as a plain one but plays recognisably differently:
+       aggressive  goes for your Calm and favours hard hitters and fast cards
+       defensive   builds Watch and mending cards, and only attacks when it is safe or kills something
+       tricky      holds its spells for a good moment, pops shields, and likes to disrupt
+       greedy      spends every point of energy it can, favouring big plays */
+  const AI_STYLES = {
+    aggressive: { icon: '🔥', name: 'Aggressive', hint: 'goes for your Calm' },
+    defensive:  { icon: '🛡️', name: 'Defensive', hint: 'plays it safe' },
+    tricky:     { icon: '🎭', name: 'Tricky', hint: 'saves its spells for the right moment' },
+    greedy:     { icon: '💰', name: 'Greedy', hint: 'always spends all its energy' }
+  };
 
   function aiNextAction(G, who, level) {
     const me = G.p[who], op = G.p[1 - who], rng = G.aiRng || G.rng;
     const r = RANDOMNESS[level] != null ? RANDOMNESS[level] : 0.25;
+    const style = (G.aiStyles && AI_STYLES[G.aiStyles[who]]) ? G.aiStyles[who] : null;
     if (!G.aiMemo || G.aiMemo.turn !== G.turn) G.aiMemo = { turn: G.turn, stopPlaying: false };
     const memo = G.aiMemo;
 
@@ -1055,11 +1068,18 @@ const BattleEngine = (function () {
       if (affordable.length) {
         const threat = op.board.reduce((s, c) => s + c.power, 0), mine = me.board.reduce((s, c) => s + c.power, 0);
         const score = c => {
-          if (c.spell) return plans.get(c.uid).score;
+          if (c.spell) {
+            let sp = plans.get(c.uid).score;
+            if (style === 'tricky') sp += (['spark', 'gust', 'chill', 'starfall', 'moonlit-tide', 'undertow'].includes(c.spell) ? 0.8 : 0) - (sp >= 3 ? 0 : 1.2);   // holds a small spell, uses a big one, likes to disrupt
+            return sp;
+          }
           let s = valueOf(c) / c.cost;
           if (threat > mine + 2 && (c.kw.includes('guard') || c.kw.includes('shield'))) s += 1.5;
           if (op.spirit <= 8 && (c.kw.includes('swift') || c.kw.includes('echo'))) s += 2;
           if (me.spirit <= 8 && c.kw.includes('mend')) s += 1.5;
+          if (style === 'aggressive') s += c.power * 0.35 + (c.kw.includes('swift') || c.kw.includes('echo') || c.kw.includes('bloom') ? 1 : 0) - (c.kw.includes('guard') ? 0.8 : 0);
+          else if (style === 'defensive') s += (c.kw.includes('guard') || c.kw.includes('shield') || c.kw.includes('mend') || c.kw.includes('thorns') ? 1.5 : 0) - c.power * 0.15;
+          else if (style === 'greedy') s += c.cost * 0.45;
           return s;
         };
         const pick = (rng() < r) ? affordable[Math.floor(rng() * affordable.length)] : affordable.slice().sort((a, b) => score(b) - score(a))[0];
@@ -1075,7 +1095,11 @@ const BattleEngine = (function () {
       const targets = legalTargets(G, who, a.uid);
       if (!targets.length) continue;
       let choice;
+      const faceOk = targets.some(t => t.kind === 'spirit');
+      if (style === 'defensive' && rng() >= r && a.kw.includes('guard') && !op.board.some(c => !c.shield && a.power >= c.hp) && !(faceOk && a.power >= op.spirit)) continue;   // a Watch card stays home unless it can kill or finish
       if (rng() < r) choice = targets[Math.floor(rng() * targets.length)];
+      else if (style === 'aggressive' && faceOk && (op.spirit <= 12 || a.power >= 3)) choice = { kind: 'spirit' };
+      else if (style === 'tricky' && !guards(op).length && op.board.some(c => c.shield) && !op.board.some(c => !c.shield && a.power >= c.hp)) choice = { kind: 'card', uid: op.board.find(c => c.shield).uid };   // pops a shield when nothing can be killed
       else {
         const guardT = targets.filter(t => t.kind === 'card' && op.board.find(c => c.uid === t.uid && c.kw.includes('guard')));
         if (guardT.length) choice = guardT.slice().sort((x, y) => op.board.find(c => c.uid === x.uid).hp - op.board.find(c => c.uid === y.uid).hp)[0];
@@ -1184,7 +1208,7 @@ const BattleEngine = (function () {
     return { G, record: rec };
   }
 
-  return { makeRng, step, replay, simulate, RULES, KEYWORDS, SPELLS, TWISTS, KNACKS, knackReady, setKnack, useKnack, FATES, fateReady, setFate, useFate, spreadBonus, layoutSpread, SPREAD_RULES, PASSIVES, MINORS, PASSIVE_RULES, MINOR_RULES, MAX_KEYWORDS, defOf, baseIdOf, variantId, suggestDeck, makeCard, familyOf, newGame, startTurn, canPlay, playCard, spellNeedsTarget, legalTargets, attack, endTurn, forfeit, boost, mulligan, aiNextAction, applyAction, aiTurn, guards, valueOf };
+  return { makeRng, step, replay, simulate, AI_STYLES, RULES, KEYWORDS, SPELLS, TWISTS, KNACKS, knackReady, setKnack, useKnack, FATES, fateReady, setFate, useFate, spreadBonus, layoutSpread, SPREAD_RULES, PASSIVES, MINORS, PASSIVE_RULES, MINOR_RULES, MAX_KEYWORDS, defOf, baseIdOf, variantId, suggestDeck, makeCard, familyOf, newGame, startTurn, canPlay, playCard, spellNeedsTarget, legalTargets, attack, endTurn, forfeit, boost, mulligan, aiNextAction, applyAction, aiTurn, guards, valueOf };
 })();
 /* END BATTLE ENGINE */
 
