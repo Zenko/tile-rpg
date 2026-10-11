@@ -295,6 +295,7 @@ function hrLeave() {
   const h = homeRoom; h.walk++;
   if (typeof hsLeave === 'function') hsLeave();
   if (h.ro) { h.ro.disconnect(); h.ro = null; }
+  if (typeof hmgStop === 'function') hmgStop();
   if (h.host) { h.host.remove(); h.host = null; h.world = h.player = null; }
   h.scene = null; h.sel = null; h.edit = null; h.hadModal = false;
   if (typeof sceneView !== 'undefined') sceneView.classList.remove('room-on', 'hr-idle');
@@ -309,6 +310,7 @@ function hrLayout() {
   h.host.style.setProperty('--t', h.t + 'px');
   h.world.style.width = h.cols * h.t + 'px'; h.world.style.height = h.rows * h.t + 'px';
   hrPlace(false); hrCamera(true); hrBadge(); hrMarks();
+  if (typeof hmgSync === 'function') hmgSync();   // the WebGL light layer (js/home-gl.js) sizes itself to the room and re-reads its glows
 }
 // Centre on the player like the town does, but never show past the room's edge; a room smaller than the view sits in the middle.
 // The top is kept clear of the floating top bar.

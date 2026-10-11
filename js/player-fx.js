@@ -70,6 +70,7 @@ function pfxBit(cls, x, y, o) {
   townWorld.appendChild(e);
 }
 function pfxStep(from) {
+  if (typeof tfxStep === 'function') tfxStep(from);   // sparkle trail and bridge ripples on the WebGL town (js/town-fx.js)
   const m = getMap(state.currentDistrict), t = (m.rows[from.y] || '')[from.x] || '.', x = (from.x + 0.5) * tilePx, y = (from.y + 0.92) * tilePx, rnd = () => Math.random() - 0.5;
   if (t === '.' || t === ',') {
     const cols = t === ',' ? ['#f6a9c2', '#ffffff', '#ffd86e'] : ['#9fcf7a', '#c6e58f', '#7fb35a'];
@@ -120,6 +121,7 @@ function pfxEmote(direct) {
     if (rig) rig.animate([{ transform: 'none' }, { transform: 'scale(1.09, .92)', offset: 0.35 }, { transform: 'scale(.98, 1.04)', offset: 0.7 }, { transform: 'none' }], { duration: 480, easing: 'ease-out' });
     const ring = document.createElement('div'); ring.className = 'pfx-take'; ring.style.setProperty('--rc', rgb);
     ring.style.left = (pr.left + pr.width / 2) + 'px'; ring.style.top = (pr.top + pr.height * 0.6) + 'px'; document.body.appendChild(ring);
+    if (typeof tfxBurst === 'function') tfxBurst(loot.r);   // the WebGL ring and motes at her feet (js/town-fx.js)
     ring.animate([{ transform: 'translate(-50%, -50%) scale(.3)', opacity: 0.9 }, { transform: 'translate(-50%, -50%) scale(2.6)', opacity: 0 }], { duration: 650, easing: 'ease-out' }).onfinish = () => ring.remove();
   };
   arc.onfinish = done; arc.oncancel = () => chip.remove();

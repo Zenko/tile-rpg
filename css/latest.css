@@ -2004,3 +2004,14 @@ svg.hr-th { display: block; position: relative; box-sizing: border-box; overflow
 .mail-item.open .mail-claim-btn { min-height: 48px; border-radius: 999px; font-weight: 800; box-shadow: 0 4px 14px color-mix(in srgb, var(--water) 30%, transparent); }
 .mail-item { border-radius: 20px; }
 .mail-item .mail-ava { border-radius: 50%; }
+
+/* TOWN EFFECTS ON WEBGL (js/town-fx.js): while the Pixi layer draws fireflies and leaves, the old DOM motes stay hidden. */
+.town-view.tfx-on .pfx-motes { display: none; }
+
+/* HOLO FOIL SHADER (js/holo-gl.js): a Pixi canvas inside the card face paints the foil; when it runs the CSS foil layers step aside. */
+.holo-gl-canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; border-radius: inherit; pointer-events: none; z-index: 7; }
+.reveal-card.holo.holo-gl .holo-foil, .reveal-card.holo.holo-gl .holo-glare, .reveal-card.holo.holo-gl .holo-spark { display: none; }
+
+/* HOME ROOM LIGHT ON WEBGL (js/home-gl.js): one canvas in the scrolling room draws the glows, window light and dust; the plain glow divs step aside while it runs. */
+.hmg-canvas { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 400; }
+.hr-world.hmg-on .hr-glow { display: none; }

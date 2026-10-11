@@ -142,6 +142,7 @@ function showCardReveal(cardId, heading, isGift, note, xpGained, opts) {
   face.className = `reveal-card rarity-${def.rarity}` + (def.spell ? ' spell' : '');
   face.innerHTML = cardFaceHtml(def);
   face.parentElement.classList.toggle('has-fa', fullArtApply(face, def));   // mythic, divine and Atlas cards with full art (js/full-art.js)
+  if (tier >= 1 && typeof rvfxWarm === 'function') rvfxWarm();   // the WebGL burst canvas (js/reveal-fx.js) is made the first time a rare-and-up card shows
   if (typeof holoApply === 'function') holoApply(face, tier);   // rainbow foil that follows the finger, ultra and up (js/holo-foil.js)
   pfxLoot = opts.view ? null : { html: cardArtHtml(def), r: def.rarity };   // what she pockets once this popup closes; a card you are only looking at gives nothing (js/player-fx.js)
   face.classList.remove('reveal-icon'); void face.offsetWidth; face.classList.add('reveal-icon');
@@ -153,6 +154,7 @@ function showCardReveal(cardId, heading, isGift, note, xpGained, opts) {
   const open = () => {   // everything that celebrates the card itself, either at once or when the face-down card is tapped
     pickupDesc.innerHTML = descHtml;
     sparkleBurst(document.getElementById('pickupSparkles'), ['✨', '🌟', '·'], sparkCounts[tier] || 0);
+    if (typeof rvfxReveal === 'function') rvfxReveal(face.parentElement, def.rarity, !!opts.flip);   // WebGL light burst over the card (js/reveal-fx.js)
     if (def.spell) showTipOnce('spells');
     if (tier >= 4) { sfx('mythic'); buzz(HAP.big); }
     else if (tier >= 1) { sfx('rare'); buzz(HAP.win); }

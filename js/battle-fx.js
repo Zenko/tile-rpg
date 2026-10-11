@@ -4,6 +4,7 @@
    that draws light and particles the DOM cannot do cheaply: additive sparks, glows and shockwave rings. It ADDS to the existing effects, it
    does not replace them: slashes, shields, floaters, vignettes, shakes and the spell orb flight are untouched, and `btImpact` (the old DOM
    sparks) is what runs whenever this file returns false.
+   The hit flash is a white additive rounded rectangle sized to the card or bar that was hit (a 'rect' particle with w / h stretch), drawn for 0.2 s.
    Prototype and the full effect set: pixi-fx-lab.html (battle hit) and pixi-lab.html (particle effects).
    Rules:
    - Lazy and cheap. PixiJS is created by bfxWarm() when a battle starts (it needs the async vendor script), has NO ticker, and renders only
@@ -30,8 +31,9 @@ async function bfxWarm() {
     const cv = document.createElement('canvas'); cv.width = cv.height = 64; const c = cv.getContext('2d'), g = c.createRadialGradient(32, 32, 0, 32, 32, 32);
     g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(0.3, 'rgba(255,255,255,0.6)'); g.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = g; c.fillRect(0, 0, 64, 64);
     const rc = document.createElement('canvas'); rc.width = rc.height = 128; const r = rc.getContext('2d'); r.shadowColor = '#fff'; r.shadowBlur = 8; r.strokeStyle = '#fff'; r.lineWidth = 5; r.beginPath(); r.arc(64, 64, 52, 0, 7); r.stroke();
+    const fc = document.createElement('canvas'); fc.width = fc.height = 64; const f = fc.getContext('2d'); f.shadowColor = '#fff'; f.shadowBlur = 8; f.fillStyle = '#fff'; f.beginPath(); if (f.roundRect) f.roundRect(8, 8, 48, 48, 9); else f.rect(8, 8, 48, 48); f.fill();
     app.canvas.id = 'bfxCanvas'; app.canvas.setAttribute('aria-hidden', 'true'); app.canvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:64;display:none';
-    bfx = { app, glow: PIXI.Texture.from(cv), ring: PIXI.Texture.from(rc), parts: [], pool: [], raf: 0, last: 0 };
+    bfx = { app, glow: PIXI.Texture.from(cv), ring: PIXI.Texture.from(rc), rect: PIXI.Texture.from(fc), parts: [], pool: [], raf: 0, last: 0 };
     battleView.appendChild(app.canvas);
     app.canvas.addEventListener('webglcontextlost', e => e.preventDefault());
   } catch (e) { bfxFailed = true; bfx = null; console.warn('Battle effects: WebGL unavailable, using the DOM effects.', e && e.message || e); }
@@ -43,8 +45,8 @@ const bfxScale = n => Math.max(2, Math.round(n * (typeof prefs !== 'undefined' &
 function bfxEmit(tex, x, y, o) {
   if (bfx.parts.length >= BFX_MAX) return;
   let s = bfx.pool.pop(); if (!s) { s = new PIXI.Sprite(); s.anchor.set(0.5); bfx.app.stage.addChild(s); }
-  s.texture = tex === 'ring' ? bfx.ring : bfx.glow; s.visible = true; s.tint = o.tint; s.blendMode = 'add'; s.position.set(x, y);
-  bfx.parts.push({ s, x, y, vx: o.vx || 0, vy: o.vy || 0, ay: o.ay || 0, drag: o.drag === undefined ? 0.2 : o.drag, life: o.life || 0.6, age: 0, s0: o.s0 || 14, s1: o.s1 === undefined ? 2 : o.s1, a: o.a === undefined ? 1 : o.a });
+  s.texture = tex === 'ring' ? bfx.ring : tex === 'rect' ? bfx.rect : bfx.glow; s.visible = true; s.tint = o.tint; s.blendMode = 'add'; s.position.set(x, y);
+  bfx.parts.push({ s, x, y, vx: o.vx || 0, vy: o.vy || 0, ay: o.ay || 0, drag: o.drag === undefined ? 0.2 : o.drag, life: o.life || 0.6, age: 0, s0: o.s0 || 14, s1: o.s1 === undefined ? 2 : o.s1, a: o.a === undefined ? 1 : o.a, w: o.w || 0, h: o.h || 0 });
 }
 function bfxStep(now) {
   const b = bfx, dt = Math.min(0.05, (now - b.last) / 1000 || 0.016); b.last = now;
@@ -52,7 +54,7 @@ function bfxStep(now) {
     const p = b.parts[i]; p.age += dt; const u = p.age / p.life;
     if (u >= 1) { p.s.visible = false; b.pool.push(p.s); b.parts[i] = b.parts[b.parts.length - 1]; b.parts.pop(); continue; }
     const d = Math.pow(p.drag, dt); p.vx *= d; p.vy = p.vy * d + p.ay * dt; p.x += p.vx * dt; p.y += p.vy * dt;
-    p.s.position.set(p.x, p.y); p.s.scale.set((p.s0 + (p.s1 - p.s0) * (1 - (1 - u) * (1 - u))) / 64); p.s.alpha = p.a * (1 - u);
+    p.s.position.set(p.x, p.y); const sz = (p.s0 + (p.s1 - p.s0) * (1 - (1 - u) * (1 - u))) / 64; if (p.w) p.s.scale.set(sz * p.w, sz * p.h); else p.s.scale.set(sz); p.s.alpha = p.a * (1 - u);
   }
   b.app.render();
   if (b.parts.length) b.raf = requestAnimationFrame(bfxStep); else { b.raf = 0; b.app.canvas.style.display = 'none'; }
@@ -68,6 +70,7 @@ function bfxImpact(el, n, tint) {
   try {
     if (!bfxOk()) return false;
     const c = bfxCenter(el); if (!c) return false; const big = n >= 6, base = Math.min(c.w, 120) / 80;
+    if (!big) bfxEmit('rect', c.x, c.y, { tint: 0xffffff, s0: 64, s1: 64 * 1.08, w: c.w * 1.1 / 48, h: c.h * 1.1 / 48, life: 0.2, a: 0.7, drag: 1 });   // the hit flash: the whole card or bar lights up white for a moment
     bfxEmit('glow', c.x, c.y, { tint: 0xffd9a0, s0: 30 * base, s1: 110 * base, life: 0.22, a: 0.9, drag: 1 });
     bfxEmit('ring', c.x, c.y, { tint: tint || 0xffd2a0, s0: 14 * base, s1: (big ? 190 : 130) * base, life: big ? 0.5 : 0.38, a: 0.85, drag: 1 });
     for (let i = 0, k = bfxScale(big ? 22 : 14); i < k; i++) { const a = bfxR(0, 6.283), v = bfxR(90, big ? 340 : 260); bfxEmit('glow', c.x, c.y, { tint: tint || bfxPick([0xffe08a, 0xff9a2e, 0xffffff]), vx: Math.cos(a) * v, vy: Math.sin(a) * v - 40, ay: 380, drag: 0.15, life: bfxR(0.3, 0.7), s0: bfxR(7, 15) }); }

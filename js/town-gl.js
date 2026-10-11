@@ -153,6 +153,7 @@ function tglBuildScene() {
   tgl.vw = 0;   // force tglResize() to size everything for this town view
   tglResize();
   if (lastCam) tglCamera(lastCam.cx, lastCam.cy, false);
+  if (typeof tfxReset === 'function') tfxReset();   // the effects layer (js/town-fx.js) belongs to the old map
 }
 const tglAt = (m, x, y) => (x < 0 || y < 0 || x >= m.w || y >= m.h) ? 'o' : m.rows[y][x];
 const tglIsPath = c => c === '=' || c === 'b' || c === '#', tglIsWater = c => c === '~' || c === 'b';

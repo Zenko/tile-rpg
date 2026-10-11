@@ -19,6 +19,7 @@ function holoApply(face, tier) {
   face.classList.add('holo', 'h' + Math.min(tier, 5));
   face.insertAdjacentHTML('beforeend', '<span class="holo-foil" aria-hidden="true"></span><span class="holo-glare" aria-hidden="true"></span>' + (tier >= 3 ? '<span class="holo-spark" aria-hidden="true"></span>' : ''));
   face.style.removeProperty('--hx'); face.style.removeProperty('--hy');
+  if (typeof hglApply === 'function') hglApply(face, tier);   // the shader version (js/holo-gl.js); hides the CSS spans above when it is running
   if (holoBound !== frame) {
     holoBound = frame;
     const move = e => {

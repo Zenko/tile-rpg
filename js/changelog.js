@@ -18,6 +18,12 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'new', x: 'The town has more life. At night fireflies drift over the grass and embers rise from lit lamps, leaves fall by day in the colours of the season (pink petals in spring, orange and gold in autumn), the water glints, and you leave a faint sparkle trail when you walk. Stepping on a bridge sends a ripple out. These follow the Character effects switch in Settings.' },
+  { t:'new', x: 'Picking up a card or item now bursts light around your character, bigger for rarer finds.' },
+  { t:'new', x: 'Opening a card from a pack, a summon or a Fate now bursts with light: rings, rays and falling sparks in the card\'s colour, grander for each rarity, with a golden flash for divine and Atlas cards.' },
+  { t:'better', x: 'Ultra rare and better cards have a smoother, shinier foil that shimmers as you move your finger over the card.' },
+  { t:'better', x: 'In battle, a card or Spirit bar flashes white for a moment when it is hit.' },
+  { t:'better', x: 'Your cottage has real light: lamps and candles flicker, the fireplace sends up embers, and windows let in shafts of light with dust floating through them.' },
   { t:'better', x: 'Your character walks a little slower, about a fifth, so it is easier to follow on the map and in your cottage.' },
   { t:'better', x: 'Talking to a neighbour is now a full screen. They stand large above a name and hearts bar, with their speech just above their head, and below it big Chat, Play and Gift cards that each open their own list (Gift only appears when you have something to give, and a badge on Chat says a favour is waiting). The town stays visible behind it, "Head back out" is at the bottom like the building screens, and the Android back gesture closes the screen (or goes back to the cards first).' },
   { t:'better', x: 'A new look for choice screens. Building, cottage, mailbox and favourite-card screens show each choice as an icon tile with a clear title, the main action stands out, and "Head back out" or "Close" stays pinned at the bottom. Picking a piece of furniture in your cottage opens a short sheet so you can still see the room. Neighbour chat has a portrait beside the name and hearts and a round close button. Favourite cards show three frames that fill as you pick.' },
