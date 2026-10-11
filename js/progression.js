@@ -529,7 +529,7 @@ function familyCardId(fam, rarity) {
   const same = all.filter(c => c.rarity === rarity);
   return seasonalPick(same.length ? same : all).id;
 }
-function buildDeckForOpponent(count, forBoss, tier, seed, district, wins) {
+function buildDeckForOpponent(count, forBoss, tier, seed, district, wins, plan) {
   tier = Math.max(1, Math.min(4, tier || foeTierFor(forBoss)));
   const rarityFor = () => {
     const r = Math.random();
@@ -544,7 +544,9 @@ function buildDeckForOpponent(count, forBoss, tier, seed, district, wins) {
   for (let i = 0; i < 14; i++) pool.push(fam && i % 2 === 0 ? familyCardId(fam, rarityFor()) : randomCardId(rarityFor()));
   const counts = {};
   pool.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
-  return foeEnhanceDeck(BattleEngine.suggestDeck(counts), tier, seed);
+  // A neighbour's plan (js/npc-brain.js) is a few cards they want in the deck: make sure the pool holds them, and keep them first.
+  if (plan && plan.keep) plan.keep.forEach(id => { counts[id] = Math.max(counts[id] || 0, 2); });
+  return foeEnhanceDeck(BattleEngine.suggestDeck(counts, plan && plan.keep), tier, seed);
 }
 function foeEnhanceDeck(deck, tier, seed, extra) {
   deck = deck.slice();

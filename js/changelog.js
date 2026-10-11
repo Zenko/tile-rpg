@@ -18,6 +18,8 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'new', x: 'Neighbours now plan their own decks. They pack cards that suit the weather and the season, a favourite family of their own, and the versus screen tells you what they brought.' },
+  { t:'new', x: 'Chat -> Suggest a deck: ask a neighbour to build around a family, a tougher or gentler deck, or the season. The more hearts they have for you, the more of your idea they use.' },
   { t:'better', x: 'Cards you can play in battle now glow with an animated gold ring and a shimmer, and the cost circles are bright glowing gems again.' },
   { t:'better', x: 'Tapping from card to card in your hand is smooth: the cards ease up and down instead of snapping.' },
   { t:'better', x: 'Press and hold a card now shows the whole card, with its art, keywords and stats, large.' },

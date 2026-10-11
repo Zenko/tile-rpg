@@ -187,6 +187,17 @@ function renderTalkTopics(f) {
   box.classList.toggle('hidden', !show);
   if (!show) return;
   const used = f._topics || (f._topics = {});
+  if (f._suggest && typeof npcDeckHint === 'function') {   // "Suggest a deck" (js/npc-brain.js): pick what they should build next
+    const cur = npcDeckHint(f);
+    box.innerHTML = NPC_HINTS.map(h => `<button class="talk-topic${cur && cur.id === h.id ? ' used' : ''}" data-hint="${h.id}">${h.label}</button>`).join('') + '<button class="talk-topic" data-hint="">← Never mind</button>';
+    box.querySelectorAll('[data-hint]').forEach(b => b.addEventListener('click', () => {
+      if (!talkTo) return;
+      const id = b.dataset.hint; talkTo._suggest = false;
+      if (id) { const r = npcAcceptHint(talkTo, id); talkSay(r.say); talkReact(r.ok ? '💞' : '💭'); sfx('tap'); buzz(HAP.tap); }
+      renderTalkTopics(talkTo);
+    }));
+    return;
+  }
   box.innerHTML = TALK_TOPICS.map(t => `<button class="talk-topic${used[t.id] ? ' used' : ''}" data-topic="${t.id}">${t.label}</button>`).join('');
   box.querySelectorAll('[data-topic]').forEach(b => b.addEventListener('click', () => {
     if (!talkTo) return;
@@ -197,6 +208,11 @@ function renderTalkTopics(f) {
     else talkReact('💬');
     b.classList.add('used');
   }));
+  if (typeof npcAcceptHint === 'function') {
+    const sb = document.createElement('button'); sb.className = 'talk-topic'; sb.textContent = '🃏 Suggest a deck';
+    sb.addEventListener('click', () => { if (!talkTo) return; talkTo._suggest = true; talkSay('A deck? What would you like me to build?'); sfx('tap'); renderTalkTopics(talkTo); });
+    box.appendChild(sb);
+  }
 }
 function renderTalk() { renderTalkBody(); renderTalkView(); }
 function renderTalkBody() {

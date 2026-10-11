@@ -2117,3 +2117,8 @@ svg.hr-th { display: block; position: relative; box-sizing: border-box; overflow
 .update-banner .ub-text small { font-size: .8rem; opacity: .85; }
 .update-banner button { min-height: 46px; padding: 0 22px; font-size: .95rem; font-weight: 800; background: #2e2005; color: #ffe9a8; box-shadow: 0 3px 10px rgba(0, 0, 0, .3); }
 @media (prefers-reduced-motion: reduce) { .update-banner.show { animation: none; } }
+
+/* Build 216: the neighbour's deck note on the versus card */
+.bt-intro-note { margin-top: 4px; max-width: 220px; font-size: .72rem; line-height: 1.3; color: #c9d2da; }
+.bt-intro-note:empty { display: none; }
+:root[data-theme="light"] .bt-intro-note { color: var(--ink-soft); }

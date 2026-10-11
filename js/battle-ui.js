@@ -30,12 +30,13 @@ function btIntro(opponent, isBoss, first) {
     const tw = bossTwistFor(opponent), t = tw ? BattleEngine.TWISTS[tw] : null;
     const tag = isBoss ? '👑 District boss' : opponent.atlas ? '🗺️ The Atlas' : opponent.cup ? '🏆 Dreamers’ Cup' : opponent.draft ? '🎴 Draft Run' : opponent.ghost ? '👻 Lingering duel' : opponent.dungeon ? '🕯️ Cellar' : opponent.isRival ? '⚡ Rival' : '⚔️ Friendly match';
     const el = document.createElement('div'); el.className = 'bt-intro' + (isBoss ? ' boss' : '');
-    el.innerHTML = `<div class="bt-intro-side opp"><span class="bt-intro-av"></span><div><div class="bt-intro-name"></div><div class="bt-intro-tag">${tag}</div></div></div>
+    el.innerHTML = `<div class="bt-intro-side opp"><span class="bt-intro-av"></span><div><div class="bt-intro-name"></div><div class="bt-intro-tag">${tag}</div><div class="bt-intro-note"></div></div></div>
       <div class="bt-intro-vs">VS</div>
       <div class="bt-intro-side you"><span class="bt-intro-av you-av"></span><div><div class="bt-intro-name you-name"></div><div class="bt-intro-tag">${first === 1 ? '🎁 You go second · +1 card' : '🥇 You go first'}</div></div></div>
       ${t ? `<div class="bt-intro-twist"><b>${t.icon} Boss twist</b><span></span></div>` : ''}`;
     el.querySelector('.opp .bt-intro-av').textContent = opponentPortrait(opponent);
     el.querySelector('.opp .bt-intro-name').textContent = opponent.name;
+    el.querySelector('.bt-intro-note').textContent = opponent.deckNote || '';
     const me = el.querySelector('.you-av'); applyAvatarStyle(me, state.character); setAvFace(me, state.character);
     el.querySelector('.you-name').textContent = state.character.name || 'You';
     if (t) el.querySelector('.bt-intro-twist span').textContent = t.text;
@@ -91,7 +92,9 @@ function startBattleNow(opponent, first) {
   // Plain neighbors and district bosses get a fresh deck each fight, scaled to how many wins you have (their stored deck
   // predates enhanced and unique foe cards). Every other kind of opponent brings its own deck.
   const plainFoe = !opponent.dungeon && !opponent.cup && !opponent.draft && !opponent.ghost && !opponent.challenge && !opponent.signature && !opponent.isRival && !opponent.puzzle && !opponent.trial && !opponent.spar;
-  const oppDeck = plainFoe ? buildDeckForOpponent(DECK_SIZE, isBoss, null, opponent.name, state.currentDistrict)   // a district's folk favour its family
+  const plan = plainFoe && !isBoss && typeof npcDeckPlan === 'function' ? npcDeckPlan(opponent) : null;   // what this neighbour wants in their deck today (js/npc-brain.js)
+  opponent.deckNote = plan ? plan.note : '';
+  const oppDeck = plainFoe ? buildDeckForOpponent(DECK_SIZE, isBoss, null, opponent.name, state.currentDistrict, null, plan)   // a district's folk favour its family
     : (Array.isArray(opponent.deck) && opponent.deck.length === DECK_SIZE) ? opponent.deck : buildDeckForOpponent(DECK_SIZE, isBoss);
   const twistKind = bossTwistFor(opponent);
   const world = battleWorld(opponent, weather);
