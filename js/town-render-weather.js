@@ -2,7 +2,7 @@
    TOWN MAP: drawing, camera, tap-to-walk, houses and the cellar dungeon.
    ============================================================ */
 const townView = document.getElementById('townGrid');
-const VIEW_COLS = 7; let STEP_MS = 140;   // `let`: a walk with your companion slows it down while it lasts (js/companion-activities.js)
+const VIEW_COLS = 7; let STEP_MS = 170;   // `let`: a walk with your companion slows it down while it lasts (js/companion-activities.js)
 let viewRows = 7;
 const CAM_PAD_TOP = 70, CAM_PAD_BOTTOM = 96;   // px of the map hidden behind the floating top pill and bottom dock
 let townWorld = null, townBuiltFor = null, tilePx = 48, playerEl = null, walkToken = 0;

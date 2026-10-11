@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'better', x: 'Your character walks a little slower, about a fifth, so it is easier to follow on the map and in your cottage.' },
   { t:'better', x: 'Talking to a neighbour is now a full screen. They stand large above a name and hearts bar, with their speech just above their head, and below it big Chat, Play and Gift cards that each open their own list (Gift only appears when you have something to give, and a badge on Chat says a favour is waiting). Exit is bigger at the top right, and the Android back gesture closes the screen (or goes back to the cards first).' },
   { t:'better', x: 'A new look for choice screens. Building, cottage, mailbox and favourite-card screens show each choice as an icon tile with a clear title, the main action stands out, and "Head back out" or "Close" stays pinned at the bottom. Picking a piece of furniture in your cottage opens a short sheet so you can still see the room. Neighbour chat has a portrait beside the name and hearts and a round close button. Favourite cards show three frames that fill as you pick.' },
   { t:'fixed', x: 'The Done button while decorating no longer floats over Settings (or any other menu) when you open one from your home.' },

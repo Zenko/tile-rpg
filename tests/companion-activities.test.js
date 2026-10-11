@@ -46,7 +46,7 @@ module.exports = async (page, assert) => {
   });
   assert.ok(walk.on && walk.pill, 'the walk should start and show its pill'); assert.strictEqual(walk.slow, 720, 'a relaxed pace');
   assert.ok(walk.moved, 'the player should have moved on their own'); assert.ok(walk.bubble, 'the companion should be chatting in a bubble');
-  assert.ok(walk.stopped && walk.pillHidden && walk.restored === 140, 'a tap stops the walk and restores the usual speed');
+  assert.ok(walk.stopped && walk.pillHidden && walk.restored === 170, 'a tap stops the walk and restores the usual speed');
   assert.strictEqual(walk.bond, 1, 'a proper walk brings you closer'); assert.ok(walk.tabStops, 'leaving the town stops it');
 
   // ----- calm: your companion keeps you company -----
