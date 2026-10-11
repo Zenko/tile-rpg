@@ -1303,14 +1303,6 @@ body.in-story .toast { opacity: 0; }
 @keyframes ap-burst { from { opacity: 1; transform: translate(-50%, -50%) scale(.4); } to { opacity: 0; transform: translate(-50%, -50%) scale(1); } }
 @media (prefers-reduced-motion: reduce) { .atk-preview .ap-card.strike .fa-hero, .ap-flash, .ap-burst { animation: none; } }
 
-/* ===== BIG HANDS =====
-   With five or more cards in hand (perks add cards) the old fan ran off both screen edges and the bottom, so the outer cards were
-   cut off. btRenderHand sets --hn (card count) and the class .big; here each card is sized so the whole row, plus a little overlap,
-   fits the hand's width, and the fan is flatter (smaller rotation and drop, set in the JS). */
-#battleView .hand.big { padding-left: 18px; padding-right: 18px; padding-bottom: 18px; }
-#battleView .hand.big .hcard { flex: 0 0 auto; max-width: none; margin: 0 -5px; width: min(74px, calc((100% + (var(--hn) - 1) * 10px) / var(--hn))); height: auto; aspect-ratio: 3 / 4; }
-#battleView .hand.big .hcard { transform-origin: 50% 70%; }
-
 /* In-game confirm sheet (askConfirm, js/collection-tools.js). Above every scene and sheet that can ask a question. */
 #confirmOverlay { z-index: 90; }
 #confirmOverlay .overlay-card { text-align: center; }
@@ -2015,3 +2007,49 @@ svg.hr-th { display: block; position: relative; box-sizing: border-box; overflow
 /* HOME ROOM LIGHT ON WEBGL (js/home-gl.js): one canvas in the scrolling room draws the glows, window light and dust; the plain glow divs step aside while it runs. */
 .hmg-canvas { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 400; }
 .hr-world.hmg-on .hr-glow { display: none; }
+
+
+/* ===== Build 213: neighbour screen veil, light-theme battle contrast, stacked hand, Watch badge ===== */
+/* Neighbour screen: the veil over the town was the theme's page colour, which is nearly white in the light theme. --tk-veil is a
+   slightly deeper sand there; dark theme keeps --bg-top. */
+#talkOverlay { --tk-veil: var(--bg-top); }
+:root[data-theme="light"] #talkOverlay { --tk-veil: color-mix(in srgb, var(--bg-top) 60%, #5c6855); }
+#talkOverlay .tk-bg { background: linear-gradient(180deg, color-mix(in srgb, var(--tk-veil) 96%, transparent) 0, color-mix(in srgb, var(--tk-veil) 92%, transparent) calc(env(safe-area-inset-top, 0px) + 92px), color-mix(in srgb, var(--tk-veil) 36%, transparent) calc(env(safe-area-inset-top, 0px) + 200px), color-mix(in srgb, var(--tk-veil) 48%, transparent) 45%, color-mix(in srgb, var(--tk-veil) 86%, transparent) 70%, color-mix(in srgb, var(--tk-veil) 96%, transparent)); }
+
+/* Light-theme battle: a sand surface a step deeper than --stone for every pill, button and card paper that sat on the green mat,
+   dark ink on it, and names on their own plates. The dark theme is untouched. */
+:root[data-theme="light"] #battleView { --bt-surface: #e6dcc6; --bt-edge: #c4b89c; --bt-ink: #34332f; --bt-ink-soft: #55534c; }
+:root[data-theme="light"] #battleView .divider .msg,
+:root[data-theme="light"] #battleView .coach:not(:empty) { background: var(--bt-surface); border: 1px solid var(--bt-edge); color: var(--bt-ink); }
+:root[data-theme="light"] #battleView .bt-mini { background: var(--bt-surface); border-color: var(--bt-edge); color: var(--bt-ink); box-shadow: 0 2px 6px var(--shadow); }
+:root[data-theme="light"] #battleView .nmv .who,
+:root[data-theme="light"] #battleView .nmv .deckcount { align-self: flex-start; max-width: 100%; padding: 1px 12px; border-radius: 999px; background: var(--bt-surface); border: 1px solid var(--bt-edge); color: var(--bt-ink); }
+:root[data-theme="light"] #battleView .nmv .deckcount { margin-top: 3px; font-weight: 700; }
+/* the End turn button: the player's colour is often pastel, so it is deepened until white text reads on it */
+:root[data-theme="light"] #battleView .endbtn { background: color-mix(in srgb, var(--side-accent, var(--rc-b)) 52%, #1f2326); color: #fff; font-weight: 800; }
+:root[data-theme="light"] #battleView .endbtn:disabled { opacity: .75; }
+:root[data-theme="light"] #battleView .gem { background: var(--bt-edge); border-color: #a89c80; }
+/* card paper (name + stats panel): sand instead of near-white */
+:root[data-theme="light"] #battleView .card, :root[data-theme="light"] .reveal-card, :root[data-theme="light"] .alm-card.tile { --panel: #e9dfc9; }
+
+/* ===== STACKED HAND =====
+   Replaces the fan and the old "big hand" shrinking (build 213). Cards are bigger and overlap like a held hand of cards: each shows
+   at least its left edge (cost, keywords, power). The overlap is worked out from the hand's own width (container units) and the
+   card count (--hn, set by btRenderHand), so any hand fits without scrolling and without a drag fighting a swipe.
+   Playable cards are raised and ringed; unaffordable ones stay at full opacity and colour. Tapping a card raises it above the stack. */
+#battleView #btHand { --hw: 92px; container-type: inline-size; height: 162px; padding: 22px 12px 4px; gap: 0; align-items: flex-end; justify-content: center; }
+#battleView #btHand .hcard {
+  flex: 0 0 auto; width: var(--hw); max-width: none; height: auto; aspect-ratio: 3 / 4; transform: none; transform-origin: 50% 100%;
+  margin: 0 0 0 calc(min(var(--hw) + 4px, (100cqw - 24px - var(--hw)) / max(var(--hn) - 1, 1)) - var(--hw)); z-index: 1; transition: none;
+}
+#battleView #btHand .hcard:first-child { margin-left: 0; }
+#battleView #btHand .hcard .card { transition: transform .18s ease, box-shadow .18s ease; box-shadow: -3px 0 8px rgba(0, 0, 0, .28), 0 4px 10px var(--shadow); }
+#battleView #btHand .hcard .card.unaffordable { opacity: 1; filter: none; }
+#battleView #btHand .hcard .card.playable { transform: translateY(-10px); box-shadow: 0 0 0 2.5px var(--water-glow), 0 0 14px color-mix(in srgb, var(--water-glow) 70%, transparent), -3px 0 8px rgba(0, 0, 0, .28); }
+:root[data-theme="light"] #battleView #btHand .hcard .card.playable { box-shadow: 0 0 0 3px #2f7f73, 0 0 12px rgba(47, 127, 115, .55), -3px 0 8px rgba(0, 0, 0, .22); }
+#battleView #btHand .hcard:has(.card.selected) { z-index: 20; }
+#battleView #btHand .hcard .card.selected { transform: translateY(-26px) scale(1.1); }
+#battleView #btHand .hcard .card .badge.grd { display: none; }
+
+/* The Watch badge hangs below its card, and the player's row is drawn after (so over) the opponent's: lift the opponent's row. */
+#battleView #btOppRow { position: relative; z-index: 2; }

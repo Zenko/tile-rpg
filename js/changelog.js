@@ -18,6 +18,9 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'better', x: 'Your hand in battle is now a stack of bigger cards that overlap like cards held in your hand, so a full hand is easier to read. Cards you can play are raised and outlined, and cards you cannot afford yet stay at full strength instead of fading.' },
+  { t:'better', x: 'Light theme: the neighbour screen background is a little darker, and battles have stronger contrast - a darker End turn button, name plates for you and your opponent, deeper action buttons and message pills, and sand-coloured card text panels.' },
+  { t:'fixed', x: 'The Watch shield under an enemy card is no longer covered by your row of cards.' },
   { t:'new', x: 'The town has more life. At night fireflies drift over the grass and embers rise from lit lamps, leaves fall by day in the colours of the season (pink petals in spring, orange and gold in autumn), the water glints, and you leave a faint sparkle trail when you walk. Stepping on a bridge sends a ripple out. These follow the Character effects switch in Settings.' },
   { t:'new', x: 'Picking up a card or item now bursts light around your character, bigger for rarer finds.' },
   { t:'new', x: 'Opening a card from a pack, a summon or a Fate now bursts with light: rings, rays and falling sparks in the card\'s colour, grander for each rarity, with a golden flash for divine and Atlas cards.' },
