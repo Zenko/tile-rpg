@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'better', x: 'A new look for choice screens. Building, cottage, mailbox and favourite-card screens show each choice as an icon tile with a clear title, the main action stands out, and "Head back out" or "Close" stays pinned at the bottom. Picking a piece of furniture in your cottage opens a short sheet so you can still see the room. Neighbour chat has a portrait beside the name and hearts and a round close button. Favourite cards show three frames that fill as you pick.' },
   { t:'fixed', x: 'The Done button while decorating no longer floats over Settings (or any other menu) when you open one from your home.' },
   { t:'new', x: 'Cosiness. Your home scores up to 100 for how lived-in it feels, from decorations, variety, light, plants, spirit perches and family corners. Open Decorate → Room to see it and what it earns: more Embers for a nap, a bigger daily bonus and a better chance a spirit calls.' },
   { t:'new', x: 'Your cottage shows in town. A glow in the window, smoke, a lantern, flower pots, a flag and a bird appear on the outside as your home levels up and gets cosier.' },

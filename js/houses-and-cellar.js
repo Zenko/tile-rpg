@@ -524,7 +524,8 @@ function favButtons() {
   const h = homeState(), ids = [...new Set(state.ownedCards.map(id => BattleEngine.baseIdOf(id)))].filter(id => cardDef(id))
     .sort((a, b) => RARITY_ORDER.indexOf(cardDef(b).rarity) - RARITY_ORDER.indexOf(cardDef(a).rarity) || cardDef(b).power - cardDef(a).power);
   const shown = [...new Set(h.favs.concat(ids))].slice(0, 12);
-  return shown.map(id => { const d = cardDef(id), on = h.favs.includes(id); return sceneBtn('fav:' + id, `${on ? '⭐' : '☆'} ${d.icon} ${d.name} <small>${RARITY_LABEL[d.rarity]}</small>`); }).join('');
+  const frames = `<div class="fav-slots">${Array.from({ length: FAV_MAX }, (_, i) => `<span class="${h.favs[i] ? 'on' : ''}">${h.favs[i] ? cardDef(h.favs[i]).icon : '+'}</span>`).join('')}<b>${h.favs.length} of ${FAV_MAX} framed</b></div>`;
+  return frames + shown.map(id => { const d = cardDef(id), on = h.favs.includes(id); return sceneBtn('fav:' + id, `${on ? '⭐' : '☆'} ${d.icon} ${d.name} <small>${RARITY_LABEL[d.rarity]}</small>`); }).join('');
 }
 function toggleFav(id) {
   const h = homeState(), d = cardDef(id);
@@ -693,11 +694,18 @@ function deleteLetter(id) {
 
 // A label like "Play: Catch the Grain · 3 prizes left today" is split at the first " · " so the storefront layout can show the
 // status as a small chip on the right (labels with markup are left alone). Other layouts show it inline, see .sb-meta in the CSS.
-function sceneBtn(id, label, disabled) {
+// Sheet kit (build 206): a leading emoji becomes the row's icon tile and the title is the bold line. textContent stays what it
+// was ("🌱 Seeds"), since the space is kept between the spans. `cls` adds classes (the edit panel's Done is 'sc-done').
+const SB_EMOJI = /^([\p{Extended_Pictographic}☆★][\uFE0F\u200D\u{1F3FB}-\u{1F3FF}\p{Extended_Pictographic}]*)\s+/u;
+function sceneBtn(id, label, disabled, cls) {
   let inner = label;
-  const i = typeof label === 'string' && !label.includes('<') ? label.indexOf(' · ') : -1;
-  if (i > 0) inner = `<span class="sb-main">${label.slice(0, i)}</span><span class="sb-meta">${label.slice(i + 3)}</span>`;
-  return `<button class="btn sc-btn" data-act="${id}" ${disabled ? 'disabled' : ''}>${inner}</button>`;
+  if (typeof label === 'string') {
+    const m = label.match(SB_EMOJI), rest = m ? label.slice(m[0].length) : label;
+    const i = !rest.includes('<') ? rest.indexOf(' · ') : -1;
+    const main = i > 0 ? rest.slice(0, i) : rest;
+    inner = (m ? `<span class="ico">${m[1]}</span> ` : '') + (m || i > 0 ? `<span class="sb-main">${main}</span>` : main) + (i > 0 ? `<span class="sb-meta">${rest.slice(i + 3)}</span>` : '');
+  }
+  return `<button class="btn sc-btn sc-row${cls ? ' ' + cls : ''}" data-act="${id}" ${disabled ? 'disabled' : ''}>${inner}</button>`;
 }
 // The top-left arrow is gone, so every scene state must offer its own way out. They all do today; this keeps it true.
 const SCENE_EXIT_ACTS = ['leave', 'back', 'mg-back', 'wings-back', 'exp-cancel', 'hr-close'];   // hr-close: your cottage's Close, which stays in the house (js/home-room.js)

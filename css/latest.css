@@ -1903,3 +1903,63 @@ svg.hr-th { display: block; position: relative; box-sizing: border-box; overflow
 /* Home room: the Decorate/Done button (z 600) must not float over menus. #sceneView was not a stacking context, so the
    button painted above Settings and every other overlay (z 50+). Isolating the scene keeps 600 inside it. */
 #sceneView.room-on { isolation: isolate; }
+
+/* ===== Sheet kit (build 206; prototype in sheet-lab.html) =====
+   One look for every choice sheet: a row is an icon tile, a bold title and an optional pill; the call to action is filled;
+   the way out is a sticky footer; a sheet that only needs a little room is short. sceneBtn() (js/houses-and-cellar.js)
+   puts a leading emoji in .ico and adds .sc-row, so only buttons it builds change; hand-built .sc-btn rows (decorate
+   panel's tabs, buy rows) keep their own styles. */
+#sceneView.sc-std .sc-btn.sc-row { gap: 14px; min-height: 64px; padding: 10px 14px 10px 10px; border-radius: 20px; font-size: 1rem; transition: transform .15s, background .15s; }
+#sceneView.sc-std .sc-btn.sc-row:not(:disabled):active { transform: scale(.98); background: color-mix(in srgb, var(--hl) 12%, transparent); }
+#sceneView.sc-std .sc-btn.sc-row .ico { flex: none; width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; font-size: 1.4rem; line-height: 1; background: color-mix(in srgb, var(--water) 22%, transparent); }
+#sceneView.sc-std .sc-btn.sc-row:has(.ico) { padding-left: 10px; }
+#sceneView.sc-std .sc-btn.sc-row:not(:has(.ico)) { padding-left: 16px; }
+#sceneView.sc-std .sc-btn.sc-row small { display: block; font-weight: 600; opacity: .7; font-size: .76rem; }
+#sceneView.sc-std .sc-btn.sc-row:not(:disabled):not([data-act="leave"]):not([data-act="back"]):not([data-act="hr-close"]):not([data-act="mg-back"]):not(.sc-done)::after { content: '›'; flex: none; margin-left: auto; padding-left: 4px; font-size: 1.4rem; font-weight: 800; opacity: .55; }
+#sceneView.sc-std .sc-btn.sc-row:has(.sb-meta)::after { display: none; }   /* a pill takes the chevron's place */
+#sceneView.sc-std .sc-btn.sc-row .sb-meta { margin-left: auto; }
+/* the call to action: filled, taller, with a soft glow */
+#sceneView.sc-std .sc-btn.sc-row[data-act^="mg-"]:not([data-act="mg-back"]):not([data-act="mg-again"]) { min-height: 76px; box-shadow: 0 6px 18px color-mix(in srgb, var(--water) 35%, transparent); }
+#sceneView.sc-std .sc-btn.sc-row[data-act^="mg-"]:not([data-act="mg-back"]):not([data-act="mg-again"]) .ico { background: color-mix(in srgb, var(--on-water) 12%, transparent); }
+/* the way out: a sticky footer that always sits at the bottom of the sheet */
+#sceneView.sc-std .sc-actions { padding-bottom: 0; }
+#sceneView.sc-std .sc-btn.sc-row[data-act="leave"], #sceneView.sc-std .sc-btn.sc-row[data-act="back"], #sceneView.sc-std .sc-btn.sc-row[data-act="hr-close"]:not(.sc-done) {
+  position: sticky; bottom: 0; z-index: 2; align-self: stretch; width: auto; margin: auto -16px 0; min-height: 60px; padding: 8px 16px calc(12px + env(safe-area-inset-bottom, 0px)); border-radius: 0;
+  justify-content: center; background: var(--stone); border: 0; border-top: 1px solid color-mix(in srgb, var(--stone-edge) 70%, transparent); color: var(--ink-soft); font-weight: 700; font-size: .95rem; }
+#sceneView.sc-std .sc-btn.sc-row[data-act="leave"]::before { content: '←'; margin-right: 8px; }
+/* Done in the decorate panel is the one action there: a filled bar */
+#sceneView.sc-std .sc-btn.sc-done { position: sticky; bottom: 0; z-index: 2; flex: none; justify-content: center; min-height: 52px; margin-top: 4px; border-radius: 999px; background: var(--water); color: var(--on-water); border-color: transparent; box-shadow: 0 4px 14px var(--shadow); }
+/* favourite cards: three frames that fill as you pick */
+.fav-slots { display: flex; align-items: center; gap: 10px; flex: none; padding: 2px 2px 4px; }
+.fav-slots span { flex: none; width: 52px; height: 40px; border-radius: 12px; border: 2px dashed var(--stone-edge); display: grid; place-items: center; font-size: 1.3rem; color: var(--ink-soft); }
+.fav-slots span.on { border: 2px solid var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--ink); }
+.fav-slots b { margin-left: auto; font-size: .8rem; color: var(--ink-soft); }
+/* one piece of furniture picked: a short sheet, the room stays in view */
+#sceneView.room-on.hr-peek .sc-stage { height: auto; flex: 1 1 0; min-height: 0; box-shadow: none; }
+#sceneView.room-on.hr-peek .sc-actions { flex: 0 1 auto; max-height: 62%; margin-top: -24px; }
+#sceneView.room-on.hr-peek .sc-bubble { top: calc(var(--hud-h, 70px) + 14px); }
+
+/* neighbour talk card: portrait beside the name and hearts, a speech bubble, the call to action filled, a round close */
+#talkCard { display: grid; grid-template-columns: auto 1fr; column-gap: 14px; align-items: center; text-align: left; padding-top: 22px; }
+#talkCard > * { grid-column: 1 / -1; }
+#talkCard .sheet-handle { margin: -10px auto 10px; }
+#talkCard .talk-portrait { grid-column: 1; grid-row: 2 / span 2; width: 68px; height: 68px; margin: 0; font-size: 2.3rem; }
+#talkCard .talk-name { grid-column: 2; grid-row: 2; align-self: end; margin: 0; font: 500 1.35rem var(--f-display); letter-spacing: 0; }
+#talkCard .talk-hearts { grid-column: 2; grid-row: 3; align-self: start; margin: 2px 0 0; text-align: left; }
+#talkCard .talk-hearts.hidden { display: none; }
+#talkCard .talk-bubble { margin: 14px 0 10px; border-radius: 6px 20px 20px 20px; text-align: left; background: color-mix(in srgb, var(--hl) 7%, transparent); border: 0; padding: 12px 16px; }
+#talkCard .talk-bubble::before { display: none; }
+#talkCard .talk-topics { justify-content: flex-start; margin: 0 0 8px; }
+#talkCard .talk-topic { flex: none; font-weight: 700; font-size: .85rem; padding: 8px 14px; }
+#talkCard .talk-sub, #talkCard .talk-tag { text-align: left; }
+#talkCard .btn { min-height: 52px; font-weight: 800; border-radius: 999px; }
+#talkCard #talkMain { box-shadow: 0 6px 18px color-mix(in srgb, var(--water) 35%, transparent); }
+#talkCard .talk-fight, #talkCard .talk-gift { background: color-mix(in srgb, var(--hl) 8%, transparent); color: var(--ink); border: 1px solid var(--stone-edge); box-shadow: none; }
+#talkCard .btn:disabled { opacity: .7; }
+#talkCard .talk-close { position: absolute; right: 12px; top: 12px; width: 36px; height: 36px; min-height: 0 !important; margin: 0 !important; padding: 0; font-size: 0; border-radius: 50%; background: color-mix(in srgb, var(--hl) 8%, transparent); color: var(--ink-soft); box-shadow: none; }
+#talkCard .talk-close::before { content: '✕'; font-size: 1rem; font-weight: 800; }
+
+/* letters: the gift is the highlighted attachment, the delete is quiet */
+.mail-item.open .mail-claim-btn { min-height: 48px; border-radius: 999px; font-weight: 800; box-shadow: 0 4px 14px color-mix(in srgb, var(--water) 30%, transparent); }
+.mail-item { border-radius: 20px; }
+.mail-item .mail-ava { border-radius: 50%; }

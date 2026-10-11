@@ -596,7 +596,7 @@ function hrEditHtml() {
     if (N) s += `<div class="hr-info"><b>Next: Level ${home.level + 1} · ${N.name}</b><span>Reveals ${hrUnlockText(home.level + 1)}</span></div>` + sceneBtn('hr:up', `⬆️ Upgrade your home · 🫧 ${N.cost}`, state.progress.pebbles < N.cost);
     else s += '<div class="hr-info"><b>Your home is as grand as it gets</b><span>Every colour and piece is yours.</span></div>';
   }
-  return s + sceneBtn('hr-close', '✓ Done');
+  return s + sceneBtn('hr-close', '✓ Done', false, 'sc-done');
 }
 // Every button the room adds goes through here: 'hr-close' and 'hr:<what>:<which>'.
 function hrAction(act) {
@@ -680,6 +680,7 @@ function hrSync() {
     else { h.sel = null; acts.innerHTML = ''; scene.text = ''; txt.textContent = ''; }
   }
   sceneView.classList.toggle('hr-idle', !modal && !h.sel && !h.edit);
+  sceneView.classList.toggle('hr-peek', !modal && !!h.sel && !h.edit);   // one piece picked: a short sheet, the room stays in view
   h.host.classList.toggle('editing', !!h.edit);   // no browser panning while a drag moves the camera
   const btn = h.host.querySelector('.hr-edit-btn');
   btn.classList.toggle('hidden', modal);
