@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'better', x: 'Battle: the energy circles are bright glowing gold like the cost on a card, and dark when spent, so you can see how much you have to spend. Playable cards have a clean gold outline inside their edge (no glow or shine), and it no longer overlaps the card beside it.' },
   { t:'better', x: 'Neighbours turn to face each other when they stop to chat. The coach notices when the same tip keeps coming up across your losses and says so. When Rook comes back he tells you what he has worked out about your deck.' },
   { t:'new', x: 'Journal -> Neighbours: everyone you have met, with hearts, the score between you, how they play, their favourite family, their daily routine, and who they are closest to. If they are nearby it says what they are doing right now.' },
   { t:'better', x: 'When you talk to a neighbour it now shows what they are up to ("Wren is off to sit for a while").' },

@@ -2078,21 +2078,14 @@ svg.hr-th { display: block; position: relative; box-sizing: border-box; overflow
 #battleView .hand .card.playable .cost { animation: bt-gem-pulse 1.6s ease-in-out infinite; }
 @keyframes bt-gem-pulse { 50% { box-shadow: 0 0 0 1.5px rgba(255, 244, 200, .7), 0 0 15px 4px rgba(255, 206, 90, .95), 0 2px 5px rgba(0, 0, 0, .35); } }
 
-/* Playable cards: a gold animated ring with a travelling glow, much easier to spot than the old teal outline. */
+/* Playable cards: a gold ring drawn INSIDE the card edge (an outline with a negative offset), so it never bleeds onto the card beside it in the stack, and it
+   sits above the art. No glow and no shine (build 234): the ring alone is the highlight; it only breathes a little. */
 #battleView #btHand .hcard .card.playable, :root[data-theme="light"] #battleView #btHand .hcard .card.playable {
-  box-shadow: 0 0 0 3px #ffd25e, 0 0 16px 3px rgba(255, 200, 70, .8), -3px 0 8px rgba(0, 0, 0, .28); animation: bt-playable 1.5s ease-in-out infinite;
+  outline: 3px solid #ffd25e; outline-offset: -3px; box-shadow: 0 0 0 1px rgba(60, 40, 0, .5), -2px 0 6px rgba(0, 0, 0, .25); animation: bt-playable 1.5s ease-in-out infinite;
 }
-@keyframes bt-playable {
-  0%, 100% { box-shadow: 0 0 0 3px #ffd25e, 0 0 12px 2px rgba(255, 200, 70, .65), -3px 0 8px rgba(0, 0, 0, .28); }
-  50% { box-shadow: 0 0 0 3.5px #fff0a8, 0 0 24px 7px rgba(255, 205, 80, .95), -3px 0 8px rgba(0, 0, 0, .28); }
-}
-#battleView #btHand .hcard .card.playable::before {
-  content: ''; position: absolute; inset: 0; z-index: 4; border-radius: inherit; pointer-events: none;
-  background: linear-gradient(105deg, transparent 38%, rgba(255, 244, 190, .42) 50%, transparent 62%); background-size: 260% 100%; animation: bt-sheen 2.6s ease-in-out infinite;
-}
-@keyframes bt-sheen { 0% { background-position: 130% 0; } 60%, 100% { background-position: -130% 0; } }
-#battleView #btHand .hcard .card.selected { animation: none; box-shadow: 0 0 0 3.5px #fff0a8, 0 0 26px 8px rgba(255, 205, 80, .95), 0 10px 24px rgba(0, 0, 0, .4); }
-@media (prefers-reduced-motion: reduce) { #battleView #btHand .hcard .card.playable, #battleView .hand .card.playable .cost, #battleView #btHand .hcard .card.playable::before { animation: none; } }
+@keyframes bt-playable { 50% { outline-color: #ffb000; } }
+#battleView #btHand .hcard .card.selected { animation: none; outline: 3.5px solid #ffd25e; outline-offset: -3.5px; box-shadow: 0 0 0 1px rgba(60, 40, 0, .5), 0 10px 22px rgba(0, 0, 0, .4); }
+@media (prefers-reduced-motion: reduce) { #battleView #btHand .hcard .card.playable, #battleView .hand .card.playable .cost { animation: none; } }
 
 /* Buttery hand: the cards are kept between renders (js/battle-ui.js btRenderHand), so these transitions run when you tap from one card to the next. */
 #battleView #btHand .hcard { transition: margin-left .3s cubic-bezier(.22, 1, .36, 1); }
@@ -2152,3 +2145,12 @@ svg.hr-th { display: block; position: relative; box-sizing: border-box; overflow
 .pp-now { margin: 8px 0 2px; padding: 4px 10px; border-radius: 999px; width: fit-content; font-size: .76rem; background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--ink); }
 .pp-lines { list-style: none; margin: 8px 0 0; padding: 0; font-size: .8rem; line-height: 1.5; color: var(--ink-soft); }
 .pp-lines li { padding: 1px 0; }
+
+/* ===== Build 234: the energy circles match the card cost circles =====
+   Available energy is the same bright glowing gold gem as the cost on a card, spent energy is a dark hollow ring, so how much you can spend reads at a glance
+   (in the light theme an older rule had turned every circle the same pale sand). Two ids beat that rule in either theme. */
+#battleView #btGems { gap: 7px; }
+#battleView #btGems .gem { width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(20, 24, 30, .6); background: rgba(20, 24, 30, .3); box-shadow: inset 0 1px 3px rgba(0, 0, 0, .35); opacity: 1; transform: none; }
+#battleView #btGems .gem.on { background: radial-gradient(circle at 35% 30%, #fffbea, #ffd96a 55%, #e0a43a); border: 1.5px solid #c98a2e; box-shadow: 0 0 0 1.5px rgba(255, 244, 200, .55), 0 0 10px 2px rgba(255, 200, 80, .75), 0 2px 5px rgba(0, 0, 0, .35); }
+#battleView #btGems .gem.spent { background: rgba(20, 24, 30, .38); border-color: rgba(20, 24, 30, .65); }
+#battleView #btGems .gem:not(.on):not(.spent) { opacity: .4; border-style: dashed; background: transparent; box-shadow: none; }
