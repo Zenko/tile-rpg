@@ -547,18 +547,31 @@ function btRenderBoards(entering) {
 
 function btRenderHand(drawnUid, dealAll) {
   const G = battle.G, me = G.p[0], box = btGet('btHand');
-  box.innerHTML = '';
   // The hand is a stack: each card overlaps the one before it by however much it takes to fit the row (see "STACKED HAND" in css/latest.css).
   const n = me.hand.length;
   box.style.setProperty('--hn', n);
+  // Reuse each card's element between renders (matched by uid) and only flip its classes, so tapping from card to card lets the
+  // raise / glow / lower transitions play instead of the whole hand being torn down and rebuilt.
+  const old = new Map([...box.children].map(w => [w.dataset.uid, w]));
   me.hand.forEach((c, i) => {
-    const w = document.createElement('div'); w.className = 'hcard';
-    const ok = !battle.busy && BattleEngine.canPlay(G, 0, c.uid).ok;
-    const el = btCardEl(c, (ok ? 'playable ' : 'unaffordable ') + (c.spread ? 'spread-' + c.spread + ' ' : '') + (battle.sel && battle.sel.uid === c.uid ? 'selected ' : '') + ((drawnUid === c.uid || dealAll) && btMotionOk() ? 'deal-hide' : ''), true);
-    el.addEventListener('click', () => btOnHandCard(c));
-    el.addEventListener('pointerdown', e => btStartDrag(e, c));
-    w.appendChild(el); box.appendChild(w);
+    const ok = !battle.busy && BattleEngine.canPlay(G, 0, c.uid).ok, sel = !!(battle.sel && battle.sel.uid === c.uid);
+    const sig = [c.id, c.cost, c.power, c.hp, c.grit, c.kw.join(), c.spread || '', c.shield ? 1 : 0, c.lull ? 1 : 0].join('|');
+    let w = old.get(String(c.uid)); old.delete(String(c.uid));
+    if (w && w.dataset.sig === sig && !((drawnUid === c.uid || dealAll) && btMotionOk())) {
+      const el = w.firstChild; el._c = c;
+      el.classList.toggle('playable', ok); el.classList.toggle('unaffordable', !ok); el.classList.toggle('selected', sel);
+    } else {
+      if (w) w.remove();   // a changed card (new cost, stats...) gets a fresh element
+      w = document.createElement('div'); w.className = 'hcard'; w.dataset.uid = c.uid; w.dataset.sig = sig;
+      const el = btCardEl(c, (ok ? 'playable ' : 'unaffordable ') + (c.spread ? 'spread-' + c.spread + ' ' : '') + (sel ? 'selected ' : '') + ((drawnUid === c.uid || dealAll) && btMotionOk() ? 'deal-hide' : ''), true);
+      el._c = c;
+      el.addEventListener('click', () => btOnHandCard(el._c));
+      el.addEventListener('pointerdown', e => btStartDrag(e, el._c));
+      w.appendChild(el);
+    }
+    if (box.children[i] !== w) box.insertBefore(w, box.children[i] || null);
   });
+  old.forEach(w => w.remove());
   const endBtn = btGet('btEnd');
   endBtn.disabled = G.active !== 0 || G.over || battle.busy;
   const anyMove = G.active === 0 && (me.hand.some(c => BattleEngine.canPlay(G, 0, c.uid).ok) || me.board.some(c => c.ready && c.attacks === 0));
@@ -599,7 +612,9 @@ function btShowTip(c, hint) {
     ${!c.spell && BattleEngine.familyOf(c.id) ? `<div class="kw">${FAMILIES[BattleEngine.familyOf(c.id)].icon} <b>${FAMILIES[BattleEngine.familyOf(c.id)].name} family.</b> Kin cards grow with their family.</div>` : ''}
     ${def.foe ? '<div class="kw">✦ <b>Unique.</b> Only opponents carry this card.</div>' : def.crafted ? '<div class="kw">＋ <b>Enhanced.</b> A sharpened version of an ordinary card.</div>' : ''}
     ${hint ? `<div class="hint">${hint}</div>` : ''}`;
+  const was = tip.classList.contains('show');
   tip.classList.add('show'); battleView.classList.add('tip-open');
+  if (was) { tip.classList.remove('swap'); void tip.offsetWidth; tip.classList.add('swap'); }   // switching cards: the sheet eases to the new text
   btPlaceTip();
 }
 // The sheet sits just above your bar (measured, not hard-coded), so the ? and flag buttons are never underneath it.
@@ -607,7 +622,7 @@ function btPlaceTip() {
   const view = battleView.getBoundingClientRect(), bar = btGet('btYouBar').getBoundingClientRect();
   btGet('btTip').style.bottom = Math.max(0, view.bottom - bar.top + 6) + 'px';
 }
-function btHideTip() { btGet('btTip').classList.remove('show', 'interactive'); battleView.classList.remove('tip-open'); }
+function btHideTip() { btGet('btTip').classList.remove('show', 'interactive', 'swap'); battleView.classList.remove('tip-open'); }
 
 /* ---------------- drag a card from your hand onto the table ----------------
    Pointer events, so it works the same with a finger or a mouse. A press that moves less than DRAG_MIN px is still a

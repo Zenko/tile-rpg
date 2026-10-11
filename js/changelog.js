@@ -18,6 +18,11 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'better', x: 'Cards you can play in battle now glow with an animated gold ring and a shimmer, and the cost circles are bright glowing gems again.' },
+  { t:'better', x: 'Tapping from card to card in your hand is smooth: the cards ease up and down instead of snapping.' },
+  { t:'better', x: 'Press and hold a card now shows the whole card, with its art, keywords and stats, large.' },
+  { t:'better', x: 'The battle intro screen is darker and lighter-weight in the light theme, and the "new version" banner is bigger, wider and gold so you will not miss it.' },
+  { t:'fixed', x: 'The Close button on the card detail sheet works on the first tap.' },
   { t:'better', x: 'The neighbour screen softly blurs the town behind it, and in the light theme the backdrop is now a darker, stronger shade so everything on it stands out.' },
   { t:'better', x: 'Your hand in battle is now a stack of bigger cards that overlap like cards held in your hand, so a full hand is easier to read. Cards you can play are raised and outlined, and cards you cannot afford yet stay at full strength instead of fading.' },
   { t:'better', x: 'Light theme: the neighbour screen background is a little darker, and battles have stronger contrast - a darker End turn button, name plates for you and your opponent, deeper action buttons and message pills, and sand-coloured card text panels.' },

@@ -2060,3 +2060,60 @@ svg.hr-th { display: block; position: relative; box-sizing: border-box; overflow
    the two blur lines. The light theme's veil is black and more opaque instead of the pale sand. */
 #talkOverlay .tk-bg { -webkit-backdrop-filter: blur(3px) !important; backdrop-filter: blur(3px) !important; }
 :root[data-theme="light"] #talkOverlay .tk-bg { background: linear-gradient(180deg, rgba(0, 0, 0, .86) 0, rgba(0, 0, 0, .8) calc(env(safe-area-inset-top, 0px) + 92px), rgba(0, 0, 0, .4) calc(env(safe-area-inset-top, 0px) + 200px), rgba(0, 0, 0, .44) 45%, rgba(0, 0, 0, .8) 70%, rgba(0, 0, 0, .9)); }
+
+
+/* ===== Build 215: dark battle intro veil, glowing playable cards and cost gems, buttery hand, full-card inspect, bold update banner ===== */
+/* Battle intro (VS screen): in the light theme the pale veil was swapped for a dark, lighter-weight one, like the neighbour screen. */
+:root[data-theme="light"] .bt-intro { background: rgba(8, 11, 15, .5); }
+:root[data-theme="light"] .bt-intro-vs { color: #e8cb88; text-shadow: 0 2px 14px rgba(232, 203, 136, .55); }
+:root[data-theme="light"] .bt-intro.boss .bt-intro-vs { color: #f0b4ae; text-shadow: 0 2px 16px rgba(177, 97, 94, .7); }
+
+/* Cost circles: the bright, glowing gem again (same look as the energy gems under the board), on battle cards, the reveal popup and the inspect sheet.
+   A card you cannot afford keeps a pale, flat gem, so the glow itself says "playable". */
+#battleView .card .cost, .reveal-card .cost {
+  background: radial-gradient(circle at 35% 30%, #fffbea, #ffd96a 55%, #e0a43a); color: #4a2f05; border: 1.5px solid #c98a2e; font-weight: 800; text-shadow: 0 1px 0 rgba(255, 255, 255, .5);
+  box-shadow: 0 0 0 1.5px rgba(255, 244, 200, .55), 0 0 10px 2px rgba(255, 200, 80, .75), 0 2px 5px rgba(0, 0, 0, .35);
+}
+#battleView .hand .card.unaffordable .cost { background: radial-gradient(circle at 35% 30%, #fbf8ef, #d8d1bd); color: #5a5547; border-color: #b3aa92; text-shadow: none; box-shadow: 0 2px 5px rgba(0, 0, 0, .35); }
+#battleView .hand .card.playable .cost { animation: bt-gem-pulse 1.6s ease-in-out infinite; }
+@keyframes bt-gem-pulse { 50% { box-shadow: 0 0 0 1.5px rgba(255, 244, 200, .7), 0 0 15px 4px rgba(255, 206, 90, .95), 0 2px 5px rgba(0, 0, 0, .35); } }
+
+/* Playable cards: a gold animated ring with a travelling glow, much easier to spot than the old teal outline. */
+#battleView #btHand .hcard .card.playable, :root[data-theme="light"] #battleView #btHand .hcard .card.playable {
+  box-shadow: 0 0 0 3px #ffd25e, 0 0 16px 3px rgba(255, 200, 70, .8), -3px 0 8px rgba(0, 0, 0, .28); animation: bt-playable 1.5s ease-in-out infinite;
+}
+@keyframes bt-playable {
+  0%, 100% { box-shadow: 0 0 0 3px #ffd25e, 0 0 12px 2px rgba(255, 200, 70, .65), -3px 0 8px rgba(0, 0, 0, .28); }
+  50% { box-shadow: 0 0 0 3.5px #fff0a8, 0 0 24px 7px rgba(255, 205, 80, .95), -3px 0 8px rgba(0, 0, 0, .28); }
+}
+#battleView #btHand .hcard .card.playable::before {
+  content: ''; position: absolute; inset: 0; z-index: 4; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(105deg, transparent 38%, rgba(255, 244, 190, .42) 50%, transparent 62%); background-size: 260% 100%; animation: bt-sheen 2.6s ease-in-out infinite;
+}
+@keyframes bt-sheen { 0% { background-position: 130% 0; } 60%, 100% { background-position: -130% 0; } }
+#battleView #btHand .hcard .card.selected { animation: none; box-shadow: 0 0 0 3.5px #fff0a8, 0 0 26px 8px rgba(255, 205, 80, .95), 0 10px 24px rgba(0, 0, 0, .4); }
+@media (prefers-reduced-motion: reduce) { #battleView #btHand .hcard .card.playable, #battleView .hand .card.playable .cost, #battleView #btHand .hcard .card.playable::before { animation: none; } }
+
+/* Buttery hand: the cards are kept between renders (js/battle-ui.js btRenderHand), so these transitions run when you tap from one card to the next. */
+#battleView #btHand .hcard { transition: margin-left .3s cubic-bezier(.22, 1, .36, 1); }
+#battleView #btHand .hcard .card { transition: transform .34s cubic-bezier(.22, 1, .36, 1), box-shadow .34s ease; will-change: transform; }
+#battleView .tip.swap { animation: bt-tip-swap .22s ease both; }
+@keyframes bt-tip-swap { from { opacity: .35; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* Card inspect (press and hold): the whole card face, the same one the reveal popup draws, at a larger size. */
+.inspect-overlay .reveal-card-frame.ins-frame { margin: 2px 0 12px; }
+.inspect-overlay .reveal-card-frame .ins-face { width: min(220px, 60vw); }
+
+/* Update banner: wide, tall and gold so it cannot be missed. */
+.update-banner {
+  left: 8px; right: 8px; width: auto; max-width: 560px; margin: 0 auto; transform: translateY(-130%); gap: 14px; padding: 16px 16px 16px 18px; font-size: 1rem;
+  background: linear-gradient(135deg, #f3cf7a, var(--accent)); color: #2e2005; border: 0; border-radius: 0 0 22px 22px; box-shadow: 0 10px 32px rgba(0, 0, 0, .38), 0 0 0 2px rgba(255, 244, 200, .6) inset;
+}
+.update-banner.show { transform: translateY(0); animation: ub-glow 2.2s ease-in-out infinite; }
+@keyframes ub-glow { 50% { box-shadow: 0 10px 38px rgba(255, 200, 70, .6), 0 0 0 2px rgba(255, 244, 200, .9) inset; } }
+.update-banner .ub-icon { flex: none; font-size: 1.9rem; line-height: 1; }
+.update-banner .ub-text { flex: 1; min-width: 0; display: flex; flex-direction: column; text-align: left; line-height: 1.25; }
+.update-banner .ub-text b { font-size: 1.08rem; font-weight: 800; }
+.update-banner .ub-text small { font-size: .8rem; opacity: .85; }
+.update-banner button { min-height: 46px; padding: 0 22px; font-size: .95rem; font-weight: 800; background: #2e2005; color: #ffe9a8; box-shadow: 0 3px 10px rgba(0, 0, 0, .3); }
+@media (prefers-reduced-motion: reduce) { .update-banner.show { animation: none; } }

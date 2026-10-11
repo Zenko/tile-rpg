@@ -24,20 +24,19 @@ function openCardInspect(id) {
   const def = cardDef(id); if (!def) return;
   const counts = typeof ownedCardCounts === 'function' ? ownedCardCounts() : {};
   const owned = counts[id] || 0, inDeck = state.deck.filter(d => d === id).length;
-  const stats = def.spell ? '<div class="ins-stat">✨ Spell</div>' : `<div class="ins-stat"><span>⚔ ${def.power}</span><span>♥ ${def.grit}</span></div>`;
   const note = def.foe ? '<div class="ins-note">✦ A unique card that only opponents carry.</div>'
     : def.crafted ? '<div class="ins-note">＋ Enhanced: sharpened by the Workshop.</div>' : '';
   const card = document.getElementById('inspectCard');
   card.innerHTML = `<div class="sheet-handle" data-sheet-handle></div>
-    <div class="ins-card rarity-${def.rarity}"><span class="ins-cost">${def.cost}</span><div class="ins-icon">${cardArtHtml(def)}</div></div>
-    <h2>${def.name}</h2>
+    <div class="reveal-card-frame ins-frame"><div class="reveal-card ins-face rarity-${def.rarity}${def.spell ? ' spell' : ''}" id="inspectFace">${cardFaceHtml(def)}</div></div>
     <div class="ins-sub">${RARITY_LABEL[def.rarity]} · costs ${def.cost}⚡</div>
-    ${stats}
     ${hasAbility(def) ? `<div class="ins-abilities">${cardAbilityHtml(def)}</div>` : '<div class="ins-abilities dim">No keywords.</div>'}
     ${note}
     <p class="ins-story">${cardStory(def)}</p>
     <div class="ins-own">${owned ? `You own ${owned}${inDeck ? ` · ${inDeck} in your deck` : ''}` : 'Not in your collection'}</div>
     <button class="btn" id="inspectClose">Close</button>`;
+  const face = document.getElementById('inspectFace');
+  if (typeof fullArtApply === 'function') face.parentElement.classList.toggle('has-fa', fullArtApply(face, def));   // the same full-art look as the reveal popup
   document.getElementById('inspectOverlay').classList.remove('hidden');
   document.getElementById('inspectClose').addEventListener('click', closeCardInspect);
   sfx('nav'); buzz(HAP.tap);
@@ -56,6 +55,10 @@ document.getElementById('inspectOverlay').addEventListener('click', e => { if (e
   });
   document.addEventListener('pointermove', e => { if (timer && Math.hypot(e.clientX - sx, e.clientY - sy) > 10) cancel(); });
   ['pointerup', 'pointercancel', 'scroll'].forEach(ev => document.addEventListener(ev, cancel, true));
+  // The click that follows a long press is swallowed - but when the finger lifts over the inspect sheet no click ever arrives, and the flag
+  // used to stay set and eat the player's next tap (the Close button needed several presses). It now expires, and any new press clears it.
+  document.addEventListener('pointerup', () => { if (fired) setTimeout(() => { fired = false; }, 350); }, true);
+  document.addEventListener('pointerdown', e => { if (!(e.target.closest && e.target.closest('[data-inspect]'))) fired = false; }, true);
   // a long-press on Android also asks for a context menu; the click that follows a fired press is swallowed once
   document.addEventListener('contextmenu', e => { if (e.target.closest && e.target.closest('[data-inspect]')) e.preventDefault(); });
   document.addEventListener('click', e => { if (fired) { fired = false; e.stopPropagation(); e.preventDefault(); } }, true);
