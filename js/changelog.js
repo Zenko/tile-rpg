@@ -18,6 +18,8 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'new', x: 'Neighbours come to you. Now and then one walks over while you stand still and waits beside you with a marker: an exclamation mark for a favour, a speech bubble for a chat, crossed swords for a friendly game. Tap them and they say why they came.' },
+  { t:'new', x: 'Settings -> Neighbours come to you: Never, Sometimes or Often. Visits are rationed (one at a time, a pause between them, a daily limit) and a neighbour you ignore simply waves and rests for a while.' },
   { t:'new', x: 'Neighbours meet each other. When two stand side by side they chat, swap small gifts, trade deck tips or play a friendly game, with little speech bubbles over their heads. Friends seek each other out more.' },
   { t:'better', x: 'Talk to a neighbour soon after and they may mention who they were just with. A deck tip from a friend can find its way into their next deck.' },
   { t:'new', x: 'Neighbours now have somewhere to be. They walk to benches, wells, doorways, home and each other, linger for a while, then head somewhere new.' },

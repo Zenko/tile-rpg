@@ -881,6 +881,7 @@ const adjacentTo = (t) => (x, y) => Math.abs(x - t.x) + Math.abs(y - t.y) === 1;
 function interactWith(kind, t) {
   if (inBattle || inScene) return;
   if (typeof playerLookAt === 'function') playerLookAt(t);   // js/player-sprite.js: turn to face what she is about to use
+  if ((kind === 'talk' || kind === 'fight') && typeof npcApproachAccepted === 'function') npcApproachAccepted(t);   // a neighbour who came over to you (js/npc-brain.js)
 
   if (kind === 'talk') { openTalk(t); return; }
   if (kind === 'fight') {

@@ -195,6 +195,7 @@ function npcArrive(f, now) {
 }
 // One decision for one neighbour. Called from wanderTick (js/neighbors-bosses.js) when its own clock says so.
 function npcWanderTick(m, data, f, now) {
+  if (typeof NPC_APP !== 'undefined' && NPC_APP.cur && NPC_APP.cur.id === f.id) { npcApproachStep(m, data, f, now); return; }   // on their way to you (stage 4)
   const mind = npcMind(f);
   if (now < (mind.dwellUntil || 0)) { f.nextMoveAt = now + npcRand(NPC_WALK.idleMs[0], NPC_WALK.idleMs[1]); mind.social = Math.min(1, mind.social + 0.004); return; }
   if (!mind.goal && !npcChooseGoal(m, data, f, now)) { mind.dwellUntil = now + 2500; f.nextMoveAt = now + 2500; return; }
@@ -289,6 +290,7 @@ function npcMeetTick(data, now) {
   for (let i = 0; i < ns.length; i++) for (let j = i + 1; j < ns.length; j++) {
     const a = ns[i], b = ns[j];
     if (Math.abs(a.x - b.x) + Math.abs(a.y - b.y) !== 1) continue;
+    if (NPC_APP.cur && (NPC_APP.cur.id === a.id || NPC_APP.cur.id === b.id)) continue;   // someone is on their way to you
     const e = npcBonds()[npcBondKey(a, b)];
     if (e && now - e.last < NPC_MEET.cooldownMs) continue;
     const ma = npcMind(a), mb = npcMind(b);
@@ -298,6 +300,8 @@ function npcMeetTick(data, now) {
 }
 // What a neighbour says when you walk up: a hint of who they were just with, if it was recent.
 function npcGreeting(f, fallback) {
+  const ap = typeof npcApproachGreeting === 'function' ? npcApproachGreeting(f) : null;   // they came to you: say why
+  if (ap) return ap;
   const lm = f && f.lastMeet;
   if (lm && Date.now() - lm.at < NPC_MEET.fresh) {
     if (lm.kind === 'match') return `Hello there. ${lm.with} and I were just playing a friendly game. Fancy one yourself?`;
@@ -307,3 +311,156 @@ function npcGreeting(f, fallback) {
   }
   return fallback;
 }
+
+/* ============================================================
+   NPC BRAIN, STAGE 4: NEIGHBOURS COME TO YOU (build 219)
+   Now and then a neighbour walks over to where you are standing and waits beside you with a little marker over their head:
+     ❗ help   they have a small favour to ask (the usual Favours: opening their talk screen shows the request, ready to accept)
+     💬 social they would like a word (it is their turn to be sociable: lonely neighbours, and ones you have not chatted with today)
+     ⚔️ match   they would like a friendly game (only when your deck is full; bold neighbours and good friends ask more)
+   It is meant to be a pleasant surprise, never a nag, so it is rationed on purpose:
+     - Settings -> "Neighbours come to you": Never / Sometimes (default) / Often. Never switches it off entirely.
+     - one neighbour at a time, a pause between visits (NPC_APPROACH.every), a cap per day, and a longer rest for a neighbour you ignored,
+     - only while you are standing still (so nobody chases you down the street), in the open town, after the opening scene,
+     - they give up after a while and wave goodbye (👋), and are never put out about it.
+   Tapping the neighbour (or their marker) accepts: their talk screen opens with a line that fits why they came.
+   Nothing here is saved except a per-day count in state.progress.approaches.
+   ============================================================ */
+const NPC_APPROACH = {
+  modes: ['off', 'sometimes', 'often'],
+  every: { sometimes: 150000, often: 70000 },      // ms between one visit starting and the next being considered
+  chance: { sometimes: 0.5, often: 0.8 },          // each time it is considered (every checkMs)
+  daily: { sometimes: 6, often: 14 },
+  checkMs: 8000, radius: 14, idleMs: 3500, walkMs: 30000, waitMs: 22000, perNpcMs: 360000, ignoredMs: 720000, stepMs: [560, 760],
+  icons: { help: '❗', social: '💬', match: '⚔️' }
+};
+const NPC_APP = { last: 0, checkAt: 0, cur: null, pos: null, posAt: 0 };
+function npcApproachMode() { return NPC_APPROACH.modes.includes(prefs.approach) ? prefs.approach : 'sometimes'; }
+function npcApproachToday() { const p = state.progress; if (!p.approaches || p.approaches.day !== todayKey()) p.approaches = { day: todayKey(), n: 0 }; return p.approaches; }
+function npcPlayerStill(now) {
+  const p = state.playerPos;
+  if (!NPC_APP.pos || NPC_APP.pos.x !== p.x || NPC_APP.pos.y !== p.y) { NPC_APP.pos = { x: p.x, y: p.y }; NPC_APP.posAt = now; }
+  return now - NPC_APP.posAt >= NPC_APPROACH.idleMs;
+}
+const npcNextToPlayer = f => Math.abs(f.x - state.playerPos.x) + Math.abs(f.y - state.playerPos.y) === 1;
+// Which kinds could this neighbour come to you about right now? Returns [{ kind, w }].
+function npcApproachKinds(f, data) {
+  const out = [], mind = npcMind(f), taste = npcTaste(f), hearts = friendHearts(f), r = reqState().list[f.id];
+  if (!r && activeCount() < REQ_MAX_ACTIVE) out.push({ kind: 'help', w: 3 + (hearts >= 1 ? 1 : 0) });
+  const chatted = !!(talkChatsToday().done || {})[neighborKey(f)];
+  out.push({ kind: 'social', w: 1.5 + mind.social * 3 + (chatted ? 0 : 1.5) });
+  if (state.deck.length >= DECK_SIZE) out.push({ kind: 'match', w: 0.8 + (taste.bold ? 1 : 0) + (hearts >= 2 ? 1 : 0) });
+  return out;
+}
+// Can this neighbour actually get to you? (a route exists and the first step is one they may take: see stillConnected)
+function npcApproachFeasible(f, data) {
+  const m = getMap(state.currentDistrict), p = state.playerPos;
+  if (npcNextToPlayer(f)) return true;
+  const path = findPath(m, data, { x: f.x, y: f.y }, (x, y) => Math.abs(x - p.x) + Math.abs(y - p.y) === 1), n = path && path[0];
+  return !!n && tileFreeForWander(m, data, n.x, n.y, f) && stillConnected(m, data, f, n.x, n.y);
+}
+// Pick who comes and why, or null. Pure choice: nothing is started here.
+function npcApproachChoose(data, now) {
+  const mode = npcApproachMode(), p = state.playerPos, opts = [];
+  (data.npcs || []).forEach(f => {
+    if (!npcBrained(f) || f.defeated) return;
+    const mind = npcMind(f);
+    if (now < (mind.approachAt || 0)) return;
+    const dist = Math.abs(f.x - p.x) + Math.abs(f.y - p.y);
+    if (dist > NPC_APPROACH.radius || dist < 2 || !npcApproachFeasible(f, data)) return;
+    npcApproachKinds(f, data).forEach(k => opts.push({ f, kind: k.kind, w: k.w * (1.2 - dist / (NPC_APPROACH.radius * 1.5)) }));
+  });
+  if (!opts.length || mode === 'off') return null;
+  let r = Math.random() * opts.reduce((a, o) => a + o.w, 0);
+  for (const o of opts) { r -= o.w; if (r <= 0) return o; }
+  return opts[0];
+}
+function npcApproachMarker(f, on) {
+  const el = typeof entityElsById !== 'undefined' ? entityElsById.get(f.id) : null; if (!el) return;
+  let m = el.querySelector(':scope > .ent-ask');
+  if (!on) { if (m) m.remove(); return; }
+  const icon = NPC_APPROACH.icons[f.approach && f.approach.kind] || '❗';
+  if (!m) { m = document.createElement('span'); m.className = 'ent-ask'; el.appendChild(m); }
+  if (m.textContent !== icon) m.textContent = icon;
+}
+function npcApproachEnd(f, now, polite) {
+  const mind = f ? npcMind(f) : null;
+  if (f) {
+    mind.goal = null; mind.dwellUntil = now + 4000; mind.approachAt = now + (polite ? NPC_APPROACH.ignoredMs : NPC_APPROACH.perNpcMs);
+    f.intent = polite ? 'a little disappointed, but fine' : 'pausing';
+    npcApproachMarker(f, false);
+    if (polite) npcBubble(f, '👋', 0);
+  }
+  NPC_APP.cur = null;
+}
+function npcApproachStart(o, now) {
+  const f = o.f, mind = npcMind(f);
+  NPC_APP.cur = { id: f.id, kind: o.kind, phase: 'walking', since: now, fails: 0 };
+  NPC_APP.last = now; npcApproachToday().n++;
+  f.approach = { kind: o.kind, at: now };
+  mind.goal = { id: 'player', kind: 'player', x: state.playerPos.x, y: state.playerPos.y, at: now }; mind.dwellUntil = 0;
+  f.intent = 'coming over to see you'; f.nextMoveAt = 0;
+}
+// Once per wander tick: decide whether anyone should come over, and look after a visit in progress.
+function npcApproachTick(data, now) {
+  const cur = NPC_APP.cur;
+  if (cur) {
+    const f = (data.npcs || []).find(n => n.id === cur.id);
+    if (!f || f.defeated) { NPC_APP.cur = null; return; }
+    if (cur.phase === 'waiting') {
+      if (!npcNextToPlayer(f)) { cur.phase = 'walking'; npcApproachMarker(f, false); return; }   // you walked on: they follow
+      npcApproachMarker(f, true);
+      if (now - cur.since > NPC_APPROACH.waitMs) npcApproachEnd(f, now, true);                   // gently gives up
+    } else if (now - cur.since > NPC_APPROACH.walkMs) npcApproachEnd(f, now, false);
+    return;
+  }
+  if (now < NPC_APP.checkAt) return;
+  NPC_APP.checkAt = now + NPC_APPROACH.checkMs;
+  const mode = npcApproachMode();
+  if (mode === 'off' || !npcPlayerStill(now)) return;
+  if (typeof storySeen === 'function' && !storySeen('intro')) return;
+  if (now - NPC_APP.last < NPC_APPROACH.every[mode] || npcApproachToday().n >= NPC_APPROACH.daily[mode]) return;
+  if (Math.random() > NPC_APPROACH.chance[mode]) return;
+  const o = npcApproachChoose(data, now);
+  if (o) npcApproachStart(o, now);
+}
+// One step of the walk over. Called from npcWanderTick for the neighbour who is coming.
+function npcApproachStep(m, data, f, now) {
+  const cur = NPC_APP.cur, p = state.playerPos;
+  if (npcNextToPlayer(f)) {
+    if (cur.phase !== 'waiting') {
+      cur.phase = 'waiting'; cur.since = now; npcMind(f).goal = null;
+      f.intent = 'waiting to talk to you'; npcApproachMarker(f, true);
+      const why = { help: 'has a favour to ask', social: 'would like a word', match: 'would like a friendly game' }[cur.kind];
+      toast(`${NPC_APPROACH.icons[cur.kind]} ${f.name} ${why}`);
+    }
+    f.nextMoveAt = now + 800; return;
+  }
+  const path = findPath(m, data, { x: f.x, y: f.y }, (x, y) => Math.abs(x - p.x) + Math.abs(y - p.y) === 1), next = path && path[0];
+  if (!next || !tileFreeForWander(m, data, next.x, next.y, f) || !stillConnected(m, data, f, next.x, next.y)) {
+    if (++cur.fails >= NPC_WALK.maxFails) npcApproachEnd(f, now, false);
+    f.nextMoveAt = now + 900; return;
+  }
+  cur.fails = 0;
+  moveFighter(f, { x: next.x, y: next.y, dx: next.x - f.x, dy: next.y - f.y });
+  f.nextMoveAt = now + npcRand(NPC_APPROACH.stepMs[0], NPC_APPROACH.stepMs[1]);
+}
+// You tapped the neighbour who came to you (talk or fight): they are happy, and a favour is ready for you.
+function npcApproachAccepted(f) {
+  if (!f || !NPC_APP.cur || NPC_APP.cur.id !== f.id) return;
+  const kind = NPC_APP.cur.kind, now = Date.now();
+  if (kind === 'help' && !reqState().list[f.id] && activeCount() < REQ_MAX_ACTIVE) { reqState().list[f.id] = makeRequest(f, getMap(state.currentDistrict)); saveState(); }
+  npcMind(f).social = Math.max(0, npcMind(f).social - 0.4);
+  npcApproachEnd(f, now, false);
+}
+function npcApproachGreeting(f) {
+  const a = f && f.approach; if (!a || Date.now() - a.at > 4 * 60 * 1000) return null;
+  return { help: 'Oh good, you are here. I was hoping you had a minute.', social: 'There you are. I was hoping to catch you for a word.', match: 'Ah, just the dreamer I wanted. Up for a friendly game?' }[a.kind] || null;
+}
+// Settings -> Neighbours come to you.
+function syncApproachSeg() { document.querySelectorAll('#approachSeg .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.approachPick === npcApproachMode())); }
+document.querySelectorAll('#approachSeg .seg-btn').forEach(b => b.addEventListener('click', () => {
+  prefs.approach = b.dataset.approachPick; savePrefs(); syncApproachSeg(); sfx('tap');
+  if (prefs.approach === 'off' && NPC_APP.cur) { const data = ensureDistrictData(state.currentDistrict), f = data.npcs.find(n => n.id === NPC_APP.cur.id); npcApproachEnd(f, Date.now(), false); }
+}));
+syncApproachSeg();

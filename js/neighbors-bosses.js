@@ -163,6 +163,7 @@ function wanderTick() {
     const to = wanderStep(m, data, f);
     if (to) moveFighter(f, to);
   });
+  if (typeof npcApproachTick === 'function') npcApproachTick(data, now);   // js/npc-brain.js: now and then a neighbour comes over to you
   if (typeof npcMeetTick === 'function') npcMeetTick(data, now);   // js/npc-brain.js: neighbours standing side by side may chat, trade tips...
 }
 /* Spirits drift on their own, much simpler clock: no connectivity checks, they never block anything. */
