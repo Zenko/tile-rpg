@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'new', x: 'Neighbours have daily routines. Each has their own favourite way to spend the morning, afternoon and evening (a bakery visit, a bench, the fountain, a friend) and you can learn them, or just ask. They show a little sign when they arrive, like bread at the bakery.' },
   { t:'new', x: 'Neighbours remember you. They keep track of your matches (who is ahead), the favours you did and gifts you gave, and when you walked past them. They mention it when you talk, and Chat -> "What do you remember?" gives you the score.' },
   { t:'better', x: 'A neighbour you have beaten twice running comes back having practised, with an extra tough card in their deck.' },
   { t:'new', x: 'Opponents adjust to how you have been doing. After a rough patch they ease off a little (and say they are feeling gentle), after a winning streak they push back (in a competitive mood). It is always small, never touches special matches, and can be switched off in Settings -> Battles.' },

@@ -112,6 +112,28 @@ const NPC_WALK = {
   radius: { steady: 7, bold: 12 },     // how far from home they will choose to go
   maxFails: 3
 };
+/* Daily routine (build 223). Each neighbour has habits that follow the sky: a favourite way to spend the morning, the afternoon and the evening, fixed by
+   their name (so you can learn them: "Wren is always at the bakery in the morning"). A habit is a place kind ('door:bakery' = that building's door,
+   'door' = any doorway, 'bench', 'well', 'fountain', 'lamp', 'friend', 'home'); matching places get a bonus in npcScoreGoals during that part of the day.
+   Night has no routine: everyone heads home. */
+const NPC_ROUTINE = {
+  morning:   ['door:bakery', 'bench', 'well', 'door:bakery', 'fountain'],
+  afternoon: ['door', 'friend', 'bench', 'fountain', 'well', 'door'],
+  evening:   ['friend', 'bench', 'lamp', 'home', 'fountain']
+};
+function npcPhase(dayPos) { return dayPos >= 0.24 && dayPos < 0.46 ? 'morning' : dayPos >= 0.46 && dayPos < 0.72 ? 'afternoon' : dayPos >= 0.72 && dayPos < 0.88 ? 'evening' : 'night'; }
+function npcRoutine(f) {
+  const h = foeSeedHash('routine:' + (f && f.name)), pick = (arr, shift) => arr[(h >>> shift) % arr.length];
+  return { morning: pick(NPC_ROUTINE.morning, 2), afternoon: pick(NPC_ROUTINE.afternoon, 5), evening: pick(NPC_ROUTINE.evening, 8) };
+}
+function npcPrefMatches(pref, c) { return !!pref && (pref.startsWith('door:') ? c.kind === 'door' && c.btype === pref.slice(5) : pref === c.kind); }
+const NPC_PHASE_WORDS = { morning: 'the morning', afternoon: 'the afternoon', evening: 'the evening' };
+const NPC_PREF_WORDS = { 'door:bakery': 'at the bakery', door: 'popping into a doorway', bench: 'on a bench', well: 'by the well', fountain: 'by the fountain', lamp: 'by a lamp', friend: 'with a friend', home: 'at home' };
+// "I like to spend the morning at the bakery." (a line for the talk screen, or null at night)
+function npcRoutineLine(f) {
+  const ph = npcPhase(skyPhase().dayPos), pref = ph === 'night' ? null : npcRoutine(f)[ph];
+  return pref ? `I like to spend ${NPC_PHASE_WORDS[ph]} ${NPC_PREF_WORDS[pref]}.` : null;
+}
 const NPC_INTENT_WORDS = { home: 'heading home', bench: 'off to sit for a while', door: 'popping by a doorway', well: 'wandering to the well', fountain: 'strolling to the fountain', lamp: 'checking on a lamp', nets: 'looking over the nets', friend: 'going to chat with a neighbour', look: 'having a look around' };
 function npcBrained(f) { return !!f && !f.isBoss && !f.isAtlas && !f.isRival && !f.signature && /^npc-/.test(f.id || ''); }
 const npcRand = (a, b) => a + Math.random() * (b - a);
@@ -127,7 +149,7 @@ function npcMind(f) {
 function npcLandmarks(m) {
   if (m._npcLandmarks) return m._npcLandmarks;
   const list = [];
-  (m.buildings || []).forEach(b => list.push({ kind: 'door', x: b.entry.x, y: b.entry.y, solid: false, id: 'door:' + b.entry.x + ',' + b.entry.y }));
+  (m.buildings || []).forEach(b => list.push({ kind: 'door', btype: b.type, x: b.entry.x, y: b.entry.y, solid: false, id: 'door:' + b.entry.x + ',' + b.entry.y }));
   (m.props || []).forEach(p => list.push({ kind: ['bench', 'well', 'fountain', 'lamp', 'nets'].includes(p.type) ? p.type : 'look', x: p.x, y: p.y, solid: true, id: 'prop:' + p.id }));
   return (m._npcLandmarks = list);
 }
@@ -157,6 +179,7 @@ function npcScoreGoals(ctx) {
     else if (c.kind === 'door') s += (wet ? 0.7 : 0.15) + (ctx.night ? 0.1 : 0) + (ctx.bold ? 0.25 : 0);
     else if (c.kind === 'friend') s += ctx.social * 1.5 + Math.min(1, (c.bond || 0) * 0.12) + (ctx.night ? -0.5 : 0) - (wet ? 0.2 : 0);
     else s += (fine ? 0.5 : wet ? -0.7 : 0) + (ctx.night ? -0.5 : 0) + (c.kind === 'bench' ? 0.25 : 0);
+    if (npcPrefMatches(ctx.pref, c)) s += 0.9;                  // their habit at this time of day
     if (ctx.recent.includes(c.id)) s -= 0.9;
     out.push({ c, s });
   });
@@ -175,9 +198,9 @@ function npcChooseGoal(m, data, f, now) {
   const mind = npcMind(f), taste = npcTaste(f);
   if (typeof f.homeX !== 'number') { f.homeX = f.x; f.homeY = f.y; }
   const cands = [{ id: 'home', kind: 'home', x: f.homeX, y: f.homeY }];
-  npcLandmarks(m).forEach(lm => { const t = npcStandTile(m, data, f, lm); if (t) cands.push({ id: lm.id, kind: lm.kind, x: t.x, y: t.y }); });
+  npcLandmarks(m).forEach(lm => { const t = npcStandTile(m, data, f, lm); if (t) cands.push({ id: lm.id, kind: lm.kind, btype: lm.btype, x: t.x, y: t.y }); });
   data.npcs.forEach(o => { if (o !== f && npcBrained(o) && !o.defeated) cands.push({ id: 'friend:' + o.id, kind: 'friend', x: o.x, y: o.y, who: o, bond: npcBond(f, o) }); });
-  const ctx = { night: !!skyPhase().isNight, weather: weatherNow(), bold: taste.bold, social: mind.social, home: { x: f.homeX, y: f.homeY }, pos: { x: f.x, y: f.y }, recent: mind.recent, cands };
+  const phase = npcPhase(skyPhase().dayPos), ctx = { night: !!skyPhase().isNight, pref: phase === 'night' ? null : npcRoutine(f)[phase], weather: weatherNow(), bold: taste.bold, social: mind.social, home: { x: f.homeX, y: f.homeY }, pos: { x: f.x, y: f.y }, recent: mind.recent, cands };
   const pick = npcPickScored(npcScoreGoals(ctx));
   if (!pick) return null;
   let tx = pick.x, ty = pick.y;
@@ -187,7 +210,8 @@ function npcChooseGoal(m, data, f, now) {
   }
   mind.goal = { id: pick.id, kind: pick.kind, x: tx, y: ty, who: pick.who ? pick.who.id : null, at: now };
   mind.fails = 0;
-  f.intent = NPC_INTENT_WORDS[pick.kind] || 'wandering';
+  mind.goal.btype = pick.btype;
+  f.intent = pick.btype === 'bakery' ? 'off to the bakery' : (NPC_INTENT_WORDS[pick.kind] || 'wandering');
   return mind.goal;
 }
 function npcArrive(f, now) {
@@ -195,6 +219,8 @@ function npcArrive(f, now) {
   if (g) {
     mind.recent.push(g.id); if (mind.recent.length > 3) mind.recent.shift();
     if (g.kind === 'friend') mind.social = Math.max(0, mind.social - 0.7); else mind.social = Math.min(1, mind.social + 0.15);
+    const emote = g.btype === 'bakery' ? '🍞' : g.kind === 'bench' ? '😌' : g.kind === 'well' || g.kind === 'fountain' ? '💧' : g.kind === 'lamp' ? '🏮' : null;
+    if (emote && Math.random() < 0.5) npcBubble(f, emote, 200);   // a little sign of what they came for
     const d = NPC_WALK.dwell[g.kind] || NPC_WALK.dwell.look;
     mind.dwellUntil = now + npcRand(d[0], d[1]);
     f.intent = g.kind === 'home' ? 'resting at home' : g.kind === 'friend' ? 'chatting' : g.kind === 'bench' ? 'sitting' : 'pausing';
@@ -318,7 +344,9 @@ function npcGreeting(f, fallback) {
     return `Hello there. I was just chatting with ${lm.with} about ${lm.topic}.`;
   }
   const mem = typeof npcMemGreeting === 'function' ? npcMemGreeting(f) : null;   // what they remember of you (js/npc-memory.js)
-  return mem || fallback;
+  if (mem) return mem;
+  const rt = Math.random() < 0.4 ? npcRoutineLine(f) : null;
+  return rt ? `Hello there. ${rt}` : fallback;
 }
 
 /* ============================================================

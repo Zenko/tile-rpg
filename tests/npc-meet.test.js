@@ -17,7 +17,7 @@ module.exports = async (page, assert) => {
     // the greeting mentions it while fresh, and falls back later
     out.greet = npcGreeting(a, 'FALLBACK').includes('Briar');
     a.lastMeet.at = Date.now() - NPC_MEET.fresh - 1000;
-    out.greetOld = npcGreeting(a, 'FALLBACK') === 'FALLBACK';
+    { const g = npcGreeting(a, 'FALLBACK'); out.greetOld = (g === 'FALLBACK' || /^Hello there\. I like to spend/.test(g)) && !g.includes('Briar'); }   // the fallback, or a line about their routine
     // the cooldown stops a second meeting right away, then allows one
     let meetings = 0; const real = npcMeet; window.__count = 0;
     const origRandom = Math.random; Math.random = () => 0;     // always roll "yes"
