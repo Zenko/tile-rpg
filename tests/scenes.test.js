@@ -37,13 +37,17 @@ module.exports = async (page, assert) => {
 
   // ---- Wren's first beat plays once, a choice only adds a reply, and the goal pill carries her ask ----
   await page.evaluate(() => { state.progress.totals.steps = 0; state.progress.story = { step: 0, notified: -1, beat: -1 }; storyHoldUntil(0); });
+  // A first-time tip that pops up while the machine is busy counts as "something open" (storyBusy), so the beat would wait for it: mark every tip seen and close any that is up.
+  await page.evaluate(() => { Object.keys(TIPS).forEach(k => { tipsSeen()[k] = true; }); document.getElementById('tipOverlay').classList.add('hidden'); });
   await page.evaluate(() => { storyBeatCheck(); });
-  await page.waitForTimeout(150);
+  await page.waitForFunction(() => document.getElementById('sceneOverlay').dataset.style === 'talk', null, { timeout: 6000 }).catch(() => {});   // the beat opens a moment later on a busy machine
   let talk = await page.evaluate(() => ({ style: document.getElementById('sceneOverlay').dataset.style, who: document.getElementById('storyName').textContent, beat: storyState().beat }));
   assert.strictEqual(talk.style, 'talk'); assert.strictEqual(talk.who, 'Wren'); assert.strictEqual(talk.beat, 0, 'the beat is remembered as soon as it plays');
-  await page.click('#storyStage'); await page.waitForTimeout(100);   // finishes typing the first card
-  await page.click('#storyStage'); await page.waitForTimeout(100);   // next card (the one with choices)
-  await page.waitForSelector('.scn-opt', { timeout: 3000 });
+  // Tap the stage until the choices show: a tap while a card types shows it at once, a tap on a finished card moves on. The old version
+  // tapped twice and then waited 3 s for the choices card to type itself out (about 11 ms a character, so close to 3 s) - flaky on a slow
+  // CI machine. A DOM click skips Playwright's "stable" check, which the restarting card animation can keep failing.
+  for (let i = 0; i < 10 && !(await page.$('.scn-opt')); i++) { await page.$eval('#storyStage', el => el.click()); await page.waitForTimeout(120); }
+  await page.waitForSelector('.scn-opt', { timeout: 8000 });
   assert.strictEqual(await page.evaluate(() => document.querySelectorAll('.scn-opt').length), 3, 'three questions to ask');
   await page.click('.scn-opt >> nth=2'); await page.waitForTimeout(150);
   await page.waitForFunction(() => /doors here only lead deeper/i.test(document.getElementById('storyText').textContent), null, { timeout: 3000 });
@@ -55,12 +59,12 @@ module.exports = async (page, assert) => {
   // ---- the pill leads during the first chain, and a tap with nothing to go to replays the beat ----
   await page.evaluate(() => { refreshGoalChip(true); });
   assert.ok(/Wren: wander/.test(await page.textContent('#goalText')));
-  await page.click('#goalChip'); await page.waitForTimeout(250);
+  await page.click('#goalChip'); await page.waitForFunction(() => playerEl.classList.contains('walking'), null, { timeout: 6000 }).catch(() => {});
   assert.ok(await page.evaluate(() => playerEl.classList.contains('walking')), 'tapping a pill with somewhere to go walks there (js/guide-walk.js)');
-  await page.evaluate(() => { cancelWalk(); state.progress.story.step = 11; refreshGoalChip(true); });   // 'reach level 5' has no place to go
-  await page.click('#goalChip'); await page.waitForTimeout(150);
+  await page.evaluate(() => { storyHoldUntil(60000); cancelWalk(); state.progress.story.step = 11; refreshGoalChip(true); });   // the hold keeps the game's own 2 s check from playing step 11's beat first (a scene already open refuses the replay)   // 'reach level 5' has no place to go
+  await page.click('#goalChip'); await page.waitForFunction(() => !!storyCur && storyCur.replay, null, { timeout: 6000 }).catch(() => {});
   assert.ok(await page.evaluate(() => !!storyCur && storyCur.replay), 'tapping a pill with nothing to go to replays her words');
-  await page.evaluate(() => { while (storyCur) storyEnd(); state.progress.story.step = 0; });
+  await page.evaluate(() => { while (storyCur) storyEnd(); state.progress.story.step = 0; storyHoldUntil(0); });
 
   // ---- the gold diamond marks the building for the current step, only in its district, and not in Cozy mode ----
   const mark = await page.evaluate(() => {
