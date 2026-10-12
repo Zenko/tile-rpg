@@ -194,7 +194,7 @@
 .ch-stage.compact .ch-top { opacity: 0; pointer-events: none; }
 .ch-id { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; min-width: 0; }
 .ch-name { font-family: var(--f-display); font-weight: 500; font-size: 1.2rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ch-chip, .ch-peb { font-size: .7rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: rgba(15,24,30,.5); color: #fff; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); white-space: nowrap; }
+.ch-chip, .ch-peb { font-size: .7rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: rgba(15,24,30,.5); color: #fff; white-space: nowrap; }
 .ch-actors { position: absolute; left: 0; right: 0; bottom: 30px; display: flex; justify-content: center; align-items: flex-end; gap: 26px; z-index: 2; transition: transform .35s ease, bottom .35s ease; }
 .ch-stage.compact .ch-actors { bottom: 14px; transform: scale(.62); transform-origin: 50% 100%; }
 .ch-actor { border: 0; background: none; padding: 0; font: inherit; color: inherit; display: grid; justify-items: center; gap: 5px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
@@ -235,7 +235,7 @@ body.in-battle .screen { padding: 0 0 calc(6px + env(safe-area-inset-bottom)); }
 body.in-battle .board-wrap { padding: 8px 10px 0; }
 /* the top pill: avatar, district and sky in the middle, Pebbles on the right */
 .hud { position: absolute; left: 10px; right: 10px; top: 10px; margin: 0; z-index: 10; padding: 6px 10px 6px 8px; gap: 8px; border-radius: 999px;
-  background: var(--glass); border: 1px solid color-mix(in srgb, var(--stone-edge) 80%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 6px 18px var(--shadow); }
+  background: var(--glass); border: 1px solid color-mix(in srgb, var(--stone-edge) 80%, transparent); box-shadow: 0 6px 18px var(--shadow); }
 .hud-identity { order: 0; } .hud-ambient { order: 1; } .hud-resources { order: 2; }
 .hud-id-text, .hud-spacer, .hud-clock, #pillCards, #pillWins { display: none; }
 .hud-ambient { flex: 1; max-width: none; min-width: 0; justify-content: center; padding: 0 4px; background: none; border: 0; box-shadow: none; }
@@ -254,7 +254,7 @@ body.in-battle .board-wrap { padding: 8px 10px 0; }
 .town-view { margin: 0; border-radius: 0; box-shadow: none; }
 .map-radar-btn { top: calc(var(--hud-h) + 10px); bottom: auto; right: 12px; }
 .town-info { position: absolute; left: 12px; right: 12px; bottom: calc(var(--dock-h) + 22px + env(safe-area-inset-bottom)); margin: 0; z-index: 8; display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none; }
-.ambient-line, .town-info .log { width: max-content; max-width: 100%; padding: 5px 12px; border-radius: 999px; background: var(--glass); border: 1px solid color-mix(in srgb, var(--stone-edge) 80%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); font-size: 0.72rem; box-shadow: 0 4px 12px var(--shadow); }
+.ambient-line, .town-info .log { width: max-content; max-width: 100%; padding: 5px 12px; border-radius: 999px; background: var(--glass); border: 1px solid color-mix(in srgb, var(--stone-edge) 80%, transparent); font-size: 0.72rem; box-shadow: 0 4px 12px var(--shadow); }
 .town-info .log { color: var(--ink); min-height: 0; margin: 0; }
 .town-info .log:empty { display: none; }
 #decorationHint, #hideseekHint { position: absolute; top: calc(var(--hud-h) + 8px); left: 12px; right: 64px; z-index: 12; }
@@ -262,7 +262,7 @@ body.in-battle .board-wrap { padding: 8px 10px 0; }
 /* the dock: five equal slots with a pill that slides under the current tab. The slide is a transform and the
    icon lift is a transform too, so tab switches stay smooth even when the page is busy (v1.66.0) */
 .bottom-nav { --i: 0; position: absolute; left: 14px; right: 14px; bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 10; padding: 6px; gap: 0; border-radius: 30px; border: 1px solid color-mix(in srgb, var(--stone-edge) 80%, transparent);
-  background: var(--glass); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 10px 26px var(--shadow); contain: layout; }
+  background: var(--glass); box-shadow: 0 10px 26px var(--shadow); contain: layout; }
 .bottom-nav::before { content: ''; position: absolute; left: 6px; top: 6px; bottom: 6px; width: calc((100% - 12px) / 5); border-radius: 24px; background: var(--water);
   box-shadow: 0 4px 14px color-mix(in srgb, var(--water) 45%, transparent); transform: translate3d(calc(var(--i) * 100%), 0, 0); transition: transform 0.42s cubic-bezier(0.3, 1.35, 0.45, 1); will-change: transform; }
 #bottomNav .tab-btn { position: relative; z-index: 1; flex: 1 1 0; min-width: 0; height: 52px; padding: 0; gap: 1px; justify-content: center; border-radius: 24px; background: none; font-size: 0.62rem; font-weight: 700; color: var(--ink-soft); transition: color 0.25s ease; -webkit-tap-highlight-color: transparent; }

@@ -250,7 +250,7 @@ html.big-text { font-size: 112%; }
 .fs-depth .fillv { position: absolute; left: 4px; right: 4px; bottom: 4px; border-radius: 14px; background: linear-gradient(0deg, #3f7f94, #8dbccb); transition: height .12s linear; }
 .fs-depth .t0, .fs-depth .t1 { position: absolute; left: -28px; font-size: .6rem; color: var(--ink-soft); font-weight: 700; } .fs-depth .t0 { top: 4px; } .fs-depth .t1 { bottom: 2px; }
 .fs-depth .mk { position: absolute; left: 50%; font-size: 1.2rem; transform: translate(-50%, 50%); }
-.fs-panel { left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 7; padding: 14px 16px 12px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; background: rgba(35,43,52,.82); border: 1px solid rgba(233,237,241,.14); border-radius: 22px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.fs-panel { left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 7; padding: 14px 16px 12px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; background: rgba(35,43,52,.82); border: 1px solid rgba(233,237,241,.14); border-radius: 22px;}
 .fs-panel h2 { font-family: var(--f-display); font-weight: 500; font-size: 1.35rem; line-height: 1.15; margin: 0; text-wrap: balance; }
 .fs-panel p { margin: 0; color: var(--ink-soft); font-size: .88rem; min-height: 1.3em; }
 .fs-panel .btn { min-height: 50px; padding: 0 30px; }
