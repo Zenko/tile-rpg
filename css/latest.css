@@ -416,13 +416,6 @@ body.in-battle .screen { padding: 0; }
 .jdetail { margin-top: 12px; padding: 12px 14px; display: grid; gap: 4px; text-align: left; }
 .jdetail b { font-family: var(--f-display); font-size: 1.02rem; font-weight: 500; }
 
-/* Notes */
-.nwrap { position: relative; margin-bottom: 8px; border-radius: 14px; overflow: hidden; background: var(--lose-glow); }
-.ndel { position: absolute; right: 0; top: 0; bottom: 0; width: 96px; display: grid; place-items: center; color: #fff; font-weight: 800; font-size: .8rem; }
-.nwrap .note-item { position: relative; margin: 0; transition: transform .2s; touch-action: pan-y; }
-.nwrap .note-item.drag { transition: none; }
-.note-pin-btn { flex: none; width: 40px; height: 40px; border-radius: 50%; border: 0; background: transparent; font-size: 1.05rem; opacity: .4; cursor: pointer; }
-.note-pin-btn[aria-pressed="true"] { opacity: 1; background: color-mix(in srgb, var(--accent) 22%, transparent); }
 
 /* Undo bar */
 .jundo { position: fixed; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom)); transform: translate(-50%, 12px); z-index: 60; display: flex; gap: 12px; align-items: center; background: var(--stone); border: 1px solid var(--stone-edge); border-radius: 999px; padding: 8px 8px 8px 16px; font-size: .8rem; box-shadow: 0 8px 24px var(--shadow); opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; color: var(--ink); }

@@ -268,50 +268,8 @@
           <div id="almanacBody"></div>
         </div>
         <div id="notesView" class="hidden">
-          <div id="notesListView">
-            <input type="search" id="notesSearch" class="jsearch" placeholder="Search your theories" aria-label="Search notes">
-            <div class="notes-list-toolbar">
-              <button class="btn" id="newNoteWriteBtn">✏️ New Note</button>
-              <button class="btn btn-ghost" id="newNoteDrawBtn">🖌️ New Drawing</button>
-            </div>
-            <div class="atlas-hints hidden" id="atlasHints"></div>
-            <div class="panel-list" id="notesList"></div>
-          </div>
-          <div id="notesEditorView" class="hidden">
-            <div class="notes-editor-header">
-              <button class="icon-btn notes-back-btn" id="notesBackBtn" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
-              <span class="notes-draft-status" id="notesDraftStatus"></span>
-              <button class="btn btn-ghost notes-export-btn" id="notesExportBtn" title="Save this note as an image">🖼️</button>
-              <button class="btn" id="notesSaveBtn">Save</button>
-            </div>
-            <input type="text" id="noteTitleInput" class="name-input notes-title-input" placeholder="Title (optional)" maxlength="60">
-            <div id="notesWriteView">
-              <textarea id="notesArea" class="notes-area" placeholder="Jot down anything you like - plans, favorite finds, reminders..." maxlength="4000"></textarea>
-            </div>
-            <div id="notesDrawView" class="hidden">
-              <div class="draw-toolbar">
-                <div class="draw-colors" id="drawColors"></div>
-                <button class="draw-tool-btn" id="drawCustomColorBtn" title="Custom color" aria-label="Custom color">🎨</button>
-                <input type="color" id="drawCustomColorInput" class="draw-custom-color-input" tabindex="-1">
-                <div class="draw-sep"></div>
-                <div class="draw-sizes" id="drawSizes"></div>
-                <div class="draw-sep"></div>
-                <button class="draw-tool-btn" id="drawEraseBtn" title="Eraser" aria-label="Eraser">🧹</button>
-                <button class="draw-tool-btn" id="drawUndoBtn" title="Undo" aria-label="Undo">↩️</button>
-                <button class="draw-tool-btn" id="drawClearBtn" title="Clear canvas" aria-label="Clear canvas">🗑️</button>
-              </div>
-              <div class="paper-toolbar" id="paperToolbar">
-                <span class="paper-label">Paper</span>
-                <button type="button" class="paper-btn" data-paper="blank">Blank</button>
-                <button type="button" class="paper-btn" data-paper="lined">Lined</button>
-                <button type="button" class="paper-btn" data-paper="grid">Grid</button>
-                <button type="button" class="paper-btn" data-paper="dotted">Dotted</button>
-              </div>
-              <div class="draw-canvas-wrap" id="drawCanvasWrap">
-                <canvas id="notesCanvas" class="notes-canvas"></canvas>
-              </div>
-            </div>
-          </div>
+          <div class="atlas-hints hidden" id="atlasHints"></div>
+          <div class="notes-empty hidden" id="theoriesEmpty">Nothing here yet. What the Atlas tells you will be kept on this page.</div>
         </div>
       </div>
 
@@ -892,7 +850,6 @@ pixiReady.catch(function () {});
 <link rel="prefetch" href="js/changelog-archive.js" as="script">
 <script src="js/changelog.js"></script>
 <script src="js/journal-pages.js"></script>
-<script src="js/notes.js"></script>
 <script src="js/world-map.js"></script>
 <script src="js/titles.js"></script>
 <script src="js/character-tab.js"></script>

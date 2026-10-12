@@ -1,4 +1,4 @@
-/* ---------------- journal: an auto-kept event log, plus a notebook of written/drawn notes ---------------- */
+/* ---------------- journal: an auto-kept event log. (The notebook of written/drawn notes was taken out in build 237; pr.notesList is still kept in saves untouched.) ---------------- */
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
@@ -17,8 +17,6 @@ function ensureJournal() {
   delete pr.drawing;
   return pr;
 }
-function genNoteId() { return 'note_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
-function findNote(id) { return ensureJournal().notesList.find(n => n.id === id); }
 const EVENT_LOG_MAX = 150;
 function logEvent(icon, text, cat) {
   const pr = ensureJournal();
@@ -79,7 +77,7 @@ function renderJournal() {
   else if (jSeg === 'battles') renderBattleLog();
   else if (jSeg === 'almanac') renderJournalAlmanac();
   else if (jSeg === 'people') renderPeople();
-  else if (jSeg === 'notes') renderNotesList();
+  else if (jSeg === 'notes') renderAtlasHints();   // Theories now only keeps what the Atlas has said (notes and drawings are paused, see HANDOFF)
   updateJournalBadge();
 }
 function jChips(el, list, current, onPick) {
@@ -214,7 +212,6 @@ function switchJournalSegment(key) {
     const btn = document.getElementById(s.btn); btn.classList.toggle('active', k === key); btn.setAttribute('aria-selected', k === key);
     document.getElementById(s.view).classList.toggle('hidden', k !== key);
   });
-  if (key !== 'notes') closeNoteEditor();
   renderJournal();
 }
 Object.entries(JOURNAL_SEGMENTS).forEach(([k, s]) => document.getElementById(s.btn).addEventListener('click', () => switchJournalSegment(k)));

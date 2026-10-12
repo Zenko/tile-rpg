@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'better', x: 'Journal -> Theories now only keeps what the Atlas has told you. Notes and drawings are paused for now (they were making saves too big); anything you wrote is still safe in your save.' },
   { t:'better', x: 'Lighter on your battery: the game stops its background checks (weather, mail, the boss clock) while the app is hidden and catches up the moment you come back. Start-up also carries less: the old Before Beta notes now load only when you open them.' },
   { t:'better', x: 'Battle: the energy circles are bright glowing gold like the cost on a card, and dark when spent, so you can see how much you have to spend. Playable cards have a clean gold outline inside their edge (no glow or shine), and it no longer overlaps the card beside it.' },
   { t:'better', x: 'Neighbours turn to face each other when they stop to chat. The coach notices when the same tip keeps coming up across your losses and says so. When Rook comes back he tells you what he has worked out about your deck.' },
