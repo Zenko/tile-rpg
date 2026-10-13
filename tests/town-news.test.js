@@ -93,8 +93,12 @@ module.exports = async (page, assert) => {
     const cards = state.ownedCards.length, peb2 = state.progress.pebbles; communityClaim();
     out.fullPaid = st.full && state.ownedCards.length === cards + 1 && state.progress.pebbles >= peb2 + COMMUNITY.full && /* a level-up from the goal's XP can add a few more */ (state.progress.totals.townGoals || 0) === 1;
     out.done = !communityClaimable();
-    out.offlineOk = communityCloudOk() === false;   // the test sandbox has no Firestore: pushing and fetching must quietly do nothing
+    // With no cloud (offline, signed out), pushing and fetching must quietly do nothing. Switched off here rather than assumed:
+    // on a CI runner with network, Firebase can sign in before this line runs.
+    const wasReady = cloudReady; cloudReady = false;
+    out.offlineOk = communityCloudOk() === false;
     communityPush(true); communityFetch(true);
+    cloudReady = wasReady;
     document.getElementById('pickupOverlay').classList.add('hidden');
     return out;
   });
