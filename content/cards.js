@@ -2,8 +2,9 @@
    CONTENT: CARDS, PACKS AND FATES
    ============================================================
    Every card's name, icon, rarity and numbers, the packs that sell them, the families and the Fates.
-   APPEND NEW CARDS TO THE END of CARD_POOL only: deck share codes store cards by position. Card ids never change
-   (saves and art files use them); names, icons and text can. Card pictures: assets/cards/<id>.png (CARD_ART in
+   Once real players have saves: APPEND NEW CARDS TO THE END of CARD_POOL only (deck share codes store cards by position)
+   and never change a card id (saves use them). Until the launch reset (HANDOFF section 5) both are free, as long as the
+   art files and the code that names a card id are updated with it. Names, icons and text can always change. Card pictures: assets/cards/<id>.png (CARD_ART in
    js/data-and-engine.js). Combat numbers are balanced by simulation - see HANDOFF section 5 before changing them.
    ============================================================ */
 

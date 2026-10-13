@@ -2,7 +2,7 @@
    CONTENT: TIPS, THE TOWN GUIDE, QUESTS, MILESTONES AND TITLES
    ============================================================
    Everything that explains the game or sets a goal: first-time tips, the Town Guide, daily and weekly quests,
-   milestones (achievements) and earned titles. Quest and milestone ids are saved: keep them; text and rewards can change.
+   milestones (achievements) and earned titles. Quest and milestone ids are saved (keep them once real players have saves); text and rewards can change.
    ============================================================ */
 
 // ---- used by js/progression.js ----

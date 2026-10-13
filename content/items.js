@@ -2,7 +2,7 @@
    CONTENT: THINGS TO BUY AND PLACE
    ============================================================
    Decorations for the town, furniture for your cottage, card sleeves, avatar borders and character backdrops.
-   Ids are saved in players' inventories: rename and re-price freely, but keep the ids.
+   Ids are saved in players' inventories: rename and re-price freely; keep the ids once real players have saves.
    ============================================================ */
 
 // ---- used by js/data-and-engine.js ----

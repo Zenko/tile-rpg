@@ -7,8 +7,8 @@
    file may use these at its top level.
 
    Rules for editing:
-   - Change the VALUES, never the keys. The keys (square, grove, baker, ...) are internal ids that saves, deck codes
-     and the code itself use; players never see them.
+   - Change the VALUES, never the keys. The keys (square, grove, baker, ...) are internal ids that the code itself uses
+     (and, once real players have saves, their saves and deck codes); players never see them.
    - Titles that sit in front of a name are written in the sentences, not here: "the Atlas", "Madame Brume",
      "Curator Paz", "Maple's Bakery". Pick names that read well after "the" / before "'s".
    - The text still uses she / they for some people (Wren and Maple are "her"); check those lines if you change who
