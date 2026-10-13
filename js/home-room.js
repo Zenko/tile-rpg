@@ -56,48 +56,7 @@ const HR_RUGS = [
   { id: 'teal', name: 'Teal', lvl: 1, c: ['#2f6068', '#244a52'] }, { id: 'red', name: 'Brick', lvl: 1, c: ['#8a3d36', '#6b2e29'] },
   { id: 'plum', name: 'Plum', lvl: 2, c: ['#5f4a7a', '#493860'] }, { id: 'mustard', name: 'Mustard', lvl: 3, c: ['#a8812f', '#85661f'] },
   { id: 'fern', name: 'Fern', lvl: 4, c: ['#4a7a4e', '#385f3c'] }, { id: 'cream', name: 'Cream', lvl: 5, c: ['#cdbf9c', '#a99b78'] }];   // names-ok: a rug colour
-/* Everything that can stand in the room. `act` marks a menu piece (an id from INTERIORS.home: owned from the start, never put away).
-   The rest is bought with Embers (`cost`) once the home reaches `lvl`. wall = hangs on the back wall, flat = lies on the floor under
-   everything (w x h tiles), tall = drawn one and a half tiles high, glow = light it gives off (dx, dy in tiles from its tile). */
-const HR_CATALOG = {
-  nap: { name: 'Armchair', icon: '🛋️', spr: 'r-armchair', act: 'nap', say: () => 'A sunny chair by the window. The cushion is still warm.' },
-  decorate: { name: 'The shelves', icon: '📚', spr: 'r-shelves', tall: 1, wall: 1, act: 'decorate', say: () => 'Room for a few more things.' },
-  favs: { name: 'Framed cards', icon: '⭐', spr: 'r-frames', tall: 1, wall: 1, act: 'favs', say: () => 'Your favourite cards, framed on the wall.' },
-  trophies: { name: 'Trophy case', icon: '🏆', spr: 'r-trophy', tall: 1, wall: 1, act: 'trophies', say: () => 'Everything you have won so far.' },
-  altar: { name: 'The altar', icon: '🕯️', spr: 'r-altar', act: 'altar', glow: { dx: .5, dy: .2, r: 3.2 }, say: () => 'A small flame, always lit.' },
-  sand: { name: 'Sand garden', icon: '🪨', spr: 'r-sand', act: 'calm-sand', say: () => 'The sand is smooth, waiting for a rake.' },
-  bonsai: { name: 'Your bonsai', icon: '🪴', spr: 'r-bonsai', act: 'calm-bonsai', say: () => 'It looks a little taller than yesterday.' },
-  tidy: { name: 'Basket', icon: '🧺', spr: 'r-basket', act: 'mg-tidy', say: () => 'Toys everywhere. Someone has been busy.' },
-  mail: { name: 'Mailbox', icon: '📬', spr: 'r-mail', act: 'mail', say: () => unreadMail() ? `📬 ${unreadMail()} unread letter${unreadMail() === 1 ? '' : 's'} in the mailbox.` : 'The mailbox is empty for now.' },
-  window: { name: 'Window', icon: '🪟', spr: 'r-window', tall: 1, wall: 1, cost: 30, lvl: 1, glow: { dx: .5, dy: .9, r: 2.6, day: 1 } },
-  sconce: { name: 'Wall lamp', icon: '💡', spr: 'r-sconce', tall: 1, wall: 1, cost: 20, lvl: 1, glow: { dx: .5, dy: .6, r: 3 } },
-  clock: { name: 'Clock', icon: '🕰️', spr: 'r-clock', tall: 1, wall: 1, cost: 18, lvl: 1 },
-  toys: { name: 'Toys', icon: '🧸', spr: 'r-toys', flat: 1, cost: 8, lvl: 1 },
-  plant: { name: 'Potted plant', icon: '🪴', spr: 'r-plant', cost: 12, lvl: 1 },
-  stool: { name: 'Stool', icon: '🪑', spr: 'r-stool', cost: 10, lvl: 1 },
-  table: { name: 'Side table', icon: '🌼', spr: 'r-table', cost: 22, lvl: 1 },
-  lamp: { name: 'Floor lamp', icon: '🏮', spr: 'r-lamp', tall: 1, cost: 30, lvl: 1, glow: { dx: .5, dy: .4, r: 3 } },
-  rug2: { name: 'Small rug', icon: '🧶', flat: 1, rug: 1, w: 2, h: 2, cost: 18, lvl: 1 },
-  rug3: { name: 'Rug', icon: '🧶', flat: 1, rug: 1, w: 3, h: 3, cost: 30, lvl: 1 },
-  cot: { name: 'Cot', icon: '🛏️', spr: 'r-cot', cost: 60, lvl: 2 },
-  painting: { name: 'Painting', icon: '🖼️', spr: 'r-painting', tall: 1, wall: 1, cost: 25, lvl: 2 },
-  bookcase: { name: 'Bookcase', icon: '📚', spr: 'r-shelf', tall: 1, cost: 45, lvl: 2 },
-  cat: { name: 'Sleeping cat', icon: '🐈', spr: 'r-cat', cost: 40, lvl: 2 },
-  fireplace: { name: 'Fireplace', icon: '🔥', spr: 'r-fireplace', tall: 1, wall: 1, cost: 120, lvl: 3, glow: { dx: .5, dy: .9, r: 3.8 } },
-  wardrobe: { name: 'Wardrobe', icon: '🚪', spr: 'r-wardrobe', tall: 1, cost: 70, lvl: 3 },
-  chest: { name: 'Chest', icon: '🧰', spr: 'r-chest', cost: 50, lvl: 3 },
-  tree: { name: 'Indoor tree', icon: '🌳', spr: 'r-tree', tall: 1, cost: 90, lvl: 4 },
-  rug4: { name: 'Grand rug', icon: '🧶', flat: 1, rug: 1, w: 4, h: 4, cost: 60, lvl: 4 },
-  // Spirit pieces (js/home-spirits.js). `uses` marks a piece with a sheet of its own (like the menu pieces, but not one of INTERIORS.home's
-  // actions); `family` marks a family corner, which draws spirits of that family to visit.
-  perch: { name: 'Spirit perch', icon: '🕊️', spr: 'r-perch', tall: 1, uses: 1, cost: 40, lvl: 2, say: () => hsSay('perch') },
-  cabinet: { name: 'Collector\'s cabinet', icon: '🏅', spr: 'r-cabinet', tall: 1, wall: 1, uses: 1, cost: 60, lvl: 2, say: () => hsSay('cabinet') },
-  mantel: { name: 'Reborn mantel', icon: '✨', spr: 'r-mantel', tall: 1, wall: 1, uses: 1, cost: 120, lvl: 3, say: () => hsSay('mantel') },
-  grove: { name: 'Grove nook', icon: '🌿', spr: 'r-grove', family: 'grove', cost: 45, lvl: 2 },
-  cairn: { name: 'Memory cairn', icon: '🪨', spr: 'r-cairn', family: 'stone', cost: 45, lvl: 2 },
-  basin: { name: 'Tide basin', icon: '🌊', spr: 'r-basin', family: 'tide', cost: 45, lvl: 2 },
-  chimes: { name: 'Wind chimes', icon: '🎐', spr: 'r-chimes', family: 'wind', cost: 45, lvl: 2 }
-};
+// HR_CATALOG: in content/items.js (the game's words and data, kept apart from the code)
 const hrUses = d => !!(d.act || d.uses);   // a piece you walk up to and use
 // A new home: a plain 6 by 6 room with only the pieces that do something, and nothing to look at (no windows, rug, lamp or toys), so there
 // is something to want. Every piece here can be moved or put away. Homes saved before this keep the layout they were given.

@@ -51,32 +51,7 @@ function openAtlas() {
   withDoorFade(() => { openScene('atlas'); showTipOnce('atlas'); });
 }
 
-/* ---------- Ask: the written chat ---------- */
-// Every reply to a big question is a maybe. Several lines per question so a second visit does not repeat itself.
-const ATLAS_TOPICS = [
-  { id: 'where', label: '🌫️ Where are we?', lines: [
-    'Somewhere that is kind to you. Perhaps somewhere that is you.',
-    'A place with doors. Whether they open outward, I could not say.',
-    'Here. It is a good word. It holds a great deal.'] },
-  { id: 'who', label: '🗺️ Who are you?', lines: [
-    'I am what the places are written on. Perhaps. Ask me again tomorrow.',
-    'Every road you have walked is in me somewhere. So are the ones you have not.',
-    'A friend, if that helps. It usually does.'] },
-  { id: 'me', label: '💭 What am I?', lines: [
-    'Someone who arrived. Beyond that, you know more than I do.',
-    `A ${GAME.player.one}. The word is wider than it looks.`,
-    'Curious. That is already a great deal to be.'] },
-  { id: 'gods', label: '🕯️ Tell me about the gods', lines: [
-    `${BOSSES.square} keeps the threshold and cannot tell which side they stand on. Be gentle with them.`,
-    `${BOSSES.market} trades in small secrets. Offer one back and you will be liked.`,
-    `${BOSSES.harbor} breathes in and out. Everything else is a rhythm they allow.`,
-    `${BOSSES.garden} plants whatever you leave behind. Mind what you think near them.`] },
-  { id: 'wake', label: '🌙 Can I wake up?', lines: [
-    'Perhaps you have, a few times. How would you tell?',
-    'Waking is a lovely idea. Many here have it. It keeps them warm.',
-    'That depends which dream you mean.'] },
-  { id: 'next', label: '🧭 What should I do next?', guidance: true }
-];
+// ATLAS_TOPICS: in content/story.js (the game's words and data, kept apart from the code)
 function atlasPick(arr, key) {
   const a = atlasState(); let i = Math.floor(Math.random() * arr.length);
   if (arr.length > 1 && a.last === key + i) i = (i + 1) % arr.length;

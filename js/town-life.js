@@ -80,7 +80,7 @@ function lifeProp(p) {
   showTipOnce('townlife');
   return true;
 }
-const WISH_LINES = ['Your coin sinks slowly. You feel lighter.', 'A far-off splash. Somebody, somewhere, smiles.', 'The water ripples twice, as if it heard.', 'You wish for a quiet evening. It seems likely.'];
+// WISH_LINES: in content/dialogue.js (the game's words and data, kept apart from the code)
 function lifeDo(id, p) {
   if (inBattle || inScene) return;
   if (id === 'sit') {

@@ -8,7 +8,7 @@
 const { BattleEngine: BE, CARD_POOL } = require('../server/load-engine')();
 const fs = require('fs');
 const N = +(process.argv[2] || 200), ITERS = +(process.argv[3] || 300), OUT = process.argv[4], START = process.argv[5];
-const src = fs.readFileSync(require('path').join(__dirname, '..', 'js', 'data-and-engine.js'), 'utf8'), lm = src.match(/const lists = \{([\s\S]*?)\n  \};/)[1], FAM = {};
+const src = fs.readFileSync(require('path').join(__dirname, '..', 'content', 'cards.js'), 'utf8'), lm = src.match(/const lists = \{([\s\S]*?)\n  \};/)[1], FAM = {};
 for (const m of lm.matchAll(/(\w+): '([^']+)'/g)) m[2].split(/\s+/).forEach(id => FAM[id] = m[1]);
 const pool = CARD_POOL.filter(c => !c.exclusive && !c.foe);
 const creatures = pool.filter(c => !c.spell);

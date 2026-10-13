@@ -3,54 +3,7 @@
    A short explanation the first time you meet each system. Shown once ever; if another popup is open it waits
    its turn rather than stacking on top.
    ============================================================ */
-const TIPS = {
-  story:      { icon: '🧓', title: `${CAST.guide.name} points the way`, text: `${CAST.guide.name} tells you what to try next. The pill under the top bar says what she asked: tap it to hear her again or to go there. A small gold diamond bobs over the building to visit. Turn it all off with Cozy mode in Settings.` },
-  atlas:      { icon: '🗺️', title: `The ${CAST.atlas.name}`, text: 'It travels with you from district to district. Ask it questions, play its harder games, challenge it to a match, or see what it keeps for sale. It never explains itself.' },
-  altar:      { icon: '🕯️', title: 'The altar', text: 'In your cottage. Beat a district god, bring spare cards of their family, and the god can be summoned as a card. Once all four are home, something else may answer.' },
-  candles:    { icon: '🔥', title: 'The candles', text: `Four candles around a bowl, one for each family. Drag spare cards onto their candles, and the tallest flames decide which spirit answers: you get a card of that family. Hold the glowing bowl (or tap the big button) to call. Let it burn for an hour or overnight for a bonus. Each god belongs on the candle its riddle points at: put all four there and the ${CAST.atlas.name} answers.` },
-  trials:     { icon: '🔮', title: 'Trials', text: 'In the Fates screen (Quiet Nook → Fates → Trials), five foes each bring a Fate and a Spread of their own. Beat one for the first time to take home its Fate card. They open in order, and they are meant to be hard.' },
-  spread:     { icon: '🃏', title: 'Fate Spread', text: 'On the Deck screen, lay three cards as Past, Present and Future. Past is always in your opening hand, Present enters with a Haze, and Future arrives on your 4th turn. Three cards of one family give Harmony (+2 Calm); three different families give Contrast (+1 card).' },
-  fate:       { icon: '🔮', title: 'Fate', text: 'Attune a Fates (Quiet Nook → Fates → The Fates) and you can take its power into a match. Pick it on the keep-this-hand screen; a purple round button by your bar glows when it is ready. Each one works once per match, from its own turn, and most cost a little.' },
-  fortune:    { icon: '🔮', title: `Madame ${CAST.fortuneTeller.name}'s tent`, text: `On ${PLACES.market} from dusk until dawn. ${CAST.fortuneTeller.name} gives your daily Fate reading, swaps one card once a day, tells you the story of your deck, and sells Fate packs.` },
-  tarot:      { icon: '🔮', title: 'Fates', text: 'Once a day, draw three Fates. Turn them all over and the middle card gives the day a fortune. The 22 Fates are real cards from the game: own the card and you own the Arcana, and you can attune three for a small permanent perk.' },
-  cellarRun:  { icon: '🕯️', title: 'The cellar', text: `Every floor offers a few doors: a fight, a chest, a campfire, a shrine or a peddler, hidden in the dark: walk with your lantern and tap tiles to explore. Barrels hold ${GAME.currency.many}, a key opens the locked chest, rats dim the light and glowcaps brighten it. You have three hearts; losing a fight costs one, and at zero the run ends. Leaving does not end it.` },
-  calm:       { icon: '🧘', title: 'The quiet nook', text: 'A few quiet things to do that score nothing and cost nothing: breathe, rake sand, watch the stars, drink tea, tend a bonsai. Five slow breaths leave you Rested for the day.' },
-  path:       { icon: '🧭', title: 'Your path', text: `Every level gives you a skill point. Spend them on Angler, Gardener, Duelist or Wanderer, and upgrade your rod, watering can and lantern with ${GAME.currency.many}. You can reset your points for free any time.` },
-  bakery:     { icon: '🍞', title: 'The bakery', text: 'Put a loaf in the oven - it bakes in real time. Share bread with neighbors (one gift each per day) to grow your friendship, or cook with it.' },
-  cook:       { icon: '🍳', title: 'Cooking', text: 'Harvests and fish land in your pantry. Cook them into dishes: give one as a gift (worth more than bread), eat it on the keep-this-hand screen for a head start, or bring one to a neighbor who asked.' },
-  garden:     { icon: '🌱', title: 'Thought Tending', text: `Buy seeds here, then tap a glowing patch of ${PLACES.square} to plant. Crops grow in real time (faster in the rain). Card seeds grow a card.` },
-  puzzle:     { icon: '🧩', title: 'The daily puzzle', text: 'A fixed board: win it this turn. Ending your turn gives up and resets the board, so take your time. The first solve each day pays a card.' },
-  cup:        { icon: '🏆', title: `The ${GAME.player.many}’ Cup`, text: 'Three matches in a row. Your Calm carries over between rounds - there is no healing - and a loss ends the run. Sweep all three for the week\'s trophy.' },
-  homeDecor:  { icon: '🎨', title: 'Decorate your home', text: `Tap a piece to pick it up, then tap where it should go. Everything can move or be put away, even the mailbox and the bonsai. Drag to look around. Buy new furniture in Items, and put the decorations you bought for town in your home too. Change the floor, walls and rug in Colours, and spend ${GAME.currency.many} in Room to level your home up: each level makes it bigger and reveals more colours and furniture.` },
-  homeSpirits: { icon: '🕊️', title: 'Spirits at home', text: 'Your spirits live in your home. Put a Spirit perch down to show one of your cards, light medals in the Collector\'s cabinet by finishing card sets, and put Reborn cards on the mantel. Family corners (a Grove nook, Memory cairn, Tide basin or Wind chimes) draw spirits of that family. From home level 3, now and then a spirit comes to visit: tap it and it leaves you a rare card.' },
-  home:       { icon: '🏠', title: 'Your cottage', text: 'Your own place, and you can walk around it. Tap the floor to move and tap furniture to use it: read letters at the mailbox, put decorations on the shelves, frame favourite cards, look over your trophies, tend the bonsai or take a nap. Close puts a menu away and keeps you here. The door on the bottom wall is the way out, and Decorate (top right) is for making it yours.' },
-  lantern:    { icon: '🏮', title: 'The Lantern Market', text: `${CAST.nightVendor.name} only trades after dark: Lantern Packs full of moonlit cards, glowing decorations, and ${GAME.currency.many} for the critters in your jar.` },
-  bugs:       { icon: '✨', title: 'Night critters', text: 'Glowing critters come out at night. Tap one to catch it - it goes in your jar for the Lantern Market and in the critter log under Cards → Fish.' },
-  companion:  { icon: '👻', title: 'A companion', text: `A wandering spirit can walk with you if you own its card and are high enough level. Character → Companion lists everyone who could: cards, neighbours (at full hearts), bosses and ${CAST.rival.name}. Tap your companion to do things together.` },
-  companionPlay: { icon: '🙈', title: 'Play with your companion', text: "Tap your companion in town to play Hide and Seek right there on the map - it ducks behind a real spot nearby, so watch closely, then tap where it went from memory. Rounds get quicker and add more hiding spots the longer your streak runs." },
-  cellarDeep: { icon: '🕳️', title: 'The deep cellar', text: 'From here on it is a run: a loss or climbing out ends it and the cellar rests. Every 5th floor is a guardian with a rare prize.' },
-  rival:      { icon: '🎭', title: 'A rival', text: `${CAST.rival.name} moves between districts. Every win sends them off to build a stronger deck - eight chapters in all, with a unique final prize.` },
-  friends:    { icon: '💞', title: 'Friendship', text: 'Favours, gifts and friendly wins earn hearts. At 3 hearts a neighbor plays their signature deck with you; at 5 they give you a keepsake.' },
-  inspect:    { icon: '🔍', title: 'Look closer', text: 'Press and hold any card - in your collection, the deck, a battle or the Index - to see it large, with its full name, rules and story.' },
-  spells:     { icon: '✨', title: 'Spell cards', text: 'Spells are cast from your hand for an instant effect and never take a board slot. Aimed spells ignore Watch.' },
-  museum:      { icon: '🏛️', title: 'The Card Museum', text: `Donate spare copies of cards to fill six wings. The museum never takes your last copy or one your deck uses. Each finished wing pays ${GAME.currency.many} and gives a keepsake decoration.` },
-  expeditions: { icon: '🧭', title: 'Expeditions', text: 'Send up to three spare cards away for a while - two teams at once. Flicker cards travel faster, Watch cards keep the team safe, Startle cards find treasure, and stronger teams bring back more. Your cards come home with loot and a little mastery.' },
-  trades:      { icon: '🤝', title: 'The trading board', text: 'Three new offers every morning: swap a spare for a card you have never had, bundle three spares for a rarer card, or sell one to a collector for three times its release value.' },
-  challenges:  { icon: '🎯', title: 'Deck challenges', text: 'Three rules a day, like "only commons" or "no two cards the same". Win with a deck that follows the rule for a card prize. Keep a deck slot for challenges so switching is quick.' },
-  minigames:  { icon: '🎲', title: 'Mini-games', text: `Every house has a little game. Earn a bronze, silver or gold medal; the first three medals in each game every day pay ${GAME.currency.many}, and gold can turn up a card. Play as much as you like after that.` },
-  lookaround: { icon: '🖐️', title: 'Look around', text: 'Drag the town map with your finger to look at the rest of the district. Tap the target button to bring the camera back to your character; walking somewhere does it too.' },
-  forecast:   { icon: '🪧', title: 'The weather board', text: 'Signs show the forecast. Weather changes play: clear pays a little extra on daily tasks, cloudy doubles spirit XP, rain helps fishing and growing, storms boost Flicker cards, snow toughens bosses for richer prizes.' },
-  events:     { icon: '📅', title: 'Daily town events', text: "One event runs each day, shown next to the district name - a Thought Fishing Derby, Market Day, Harvest Fair and more, each bending the rules a little in your favor." },
-  foils:      { icon: '✨', title: 'Reborn cards', text: 'A Reborn card is a spirit that faded as an Echo and came back, purely a collector\'s chase - the same card, just shimmering. Your Reborn total shows at the top of Cards → Sets and in your cottage trophy case.' },
-  puddleworld: { icon: '🌀', title: 'A puddle swallowed you', text: 'Splash through enough puddles in the rain and one of them leads somewhere else: a little world that only lasts a few minutes. Some are places to explore for hidden cards, some are mazes to find your way out of, some are board games where only the dice move you, and some are underwater. Watch the timer in the top bar: when it runs out the world is gone and you are back where you fell in. Tap the timer if you want to climb out early.' },
-  townnews:   { icon: '📰', title: 'The Dream Gazette', text: `A new front page every morning, the same for every ${GAME.player.lower} in town. It also lists today's event, any weather moment, the town goal and who is visiting. Find it at the top of the Journal's Today page.` },
-  towngoal:   { icon: '🤝', title: 'The town goal', text: `One goal a week that the whole town works on together. You count, your neighbours chip in a little every day, and so do the other ${GAME.player.lowerMany} when you are online. Halfway and done both pay out: claim them here.` },
-  visitors:   { icon: '🧳', title: 'Travelling visitors', text: `On most days somebody passes through one of the districts. ${CAST.pedlar.name} the Pedlar sells three cards you cannot get in packs that day; ${CAST.wanderer.name} the Wanderer plays a one-family deck and leaves a card with whoever beats it first. The Journal's Today page says where they are.` },
-  townlife:   { icon: '🪑', title: 'Things to do around town', text: 'Props do things now: sit on benches, make a wish at wells, light lamps after dark, haggle, haul nets, water plants or busk for tips. Shake trees, skip stones, splash through puddles in the rain. Everything nudges the district\'s town mood - fill it up and the district dresses itself up for good.' },
-  character:  { icon: '🧑', title: 'Your character', text: 'You and your companion stand on a backdrop you choose. Check your stats here, change how you look in Look, and see your bag, milestones and companion. Tap the 🎨 to jump to the backdrops, and tap a milestone with a 🏷️ title to wear it. Settings are behind your avatar at the top.' },
-  fishing:    { icon: '🎣', title: 'Thought Fishing', text: 'Pick a bait that suits the fish you want, then cast and watch the shadow: its size hints at the catch. When it bites, tap to hook it, then hold the button to reel. Keep the marker in the green and ease off when the fish runs. Nothing is lost if it gets away. Prefer simpler? Turn on Easy reeling in Settings.' },
-  inventory:  { icon: '🎒', title: 'Your inventory', text: 'Everything you\'re carrying, in one place: pantry ingredients, cooked dishes, seeds and spare decorations. Tap Plant or Place to use one straight from the list.' },
-};
+// TIPS: in content/guide.js (the game's words and data, kept apart from the code)
 function tipsSeen() { const p = state.progress; if (!p.tipsSeen || typeof p.tipsSeen !== 'object') p.tipsSeen = {}; return p.tipsSeen; }
 let tipQueue = [];
 function showTipOnce(id) {
@@ -262,39 +215,7 @@ const tabs = {
 
 function cardDef(id) { return BattleEngine.defOf(id); }
 
-// A small, stable flavor line per card - picked deterministically from the card's id so it never changes
-// between views, without hand-authoring one for every card in the pool.
-const CARD_STORY_TEMPLATES = {
-  common: [
-    "A humble find, but every deck needs a few of these.",
-    "Nothing fancy - just steady, reliable {name}.",
-    "You've probably walked past a dozen of these without noticing.",
-    "Common where you'd expect, and always useful in a pinch.",
-    "{name} doesn't ask for much attention, and rarely gets any.",
-  ],
-  rare: [
-    "Not every day you come across a {name}.",
-    "Keep an eye out - {name} doesn't show up twice in the same spot.",
-    "There's a little more shine to {name} than the everyday finds.",
-    "{name} has a way of turning a plain match into a memorable one.",
-  ],
-  ultra: [
-    "Few decks are lucky enough to carry a {name}.",
-    "{name} is the kind of card people remember pulling.",
-    "Word travels fast when someone finds a {name}.",
-    "There's a reason {name} makes people stop and look twice.",
-  ],
-  super: [
-    "{name} is spoken about more than it's actually seen.",
-    "A genuine rarity - {name} turns heads across town.",
-    "Some collectors chase {name} for months without luck.",
-  ],
-  mythic: [
-    `{name} might be the rarest thing in all of ${GAME.title}.`,
-    "Legends get told about cards like {name}.",
-    "There may only be a handful of {name} in the whole town.",
-  ],
-};
+// CARD_STORY_TEMPLATES: in content/cards.js (the game's words and data, kept apart from the code)
 function cardStory(def) {
   const pool = CARD_STORY_TEMPLATES[def.rarity] || CARD_STORY_TEMPLATES.common;
   let h = 0; for (let i = 0; i < def.id.length; i++) h = (h * 31 + def.id.charCodeAt(i)) >>> 0;

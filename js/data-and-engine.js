@@ -11,236 +11,11 @@ const NPC_RESPAWN_MS = 180000;
 // Embers: earned by releasing spare copies, spent on card packs.
 // A pack costs more than any single release pays, so it can never be looped for profit.
 const RELEASE_VALUE = { common: 1, rare: 3, ultra: 8, super: 20, mythic: 50, divine: 120, atlas: 250 };   // divine and atlas are summon-only (never spare), the values just keep sorts and charms total
-// Pack odds are flat on purpose: they must NOT scale with wins, or a veteran's packs would
-// out-pay their own cost and release-and-rebuy would become free money (checked by simulation).
-const PACKS = [
-  { id: 'puddle', name: 'Nap Pack', icon: '💦', cost: 4,  floorLabel: 'Any card',           desc: 'A cheap, quick draw - mostly commons, but every card has a shot.',
-    odds: { common: 0.78, rare: 0.17, ultra: 0.04, super: 0.008, mythic: 0.002 } },
-  { id: 'meadow', name: 'Daydream Pack', icon: '🌾', cost: 8,  floorLabel: 'Any card',           desc: 'Mostly everyday finds, with a chance of something better.',
-    odds: { common: 0.62, rare: 0.27, ultra: 0.08, super: 0.025, mythic: 0.005 } },
-  { id: 'brook',  name: 'Moonlit Pack',  icon: '💧', cost: 30, floorLabel: 'Rare or better',     desc: 'A rare card is guaranteed.',
-    odds: { common: 0, rare: 0.70, ultra: 0.22, super: 0.065, mythic: 0.015 } },
-  { id: 'orchard', name: 'Midnight Pack', icon: '🍂', cost: 55, floorLabel: 'Rare or better',   desc: 'Better odds than a Moonlit Pack for the same guarantee.',
-    odds: { common: 0, rare: 0.52, ultra: 0.35, super: 0.10, mythic: 0.03 } },
-  { id: 'aurora', name: 'Lucid Pack', icon: '🌌', cost: 105, floorLabel: 'Ultra rare or better', desc: 'An ultra rare card is guaranteed.',
-    odds: { common: 0, rare: 0, ultra: 0.78, super: 0.18, mythic: 0.04 } },
-  { id: 'zenith', name: 'Reverie Pack', icon: '⛰️', cost: 280, floorLabel: 'Super or better', desc: 'A super rare card is guaranteed, with a real shot at mythic.',
-    odds: { common: 0, rare: 0, ultra: 0, super: 0.82, mythic: 0.18 } },
-  { id: 'spellbook', name: 'Lullaby Pack', icon: '📜', cost: 30, floorLabel: 'Always a spell', only: 'spell', desc: 'A single spell card: instant effects that never take a board slot.',
-    odds: { common: 0.45, rare: 0.36, ultra: 0.13, super: 0.045, mythic: 0.015 } }
-];   // defeated neighbors return after 3 minutes
+// PACKS: in content/cards.js (the game's words and data, kept apart from the code)
 
-// Shop > Items: decorations the player places into El Umbral. Buying one adds it to the player's
-// decoration inventory (state.decorationInventory) rather than spending it immediately - see
-// buyDecoration / startPlacingDecoration / handleDecorationTap for the buy -> store -> place flow.
-// cat groups the Items shop's filter chips: 'plant', 'seating', 'lighting', 'ornament'.
-const DECORATION_ITEMS = [
-  { id: 'wind-chime', name: 'Wind Chime', icon: '🎐', cost: 16, desc: 'Tap it and it sings a soft note.', cat: 'ornament' },
-  { id: 'planter', name: 'Potted Plant', icon: '🪴', cost: 10, desc: 'A leafy little planter for a quiet corner.', cat: 'plant' },
-  { id: 'flag', name: 'Little Flag', icon: '🚩', cost: 10, desc: 'Marks the spot as yours.', cat: 'ornament' },
-  { id: 'wildflowers', name: 'Wildflower Patch', icon: '🌼', cost: 12, desc: "A little wild, on purpose.", cat: 'plant' },
-  { id: 'basket', name: 'Woven Basket', icon: '🧺', cost: 12, desc: 'Left out, waiting to be filled.', cat: 'ornament' },
-  { id: 'gardenrock', name: 'Memory Stone', icon: '🪨', cost: 14, desc: 'Smooth and cool to the touch.', cat: 'ornament' },
-  { id: 'candle', name: 'Garden Candle', icon: '🕯️', cost: 14, desc: "Flickers even when there's no wind.", cat: 'lighting' },
-  { id: 'lantern', name: 'Paper Lantern', icon: '🏮', cost: 15, desc: 'Glows soft even in daylight.', cat: 'lighting' },
-  { id: 'tulips', name: 'Tulip Bed', icon: '🌷', cost: 16, desc: 'Planted in a tidy little row.', cat: 'plant' },
-  { id: 'mushroom', name: 'Mushroom Ring', icon: '🍄', cost: 16, desc: "Somebody says it's good luck.", cat: 'ornament' },
-  { id: 'log-bench', name: 'Log Seat', icon: '🪵', cost: 18, desc: 'Rough-hewn, but comfortable enough.', cat: 'seating' },
-  { id: 'sunflowers', name: 'Sunflower Row', icon: '🌻', cost: 18, desc: 'Turns to follow the light.', cat: 'plant' },
-  { id: 'garden-bench', name: 'Garden Bench', icon: '🪑', cost: 20, desc: 'Somewhere new to sit and watch the square.', cat: 'seating' },
-  { id: 'bamboo', name: 'Bamboo Stalks', icon: '🎋', cost: 22, desc: 'Rustles gently in the breeze.', cat: 'plant' },
-  { id: 'vase', name: 'Old Vase', icon: '🏺', cost: 24, desc: 'Cracked, but still holding water.', cat: 'ornament' },
-  { id: 'birdbath', name: 'Birdbath', icon: '🐦', cost: 25, desc: 'Sparrows will find it eventually.', cat: 'ornament' },
-  { id: 'carp-streamer', name: 'Carp Streamer', icon: '🎏', cost: 26, desc: 'Dances whenever the wind picks up.', cat: 'ornament' },
-  { id: 'duck', name: 'Garden Duck', icon: '🦆', cost: 28, desc: "Doesn't move, but looks like it might.", cat: 'ornament' },
-  { id: 'topiary', name: 'Topiary', icon: '🌳', cost: 30, desc: 'Trimmed into a tidy little spiral.', cat: 'plant' },
-  { id: 'streetlamp', name: 'Street Lamp', icon: '💡', cost: 35, desc: 'A warm little pool of light after dark.', cat: 'lighting' },
-  { id: 'statue', name: 'Old Statue', icon: '🗿', cost: 40, desc: 'Weathered, and a little mysterious.', cat: 'ornament' },
-  // night: sold only at the Lantern Market after dark; they glow once the sun goes down
-  { id: 'firefly-jar', name: 'Firefly Jar', icon: '🫙', cost: 30, desc: 'A soft, flickering light for dark evenings.', night: true, cat: 'lighting' },
-  { id: 'star-garland', name: 'Star Garland', icon: '💫', cost: 35, desc: 'Twinkles like a tiny night sky.', night: true, cat: 'lighting' },
-  { id: 'moon-lamp', name: 'Moon Lamp', icon: '🌕', cost: 45, desc: 'A little moon of your own.', night: true, cat: 'lighting' },
-  // Premium decorations (v1.87.0): the big, aspirational Ember sinks. `level` is the Dreamer level that opens them in the shop.
-  { id: 'moon-gate', name: 'Moon Gate', icon: '⛩️', cost: 90, level: 6, desc: 'A round stone gate. Walk through it twice for luck.', cat: 'ornament' },
-  { id: 'koi-pond', name: 'Dreaming Pond', icon: '🐟', cost: 120, level: 8, desc: 'A still pond with a slow, golden visitor.', cat: 'plant' },
-  { id: 'crystal-fountain', name: 'Crystal Fountain', icon: '⛲', cost: 160, level: 10, desc: 'Water that chimes as it falls.', cat: 'ornament' },
-  { id: 'wishing-tree', name: 'Wishing Tree', icon: '🎋', cost: 220, level: 12, desc: 'Ribbons from every wish ever made.', cat: 'plant' },
-  { id: 'golden-keeper', name: `Golden ${GAME.player.one}`, icon: '🏆', cost: 300, level: 15, desc: `A statue of the ${GAME.player.one}, mid-triumph.`, cat: 'ornament' },
-  // sold only by the Atlas (js/atlas.js ATLAS_SHOP), never in the Card Shop
-  { id: 'atlas-compass', name: 'Compass Rose', icon: '🧭', cost: 150, desc: 'It always points at something you meant to find.', cat: 'ornament', atlas: true },
-  { id: 'atlas-lantern', name: 'Map Lantern', icon: '🏮', cost: 180, desc: 'Lights up the parts of the ground nobody has drawn yet.', cat: 'ornament', atlas: true },
-  { id: 'dream-globe', name: 'Dream Globe', icon: '🌐', cost: 240, desc: 'Turn it and a different dream faces you.', cat: 'ornament', atlas: true },
-  { id: 'star-chart', name: 'Star Chart', icon: '🌌', cost: 320, desc: 'Every star on it is a place you almost went.', cat: 'ornament', atlas: true }
-];
+// DECORATION_ITEMS: in content/items.js (the game's words and data, kept apart from the code)
 
-const CARD_POOL = [
-  { id: 'sprout', name: 'Sprout', icon: '🌱', rarity: 'common', cost: 1, power: 2, grit: 2, kw: ['bloom'] },
-  { id: 'pebble', name: 'Worry Stone', icon: '🪨', rarity: 'common', cost: 1, power: 2, grit: 1, kw: ['guard'] },
-  { id: 'droplet', name: 'Droplet', icon: '💧', rarity: 'common', cost: 1, power: 1, grit: 4, kw: ['mend'] },
-  { id: 'toadstool', name: 'Toadstool', icon: '🍄', rarity: 'common', cost: 2, power: 4, grit: 2, kw: ['guard'] },
-  { id: 'bubble', name: 'Dream Bubble', icon: '🫧', rarity: 'common', cost: 2, power: 2, grit: 3, kw: ['shield'] },
-  { id: 'flintstone', name: 'Flint', icon: '🪨', rarity: 'common', cost: 2, power: 2, grit: 1, kw: ['swift'] },
-
-  { id: 'blossom', name: 'Blossom', icon: '🌸', rarity: 'rare', cost: 3, power: 4, grit: 4, kw: ['bloom'] },
-  { id: 'geode', name: 'Memory Geode', icon: '💎', rarity: 'rare', cost: 3, power: 2, grit: 5, kw: ['guard'] },
-  { id: 'tide', name: 'Gentle Wave', icon: '🌊', rarity: 'rare', cost: 3, power: 5, grit: 3, kw: ['echo'] },
-  { id: 'feather', name: 'Drifting Feather', icon: '🪶', rarity: 'rare', cost: 2, power: 1, grit: 2, kw: ['swift'] },
-
-  { id: 'dove', name: 'Letter Dove', icon: '🕊️', rarity: 'ultra', cost: 3, power: 2, grit: 4, kw: ['mend', 'swift'] },
-  { id: 'crystal-spire', name: 'Memory Spire', icon: '🔷', rarity: 'ultra', cost: 4, power: 6, grit: 2, kw: ['shield'] },
-  { id: 'gale', name: 'Wandering Gale', icon: '🌬️', rarity: 'ultra', cost: 3, power: 4, grit: 1, kw: ['swift'] },
-  { id: 'ember-fox', name: 'Dusk Fox', icon: '🦊', rarity: 'ultra', cost: 3, power: 4, grit: 5, kw: ['echo'] },
-
-  { id: 'moonstone', name: 'Moonstone', icon: '🔮', rarity: 'super', cost: 4, power: 4, grit: 7, kw: ['shield'] },
-
-  { id: 'aurora-stag', name: 'Dawn Stag', icon: '🦌', rarity: 'mythic', cost: 5, power: 9, grit: 8, kw: ['bloom'] },
-  { id: 'deep-current', name: 'Slow Current', icon: '🐋', rarity: 'mythic', cost: 5, power: 7, grit: 8, kw: ['mend'] },
-  { id: 'mountain-heart', name: 'Mountain of Memory', icon: '⛰️', rarity: 'mythic', cost: 5, power: 7, grit: 7, kw: ['guard'] },
-  { id: 'origami-crane', name: 'Origami Crane', icon: '🪽', rarity: 'common', cost: 1, power: 2, grit: 1, kw: ['swift'] },
-  { id: 'rice-cake', name: 'Rice Cake', icon: '🍡', rarity: 'common', cost: 2, power: 2, grit: 3, kw: ['guard'] },
-  { id: 'paper-fan', name: 'Paper Fan', icon: '🪭', rarity: 'common', cost: 2, power: 3, grit: 1, kw: ['echo'] },
-  { id: 'torii-gate', name: 'Torii Gate', icon: '⛩️', rarity: 'rare', cost: 3, power: 2, grit: 5, kw: ['guard'] },
-  { id: 'folding-screen', name: 'Folding Screen', icon: '🎏', rarity: 'rare', cost: 3, power: 3, grit: 4, kw: ['shield'] },
-  { id: 'temple-bell', name: 'Temple Bell', icon: '🔔', rarity: 'rare', cost: 3, power: 4, grit: 4, kw: ['echo'] },
-  { id: 'stone-lantern', name: 'Night Lamp', icon: '🗼', rarity: 'ultra', cost: 3, power: 3, grit: 5, kw: ['guard'] },
-  { id: 'koi-ascending', name: 'Koi Ascending', icon: '🐉', rarity: 'rare', cost: 3, power: 3, grit: 5, kw: ['mend'] },
-  { id: 'cherry-blossom-storm', name: 'Blossom Drift', icon: '🍃', rarity: 'ultra', cost: 4, power: 4, grit: 3, kw: ['bloom'] },
-
-  { id: 'acorn', name: 'Acorn', icon: '🌰', rarity: 'common', cost: 1, power: 1, grit: 3, kw: ['mend'] },
-  { id: 'firefly', name: 'Firefly', icon: '🪲', rarity: 'common', cost: 2, power: 2, grit: 4, kw: ['swift'] },
-
-  { id: 'hollow-log', name: 'Hollow Log', icon: '🪵', rarity: 'rare', cost: 3, power: 3, grit: 5, kw: ['shield'] },
-  { id: 'foxglove', name: 'Foxglove', icon: '🌷', rarity: 'rare', cost: 3, power: 3, grit: 5, kw: ['mend'] },
-  { id: 'old-kettle', name: 'Old Kettle', icon: '🫖', rarity: 'rare', cost: 3, power: 4, grit: 4, kw: ['mend'] },
-
-  { id: 'heron', name: 'Sleepwalking Heron', icon: '🦢', rarity: 'ultra', cost: 4, power: 4, grit: 4, kw: ['mend'] },
-  { id: 'hedgehog', name: 'Sleepy Hedgehog', icon: '🦔', rarity: 'ultra', cost: 3, power: 3, grit: 4, kw: ['guard'] },
-  { id: 'paper-boat', name: 'Paper Boat', icon: '⛵', rarity: 'ultra', cost: 3, power: 4, grit: 3, kw: ['swift', 'echo'] },
-  { id: 'glass-float', name: 'Glass Float', icon: '🔵', rarity: 'ultra', cost: 4, power: 4, grit: 5, kw: ['shield'] },
-  { id: 'lantern-fish', name: 'Lantern Fish', icon: '🐠', rarity: 'ultra', cost: 3, power: 3, grit: 4, kw: ['echo'] },
-
-  { id: 'silver-fox', name: 'Whisper Fox', icon: '🦊', rarity: 'super', cost: 4, power: 7, grit: 4, kw: ['swift'] },
-  { id: 'wishing-well', name: 'Wishing Well', icon: '⭐', rarity: 'super', cost: 4, power: 5, grit: 5, kw: ['mend'] },
-  { id: 'storm-lily', name: 'Moonrain Lily', icon: '🌼', rarity: 'super', cost: 4, power: 6, grit: 6, kw: ['bloom'] },
-  { id: 'copper-kettle-spirit', name: 'Hearth Spirit', icon: '👻', rarity: 'super', cost: 4, power: 5, grit: 6, kw: ['shield'] },
-  { id: 'jade-turtle', name: 'Ageless Turtle', icon: '🐢', rarity: 'super', cost: 4, power: 6, grit: 6, kw: ['guard'] },
-  { id: 'river-otter', name: 'Drifting Otter', icon: '🦦', rarity: 'super', cost: 4, power: 6, grit: 7, kw: ['mend'] },
-
-  { id: 'sky-whale', name: 'Whisper Whale', icon: '🐳', rarity: 'mythic', cost: 5, power: 8, grit: 6, kw: ['mend'] },
-  { id: 'moon-dragon', name: 'Moonwhisper Dragon', icon: '🐲', rarity: 'mythic', cost: 5, power: 7, grit: 6, kw: ['swift'] },
-  { id: 'thundering-ram', name: 'Stormkeeper Ram', icon: '🐏', rarity: 'mythic', cost: 5, power: 8, grit: 8, kw: ['guard'] },
-  { id: 'void-koi', name: 'Starless Koi', icon: '🐟', rarity: 'mythic', cost: 5, power: 10, grit: 8, kw: ['echo'] },
-  { id: 'sunken-leviathan', name: 'Drowsy Leviathan', icon: '🐙', rarity: 'mythic', cost: 5, power: 9, grit: 9, kw: ['guard'] },
-
-  // Briar, Chorus and Sip
-  { id: 'bramble', name: 'Bramble', icon: '🥀', rarity: 'common', cost: 1, power: 1, grit: 4, kw: ['thorns'] },
-  { id: 'morning-bugle', name: 'Morning Bugle', icon: '📯', rarity: 'common', cost: 2, power: 2, grit: 2, kw: ['rally'] },
-  { id: 'dusk-bat', name: 'Dusk Bat', icon: '🦇', rarity: 'common', cost: 2, power: 2, grit: 2, kw: ['drain'] },
-  { id: 'village-banner', name: 'Market Banner', icon: '🚩', rarity: 'rare', cost: 3, power: 3, grit: 3, kw: ['rally'] },
-  { id: 'whirlpool', name: 'Whirlpool', icon: '🌀', rarity: 'rare', cost: 3, power: 3, grit: 4, kw: ['drain'] },
-  { id: 'cactus-keeper', name: 'Briar Keeper', icon: '🌵', rarity: 'ultra', cost: 3, power: 3, grit: 5, kw: ['thorns', 'guard'] },
-  { id: 'lion-dancer', name: 'Lantern Dancer', icon: '🦁', rarity: 'super', cost: 4, power: 6, grit: 4, kw: ['rally', 'swift'] },
-  { id: 'mist-wraith', name: 'Mist Wisp', icon: '🌫️', rarity: 'super', cost: 4, power: 4, grit: 5, kw: ['drain', 'shield'] },
-  { id: 'bramble-king', name: 'Briar King', icon: '👑', rarity: 'mythic', cost: 5, power: 8, grit: 8, kw: ['thorns', 'rally'] },
-
-  // Spells: played from the hand for an instant effect, never take a board slot. `spell` names the effect in BattleEngine.SPELLS.
-  { id: 'spark', name: 'Spark', icon: '⚡', rarity: 'common', cost: 1, power: 0, grit: 0, kw: [], spell: 'spark' },
-  { id: 'rain-shower', name: 'Rain Shower', icon: '🌦️', rarity: 'common', cost: 1, power: 0, grit: 0, kw: [], spell: 'rain-shower' },
-  { id: 'harvest', name: 'Harvest', icon: '🧺', rarity: 'rare', cost: 2, power: 0, grit: 0, kw: [], spell: 'harvest' },
-  { id: 'gust', name: 'Gust', icon: '🍃', rarity: 'rare', cost: 3, power: 0, grit: 0, kw: [], spell: 'gust' },
-  { id: 'sunbeam', name: 'Sunbeam', icon: '🌞', rarity: 'rare', cost: 2, power: 0, grit: 0, kw: [], spell: 'sunbeam' },
-  { id: 'thunderclap', name: 'Thunderclap', icon: '🌩️', rarity: 'ultra', cost: 3, power: 0, grit: 0, kw: [], spell: 'thunderclap' },
-  { id: 'second-wind', name: 'Second Wind', icon: '🌬️', rarity: 'ultra', cost: 3, power: 0, grit: 0, kw: [], spell: 'second-wind' },
-  { id: 'moonlit-tide', name: 'Moonlit Tide', icon: '🌊', rarity: 'super', cost: 4, power: 0, grit: 0, kw: [], spell: 'moonlit-tide' },
-  { id: 'starfall', name: 'Starfall', icon: '🌠', rarity: 'mythic', cost: 5, power: 0, grit: 0, kw: [], spell: 'starfall' },
-
-  // Exclusive cards: never in packs, ground finds or opponent decks. `exclusive` says who hands them out.
-  { id: 'glowworm', name: 'Glowworm', icon: '🪱', rarity: 'ultra', cost: 2, power: 2, grit: 3, kw: ['mend', 'shield'], exclusive: 'cellar' },
-  { id: 'echo-cavern', name: 'Echo Cavern', icon: '🕳️', rarity: 'super', cost: 4, power: 6, grit: 6, kw: ['echo', 'guard'], exclusive: 'cellar' },
-  { id: 'deep-wyrm', name: 'Forgotten Wyrm', icon: '🐉', rarity: 'mythic', cost: 5, power: 9, grit: 9, kw: ['bloom', 'guard'], exclusive: 'cellar' },
-  { id: 'rooks-ace', name: `${CAST.rival.name}'s Ace`, icon: '🎭', rarity: 'mythic', cost: 4, power: 7, grit: 6, kw: ['swift', 'echo'], exclusive: 'rival' },
-  // v1.82.0 - four families (CARD_FAMILY below), one per district, and the Echo / Lull / Kin / Sting keywords. Appended at the
-  // end on purpose: deck share codes store cards by their position in this list.
-  // Grove (El Jardín Lúcido): Echo leaves an Afterthought behind, Kin grows with its family.
-  { id: 'seedpod', name: 'Seedpod', icon: '🫘', rarity: 'common', cost: 1, power: 1, grit: 2, kw: ['seed'] },
-  { id: 'moss-hare', name: 'Moss Hare', icon: '🐇', rarity: 'rare', cost: 3, power: 3, grit: 3, kw: ['kin'] },
-  { id: 'dandelion', name: 'Dandelion Wish', icon: '🏵️', rarity: 'rare', cost: 3, power: 2, grit: 5, kw: ['seed', 'bloom'] },
-  { id: 'oak-warden', name: 'Warden of Roots', icon: '🌳', rarity: 'super', cost: 4, power: 4, grit: 6, kw: ['seed', 'guard'] },
-  { id: 'world-tree', name: 'The Dreaming Tree', icon: '🎄', rarity: 'mythic', cost: 5, power: 6, grit: 10, kw: ['seed', 'kin'] },
-  // Stone (El Umbral): steady bodies that dig the small things out.
-  { id: 'stone-hen', name: 'Stone Hen', icon: '🐔', rarity: 'common', cost: 2, power: 1, grit: 3, kw: ['kin'] },
-  { id: 'cliff-goat', name: 'Cliff Goat', icon: '🐐', rarity: 'rare', cost: 3, power: 2, grit: 5, kw: ['guard', 'kin'] },
-  { id: 'badger', name: 'Badger', icon: '🦡', rarity: 'rare', cost: 3, power: 3, grit: 2, kw: ['sting'] },
-  { id: 'quarry-bear', name: 'Stonedigger Bear', icon: '🐻', rarity: 'ultra', cost: 4, power: 4, grit: 7, kw: ['sting', 'guard'] },
-  { id: 'mossy-titan', name: 'Mossmind Titan', icon: '🗻', rarity: 'mythic', cost: 5, power: 6, grit: 10, kw: ['guard', 'kin'] },
-  // Tide (La Orilla del Arrullo): Lull holds the enemy's best card back for a turn.
-  { id: 'hermit-crab', name: 'Hermit Crab', icon: '🦀', rarity: 'common', cost: 2, power: 2, grit: 4, kw: ['lull'] },
-  { id: 'puffer', name: 'Puffer', icon: '🐡', rarity: 'common', cost: 2, power: 3, grit: 3, kw: ['thorns'] },
-  { id: 'harbor-seal', name: 'Shore Seal', icon: '🦭', rarity: 'rare', cost: 3, power: 3, grit: 4, kw: ['lull'] },
-  { id: 'moon-jelly', name: 'Moon Jelly', icon: '🪼', rarity: 'ultra', cost: 3, power: 3, grit: 5, kw: ['lull', 'shield'] },
-  { id: 'tide-caller', name: 'Tide Caller', icon: '🐚', rarity: 'ultra', cost: 4, power: 4, grit: 5, kw: ['lull', 'mend'] },
-  { id: 'kraken', name: 'Lullaby Kraken', icon: '🦑', rarity: 'mythic', cost: 5, power: 6, grit: 8, kw: ['lull', 'drain'] },
-  // Wind (El Mercado de Susurros): fast cards that sting on the way in.
-  { id: 'honeybee', name: 'Honeybee', icon: '🐝', rarity: 'common', cost: 2, power: 4, grit: 2, kw: ['sting'] },
-  { id: 'market-sparrow', name: 'Market Sparrow', icon: '🐦', rarity: 'rare', cost: 3, power: 2, grit: 2, kw: ['swift', 'sting'] },
-  { id: 'kite-runner', name: 'Kite Runner', icon: '🪁', rarity: 'ultra', cost: 3, power: 2, grit: 4, kw: ['swift', 'kin'] },
-  // New spells (effects in BattleEngine.SPELLS)
-  { id: 'chill', name: 'Chill', icon: '❄️', rarity: 'common', cost: 1, power: 0, grit: 0, kw: [], spell: 'chill' },
-  { id: 'overgrowth', name: 'Overgrowth', icon: '🌱', rarity: 'rare', cost: 2, power: 0, grit: 0, kw: [], spell: 'overgrowth' },
-  { id: 'stone-skin', name: 'Stone Skin', icon: '🧱', rarity: 'rare', cost: 2, power: 0, grit: 0, kw: [], spell: 'stone-skin' },
-  { id: 'undertow', name: 'Undertow', icon: '🌀', rarity: 'rare', cost: 3, power: 0, grit: 0, kw: [], spell: 'undertow' },
-  { id: 'quickstep', name: 'Quickstep', icon: '👟', rarity: 'ultra', cost: 3, power: 0, grit: 0, kw: [], spell: 'quickstep' },
-  { id: 'picnic', name: 'Picnic', icon: '🧺', rarity: 'rare', cost: 1, power: 0, grit: 0, kw: [], spell: 'picnic' },
-  // The four spirit gods (Divine) and the Atlas (Atlas rarity): earned by summoning, never found. Energy is capped at 5, so they cost 5.
-  // Stats come from a paired simulation (2500 games each, one of these swapped into a random deck, smart AI both sides; re-run after the build 151 balance pass): +5 to +9 win
-  // points each, against 0 to +5 for the mythics. Ensueño needs the big numbers because Echo + Bloom is slow. Swift on the Atlas was +20, so it has none.
-  { id: 'duermevela', name: BOSSES.square, icon: '🚪', rarity: 'divine', cost: 5, power: 8, grit: 9, kw: ['guard', 'shield'], exclusive: 'summon' },
-  { id: 'murmullo', name: BOSSES.market, icon: '🤫', rarity: 'divine', cost: 5, power: 8, grit: 7, kw: ['swift', 'sting'], exclusive: 'summon' },
-  { id: 'marea-lenta', name: BOSSES.harbor, icon: '🪸', rarity: 'divine', cost: 5, power: 8, grit: 8, kw: ['mend', 'lull'], exclusive: 'summon' },
-  { id: 'ensueno', name: BOSSES.garden, icon: '💭', rarity: 'divine', cost: 5, power: 14, grit: 13, kw: ['seed', 'bloom'], exclusive: 'summon' },
-  { id: 'the-atlas', name: `The ${CAST.atlas.name}`, icon: '🗺️', rarity: 'atlas', cost: 5, power: 10, grit: 12, kw: ['guard'], exclusive: 'summon' },
-];
-/* Foe cards: unique cards that only opponents carry (neighbors, bosses, cellar floors). They are deliberately NOT in
-   CARD_POOL - so they never show up in packs, the Index, deck codes or rewards - but defOf() knows them, so the battle
-   engine and card art treat them like any other card. `tier` is the earliest foe tier that may field them (see
-   foeTierFor in progression.js). */
-const FOE_CARDS = [
-  { id: 'market-cat',     name: 'Market Cat',     icon: '🐈', rarity: 'rare',   cost: 2, power: 3, grit: 2, kw: ['swift'],           foe: true, tier: 1 },
-  { id: 'lamplighter',    name: 'Lamplighter',    icon: '🏮', rarity: 'rare',   cost: 2, power: 2, grit: 3, kw: ['mend'],            foe: true, tier: 1 },
-  { id: 'pebble-golem',   name: 'Worry Golem',    icon: '🗿', rarity: 'rare',   cost: 3, power: 3, grit: 5, kw: ['guard'],           foe: true, tier: 1 },
-  { id: 'thorn-hare',     name: 'Briar Hare',     icon: '🐇', rarity: 'ultra',  cost: 3, power: 4, grit: 3, kw: ['swift', 'thorns'], foe: true, tier: 2 },
-  { id: 'wisp-keeper',    name: 'Wisp Warden',    icon: '🕯️', rarity: 'ultra',  cost: 3, power: 3, grit: 4, kw: ['mend', 'shield'],  foe: true, tier: 2 },
-  { id: 'bell-ringer',    name: 'Bell Ringer',    icon: '🛎️', rarity: 'ultra',  cost: 3, power: 3, grit: 4, kw: ['echo', 'rally'],   foe: true, tier: 2 },
-  { id: 'storm-heron',    name: 'Dream Heron',    icon: '🦅', rarity: 'super',  cost: 4, power: 5, grit: 4, kw: ['swift', 'drain'],  foe: true, tier: 3 },
-  { id: 'iron-tortoise',  name: 'Iron Tortoise',  icon: '🐢', rarity: 'super',  cost: 4, power: 4, grit: 7, kw: ['guard', 'thorns'], foe: true, tier: 3 },
-  { id: 'cinder-fox',      name: 'Cinder Fox',     icon: '🦊', rarity: 'super',  cost: 4, power: 6, grit: 4, kw: ['swift', 'bloom'],  foe: true, tier: 3 },
-  { id: 'night-regent',   name: 'Regent of Sleep',   icon: '🦉', rarity: 'mythic', cost: 5, power: 7, grit: 7, kw: ['guard', 'drain'],  foe: true, tier: 4 },
-  { id: 'tide-leviathan', name: 'Slow Leviathan', icon: '🐋', rarity: 'mythic', cost: 5, power: 7, grit: 8, kw: ['shield', 'echo'],  foe: true, tier: 4 },
-];
-// Families (v1.82.0): each district leans on one. Kin cards grow with the other cards of their family on your board, and a
-// district's neighbors and boss build decks that favour their family (buildDeckForOpponent). Spells and unlisted cards have none.
-const FAMILIES = {
-  grove: { icon: '🌿', name: FAMILY_NAMES.grove, district: 'garden' },
-  stone: { icon: '🪨', name: FAMILY_NAMES.stone, district: 'square' },
-  tide:  { icon: '🌊', name: FAMILY_NAMES.tide,  district: 'harbor' },
-  wind:  { icon: '🪶', name: FAMILY_NAMES.wind,  district: 'market' }
-};
-const CARD_FAMILY = (() => {
-  const lists = {
-    grove: 'sprout blossom toadstool cherry-blossom-storm acorn firefly hollow-log foxglove hedgehog storm-lily aurora-stag bramble cactus-keeper bramble-king glowworm seedpod moss-hare dandelion oak-warden world-tree ensueno',
-    stone: 'pebble flintstone geode crystal-spire moonstone mountain-heart rice-cake torii-gate stone-lantern old-kettle copper-kettle-spirit jade-turtle thundering-ram echo-cavern deep-wyrm stone-hen cliff-goat badger quarry-bear mossy-titan duermevela',
-    tide: 'droplet bubble tide koi-ascending deep-current whirlpool lantern-fish glass-float river-otter void-koi sunken-leviathan wishing-well heron paper-boat hermit-crab puffer harbor-seal moon-jelly tide-caller kraken marea-lenta',
-    wind: 'feather dove gale origami-crane paper-fan folding-screen temple-bell sky-whale moon-dragon lion-dancer morning-bugle dusk-bat village-banner silver-fox ember-fox rooks-ace mist-wraith honeybee market-sparrow kite-runner murmullo'
-  };
-  const m = {};
-  Object.keys(lists).forEach(f => lists[f].split(' ').forEach(id => { m[id] = f; }));
-  return m;
-})();
-// Tokens that cards create mid-battle. Never in packs, pools, decks or the Index; BattleEngine.defOf still knows them.
-const TOKEN_CARDS = [
-  { id: 'seedling', name: 'Afterthought', icon: '🌱', rarity: 'common', cost: 0, power: 1, grit: 2, kw: [], token: true }
-];
-const EXCLUSIVE_HINT = { cellar: 'found deep in the cellar', rival: "a rival's final prize", summon: 'earned at the altar' };
+// CARD_POOL, FOE_CARDS, FAMILIES, CARD_FAMILY, TOKEN_CARDS, EXCLUSIVE_HINT: in content/cards.js (the game's words and data, kept apart from the code)
 
 // Divine (the four gods) and Atlas (the one-of-a-kind top card) sit above mythic. They are never in packs, on the ground or in opponent decks
 // (`exclusive: 'summon'`), and they can't be traded up to or from (see TRADE_TOP): the altar is the only way to get them.
@@ -1215,16 +990,9 @@ const BattleEngine = (function () {
 
 const KW = BattleEngine.KEYWORDS;
 
-const RARITY_LABEL = { common: 'common', rare: 'rare', ultra: 'ultra rare', super: 'super ultra rare', mythic: 'mythic', divine: 'divine', atlas: 'atlas' };
+// RARITY_LABEL: in content/cards.js (the game's words and data, kept apart from the code)
 
-// Each town has its own population - a name pool and a species/face pool - so neighbors read as a
-// different crowd from one district to the next, not just the same people in a different building.
-const NPC_POOLS = {
-  square: { names: [CAST.guide.name, 'Sable', 'Fenn', 'Marlow', 'Tansy', 'Rowan', 'Juniper', 'Cove'],
-             icons: ['🧑', '👩', '🧔', '👨', '🧑‍🦱', '🧑‍🦳', '🧕', '🧑‍🎨'] },
-  market: { names: [CAST.threadSeller.name, 'Hazel', 'Bramble', CAST.grainSeller.name, 'Nutmeg', 'Acorn', 'Chestnut', 'Ginger'],
-             icons: ['🐰', '🐹', '🐭', '🐿️'] },
-};
+// NPC_POOLS: in content/world.js (the game's words and data, kept apart from the code)
 function npcPool(key) { return NPC_POOLS[key] || NPC_POOLS.square; }
 // Names stay unique within a district, since friendship is remembered by name.
 function randomNpcName(key, taken) {
@@ -1248,20 +1016,7 @@ function opponentPortrait(opponent) {
   return icons[h % icons.length];
 }
 
-const DISTRICTS = {
-  square: { name: PLACES.square, theme: 'square', unlockWins: 0, unlockLevel: 1, boss: BOSSES.square, bossIcon: '🌳',
-    scenery: [{ icon: '🪑', title: 'A quiet bench', desc: 'A good place to sit and watch the town go by.' },
-              { icon: '⛲', title: 'La Fuente', desc: 'It hums a half-remembered song.' }] },
-  market: { name: PLACES.market, theme: 'market', unlockWins: 1, unlockLevel: 2, boss: BOSSES.market, bossIcon: '🦡',
-    scenery: [{ icon: '🏪', title: 'A small stall', desc: 'The vendor is out today, but the awning gives good shade.' },
-              { icon: '🧺', title: 'A basket of goods', desc: 'Nothing to take, but it smells like fresh bread.' }] },
-  harbor: { name: PLACES.harbor, theme: 'harbor', unlockWins: 3, unlockLevel: 4, boss: BOSSES.harbor, bossIcon: '⚓',
-    scenery: [{ icon: '⛵', title: 'A moored boat', desc: 'It rocks gently against the dock.' },
-              { icon: '🦭', title: 'A resting seal', desc: 'It barely opens an eye as you pass.' }] },
-  garden: { name: PLACES.garden, theme: 'garden', unlockWins: 5, unlockLevel: 6, boss: BOSSES.garden, bossIcon: '🌻',
-    scenery: [{ icon: '🌻', title: 'Sunflowers', desc: 'They turn slowly to follow the light.' },
-              { icon: '🪴', title: 'A potted fern', desc: 'Someone tends this carefully.' }] }
-};
+// DISTRICTS: in content/world.js (the game's words and data, kept apart from the code)
 // A district needs both enough wins and enough XP level to open - wins alone no longer carries you there.
 function districtUnlocked(key) {
   const def = DISTRICTS[key];

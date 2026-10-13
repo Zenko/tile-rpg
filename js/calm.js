@@ -28,7 +28,7 @@ const CALM_ACTIVITIES = [
   { id: 'tarot',    icon: '🔮', name: 'Fates',           text: 'A daily reading, and the Fates.' },
 ];
 const CALM_SCALE = [392, 440, 523, 587, 659, 784, 880];     // a pentatonic scale: any two notes sound fine together
-const CALM_TEA_LINES = ['The steam curls and lets go.', 'Warm hands, a quiet mind.', 'Nothing needs you for the next minute.', 'The cup is just the right size.', 'Somewhere, rain on a roof.', 'You taste leaves, and a little sunlight.', 'Slow is also a speed.', 'The kettle sings and settles.', 'A good pause is a kind of progress.', 'You do not have to finish anything.'];
+// CALM_TEA_LINES: in content/dialogue.js (the game's words and data, kept apart from the code)
 const CALM_SIT_LINES = ['A leaf turns over in the breeze.', 'Someone laughs, far away and friendly.', 'The light moves a little along the wall.', 'A bird makes a small decision.', 'The town hums to itself.', 'Nothing is asked of you here.'];
 const BONSAI_STAGES = [{ icon: '🌱', name: 'Seedling', at: 0 }, { icon: '🌿', name: 'Sapling', at: 3 }, { icon: '🪴', name: 'Young tree', at: 7 }, { icon: '🌳', name: 'Bonsai', at: 14 }, { icon: '🎋', name: 'Old bonsai', at: 30 }];
 const CALM_CONSTELLATIONS = [

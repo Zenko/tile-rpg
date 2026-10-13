@@ -109,12 +109,7 @@ const COMPANION_LEVEL = {
   rival: 10,
 };
 const COMPANION_HEARTS = 5;     // a neighbour has to be a best friend before they will walk with you
-const COMPANION_TRAITS = {
-  card: ['Hums quietly when you stop walking.', 'Never goes more than three steps away.', 'Pretends not to notice the puddles, then hops them.', 'Gets a little brighter every time you win.', 'Likes to wait where the light is good.', 'Turns to look whenever you turn a corner.', 'Is secretly very proud to be a card.', 'Rests in your shadow when it rains.'],
-  npc: ['Narrates the walk, whether you ask or not.', 'Always has a snack in a pocket.', 'Waves at everyone you pass.', 'Walks a little ahead, then waits with a grin.', 'Hums a tune they never quite finish.', 'Notices small things and mentions them.', 'Says they are only here for the fresh air.', 'Keeps a careful count of your steps.'],
-  boss: ['Walks slowly, and the grass leans aside.', 'Looks down at everything, kindly.', 'Has promised to behave. Mostly.', 'Takes up a lot of the path and knows it.', 'Rumbles when something is hidden nearby.', 'Still sizes up every stranger for a match.'],
-  rival: ['Claims to be here to keep an eye on you.', 'Practises card shuffles at every bench.', 'Pretends not to be impressed.', 'Keeps score of your wins out loud.'],
-};
+// COMPANION_TRAITS: in content/cards.js (the game's words and data, kept apart from the code)
 function companionKind(c) { return (c && c.kind) || 'card'; }
 function companionKeyOf(kind, id) { return kind + ':' + id; }
 function companionKey(c) { return companionKeyOf(companionKind(c), companionKind(c) === 'card' ? c.cardId : c.id); }
@@ -419,17 +414,7 @@ function setCharm(id) {
 }
 function clearCharm(i) { charms()[i] = null; saveState(); sfx('tap'); }
 
-/* ---------------- set bonuses: own every card of a themed set for a lasting perk ---------------- */
-const CARD_SETS = [
-  { id: 'koi',      name: 'Drifting Shoal', icon: '🎏', cards: ['koi-ascending', 'void-koi', 'lantern-fish', 'moon-jelly'],                      kind: 'fish',        val: 0.10, text: 'Fish bite 10% sooner' },
-  { id: 'moon',     name: 'Moon Phases',    icon: '🌙', cards: ['moonstone', 'moon-dragon', 'storm-lily', 'sunbeam', 'moonlit-tide'],           kind: 'xp',          val: 0.05, text: '+5% XP' },
-  { id: 'garden',   name: 'Midnight Bloom',  icon: '🌷', cards: ['sprout', 'blossom', 'foxglove', 'cherry-blossom-storm', 'aurora-stag'],       kind: 'crops',       val: 0.10, text: 'Crops grow 10% faster' },
-  { id: 'stones',   name: 'Memory Stones',  icon: '🪨', cards: ['pebble', 'flintstone', 'geode', 'crystal-spire', 'mountain-heart'],          kind: 'startSpirit', val: 1,    text: '+1 Calm at the start of matches' },
-  { id: 'birds',    name: 'Whisper Wings',  icon: '🐦', cards: ['origami-crane', 'feather', 'market-sparrow', 'dove', 'heron'], kind: 'finds',      val: 0.15, text: 'Hidden finds +15%' },
-  { id: 'storm',    name: 'Dream Storms',   icon: '⛈️', cards: ['gale', 'thunderclap', 'thundering-ram', 'whirlpool'],                     kind: 'chest',       val: 0.15, text: 'Hidden chests +15%' },
-  { id: 'festival', name: 'Lantern Night',  icon: '🏮', cards: ['paper-fan', 'temple-bell', 'morning-bugle', 'stone-lantern', 'lion-dancer'], kind: 'miniPebbles', val: 1, text: `+1 ${GAME.currency.one} per mini-game medal` },
-  { id: 'spells',   name: 'Book of Lullabies', icon: '📜', cards: CARD_POOL.filter(c => c.spell).map(c => c.id),                             kind: 'startDraw',   val: 1,    text: 'Draw 1 extra card at the start of matches' },
-];
+// CARD_SETS: in content/cards.js (the game's words and data, kept apart from the code)
 function setProgress(s) { const own = baseOwnedSet(); return s.cards.filter(id => own.has(id)).length; }
 function setComplete(s) { return setProgress(s) === s.cards.length; }
 // A set's one-time completion prize, checked whenever cards change hands.

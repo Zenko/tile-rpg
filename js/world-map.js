@@ -48,13 +48,7 @@ const WM_ART = {
   harbor: '<rect x="193" y="216" width="3" height="20" fill="#d6c7a4"/><path d="M196 218l14 12h-14z" fill="#e9edf1"/>',
   garden: '<circle cx="80" cy="92" r="8" class="wm-art-bloom"/><path d="M80 99v12" stroke="#3c7a5c" stroke-width="3"/>'
 };
-// Text and the few facts that aren't stored anywhere else. Buildings and neighbour names come from the real maps/save.
-const WM_INFO = {
-  square: { short: 'Square', blurb: `The threshold of the dream. Every ${GAME.player.lower} arrives here first, and every road leads back to it.`, extras: [`${GAME.player.many}’ Cup fountain`, 'Weather sign'] },
-  market: { short: 'Market', blurb: 'Lantern-lit stalls and voices just below understanding. A lantern market opens after dark.', extras: ['Trading board', `${CAST.nightVendor.name}'s Lantern Market (night only)`] },
-  harbor: { short: 'Harbor', blurb: 'A tideless sea under a low moon. The best Thought Fishing around, and a god who breathes the tide in and out.', extras: ['Thought Fishing spots (they shuffle every 10 minutes)'] },
-  garden: { short: 'Garden', blurb: 'A hush of glowing blooms that grow toward whatever you are thinking, with a glasshouse in the middle.', extras: [] }
-};
+// WM_INFO: in content/world.js (the game's words and data, kept apart from the code)
 const WM_ORDER = ['square', 'market', 'harbor', 'garden'];
 let wmSel = 'square';
 const wmEsc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -275,45 +269,11 @@ const MAT_OPTIONS = [
 // Width is its own free choice (Character > Look): thin, medium or thick. Thick is the default.
 const BORDER_WIDTHS = [{ id: 'thin', name: 'Thin', px: '2px' }, { id: 'medium', name: 'Medium', px: '3.5px' }, { id: 'thick', name: 'Thick', px: '5px' }];
 const borderWidthDef = id => BORDER_WIDTHS.find(w => w.id === id) || BORDER_WIDTHS[2];
-const BORDER_OPTIONS = [
-  { id: 'solid',   name: 'Solid',      cost: 0,  native: 'solid' },
-  { id: 'dashed',  name: 'Dashed',     cost: 12, native: 'dashed' },
-  { id: 'dotted',  name: 'Dotted',     cost: 12, native: 'dotted' },
-  { id: 'double',  name: 'Double',     cost: 15, native: 'double' },
-  { id: 'groove',  name: 'Groove',     cost: 15, native: 'groove' },
-  { id: 'ridge',   name: 'Ridge',      cost: 15, native: 'ridge' },
-  { id: 'glow',    name: 'Glow',       cost: 22, native: 'solid', glow: true },
-  { id: 'neon',    name: 'Neon dashes', cost: 28, native: 'dashed', glow: true },
-  { id: 'twotone', name: 'Two-tone',   cost: 18, grad: c => `conic-gradient(${c} 0 50%, color-mix(in srgb, ${c} 45%, #fff) 50% 100%)` },
-  { id: 'candy',   name: 'Candy stripe', cost: 20, grad: c => `repeating-conic-gradient(${c} 0 15deg, #fff 15deg 30deg)` },
-  { id: 'sunset',  name: 'Sunset fade', cost: 24, grad: c => `linear-gradient(135deg, ${c}, color-mix(in srgb, ${c} 35%, #ff8fb1))` },
-  { id: 'rainbow', name: 'Rainbow',    cost: 30, fixed: true, grad: () => 'conic-gradient(#e86a6a, #f0c05a, #7fbf8a, #6fc3d6, #7a8fe0, #c27ad6, #e86a6a)' },
-  { id: 'gold',    name: 'Gilded',     cost: 36, fixed: true, glow: true, grad: () => 'conic-gradient(#f6e3a1, #c9962d, #fff0b8, #a87420, #f6e3a1)' },
-  // Premium rings (v1.87.0): the high-end Ember sinks
-  { id: 'prism',   name: 'Prism',      cost: 90,  fixed: true, grad: () => 'conic-gradient(from 30deg, #ffd1dc, #ffe9b8, #d1f5d3, #c4e7ff, #e0d1ff, #ffd1dc)' },
-  { id: 'ember',   name: 'Ember',      cost: 120, fixed: true, glow: true, grad: () => 'conic-gradient(#ff9a3c, #e8443a, #ffd36b, #e8443a, #ff9a3c)' },   // names-ok: an avatar border, not the currency
-  { id: 'galaxy',  name: 'Galaxy',     cost: 170, fixed: true, glow: true, grad: () => 'conic-gradient(#2b1f5c, #7a4fd6, #3fb6e8, #7a4fd6, #2b1f5c)' },
-  { id: 'crown',   name: 'Crown',      cost: 240, fixed: true, glow: true, grad: () => 'conic-gradient(#fff3b0, #f0b429, #fff3b0, #c98a12, #fff3b0)' }
-];
+// BORDER_OPTIONS: in content/items.js (the game's words and data, kept apart from the code)
 const borderDef = id => BORDER_OPTIONS.find(b => b.id === id) || BORDER_OPTIONS[0];
 // Free colours for the ring (the first is the old default, sea glass). A custom colour can be picked too.
 const BORDER_COLORS = ['#8dbccb', '#e8cb88', '#d98a3d', '#b1615e', '#c27a9c', '#9a86c9', '#6a96c2', '#6a9f7c', '#7fbf8a', '#b17a63', '#e9edf1', '#2c3641'];
-// Backdrops for the Character tab's stage (you and your companion). 'live' follows the real sky and weather; the
-// rest are painted from the sky/ground colours and a few emoji scattered over them (see stageHtml() in js/character-tab.js).
-// Same Shop-and-equip flow as the mats: ids live in state.character.unlockedStages / state.character.stage.
-const STAGE_OPTIONS = [
-  { id: 'live',    name: "Today's sky",    cost: 0,  live: true },
-  { id: 'meadow',  name: 'Meadow',         cost: 12, sky: ['#9fd3ea', '#e6f3d8'], ground: '#86b873', deco: ['☁️', '☁️', '🌼', '🌷', '🦋'] },
-  { id: 'harbor',  name: 'Harbor lights',  cost: 18, sky: ['#f4b88f', '#8fa9c9'], ground: '#58798f', deco: ['⛵', '🌅', '🕊️', '⚓'] },
-  { id: 'autumn',  name: 'Autumn grove',   cost: 20, sky: ['#f2c58b', '#f7e4c2'], ground: '#b3733c', deco: ['🍂', '🍁', '🍂', '🌰', '🍁'] },
-  { id: 'night',   name: 'Starry night',   cost: 22, sky: ['#0f1b3a', '#33457a'], ground: '#25344a', deco: ['⭐', '✨', '🌙', '⭐', '✨'], dark: true },
-  { id: 'snow',    name: 'Snowfall',       cost: 24, sky: ['#b9cde0', '#eef4fa'], ground: '#e8eef5', deco: ['❄️', '❄️', '⛄', '❄️', '🌲'] },
-  { id: 'lantern', name: 'Lantern night',  cost: 30, sky: ['#2a1d3d', '#7a3f55'], ground: '#3b2634', deco: ['🏮', '🏮', '✨', '🏮', '🌙'], dark: true },
-  { id: 'aurora',  name: 'Aurora hill',    cost: 40, sky: ['#0b2a3a', '#2f8f7a'], ground: '#1d3a4a', deco: ['🌌', '✨', '⭐', '✨', '🌲'], dark: true },
-  { id: 'sakura',  name: 'Sakura grove',   cost: 100, sky: ['#f7d6e0', '#fdf0e6'], ground: '#a7c98a', deco: ['🌸', '🌸', '🏮', '🦋', '🌸'] },
-  { id: 'nightfall', name: 'Nightfall',    cost: 140, sky: ['#141a36', '#3b4a7a'], ground: '#222c4a', deco: ['🌙', '⭐', '✨', '🦉', '⭐'], dark: true },
-  { id: 'summit',  name: 'Misty summit',   cost: 190, sky: ['#cfdbe8', '#f4f7fa'], ground: '#8a9aa8', deco: ['⛰️', '☁️', '🦅', '☁️', '❄️'] },
-];
+// STAGE_OPTIONS: in content/items.js (the game's words and data, kept apart from the code)
 const stageDef = id => STAGE_OPTIONS.find(s => s.id === id) || STAGE_OPTIONS[0];
 // The sky colours of a backdrop; 'live' reads the game clock so the stage turns dusky and dark with the town.
 function stageColors(def) {

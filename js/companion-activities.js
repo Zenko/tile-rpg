@@ -15,40 +15,7 @@
    rest of the game uses (showCardReveal-style tiles, startBattle, the Calm overlay, the town walk helpers).
    ============================================================ */
 
-/* ---------- what they say: first person, short, a little different every time ---------- */
-const COMPANION_TALK = {
-  any: ['This is nice.', 'I like walking with you.', 'Do you ever just listen to the town?', 'No hurry, is there?', 'I could do this all day.', 'You walk at a good pace.', 'I was hoping you would come by.', 'Thank you for bringing me.', 'Everything feels a little brighter with company.', 'I noticed something small just now. I forgot what.'],
-  clear: ['What a bright day.', 'The light on the stones is lovely today.', 'Not a cloud to worry about.'],
-  cloudy: ['Soft light today. I like it.', 'Mist makes the town feel close.', 'Everything looks a little dreamy in this.'],
-  rain: ['Listen to the rain on the roofs.', 'I like how the puddles shine.', 'Mind the puddles. Or do not.'],
-  storm: ['The air is tingling. Stay close.', 'Big sky today.', 'I do not mind a storm, with you here.'],
-  snow: ['Little drifting stars everywhere.', 'It is so quiet in the snow.', 'Look, it is landing on your sleeve.'],
-  night: ['The lanterns look like small moons.', 'Nights are for slow walks.', 'Do you think the stars know our names?'],
-  places: {
-    square: [`${PLACES.square} always smells like warm bread.`, 'The old stones here remember a lot.', 'I like the benches. Someone is always just leaving.'],
-    market: ['So many voices at once. I love it.', 'Someone is selling something that smells wonderful.', 'Keep your cards close in a crowd.'],
-    harbor: ['Hear the water? It is humming along.', 'The boats sound like they are sleeping.', 'I could watch the tide for hours.'],
-    garden: ['Everything here is growing, quietly.', 'The flowers keep their own time.', 'Do plants dream, do you think?'],
-  },
-  perk: {
-    spirit: ['I feel steady when I am beside you.', 'If a match comes, I will be right here.'],
-    finds: ['I think there is something in the grass. Maybe.', 'Keep your eyes low. Things hide there.'],
-    crops: ['Your garden must be doing well.', 'I can feel the seedlings from here.'],
-    harvest: ['Harvest days are the best days.', 'Could we bake something later?'],
-    chest: ['Somewhere a lock is waiting for a key.', 'I have a feeling about chests today.'],
-    fish: ['The fish are talking. It sounds like bubbles.', 'We should visit the water later.'],
-    xp: ['You are getting better at all of this.', 'Every day you learn a little more.'],
-  },
-  kind: {
-    card: ['Being a card is mostly waiting. This is better.', 'I used to be in a deck. Now I get to walk.', 'My picture looks good in this light, I think.'],
-    spell: ['I only ever last a moment in a match. This is longer.', 'Spells do not usually get walks. Thank you.'],
-    npc: ['Folks keep waving at us.', 'I told them I was out with a friend.', 'It is good to have somewhere to be.'],
-    boss: ['The town looks smaller from up here.', 'I have promised not to scare anyone. Mostly.', 'Walking is not so different from guarding.'],
-    rival: ['Do not think this means I am going easy next time.', 'I am only here to watch your footwork.', 'Your deck is getting scary, you know.'],
-  },
-  bond: ['I think we are good friends now.', 'I would follow you anywhere. Almost anywhere.', 'You make this town feel like home.'],
-};
-const COMPANION_CALM_TALK = ['This is peaceful.', 'I am just breathing.', 'Mmm.', 'The quiet is soft today.', 'I am glad we stopped.', 'Nothing needs us right now.'];
+// COMPANION_TALK, COMPANION_CALM_TALK: in content/dialogue.js (the game's words and data, kept apart from the code)
 let companionRecent = [];
 function companionPlayerName() { return (state.character && state.character.name) || 'friend'; }
 function companionTalk(c) {

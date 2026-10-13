@@ -329,8 +329,7 @@ PW_KINDS.ladders = {
 /* ============================================================ DEEP ============================================================ */
 const PW_DEEP_NAMES = ['Marina', 'Coral', 'Bubbles', 'Finn', 'Pearl', 'Squidley', 'Tide', 'Kelp', 'Shelly', 'Brine', 'Sandy', 'Drift'];
 const PW_DEEP_FOLK = ['🧜‍♀️', '🧜‍♂️', '🐙', '🦑', '🐢', '🦀', '🐡', '🐬', '🦞'];
-const PW_DEEP_LINES = ['The tide is in a mood today.', 'Have you seen the lantern reef? It hums at night.', 'Mind the current by the plaza. It steals hats.', 'We never close the doors. We just forget how they open.',
-  'This used to be a market. You can still hear the haggling, if you hold your breath.', 'Everything here is a little bit slower. I like it.', 'The fish know everything. They just do not say.', 'Do not tell the crabs I said so, but the east quarter has the best view.'];
+// PW_DEEP_LINES: in content/dialogue.js (the game's words and data, kept apart from the code)
 const PW_DEEP_GIFT = ['Here, I found this in the sand. It is yours.', 'A traveller left this behind. Take it.', 'It was going to float away anyway.', 'I keep these for visitors. You are the first in a while.'];
 const PWD = { stepBefore: null };
 function pwDeepGenerate(w) {

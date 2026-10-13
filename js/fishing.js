@@ -4,21 +4,7 @@
    Calm, no penalty for missing, a small daily cap on rewards.
    (v1.62.0: a bait choice, a fish shadow that shows its size, and hold-to-reel with a tension gauge.)
    ============================================================ */
-// Beyond the everyday three, a fish may only bite in some districts (where), at night, or in certain weather.
-// `hint` is what the Fish page shows before you've caught one.
-const FISH = [
-  { id: 'minnow', name: 'Minnow',      icon: '🐟', pebbles: 2, weight: 58, blurb: 'Small, silver and quick.',        drain: 3.0, pull: 16, hint: 'Bites anywhere, any time' },
-  { id: 'perch',  name: 'Perch',       icon: '🐠', pebbles: 3, weight: 30, blurb: 'Striped and a little proud of it.', drain: 5.5, pull: 13, hint: 'Bites anywhere, any time' },
-  { id: 'carp',   name: 'Golden Carp', icon: '🏅', pebbles: 5, weight: 12, blurb: 'It shimmers like a coin in the sun.', drain: 8.0, pull: 10, hint: 'Anywhere, but shy' },
-  { id: 'crab',   name: 'Harbor Crab', icon: '🦀', pebbles: 3, weight: 26, where: ['harbor'], blurb: 'It pinches the line, then lets go politely.', drain: 4.5, pull: 14, hint: `Scuttles only in ${PLACES.harbor}` },
-  { id: 'puffer', name: 'Pufferfish',  icon: '🐡', pebbles: 5, weight: 12, where: ['harbor'], blurb: 'It puffs up, offended, then settles down.', drain: 6.0, pull: 12, hint: `Lives only in ${PLACES.harbor}` },
-  { id: 'eel',    name: 'Moonlit Eel', icon: '🐍', pebbles: 4, weight: 18, night: true, blurb: 'Long and silver, like a ribbon of moonlight.', drain: 6.0, pull: 12, hint: 'Bites only at night' },
-  { id: 'trout',  name: 'Rainbow Trout', icon: '🌈', pebbles: 5, weight: 18, weather: ['rain'], blurb: 'Every scale a different colour.', drain: 6.5, pull: 12, hint: 'Rises only in the rain' },
-  { id: 'pike',   name: 'Thunder Pike', icon: '⚡', pebbles: 6, weight: 14, weather: ['storm'], blurb: 'It crackles faintly when it thrashes.', drain: 8.5, pull: 10, hint: 'Hunts only in storms' },
-  { id: 'ghost-koi', name: 'Ghost Koi', icon: '👻', pebbles: 6, weight: 14, weather: ['cloudy'], blurb: 'You can almost see through it.', drain: 7.0, pull: 11, hint: 'Drifts up only under cloudy skies' },
-  { id: 'frost-cod', name: 'Frost Cod', icon: '🧊', pebbles: 5, weight: 16, weather: ['snow'], blurb: 'Cold to the touch, and very grumpy.', drain: 6.0, pull: 12, hint: 'Bites only when it snows' },
-  { id: 'star-koi', name: 'Starlight Koi', icon: '🌟', pebbles: 25, weight: 1.2, legendary: true, blurb: 'The water glows gold around it. You will remember this.', drain: 10, pull: 9, hint: 'A legend. Anywhere, almost never' },
-];
+// FISH: in content/world.js (the game's words and data, kept apart from the code)
 // Which fish can bite right here, right now.
 function fishAvailable(f) {
   if (f.where && !f.where.includes(state.currentDistrict)) return false;

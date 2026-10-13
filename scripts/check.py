@@ -20,7 +20,7 @@ ok = True
 def fail(msg):
     global ok; ok = False; print('FAIL  ' + msg)
 
-files = sorted(glob.glob('js/*.js')) + ['assets/sprites.js', 'assets/player-art.js']
+files = sorted(glob.glob('js/*.js')) + sorted(glob.glob('content/*.js')) + ['assets/sprites.js', 'assets/player-art.js']
 for f in files:
     r = subprocess.run(['node', '--check', f], capture_output=True, text=True)
     if r.returncode: fail(f'syntax error in {f}\n{r.stderr.strip()}')
@@ -71,7 +71,7 @@ if not os.path.exists('art-manifest.json') or open('art-manifest.json').read() !
     open('art-manifest.json', 'w').write(new); print(f'wrote art-manifest.json ({len(art)} pictures)')
 
 # 7. The names players see live in js/game-config.js (HANDOFF §5 "Reskinning"). A name typed straight into a string in js/
-#    would not change when the config does, so it fails here. Comments may say anything; a line that really means the plain
+#    (or content/) would not change when the config does, so it fails here. Comments may say anything; a line that really means the plain
 #    word (an 'Ember' cosmetic, a 'Fern' rug colour) ends with a `names-ok` comment. The changelogs are history, left alone.
 def js_strings(src):
     """Yield (line, text) for the literal text of every '...', "..." and `...` in a JS source, skipping comments and regexes."""
@@ -122,7 +122,7 @@ else:
     names += list(cfg['PLACES'].values()) + list(cfg['BOSSES'].values()) + list(cfg['FAMILY_NAMES'].values()) + [c['name'] for c in cfg['CAST'].values()]
     name_re = re.compile(r'(?<![A-Za-z])(' + '|'.join(sorted(map(re.escape, set(names)), key=len, reverse=True)) + r')(?![A-Za-zñ])')
     for f, src in allsrc.items():
-        if f in ('js/game-config.js', 'js/changelog.js', 'js/changelog-archive.js') or not f.startswith('js/'): continue
+        if f in ('js/game-config.js', 'js/changelog.js', 'js/changelog-archive.js') or not f.startswith(('js/', 'content/')): continue
         lines = src.split('\n')
         for ln, text in js_strings(src):
             for m in name_re.finditer(text):

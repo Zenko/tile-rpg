@@ -16,13 +16,15 @@
    - `scripts/check.py` fails if one of these names is typed straight into a string anywhere in js/, so a new line of
      dialogue cannot quietly bring an old name back. The changelog files are history and are left alone.
 
-   Names that live with their own data instead (each is still one place):
-   - cards: name and icon in CARD_POOL / FOE_CARDS / TOKEN_CARDS (js/data-and-engine.js)
-   - packs, decorations: PACKS, DECORATION_ITEMS (js/data-and-engine.js)
-   - random neighbours: NPC_POOLS (js/data-and-engine.js)
-   - buildings: INTERIORS[id].title (js/houses-and-cellar.js)
-   - Fates (tarot): ARCANA (js/tarot.js); spirits at the altar: js/summoning.js
-   - save key: STORAGE_KEY (js/data-and-engine.js) - changing it starts every player on a fresh save
+   Everything else the game says lives in content/ (loaded straight after this file), one file per kind of thing:
+   - content/cards.js     cards, packs, families, Fates, card sets
+   - content/world.js     districts, random neighbour names, buildings and their keepers' lines, fish, seeds, recipes
+   - content/items.js     decorations, cottage furniture, sleeves, avatar borders, backdrops
+   - content/dialogue.js  companion and neighbour talk, favours, hints, letters
+   - content/story.js     the opening, the story steps and the guide's words, events, the Gazette, gossip
+   - content/guide.js     tips, the Town Guide, quests, milestones, titles
+   Not yet in content/: spirits at the altar (js/summoning.js), mini-game rules (js/puzzle-memory-minigames.js) and
+   the save key, STORAGE_KEY (js/data-and-engine.js) - changing that starts every player on a fresh save.
    ============================================================ */
 const GAME = {
   title: 'Tile RPG',                                  // tab title, version line, feedback mail, signs in town

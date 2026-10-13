@@ -176,17 +176,7 @@ function weatherBoardHtml(quote) {
 }
 function weatherEffectLine() { const w = WEATHER_EFFECTS[weatherNow()]; return w ? `${WEATHER_KINDS[weatherNow()].icon} ${w.short}` : ''; }
 
-/* ---------------- ambient flavor line: a quiet, rotating sense-of-place above the event log ---------------- */
-const DISTRICT_AMBIENT = {
-  square: { day: ['Pigeons peck at crumbs near the fountain.', 'Sunlight settles warm over the square.', 'Someone left a book open on a bench.', 'The old fountain trickles quietly.'],
-            night: ['The fountain catches the moonlight.', 'Lamplight pools soft over the cobblestones.', 'The square is hushed but for a distant owl.', 'Moths circle the street lamps.'] },
-  market: { day: ['The smell of fresh bread drifts from a stall.', 'Awnings flap gently in the breeze.', 'Baskets of goods sit stacked and waiting.', 'A cart wheel creaks somewhere nearby.'],
-            night: ['The stalls are shuttered for the night.', 'A lone lantern glows over the empty market.', 'Crates sit stacked neatly, waiting for morning.'] },
-  harbor: { day: ['Gulls wheel and call over the docks.', 'Boats rock gently against their moorings.', 'Salt air drifts in off the water.', 'A seal suns itself on the rocks.'],
-            night: ['Waves lap quietly against the dock posts.', 'A buoy bell rings faint in the distance.', 'Harbor lights ripple on dark water.'] },
-  garden: { day: ['Bees drift lazily between the blossoms.', 'Sunflowers turn slowly toward the light.', 'Something rustles gently in the hedges.', 'The air smells of warm earth and petals.'],
-            night: ['Night-blooming flowers open their petals.', 'Crickets sing from somewhere in the garden.', 'The garden holds its breath in the moonlight.'] },
-};
+// DISTRICT_AMBIENT: in content/world.js (the game's words and data, kept apart from the code)
 const WEATHER_AMBIENT = {
   cloudy: ['Mist drifts lazily between the buildings.', 'The light has gone soft and pearly.'],
   rain: ['Moonrain patters on the rooftops, silver and slow.', 'Puddles gather along the path, each holding a small moon.', 'The air smells like wet stone.'],
@@ -755,19 +745,7 @@ function pickSpot(m, taken, data, walker) {
   const from = walker && roomy.length ? roomy : (safe.length ? safe : free);
   return from.length ? from[Math.floor(Math.random() * from.length)] : { x: m.spawn.x, y: m.spawn.y };
 }
-// One-line lore rolled once per spirit and kept for its lifetime, so re-tapping it tells the same story.
-const SPIRIT_STORIES = [
-  '{name} drifted in on the wind and never quite left {town}.',
-  'Locals say {name} has watched over {town} for longer than anyone can remember.',
-  'A quiet spirit - {name} only shows itself to those who slow down enough to notice.',
-  '{name} seems to know every corner of {town} by heart.',
-  'They say {name} brings luck to whoever crosses its path with a kind word.',
-  '{name} flickers in and out of sight, like a memory not quite ready to fade.',
-  'No one is quite sure where {name} came from, only that it has always been near {town}.',
-  '{name} hums a tune too faint to place, gone the moment you try to listen closer.',
-  'Children in {town} leave small gifts out for {name}, just in case the stories are true.',
-  '{name} rarely lingers long enough to be seen twice in the same place.',
-];
+// SPIRIT_STORIES: in content/dialogue.js (the game's words and data, kept apart from the code)
 // Wandering spirit critters, drawn at random from the card pool - purely decorative flavor, added lazily
 // so districts already visited (and cached) in an existing save pick some up too.
 function ensureSpirits(key, data) {

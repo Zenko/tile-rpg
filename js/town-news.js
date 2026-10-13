@@ -35,21 +35,7 @@ function tnQuiet() { return !!prefs.cozy; }   // Cozy mode keeps everything work
    A deed is { s: stat, n, d: district, at, told: [neighbour keys] }. The same deed in the same district within mergeMs grows
    instead of adding a line ("caught 3 fish"), and a neighbour only brings each deed up once. */
 const GOSSIP = { keep: 12, freshMs: 6 * 3600 * 1000, mergeMs: 30 * 60 * 1000, chance: 0.5, toldCap: 10 };
-const GOSSIP_DEEDS = {
-  fishCaught:        { did: n => n > 1 ? `caught ${n} fish` : 'landed a fish' },
-  battlesWon:        { did: n => n > 1 ? `won ${n} matches` : 'won a match' },
-  bossesWon:         { did: () => 'stood up to the district god and won', big: true },
-  cropsHarvested:    { did: n => n > 1 ? `brought in ${n} crops` : 'brought in a harvest' },
-  breadBaked:        { did: n => n > 1 ? `baked ${n} loaves` : `baked a loaf at ${CAST.baker.name}'s` },
-  decorationsPlaced: { did: () => 'put up a new decoration' },
-  puzzlesSolved:     { did: () => 'cracked the daily puzzle in the Reading Nook' },
-  cupTrophies:       { did: () => `won the ${GAME.player.many}’ Cup`, big: true },
-  puddleWorlds:      { did: () => 'fell straight through a puddle and came back', big: true },
-  minigameGolds:     { did: () => 'took a gold medal at one of the house games' },
-  favours:           { did: n => n > 1 ? `helped ${n} neighbours out` : 'did a neighbour a favour' },
-  homeVisitors:      { did: () => 'had a spirit come calling at your cottage' },
-  visitorWins:       { did: () => 'beat the travelling Wanderer', big: true },
-};
+// GOSSIP_DEEDS: in content/story.js (the game's words and data, kept apart from the code)
 // Called from bumpStat (js/quests.js) for every stat; only the ones above are worth talking about.
 function gossipNote(stat, n) {
   if (!GOSSIP_DEEDS[stat] || !state || !state.progress) return;
@@ -84,15 +70,7 @@ function gossipLine(f, now) {
 // What npcGreeting (js/npc-brain.js) asks: a coin flip first, so gossip is a nice surprise, not every greeting.
 function gossipGreeting(f) { return Math.random() < GOSSIP.chance ? gossipLine(f) : null; }
 
-/* ---------------- 2. WEATHER MOMENTS ----------------
-   fx numbers multiply the weather's own (dailyBonus adds). A moment ends when its time is up or the weather changes. */
-const MOMENTS = {
-  'koi-run':       { weather: 'rain',   icon: '🐟', name: 'Koi run', text: 'The fish are restless in the moonrain: rare fish bite more often, and sooner.', fx: { rareFish: 2, biteSpeed: 0.8 } },
-  'static':        { weather: 'storm',  icon: '⚡', name: 'Static in the air', text: 'The storm shakes hidden cards loose: they turn up twice as often.', fx: { findMult: 2 } },
-  'star-shower':   { weather: 'snow',   icon: '🌠', name: 'Star shower', text: 'Falling stars land as treasure: chests turn up twice as often.', fx: { chestMult: 2 } },
-  'mist-lanterns': { weather: 'cloudy', icon: '🏮', name: 'Lanterns in the mist', text: `Lanterns light the way between houses: daily tasks pay +2 ${GAME.currency.many}.`, fx: { dailyBonus: 2 } },
-  'rainbow':       { weather: 'clear',  after: ['rain', 'storm'], icon: '🌈', name: 'Rainbow', night: 'Moonbow', text: 'An arc of colour over town: hidden cards and chests turn up half again as often.', fx: { findMult: 1.5, chestMult: 1.5 } },
-};
+// MOMENTS: in content/story.js (the game's words and data, kept apart from the code)
 const MOMENT = { chance: 0.5, rainbowChance: 0.8, ms: 4 * 60 * 1000 };
 // Called by maybeRollWeather (js/town-render-weather.js) when the weather really changes. `roll` is for tests.
 function momentOnWeather(prev, cur, roll) {
@@ -130,29 +108,7 @@ function momentVisual() {
   else if (!on && el) { el.classList.remove('on'); setTimeout(() => el.remove(), 2600); }
 }
 
-/* ---------------- 3. THE DREAM GAZETTE ----------------
-   {a} {b} = two different townsfolk, {d} = a district, {s} = the season, {f} = a card family. Seeded by the date only, so the
-   story is the same for every tester that day; the "also today" lines below it are yours. */
-const GAZETTE_STORIES = [
-  { h: '{a} swears the fountain hummed a new tune', b: 'Nobody else heard it, but {b} has been humming it all morning. Readers are asked to stand very still by the water and report back.' },
-  { h: 'Lost: one left slipper, last seen in {d}', b: '{a} would like it back. {b} points out that nobody in town has ever owned a right one.' },
-  { h: '{s} arrives early, says {a}', b: 'The evidence: a single leaf, a feeling, and the way the light leans in {d}. {b} remains unconvinced.' },
-  { h: `Record loaf baked at ${CAST.baker.name}’s`, b: 'It was so tall that {a} had to stand on a crate to see over it. {b} took the first slice before anyone could stop them.' },
-  { h: '{f} cards spotted dozing in {d}', b: `${GAME.player.many} walking that way are asked to step softly. {a} says one of them snored, which {b} calls "frankly unlikely".` },
-  { h: 'Mystery of the moving bench solved', b: 'It was {a}, moving it one inch a day toward the sun. {b} has asked for the bench to be returned "to where benches go".' },
-  { h: '{a} and {b} declare a truce', b: 'The argument, which began over the correct way to fold a map of {d}, has been settled. Neither will say who won.' },
-  { h: 'Tide reported "unusually polite"', b: '{a} says the water came in, waited, and went out again without a fuss. {b} suspects it wants something.' },
-  { h: 'Night market lantern count reaches a new high', b: '{a} counted twice and got two different numbers, both of them large. {b} recommends counting in the daytime.' },
-  { h: 'Small cloud follows {a} around {d}', b: 'It rains only on their hat. {b} has offered to swap hats, "for science".' },
-  { h: 'Letter of the week: "Where do dreams go when you wake?"', b: '{a} replies: "Into the cupboard, mostly." {b} would like to add that the cupboard is full.' },
-  { h: 'Crop of the season: the {s} turnip', b: 'Round, cheerful and very slightly glowing. {a} grew one the size of a lantern. {b} has started talking to theirs.' },
-  { h: 'A spirit asks for directions in {d}', b: '{a} sent it left, {b} sent it right. It went up. Witnesses say it seemed happy with the outcome.' },
-  { h: 'Town clock runs backwards for one minute', b: 'Nobody minded. {a} says they got an extra minute of sleep out of it, and {b} used it to finish a sandwich.' },
-  { h: 'Puddles "deeper than they look", warns {a}', b: `A ${GAME.player.lower} was seen splashing into one and coming out somewhere else entirely. {b} says that is just good puddle design.` },
-  { h: 'Card match in {d} ends in a draw of biscuits', b: '{a} ran out of cards, {b} ran out of patience, and everybody shared the biscuits. A good day for {f} decks, by all accounts.' },
-  { h: 'Wind carries a song from far away', b: 'It drifted through {d} at dawn. {a} wrote down the words; {b} says they were mostly "la".' },
-  { h: 'Fishing report: "The thoughts are biting"', b: '{a} caught three small worries and let them all go. {b} caught a big idea and is still deciding what to do with it.' },
-];
+// GAZETTE_STORIES: in content/story.js (the game's words and data, kept apart from the code)
 function gazetteToday(day) {
   day = day || todayKey();
   const rng = seeded('gazette-' + day), st = tnPick(rng, GAZETTE_STORIES);
@@ -269,12 +225,7 @@ function communityFetch(force) {
   } catch (e) { /* same as above */ }
 }
 
-/* ---------------- 5. VISITORS ----------------
-   Who comes, where and with what is seeded by the date (the district is picked among the ones you have opened). */
-const VISITORS = {
-  pedlar:   { name: `${CAST.pedlar.name} the Pedlar`, icon: CAST.pedlar.icon, greet: 'Oh, a customer! I only pass through once in a while, so take a look. Everything here is one of a kind, today only.' },
-  wanderer: { name: `${CAST.wanderer.name} the Wanderer`, icon: CAST.wanderer.icon, greet: 'I walk from town to town with one deck and play whoever will have me. Fancy a match? Beat me and I will leave you a card from my bag.' },
-};
+// VISITORS: in content/world.js (the game's words and data, kept apart from the code)
 const VISIT = { chance: 0.6, minLevel: 2, prices: { rare: 25, ultra: 70, super: 150 }, winPebbles: 12, prizeRarity: 'ultra' };
 function visitorToday(day) {
   day = day || todayKey();

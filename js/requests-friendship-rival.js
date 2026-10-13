@@ -10,14 +10,7 @@ const REQ_LANDMARKS = [
   { id: 'well',   label: 'visit the well',   where: 'the well' },
   { id: 'fountain', label: 'stand by the fountain', where: 'the fountain' },
 ];
-const REQ_VISITS = [
-  { building: 'nook',    who: CAST.scholar.name, place: 'the Reading Nook', line: `Could you pop into the Reading Nook and tell ${CAST.scholar.name} I said hello?` },
-  { building: 'cottage', who: CAST.guide.name,  place: `${CAST.guide.name}'s Cottage`,   line: `Would you look in on ${CAST.guide.name} at the cottage? Just say I sent you.` },
-  { building: 'bakery',  who: CAST.baker.name, place: `${CAST.baker.name}'s Bakery`,   line: `Pop into the bakery and tell ${CAST.baker.name} her rolls are the talk of the square.` },
-  { building: 'house2',  who: CAST.gardener.name,  place: `${CAST.gardener.name}'s Cottage`,   line: `${CAST.gardener.name} lent me a watering can ages ago. Could you let her know I have not forgotten?` },
-  { building: 'stall-spice',  who: CAST.spiceSeller.name, place: `${CAST.spiceSeller.name}'s Spice Stall`, line: `Could you ask ${CAST.spiceSeller.name} what today's deal is? I'm too shy to haggle.` },
-  { building: 'stall-tinker', who: CAST.tinker.name,    place: `${CAST.tinker.name}'s Tinker Stall`,   line: `Tell ${CAST.tinker.name} the little bell on the door is squeaking again, would you?` },
-];
+// REQ_VISITS: in content/dialogue.js (the game's words and data, kept apart from the code)
 const REQ_PEBBLES = { fetch: 4, deck: 4, fish: 5, walk: 4, win: 0, visit: 4, dish: 9 };
 const REQ_WIN_RARITY = 'rare';                 // "win without X" pays a card of rare or better
 const REQ_MAX_ACTIVE = 2;                      // you can carry at most two open requests, so the list never overwhelms
@@ -160,13 +153,7 @@ function talkReact(emoji) {
   const fl = document.createElement('span'); fl.className = 'talk-float'; fl.textContent = emoji;
   pt.appendChild(fl); setTimeout(() => fl.remove(), 1100);
 }
-const TALK_WEATHER = {
-  clear:  ['Lovely and bright, isn\'t it? Good day for a wander.', 'Not a cloud to complain about. I could sit out in this all afternoon.'],
-  cloudy: ['A bit misty, but I don\'t mind. It keeps the glare off the cards.', 'Misty days are for slow walks and warm drinks.'],
-  rain:   ['Listen to the moonrain on the roofs. I do love the sound.', 'Puddles everywhere, each with its own little moon!'],
-  storm:  ['Quite the dream storm! Everything feels a little faster in this weather.', 'It always makes my cards tingle. Stay close, friend.'],
-  snow:   ['Drifting stars! Everything is so quiet under them.', 'Come and find me by the warm windows later.']
-};
+// TALK_WEATHER: in content/dialogue.js (the game's words and data, kept apart from the code)
 const TALK_GOSSIP = [
   place => `Things are calm around ${place}. I like it that way.`,
   place => `Someone left a card on a bench in ${place} yesterday. Finders keepers, I suppose!`,

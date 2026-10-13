@@ -4,12 +4,7 @@
    El Umbral, and harvest when grown. Growth runs on real time and the rain makes it half again as fast.
    Card seeds grow a card instead of (well, as well as) Embers.
    ============================================================ */
-const SEEDS = [
-  { id: 'daisy',     name: 'Daisy',     icon: '🌼', cost: 5,  growMin: 5,  pebbles: 7,  xp: 10, desc: 'Quick and cheerful.' },
-  { id: 'pumpkin',   name: 'Pumpkin',   icon: '🎃', cost: 12, growMin: 15, pebbles: 18, xp: 20, desc: 'Slow, but it pays.' },
-  { id: 'sunflower', name: 'Sunflower', icon: '🌻', cost: 22, growMin: 25, pebbles: 6,  xp: 25, card: 'rare',  desc: 'A card seed: grows a rare card or better.' },
-  { id: 'moonbean',  name: 'Moonbean',  icon: '🌙', cost: 0,  growMin: 40, pebbles: 8,  xp: 40, card: 'ultra', found: true, desc: `Only found in ${PLACES.garden}. Grows an ultra rare card or better.` },
-];
+// SEEDS: in content/world.js (the game's words and data, kept apart from the code)
 const PLOT_MAX = 8;
 const SEED_FIND_CHANCE = 0.03;          // per El Jardín Lúcido grass tile walked, reset daily
 function seedDef(id) { return SEEDS.find(s => s.id === id); }

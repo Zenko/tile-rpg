@@ -18,7 +18,7 @@ const SOLID_TERRAIN = 'oihr~';
 const BIOME_OF = { square: 'meadow', market: 'bazaar', harbor: 'harbor', garden: 'orchard' };
 const PROP_ICON = { fountain: '⛲', bench: '🪑', well: '🪣', lamp: '🏮', sign: '🪧', door: '🚪', crate: '📦', nets: '🪢' };
 const PROP_SPRITE = { fountain: 'p-fountain', bench: 'p-bench', well: 'p-well', lamp: 'p-lamp', sign: 'p-sign' };
-const TREE_FLAVOR = ['An old tree. It has seen a lot of quiet afternoons.', 'The trunk is too wide to squeeze past.', 'Leaves rustle overhead.', 'Nothing to do here but admire it.'];
+// TREE_FLAVOR: in content/world.js (the game's words and data, kept apart from the code)
 const WATER_FLAVOR = ['The water is cool and clear. Best to keep your boots dry.', 'Small ripples spread and fade.'];
 
 function seeded(str) {

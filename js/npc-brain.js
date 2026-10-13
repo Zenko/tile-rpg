@@ -15,15 +15,7 @@
    ============================================================ */
 const NPC_WEATHER_FAMILY = { clear: 'grove', cloudy: 'wind', rain: 'tide', storm: 'wind', snow: 'stone' };
 const NPC_WEATHER_WORDS = { clear: 'clear skies', cloudy: 'the mist', rain: 'the rain', storm: 'the storm', snow: 'the snow' };
-const NPC_HINTS = [
-  { id: 'family:grove', label: `🌿 ${FAMILY_NAMES.grove} cards`, say: `${FAMILY_NAMES.grove} cards? Lovely, I will pack some.` },
-  { id: 'family:stone', label: `🪨 ${FAMILY_NAMES.stone} cards`, say: `${FAMILY_NAMES.stone}, solid and steady. I can do that.` },
-  { id: 'family:tide', label: `🌊 ${FAMILY_NAMES.tide} cards`, say: `${FAMILY_NAMES.tide} it is. I like the sound of that.` },
-  { id: 'family:wind', label: `🪶 ${FAMILY_NAMES.wind} cards`, say: `${FAMILY_NAMES.wind} cards, light on their feet. Good idea.` },
-  { id: 'tough', label: '💪 Something tougher', say: 'You want a real challenge? Then I will bring my sturdiest cards.' },
-  { id: 'gentle', label: '🫖 Something gentler', say: 'A softer deck for a softer day. I will go easy.' },
-  { id: 'seasonal', label: '🍂 Whatever suits the season', say: 'Something seasonal. I will see what the weather brings.' }
-];
+// NPC_HINTS: in content/dialogue.js (the game's words and data, kept apart from the code)
 function npcHintDef(id) { return NPC_HINTS.find(h => h.id === id) || null; }
 function npcTaste(f) {
   const h = foeSeedHash('taste:' + (f && f.name));

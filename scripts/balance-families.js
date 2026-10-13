@@ -4,7 +4,7 @@
 const dir = require('path').join(__dirname, '..'), K = +(process.argv[2] || 16), G = +(process.argv[3] || 30);
 const { BattleEngine: BE, CARD_POOL } = require(dir + '/server/load-engine')();
 const fs = require('fs');
-const src = fs.readFileSync(dir + '/js/data-and-engine.js', 'utf8'), lm = src.match(/const lists = \{([\s\S]*?)\n  \};/)[1], FAM = {};
+const src = fs.readFileSync(dir + '/content/cards.js', 'utf8'), lm = src.match(/const lists = \{([\s\S]*?)\n  \};/)[1], FAM = {};
 for (const m of lm.matchAll(/(\w+): '([^']+)'/g)) m[2].split(/\s+/).forEach(id => FAM[id] = m[1]);
 const pool = CARD_POOL.filter(c => !c.exclusive && !c.foe), fams = ['grove', 'stone', 'tide', 'wind'];
 let sr = +(process.argv[4] || 123456); const rnd = () => (sr = (sr * 1664525 + 1013904223) >>> 0) / 4294967296;
