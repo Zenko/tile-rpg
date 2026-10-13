@@ -178,6 +178,7 @@ function withTravelTransition(key, swap, opts) {   // opts: { sub, icon } overri
   }, reduce ? 40 : 300);
 }
 function crossExit(exit) {
+  if (typeof pwReachedExit === 'function' && pwReachedExit(exit)) return;   // js/puddle-worlds.js: the way out of a maze world
   const def = DISTRICTS[exit.to];
   if (!districtUnlocked(exit.to)) {
     townLog.textContent = `The way to ${def.name} is still overgrown. ${districtLockReason(exit.to)} to clear it.`;

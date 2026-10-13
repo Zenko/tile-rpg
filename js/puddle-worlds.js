@@ -13,6 +13,9 @@
    - Cards here do not vanish and respawn like the town's (items are `fixed`), the way home is blocked (pwBlocksTravel), and the
      way out is the timer, or tapping it to leave early.
    - Off in Cozy mode (a countdown is exactly the pressure that mode takes away).
+   Kinds of world (build 245): every world has a `kind`. 'explore' (below) is the original: wander and look for cards. js/puddle-modes.js adds
+   'maze' (find the way out, racing neighbours), 'ladders' (a dice-only board game) and 'deep' (an underwater city). A kind is an entry in
+   PW_KINDS with hooks: create, generate, build, enter, leave, boot, render, tap, exit, goal (see pwKind and the hook helpers below).
    Tunables are the PW_* constants right below. Colour palettes: scripts/build-pw-biomes.py -> css/latest.css.
    ============================================================ */
 const PW_KEY = 'pw';
@@ -31,14 +34,15 @@ TRAVEL_ICON[PW_KEY] = '🌀';
 
 const PW_BIOMES = [
   { id: 'pw-glass', word: 'Glass' }, { id: 'pw-ember', word: 'Ember' }, { id: 'pw-mirror', word: 'Mirror' }, { id: 'pw-bloom', word: 'Blossom' },
-  { id: 'pw-static', word: 'Static' }, { id: 'pw-tide', word: 'Drowned' }, { id: 'pw-dusk', word: 'Dusk' }
+  { id: 'pw-static', word: 'Static' }, { id: 'pw-tide', word: 'Drowned' }, { id: 'pw-dusk', word: 'Dusk' },
+  { id: 'pw-reef', word: 'Reef', deep: true }, { id: 'pw-abyss', word: 'Abyssal', deep: true }   // the two underwater palettes: only 'deep' worlds use them
 ];
+const pwBiomesFor = deep => PW_BIOMES.filter(b => !!b.deep === !!deep);
 const PW_SHAPES = {
   meadow:  ['Meadow', 'Fields', 'Commons'],
   grove:   ['Hollow', 'Thicket', 'Grove'],
   islands: ['Archipelago', 'Shallows', 'Atoll'],
   ring:    ['Circle', 'Plaza', 'Orbit'],
-  maze:    ['Warren', 'Labyrinth', 'Maze'],
   river:   ['Reach', 'Crossing', 'Bend']
 };
 const PW_MOODS = [
@@ -53,17 +57,24 @@ const PW_PROPS = {
   fountain: { title: 'A fountain running backwards', desc: 'The water falls upward and lands in the sky.' }
 };
 
+/* ---------------- kinds of world ---------------- */
+const PW_KINDS = {};   // kind -> { weight, create, generate, build, enter, leave, boot, render, tap, exit, goal }; 'explore' is defined below
+function pwKind(w) { w = w || pwActive(); return (w && PW_KINDS[w.kind]) || PW_KINDS.explore; }
+
 /* ---------------- the world record ---------------- */
 function pwActive() { const w = state.progress && state.progress.puddleWorld; return w && w.endsAt ? w : null; }
-function pwNewWorld() {
+function pwNewWorld(forceKind) {
   const pr = state.progress, last = pr.pwLast || {};
   const seed = Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-3);
   const rnd = seeded('pw-pick-' + seed), pick = a => a[Math.floor(rnd() * a.length)];
-  const biome = pick(PW_BIOMES.filter(b => b.id !== last.biome)), shapeKey = pick(Object.keys(PW_SHAPES).filter(s => s !== last.shape));
-  const size = [15 + 2 * Math.floor(rnd() * 3), 15 + 2 * Math.floor(rnd() * 3)];   // 15, 17 or 19 each way (odd, for the maze)
-  const now = Date.now();
-  return { seed, shape: shapeKey, biome: biome.id, name: biome.word + ' ' + pick(PW_SHAPES[shapeKey]), sub: pick(PW_MOODS), size,
-    startedAt: now, endsAt: now + PW_MIN_MS + Math.floor(rnd() * (PW_MAX_MS - PW_MIN_MS)), origin: null, cards0: state.ownedCards.length };
+  // the kind: weighted, never the same twice running
+  const kinds = Object.keys(PW_KINDS).filter(k => k !== last.kind || Object.keys(PW_KINDS).length < 2);
+  let kind = forceKind && PW_KINDS[forceKind] ? forceKind : kinds[0], r = rnd() * kinds.reduce((a, k) => a + PW_KINDS[k].weight, 0);
+  if (!(forceKind && PW_KINDS[forceKind])) for (const k of kinds) { r -= PW_KINDS[k].weight; if (r < 0) { kind = k; break; } }
+  const now = Date.now(), w = { seed, kind, sub: pick(PW_MOODS), startedAt: now, origin: null, cards0: state.ownedCards.length };
+  PW_KINDS[kind].create(w, rnd, pick, last);
+  w.endsAt = now + (w.ms || PW_MIN_MS + Math.floor(rnd() * (PW_MAX_MS - PW_MIN_MS)));
+  return w;
 }
 // Points the shared lookups (name, biome, cached map) at the current world. Safe to call again.
 function pwApply(w) {
@@ -128,20 +139,6 @@ const PW_BUILD = {
     }
     for (let y = spawn.y; y > cy + 2; y--) g[y][spawn.x] = '=';
   },
-  maze(g, W, H, rnd, spawn) {
-    for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) g[y][x] = 'rrh'[Math.floor(rnd() * 3)];
-    const stack = [{ x: spawn.x, y: spawn.y }]; g[spawn.y][spawn.x] = '.';
-    while (stack.length) {
-      const c = stack[stack.length - 1], opts = [[2, 0], [-2, 0], [0, 2], [0, -2]].filter(([dx, dy]) => { const nx = c.x + dx, ny = c.y + dy; return nx > 0 && ny > 0 && nx < W - 1 && ny < H - 1 && 'rh'.includes(g[ny][nx]); });
-      if (!opts.length) { stack.pop(); continue; }
-      const [dx, dy] = opts[Math.floor(rnd() * opts.length)];
-      g[c.y + dy / 2][c.x + dx / 2] = '.'; g[c.y + dy][c.x + dx] = '.'; stack.push({ x: c.x + dx, y: c.y + dy });
-    }
-    for (let y = 2; y < H - 2; y++) for (let x = 2; x < W - 2; x++) if ((x + y) % 2 === 1 && 'rh'.includes(g[y][x]) && rnd() < 0.14) g[y][x] = '.';   // loops, so it is not one long corridor
-    for (let r = 0; r < 2; r++) { const rx = 2 * (1 + Math.floor(rnd() * ((W - 5) / 2))), ry = 2 * (1 + Math.floor(rnd() * ((H - 7) / 2)));
-      for (let y = ry - 1; y <= ry + 1; y++) for (let x = rx - 1; x <= rx + 1; x++) if (x > 0 && y > 0 && x < W - 1 && y < H - 1) g[y][x] = rnd() < 0.4 ? ',' : '.'; }
-    for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) if (g[y][x] === '.' && rnd() < 0.12) g[y][x] = ',';
-  },
   river(g, W, H, rnd, spawn) {
     const cy = H * 0.42, amp = 1.3 + rnd() * 1.2, f = 0.5 + rnd() * 0.5, ph = rnd() * 6, wide = rnd() < 0.5 ? 2 : 3;
     for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) { const r = rnd(); g[y][x] = r < (y < cy ? 0.24 : 0.14) ? 'ooi'[Math.floor(rnd() * 3)] : r < 0.42 ? ',' : '.'; }
@@ -158,17 +155,18 @@ function pwMapDef(w) {
   w = w || pwActive() || { seed: 'none', shape: 'meadow', size: [15, 15] };
   return w.map || pwGenerate(w);
 }
-function pwGenerate(w) {
+function pwGenerate(w) { return pwKind(w).generate(w); }
+function pwGenerateExplore(w) {
   let best = null;
   for (let attempt = 0; attempt < 6 && !best; attempt++) {
     const shape = attempt < 4 ? w.shape : 'meadow';                     // a shape that came out too small falls back to a meadow
     const rnd = seeded('pw-map-' + w.seed + ':' + attempt), W = w.size[0], H = w.size[1];
     const g = Array.from({ length: H }, () => Array(W).fill('.'));
-    const spawn = { x: shape === 'maze' ? (W >> 1) | 1 : W >> 1, y: H - 2 };
-    PW_BUILD[shape](g, W, H, rnd, spawn);
+    const spawn = { x: W >> 1, y: H - 2 };
+    (PW_BUILD[shape] || PW_BUILD.meadow)(g, W, H, rnd, spawn);   // (older saved worlds can name a shape that no longer exists)
     for (let x = 0; x < W; x++) { g[0][x] = 'o'; g[H - 1][x] = 'i'; }
     for (let y = 0; y < H; y++) { g[y][0] = 'i'; g[y][W - 1] = 'o'; }
-    g[spawn.y][spawn.x] = '='; if (shape !== 'maze') { g[spawn.y][spawn.x - 1] = '='; g[spawn.y][spawn.x + 1] = '='; }
+    g[spawn.y][spawn.x] = '='; g[spawn.y][spawn.x - 1] = '='; g[spawn.y][spawn.x + 1] = '=';
     // everything you can stand on must be joined to the arrival spot; whatever is not becomes a tree
     const seen = new Set([spawn.x + ',' + spawn.y]), q = [spawn];
     while (q.length) { const c = q.shift(); [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(([dx, dy]) => { const nx = c.x + dx, ny = c.y + dy, k = nx + ',' + ny;
@@ -196,18 +194,59 @@ function pwGenerate(w) {
 
 /* ---------------- the hidden cards and spirits ---------------- */
 function pwBuildData() {
-  const m = getMap(PW_KEY), data = { npcs: [], boss: null, items: [], spirits: null, scenery: [], buildings: {}, decorations: [], pw: true };
+  const w = pwActive(), m = getMap(PW_KEY), data = { npcs: [], boss: null, items: [], spirits: null, scenery: [], buildings: {}, decorations: [], pw: true };
   state.districtData[PW_KEY] = data;
-  const taken = new Set([m.spawn.x + ',' + m.spawn.y]);
-  for (let i = 0; i <= PW_ITEMS; i++) {
-    const s = pickSpot(m, taken, data, null); taken.add(s.x + ',' + s.y);
-    // the last one is the treasure: a proper reward roll (rare or better); the rest are town finds, a little richer than usual
-    const rarity = i === PW_ITEMS ? rollRewardRarity(false) : (Math.random() < 0.35 ? 'rare' : 'common');
-    data.items.push({ id: 'item-pw-' + i, x: s.x, y: s.y, cardId: weightedTownCardId(rarity), collected: false, spawnedAt: 0, collectedAt: null, fixed: true, treasure: i === PW_ITEMS });
-  }
-  ensureSpirits(PW_KEY, data);
+  pwKind(w).build(w, data, m);
   return data;
 }
+// Shared by the kinds: n hidden cards on open ground (the last one a proper reward roll when `treasure`), never on `taken`.
+function pwScatterItems(data, m, n, treasure, taken) {
+  taken = taken || new Set([m.spawn.x + ',' + m.spawn.y]);
+  for (let i = 0; i < n; i++) {
+    const s = pickSpot(m, taken, data, null); taken.add(s.x + ',' + s.y);
+    const isTreasure = treasure && i === n - 1, rarity = isTreasure ? rollRewardRarity(false) : (Math.random() < 0.35 ? 'rare' : 'common');
+    data.items.push({ id: 'item-pw-' + data.items.length, x: s.x, y: s.y, cardId: weightedTownCardId(rarity), collected: false, spawnedAt: 0, collectedAt: null, fixed: true, treasure: isTreasure });
+  }
+}
+// A card given outright (a reward, a gift): the same pickup sheet as a hidden card.
+function pwGiveCard(cardId, label) {
+  const isNew = !state.ownedCards.includes(cardId);
+  state.ownedCards.push(cardId); saveState(); updateHud(); bumpPill('pillCards'); bumpStat('cardsFound', 1);
+  if (isNew) toast('📖 New entry in your Index');
+  sfx('claim'); buzz(HAP.tap); showCardReveal(cardId, label, false, null, XP_PER_STAT.cardsFound);
+}
+// The persistent layer for things that move on their own (racers, pawns, folk, fish). It lives inside the town world but is not an
+// `.ent`, so the town's redraws (which clear every .ent) never destroy it, and its elements keep their CSS transitions.
+function pwLayer(create) {
+  if (!townWorld) return null;
+  let l = townWorld.querySelector(':scope > .pw-layer');
+  if (!l && create) { l = document.createElement('div'); l.className = 'pw-layer'; townWorld.appendChild(l); }
+  return l;
+}
+function pwActor(id, x, y, html, cls) {
+  const l = pwLayer(true); if (!l) return null;
+  let e = l.querySelector(`[data-pwid="${id}"]`);
+  if (!e) { e = document.createElement('div'); e.className = 'pw-actor ' + (cls || ''); e.dataset.pwid = id; e.innerHTML = html; l.appendChild(e); }
+  else if (html != null && e.dataset.html !== html) { e.innerHTML = html; }
+  e.dataset.html = html; e.style.setProperty('--x', x); e.style.setProperty('--y', y); e.style.zIndex = Math.round(y * 2 + 1);
+  return e;
+}
+function pwActorRemove(id) { const l = pwLayer(); const e = l && l.querySelector(`[data-pwid="${id}"]`); if (e) e.remove(); }
+function pwLayerClear() { const l = pwLayer(); if (l) l.remove(); }
+
+// The original kind: wander, look for cards and spirits.
+PW_KINDS.explore = {
+  weight: 3,
+  create(w, rnd, pick, last) {
+    const biome = pick(pwBiomesFor(false).filter(b => b.id !== last.biome)), shapeKey = pick(Object.keys(PW_SHAPES).filter(s => s !== last.shape));
+    w.shape = shapeKey; w.biome = biome.id; w.name = biome.word + ' ' + pick(PW_SHAPES[shapeKey]);
+    w.size = [15 + 2 * Math.floor(rnd() * 3), 15 + 2 * Math.floor(rnd() * 3)];   // 15, 17 or 19 each way
+    w.intro = 'It will not last - look around while you can.';
+  },
+  generate: pwGenerateExplore,
+  build(w, data, m) { pwScatterItems(data, m, PW_ITEMS + 1, true); ensureSpirits(PW_KEY, data); },
+  goal() { return { icon: '🔎', text: 'Find hidden cards before the world fades' }; }
+};
 
 /* ---------------- going in and coming out ---------------- */
 function pwBusy() { return inBattle || !!storyCur || (typeof inScene !== 'undefined' && inScene) || travelFading; }
@@ -223,30 +262,32 @@ function pwMaybeEnter(x, y) {
   if (!pwCanStart() || Math.random() >= PW_CHANCE) return;
   setTimeout(() => { if (pwCanStart()) pwEnter(x, y); }, 520);   // let the splash play first
 }
-function pwEnter(x, y) {
-  const w = pwNewWorld(); w.origin = { district: state.currentDistrict, x: x == null ? state.playerPos.x : x, y: y == null ? state.playerPos.y : y };
+function pwEnter(x, y, forceKind) {
+  const w = pwNewWorld(forceKind); w.origin = { district: state.currentDistrict, x: x == null ? state.playerPos.x : x, y: y == null ? state.playerPos.y : y };
   w.map = pwGenerate(w);
-  state.progress.puddleWorld = w; state.progress.pwLast = { biome: w.biome, shape: w.shape };
+  state.progress.puddleWorld = w; state.progress.pwLast = { biome: w.biome, shape: w.shape, kind: w.kind };
   pwApply(w);
   const go = () => {
     cancelWalk();
     state.currentDistrict = PW_KEY; state.playerPos = Object.assign({}, getMap(PW_KEY).spawn);
-    pwBuildData(); townBuiltFor = null;
+    pwBuildData(); townBuiltFor = null; const k = pwKind(w); if (k.enter) k.enter(w);
     bumpStat('puddleWorlds', 1); saveState(); renderTown(); if (typeof renderDistricts === 'function') renderDistricts(); switchTab('town');
     townLog.textContent = `The puddle swallows you. ${w.sub}`;
-    toast(`🌀 You fell into the ${w.name}. It will not last - look around while you can.`);
-    logEvent('🌀', `Fell through a puddle into the ${w.name}.`);
+    toast(`🌀 You fell into the ${w.name}. ${w.intro || ''}`);
+    logEvent('🌀', `Fell through a puddle into the ${w.name}.`); if (typeof teleInc === 'function') teleInc('puddleWorld.kind.' + w.kind);
     if (typeof teleInc === 'function') teleInc('puddleWorld.entered');
     pwUpdatePill(); showTipOnce('puddleworld'); sfx('claim'); buzz(HAP.tap);
   };
   withTravelTransition(PW_KEY, go, { sub: w.sub, icon: '🌀' });
 }
 // The way out: the timer ran down, or the player chose to leave. `quiet` = no transition (used at start-up).
-function pwLeave(why, quiet) {
+function pwLeave(why, quiet, after) {   // why: 'faded' (the timer), 'left' (climbed out), 'done' (finished the world's goal); after: runs once she is back
   const w = pwActive(); if (!w) return;
   const origin = w.origin && Object.prototype.hasOwnProperty.call(DISTRICTS, w.origin.district) && w.origin.district !== PW_KEY ? w.origin : { district: 'square', x: null, y: null };
   const back = () => {
-    const found = Math.max(0, state.ownedCards.length - (w.cards0 || 0));
+    const found = Math.max(0, state.ownedCards.length - (w.cards0 || 0)), k = pwKind(w);
+    if (k.leave) { try { k.leave(w); } catch (e) { /* cleanup only */ } }
+    pwLayerClear();
     delete state.districtData[PW_KEY]; delete LIFE.puddles[PW_KEY]; delete LIFE.birds[PW_KEY];
     state.progress.puddleWorld = null; state.progress.pwEndedAt = Date.now();
     pwApply(null);
@@ -255,14 +296,15 @@ function pwLeave(why, quiet) {
     townBuiltFor = null; cancelWalk(); saveState();
     if (!quiet) {
       renderTown(); if (typeof renderDistricts === 'function') renderDistricts();
-      const gone = why === 'left' ? `You climbed back out of the ${w.name}.` : `The ${w.name} faded like a ripple, and you are back in ${DISTRICTS[origin.district].name}.`;
+      const gone = why === 'left' ? `You climbed back out of the ${w.name}.` : why === 'done' ? `You made it out of the ${w.name} and are back in ${DISTRICTS[origin.district].name}.` : `The ${w.name} faded like a ripple, and you are back in ${DISTRICTS[origin.district].name}.`;
       townLog.textContent = gone;
       toast(`🌀 ${gone}${found ? ` You came back with ${found} new card${found === 1 ? '' : 's'}.` : ''}`);
-      logEvent('🌀', `The ${w.name} ${why === 'left' ? 'was left behind' : 'faded away'}${found ? ` (${found} new card${found === 1 ? '' : 's'} found)` : ''}.`);
+      logEvent('🌀', `The ${w.name} ${why === 'left' ? 'was left behind' : why === 'done' ? 'was completed' : 'faded away'}${found ? ` (${found} new card${found === 1 ? '' : 's'} found)` : ''}.`);
       sfx('soft');
     }
     if (typeof teleInc === 'function') teleInc('puddleWorld.' + why);
     pwUpdatePill();
+    if (after && !quiet) setTimeout(after, 700);
   };
   if (quiet) back(); else withTravelTransition(origin.district, back, { sub: 'Back where you started…', icon: '🌀' });
 }
@@ -272,11 +314,25 @@ function pwBlocksTravel() {
   return true;
 }
 
+/* ---------------- hooks the rest of the game calls (all typeof-guarded there) ---------------- */
+function pwInside() { return !!pwActive() && state.currentDistrict === PW_KEY; }
+function pwRenderEntities(data, add) {   // from lifeRenderEntities (town-life.js), on every redraw of the town
+  if (!pwInside()) { pwLayerClear(); return; }
+  const w = pwActive(), k = pwKind(w); if (k.render) k.render(w, data, add);
+}
+function pwHandleTap(tx, ty) { if (!pwInside()) return false; const w = pwActive(), k = pwKind(w); return !!(k.tap && k.tap(w, tx, ty)); }   // true = the tap is used up
+function pwReachedExit(exit) { if (!exit || !exit.pw) return false; const w = pwActive(), k = pwKind(w); if (w && k.exit) k.exit(w); return true; }   // from crossExit (world-map.js)
+function pwGoal() {   // the goal pill at the top: what this world is about
+  if (!pwInside()) return null;
+  const w = pwActive(), g = pwKind(w).goal ? pwKind(w).goal(w) : null; if (!g) return null;
+  return { icon: g.icon, text: g.text, run: () => toast('🌀 ' + (g.hint || g.text)) };
+}
+
 /* ---------------- start-up, the timer and the pill ---------------- */
 // Runs right after loadState(): a world that ended while the game was closed is simply gone (you are put back, quietly).
 function pwBoot() {
   const w = pwActive();
-  if (w && Date.now() < w.endsAt) { pwApply(w); if (!state.districtData[PW_KEY]) pwBuildData(); return; }
+  if (w && Date.now() < w.endsAt) { pwApply(w); if (!state.districtData[PW_KEY]) pwBuildData(); const k = pwKind(w); if (k.boot) k.boot(w); return; }
   if (w) { pwLeave('faded', true); setTimeout(() => toast('🌀 The puddle world you fell into faded while you were away.'), 1800); return; }
   if (state.currentDistrict === PW_KEY) { state.currentDistrict = 'square'; state.playerPos = Object.assign({}, getMap('square').spawn); }
   delete state.districtData[PW_KEY];

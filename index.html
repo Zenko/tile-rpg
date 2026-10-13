@@ -444,6 +444,11 @@
 
 </div>
 
+<div class="pw-dice hidden" id="pwDice" role="group" aria-label="Dice board">
+  <div class="pwd-info"><span class="pwd-line" id="pwdLine">Your turn</span><span class="pwd-sq" id="pwdSq"></span></div>
+  <span class="pwd-face" id="pwdFace" aria-hidden="true">⚀</span>
+  <button type="button" class="btn pwd-roll" id="pwdRoll">🎲 Roll</button>
+</div>
 <script src="assets/sprites.js"></script>
 <script src="assets/player-art.js"></script>
 <div class="toast" id="toast"></div>
@@ -869,6 +874,7 @@ pixiReady.catch(function () {});
 <script src="js/ui-polish.js"></script>
 <script src="js/town-life.js"></script>
 <script src="js/puddle-worlds.js"></script>
+<script src="js/puddle-modes.js"></script>
 <script src="js/summoning.js"></script>
 <script src="js/altar-screen.js"></script>
 <script src="js/atlas.js"></script>

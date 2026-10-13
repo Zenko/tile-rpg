@@ -958,6 +958,7 @@ function handleMapTap(tx, ty) {
   if (placingDecoration) { handleDecorationTap(tx, ty); return; }
   const m = getMap(state.currentDistrict), data = ensureDistrictData(state.currentDistrict);
   if (tx < 0 || ty < 0 || tx >= m.w || ty >= m.h) return;
+  if (typeof pwHandleTap === 'function' && pwHandleTap(tx, ty)) return;   // js/puddle-worlds.js: a world can take the tap (dice board, maze rules, folk)
   cancelWalk(); setChase(null); pendingWalk = null;
   const boss = data.boss && !data.boss.defeated && bossVisible() && data.boss.x === tx && data.boss.y === ty ? data.boss : null;
   const npc = data.npcs.find(n => !n.defeated && n.x === tx && n.y === ty);

@@ -234,6 +234,7 @@ function lifeRenderEntities(data, add) {
   const d = state.currentDistrict, m = getMap(d), night = skyPhase().isNight, wx = weatherNow(), wet = wx === 'rain' || wx === 'storm';
   townView.dataset.wx = wx;
   const l = lifeState(), lv = moodLevel(data);
+  if (typeof pwRenderEntities === 'function') pwRenderEntities(data, add);   // js/puddle-worlds.js: what a puddle world draws (exit, board, actors)
   if (!night && Object.keys(l.lit).length) l.lit = {};
   const nlList = [];
   m.props.forEach(p => {

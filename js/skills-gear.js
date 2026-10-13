@@ -153,6 +153,7 @@ function charDrawPath(box) {
    Recomputed at most every 2 seconds (updateHud calls this very often) and hidden while a decoration is being placed. */
 let goalChipAt = 0, goalChipTarget = null;
 function nextGoal() {
+  const pg = typeof pwGoal === 'function' ? pwGoal() : null; if (pg) return pg;   // inside a puddle world the pill says what the world is about
   const sg = storyGoal();   // js/scenes.js: Wren's current ask. It leads during the first chain and only fills an empty pill after it.
   if (sg && sg.first) return sg;
   if (skillPointsLeft() > 0) return { icon: '🧭', text: `${skillPointsLeft()} skill point${skillPointsLeft() === 1 ? '' : 's'} to spend`, run: () => { switchTab('character'); charSetView('path'); } };

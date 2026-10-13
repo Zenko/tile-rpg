@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'new', x: 'More kinds of puddle world. A puddle might now drop you into a maze (find the way out before the timer ends, with only a few tiles lit around you and three neighbours racing to get out first), a board game (roll the dice to move, climb ladders, slide down snakes, dodge traps and win the flag while the neighbours play too), or a sunken city (swim through coral streets, meet the folk who live there and watch the fish go by). Finishing a maze or a board earns a card and Embers, more for first place.' },
 ];
 
 const RELEASES = [

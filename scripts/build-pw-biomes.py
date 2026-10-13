@@ -37,6 +37,13 @@ PALETTES = {
     'pw-tide':   dict(ground='#1f3239', ground2='#1b2e35', ground3='#24383f', tuft='#3f7070', path='#36483f', **{'path-edge': '#2b3a33', 'path-dot': '#48594f'},
                       leaf1='#1f6a6a', leaf2='#2a8a86', leaf3='#4fc0b4', pine1='#1a4a52', pine2='#226068', water='#12405e', water2='#2b7ca6', shore='#3f5a50',
                       stone='#6a8088', stone2='#52666d', stone3='#82989f', flower1='#ff9eb5', flower2='#ffe08a', flower3='#e6fffa', lamp='#9ff0e0'),
+    # the two underwater palettes (js/puddle-modes.js 'deep' worlds): sandy reef with coral, and a dark abyss with glowing violet coral
+    'pw-reef':   dict(ground='#2a4a52', ground2='#264650', ground3='#2f525b', tuft='#4f8f90', path='#3f6a74', **{'path-edge': '#335862', 'path-dot': '#5a8590'},
+                      leaf1='#d9647a', leaf2='#f08a7e', leaf3='#ffb4a0', pine1='#2f8f86', pine2='#40b0a0', water='#1d4f8a', water2='#3f8ad0', shore='#6fa0a0',
+                      stone='#7aa0b0', stone2='#5e8392', stone3='#9ec0cc', flower1='#ffd166', flower2='#ff8fb8', flower3='#e6fffa', lamp='#9ff0ff'),
+    'pw-abyss':  dict(ground='#1c2342', ground2='#181f3b', ground3='#212949', tuft='#3a4f94', path='#2b3560', **{'path-edge': '#222a4e', 'path-dot': '#3a4678'},
+                      leaf1='#5a3fa0', leaf2='#7b5ad0', leaf3='#a98cff', pine1='#1f6a8f', pine2='#2b8fb8', water='#101a3a', water2='#2a4a9a', shore='#3a4a7a',
+                      stone='#6a7098', stone2='#505678', stone3='#8a90b8', flower1='#7af0ff', flower2='#ff7ad9', flower3='#e0f0ff', lamp='#8af0ff'),
     'pw-dusk':   dict(ground='#3a3128', ground2='#362d24', ground3='#3f362c', tuft='#7a6038', path='#55442f', **{'path-edge': '#453626', 'path-dot': '#6c573c'},
                       leaf1='#8a6a2a', leaf2='#b08a3a', leaf3='#e0b85a', pine1='#5a4420', pine2='#7a5c2a', water='#3a4a6e', water2='#7e8fb8', shore='#6e5a3a',
                       stone='#82796c', stone2='#665e53', stone3='#9a9184', flower1='#ff9a5a', flower2='#ffd27a', flower3='#fff0cc', lamp='#ffb860'),

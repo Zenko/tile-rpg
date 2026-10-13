@@ -1,6 +1,8 @@
 // js/puddle-worlds.js: a splashed puddle can open a small timed world; every world is different; the timer ends it and puts you back.
 module.exports = async (page, assert) => {
   const until = (fn, arg, ms) => page.waitForFunction(fn, arg, { timeout: ms || 8000 }).catch(() => {});   // wait for the state, not a fixed time (slow CI machines)
+  // this test is about the original kind of world: pin the kind (the other kinds are in puddle-kinds.test.js)
+  await page.evaluate(() => { const pick = pwNewWorld; pwNewWorld = () => pick('explore'); });
   await page.evaluate(() => { state.progress.level = 5; state.progress.xp = Math.max(state.progress.xp || 0, 1); document.querySelectorAll('.overlay').forEach(o => o.classList.add('hidden')); });
 
   // ---- 1. the world is a hidden district: lookups work, lists never see it ----
@@ -42,7 +44,7 @@ module.exports = async (page, assert) => {
     document.documentElement.dataset.theme = 'dark';
     return out;
   });
-  ['dark', 'light'].forEach(t => { assert.ok(pal[t].every(v => /#/.test(v)), `${t}: every biome defines its colours`); assert.strictEqual(new Set(pal[t]).size, 7, `${t}: seven different palettes`); });
+  ['dark', 'light'].forEach(t => { assert.ok(pal[t].every(v => /#/.test(v)), `${t}: every biome defines its colours`); assert.strictEqual(new Set(pal[t]).size, pal[t].length, `${t}: every palette is different`); });
 
   // ---- 4. a splashed puddle can be a way in (the real hook), and the rules around it ----
   const guards = await page.evaluate(() => {

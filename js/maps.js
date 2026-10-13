@@ -127,6 +127,7 @@ function getMap(key) {
     m.exits[t.x + ',' + t.y] = exit;
   });
   for (let y = 0; y < m.h; y++) { m.solid[y] = []; for (let x = 0; x < m.w; x++) m.solid[y][x] = SOLID_TERRAIN.includes(m.rows[y][x]); }
+  if (def.pwExit) m.exits[def.pwExit.x + ',' + def.pwExit.y] = { pw: true };   // the way out of a maze world (js/puddle-modes.js)
   def.buildings.forEach(b => {
     const t = BUILDING_TYPES[b.type];
     const bb = Object.assign({ w: t.w, h: t.h, sprite: t.sprite, entry: { x: b.x + t.door, y: b.y + t.h } }, b);
