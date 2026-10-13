@@ -3,7 +3,7 @@ const cardFilter = { q: '', rarity: 'all', fam: 'all', sort: 'rarity' };
 let collView = 'grid';       // My Cards: 'grid' (tiles, tap for the detail sheet) or 'list'
 let deckView = 'build';     // Deck sub-view: 'build' (tray, chart, keywords) or 'add' (pinned strip + your cards)
 let deckInfoMode = false;    // Deck: tapping a card reads it instead of adding it
-const FILTER_CHIPS = [['all', 'All'], ['common', 'Common'], ['rare', 'Rare'], ['ultra', 'Ultra'], ['super', 'Super'], ['mythic', 'Mythic'], ['divine', 'Divine'], ['atlas', 'Atlas'], ['spell', '✨ Spells']];
+const FILTER_CHIPS = [['all', 'All'], ['common', 'Common'], ['rare', 'Rare'], ['ultra', 'Ultra'], ['super', 'Super'], ['mythic', 'Mythic'], ['divine', 'Divine'], ['atlas', CAST.atlas.name], ['spell', '✨ Spells']];
 const FAM_CHIPS = [['all', 'All families'], ...Object.keys(FAMILIES).map(k => [k, FAMILIES[k].icon + ' ' + FAMILIES[k].name])];
 const SORTS = { rarity: 'Rarity', cost: 'Cost', power: 'Power', name: 'Name' };
 function filterSortCards(ids) {
@@ -252,7 +252,7 @@ function drawCardSheet() {
       if (i >= 0) clearCharm(i); else if (!charmInfo(id)) { toast('That card has no charm effect'); return; } else setCharm(id);
     } else if (act === 'release') {
       const gain = releaseCard(id);
-      if (gain) { ensureAudio(); sfx('claim'); buzz(HAP.tap); bumpPill('pillPebbles'); toast(`🫧 +${gain} ${gain === 1 ? 'Ember' : 'Embers'}`); }
+      if (gain) { ensureAudio(); sfx('claim'); buzz(HAP.tap); bumpPill('pillPebbles'); toast(`🫧 +${gain} ${gain === 1 ? GAME.currency.one : GAME.currency.many}`); }
     }
     drawCardSheet(); refreshCardsView();
   }));

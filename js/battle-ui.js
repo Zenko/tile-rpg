@@ -28,7 +28,7 @@ function startBattle(opponent) {
 function btIntro(opponent, isBoss, first) {
   return new Promise(resolve => {
     const tw = bossTwistFor(opponent), t = tw ? BattleEngine.TWISTS[tw] : null;
-    const tag = isBoss ? '👑 District boss' : opponent.atlas ? '🗺️ The Atlas' : opponent.cup ? '🏆 Dreamers’ Cup' : opponent.draft ? '🎴 Draft Run' : opponent.ghost ? '👻 Lingering duel' : opponent.visitor ? '🎒 Travelling visitor' : opponent.dungeon ? '🕯️ Cellar' : opponent.isRival ? '⚡ Rival' : '⚔️ Friendly match';
+    const tag = isBoss ? '👑 District boss' : opponent.atlas ? `🗺️ The ${CAST.atlas.name}` : opponent.cup ? `🏆 ${GAME.player.many}’ Cup` : opponent.draft ? '🎴 Draft Run' : opponent.ghost ? '👻 Lingering duel' : opponent.visitor ? '🎒 Travelling visitor' : opponent.dungeon ? '🕯️ Cellar' : opponent.isRival ? '⚡ Rival' : '⚔️ Friendly match';
     const st = opponent.aiStyle && BattleEngine.AI_STYLES[opponent.aiStyle];   // the way this opponent likes to play (js/npc-brain.js npcAiStyle)
     const el = document.createElement('div'); el.className = 'bt-intro' + (isBoss ? ' boss' : '');
     el.innerHTML = `<div class="bt-intro-side opp"><span class="bt-intro-av"></span><div><div class="bt-intro-name"></div><div class="bt-intro-tag">${tag}${st ? ` · ${st.icon} ${st.name}` : ''}</div><div class="bt-intro-note"></div></div></div>
@@ -252,7 +252,7 @@ function knackChipsHtml(selectedId, inBattle) {
 function knackPickerWire(box, onPick) {
   box.querySelectorAll('[data-knack]').forEach(b => b.addEventListener('click', () => {
     const id = b.dataset.knack, k = BattleEngine.KNACKS[id];
-    if (!knackUnlocked(id)) { toast(`${k.name} unlocks at Dreamer level ${k.level}`); return; }
+    if (!knackUnlocked(id)) { toast(`${k.name} unlocks at ${GAME.player.one} level ${k.level}`); return; }
     chooseKnack(id); sfx('tap'); onPick(id);
   }));
 }
@@ -1206,7 +1206,7 @@ function btShowResult(won, yielded) {
       battleEndTitle.textContent = 'You stepped away.';
       battleEndStats.textContent = `No cost to you. ${npc.name} will be here whenever you are ready.`;
     } else {
-      battleEndTitle.textContent = battle.isBoss ? `${npc.name} holds firm.` : npc.atlas ? 'The Atlas smiles. "Again, if you like."' : npc.isRival ? 'Rook grins. "Not bad. Again?"' : 'A close, friendly match.';
+      battleEndTitle.textContent = battle.isBoss ? `${npc.name} holds firm.` : npc.atlas ? `The ${CAST.atlas.name} smiles. "Again, if you like."` : npc.isRival ? `${CAST.rival.name} grins. "Not bad. Again?"` : 'A close, friendly match.';
       battleEndStats.textContent = `${npc.name} won this one after ${turns} turns. No cost to you. Try a different card mix, or try again.`;
     }
     if (!yielded && typeof coachNote === 'function') {   // a kind, specific tip after a loss (js/coach.js)
@@ -1287,7 +1287,7 @@ function btShowHelp() {
     <b>To attack:</b> tap a glowing card of yours, then a target: an enemy card, or their Calm bar. Hitting Calm is capped at 4 per attack, so removing enemy cards is often better.<br><br>
     <b>Friendly neighbors</b> start with less Calm than you.<br><br>
     <b>✨ Spells</b> are cast from your hand for an instant effect and never take a board slot. Some are aimed: cast it, then tap an enemy card. Watch does not stop a spell.<br><br>
-    <b>District bosses</b> each bend one rule: 🌳 Duermevela heals 3 Calm every turn, 🧱 Murmullo's Watch cards are extra sturdy, 🌊 Marea Lenta's tide washes your strongest card back to hand every 4th turn, and 🌻 Ensueño's cheap cards all Bloom.<br><br>
+    <b>District bosses</b> each bend one rule: 🌳 ${BOSSES.square} heals 3 Calm every turn, 🧱 ${BOSSES.market}'s Watch cards are extra sturdy, 🌊 ${BOSSES.harbor}'s tide washes your strongest card back to hand every 4th turn, and 🌻 ${BOSSES.garden}'s cheap cards all Bloom.<br><br>
     <b>The world joins in</b> (for both sides): ☀️ clear Bloom +1 power, ☁️ cloud Haze +1 health, 🌧️ rain Rest heals +1, ⛈️ storm Flicker +1 power, 🌙 night Startle +1, and each district is home turf for its card family (+1 health). In ❄️ snow bosses are tougher but pay better.<br><br>
     <b>✨ Your Gift</b> is a free once-per-match power you pick on the keep-this-hand screen. Tap its round button by your bar when it glows.<br><br>
     <b>Who goes first</b> comes from a coin call or dice roll before the match. Going second means an extra card and +1 energy on your first two turns.<br><br>

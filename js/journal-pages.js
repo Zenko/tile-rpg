@@ -8,16 +8,16 @@
 /* ---------- going somewhere ---------- */
 // Buildings the Journal can send you to (id of INTERIORS, the district it stands in, and what to call it).
 const JPLACES = {
-  bakery: { scene: 'bakery', district: 'square', name: "Maple's bakery" },
+  bakery: { scene: 'bakery', district: 'square', name: `${CAST.baker.name}'s bakery` },
   home: { scene: 'home', district: 'square', name: 'your cottage' },
   nook: { scene: 'nook', district: 'square', name: 'the Reading Nook' },
   cup: { scene: 'cup', district: 'square', name: 'the fountain' },
   cellar: { scene: 'cellar', district: 'square', name: 'the cellar' },
   museum: { scene: 'museum', district: 'market', name: 'the Card Museum' },
   shop: { scene: 'card-shop', district: 'market', name: 'the Card Shop' },
-  lantern: { scene: 'lantern', district: 'market', name: "Lumen's Lantern Market" },
-  net: { scene: 'harbor-hut', district: 'harbor', name: "Tam's Net Loft" },
-  glass: { scene: 'garden-glass', district: 'garden', name: "Iris's Glasshouse" }
+  lantern: { scene: 'lantern', district: 'market', name: `${CAST.nightVendor.name}'s Lantern Market` },
+  net: { scene: 'harbor-hut', district: 'harbor', name: `${CAST.netMender.name}'s Net Loft` },
+  glass: { scene: 'garden-glass', district: 'garden', name: `${CAST.glassKeeper.name}'s Glasshouse` }
 };
 // Targets: { tab } switches tab, { menu } opens the player menu (settings / social), { map } opens the world map,
 // { scene, district, name } and the other walk-there targets listed in js/guide-walk.js take you there on foot, across districts if needed.
@@ -34,11 +34,11 @@ function journalGo(t) {
 }
 const GUIDE_GO = {
   'Districts': { map: 1 }, 'Themes': { menu: 'settings' }, 'Inventory': { tab: 'character' }, 'Character tab': { tab: 'character' },
-  'Draft Run': JPLACES.cup, 'Dreamers’ Cup': JPLACES.cup, 'Deck challenges': JPLACES.cup, 'Daily puzzle': JPLACES.nook,
+  'Draft Run': JPLACES.cup, [`${GAME.player.many}’ Cup`]: JPLACES.cup, 'Deck challenges': JPLACES.cup, 'Daily puzzle': JPLACES.nook,
   'The cellar': JPLACES.cellar, 'Letters': JPLACES.home, 'Your cottage': JPLACES.home,
   'Packs & decorations': JPLACES.shop, 'Lantern Market': JPLACES.lantern, 'The Net Loft': JPLACES.net, 'The Glasshouse': JPLACES.glass,
   'Workshop': { tab: 'collection' }, 'Index & sets': { tab: 'collection' }, 'Charms & mastery': { tab: 'collection' },
-  'Embers and soft limits': { menu: 'settings' }, 'Who goes first': { menu: 'settings' }, 'Lingering duels': { menu: 'social' }
+  [`${GAME.currency.many} and soft limits`]: { menu: 'settings' }, 'Who goes first': { menu: 'settings' }, 'Lingering duels': { menu: 'social' }
 };
 function guideTarget(name) { return GUIDE_GO[name] || null; }
 
@@ -57,11 +57,11 @@ function minigamePrizesToday() { return Object.keys(MINIGAMES).reduce((n, id) =>
 function todayModel() {
   const now = Date.now(), pr = state.progress, away = [], daily = [], week = [], locked = [];
   const bake = (ensureDistrictData('square').buildings.bakery || {}).oven;
-  if (bake && bake.startedAt && now - bake.startedAt >= (bake.ms || BAKE_MS)) away.push({ icon: '🍞', title: "Bread is ready at Maple's", sub: 'Take it out, then share it or cook with it', go: JPLACES.bakery });
+  if (bake && bake.startedAt && now - bake.startedAt >= (bake.ms || BAKE_MS)) away.push({ icon: '🍞', title: `Bread is ready at ${CAST.baker.name}'s`, sub: 'Take it out, then share it or cook with it', go: JPLACES.bakery });
   const home = expedState().active.filter(t => t.ends <= now).length;
-  if (home) away.push({ icon: '🧭', title: `${home === 1 ? 'An expedition team is' : home + ' expedition teams are'} home`, sub: 'Collect Embers, supplies and maybe a card', go: JPLACES.museum });
+  if (home) away.push({ icon: '🧭', title: `${home === 1 ? 'An expedition team is' : home + ' expedition teams are'} home`, sub: `Collect ${GAME.currency.many}, supplies and maybe a card`, go: JPLACES.museum });
   const ripe = cropsIn().filter(c => cropProgress(c) >= 1).length;
-  if (ripe) away.push({ icon: '🌻', title: `${ripe} crop${ripe === 1 ? ' is' : 's are'} ripe`, sub: 'Harvest them in El Umbral', go: { crop: true } });
+  if (ripe) away.push({ icon: '🌻', title: `${ripe} crop${ripe === 1 ? ' is' : 's are'} ripe`, sub: `Harvest them in ${PLACES.square}`, go: { crop: true } });
   const mail = unreadMail();
   if (mail) away.push({ icon: '📬', title: `${mail} unread letter${mail === 1 ? '' : 's'}`, sub: 'Read them at your cottage', go: JPLACES.home });
 
@@ -119,7 +119,7 @@ function renderToday() {
 /* ---------- Almanac ---------- */
 let almTab = 'fish', almFam = 'all', almSel = '';
 const ALM_TABS = [['fish', '🐟 Fish'], ['cards', '🃏 Cards'], ['recipes', '🍲 Recipes'], ['bugs', '✨ Critters']];
-const ALM_FAMS = [['all', 'All'], ['grove', '🌿 Brote'], ['stone', '🪨 Recuerdo'], ['tide', '🌊 Deriva'], ['wind', '🪶 Susurro'], ['spell', '✨ Spells']];
+const ALM_FAMS = [['all', 'All'], ['grove', `🌿 ${FAMILY_NAMES.grove}`], ['stone', `🪨 ${FAMILY_NAMES.stone}`], ['tide', `🌊 ${FAMILY_NAMES.tide}`], ['wind', `🪶 ${FAMILY_NAMES.wind}`], ['spell', '✨ Spells']];
 function almanacSet(tab) {
   if (tab === 'fish') { const f = fishState(); return FISH.map(x => ({ id: x.id, icon: x.icon, name: x.name, found: !!f.caught[x.id], hint: x.hint || '', blurb: x.blurb, extra: f.caught[x.id] ? `Caught ${f.caught[x.id]}×` : '' })); }
   if (tab === 'cards') { const d = discoveredSet(); return CARD_POOL.map(c => ({ id: c.id, icon: c.icon, art: c, name: c.name, found: d.has(c.id), card: c, fam: c.spell ? 'spell' : CARD_FAMILY[c.id] || '', hint: c.exclusive ? ('A prize ' + (EXCLUSIVE_HINT[c.exclusive] || 'from a special place')) : 'Packs, the ground, prizes and Draft Runs' })); }

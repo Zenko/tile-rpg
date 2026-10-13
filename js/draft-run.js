@@ -60,7 +60,7 @@ function draftIntro() {
   const d = draftState();
   if (d.active && d.stage === 'pick') return `Your draft is in progress: ${d.picks.length} of ${DRAFT_PICKS} cards chosen. Pick one card from each offer to build a deck from scratch.`;
   if (d.active) return `Your deck is ready. ${DRAFT_ROUNDS[d.round].title}: ${d.foes[d.round].icon} ${d.foes[d.round].name} is waiting. A loss ends the run.`;
-  return `The Draft Run: build a fresh deck by picking 1 card from each of ${DRAFT_PICKS} offers of three - from every card in the game, not just yours - then win four matches in a row. Your collection's perks stay home, so everyone drafts on equal terms. Ember prizes shrink once you have earned plenty from drafts in a day.${d.best ? ` Best so far: ${d.best} round${d.best === 1 ? '' : 's'}.` : ''}`;
+  return `The Draft Run: build a fresh deck by picking 1 card from each of ${DRAFT_PICKS} offers of three - from every card in the game, not just yours - then win four matches in a row. Your collection's perks stay home, so everyone drafts on equal terms. ${GAME.currency.one} prizes shrink once you have earned plenty from drafts in a day.${d.best ? ` Best so far: ${d.best} round${d.best === 1 ? '' : 's'}.` : ''}`;
 }
 
 function draftButtons() {

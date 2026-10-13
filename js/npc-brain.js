@@ -16,10 +16,10 @@
 const NPC_WEATHER_FAMILY = { clear: 'grove', cloudy: 'wind', rain: 'tide', storm: 'wind', snow: 'stone' };
 const NPC_WEATHER_WORDS = { clear: 'clear skies', cloudy: 'the mist', rain: 'the rain', storm: 'the storm', snow: 'the snow' };
 const NPC_HINTS = [
-  { id: 'family:grove', label: '🌿 Brote cards', say: 'Brote cards? Lovely, I will pack some.' },
-  { id: 'family:stone', label: '🪨 Recuerdo cards', say: 'Recuerdo, solid and steady. I can do that.' },
-  { id: 'family:tide', label: '🌊 Deriva cards', say: 'Deriva it is. I like the sound of that.' },
-  { id: 'family:wind', label: '🪶 Susurro cards', say: 'Susurro cards, light on their feet. Good idea.' },
+  { id: 'family:grove', label: `🌿 ${FAMILY_NAMES.grove} cards`, say: `${FAMILY_NAMES.grove} cards? Lovely, I will pack some.` },
+  { id: 'family:stone', label: `🪨 ${FAMILY_NAMES.stone} cards`, say: `${FAMILY_NAMES.stone}, solid and steady. I can do that.` },
+  { id: 'family:tide', label: `🌊 ${FAMILY_NAMES.tide} cards`, say: `${FAMILY_NAMES.tide} it is. I like the sound of that.` },
+  { id: 'family:wind', label: `🪶 ${FAMILY_NAMES.wind} cards`, say: `${FAMILY_NAMES.wind} cards, light on their feet. Good idea.` },
   { id: 'tough', label: '💪 Something tougher', say: 'You want a real challenge? Then I will bring my sturdiest cards.' },
   { id: 'gentle', label: '🫖 Something gentler', say: 'A softer deck for a softer day. I will go easy.' },
   { id: 'seasonal', label: '🍂 Whatever suits the season', say: 'Something seasonal. I will see what the weather brings.' }
@@ -287,7 +287,7 @@ function npcBestFriend(f, data, min) {
   return best;
 }
 function npcTopicFor(f) {
-  const t = [`the ${NPC_WEATHER_WORDS[weatherNow()] || 'weather'}`, `the ${seasonDef().name.toLowerCase()}`, 'their decks', 'a card they once found', friendHearts(f) >= 1 ? 'a certain dreamer in town' : 'the town'];
+  const t = [`the ${NPC_WEATHER_WORDS[weatherNow()] || 'weather'}`, `the ${seasonDef().name.toLowerCase()}`, 'their decks', 'a card they once found', friendHearts(f) >= 1 ? `a certain ${GAME.player.lower} in town` : 'the town'];
   return t[Math.floor(Math.random() * t.length)];
 }
 // Turn a neighbour in place to face another (a drawn character turns by view, an emoji one flips).
@@ -515,7 +515,7 @@ function npcApproachAccepted(f) {
 }
 function npcApproachGreeting(f) {
   const a = f && f.approach; if (!a || Date.now() - a.at > 4 * 60 * 1000) return null;
-  return { help: 'Oh good, you are here. I was hoping you had a minute.', social: 'There you are. I was hoping to catch you for a word.', match: 'Ah, just the dreamer I wanted. Up for a friendly game?' }[a.kind] || null;
+  return { help: 'Oh good, you are here. I was hoping you had a minute.', social: 'There you are. I was hoping to catch you for a word.', match: `Ah, just the ${GAME.player.lower} I wanted. Up for a friendly game?` }[a.kind] || null;
 }
 // Settings -> Neighbours come to you.
 function syncApproachSeg() { document.querySelectorAll('#approachSeg .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.approachPick === npcApproachMode())); }

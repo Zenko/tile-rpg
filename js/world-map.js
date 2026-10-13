@@ -50,8 +50,8 @@ const WM_ART = {
 };
 // Text and the few facts that aren't stored anywhere else. Buildings and neighbour names come from the real maps/save.
 const WM_INFO = {
-  square: { short: 'Square', blurb: 'The threshold of the dream. Every dreamer arrives here first, and every road leads back to it.', extras: ['Dreamers’ Cup fountain', 'Weather sign'] },
-  market: { short: 'Market', blurb: 'Lantern-lit stalls and voices just below understanding. A lantern market opens after dark.', extras: ['Trading board', "Lumen's Lantern Market (night only)"] },
+  square: { short: 'Square', blurb: `The threshold of the dream. Every ${GAME.player.lower} arrives here first, and every road leads back to it.`, extras: [`${GAME.player.many}’ Cup fountain`, 'Weather sign'] },
+  market: { short: 'Market', blurb: 'Lantern-lit stalls and voices just below understanding. A lantern market opens after dark.', extras: ['Trading board', `${CAST.nightVendor.name}'s Lantern Market (night only)`] },
   harbor: { short: 'Harbor', blurb: 'A tideless sea under a low moon. The best Thought Fishing around, and a god who breathes the tide in and out.', extras: ['Thought Fishing spots (they shuffle every 10 minutes)'] },
   garden: { short: 'Garden', blurb: 'A hush of glowing blooms that grow toward whatever you are thinking, with a glasshouse in the middle.', extras: [] }
 };
@@ -291,7 +291,7 @@ const BORDER_OPTIONS = [
   { id: 'gold',    name: 'Gilded',     cost: 36, fixed: true, glow: true, grad: () => 'conic-gradient(#f6e3a1, #c9962d, #fff0b8, #a87420, #f6e3a1)' },
   // Premium rings (v1.87.0): the high-end Ember sinks
   { id: 'prism',   name: 'Prism',      cost: 90,  fixed: true, grad: () => 'conic-gradient(from 30deg, #ffd1dc, #ffe9b8, #d1f5d3, #c4e7ff, #e0d1ff, #ffd1dc)' },
-  { id: 'ember',   name: 'Ember',      cost: 120, fixed: true, glow: true, grad: () => 'conic-gradient(#ff9a3c, #e8443a, #ffd36b, #e8443a, #ff9a3c)' },
+  { id: 'ember',   name: 'Ember',      cost: 120, fixed: true, glow: true, grad: () => 'conic-gradient(#ff9a3c, #e8443a, #ffd36b, #e8443a, #ff9a3c)' },   // names-ok: an avatar border, not the currency
   { id: 'galaxy',  name: 'Galaxy',     cost: 170, fixed: true, glow: true, grad: () => 'conic-gradient(#2b1f5c, #7a4fd6, #3fb6e8, #7a4fd6, #2b1f5c)' },
   { id: 'crown',   name: 'Crown',      cost: 240, fixed: true, glow: true, grad: () => 'conic-gradient(#fff3b0, #f0b429, #fff3b0, #c98a12, #fff3b0)' }
 ];

@@ -11,12 +11,12 @@ const REQ_LANDMARKS = [
   { id: 'fountain', label: 'stand by the fountain', where: 'the fountain' },
 ];
 const REQ_VISITS = [
-  { building: 'nook',    who: 'Olwen', place: 'the Reading Nook', line: 'Could you pop into the Reading Nook and tell Olwen I said hello?' },
-  { building: 'cottage', who: 'Wren',  place: "Wren's Cottage",   line: 'Would you look in on Wren at the cottage? Just say I sent you.' },
-  { building: 'bakery',  who: 'Maple', place: "Maple's Bakery",   line: 'Pop into the bakery and tell Maple her rolls are the talk of the square.' },
-  { building: 'house2',  who: 'Fern',  place: "Fern's Cottage",   line: 'Fern lent me a watering can ages ago. Could you let her know I have not forgotten?' },
-  { building: 'stall-spice',  who: 'Saffron', place: "Saffron's Spice Stall", line: "Could you ask Saffron what today's deal is? I'm too shy to haggle." },
-  { building: 'stall-tinker', who: 'Tock',    place: "Tock's Tinker Stall",   line: 'Tell Tock the little bell on the door is squeaking again, would you?' },
+  { building: 'nook',    who: CAST.scholar.name, place: 'the Reading Nook', line: `Could you pop into the Reading Nook and tell ${CAST.scholar.name} I said hello?` },
+  { building: 'cottage', who: CAST.guide.name,  place: `${CAST.guide.name}'s Cottage`,   line: `Would you look in on ${CAST.guide.name} at the cottage? Just say I sent you.` },
+  { building: 'bakery',  who: CAST.baker.name, place: `${CAST.baker.name}'s Bakery`,   line: `Pop into the bakery and tell ${CAST.baker.name} her rolls are the talk of the square.` },
+  { building: 'house2',  who: CAST.gardener.name,  place: `${CAST.gardener.name}'s Cottage`,   line: `${CAST.gardener.name} lent me a watering can ages ago. Could you let her know I have not forgotten?` },
+  { building: 'stall-spice',  who: CAST.spiceSeller.name, place: `${CAST.spiceSeller.name}'s Spice Stall`, line: `Could you ask ${CAST.spiceSeller.name} what today's deal is? I'm too shy to haggle.` },
+  { building: 'stall-tinker', who: CAST.tinker.name,    place: `${CAST.tinker.name}'s Tinker Stall`,   line: `Tell ${CAST.tinker.name} the little bell on the door is squeaking again, would you?` },
 ];
 const REQ_PEBBLES = { fetch: 4, deck: 4, fish: 5, walk: 4, win: 0, visit: 4, dish: 9 };
 const REQ_WIN_RARITY = 'rare';                 // "win without X" pays a card of rare or better
@@ -57,7 +57,7 @@ function makeRequest(f, m) {
   if (kind === 'deck') { const n = Math.min(3, Math.max(1, bigCount() + 1), CARD_POOL.filter(c => cardDef(c.id).cost >= 3).length, DECK_SIZE); return Object.assign(base, { need: n, text: `Build a full deck that includes at least ${n} card${n > 1 ? 's' : ''} costing 3 or more.`, hint: 'Bigger cards win bigger fights. Check Cards → Deck, then show me.', pebbles: REQ_PEBBLES.deck }); }
   if (kind === 'fish') { const n = 2; return Object.assign(base, { need: n, baseline: fishState().total || 0, text: `Catch ${n} fish by the water for me.`, hint: 'Tap the stream to go fishing.', pebbles: REQ_PEBBLES.fish }); }
   if (kind === 'walk') { const l = landmarks[Math.floor(Math.random() * landmarks.length)]; return Object.assign(base, { landmark: l.id, text: `Could you ${l.label} and tell me how it looks?`, hint: `Walk to ${l.where}.`, pebbles: REQ_PEBBLES.walk, seen: false }); }
-  if (kind === 'dish') { const r = RECIPES[Math.floor(Math.random() * RECIPES.length)]; return Object.assign(base, { dish: r.id, text: `I've been dreaming about ${r.icon} ${r.name}. Could you bring me one?`, hint: `Maple can help you cook it (${needsText(r)}). I will eat it, mind.`, pebbles: REQ_PEBBLES.dish }); }
+  if (kind === 'dish') { const r = RECIPES[Math.floor(Math.random() * RECIPES.length)]; return Object.assign(base, { dish: r.id, text: `I've been dreaming about ${r.icon} ${r.name}. Could you bring me one?`, hint: `${CAST.baker.name} can help you cook it (${needsText(r)}). I will eat it, mind.`, pebbles: REQ_PEBBLES.dish }); }
   if (kind === 'visit') { const v = visits[Math.floor(Math.random() * visits.length)]; return Object.assign(base, { building: v.building, who: v.who, text: v.line, hint: `Step inside ${v.place}.`, pebbles: REQ_PEBBLES.visit, visited: false }); }
   const k = ['swift', 'guard'][Math.floor(Math.random() * 2)];
   return Object.assign(base, { avoid: k, baseline: state.progress.totals.battlesWon || 0, wonClean: false, text: `Win a match without playing any ${kwIcon(k)} ${kwName(k)} cards.`, hint: 'Take a friendly match with a deck that has none, then tell me.', reward: REQ_WIN_RARITY });
@@ -260,13 +260,13 @@ function renderTalkBody() {
     e.main.textContent = '🤝 Ask if they need a hand'; e.main.dataset.act = 'ask';
   } else if (r.state === 'open') {
     talkSay(r.text); e.sub.textContent = r.hint;
-    e.tag.textContent = r.reward ? `Reward: a ${REQ_WIN_RARITY} card or better` : `Reward: 🫧 ${r.pebbles} Embers`;
+    e.tag.textContent = r.reward ? `Reward: a ${REQ_WIN_RARITY} card or better` : `Reward: 🫧 ${r.pebbles} ${GAME.currency.many}`;
     if (activeCount() >= REQ_MAX_ACTIVE) { e.main.textContent = 'You have two favours open already'; e.main.disabled = true; e.main.dataset.act = ''; }
     else { e.main.textContent = '✅ Happy to help'; e.main.dataset.act = 'accept'; }
   } else if (r.state === 'active') {
     talkSay(requestDone(r) ? (r.replyText || 'You did it? Wonderful!') : r.text);
     e.sub.textContent = requestDone(r) ? 'Thank you, truly.' : `${r.hint}  (${requestProgressText(r)})`;
-    e.tag.textContent = r.reward ? `Reward: a ${REQ_WIN_RARITY} card or better` : `Reward: 🫧 ${r.pebbles} Embers`;
+    e.tag.textContent = r.reward ? `Reward: a ${REQ_WIN_RARITY} card or better` : `Reward: 🫧 ${r.pebbles} ${GAME.currency.many}`;
     if (requestDone(r)) { e.main.textContent = '🎁 Hand it in'; e.main.dataset.act = 'complete'; }
     else { e.main.textContent = 'Still working on it'; e.main.disabled = true; e.main.dataset.act = ''; }
   } else {
@@ -348,9 +348,9 @@ function completeRequest(f) {
   let rewardCard = null;
   if (r.reward) { rewardCard = randomCardId(rollRewardRarity(false)); state.ownedCards.push(rewardCard); bumpStat('cardsFound', 1); bumpPill('pillCards'); }
   else addPebbles(r.pebbles, 'favours');
-  logEvent('🎁', `Finished a favour for ${f.name}${rewardCard ? '' : ` for 🫧 ${r.pebbles} Embers`}.`);
+  logEvent('🎁', `Finished a favour for ${f.name}${rewardCard ? '' : ` for 🫧 ${r.pebbles} ${GAME.currency.many}`}.`);
   saveState(); updateHud(); renderTalk(); sfx('claim'); buzz(HAP.win);
-  toast(rewardCard ? '🎁 A card, as thanks' : `🫧 +${r.pebbles} Embers`);
+  toast(rewardCard ? '🎁 A card, as thanks' : `🫧 +${r.pebbles} ${GAME.currency.many}`);
   if (rewardCard) setTimeout(() => showCardReveal(rewardCard, `A gift from ${f.name}`, true), 300);
 }
 function closeTalk() { document.getElementById('talkCards').classList.add('hidden'); clearInterval(talkTypeTimer); talkSaid = ''; document.getElementById('talkPortrait').dataset.for = ''; if (talkTo) { delete talkTo._thanks; delete talkTo._topics; delete talkTo._reacted; delete talkTo._tk; } talkTo = null; talkView = 'home'; talkEls().ov.classList.add('hidden'); talkHistoryPop(); }
@@ -364,7 +364,7 @@ document.getElementById('talkCardGift').addEventListener('click', () => { if (!t
 const BREAD_THANKS = [
   'Fresh bread? For me? You are too kind.',
   'Oh, it is still warm! Thank you, friend.',
-  'Maple\'s bread! I will save the crust for the ducks.',
+  `${CAST.baker.name}'s bread! I will save the crust for the ducks.`,
   'You remembered I like the crusty ones. Thank you!',
 ];
 function giftsToday() { const p = state.progress; if (!p.gifts || p.gifts.day !== todayKey()) p.gifts = { day: todayKey(), to: {} }; return p.gifts; }
@@ -562,7 +562,7 @@ function signatureWin() {
    in sync with the one true record in state.progress.rival by syncRival().
    ============================================================ */
 const RIVAL = {
-  id: 'rival-rook', name: 'Rook', icon: '🎭', chapters: 8,
+  id: 'rival-rook', name: CAST.rival.name, icon: CAST.rival.icon, chapters: 8,
   stayMs: 20 * 60 * 1000,   // how long Rook practises in one district before moving on
   restMs: 8 * 60 * 1000,    // after a loss, Rook goes off to rebuild their deck for a while
   lines: [
@@ -607,7 +607,7 @@ function syncRival() {
       const others = open.filter(k => k !== rv.district), from = others.length ? others : open;
       const was = rv.district;
       rv.district = from[Math.floor(Math.random() * from.length)]; rv.arrivedAt = now;
-      if (was && was === state.currentDistrict && rv.district !== was) toast(`🎭 Rook heads off toward ${DISTRICTS[rv.district].name}`);
+      if (was && was === state.currentDistrict && rv.district !== was) toast(`🎭 ${CAST.rival.name} heads off toward ${DISTRICTS[rv.district].name}`);
     }
     where = rv.district;
   }
@@ -623,8 +623,8 @@ function syncRival() {
                     deck: rivalDeck(rv.chapter), profile: rivalProfile(rv.chapter), rewardCard: null, defeated: false, isBoss: false, justArrived: true });
       if (where === state.currentDistrict) {
         changed = true;
-        if (!rv.met) { rv.met = true; toast('🎭 Someone with a deck of cards is watching you…'); logEvent('🎭', `A rival named Rook turned up in ${DISTRICTS[where].name}.`); }
-        else toast(`🎭 Rook is back in ${DISTRICTS[where].name}${typeof rookComebackLine === 'function' ? rookComebackLine() : ', practising'}`);
+        if (!rv.met) { rv.met = true; toast('🎭 Someone with a deck of cards is watching you…'); logEvent('🎭', `A rival named ${CAST.rival.name} turned up in ${DISTRICTS[where].name}.`); }
+        else toast(`🎭 ${CAST.rival.name} is back in ${DISTRICTS[where].name}${typeof rookComebackLine === 'function' ? rookComebackLine() : ', practising'}`);
       }
     }
   }
@@ -634,10 +634,10 @@ function syncRival() {
 function renderRivalTalk(f) {
   const e = talkEls(), rv = rivalState(), done = rv.chapter >= RIVAL.chapters;
   showTipOnce('rival');
-  e.name.textContent = `🎭 Rook · ${done ? 'rival and friend' : `rivalry ${rv.chapter}/${RIVAL.chapters}`}`;
+  e.name.textContent = `🎭 ${CAST.rival.name} · ${done ? 'rival and friend' : `rivalry ${rv.chapter}/${RIVAL.chapters}`}`;
   talkSay(`"${rivalLine().hello}${typeof rookTalkHint === 'function' ? rookTalkHint() : ''}"`);
-  e.sub.textContent = done ? 'The rivalry is settled, but Rook still loves a match.' : 'Every time you win, Rook comes back with a stronger deck.';
-  e.tag.textContent = done ? 'Prize: a rare card or better, and 🫧 10' : rv.chapter === RIVAL.chapters - 1 ? "Prize: Rook's finale card, found nowhere else" : `Prize: ${rivalPrizeLabel(rv.chapter + 1)}`;
+  e.sub.textContent = done ? `The rivalry is settled, but ${CAST.rival.name} still loves a match.` : `Every time you win, ${CAST.rival.name} comes back with a stronger deck.`;
+  e.tag.textContent = done ? 'Prize: a rare card or better, and 🫧 10' : rv.chapter === RIVAL.chapters - 1 ? `Prize: ${CAST.rival.name}'s finale card, found nowhere else` : `Prize: ${rivalPrizeLabel(rv.chapter + 1)}`;
   e.main.classList.add('hidden');
   document.getElementById('talkGift').classList.add('hidden');
   document.getElementById('talkDish').classList.add('hidden');
@@ -645,7 +645,7 @@ function renderRivalTalk(f) {
   document.getElementById('talkCards').classList.add('hidden');
   document.getElementById('talkHearts').classList.add('hidden');
   document.getElementById('talkSig').classList.add('hidden');
-  e.fight.textContent = '⚔️ Duel Rook';
+  e.fight.textContent = `⚔️ Duel ${CAST.rival.name}`;
 }
 function rivalPrizeRarity(ch) { return ch <= 2 ? 'rare' : ch <= 5 ? 'ultra' : 'super'; }
 function rivalPrizeLabel(ch) { return `${aOrAn(RARITY_LABEL[rivalPrizeRarity(ch)])} card or better`; }
@@ -669,12 +669,12 @@ function rivalWin() {
   const def = cardDef(cardId), icon = btGet('battleEndIcon'), endCard = btGet('battleEndCard');
   icon.textContent = '🎭'; icon.className = 'big-icon reveal-icon';
   endCard.classList.add('glow-' + def.rarity);
-  battleEndTitle.textContent = `Rook: "${line}"`;
-  battleEndStats.innerHTML = `${!done ? `Rivalry <b>${rv.chapter}/${RIVAL.chapters}</b>. ` : ''}Rook hands over<br><b>${cardArtHtml(def)} ${def.name}</b> <span class="rarity-tag rt-${def.rarity}" style="margin:4px 0 0">${RARITY_LABEL[def.rarity]}</span>${done ? '<br><b>+10 🫧</b>' : ''}`;
+  battleEndTitle.textContent = `${CAST.rival.name}: "${line}"`;
+  battleEndStats.innerHTML = `${!done ? `Rivalry <b>${rv.chapter}/${RIVAL.chapters}</b>. ` : ''}${CAST.rival.name} hands over<br><b>${cardArtHtml(def)} ${def.name}</b> <span class="rarity-tag rt-${def.rarity}" style="margin:4px 0 0">${RARITY_LABEL[def.rarity]}</span>${done ? '<br><b>+10 🫧</b>' : ''}`;
   btGet('battleRetryBtn').classList.add('hidden');
   sparkleBurst(btGet('battleSparkles'), ['🎭', '✨', '🌟'], rv.chapter >= RIVAL.chapters && !done ? 24 : 12);
   sfx(!done && rv.chapter >= RIVAL.chapters ? 'mythic' : 'win'); buzz(HAP.win); bumpPill('pillWins');
-  logEvent('🎭', !done && rv.chapter >= RIVAL.chapters ? 'Settled the rivalry with Rook - and earned their Ace.' : `Beat Rook (rivalry ${Math.min(rv.chapter, RIVAL.chapters)}/${RIVAL.chapters}).`);
+  logEvent('🎭', !done && rv.chapter >= RIVAL.chapters ? `Settled the rivalry with ${CAST.rival.name} - and earned their Ace.` : `Beat ${CAST.rival.name} (rivalry ${Math.min(rv.chapter, RIVAL.chapters)}/${RIVAL.chapters}).`);
   if (isNew) setTimeout(() => toast('📖 New entry in your Index'), 900);
 }
 

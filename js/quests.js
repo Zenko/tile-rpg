@@ -14,7 +14,7 @@ for (let s = 500; s <= 10000; s += 500) {
 
 const QUEST_POOL = [
   { id: 'draft2',   icon: '🎴', name: 'Win 2 matches in a Draft Run', goal: 2, stat: 'draftWins', reward: 'rare' },
-  { id: 'knack1',   icon: '✨', name: "Use your Dreamer’s Gift in a match", goal: 1, stat: 'knacksUsed', reward: 'common' },
+  { id: 'knack1',   icon: '✨', name: `Use your ${GAME.player.one}’s Gift in a match`, goal: 1, stat: 'knacksUsed', reward: 'common' },
   { id: 'find2',    icon: '🍂', name: 'Find 2 cards on the ground',   goal: 2,  stat: 'cardsFound',      reward: 'common' },
   { id: 'find3',    icon: '🃏', name: 'Find 3 cards on the ground',   goal: 3,  stat: 'cardsFound',      reward: 'rare' },
   { id: 'find5',    icon: '✨', name: 'Find 5 cards on the ground',   goal: 5,  stat: 'cardsFound',      reward: 'ultra' },
@@ -52,12 +52,12 @@ const QUEST_POOL = [
   { id: 'bake1',    icon: '🍞', name: 'Bake a loaf at the bakery',    goal: 1,  stat: 'breadBaked',      reward: 'rare' },
   { id: 'share1',   icon: '🥖', name: 'Share a loaf with a neighbor', goal: 1,  stat: 'breadShared',     reward: 'rare' },
   { id: 'spell3',   icon: '✨', name: 'Cast 3 spells in battle',      goal: 3,  stat: 'spellsCast',      reward: 'rare' },
-  { id: 'plant2',   icon: '🌱', name: 'Plant 2 seeds in El Umbral', goal: 2,  stat: 'seedsPlanted',    reward: 'common' },
+  { id: 'plant2',   icon: '🌱', name: `Plant 2 seeds in ${PLACES.square}`, goal: 2,  stat: 'seedsPlanted',    reward: 'common' },
   { id: 'harvest1', icon: '🌻', name: 'Harvest something you grew',   goal: 1,  stat: 'cropsHarvested',  reward: 'rare' },
-  { id: 'rival1',   icon: '🎭', name: 'Beat your rival, Rook',        goal: 1,  stat: 'rivalWins',       reward: 'ultra' },
-  { id: 'cook1',    icon: '🍳', name: 'Cook a dish with Maple',       goal: 1,  stat: 'dishesCooked',    reward: 'rare' },
-  { id: 'puzzle1',  icon: '🧩', name: "Solve Olwen's daily puzzle",   goal: 1,  stat: 'puzzlesSolved',   reward: 'ultra' },
-  { id: 'cupwin1',  icon: '🥉', name: 'Win a Dreamers’ Cup match',     goal: 1,  stat: 'cupRoundsWon',    reward: 'rare' },
+  { id: 'rival1',   icon: '🎭', name: `Beat your rival, ${CAST.rival.name}`,        goal: 1,  stat: 'rivalWins',       reward: 'ultra' },
+  { id: 'cook1',    icon: '🍳', name: `Cook a dish with ${CAST.baker.name}`,       goal: 1,  stat: 'dishesCooked',    reward: 'rare' },
+  { id: 'puzzle1',  icon: '🧩', name: `Solve ${CAST.scholar.name}'s daily puzzle`,   goal: 1,  stat: 'puzzlesSolved',   reward: 'ultra' },
+  { id: 'cupwin1',  icon: '🥉', name: `Win a ${GAME.player.many}’ Cup match`,     goal: 1,  stat: 'cupRoundsWon',    reward: 'rare' },
   { id: 'bugs2',    icon: '✨', name: 'Catch 2 night critters',       goal: 2,  stat: 'bugsCaught',      reward: 'common' },
   { id: 'mini3',    icon: '🎲', name: 'Play 3 house mini-games',      goal: 3,  stat: 'minigamesPlayed', reward: 'common' },
   { id: 'trade1',   icon: '🤝', name: 'Make a trade at the board',    goal: 1,  stat: 'tradesDone',      reward: 'rare' },
@@ -104,8 +104,8 @@ const WEEKLY_QUEST_POOL = [
   { id: 'w_share5',   icon: '🥖', name: 'Share 5 loaves with neighbors', goal: 5, stat: 'breadShared',  reward: 'super' },
   { id: 'w_spell20',  icon: '📜', name: 'Cast 20 spells in battle',  goal: 20, stat: 'spellsCast',      reward: 'super' },
   { id: 'w_harvest8', icon: '🧺', name: 'Harvest 8 crops',           goal: 8,  stat: 'cropsHarvested',  reward: 'super' },
-  { id: 'w_rival3',   icon: '🎭', name: 'Beat Rook 3 times',         goal: 3,  stat: 'rivalWins',       reward: 'mythic' },
-  { id: 'w_cup',      icon: '🏆', name: "Win this week's Dreamers’ Cup", goal: 1, stat: 'cupTrophies',     reward: 'mythic' },
+  { id: 'w_rival3',   icon: '🎭', name: `Beat ${CAST.rival.name} 3 times`,         goal: 3,  stat: 'rivalWins',       reward: 'mythic' },
+  { id: 'w_cup',      icon: '🏆', name: `Win this week's ${GAME.player.many}’ Cup`, goal: 1, stat: 'cupTrophies',     reward: 'mythic' },
   { id: 'w_cook6',    icon: '🥘', name: 'Cook 6 dishes',             goal: 6,  stat: 'dishesCooked',    reward: 'super' },
   { id: 'w_puzzle4',  icon: '🧩', name: 'Solve 4 daily puzzles',     goal: 4,  stat: 'puzzlesSolved',   reward: 'mythic' },
   { id: 'w_bugs12',   icon: '🫙', name: 'Catch 12 night critters',   goal: 12, stat: 'bugsCaught',      reward: 'super' },
@@ -228,7 +228,7 @@ const ACHIEVEMENTS = [
   { id: 'cellar-5',    icon: '🕳️', name: 'Cellar floor 5',   test: () => (state.progress.cellarBest || 0) >= 5 },
   { id: 'cellar-10',   icon: '🦇', name: 'Cellar floor 10',  test: () => (state.progress.cellarBest || 0) >= 10 },
   { id: 'cellar-20',   icon: '🐉', name: 'Cellar floor 20',  test: () => (state.progress.cellarBest || 0) >= 20 },
-  { id: 'rival-first', icon: '🎭', name: 'Beat Rook',        test: () => (state.progress.totals.rivalWins || 0) >= 1 },
+  { id: 'rival-first', icon: '🎭', name: `Beat ${CAST.rival.name}`,        test: () => (state.progress.totals.rivalWins || 0) >= 1 },
   { id: 'rival-done',  icon: '🃏', name: 'Rivalry settled',  test: () => !!(state.progress.rival && state.progress.rival.chapter >= RIVAL.chapters) },
   { id: 'friend-3',    icon: '💞', name: 'A true friend',    test: () => Object.values(state.progress.friends || {}).some(f => heartsFor(f.points) >= 3) },
   { id: 'friend-5',    icon: '💖', name: 'Best friends',     test: () => Object.values(state.progress.friends || {}).some(f => heartsFor(f.points) >= 5) },
@@ -255,10 +255,10 @@ const ACHIEVEMENTS = [
   { id: 'mini-50',     icon: '🕹️', name: '50 mini-games',    test: () => (state.progress.totals.minigamesPlayed || 0) >= 50 },
   { id: 'first-summon', icon: '🕯️', name: 'First summon',    test: () => (state.progress.totals.summons || 0) >= 1 },
   { id: 'four-gods',   icon: '✨', name: 'All four gods home', test: () => SUMMONS.filter(s => !s.atlas).every(s => state.ownedCards.includes(s.card)) },
-  { id: 'atlas-home',  icon: '🗺️', name: 'The Atlas',       test: () => state.ownedCards.includes('the-atlas') },
-  { id: 'atlas-win',   icon: '⚔️', name: 'Beat the Atlas',  test: () => (state.progress.totals.atlasWins || 0) >= 1 },
-  { id: 'atlas-all',   icon: '📜', name: 'Every Atlas challenge', test: () => !!state.progress.atlas && ATLAS_BATTLES.every(b => state.progress.atlas.battles && state.progress.atlas.battles[b.id]) },
-  { id: 'atlas-gold',  icon: '🥇', name: 'Gold with the Atlas', test: () => (state.progress.totals.atlasGolds || 0) >= 1 },
+  { id: 'atlas-home',  icon: '🗺️', name: `The ${CAST.atlas.name}`,       test: () => state.ownedCards.includes('the-atlas') },
+  { id: 'atlas-win',   icon: '⚔️', name: `Beat the ${CAST.atlas.name}`,  test: () => (state.progress.totals.atlasWins || 0) >= 1 },
+  { id: 'atlas-all',   icon: '📜', name: `Every ${CAST.atlas.name} challenge`, test: () => !!state.progress.atlas && ATLAS_BATTLES.every(b => state.progress.atlas.battles && state.progress.atlas.battles[b.id]) },
+  { id: 'atlas-gold',  icon: '🥇', name: `Gold with the ${CAST.atlas.name}`, test: () => (state.progress.totals.atlasGolds || 0) >= 1 },
   { id: 'first-trade', icon: '🤝', name: 'First trade',      test: () => (state.progress.totals.tradesDone || 0) >= 1 },
   { id: 'trade-15',    icon: '💱', name: '15 trades',        test: () => (state.progress.totals.tradesDone || 0) >= 15 },
   { id: 'mastery-3',   icon: '✨', name: 'A ★★★ card',       test: () => Object.keys(state.progress.mastery || {}).some(id => masteryRank(id) >= 3) },
@@ -601,7 +601,7 @@ function renderFavours() {
     const ready = requestDone(r);
     const el = document.createElement('div');
     el.className = 'quest' + (ready ? ' done' : '');
-    const rewardText = r.reward ? `a ${REQ_WIN_RARITY} card or better` : `🫧 ${r.pebbles} Embers`;
+    const rewardText = r.reward ? `a ${REQ_WIN_RARITY} card or better` : `🫧 ${r.pebbles} ${GAME.currency.many}`;
     el.innerHTML = `
       <div class="quest-top">
         <span class="q-icon">🤝</span>

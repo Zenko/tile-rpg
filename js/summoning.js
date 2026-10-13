@@ -73,7 +73,7 @@ function summonTap(id) {
   const s = summonDef(id); if (!s) return altarIntro();
   const d = cardDef(s.card);
   if (s.atlas && !atlasRevealed() && !summonOwned(s)) return 'The candles lean toward something you cannot see yet.';
-  if (summonOwned(s)) return s.atlas ? 'The Atlas is with you. It was always going to be.' : `${d.name} is home. Their card waits in your collection.`;
+  if (summonOwned(s)) return s.atlas ? `The ${CAST.atlas.name} is with you. It was always going to be.` : `${d.name} is home. Their card waits in your collection.`;
   if (!summonReady(s)) return `${d.icon} ${d.name} is not ready.\n` + summonReqs(s).map(r => `${r.ok ? '✅' : '▫️'} ${r.text}`).join('\n');
   return summonDo(s);
 }
@@ -86,9 +86,9 @@ function summonDo(s) {
   noteCardsFound(1);
   bumpStat('summons', 1);
   const d = cardDef(s.card);
-  logEvent(s.atlas ? '🗺️' : '🕯️', s.atlas ? 'Summoned the Atlas.' : `Summoned ${d.name}${offer.length ? `, offering ${offer.map(id => cardDef(id).name).join(', ')}` : ''}.`);
+  logEvent(s.atlas ? '🗺️' : '🕯️', s.atlas ? `Summoned the ${CAST.atlas.name}.` : `Summoned ${d.name}${offer.length ? `, offering ${offer.map(id => cardDef(id).name).join(', ')}` : ''}.`);
   saveState(); updateHud(); ensureAudio(); sfx('mythic'); buzz(HAP.big);
-  showCardReveal(s.card, s.atlas ? 'The Atlas arrives' : 'Summoned', true, null, 0, { flip: true, isNew: true });
+  showCardReveal(s.card, s.atlas ? `The ${CAST.atlas.name} arrives` : 'Summoned', true, null, 0, { flip: true, isNew: true });
   checkAchievements();
   return s.atlas ? 'The candles all lean one way. Something very large has noticed you, and it is not unkind.' : `${d.name} answers the call.${offer.length ? ` You gave up ${offer.map(id => cardDef(id).name).join(', ')}.` : ''}`;
 }
@@ -108,10 +108,10 @@ function summonDo(s) {
 const ALTAR_FAMS = ['grove', 'stone', 'tide', 'wind'];
 const ALTAR_PER_CANDLE = 3, ALTAR_TOTAL = 6, ALTAR_PILLARS = 2, ALTAR_TIER_CAP = 3;   // index into RARITY_ORDER: super
 const ALTAR_PTS = { common: 1, rare: 2, ultra: 3, super: 4, mythic: 5 };
-const ALTAR_PRE = { grove: 'Mossy', stone: 'Hollow', tide: 'Drifting', wind: 'Hushed' }, ALTAR_NOUN = { grove: 'Fawn', stone: 'Warden', tide: 'Heron', wind: 'Moth' };
+const ALTAR_PRE = { grove: 'Mossy', stone: 'Hollow', tide: 'Drifting', wind: 'Hushed' }, ALTAR_NOUN = { grove: 'Fawn', stone: 'Warden', tide: 'Heron', wind: 'Moth' };   // names-ok: spirit name words, not the pedlar
 const ALTAR_BURNS = [
   { id: 'now', label: 'Now', sub: 'no wait' },
-  { id: 'hour', label: '1 hour', sub: '+2 Embers a card', ms: 3600000 },
+  { id: 'hour', label: '1 hour', sub: `+2 ${GAME.currency.many} a card`, ms: 3600000 },
   { id: 'night', label: 'Overnight', sub: '4+ cards: a rarity higher', ms: 8 * 3600000 }
 ];
 const ALTAR_GODS = SUMMONS.filter(x => !x.atlas).map(x => x.card);
@@ -193,7 +193,7 @@ function altarGrant(sp) {
   bumpStat('echoes', 1);
   logEvent('🕯️', `${sp.name} answered the candles${first ? ' for the first time' : ''}: ${d.name}.`);
   saveState(); updateHud(); ensureAudio(); sfx('claim'); buzz(HAP.big);
-  showCardReveal(cardId, `${sp.name} answers`, true, first ? 'A new page in your Spirit Book. 6 Embers for the find.' : 'You have met before.', 0, { flip: true, isNew });
+  showCardReveal(cardId, `${sp.name} answers`, true, first ? `A new page in your Spirit Book. 6 ${GAME.currency.many} for the find.` : 'You have met before.', 0, { flip: true, isNew });
   return `${sp.name} answers the candles. ${d.name} is yours.${first ? ' New in your Spirit Book.' : ''}`;
 }
 function altarGo() {

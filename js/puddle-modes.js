@@ -149,7 +149,7 @@ PW_KINDS.maze = {
     const rank = (w.outBy || []).length + 1, first = rank === 1, emb = first ? 10 : rank === 2 ? 6 : rank === 3 ? 4 : 3;
     bumpStat('puddleWins', 1);
     pwLeave('done', false, () => {
-      addPebbles(emb, 'puddle-world'); toast(`🌀 ${first ? 'First one out! ' : ''}+${emb} Embers`);
+      addPebbles(emb, 'puddle-world'); toast(`🌀 ${first ? 'First one out! ' : ''}+${emb} ${GAME.currency.many}`);
       pwGiveCard(weightedTownCardId(first ? rollRewardRarity(false) : (Math.random() < 0.5 ? 'rare' : 'common')), first ? 'First one out of the maze' : 'Out of the maze');
     });
   },
@@ -280,7 +280,7 @@ function pwBoardWin(w, place) {
   const emb = place === 1 ? 10 : place === 2 ? 6 : 4;
   bumpStat('puddleWins', 1); PWB.busy = true;
   pwLeave('done', false, () => {
-    addPebbles(emb, 'puddle-world'); toast(`🌀 ${place === 1 ? 'You won the board! ' : place === 2 ? 'Second place. ' : 'You finished. '}+${emb} Embers`);
+    addPebbles(emb, 'puddle-world'); toast(`🌀 ${place === 1 ? 'You won the board! ' : place === 2 ? 'Second place. ' : 'You finished. '}+${emb} ${GAME.currency.many}`);
     pwGiveCard(weightedTownCardId(place === 1 ? rollRewardRarity(false) : (Math.random() < 0.5 ? 'rare' : 'common')), place === 1 ? 'Winner of the board' : 'A prize from the board');
   });
 }

@@ -65,7 +65,7 @@ const DECORATION_ITEMS = [
   { id: 'koi-pond', name: 'Dreaming Pond', icon: '🐟', cost: 120, level: 8, desc: 'A still pond with a slow, golden visitor.', cat: 'plant' },
   { id: 'crystal-fountain', name: 'Crystal Fountain', icon: '⛲', cost: 160, level: 10, desc: 'Water that chimes as it falls.', cat: 'ornament' },
   { id: 'wishing-tree', name: 'Wishing Tree', icon: '🎋', cost: 220, level: 12, desc: 'Ribbons from every wish ever made.', cat: 'plant' },
-  { id: 'golden-keeper', name: 'Golden Dreamer', icon: '🏆', cost: 300, level: 15, desc: 'A statue of the Dreamer, mid-triumph.', cat: 'ornament' },
+  { id: 'golden-keeper', name: `Golden ${GAME.player.one}`, icon: '🏆', cost: 300, level: 15, desc: `A statue of the ${GAME.player.one}, mid-triumph.`, cat: 'ornament' },
   // sold only by the Atlas (js/atlas.js ATLAS_SHOP), never in the Card Shop
   { id: 'atlas-compass', name: 'Compass Rose', icon: '🧭', cost: 150, desc: 'It always points at something you meant to find.', cat: 'ornament', atlas: true },
   { id: 'atlas-lantern', name: 'Map Lantern', icon: '🏮', cost: 180, desc: 'Lights up the parts of the ground nobody has drawn yet.', cat: 'ornament', atlas: true },
@@ -158,7 +158,7 @@ const CARD_POOL = [
   { id: 'glowworm', name: 'Glowworm', icon: '🪱', rarity: 'ultra', cost: 2, power: 2, grit: 3, kw: ['mend', 'shield'], exclusive: 'cellar' },
   { id: 'echo-cavern', name: 'Echo Cavern', icon: '🕳️', rarity: 'super', cost: 4, power: 6, grit: 6, kw: ['echo', 'guard'], exclusive: 'cellar' },
   { id: 'deep-wyrm', name: 'Forgotten Wyrm', icon: '🐉', rarity: 'mythic', cost: 5, power: 9, grit: 9, kw: ['bloom', 'guard'], exclusive: 'cellar' },
-  { id: 'rooks-ace', name: "Rook's Ace", icon: '🎭', rarity: 'mythic', cost: 4, power: 7, grit: 6, kw: ['swift', 'echo'], exclusive: 'rival' },
+  { id: 'rooks-ace', name: `${CAST.rival.name}'s Ace`, icon: '🎭', rarity: 'mythic', cost: 4, power: 7, grit: 6, kw: ['swift', 'echo'], exclusive: 'rival' },
   // v1.82.0 - four families (CARD_FAMILY below), one per district, and the Echo / Lull / Kin / Sting keywords. Appended at the
   // end on purpose: deck share codes store cards by their position in this list.
   // Grove (El Jardín Lúcido): Echo leaves an Afterthought behind, Kin grows with its family.
@@ -194,11 +194,11 @@ const CARD_POOL = [
   // The four spirit gods (Divine) and the Atlas (Atlas rarity): earned by summoning, never found. Energy is capped at 5, so they cost 5.
   // Stats come from a paired simulation (2500 games each, one of these swapped into a random deck, smart AI both sides; re-run after the build 151 balance pass): +5 to +9 win
   // points each, against 0 to +5 for the mythics. Ensueño needs the big numbers because Echo + Bloom is slow. Swift on the Atlas was +20, so it has none.
-  { id: 'duermevela', name: 'Duermevela', icon: '🚪', rarity: 'divine', cost: 5, power: 8, grit: 9, kw: ['guard', 'shield'], exclusive: 'summon' },
-  { id: 'murmullo', name: 'Murmullo', icon: '🤫', rarity: 'divine', cost: 5, power: 8, grit: 7, kw: ['swift', 'sting'], exclusive: 'summon' },
-  { id: 'marea-lenta', name: 'Marea Lenta', icon: '🪸', rarity: 'divine', cost: 5, power: 8, grit: 8, kw: ['mend', 'lull'], exclusive: 'summon' },
-  { id: 'ensueno', name: 'Ensueño', icon: '💭', rarity: 'divine', cost: 5, power: 14, grit: 13, kw: ['seed', 'bloom'], exclusive: 'summon' },
-  { id: 'the-atlas', name: 'The Atlas', icon: '🗺️', rarity: 'atlas', cost: 5, power: 10, grit: 12, kw: ['guard'], exclusive: 'summon' },
+  { id: 'duermevela', name: BOSSES.square, icon: '🚪', rarity: 'divine', cost: 5, power: 8, grit: 9, kw: ['guard', 'shield'], exclusive: 'summon' },
+  { id: 'murmullo', name: BOSSES.market, icon: '🤫', rarity: 'divine', cost: 5, power: 8, grit: 7, kw: ['swift', 'sting'], exclusive: 'summon' },
+  { id: 'marea-lenta', name: BOSSES.harbor, icon: '🪸', rarity: 'divine', cost: 5, power: 8, grit: 8, kw: ['mend', 'lull'], exclusive: 'summon' },
+  { id: 'ensueno', name: BOSSES.garden, icon: '💭', rarity: 'divine', cost: 5, power: 14, grit: 13, kw: ['seed', 'bloom'], exclusive: 'summon' },
+  { id: 'the-atlas', name: `The ${CAST.atlas.name}`, icon: '🗺️', rarity: 'atlas', cost: 5, power: 10, grit: 12, kw: ['guard'], exclusive: 'summon' },
 ];
 /* Foe cards: unique cards that only opponents carry (neighbors, bosses, cellar floors). They are deliberately NOT in
    CARD_POOL - so they never show up in packs, the Index, deck codes or rewards - but defOf() knows them, so the battle
@@ -220,10 +220,10 @@ const FOE_CARDS = [
 // Families (v1.82.0): each district leans on one. Kin cards grow with the other cards of their family on your board, and a
 // district's neighbors and boss build decks that favour their family (buildDeckForOpponent). Spells and unlisted cards have none.
 const FAMILIES = {
-  grove: { icon: '🌿', name: 'Brote', district: 'garden' },
-  stone: { icon: '🪨', name: 'Recuerdo', district: 'square' },
-  tide:  { icon: '🌊', name: 'Deriva',  district: 'harbor' },
-  wind:  { icon: '🪶', name: 'Susurro',  district: 'market' }
+  grove: { icon: '🌿', name: FAMILY_NAMES.grove, district: 'garden' },
+  stone: { icon: '🪨', name: FAMILY_NAMES.stone, district: 'square' },
+  tide:  { icon: '🌊', name: FAMILY_NAMES.tide,  district: 'harbor' },
+  wind:  { icon: '🪶', name: FAMILY_NAMES.wind,  district: 'market' }
 };
 const CARD_FAMILY = (() => {
   const lists = {
@@ -569,17 +569,17 @@ const BattleEngine = (function () {
      screen and battle UI work the family out in archetypePassive(), js/ladder-practice.js). Wind changes the cards when the
      decks are built; Grove, Stone and Tide trigger when a card of the family is played. Re-run the simulation before changing a number. */
   const PASSIVES = {
-    grove: { icon: '🌱', name: 'Rooted',   text: 'Brote cards restore 2 Calm when they arrive.' },
-    stone: { icon: '⛰️', name: 'Bedrock',  text: 'Your first Recuerdo card costing 4 or more enters with a Haze.' },
-    tide:  { icon: '🌊', name: 'Undertow', text: 'The first Deriva card you play each turn draws a card, if you hold 4 or fewer.' },
-    wind:  { icon: '🪶', name: 'Tailwind', text: 'Flicker Susurro cards costing 2 or less get +1 power.' }
+    grove: { icon: '🌱', name: 'Rooted',   text: `${FAMILY_NAMES.grove} cards restore 2 Calm when they arrive.` },
+    stone: { icon: '⛰️', name: 'Bedrock',  text: `Your first ${FAMILY_NAMES.stone} card costing 4 or more enters with a Haze.` },
+    tide:  { icon: '🌊', name: 'Undertow', text: `The first ${FAMILY_NAMES.tide} card you play each turn draws a card, if you hold 4 or fewer.` },
+    wind:  { icon: '🪶', name: 'Tailwind', text: `Flicker ${FAMILY_NAMES.wind} cards costing 2 or less get +1 power.` }
   };
   // The smaller step at 6-7 cards of a family (opts.passiveTier = [1|2, ...]; 2 is the default): the same idea, once per match.
   const MINORS = {
-    grove: { icon: '🌱', name: 'Seedling', text: 'Your first Brote card each match restores 3 Calm.' },
-    stone: { icon: '⛰️', name: 'Footing',  text: 'Your first Recuerdo card costing 3 or more enters with +1 health.' },
-    tide:  { icon: '🌊', name: 'Ebb',      text: 'Your first Deriva card costing 3 or more refunds 1 Energy.' },
-    wind:  { icon: '🪶', name: 'Breeze',   text: 'Your first Flicker Susurro card each match gets +1 power.' }
+    grove: { icon: '🌱', name: 'Seedling', text: `Your first ${FAMILY_NAMES.grove} card each match restores 3 Calm.` },
+    stone: { icon: '⛰️', name: 'Footing',  text: `Your first ${FAMILY_NAMES.stone} card costing 3 or more enters with +1 health.` },
+    tide:  { icon: '🌊', name: 'Ebb',      text: `Your first ${FAMILY_NAMES.tide} card costing 3 or more refunds 1 Energy.` },
+    wind:  { icon: '🪶', name: 'Breeze',   text: `Your first Flicker ${FAMILY_NAMES.wind} card each match gets +1 power.` }
   };
   const MINOR_RULES = { groveHeal: 3, stoneMinCost: 3, tideMinCost: 3 };   // tuned by simulation
   const PASSIVE_RULES = { windMaxCost: 2, stoneMinCost: 4 };   // Wind only touches Flicker cards up to this cost (tuned by simulation)
@@ -1220,9 +1220,9 @@ const RARITY_LABEL = { common: 'common', rare: 'rare', ultra: 'ultra rare', supe
 // Each town has its own population - a name pool and a species/face pool - so neighbors read as a
 // different crowd from one district to the next, not just the same people in a different building.
 const NPC_POOLS = {
-  square: { names: ['Wren', 'Sable', 'Fenn', 'Marlow', 'Tansy', 'Rowan', 'Juniper', 'Cove'],
+  square: { names: [CAST.guide.name, 'Sable', 'Fenn', 'Marlow', 'Tansy', 'Rowan', 'Juniper', 'Cove'],
              icons: ['🧑', '👩', '🧔', '👨', '🧑‍🦱', '🧑‍🦳', '🧕', '🧑‍🎨'] },
-  market: { names: ['Clover', 'Hazel', 'Bramble', 'Pip', 'Nutmeg', 'Acorn', 'Chestnut', 'Ginger'],
+  market: { names: [CAST.threadSeller.name, 'Hazel', 'Bramble', CAST.grainSeller.name, 'Nutmeg', 'Acorn', 'Chestnut', 'Ginger'],
              icons: ['🐰', '🐹', '🐭', '🐿️'] },
 };
 function npcPool(key) { return NPC_POOLS[key] || NPC_POOLS.square; }
@@ -1249,16 +1249,16 @@ function opponentPortrait(opponent) {
 }
 
 const DISTRICTS = {
-  square: { name: 'El Umbral', theme: 'square', unlockWins: 0, unlockLevel: 1, boss: 'Duermevela', bossIcon: '🌳',
+  square: { name: PLACES.square, theme: 'square', unlockWins: 0, unlockLevel: 1, boss: BOSSES.square, bossIcon: '🌳',
     scenery: [{ icon: '🪑', title: 'A quiet bench', desc: 'A good place to sit and watch the town go by.' },
               { icon: '⛲', title: 'La Fuente', desc: 'It hums a half-remembered song.' }] },
-  market: { name: 'El Mercado de Susurros', theme: 'market', unlockWins: 1, unlockLevel: 2, boss: 'Murmullo', bossIcon: '🦡',
+  market: { name: PLACES.market, theme: 'market', unlockWins: 1, unlockLevel: 2, boss: BOSSES.market, bossIcon: '🦡',
     scenery: [{ icon: '🏪', title: 'A small stall', desc: 'The vendor is out today, but the awning gives good shade.' },
               { icon: '🧺', title: 'A basket of goods', desc: 'Nothing to take, but it smells like fresh bread.' }] },
-  harbor: { name: 'La Orilla del Arrullo', theme: 'harbor', unlockWins: 3, unlockLevel: 4, boss: 'Marea Lenta', bossIcon: '⚓',
+  harbor: { name: PLACES.harbor, theme: 'harbor', unlockWins: 3, unlockLevel: 4, boss: BOSSES.harbor, bossIcon: '⚓',
     scenery: [{ icon: '⛵', title: 'A moored boat', desc: 'It rocks gently against the dock.' },
               { icon: '🦭', title: 'A resting seal', desc: 'It barely opens an eye as you pass.' }] },
-  garden: { name: 'El Jardín Lúcido', theme: 'garden', unlockWins: 5, unlockLevel: 6, boss: 'Ensueño', bossIcon: '🌻',
+  garden: { name: PLACES.garden, theme: 'garden', unlockWins: 5, unlockLevel: 6, boss: BOSSES.garden, bossIcon: '🌻',
     scenery: [{ icon: '🌻', title: 'Sunflowers', desc: 'They turn slowly to follow the light.' },
               { icon: '🪴', title: 'A potted fern', desc: 'Someone tends this carefully.' }] }
 };

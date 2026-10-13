@@ -92,7 +92,7 @@ function flyToHud(icon, pillId) {
     if (typeof inBattle !== 'undefined' && inBattle) return;
     if (typeof inScene !== 'undefined' && inScene && typeof closeScene === 'function') closeScene();
     sfx('nav'); buzz(HAP.tap);
-    if (tab === 'shop' && typeof districtUnlocked === 'function' && districtUnlocked('market')) { toast('🛍️ Spend Embers at the Card Shop on El Mercado de Susurros'); return; }
+    if (tab === 'shop' && typeof districtUnlocked === 'function' && districtUnlocked('market')) { toast(`🛍️ Spend ${GAME.currency.many} at the Card Shop on ${PLACES.market}`); return; }
     switchTab(tab);
   };
   el.addEventListener('click', go);

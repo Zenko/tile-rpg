@@ -13,7 +13,7 @@ const BUGS = [
   { id: 'firefly',     name: 'Firefly',     icon: '✨', weight: 50, pebbles: 2, hint: 'Any night' },
   { id: 'cricket',     name: 'Cricket',     icon: '🦗', weight: 26, pebbles: 2, hint: 'Any night' },
   { id: 'glow-beetle', name: 'Glow Beetle', icon: '🪲', weight: 14, pebbles: 3, hint: 'Any night, now and then' },
-  { id: 'luna-moth',   name: 'Luna Moth',   icon: '🦋', weight: 9,  pebbles: 4, hint: 'Any night, but shy' },
+  { id: 'luna-moth',   name: 'Luna Moth',   icon: '🦋', weight: 9,  pebbles: 4, hint: 'Any night, but shy' },   // names-ok: a critter, not the pedlar
   { id: 'rain-snail',  name: 'Rain Snail',  icon: '🐌', weight: 18, pebbles: 3, weather: ['rain', 'storm'], hint: 'Only on rainy nights' },
   { id: 'starwing',    name: 'Starwing',    icon: '💫', weight: 1.5, pebbles: 15, legendary: true, hint: 'A legend of the night sky' },
 ];
@@ -54,25 +54,25 @@ function catchBug(b) {
   saveState(); renderTown();
 }
 function buyNightPack() {
-  if (!isNightNow()) return 'Lumen yawns. "The night packs are packed away until dark."';
-  if (state.progress.pebbles < NIGHT_PACK_COST) { sfx('tie'); return `Lumen blinks slowly. "🫧 ${NIGHT_PACK_COST}, night friend."`; }
+  if (!isNightNow()) return `${CAST.nightVendor.name} yawns. "The night packs are packed away until dark."`;
+  if (state.progress.pebbles < NIGHT_PACK_COST) { sfx('tie'); return `${CAST.nightVendor.name} blinks slowly. "🫧 ${NIGHT_PACK_COST}, night friend."`; }
   spendPebbles(NIGHT_PACK_COST, 'night-pack');
   const r = Math.random(), rar = r < 0.03 ? 'mythic' : r < 0.15 ? 'super' : r < 0.45 ? 'ultra' : 'rare';
   let pool = NIGHT_CARDS.map(cardDef).filter(d => d && d.rarity === rar);
   if (!pool.length) pool = NIGHT_CARDS.map(cardDef).filter(Boolean);
   const cid = seasonalPick(pool).id, isNew = !discoveredSet().has(cid);
   state.ownedCards.push(cid); noteCardsFound(1); state.progress.packsOpened += 1;
-  logEvent('🌙', `Bought a Lantern Pack from Lumen for 🫧 ${NIGHT_PACK_COST}.`);
+  logEvent('🌙', `Bought a Lantern Pack from ${CAST.nightVendor.name} for 🫧 ${NIGHT_PACK_COST}.`);
   saveState(); updateHud(); bumpPill('pillCards'); bumpPill('pillPebbles');
   showCardReveal(cid, 'Lantern Pack', true);
   if (isNew) toast('📖 New entry in your Index');
-  return 'Lumen tears the dark paper with one talon. "May it serve you well."';
+  return `${CAST.nightVendor.name} tears the dark paper with one talon. "May it serve you well."`;
 }
 function sellJar() {
   const v = jarValue();
   if (!v) return 'Your jar is empty. Critters glow in the grass at night - tap one to catch it.';
   bugState().jar = {}; addPebbles(v, 'bugs'); saveState(); sfx('claim');
-  return `Lumen releases your critters into the lantern light, one by one, and counts out 🫧 ${v}.`;
+  return `${CAST.nightVendor.name} releases your critters into the lantern light, one by one, and counts out 🫧 ${v}.`;
 }
 
 /* ============================================================
@@ -93,7 +93,7 @@ const COMPANION_PERKS = {
   spirit:  { icon: '🛡️', text: '+2 Calm at the start of every match' },
   finds:   { icon: '👀', text: 'Spots more hidden cards in the grass' },
   crops:   { icon: '🌱', text: 'Crops grow 25% faster' },
-  harvest: { icon: '🧺', text: '+2 Embers from every harvest' },
+  harvest: { icon: '🧺', text: `+2 ${GAME.currency.many} from every harvest` },
   chest:   { icon: '🗝️', text: 'Hidden chests turn up more often' },
   fish:    { icon: '🎣', text: 'Fish bite sooner' },
   xp:      { icon: '⭐', text: '+10% XP from everything' },
@@ -214,7 +214,7 @@ function companionRoster() {
 function companionBlock(e) {
   if (!e) return 'Not available';
   if (state.companion && companionKey(state.companion) === e.key) return '';
-  if (e.kind === 'card') { if (e.rarity === 'atlas') return 'The Atlas cannot walk with anyone'; if (!e.owned) return 'You need to own this card to walk with it'; }
+  if (e.kind === 'card') { if (e.rarity === 'atlas') return `The ${CAST.atlas.name} cannot walk with anyone`; if (!e.owned) return 'You need to own this card to walk with it'; }
   const lv = ensureLevel().level, needLv = lv < e.level, needHearts = e.kind === 'npc' && e.hearts < e.needHearts;
   if (needLv && needHearts) return `Needs Lv ${e.level} and ${e.needHearts} hearts (you are Lv ${lv} with ${e.hearts})`;
   if (needHearts) return `Needs ${e.needHearts} hearts (you have ${e.hearts})`;
@@ -358,7 +358,7 @@ function companionNpcObj(c) {
   c = c || state.companion; if (!c) return null;
   if (companionKind(c) === 'rival') {
     const rv = rivalState(), left = (rv.awayUntil || 0) - Date.now();
-    if (left > 0) { toast(`🎭 Rook is rebuilding their deck (${fmtLeft(left)})`); return null; }
+    if (left > 0) { toast(`🎭 ${CAST.rival.name} is rebuilding their deck (${fmtLeft(left)})`); return null; }
     return { id: RIVAL.id, name: RIVAL.name, icon: RIVAL.icon, isRival: true, x: state.playerPos.x, y: state.playerPos.y, deck: rivalDeck(rv.chapter), profile: rivalProfile(rv.chapter), rewardCard: null, defeated: false, isBoss: false };
   }
   return c.npc || null;
@@ -390,12 +390,12 @@ const CHARM_KINDS = {
   echo:   { kind: 'fish',           val: t => 0.05 * t,        text: v => `Fish bite ${Math.round(v * 100)}% sooner` },
   swift:  { kind: 'finds',          val: t => 0.10 * t,        text: v => `Hidden finds +${Math.round(v * 100)}%` },
   guard:  { kind: 'chest',          val: t => 0.10 * t,        text: v => `Hidden chests +${Math.round(v * 100)}%` },
-  bloom:  { kind: 'harvestPebbles', val: t => t,               text: v => `+${v} Ember${v === 1 ? '' : 's'} per harvest` },
+  bloom:  { kind: 'harvestPebbles', val: t => t,               text: v => `+${v} ${currencyName(v)} per harvest` },
   shield: { kind: 'startSpirit',    val: t => Math.ceil(t / 2), text: v => `+${v} Calm at the start of matches` },
   rally:  { kind: 'xp',             val: t => 0.02 * t,        text: v => `+${Math.round(v * 100)}% XP` },
   drain:  { kind: 'bake',           val: t => 0.06 * t,        text: v => `Bread bakes ${Math.round(v * 100)}% faster` },
-  thorns: { kind: 'winPebbles',     val: t => t,               text: v => `+${v} Ember${v === 1 ? '' : 's'} for every match won` },
-  spell:  { kind: 'miniPebbles',    val: t => Math.ceil(t / 2), text: v => `+${v} Ember${v === 1 ? '' : 's'} per mini-game medal` },
+  thorns: { kind: 'winPebbles',     val: t => t,               text: v => `+${v} ${currencyName(v)} for every match won` },
+  spell:  { kind: 'miniPebbles',    val: t => Math.ceil(t / 2), text: v => `+${v} ${currencyName(v)} per mini-game medal` },
 };
 const CHARM_SLOT_LEVELS = [1, 5, 10];      // level needed for charm slot 1, 2, 3
 function charmSlotsOpen() { return CHARM_SLOT_LEVELS.filter(l => (state.progress.level || 1) >= l).length; }
@@ -427,7 +427,7 @@ const CARD_SETS = [
   { id: 'stones',   name: 'Memory Stones',  icon: '🪨', cards: ['pebble', 'flintstone', 'geode', 'crystal-spire', 'mountain-heart'],          kind: 'startSpirit', val: 1,    text: '+1 Calm at the start of matches' },
   { id: 'birds',    name: 'Whisper Wings',  icon: '🐦', cards: ['origami-crane', 'feather', 'market-sparrow', 'dove', 'heron'], kind: 'finds',      val: 0.15, text: 'Hidden finds +15%' },
   { id: 'storm',    name: 'Dream Storms',   icon: '⛈️', cards: ['gale', 'thunderclap', 'thundering-ram', 'whirlpool'],                     kind: 'chest',       val: 0.15, text: 'Hidden chests +15%' },
-  { id: 'festival', name: 'Lantern Night',  icon: '🏮', cards: ['paper-fan', 'temple-bell', 'morning-bugle', 'stone-lantern', 'lion-dancer'], kind: 'miniPebbles', val: 1, text: '+1 Ember per mini-game medal' },
+  { id: 'festival', name: 'Lantern Night',  icon: '🏮', cards: ['paper-fan', 'temple-bell', 'morning-bugle', 'stone-lantern', 'lion-dancer'], kind: 'miniPebbles', val: 1, text: `+1 ${GAME.currency.one} per mini-game medal` },
   { id: 'spells',   name: 'Book of Lullabies', icon: '📜', cards: CARD_POOL.filter(c => c.spell).map(c => c.id),                             kind: 'startDraw',   val: 1,    text: 'Draw 1 extra card at the start of matches' },
 ];
 function setProgress(s) { const own = baseOwnedSet(); return s.cards.filter(id => own.has(id)).length; }
@@ -525,9 +525,9 @@ function museumCardButtons(wid) {
    trip, Watch / Haze / Briar make a mishap less likely, Startle improves the odds of a card, Bloom and Sip bring
    extra supplies, Chorus adds Embers, Rest brings back more experience. Strength (power + health) scales the Embers. */
 const EXPEDITIONS = [
-  { id: 'meadow', name: 'Meadow Walk',     icon: '🌾', mins: 20,  need: 8,  desc: 'Seeds, daisies and Embers. A common card now and then.' },
-  { id: 'shore',  name: 'Along the Shore', icon: '🐚', mins: 45,  need: 14, desc: 'Fish, Embers, and a fair chance of a rare card.' },
-  { id: 'ruins',  name: 'Old Ruins',       icon: '🏚️', mins: 90,  need: 20, desc: 'Plenty of Embers and a good chance of a rare card or better.' },
+  { id: 'meadow', name: 'Meadow Walk',     icon: '🌾', mins: 20,  need: 8,  desc: `Seeds, daisies and ${GAME.currency.many}. A common card now and then.` },
+  { id: 'shore',  name: 'Along the Shore', icon: '🐚', mins: 45,  need: 14, desc: `Fish, ${GAME.currency.many}, and a fair chance of a rare card.` },
+  { id: 'ruins',  name: 'Old Ruins',       icon: '🏚️', mins: 90,  need: 20, desc: `Plenty of ${GAME.currency.many} and a good chance of a rare card or better.` },
   { id: 'peaks',  name: 'Misty Peaks',     icon: '⛰️', mins: 180, need: 28, desc: 'A long climb. The best odds of an ultra rare card or better, and Moonbeans.' },
 ];
 const EXPED_TEAMS = 2, EXPED_PARTY = 3;
@@ -710,10 +710,10 @@ const CHALLENGE_RULES = [
   { id: 'keywords', icon: '🧩', text: 'Every card has a keyword or is a spell', test: ds => ds.every(d => d.spell || d.kw.length) },
   { id: 'rareplus', icon: '💎', text: 'Only rare cards or better',         test: ds => ds.every(d => d.rarity !== 'common') },
   // Family formats (build 100): spells have no family, so they are allowed in every one.
-  { id: 'fam-grove', icon: '🌿', text: 'Only Brote cards (and spells)',    test: ds => ds.every(d => d.spell || CARD_FAMILY[BattleEngine.baseIdOf(d.id)] === 'grove') },
-  { id: 'fam-stone', icon: '🪨', text: 'Only Recuerdo cards (and spells)',    test: ds => ds.every(d => d.spell || CARD_FAMILY[BattleEngine.baseIdOf(d.id)] === 'stone') },
-  { id: 'fam-tide',  icon: '🌊', text: 'Only Deriva cards (and spells)',     test: ds => ds.every(d => d.spell || CARD_FAMILY[BattleEngine.baseIdOf(d.id)] === 'tide') },
-  { id: 'fam-wind',  icon: '🪶', text: 'Only Susurro cards (and spells)',     test: ds => ds.every(d => d.spell || CARD_FAMILY[BattleEngine.baseIdOf(d.id)] === 'wind') },
+  { id: 'fam-grove', icon: '🌿', text: `Only ${FAMILY_NAMES.grove} cards (and spells)`,    test: ds => ds.every(d => d.spell || CARD_FAMILY[BattleEngine.baseIdOf(d.id)] === 'grove') },
+  { id: 'fam-stone', icon: '🪨', text: `Only ${FAMILY_NAMES.stone} cards (and spells)`,    test: ds => ds.every(d => d.spell || CARD_FAMILY[BattleEngine.baseIdOf(d.id)] === 'stone') },
+  { id: 'fam-tide',  icon: '🌊', text: `Only ${FAMILY_NAMES.tide} cards (and spells)`,     test: ds => ds.every(d => d.spell || CARD_FAMILY[BattleEngine.baseIdOf(d.id)] === 'tide') },
+  { id: 'fam-wind',  icon: '🪶', text: `Only ${FAMILY_NAMES.wind} cards (and spells)`,     test: ds => ds.every(d => d.spell || CARD_FAMILY[BattleEngine.baseIdOf(d.id)] === 'wind') },
   { id: 'two-fam',   icon: '🎭', text: 'Cards from at most two families',  test: ds => new Set(ds.filter(d => !d.spell).map(d => CARD_FAMILY[BattleEngine.baseIdOf(d.id)] || 'none')).size <= 2 },
 ];
 function challengeState() {

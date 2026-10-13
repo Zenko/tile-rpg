@@ -25,7 +25,7 @@ const COMPANION_TALK = {
   snow: ['Little drifting stars everywhere.', 'It is so quiet in the snow.', 'Look, it is landing on your sleeve.'],
   night: ['The lanterns look like small moons.', 'Nights are for slow walks.', 'Do you think the stars know our names?'],
   places: {
-    square: ['El Umbral always smells like warm bread.', 'The old stones here remember a lot.', 'I like the benches. Someone is always just leaving.'],
+    square: [`${PLACES.square} always smells like warm bread.`, 'The old stones here remember a lot.', 'I like the benches. Someone is always just leaving.'],
     market: ['So many voices at once. I love it.', 'Someone is selling something that smells wonderful.', 'Keep your cards close in a crowd.'],
     harbor: ['Hear the water? It is humming along.', 'The boats sound like they are sleeping.', 'I could watch the tide for hours.'],
     garden: ['Everything here is growing, quietly.', 'The flowers keep their own time.', 'Do plants dream, do you think?'],

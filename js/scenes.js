@@ -17,7 +17,7 @@
       steps, goals and rewards are still the ones in STORY.
    Saved: state.progress.scenes = { seen: { id: true } } and state.progress.story.beat (the last step whose beat has played).
    ============================================================ */
-const STORY_GUIDE_ICON = '🧓';   // Wren, until portraits arrive
+const STORY_GUIDE_ICON = CAST.guide.icon;   // the guide's face (js/game-config.js), until portraits arrive
 
 function storyScenes() { const p = state.progress; if (!p.scenes || typeof p.scenes !== 'object') p.scenes = { seen: {} }; if (!p.scenes.seen) p.scenes.seen = {}; return p.scenes; }
 function storySeen(id) { return !!storyScenes().seen[id]; }
@@ -128,11 +128,11 @@ const WREN_NOT_SURE = 'I could not tell you how I know my way around, only that 
 const STORY_BEATS = [
   { ask: 'wander the Threshold for a bit', go: () => ({ wander: 30 }), cards: [
       { text: 'There you are. Come in off the middle of the path, dear.' },
-      { text: `I am Wren. I keep the kettle on. ${WREN_NOT_SURE}`, choices: [
-        { label: 'Where am I?', reply: 'El Umbral, the Threshold. Every dreamer starts here, though nobody remembers arriving.' },
+      { text: `I am ${CAST.guide.name}. I keep the kettle on. ${WREN_NOT_SURE}`, choices: [
+        { label: 'Where am I?', reply: `${PLACES.square}, the Threshold. Every ${GAME.player.lower} starts here, though nobody remembers arriving.` },
         { label: 'Is this a dream?', reply: 'It might be. Whose, I could not say. I have heard it called a few things.' },
         { label: 'How do I leave?', reply: 'The doors here only lead deeper in, dear. Have some tea first.' } ] },
-      { text: 'Take a slow wander first. El Umbral likes to be looked at. Thirty steps will do.' } ] },
+      { text: `Take a slow wander first. ${PLACES.square} likes to be looked at. Thirty steps will do.` } ] },
   { ask: 'say hello to a neighbor', go: () => ({ npc: true }), cards: [
       { text: 'Did you notice? Everyone here is a spirit wearing a card.' },
       { text: 'Tap one and say hello. They like being noticed more than they let on.' } ] },
@@ -141,11 +141,11 @@ const STORY_BEATS = [
       { text: 'Go on. Nobody here plays to hurt.' } ] },
   { ask: 'claim your gift in Rewards', go: () => ({ tab: 'quests' }), cards: [
       { text: 'Something is waiting for you in Rewards. Things tend to turn up for people here.' } ] },
-  { ask: 'visit my cottage, top left', mark: 'cottage', go: () => ({ scene: 'cottage', district: 'square', name: "Wren's cottage" }), cards: [
+  { ask: 'visit my cottage, top left', mark: 'cottage', go: () => ({ scene: 'cottage', district: 'square', name: `${CAST.guide.name}'s cottage` }), cards: [
       { text: 'Come by the cottage. It is top left of the square, you cannot miss it.' },
       { text: 'I will put the kettle on. I always do, and it is always just ready.' } ] },
-  { ask: 'bake a loaf at Maple\'s bakery', mark: 'bakery', go: () => JPLACES.bakery, cards: [
-      { text: 'Maple bakes bread that tastes like a memory you cannot place.' },
+  { ask: `bake a loaf at ${CAST.baker.name}'s bakery`, mark: 'bakery', go: () => JPLACES.bakery, cards: [
+      { text: `${CAST.baker.name} bakes bread that tastes like a memory you cannot place.` },
       { text: 'Bake a loaf at her bakery, bottom left. Tell me what it reminds you of. Nobody ever agrees.' } ] },
   { ask: 'catch a fish: tap the water', go: () => ({ fish: true }), cards: [
       { text: 'Cast a thought into any water. The fish bite on whatever you are thinking about.' },
@@ -153,11 +153,11 @@ const STORY_BEATS = [
   { ask: 'finish a game in any house', go: () => ({ minigame: true }), cards: [
       { text: 'Most houses have a little game going. Nobody keeps the score for long.' },
       { text: 'Try one. Mine has tea in it.' } ] },
-  { ask: 'plant a seed: Fern sells them', mark: 'house2', go: () => ({ scene: 'house2', district: 'square', name: "Fern's cottage" }), cards: [
-      { text: 'Seeds grow toward whatever you pay attention to. Fern sells them, bottom right of the square.' },
+  { ask: `plant a seed: ${CAST.gardener.name} sells them`, mark: 'house2', go: () => ({ scene: 'house2', district: 'square', name: `${CAST.gardener.name}'s cottage` }), cards: [
+      { text: `Seeds grow toward whatever you pay attention to. ${CAST.gardener.name} sells them, bottom right of the square.` },
       { text: 'Plant one and keep an eye on it. Or do not, and see what it becomes.' } ] },
   { ask: 'open a pack at the Card Shop', go: () => JPLACES.shop, cards: [
-      { text: 'Treat yourself. The Card Shop is in El Mercado de Susurros. Speak softly there.' } ] },
+      { text: `Treat yourself. The Card Shop is in ${PLACES.market}. Speak softly there.` } ] },
   { ask: 'change a card in Cards, then Deck', go: () => ({ tab: 'collection' }), cards: [
       { text: 'A deck is a sentence made of spirits. Change one word and it says something else.' },
       { text: 'Look under Cards, then Deck.' } ] },
@@ -172,10 +172,10 @@ const STORY_BEATS = [
       { text: 'There are four districts, and each one dreams a little differently.' },
       { text: 'Open the map and drift somewhere you have not been.' } ] },
   { ask: 'visit the Net Loft and Glasshouse', go: () => (state.progress.visited || {})['harbor-hut'] ? JPLACES.glass : JPLACES.net, cards: [
-      { text: 'Tam mends nets by the shore, though nothing ever seems to tear.' },
-      { text: 'Iris grows the most delicate thoughts under glass. Both would love a visitor.' } ] },
-  { ask: 'beat Rook in a match', go: () => ({ rival: true }), cards: [
-      { text: 'Rook keeps turning up. Another dreamer, like you, with a head full of theories.' },
+      { text: `${CAST.netMender.name} mends nets by the shore, though nothing ever seems to tear.` },
+      { text: `${CAST.glassKeeper.name} grows the most delicate thoughts under glass. Both would love a visitor.` } ] },
+  { ask: `beat ${CAST.rival.name} in a match`, go: () => ({ rival: true }), cards: [
+      { text: `${CAST.rival.name} keeps turning up. Another ${GAME.player.lower}, like you, with a head full of theories.` },
       { text: 'Play them, and listen. You never know which of their guesses is right. I certainly do not.' } ] },
   { ask: 'complete a themed card set', go: () => ({ tab: 'collection' }), cards: [
       { text: 'Finish what you start. A set is a small story made of cards.' } ] },
@@ -183,7 +183,7 @@ const STORY_BEATS = [
       { text: 'Look at you. Practically a local.' },
       { text: 'Keep going, dear. I have a feeling there is more to this place than the town.' } ] }
 ];
-STORY_BEATS.forEach(b => b.cards.forEach(c => { c.who = c.who || 'Wren'; c.icon = c.icon || STORY_GUIDE_ICON; }));
+STORY_BEATS.forEach(b => b.cards.forEach(c => { c.who = c.who || CAST.guide.name; c.icon = c.icon || STORY_GUIDE_ICON; }));
 
 let storyHoldAt = 0;
 function storyHoldUntil(ms) { storyHoldAt = Date.now() + ms; }
@@ -212,9 +212,9 @@ function storyFirstBeatPending() { const s = storyState(); return !inBattle && !
 function storyGoal() {
   const s = storyState(), b = storyBeatNow(), st = storyStep(); if (!b || !st) return null;
   const first = s.step < STORY_ARC_LEN;
-  if (storyReady()) return { icon: '📜', text: 'Wren: that one is done. Claim it in Rewards', run: () => journalGo({ tab: 'quests' }), first };
+  if (storyReady()) return { icon: '📜', text: `${CAST.guide.name}: that one is done. Claim it in Rewards`, run: () => journalGo({ tab: 'quests' }), first };
   const run = () => { if (b.go) journalGo(b.go()); else playStoryScene(storyBeatScript(s.step), { replay: true }); };
-  return { icon: st.icon, text: `Wren: ${b.ask}`, run, first, go: b.go ? b.go() : null };
+  return { icon: st.icon, text: `${CAST.guide.name}: ${b.ask}`, run, first, go: b.go ? b.go() : null };
 }
 // The gold diamond over the building the current step points at, only while you are in that building's district.
 function storyMark() {

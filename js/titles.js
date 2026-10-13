@@ -9,13 +9,13 @@ const TITLES = [
   { ach: 'favours-10',    name: 'Good Neighbor' },
   { ach: 'chest-5',       name: 'Treasure Hunter' },
   { ach: 'crafted-10',    name: 'Tinkerer' },
-  { ach: 'mythic-find',   name: 'Mythic Dreamer' },
+  { ach: 'mythic-find',   name: `Mythic ${GAME.player.one}` },
   { ach: 'spells-50',     name: 'Spellweaver' },
   { ach: 'cellar-10',     name: 'Deep Delver' },
   { ach: 'friend-5',      name: 'Beloved' },
   { ach: 'green-thumb',   name: 'Green Thumb' },
   { ach: 'wins-50',       name: 'Champion' },
-  { ach: 'rival-done',    name: "Rook's Equal" },
+  { ach: 'rival-done',    name: `${CAST.rival.name}'s Equal` },
   { ach: 'legend-fish',   name: 'Legend Catcher' },
   { ach: 'fish-log-full', name: 'Master Angler' },
   { ach: 'steps-10000',   name: 'Pathfinder' },
@@ -67,7 +67,7 @@ function ensureCosmeticUnlocks() {
 function buyCosmetic(kind, value, cost) {
   ensureCosmeticUnlocks();
   const ch = state.character, pr = state.progress;
-  if (pr.pebbles < cost) { toast('Not enough Embers yet'); sfx('tie'); return false; }
+  if (pr.pebbles < cost) { toast(`Not enough ${GAME.currency.many} yet`); sfx('tie'); return false; }
   spendPebbles(cost, 'cosmetics');
   const key = kind === 'emoji' ? 'unlockedEmojis' : kind === 'accessory' ? 'unlockedAccessories' : kind === 'mat' ? 'unlockedMats' : kind === 'stage' ? 'unlockedStages' : kind === 'border' ? 'unlockedAvBorders' : 'unlockedColors';
   if (!ch[key].includes(value)) ch[key].push(value);
@@ -157,7 +157,7 @@ function openPlayerMenu() {
   fetchWhosPlaying();
   syncToggles();
   switchPmSegment(pmView);
-  document.getElementById('pmVersion').textContent = 'Tile RPG ' + gameVersionLabel() + ' · build ' + BUILD;
+  document.getElementById('pmVersion').textContent = `${GAME.title} ` + gameVersionLabel() + ' · build ' + BUILD;
   document.getElementById('playerMenuBackdrop').classList.remove('hidden');
   document.getElementById('playerMenu').classList.remove('hidden');
 }

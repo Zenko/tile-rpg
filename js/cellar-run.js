@@ -19,13 +19,13 @@ const CELLAR_HEARTS = 3;
 const CELLAR_BOONS = [
   { id: 'skin',   icon: '🛡️', name: 'Thick Skin',  text: '+2 Calm at the start of cellar fights', kind: 'startSpirit', val: 2 },
   { id: 'sharp',  icon: '🗡️', name: 'Sharp Start', text: 'Draw 1 extra card in cellar fights',       kind: 'startDraw',   val: 1 },
-  { id: 'lucky',  icon: '🍀', name: 'Lucky Penny', text: 'Fights and chests pay 25% more Embers' },
+  { id: 'lucky',  icon: '🍀', name: 'Lucky Penny', text: `Fights and chests pay 25% more ${GAME.currency.many}` },
   { id: 'warm',   icon: '🔥', name: 'Warm Hands',  text: 'Campfires restore one more heart' },
   { id: 'moss',   icon: '🌱', name: 'Mossy Boots', text: 'The peddler charges less' },
   { id: 'wick',   icon: '🕯️', name: 'Long Wick',   text: '+1 heart now, and one more at most' },
 ];
 const CELLAR_DOORS = {
-  fight: { icon: '⚔️', name: 'Skirmish', weight: 3 }, chest: { icon: '🧰', name: 'Chest', hint: 'Embers or a boon', weight: 2 },
+  fight: { icon: '⚔️', name: 'Skirmish', weight: 3 }, chest: { icon: '🧰', name: 'Chest', hint: `${GAME.currency.many} or a boon`, weight: 2 },
   camp:  { icon: '🔥', name: 'Campfire', hint: 'Restore a heart', weight: 1.2 }, shrine: { icon: '⛩️', name: 'Shrine', hint: 'Gain a boon', weight: 1.2 },
   shop:  { icon: '🧳', name: 'Peddler', hint: 'Buy a boon', weight: 1 }, boss: { icon: '👁️', name: 'Guardian', weight: 0 },
 };

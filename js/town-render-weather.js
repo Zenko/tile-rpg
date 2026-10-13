@@ -1310,7 +1310,7 @@ function handleDecorationTap(tx, ty) {
 }
 function buyDecoration(item) {
   if (item.level && ensureLevel().level < item.level) { toast(`Unlocks at level ${item.level}`); sfx('tie'); return; }
-  if (state.progress.pebbles < item.cost) { toast('Not enough Embers yet'); sfx('tie'); return; }
+  if (state.progress.pebbles < item.cost) { toast(`Not enough ${GAME.currency.many} yet`); sfx('tie'); return; }
   spendPebbles(item.cost, 'decorations');
   state.decorationInventory[item.id] = decorationInventoryCount(item.id) + 1;
   saveState(); updateHud(); bumpPill('pillPebbles');

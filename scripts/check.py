@@ -70,6 +70,77 @@ new = json.dumps(art, indent=0) + '\n'
 if not os.path.exists('art-manifest.json') or open('art-manifest.json').read() != new:
     open('art-manifest.json', 'w').write(new); print(f'wrote art-manifest.json ({len(art)} pictures)')
 
+# 7. The names players see live in js/game-config.js (HANDOFF §5 "Reskinning"). A name typed straight into a string in js/
+#    would not change when the config does, so it fails here. Comments may say anything; a line that really means the plain
+#    word (an 'Ember' cosmetic, a 'Fern' rug colour) ends with a `names-ok` comment. The changelogs are history, left alone.
+def js_strings(src):
+    """Yield (line, text) for the literal text of every '...', "..." and `...` in a JS source, skipping comments and regexes."""
+    i, n, line, depth, prev = 0, len(src), 1, [], ''
+    while i < n:
+        c = src[i]
+        if c == '\n': line += 1; i += 1; continue
+        if c in ' \t\r': i += 1; continue
+        if src.startswith('//', i): i = src.find('\n', i) if '\n' in src[i:] else n; continue
+        if src.startswith('/*', i):
+            j = src.find('*/', i + 2); j = n if j < 0 else j + 2; line += src.count('\n', i, j); i = j; continue
+        if c in '\'"':
+            j, buf = i + 1, []
+            while j < n and src[j] != c:
+                if src[j] == '\\': buf.append(src[j:j + 2]); j += 2; continue
+                buf.append(src[j]); j += 1
+            yield line, ''.join(buf); line += src.count('\n', i, j); i = j + 1; prev = 'str'; continue
+        if c == '`' or (c == '}' and depth and depth[-1] == 'tpl'):
+            if c == '}': depth.pop()
+            j, buf = i + 1, []
+            while j < n and src[j] != '`':
+                if src[j] == '\\': buf.append(src[j:j + 2]); j += 2; continue
+                if src.startswith('${', j): depth.append('tpl'); j += 2; break
+                buf.append(src[j]); j += 1
+            else: j += 1
+            yield line, ''.join(buf); line += src.count('\n', i, j); i = j; prev = 'str'; continue
+        if c == '{': depth.append('{')
+        elif c == '}' and depth: depth.pop()
+        if c == '/' and (prev in ('', 'op') or prev in ('return', 'typeof', 'case')):   # a regex literal
+            j, cls = i + 1, False
+            while j < n and src[j] != '\n':
+                if src[j] == '\\': j += 2; continue
+                if src[j] == '[': cls = True
+                elif src[j] == ']': cls = False
+                elif src[j] == '/' and not cls: break
+                j += 1
+            i = j + 1; prev = 'str'; continue
+        m = re.match(r'[A-Za-z0-9_$.]+', src[i:i + 64])
+        if m: prev = m.group(0) if m.group(0) in ('return', 'typeof', 'case') else 'word'; i += len(m.group(0)); continue
+        prev = 'str' if c in ')]' else 'op'; i += 1
+
+r = subprocess.run(['node', '-e', open('js/game-config.js', encoding='utf-8').read() +
+                    ';console.log(JSON.stringify({GAME,PLACES,BOSSES,FAMILY_NAMES,CAST}))'], capture_output=True, text=True)
+if r.returncode: fail('could not evaluate js/game-config.js: ' + r.stderr.strip().splitlines()[-1])
+else:
+    cfg = json.loads(r.stdout.strip().splitlines()[-1])
+    names = [cfg['GAME']['title'], cfg['GAME']['currency']['one'], cfg['GAME']['currency']['many']] + list(cfg['GAME']['player'].values())
+    names += list(cfg['PLACES'].values()) + list(cfg['BOSSES'].values()) + list(cfg['FAMILY_NAMES'].values()) + [c['name'] for c in cfg['CAST'].values()]
+    name_re = re.compile(r'(?<![A-Za-z])(' + '|'.join(sorted(map(re.escape, set(names)), key=len, reverse=True)) + r')(?![A-Za-zñ])')
+    for f, src in allsrc.items():
+        if f in ('js/game-config.js', 'js/changelog.js', 'js/changelog-archive.js') or not f.startswith('js/'): continue
+        lines = src.split('\n')
+        for ln, text in js_strings(src):
+            for m in name_re.finditer(text):
+                if 'names-ok' not in lines[ln - 1]: fail(f'{f}:{ln} types the name "{m.group(1)}" - use js/game-config.js instead')
+    # index.html: names only inside a data-game element whose fallback text matches the config, and the manifest says the title
+    def cfg_value(p):
+        v = cfg
+        for k in p.split('.'): v = v.get(k) if isinstance(v, dict) else None
+        return v
+    for p, text in re.findall(r'data-game="([\w.]+)"[^>]*>([^<]*)<', html):
+        if cfg_value(p) is None: fail(f'index.html: data-game="{p}" is not a value in js/game-config.js')
+        elif cfg_value(p) != text: fail(f'index.html: data-game="{p}" shows "{text}" but js/game-config.js says "{cfg_value(p)}"')
+    body = re.sub(r'<script\b.*?</script>|<title>.*?</title>|data-game="[\w.]+"[^>]*>[^<]*<|\btitle="[^"]*"(?=[^>]*data-game-title)', ' ', html, flags=re.S)
+    for t in re.findall(r'>([^<]+)<', body):
+        for m in name_re.finditer(t): fail(f'index.html types the name "{m.group(1)}" - wrap it in <span data-game="...">')
+    man = json.load(open('manifest.json', encoding='utf-8'))
+    if man.get('name') != cfg['GAME']['title']: fail(f'manifest.json "name" is "{man.get("name")}" but GAME.title is "{cfg["GAME"]["title"]}"')
+
 BIG = 1500   # a nudge, not a failure: past this a file is usually doing several jobs and wants splitting (see HANDOFF)
 for f in files + sorted(glob.glob('css/*.css')):
     n = sum(1 for _ in open(f, encoding='utf-8'))

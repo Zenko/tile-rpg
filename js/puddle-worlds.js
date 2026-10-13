@@ -33,7 +33,7 @@ Object.defineProperty(DISTRICTS, PW_KEY, {
 TRAVEL_ICON[PW_KEY] = '🌀';
 
 const PW_BIOMES = [
-  { id: 'pw-glass', word: 'Glass' }, { id: 'pw-ember', word: 'Ember' }, { id: 'pw-mirror', word: 'Mirror' }, { id: 'pw-bloom', word: 'Blossom' },
+  { id: 'pw-glass', word: 'Glass' }, { id: 'pw-ember', word: 'Ember' }, { id: 'pw-mirror', word: 'Mirror' }, { id: 'pw-bloom', word: 'Blossom' },   // names-ok: a world word, not the currency
   { id: 'pw-static', word: 'Static' }, { id: 'pw-tide', word: 'Drowned' }, { id: 'pw-dusk', word: 'Dusk' },
   { id: 'pw-reef', word: 'Reef', deep: true }, { id: 'pw-abyss', word: 'Abyssal', deep: true }   // the two underwater palettes: only 'deep' worlds use them
 ];

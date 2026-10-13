@@ -55,7 +55,7 @@ const HR_WALLS = [
 const HR_RUGS = [
   { id: 'teal', name: 'Teal', lvl: 1, c: ['#2f6068', '#244a52'] }, { id: 'red', name: 'Brick', lvl: 1, c: ['#8a3d36', '#6b2e29'] },
   { id: 'plum', name: 'Plum', lvl: 2, c: ['#5f4a7a', '#493860'] }, { id: 'mustard', name: 'Mustard', lvl: 3, c: ['#a8812f', '#85661f'] },
-  { id: 'fern', name: 'Fern', lvl: 4, c: ['#4a7a4e', '#385f3c'] }, { id: 'cream', name: 'Cream', lvl: 5, c: ['#cdbf9c', '#a99b78'] }];
+  { id: 'fern', name: 'Fern', lvl: 4, c: ['#4a7a4e', '#385f3c'] }, { id: 'cream', name: 'Cream', lvl: 5, c: ['#cdbf9c', '#a99b78'] }];   // names-ok: a rug colour
 /* Everything that can stand in the room. `act` marks a menu piece (an id from INTERIORS.home: owned from the start, never put away).
    The rest is bought with Embers (`cost`) once the home reaches `lvl`. wall = hangs on the back wall, flat = lies on the floor under
    everything (w x h tiles), tall = drawn one and a half tiles high, glow = light it gives off (dx, dy in tiles from its tile). */
@@ -565,7 +565,7 @@ function hrCosyVisitBonus() { return Math.min(.15, hrCosy().score * .0015); }   
 function hrCosyHtml() {
   const c = hrCosy(), bonus = hrCosyBonus(), visit = Math.round(hrCosyVisitBonus() * 100);
   const room = Object.values(c.parts).filter(v => v[0] < v[1]).sort((a, b) => (b[1] - b[0]) / b[1] - (a[1] - a[0]) / a[1]).slice(0, 2).map(v => v[2]);
-  return `<div class="hr-h">Cosiness</div><div class="hr-info"><b>${c.score} · ${c.tier}</b><span>${bonus ? `+${bonus} Ember${bonus > 1 ? 's' : ''} for a nap` : 'Gets cosier with more in it'}${hrHome().level >= 3 && visit ? ` · +${visit}% a spirit calls` : ''}</span><div class="hr-bar"><i style="width:${c.score}%"></i></div></div>`
+  return `<div class="hr-h">Cosiness</div><div class="hr-info"><b>${c.score} · ${c.tier}</b><span>${bonus ? `+${bonus} ${currencyName(bonus)} for a nap` : 'Gets cosier with more in it'}${hrHome().level >= 3 && visit ? ` · +${visit}% a spirit calls` : ''}</span><div class="hr-bar"><i style="width:${c.score}%"></i></div></div>`
     + (room.length && c.score < 100 ? `<div class="hr-note">To raise it: ${room.join('. ').replace(/\.$/, '')}.</div>` : '');
 }
 function hrEditHtml() {
@@ -582,14 +582,14 @@ function hrEditHtml() {
       const owned = Object.keys(home.storage);
       if (owned.length) s += '<div class="hr-h">In storage</div>' + owned.map(id => {
         const d = HR_CATALOG[id], sell = hrSellFor(d);
-        return `<div class="hr-row2">${hrRow(id, d, 'hr:place:' + id, home.storage[id] > 1 ? '×' + home.storage[id] : '')}${sell ? `<button class="btn sc-btn hr-sell" data-act="hr:sellst:${id}" aria-label="Sell one for ${sell} Embers">💰 ${sell}</button>` : ''}</div>`;
+        return `<div class="hr-row2">${hrRow(id, d, 'hr:place:' + id, home.storage[id] > 1 ? '×' + home.storage[id] : '')}${sell ? `<button class="btn sc-btn hr-sell" data-act="hr:sellst:${id}" aria-label="Sell one for ${sell} ${GAME.currency.many}">💰 ${sell}</button>` : ''}</div>`;
       }).join('');
       const decos = DECORATION_ITEMS.filter(d => decorationInventoryCount(d.id) > 0);
       if (decos.length) s += '<div class="hr-h">Your decorations</div>' + decos.map(d => hrRow(d.id, { icon: d.icon, name: d.name }, 'hr:place:deco:' + d.id, '×' + decorationInventoryCount(d.id))).join('');
       s += '<div class="hr-h">Buy</div><div class="hr-cats">' + HR_CATS.map(([k, n]) => `<button class="hr-cat${e.cat === k ? ' on' : ''}" data-act="hr:cat:${k}">${n}</button>`).join('') + '</div>';
       const buy = Object.entries(HR_CATALOG).filter(([id, d]) => d.cost && (e.cat === 'all' || HR_CAT_OF[id] === e.cat)).sort((a, b) => a[1].lvl - b[1].lvl || a[1].cost - b[1].cost);
       s += buy.map(([id, d]) => hrLocked(d.lvl) ? hrRow(id, d, 'hr:noop', `Home Lv ${d.lvl}`, true, true) : hrRow(id, d, 'hr:buy:' + id, `🫧 ${d.cost}`, state.progress.pebbles < d.cost)).join('')
-        + '<div class="hr-note">Bought something you do not like? Undo gives your Embers back.</div>';
+        + `<div class="hr-note">Bought something you do not like? Undo gives your ${GAME.currency.many} back.</div>`;
     }
   } else if (e.tab === 'colors') s += hrSwatches('Floor', HR_FLOORS, 'floor') + hrSwatches('Walls', HR_WALLS, 'wall') + hrSwatches('Rug', HR_RUGS, 'rug');
   else {
@@ -634,7 +634,7 @@ function hrAction(act) {
   } else if (what === 'buy') {
     const d = HR_CATALOG[which];
     if (!d || !d.cost || hrLocked(d.lvl)) return;
-    if (state.progress.pebbles < d.cost) { toast('Not enough Embers yet'); sfx('tie'); return; }
+    if (state.progress.pebbles < d.cost) { toast(`Not enough ${GAME.currency.many} yet`); sfx('tie'); return; }
     hrDo(-d.cost, () => { spendPebbles(d.cost, 'home'); home.storage[which] = (home.storage[which] || 0) + 1; });
     e.pick = which; e.sel = null;
     saveState(); updateHud(); bumpPill('pillPebbles'); sfx('claim'); buzz(HAP.found); toast(`${d.icon} Bought. Tap a spot to put it down.`);
@@ -644,7 +644,7 @@ function hrAction(act) {
   } else if (what === 'up') {
     const N = HR_LEVELS[home.level + 1];
     if (!N) return;
-    if (state.progress.pebbles < N.cost) { toast('Not enough Embers yet'); sfx('tie'); return; }
+    if (state.progress.pebbles < N.cost) { toast(`Not enough ${GAME.currency.many} yet`); sfx('tie'); return; }
     spendPebbles(N.cost, 'home'); home.level++; saveState(); updateHud(); bumpPill('pillPebbles'); sfx('claim'); buzz(HAP.found);
     toast(`🏠 Your home is now level ${home.level}: ${N.name}`); logEvent('🏠', `Your home grew to level ${home.level}, ${N.name}.`);
     e.undo = [];   // a bigger home is not taken back

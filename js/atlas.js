@@ -10,7 +10,7 @@
      The shop - decorations sold only here (DECORATION_ITEMS with atlas: true), opened up by Atlas wins.
    Saved: state.progress.atlas = { wins, battles: { id: { done, day } }, minis: { game: { day, rewarded, best } }, last }.
    ============================================================ */
-const ATLAS = { id: 'atlas', name: 'The Atlas', icon: '🗺️' };
+const ATLAS = { id: 'atlas', name: `The ${CAST.atlas.name}`, icon: CAST.atlas.icon };
 const ATLAS_HARD = 1.35;            // mini-game medal thresholds are multiplied by this
 const ATLAS_GAMES_PAID = 2;         // paid medals per game per day
 const ATLAS_TIER_EMBERS = { bronze: 5, silver: 10, gold: 18 };
@@ -64,13 +64,13 @@ const ATLAS_TOPICS = [
     'A friend, if that helps. It usually does.'] },
   { id: 'me', label: '💭 What am I?', lines: [
     'Someone who arrived. Beyond that, you know more than I do.',
-    'A Dreamer. The word is wider than it looks.',
+    `A ${GAME.player.one}. The word is wider than it looks.`,
     'Curious. That is already a great deal to be.'] },
   { id: 'gods', label: '🕯️ Tell me about the gods', lines: [
-    'Duermevela keeps the threshold and cannot tell which side they stand on. Be gentle with them.',
-    'Murmullo trades in small secrets. Offer one back and you will be liked.',
-    'Marea Lenta breathes in and out. Everything else is a rhythm they allow.',
-    'Ensueño plants whatever you leave behind. Mind what you think near them.'] },
+    `${BOSSES.square} keeps the threshold and cannot tell which side they stand on. Be gentle with them.`,
+    `${BOSSES.market} trades in small secrets. Offer one back and you will be liked.`,
+    `${BOSSES.harbor} breathes in and out. Everything else is a rhythm they allow.`,
+    `${BOSSES.garden} plants whatever you leave behind. Mind what you think near them.`] },
   { id: 'wake', label: '🌙 Can I wake up?', lines: [
     'Perhaps you have, a few times. How would you tell?',
     'Waking is a lovely idea. Many here have it. It keeps them warm.',
@@ -115,7 +115,7 @@ function renderAtlasHints() {
   box.classList.toggle('hidden', !h.length);
   const empty = document.getElementById('theoriesEmpty'); if (empty) empty.classList.toggle('hidden', !!h.length);
   if (!h.length) return;
-  box.innerHTML = `<div class="jgroup-h">Heard from the Atlas</div>` + h.slice(-6).reverse().map(x => `<div class="atlas-hint">“${escapeHtml(x)}”</div>`).join('') + (h.length > 6 ? `<div class="atlas-hint more">…and ${h.length - 6} more</div>` : '');
+  box.innerHTML = `<div class="jgroup-h">Heard from the ${CAST.atlas.name}</div>` + h.slice(-6).reverse().map(x => `<div class="atlas-hint">“${escapeHtml(x)}”</div>`).join('') + (h.length > 6 ? `<div class="atlas-hint more">…and ${h.length - 6} more</div>` : '');
 }
 const ATLAS_HELLO = [
   'You are here. Good. So am I.',
@@ -165,8 +165,8 @@ function atlasWin() {
   const icon = btGet('battleEndIcon');
   icon.textContent = ATLAS.icon; icon.className = 'big-icon reveal-icon';
   battleEndTitle.textContent = `${t.title}: done`;
-  if (b.day !== todayKey()) { b.day = todayKey(); addPebbles(t.pay, 'atlas'); battleEndStats.innerHTML = `The Atlas turns a page for you<br><b>+${t.pay} 🫧</b>`; }
-  else battleEndStats.innerHTML = 'The Atlas has already given today. It still counts.';
+  if (b.day !== todayKey()) { b.day = todayKey(); addPebbles(t.pay, 'atlas'); battleEndStats.innerHTML = `The ${CAST.atlas.name} turns a page for you<br><b>+${t.pay} 🫧</b>`; }
+  else battleEndStats.innerHTML = `The ${CAST.atlas.name} has already given today. It still counts.`;
   saveState();
   btGet('battleRetryBtn').classList.add('hidden');
   sparkleBurst(btGet('battleSparkles'), ['🗺️', '✨'], 12); sfx('win'); buzz(HAP.win); bumpPill('pillWins');
@@ -189,14 +189,14 @@ function atlasMiniResult(id, score) {
   if (better) m.best = score;
   bumpStat('atlasGames', 1);
   let rewardText = '';
-  if (!tier) rewardText = 'No medal this time. The Atlas does not mind.';
+  if (!tier) rewardText = `No medal this time. The ${CAST.atlas.name} does not mind.`;
   else {
     if (tier === 'gold') { m.golds = (m.golds || 0) + 1; bumpStat('atlasGolds', 1); }
     if (m.rewarded < ATLAS_GAMES_PAID) { m.rewarded++; addPebbles(ATLAS_TIER_EMBERS[tier], 'atlas'); rewardText = `+${ATLAS_TIER_EMBERS[tier]} 🫧`; }
     else rewardText = "Today's prizes are used up, but it still counts toward your best.";
   }
   saveState(); updateHud();
-  logEvent(def.icon, `Played ${def.title} with the Atlas: ${def.scoreText(score)}${tier ? ' ' + MEDAL[tier] + '.' : ''}`);
+  logEvent(def.icon, `Played ${def.title} with the ${CAST.atlas.name}: ${def.scoreText(score)}${tier ? ' ' + MEDAL[tier] + '.' : ''}`);
   return { tier, rewardText, cardId: null, better };
 }
 
@@ -212,7 +212,7 @@ function atlasShopButtons() {
   return ATLAS_SHOP.map(s => {
     const item = DECORATION_ITEMS.find(x => x.id === s.id); if (!item) return '';
     const open = a.wins >= s.need;
-    return sceneBtn('atlasbuy:' + s.id, open ? `${item.icon} ${item.name} · 🫧 ${item.cost}` : `🔒 ${item.name} · ${s.need} Atlas win${s.need === 1 ? '' : 's'}`, !open);
+    return sceneBtn('atlasbuy:' + s.id, open ? `${item.icon} ${item.name} · 🫧 ${item.cost}` : `🔒 ${item.name} · ${s.need} ${CAST.atlas.name} win${s.need === 1 ? '' : 's'}`, !open);
   }).join('') + sceneBtn('back', '← Back');
 }
 function atlasBuy(id) {
@@ -223,7 +223,7 @@ function atlasBuy(id) {
   spendPebbles(item.cost, 'decorations');
   state.decorationInventory[item.id] = decorationInventoryCount(item.id) + 1;
   saveState(); updateHud(); bumpPill('pillPebbles');
-  logEvent(item.icon, `Bought a ${item.name} from the Atlas.`);
+  logEvent(item.icon, `Bought a ${item.name} from the ${CAST.atlas.name}.`);
   sfx('claim'); buzz(HAP.found);
   return `${item.icon} ${item.name} goes into your decorations. Place it from the Decorations tab.`;
 }

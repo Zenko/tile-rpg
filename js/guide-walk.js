@@ -87,7 +87,7 @@ function guidePlace(t) {
 function guideNeighbour(kind) {
   let district = state.currentDistrict;
   if (kind === 'rival') {
-    if (!rivalAround()) { toast('Rook only notices you after your first win.'); return; }
+    if (!rivalAround()) { toast(`${CAST.rival.name} only notices you after your first win.`); return; }
     district = Object.keys(state.districtData).find(k => rivalNpc(state.districtData[k])) || district;
   }
   guideArrive(district, () => {
@@ -117,7 +117,7 @@ function guideFish() {
 function guideCrop() {
   guideArrive('square', () => {
     const crops = cropsIn();
-    if (!crops.length) { toast('Nothing is planted yet. Fern sells seeds.'); return; }
+    if (!crops.length) { toast(`Nothing is planted yet. ${CAST.gardener.name} sells seeds.`); return; }
     const c = crops.find(x => cropProgress(x) >= 1) || crops[0];
     if (!walkThen(adjacentTo(c), () => interactWith('crop', c))) townLog.textContent = "You can't get to the plot from here.";
   });

@@ -63,7 +63,7 @@ function altarRender() {
   });
   $$altar('#asSmoke')[0].textContent = altarSmoke(r);
   const bowl = $$altar('#asBowl')[0]; bowl.className = 'as-bowl' + (ready ? ' ready' : '') + (r.atlas ? ' atlas' : '');
-  $$altar('#asBowlTxt')[0].textContent = ready ? (r.atlas ? 'Hold to call the Atlas' : 'Hold to call') : 'Feed the candles';
+  $$altar('#asBowlTxt')[0].textContent = ready ? (r.atlas ? `Hold to call the ${CAST.atlas.name}` : 'Hold to call') : 'Feed the candles';
   $$altar('#asBurns')[0].innerHTML = r.atlas ? '' : ALTAR_BURNS.map(b => `<button type="button" class="as-chip${d.burn === b.id ? ' on' : ''}" data-burn="${b.id}"><b>${b.label}</b><small>${b.sub}</small></button>`).join('');
   $$altar('#asHint')[0].textContent = altarUi.msg || (altarUi.armed ? `Tap the candle where ${cardDef(altarUi.armed).name} belongs, or drag it there.` : ready ? 'Hold the glowing bowl until its ring closes, or tap the button below.' : 'Drag a card up onto its candle, or just tap it.');
   const gods = altarOwnedGods();
@@ -73,7 +73,7 @@ function altarRender() {
   $$altar('#asTray')[0].innerHTML = list.length ? list.map(x => { const c = cardDef(x.id); return `<button type="button" class="as-card r-${c.rarity}${altarUi.armed === x.id ? ' armed' : ''}" data-id="${x.id}" data-fam="${CARD_FAMILY[x.id]}"><span class="q">${altarIsGod(x.id) ? '✨' : '×' + x.left}</span><span class="i">${c.icon}</span><b>${escapeHtml(c.name)}</b><small>${RARITY_LABEL[c.rarity]}</small></button>`; }).join('')
     : `<p class="as-none">${altarUi.sel === 'gods' ? 'No gods are home yet.' : `No spare ${FAMILIES[altarUi.sel].name} cards. Cards in your deck are never used.`}</p>`;
   const call = $$altar('#asCall')[0]; call.disabled = !ready; call.className = 'as-call' + (ready ? ' ready' : '') + (r.atlas ? ' atlas' : '');
-  call.innerHTML = ready ? `<span class="fl">${r.atlas ? '🗺️' : '🔥'}</span>${r.atlas ? 'Call the Atlas' : 'Let the flames speak'}` : (r.mixed ? 'Give each god its own candle' : 'Feed a candle to begin');
+  call.innerHTML = ready ? `<span class="fl">${r.atlas ? '🗺️' : '🔥'}</span>${r.atlas ? `Call the ${CAST.atlas.name}` : 'Let the flames speak'}` : (r.mixed ? 'Give each god its own candle' : 'Feed a candle to begin');
   const pil = $$altar('#asPil')[0];
   pil.innerHTML = st.burning.map((b, i) => altarDone(b) ? `<button type="button" class="rdy" data-collect="${i}">✨ ${escapeHtml(b.name)} · collect</button>` : `<span>🕯️ ${escapeHtml(b.name)} · <i data-alt-left="${i}">${altarLeft(b)}</i></span>`).join('');
   const keys = altarKeys(), got = keys.filter(k => st.found[k]).length; $$altar('#asBook')[0].textContent = `📖 ${got}/${keys.length}`;

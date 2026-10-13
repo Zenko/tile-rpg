@@ -19,7 +19,7 @@
    and nothing at the top level reaches into another file (HANDOFF §9's load-order rule).
    ============================================================ */
 const TN = { bootAt: Date.now(), tickMs: 4000, announceAfterMs: 15000 };
-const TN_CAST = ['Wren', 'Maple', 'Fern', 'Pip', 'Clover', 'Saffron', 'Tock', 'Tam', 'Iris', 'Lumen'];
+const TN_CAST = [CAST.guide.name, CAST.baker.name, CAST.gardener.name, CAST.grainSeller.name, CAST.threadSeller.name, CAST.spiceSeller.name, CAST.tinker.name, CAST.netMender.name, CAST.glassKeeper.name, CAST.nightVendor.name];
 function tnState() {
   const p = state.progress;
   if (!p.townNews || typeof p.townNews !== 'object') p.townNews = {};
@@ -40,10 +40,10 @@ const GOSSIP_DEEDS = {
   battlesWon:        { did: n => n > 1 ? `won ${n} matches` : 'won a match' },
   bossesWon:         { did: () => 'stood up to the district god and won', big: true },
   cropsHarvested:    { did: n => n > 1 ? `brought in ${n} crops` : 'brought in a harvest' },
-  breadBaked:        { did: n => n > 1 ? `baked ${n} loaves` : "baked a loaf at Maple's" },
+  breadBaked:        { did: n => n > 1 ? `baked ${n} loaves` : `baked a loaf at ${CAST.baker.name}'s` },
   decorationsPlaced: { did: () => 'put up a new decoration' },
   puzzlesSolved:     { did: () => 'cracked the daily puzzle in the Reading Nook' },
-  cupTrophies:       { did: () => 'won the Dreamers’ Cup', big: true },
+  cupTrophies:       { did: () => `won the ${GAME.player.many}’ Cup`, big: true },
   puddleWorlds:      { did: () => 'fell straight through a puddle and came back', big: true },
   minigameGolds:     { did: () => 'took a gold medal at one of the house games' },
   favours:           { did: n => n > 1 ? `helped ${n} neighbours out` : 'did a neighbour a favour' },
@@ -90,7 +90,7 @@ const MOMENTS = {
   'koi-run':       { weather: 'rain',   icon: '🐟', name: 'Koi run', text: 'The fish are restless in the moonrain: rare fish bite more often, and sooner.', fx: { rareFish: 2, biteSpeed: 0.8 } },
   'static':        { weather: 'storm',  icon: '⚡', name: 'Static in the air', text: 'The storm shakes hidden cards loose: they turn up twice as often.', fx: { findMult: 2 } },
   'star-shower':   { weather: 'snow',   icon: '🌠', name: 'Star shower', text: 'Falling stars land as treasure: chests turn up twice as often.', fx: { chestMult: 2 } },
-  'mist-lanterns': { weather: 'cloudy', icon: '🏮', name: 'Lanterns in the mist', text: 'Lanterns light the way between houses: daily tasks pay +2 Embers.', fx: { dailyBonus: 2 } },
+  'mist-lanterns': { weather: 'cloudy', icon: '🏮', name: 'Lanterns in the mist', text: `Lanterns light the way between houses: daily tasks pay +2 ${GAME.currency.many}.`, fx: { dailyBonus: 2 } },
   'rainbow':       { weather: 'clear',  after: ['rain', 'storm'], icon: '🌈', name: 'Rainbow', night: 'Moonbow', text: 'An arc of colour over town: hidden cards and chests turn up half again as often.', fx: { findMult: 1.5, chestMult: 1.5 } },
 };
 const MOMENT = { chance: 0.5, rainbowChance: 0.8, ms: 4 * 60 * 1000 };
@@ -137,8 +137,8 @@ const GAZETTE_STORIES = [
   { h: '{a} swears the fountain hummed a new tune', b: 'Nobody else heard it, but {b} has been humming it all morning. Readers are asked to stand very still by the water and report back.' },
   { h: 'Lost: one left slipper, last seen in {d}', b: '{a} would like it back. {b} points out that nobody in town has ever owned a right one.' },
   { h: '{s} arrives early, says {a}', b: 'The evidence: a single leaf, a feeling, and the way the light leans in {d}. {b} remains unconvinced.' },
-  { h: 'Record loaf baked at Maple’s', b: 'It was so tall that {a} had to stand on a crate to see over it. {b} took the first slice before anyone could stop them.' },
-  { h: '{f} cards spotted dozing in {d}', b: 'Dreamers walking that way are asked to step softly. {a} says one of them snored, which {b} calls "frankly unlikely".' },
+  { h: `Record loaf baked at ${CAST.baker.name}’s`, b: 'It was so tall that {a} had to stand on a crate to see over it. {b} took the first slice before anyone could stop them.' },
+  { h: '{f} cards spotted dozing in {d}', b: `${GAME.player.many} walking that way are asked to step softly. {a} says one of them snored, which {b} calls "frankly unlikely".` },
   { h: 'Mystery of the moving bench solved', b: 'It was {a}, moving it one inch a day toward the sun. {b} has asked for the bench to be returned "to where benches go".' },
   { h: '{a} and {b} declare a truce', b: 'The argument, which began over the correct way to fold a map of {d}, has been settled. Neither will say who won.' },
   { h: 'Tide reported "unusually polite"', b: '{a} says the water came in, waited, and went out again without a fuss. {b} suspects it wants something.' },
@@ -148,7 +148,7 @@ const GAZETTE_STORIES = [
   { h: 'Crop of the season: the {s} turnip', b: 'Round, cheerful and very slightly glowing. {a} grew one the size of a lantern. {b} has started talking to theirs.' },
   { h: 'A spirit asks for directions in {d}', b: '{a} sent it left, {b} sent it right. It went up. Witnesses say it seemed happy with the outcome.' },
   { h: 'Town clock runs backwards for one minute', b: 'Nobody minded. {a} says they got an extra minute of sleep out of it, and {b} used it to finish a sandwich.' },
-  { h: 'Puddles "deeper than they look", warns {a}', b: 'A dreamer was seen splashing into one and coming out somewhere else entirely. {b} says that is just good puddle design.' },
+  { h: 'Puddles "deeper than they look", warns {a}', b: `A ${GAME.player.lower} was seen splashing into one and coming out somewhere else entirely. {b} says that is just good puddle design.` },
   { h: 'Card match in {d} ends in a draw of biscuits', b: '{a} ran out of cards, {b} ran out of patience, and everybody shared the biscuits. A good day for {f} decks, by all accounts.' },
   { h: 'Wind carries a song from far away', b: 'It drifted through {d} at dawn. {a} wrote down the words; {b} says they were mostly "la".' },
   { h: 'Fishing report: "The thoughts are biting"', b: '{a} caught three small worries and let them all go. {b} caught a big idea and is still deciding what to do with it.' },
@@ -218,14 +218,14 @@ function communityClaim() {
   if (!c.half && f >= 0.5) {
     c.half = true; addPebbles(COMMUNITY.half, 'community'); saveState();
     toast(`${g.icon} Halfway there! The town thanks you: +${COMMUNITY.half} 🫧`);
-    logEvent(g.icon, `The town goal "${g.name}" is halfway done. +${COMMUNITY.half} Embers.`);
+    logEvent(g.icon, `The town goal "${g.name}" is halfway done. +${COMMUNITY.half} ${GAME.currency.many}.`);
   }
   if (!c.full && f >= 1) {
     c.full = true; addPebbles(COMMUNITY.full, 'community');
     const cid = randomCardId(COMMUNITY.fullRarity);
     state.ownedCards.push(cid); noteCardsFound(1); bumpPill('pillCards'); saveState(); updateHud();
     bumpStat('townGoals', 1);
-    logEvent(g.icon, `The whole town finished "${g.name}" together. +${COMMUNITY.full} Embers and a card.`);
+    logEvent(g.icon, `The whole town finished "${g.name}" together. +${COMMUNITY.full} ${GAME.currency.many} and a card.`);
     showCardReveal(cid, `${g.icon} The town goal is done! +${COMMUNITY.full} 🫧`, true);
   }
 }
@@ -234,11 +234,11 @@ function communityHtml() {
   const seg = (n, cls, label) => n > 0 ? `<i class="${cls}" style="width:${Math.max(1.5, n / g.goal * 100).toFixed(1)}%" title="${label}"></i>` : '';
   const online = typeof cloudReady !== 'undefined' && cloudReady;
   return `<p class="tn-goal-name">${escapeHtml(g.name)}</p>
-    <div class="tn-goal-bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100">${seg(t.mine, 'me', 'You')}${seg(t.npcs, 'npc', 'Neighbours')}${seg(t.others, 'oth', 'Other dreamers')}</div>
+    <div class="tn-goal-bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100">${seg(t.mine, 'me', 'You')}${seg(t.npcs, 'npc', 'Neighbours')}${seg(t.others, 'oth', `Other ${GAME.player.lowerMany}`)}</div>
     <p class="tn-goal-num"><b>${t.total} of ${g.goal}</b> ${escapeHtml(g.unit)} · ${pct}%</p>
-    <ul class="tn-goal-key"><li><i class="me"></i>You: ${t.mine}</li><li><i class="npc"></i>Your neighbours: ${t.npcs}</li><li><i class="oth"></i>Other dreamers: ${online ? `${t.others}${t.folks ? ` (${t.folks})` : ''}` : 'offline'}</li></ul>
+    <ul class="tn-goal-key"><li><i class="me"></i>You: ${t.mine}</li><li><i class="npc"></i>Your neighbours: ${t.npcs}</li><li><i class="oth"></i>Other ${GAME.player.lowerMany}: ${online ? `${t.others}${t.folks ? ` (${t.folks})` : ''}` : 'offline'}</li></ul>
     <p class="tn-goal-pay">Halfway: +${COMMUNITY.half} 🫧 ${c.half ? '✓' : ''}<br>Done: +${COMMUNITY.full} 🫧 and a card ${c.full ? '✓' : ''}</p>
-    <p class="jsoft">A new goal every week. Your neighbours chip in a little every day; the rest is up to you and the other dreamers.</p>`;
+    <p class="jsoft">A new goal every week. Your neighbours chip in a little every day; the rest is up to you and the other ${GAME.player.lowerMany}.</p>`;
 }
 function openCommunity() {
   communityFetch(true);
@@ -272,8 +272,8 @@ function communityFetch(force) {
 /* ---------------- 5. VISITORS ----------------
    Who comes, where and with what is seeded by the date (the district is picked among the ones you have opened). */
 const VISITORS = {
-  pedlar:   { name: 'Moth the Pedlar', icon: '🧳', greet: 'Oh, a customer! I only pass through once in a while, so take a look. Everything here is one of a kind, today only.' },
-  wanderer: { name: 'Quill the Wanderer', icon: '🎒', greet: 'I walk from town to town with one deck and play whoever will have me. Fancy a match? Beat me and I will leave you a card from my bag.' },
+  pedlar:   { name: `${CAST.pedlar.name} the Pedlar`, icon: CAST.pedlar.icon, greet: 'Oh, a customer! I only pass through once in a while, so take a look. Everything here is one of a kind, today only.' },
+  wanderer: { name: `${CAST.wanderer.name} the Wanderer`, icon: CAST.wanderer.icon, greet: 'I walk from town to town with one deck and play whoever will have me. Fancy a match? Beat me and I will leave you a card from my bag.' },
 };
 const VISIT = { chance: 0.6, minLevel: 2, prices: { rare: 25, ultra: 70, super: 150 }, winPebbles: 12, prizeRarity: 'ultra' };
 function visitorToday(day) {
@@ -341,7 +341,7 @@ function openPedlar(v) {
 function pedlarBuy(i) {
   const v = visitorToday(), vs = visitState(); if (!v || v.kind !== 'pedlar' || vs.sold[i]) return;
   const s = v.stock[i];
-  if (state.progress.pebbles < s.price) { toast(`Not enough Embers: that one is ${s.price} 🫧.`); sfx('soft'); return; }
+  if (state.progress.pebbles < s.price) { toast(`Not enough ${GAME.currency.many}: that one is ${s.price} 🫧.`); sfx('soft'); return; }
   spendPebbles(s.price, 'visitor'); vs.sold[i] = true;
   state.ownedCards.push(s.id); noteCardsFound(1); bumpPill('pillCards'); saveState(); updateHud();
   bumpStat('visitorBuys', 1);

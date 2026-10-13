@@ -8,7 +8,7 @@ const SEEDS = [
   { id: 'daisy',     name: 'Daisy',     icon: '🌼', cost: 5,  growMin: 5,  pebbles: 7,  xp: 10, desc: 'Quick and cheerful.' },
   { id: 'pumpkin',   name: 'Pumpkin',   icon: '🎃', cost: 12, growMin: 15, pebbles: 18, xp: 20, desc: 'Slow, but it pays.' },
   { id: 'sunflower', name: 'Sunflower', icon: '🌻', cost: 22, growMin: 25, pebbles: 6,  xp: 25, card: 'rare',  desc: 'A card seed: grows a rare card or better.' },
-  { id: 'moonbean',  name: 'Moonbean',  icon: '🌙', cost: 0,  growMin: 40, pebbles: 8,  xp: 40, card: 'ultra', found: true, desc: 'Only found in El Jardín Lúcido. Grows an ultra rare card or better.' },
+  { id: 'moonbean',  name: 'Moonbean',  icon: '🌙', cost: 0,  growMin: 40, pebbles: 8,  xp: 40, card: 'ultra', found: true, desc: `Only found in ${PLACES.garden}. Grows an ultra rare card or better.` },
 ];
 const PLOT_MAX = 8;
 const SEED_FIND_CHANCE = 0.03;          // per El Jardín Lúcido grass tile walked, reset daily
@@ -42,7 +42,7 @@ function seedsGreeting() {
 }
 function seedsIntro() {
   const used = cropsIn().length;
-  return `Seeds grow in real time in the square's soft ground, and the rain makes them grow faster. ${used}/${PLOT_MAX} plots in use. Moonbeans hide in El Jardín Lúcido's grass.`;
+  return `Seeds grow in real time in the square's soft ground, and the rain makes them grow faster. ${used}/${PLOT_MAX} plots in use. Moonbeans hide in ${PLACES.garden}'s grass.`;
 }
 function seedButtons() {
   const buy = SEEDS.filter(s => !s.found).map(s => sceneBtn('seed:buy-' + s.id, `${s.icon} Buy ${s.name} seed · 🫧 ${s.cost}${s.card ? ' · grows a card' : ''}`));
@@ -53,7 +53,7 @@ function seedAction(act) {
   const [verb, id] = [act.slice(0, act.indexOf('-')), act.slice(act.indexOf('-') + 1)], s = seedDef(id);
   if (!s) return '';
   if (verb === 'buy') {
-    if (state.progress.pebbles < s.cost) { sfx('tie'); return `Fern smiles kindly. "Those are 🫧 ${s.cost} a packet."`; }
+    if (state.progress.pebbles < s.cost) { sfx('tie'); return `${CAST.gardener.name} smiles kindly. "Those are 🫧 ${s.cost} a packet."`; }
     spendPebbles(s.cost, 'seeds'); seedInv()[id] = seedCount(id) + 1;
     saveState(); updateHud(); bumpPill('pillPebbles'); sfx('claim');
     return `${s.icon} One ${s.name} seed, wrapped in paper. ${s.desc}`;
@@ -76,7 +76,7 @@ function plantSeed(seedId, x, y) {
   cropsIn().push({ uid: 'crop-' + now + '-' + Math.floor(Math.random() * 1000), seed: seedId, x, y, plantedAt: now, lastTick: now, grown: 0 });
   bumpStat('seedsPlanted', 1);
   toast(`🌱 ${s.name} planted - ready in about ${s.growMin} min`);
-  logEvent('🌱', `Planted a ${s.name} seed in El Umbral.`);
+  logEvent('🌱', `Planted a ${s.name} seed in ${PLACES.square}.`);
 }
 function cropCardRarity(floor) {
   if (floor === 'ultra') { const r = Math.random(); return r < 0.12 ? 'mythic' : r < 0.4 ? 'super' : 'ultra'; }
@@ -94,7 +94,7 @@ function harvestCrop(c) {
     const cid = randomCardId(cropCardRarity(s.card)), isNew = !discoveredSet().has(cid);
     state.ownedCards.push(cid); bumpStat('cardsFound', 1); bumpPill('pillCards');
     saveState(); renderTown();
-    showCardReveal(cid, `${s.icon} Harvested!`, true, `+${s.pebbles} 🫧 Embers`, s.xp);
+    showCardReveal(cid, `${s.icon} Harvested!`, true, `+${s.pebbles} 🫧 ${GAME.currency.many}`, s.xp);
     if (isNew) toast('📖 New entry in your Index');
     return;
   }

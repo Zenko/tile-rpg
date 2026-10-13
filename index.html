@@ -60,7 +60,7 @@
           <span class="hs-icon">🃏</span>
           <span class="hs-bar"><span class="hs-fill hs-fill-cards"></span><span class="hs-val" id="cardCount">0</span></span>
         </div>
-        <div class="hud-stat" id="pillPebbles" title="Embers - the Card Shop on El Mercado de Susurros sells packs, sleeves and more" role="button" tabindex="0">
+        <div class="hud-stat" id="pillPebbles" title="Embers - the Card Shop on El Mercado de Susurros sells packs, sleeves and more" data-game-title="{GAME.currency.many} - the Card Shop on {PLACES.market} sells packs, sleeves and more" role="button" tabindex="0">
           <span class="hs-icon">🫧</span>
           <span class="hs-bar"><span class="hs-fill hs-fill-pebbles"></span><span class="hs-val" id="pebbleCount">0</span></span>
         </div>
@@ -71,7 +71,7 @@
       <button type="button" class="hud-pill pw-pill hidden" id="pillWorld" title="Puddle world - tap to climb out early"><span class="hp-icon">🌀</span><span id="pwTime">0:00</span></button>
       <div class="hud-ambient" id="pillSky" title="Time and weather">
         <span class="hud-ambient-text">
-          <span class="hud-district" id="hudDistrict">El Umbral</span>
+          <span class="hud-district" id="hudDistrict" data-game="PLACES.square">El Umbral</span>
           <span class="hud-ambient-sub">
             <span class="hud-ambient-icon" id="hudSkyIcon">☀️</span>
             <span class="amb-time" id="hudTimeText">Midday</span>
@@ -105,7 +105,7 @@
           <section class="st-group">
             <h3 class="st-title">Lingering duels</h3>
             <div class="st-card">
-              <div class="st-row"><span class="st-ico">👻</span><span class="st-label">Play against a tester's deck<small>The game plays their 12 cards for them. Beat a ghost for 8 Embers, once per ghost a day.</small></span></div>
+              <div class="st-row"><span class="st-ico">👻</span><span class="st-label">Play against a tester's deck<small>The game plays their 12 cards for them. Beat a ghost for 8 <span data-game="GAME.currency.many">Embers</span>, once per ghost a day.</small></span></div>
             </div>
           </section>
         </div>
@@ -191,7 +191,7 @@
                 <button id="cloudBackupBtn" class="btn btn-ghost">🔗 Back up</button>
                 <button id="cloudRestoreBtn" class="btn btn-ghost">📥 Restore</button>
               </div>
-              <div class="st-row"><span class="st-ico">📊</span><span class="st-label">Ember ledger<small>Where your Embers came from</small></span><button class="btn btn-ghost st-small" id="econToggle" type="button">Show</button></div>
+              <div class="st-row"><span class="st-ico">📊</span><span class="st-label"><span data-game="GAME.currency.one">Ember</span> ledger<small>Where your <span data-game="GAME.currency.many">Embers</span> came from</small></span><button class="btn btn-ghost st-small" id="econToggle" type="button">Show</button></div>
               <div class="panel-desc hidden st-econ" id="econPanel"></div>
             </div>
           </section>
@@ -213,7 +213,7 @@
     <div class="screen" id="screen">
 
       <div id="townPanel">
-        <div class="district-label" id="districtLabel">You're in <b id="districtName">El Umbral</b><span class="season-tag" id="seasonTag"></span></div>
+        <div class="district-label" id="districtLabel">You're in <b id="districtName" data-game="PLACES.square">El Umbral</b><span class="season-tag" id="seasonTag"></span></div>
         <button type="button" class="goal-chip hidden" id="goalChip"><span class="goal-ico" id="goalIcon">🧭</span><span class="goal-text" id="goalText"></span><span class="goal-arrow" aria-hidden="true">›</span></button>
         <div class="decoration-hint hidden" id="decorationHint">
           <span id="decorationHintText">Placing a decoration</span>
@@ -233,7 +233,7 @@
         </div>
         <div class="town-info">
           <div class="ambient-line" id="ambientLine"><span class="amb-icon" id="ambientIcon">☀️</span><span id="ambientText">Touch the town to wander.</span></div>
-          <div class="log" id="townLog">Welcome to Tile RPG.</div>
+          <div class="log" id="townLog">Welcome to <span data-game="GAME.title">Tile RPG</span>.</div>
         </div>
       </div>
 
@@ -271,7 +271,7 @@
         </div>
         <div id="notesView" class="hidden">
           <div class="atlas-hints hidden" id="atlasHints"></div>
-          <div class="notes-empty hidden" id="theoriesEmpty">Nothing here yet. What the Atlas tells you will be kept on this page.</div>
+          <div class="notes-empty hidden" id="theoriesEmpty">Nothing here yet. What the <span data-game="CAST.atlas.name">Atlas</span> tells you will be kept on this page.</div>
         </div>
       </div>
 
@@ -792,6 +792,8 @@
   </div>
 </div>
 
+<script src="js/game-config.js"></script>
+<script>applyGameConfigText();</script>
 <script src="js/data-and-engine.js"></script>
 <script src="js/icon-swap.js"></script>
 <script src="js/full-art.js"></script>

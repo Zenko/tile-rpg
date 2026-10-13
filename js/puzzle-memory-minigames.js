@@ -76,9 +76,9 @@ function puzzleView() {
 }
 function startPuzzle() {
   const pz = puzzleState();
-  if (!pz.snap) { scene.text = 'Olwen frowns at a blank page. "No puzzle today, I am afraid."'; renderScene(); return; }
+  if (!pz.snap) { scene.text = `${CAST.scholar.name} frowns at a blank page. "No puzzle today, I am afraid."`; renderScene(); return; }
   showTipOnce('puzzle');
-  startBattle({ id: 'puzzle', name: "Olwen's puzzle", icon: '🧩', puzzle: pz.snap, isBoss: false });
+  startBattle({ id: 'puzzle', name: `${CAST.scholar.name}'s puzzle`, icon: '🧩', puzzle: pz.snap, isBoss: false });
 }
 function puzzleWin() {
   const pz = puzzleState(), first = pz.solvedDay !== todayKey();
@@ -94,7 +94,7 @@ function puzzleWin() {
     const cid = randomCardId(rollRewardRarity(false)), def = cardDef(cid);
     state.ownedCards.push(cid); bumpStat('cardsFound', 1); bumpStat('puzzlesSolved', 1); bumpPill('pillCards');
     endCard.classList.add('glow-' + def.rarity);
-    battleEndStats.innerHTML = `Olwen claps quietly. Day ${pz.streak} of your streak.<br><b>${cardArtHtml(def)} ${def.name}</b> <span class="rarity-tag rt-${def.rarity}" style="margin:4px 0 0">${RARITY_LABEL[def.rarity]}</span>`;
+    battleEndStats.innerHTML = `${CAST.scholar.name} claps quietly. Day ${pz.streak} of your streak.<br><b>${cardArtHtml(def)} ${def.name}</b> <span class="rarity-tag rt-${def.rarity}" style="margin:4px 0 0">${RARITY_LABEL[def.rarity]}</span>`;
     logEvent('🧩', `Solved the daily puzzle (streak ${pz.streak}).`);
     sfx('win');
   } else { battleEndStats.innerHTML = 'Solved again - the prize was already yours today. Come back tomorrow for a new board.'; sfx('claim'); }
@@ -196,9 +196,9 @@ function memoryFinish() {
     else addPebbles(pebbles, 'memory');
   }
   saveState(); updateHud();
-  scene.text = !rewarded ? `${memory.pairs} pairs in ${memory.flips} flips. Olwen nods approvingly, though today's reward is spent.`
+  scene.text = !rewarded ? `${memory.pairs} pairs in ${memory.flips} flips. ${CAST.scholar.name} nods approvingly, though today's reward is spent.`
     : cardId ? `${memory.pairs} pairs in ${memory.flips} flips. Tucked between two books: a card!`
-    : `${memory.pairs} pairs in ${memory.flips} flips. Olwen slides ${pebbles} Ember${pebbles > 1 ? 's' : ''} across the table.`;
+    : `${memory.pairs} pairs in ${memory.flips} flips. ${CAST.scholar.name} slides ${pebbles} ${currencyName(pebbles)} across the table.`;
   memory.done = true;
   renderScene();
   if (cardId) { const isNew = !discoveredSet().has(BattleEngine.baseIdOf(cardId)); if (isNew) toast('📖 New entry in your Index'); setTimeout(() => showCardReveal(cardId, 'Found between the pages', false), 350); }
@@ -422,7 +422,7 @@ function tidyItem(prev) {
 const HAGGLE_POT = [0, 1, 2, 4, 6, 9, 12, 16, 20];
 const MINIGAMES = {
   tea: { house: 'cottage', icon: '🫖', title: 'Perfect Pour',
-    how: 'Wren pours, you say when: stop the tea inside the green band. Three cups, each a little quicker.',
+    how: `${CAST.guide.name} pours, you say when: stop the tea inside the green band. Three cups, each a little quicker.`,
     tiers: { bronze: 90, silver: 170, gold: 240 }, scoreText: s => `${s} of 300 points.`,
     init: () => ({ cup: 0, level: 0, pouring: false, band: 60, scores: [], note: '' }),
     begin: g => {
@@ -435,7 +435,7 @@ const MINIGAMES = {
       <button class="mg-big" data-mg="stop" ${st.pouring ? '' : 'disabled'}>🫖 Stop!</button></div></div>` },
 
   quiz: { house: 'nook', icon: '❓', title: 'Name That Card',
-    how: "Olwen reads out a card's details. Which card is it? Six questions.",
+    how: `${CAST.scholar.name} reads out a card's details. Which card is it? Six questions.`,
     tiers: { bronze: 2, silver: 4, gold: 6 }, scoreText: s => `${s} of 6 right.`,
     init: () => ({ q: 0, right: 0, cur: quizQuestion(), feedback: null }),
     tap: (st, v) => {
@@ -451,7 +451,7 @@ const MINIGAMES = {
         return `<button class="mg-opt${cls}" data-mg="${id}"><span>${d.icon}</span> ${d.name}</button>`; }).join('')}</div>` },
 
   frost: { house: 'bakery', icon: '🎂', title: 'Cake Toppings',
-    how: 'Watch the order Maple adds the toppings, then repeat it. One more each round.',
+    how: `Watch the order ${CAST.baker.name} adds the toppings, then repeat it. One more each round.`,
     tiers: { bronze: 2, silver: 4, gold: 6 }, scoreText: s => `${s} round${s === 1 ? '' : 's'} of toppings.`,
     init: () => ({ seq: [], pos: 0, phase: 'show', lit: null, round: 0 }),
     begin: g => frostNext(g),
@@ -467,7 +467,7 @@ const MINIGAMES = {
       <div class="cake">🎂</div><div class="tops">${TOPPINGS.map((t, i) => `<button class="mg-top${st.lit === i ? ' lit' : ''}" data-mg="${i}" ${st.phase === 'input' ? '' : 'disabled'}>${t}</button>`).join('')}</div>` },
 
   weeds: { house: 'house2', icon: '🌿', title: 'Weed the Beds',
-    how: "Pull the weeds 🌿 as they pop up - but leave Fern's flowers 🌷 alone! 20 seconds.",
+    how: `Pull the weeds 🌿 as they pop up - but leave ${CAST.gardener.name}'s flowers 🌷 alone! 20 seconds.`,
     tiers: { bronze: 6, silver: 12, gold: 18 }, scoreText: s => `${s} weed${s === 1 ? '' : 's'} pulled.`,
     init: () => ({ cells: Array(9).fill(null), score: 0, start: Date.now(), nextSpawn: 0, left: 20000 }),
     begin: g => {
@@ -520,7 +520,7 @@ const MINIGAMES = {
         const it = st.items.find(x => x.lane === l && x.y === y); return `<span class="lane-cell">${it ? (it.kind === 'grain' ? '🌾' : '🪨') : ''}</span>`; }).join('')}<span class="lane-cell basket">${st.lane === l ? '🧺' : ''}</span></button>`).join('')}</div>` },
 
   pattern: { house: 'stall-thread', icon: '🧵', title: 'Stitch the Pattern',
-    how: 'Clover shows a pattern for a moment. Stitch the same squares from memory - one more square each round.',
+    how: `${CAST.threadSeller.name} shows a pattern for a moment. Stitch the same squares from memory - one more square each round.`,
     tiers: { bronze: 1, silver: 3, gold: 5 }, scoreText: s => `${s} pattern${s === 1 ? '' : 's'} stitched.`,
     init: () => ({ round: 0, target: [], picks: [], phase: 'show', wrong: null }),
     begin: g => patternNext(g),
@@ -537,7 +537,7 @@ const MINIGAMES = {
         return `<button class="patch${on ? ' on' : ''}${st.wrong === i ? ' wrong' : ''}" data-mg="${i}" ${st.phase === 'input' ? '' : 'disabled'}></button>`; }).join('')}</div>` },
 
   haggle: { house: 'stall-spice', icon: '🫙', title: 'Higher or Lower',
-    how: 'Saffron turns over spice jars numbered 1 to 9. Guess whether the next is higher or lower - a tie counts for you. Each right guess sweetens the pot. Take it whenever you like, or lose it on a wrong guess.',
+    how: `${CAST.spiceSeller.name} turns over spice jars numbered 1 to 9. Guess whether the next is higher or lower - a tie counts for you. Each right guess sweetens the pot. Take it whenever you like, or lose it on a wrong guess.`,
     tiers: { bronze: 1, silver: 4, gold: 6 }, scoreText: s => (s ? `A streak of ${s}.` : 'Bust!'), pebbles: s => HAGGLE_POT[Math.min(s, HAGGLE_POT.length - 1)],
     init: () => ({ cur: 1 + rand(9), streak: 0, last: null, phase: 'guess' }),
     tap: (st, v) => {
@@ -662,6 +662,6 @@ function openChest(data) {
   saveState(); updateHud(); renderTown();
   sfx('claim'); buzz(HAP.big);
   logEvent('🗝️', 'Opened a hidden chest.');
-  showCardReveal(cardId, '🗝️ A hidden chest!', true, `+${pebbles} 🫧 Embers`, xp);
+  showCardReveal(cardId, '🗝️ A hidden chest!', true, `+${pebbles} 🫧 ${GAME.currency.many}`, xp);
 }
 

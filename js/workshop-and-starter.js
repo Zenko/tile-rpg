@@ -185,7 +185,7 @@ function renderCraft() {
   const box = document.getElementById('craftView');
   const counts = ownedCardCounts();
   const pct = n => Math.round(n * 100);
-  box.innerHTML = `<div class="cr-intro">Combine cards into something better. <b>Nothing here costs Embers</b>: the cards are the price.</div>
+  box.innerHTML = `<div class="cr-intro">Combine cards into something better. <b>Nothing here costs ${GAME.currency.many}</b>: the cards are the price.</div>
     <div class="cr-mode" role="tablist">
       <button class="${craftMode === 'refine' ? 'on' : ''}" data-mode="refine" role="tab" aria-selected="${craftMode === 'refine'}">🔨 Refine</button>
       <button class="${craftMode === 'trade' ? 'on' : ''}" data-mode="trade" role="tab" aria-selected="${craftMode === 'trade'}">🔁 Trade up</button>
@@ -335,7 +335,7 @@ function renderPacks() {
     <div class="wallet">
       <div>
         <div class="w-amt">🫧 ${peb}</div>
-        <div class="w-sub">${spares > 0 ? `${spares} spare card${spares === 1 ? '' : 's'} could be released for ${totalSpareValue()} more` : 'Release spare copies from My Cards to earn Embers'}</div>
+        <div class="w-sub">${spares > 0 ? `${spares} spare card${spares === 1 ? '' : 's'} could be released for ${totalSpareValue()} more` : `Release spare copies from My Cards to earn ${GAME.currency.many}`}</div>
       </div>
       ${spares > 0 ? '<button class="panel-action active" id="goRelease">Release</button>' : ''}
     </div>`;
@@ -356,7 +356,7 @@ function renderPacks() {
     el.querySelector('.btn').addEventListener('click', () => {
       ensureAudio();
       if (buyPack(pack.id)) { /* reveal overlay handles feedback */ }
-      else { toast('Not enough Embers yet'); sfx('tie'); }
+      else { toast(`Not enough ${GAME.currency.many} yet`); sfx('tie'); }
     });
     box.appendChild(el);
   });

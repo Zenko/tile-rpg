@@ -120,7 +120,7 @@ function charDrawMe(box) {
     up.innerHTML = ahead.map(u => `<div class="unlock-row"><span>${u.icon} ${u.text}</span><b>Lv ${u.level}</b></div>`).join('');
     box.appendChild(up);
   }
-  charSection(box, "Dreamer’s Gift");
+  charSection(box, `${GAME.player.one}’s Gift`);
   const kb = document.createElement('div'); kb.className = 'knack-row ch-knack';
   const drawK = () => {
     const cur = currentKnackId(), k = BattleEngine.KNACKS[cur];
@@ -186,7 +186,7 @@ function charDrawBag(box) {
   let any = false;
   const add = (title, rows) => { if (!rows.length) return; any = true; charSection(box, title); const list = document.createElement('div'); list.className = 'panel-list'; rows.forEach(r => list.appendChild(r)); box.appendChild(list); };
   const goTown = fn => () => { switchTab('town'); fn(); };
-  add('Pantry', Object.keys(INGREDIENTS).filter(k => ingredientCount(k) > 0).map(k => invRow(INGREDIENTS[k].icon, escapeHtml(INGREDIENTS[k].name), ingredientCount(k), "Cooked into dishes at Maple's Bakery.")));
+  add('Pantry', Object.keys(INGREDIENTS).filter(k => ingredientCount(k) > 0).map(k => invRow(INGREDIENTS[k].icon, escapeHtml(INGREDIENTS[k].name), ingredientCount(k), `Cooked into dishes at ${CAST.baker.name}'s Bakery.`)));
   add('Dishes', RECIPES.filter(r => dishCount(r.id) > 0).map(r => invRow(r.icon, escapeHtml(r.name), dishCount(r.id), escapeHtml(r.desc))));
   add('Seeds', SEEDS.filter(s => seedCount(s.id) > 0).map(s => invRow(s.icon, escapeHtml(s.name), seedCount(s.id), escapeHtml(s.desc), '🌱 Plant', goTown(() => startPlanting(s.id)))));
   const jar = bugState().jar;
@@ -209,7 +209,7 @@ function charDrawPals(box) {
   const c = state.companion;
   if (!c) {
     const e = document.createElement('div'); e.className = 'ch-empty';
-    e.innerHTML = `<div class="ch-empty-f">❔</div><b>No companion yet</b><div class="panel-desc">Any card you own, any neighbour or boss you have met, and Rook can walk with you. Higher levels open rarer cards and bigger names.</div><button class="btn" id="cpChoose">Choose a companion</button>`;
+    e.innerHTML = `<div class="ch-empty-f">❔</div><b>No companion yet</b><div class="panel-desc">Any card you own, any neighbour or boss you have met, and ${CAST.rival.name} can walk with you. Higher levels open rarer cards and bigger names.</div><button class="btn" id="cpChoose">Choose a companion</button>`;
     box.appendChild(e);
     e.querySelector('#cpChoose').addEventListener('click', () => { sfx('nav'); buzz(HAP.tap); openCompanionPicker(); });
   } else {
