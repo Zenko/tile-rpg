@@ -402,6 +402,7 @@ document.getElementById('feedbackModalSubmit').addEventListener('click', () => {
 });
 
 loadState();
+ensureJournal();   // drops saved note drawings once (build 240), so an old save shrinks on its first load
 applyComfortPrefs();
 ensureQuests();
 migrateMapV2();

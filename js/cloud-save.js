@@ -62,7 +62,15 @@ function cloudPush() {
   const ref = cloudDocRef();
   if (!ref || cloudSyncing) return;
   state.cloudSavedAt = Date.now();
-  ref.set({ json: JSON.stringify(state), savedAt: state.cloudSavedAt }).catch(() => { /* offline - Firestore queues this and retries automatically */ });
+  // Offline never rejects (Firestore queues the write and retries), so a rejection is a real refusal - too big (invalid-argument), over quota, or
+  // not allowed - and the player is told instead of the backup quietly going stale.
+  ref.set({ json: JSON.stringify(state), savedAt: state.cloudSavedAt }).catch(e => {
+    const code = e && e.code ? e.code : '';
+    if (code === 'invalid-argument' || code === 'resource-exhausted' || code === 'permission-denied') {
+      const why = code === 'permission-denied' ? 'The cloud backup was refused (check the Firestore rules).' : 'Your save is too big for the cloud backup.';
+      if (typeof warnSaveFailed === 'function') warnSaveFailed(why, false);
+    }
+  });
   pushPresence();   // piggybacks on the same debounce - see WHO'S PLAYING below, no extra write-quota pressure
   pushStats();      // same debounce again
 }

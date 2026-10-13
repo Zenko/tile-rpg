@@ -380,7 +380,18 @@ function flushSaveState() {
   if (!saveStatePending) return;
   saveStatePending = false;
   clearTimeout(saveStateTimer);
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); saveFailWarned = false; }
+  catch (e) { warnSaveFailed('This device could not store your save (its storage may be full).', true); }
+}
+// A save that cannot be written used to fail silently, so progress just stopped being kept. Now the player is told, at most once
+// every 5 minutes so it cannot nag, and the Settings backup line (cloudSetStatus) says so as well.
+let saveFailWarned = false, saveFailAt = 0;
+function warnSaveFailed(why, local) {
+  if (saveFailWarned && Date.now() - saveFailAt < 5 * 60 * 1000) return;
+  saveFailWarned = true; saveFailAt = Date.now();
+  if (typeof toast === 'function') toast('⚠️ ' + why + (local ? ' Progress since the last good save may be lost.' : ''));
+  if (typeof cloudSetStatus === 'function') cloudSetStatus('Save problem: ' + why);
+  if (typeof teleInc === 'function') { try { teleInc('save.failed'); } catch (e2) { /* ignore */ } }
 }
 document.addEventListener('visibilitychange', () => { if (document.hidden) flushSaveState(); });
 window.addEventListener('pagehide', flushSaveState);

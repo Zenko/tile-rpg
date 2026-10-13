@@ -1,4 +1,5 @@
-/* ---------------- journal: an auto-kept event log. (The notebook of written/drawn notes was taken out in build 237; pr.notesList is still kept in saves untouched.) ---------------- */
+/* ---------------- journal: an auto-kept event log. (The notebook of written/drawn notes was taken out in build 237. Written notes stay in
+   pr.notesList untouched; the saved drawings, which were PNGs of 50 KB to 1 MB each, are dropped once by ensureJournal, build 240.) ---------------- */
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
@@ -10,11 +11,15 @@ function ensureJournal() {
   if (typeof pr.notes === 'string' && pr.notes.trim()) {
     pr.notesList.push({ id: 'note_migrated_w', type: 'write', title: '', text: pr.notes, drawing: '', updatedAt: Date.now() });
   }
-  if (typeof pr.drawing === 'string' && pr.drawing) {
-    pr.notesList.push({ id: 'note_migrated_d', type: 'draw', title: '', text: '', drawing: pr.drawing, updatedAt: Date.now() });
-  }
   delete pr.notes;
-  delete pr.drawing;
+  delete pr.drawing;   // the old single drawing is no longer carried into the list: drawings are gone
+  if (!pr.drawingsDropped) {   // once: drawings were stored as full PNG data URLs and could fill localStorage or the 1 MB cloud document
+    const before = JSON.stringify(pr.notesList).length;
+    pr.notesList = pr.notesList.filter(n => n && n.type !== 'draw');
+    pr.notesList.forEach(n => { if (n.drawing) n.drawing = ''; });
+    pr.drawingsDropped = true;
+    if (before - JSON.stringify(pr.notesList).length > 2000 && typeof saveState === 'function') saveState();
+  }
   return pr;
 }
 const EVENT_LOG_MAX = 150;
