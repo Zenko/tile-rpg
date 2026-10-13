@@ -24,6 +24,7 @@ const JPLACES = {
 function journalGo(t) {
   if (!t) return;
   if (inBattle) return;
+  if (t.run) { t.run(); return; }   // a sheet that opens in place (the Gazette, the town goal: js/town-news.js)
   if (t.tab) { switchTab(t.tab); return; }
   if (t.calm) { switchTab('town'); setTimeout(() => openCalm(), 200); return; }
   if (t.map) { switchTab('town'); setTimeout(openWorldMap, 200); return; }
@@ -84,7 +85,10 @@ function todayModel() {
   else { const dr = draftState(); week.push({ icon: '🎴', title: 'Draft Run', sub: dr.active ? 'A run is in progress' : dr.clearedToday ? 'Cleared today. More runs pay less.' : 'Build a deck from offers of three', done: !!dr.clearedToday, frac: dr.clearedToday ? 1 : 0, go: JPLACES.cup }); }
   if (featureLocked('ghost')) locked.push({ icon: '👻', title: featureLockText('ghost').replace(/^👻 /, '') });
   else { const gs = ghostState(); week.push({ icon: '👻', title: 'Lingering duels', sub: `${gs.paid} of 5 paid wins today`, done: gs.paid >= 5, frac: gs.paid / 5, bar: [gs.paid, 5], go: { menu: 'social' } }); }
-  return { away, groups: [{ title: 'Daily', items: daily }, { title: 'This week', items: week }], locked, daily };
+  const news = typeof townNewsTodayRows === 'function' ? townNewsTodayRows() : [];   // js/town-news.js
+  const groups = [{ title: 'Daily', items: daily }, { title: 'This week', items: week }];
+  if (news.length) groups.unshift({ title: 'Town news', items: news });
+  return { away, groups, locked, daily };
 }
 function jBar(n, of) { return `<div class="jbar" role="progressbar" aria-valuenow="${n}" aria-valuemax="${of}"><i style="width:${of ? Math.round(n / of * 100) : 0}%"></i></div>`; }
 // "Clear skies now, rain in about 6 min" - the short form of forecastText() (which also lists each weather's effects).

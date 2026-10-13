@@ -28,6 +28,8 @@ const TITLES = [
   { ach: 'companion',     name: 'Spirit Friend' },
   { ach: 'pen-pal',       name: 'Pen Pal' },
   { ach: 'mini-gold-5',   name: 'All-Rounder' },
+  { ach: 'gossip-10',     name: 'Talk of the Town' },
+  { ach: 'town-goal-4',   name: 'Pillar of the Town' },
   { ach: 'mini-all-gold', name: 'Game Master' },
   { ach: 'trade-15',      name: 'Trader' },
   { ach: 'mastery-10',    name: 'Card Master' },
@@ -367,7 +369,7 @@ function townSignature() {
 function worldTick() {
   if (document.hidden) return;   // nothing to show in a hidden tab; the visibilitychange listener below runs it once on return
   if (!inBattle) { checkMail(); checkExpeditions(); checkStory(); }
-  const rivalMoved = syncRival() | syncAtlas();
+  const rivalMoved = syncRival() | syncAtlas() | (typeof syncVisitor === 'function' ? syncVisitor() : false);
   const cropsGrew = tickCrops();
   if (!inBattle && !inScene && !townPanel.classList.contains('hidden') && !townPanel.classList.contains('tab-away')) {
     const sig = townSignature();

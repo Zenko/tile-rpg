@@ -72,6 +72,9 @@ const QUEST_POOL = [
   { id: 'game2',    icon: '🎸', name: 'Play 2 town activities',        goal: 2,  stat: 'townGames',       reward: 'rare' },
   { id: 'puddle5',  icon: '🌧️', name: 'Splash through 5 puddles',      goal: 5,  stat: 'puddles',         reward: 'common' },
   { id: 'skip5',    icon: '🪨', name: 'Skip 5 stones',                 goal: 5,  stat: 'stonesSkipped',   reward: 'common' },
+  { id: 'gossip2',  icon: '💬', name: 'Hear 2 neighbours gossip about you', goal: 2, stat: 'gossipHeard',   reward: 'common' },
+  { id: 'paper1',   icon: '📰', name: 'Read the Dream Gazette',        goal: 1,  stat: 'papersRead',      reward: 'common' },
+  { id: 'visitor1', icon: '🧳', name: 'Meet a travelling visitor',     goal: 1,  stat: 'visitorsMet',     reward: 'rare' },
   ...STEP_QUEST_TIERS
 ];
 
@@ -112,7 +115,9 @@ const WEEKLY_QUEST_POOL = [
   { id: 'w_trade5',   icon: '🤝', name: 'Make 5 trades',             goal: 5,  stat: 'tradesDone',      reward: 'super' },
   { id: 'w_foil3',    icon: '✨', name: 'Find 3 Reborn cards',         goal: 3,  stat: 'foilsFound',      reward: 'mythic' },
   { id: 'w_acts60',   icon: '🏘️', name: 'Interact with 60 things around town', goal: 60, stat: 'townActs', reward: 'super' },
-  { id: 'w_games8',   icon: '🎸', name: 'Play 8 town activities',    goal: 8,  stat: 'townGames',       reward: 'super' }
+  { id: 'w_games8',   icon: '🎸', name: 'Play 8 town activities',    goal: 8,  stat: 'townGames',       reward: 'super' },
+  { id: 'w_moments3', icon: '🌈', name: 'Be out for 3 weather moments', goal: 3, stat: 'moments',          reward: 'super' },
+  { id: 'w_visit3',   icon: '🎒', name: 'Meet 3 travelling visitors', goal: 3,  stat: 'visitorsMet',     reward: 'super' }
 ];
 
 const ACHIEVEMENTS = [
@@ -128,6 +133,13 @@ const ACHIEVEMENTS = [
   { id: 'puddle-world', icon: '🌀', name: 'Fell through a puddle', test: () => (state.progress.totals.puddleWorlds || 0) >= 1 },
   { id: 'puddle-world-5', icon: '🌀', name: 'Five puddle worlds', test: () => (state.progress.totals.puddleWorlds || 0) >= 5 },
   { id: 'puddle-win',   icon: '🏁', name: 'Won a puddle world', test: () => (state.progress.totals.puddleWins || 0) >= 1 },
+  { id: 'gossip-10',    icon: '💬', name: 'Talk of the town (10 bits of gossip)', test: () => (state.progress.totals.gossipHeard || 0) >= 10 },
+  { id: 'paper-7',      icon: '📰', name: 'Read the Gazette on 7 days', test: () => (state.progress.totals.papersRead || 0) >= 7 },
+  { id: 'moment-1',     icon: '🌈', name: 'Caught a weather moment', test: () => (state.progress.totals.moments || 0) >= 1 },
+  { id: 'town-goal-1',  icon: '🤝', name: 'Finished a town goal', test: () => (state.progress.totals.townGoals || 0) >= 1 },
+  { id: 'town-goal-4',  icon: '🏘️', name: 'Finished 4 town goals', test: () => (state.progress.totals.townGoals || 0) >= 4 },
+  { id: 'pedlar-1',     icon: '🧳', name: 'Bought from the Pedlar', test: () => (state.progress.totals.visitorBuys || 0) >= 1 },
+  { id: 'wanderer-1',   icon: '🎒', name: 'Beat the Wanderer', test: () => (state.progress.totals.visitorWins || 0) >= 1 },
   { id: 'home-lv3',    icon: '🏠', name: 'A home of level 3', test: () => typeof hrHome === 'function' && hrHome().level >= 3 },
   { id: 'cosy-45',     icon: '🛋️', name: 'A snug home', test: () => typeof hrCosy === 'function' && hrCosy().score >= 45 },
   { id: 'visitors-5',  icon: '🕊️', name: 'Five spirits welcomed home', test: () => (state.progress.totals.homeVisitors || 0) >= 5 },
@@ -473,6 +485,7 @@ function bumpStat(stat, n) {
   if (stat === 'cardsFound') noteCardsFound(n || 1);
   if (typeof companionBond === 'function') companionBond(stat, n || 1);   // js/skills-gear.js
   if (typeof ladderFromStat === 'function') ladderFromStat(stat, n || 1);   // js/ladder-practice.js
+  if (typeof gossipNote === 'function') gossipNote(stat, n || 1);   // js/town-news.js: something the neighbours might talk about
   // Toast when a quest first completes, so progress feels alive
   state.progress.quests.forEach(q => {
     const def = questDef(q.id);

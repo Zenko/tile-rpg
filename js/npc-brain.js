@@ -360,6 +360,8 @@ function npcGreeting(f, fallback) {
     if (lm.kind === 'tip') return `Hello there. ${lm.with} and I were swapping deck tips. Care for a match?`;
     return `Hello there. I was just chatting with ${lm.with} about ${lm.topic}.`;
   }
+  const gos = typeof gossipGreeting === 'function' ? gossipGreeting(f) : null;   // what they heard you did lately (js/town-news.js)
+  if (gos) return gos;
   const mem = typeof npcMemGreeting === 'function' ? npcMemGreeting(f) : null;   // what they remember of you (js/npc-memory.js)
   if (mem) return mem;
   const rt = Math.random() < 0.4 ? npcRoutineLine(f) : null;

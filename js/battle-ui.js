@@ -28,7 +28,7 @@ function startBattle(opponent) {
 function btIntro(opponent, isBoss, first) {
   return new Promise(resolve => {
     const tw = bossTwistFor(opponent), t = tw ? BattleEngine.TWISTS[tw] : null;
-    const tag = isBoss ? '👑 District boss' : opponent.atlas ? '🗺️ The Atlas' : opponent.cup ? '🏆 Dreamers’ Cup' : opponent.draft ? '🎴 Draft Run' : opponent.ghost ? '👻 Lingering duel' : opponent.dungeon ? '🕯️ Cellar' : opponent.isRival ? '⚡ Rival' : '⚔️ Friendly match';
+    const tag = isBoss ? '👑 District boss' : opponent.atlas ? '🗺️ The Atlas' : opponent.cup ? '🏆 Dreamers’ Cup' : opponent.draft ? '🎴 Draft Run' : opponent.ghost ? '👻 Lingering duel' : opponent.visitor ? '🎒 Travelling visitor' : opponent.dungeon ? '🕯️ Cellar' : opponent.isRival ? '⚡ Rival' : '⚔️ Friendly match';
     const st = opponent.aiStyle && BattleEngine.AI_STYLES[opponent.aiStyle];   // the way this opponent likes to play (js/npc-brain.js npcAiStyle)
     const el = document.createElement('div'); el.className = 'bt-intro' + (isBoss ? ' boss' : '');
     el.innerHTML = `<div class="bt-intro-side opp"><span class="bt-intro-av"></span><div><div class="bt-intro-name"></div><div class="bt-intro-tag">${tag}${st ? ` · ${st.icon} ${st.name}` : ''}</div><div class="bt-intro-note"></div></div></div>
@@ -92,7 +92,7 @@ function startBattleNow(opponent, first) {
   const companionSpirit = hasPerk('spirit') && !opponent.puzzle && !neutral;
   // Plain neighbors and district bosses get a fresh deck each fight, scaled to how many wins you have (their stored deck
   // predates enhanced and unique foe cards). Every other kind of opponent brings its own deck.
-  const plainFoe = !opponent.dungeon && !opponent.cup && !opponent.draft && !opponent.ghost && !opponent.challenge && !opponent.signature && !opponent.isRival && !opponent.puzzle && !opponent.trial && !opponent.spar;
+  const plainFoe = !opponent.dungeon && !opponent.cup && !opponent.draft && !opponent.ghost && !opponent.challenge && !opponent.signature && !opponent.isRival && !opponent.puzzle && !opponent.trial && !opponent.spar && !opponent.visitor;
   opponent.adaptive = !!plainFoe;                       // a plain neighbour or boss: its result counts towards, and is shaped by, your recent form (js/adaptive.js)
   opponent.tilt = plainFoe && typeof adaptTilt === 'function' ? adaptTilt() : null;   // for the playtest counters (js/telemetry.js)
   const mood = plainFoe && typeof adaptApply === 'function' ? adaptApply(profile, opponent, isBoss) : '';
@@ -1140,6 +1140,8 @@ function btShowResult(won, yielded) {
     challengeWin();
   } else if (won && !battle.rewarded && npc.ghost) {
     ghostWin();
+  } else if (won && !battle.rewarded && npc.visitor) {
+    visitorWin();   // js/town-news.js
   } else if (!won && npc.ghost && !battle.rewarded) {
     battle.rewarded = true;
     ghostLoss();

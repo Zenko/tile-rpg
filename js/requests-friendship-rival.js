@@ -128,6 +128,7 @@ function talkEls() { return { ov: document.getElementById('talkOverlay'), name: 
 function activeCount() { return Object.values(reqState().list).filter(r => r.state === 'active').length; }
 function openTalk(f) {
   if (f.isAtlas) { openAtlas(); return; }          // the Atlas has its own scene (js/atlas.js)
+  if (f.isVisitor && typeof openVisitor === 'function') { openVisitor(f); return; }   // a travelling visitor (js/town-news.js)
   talkTo = f; talkView = 'home'; const e = talkEls();
   noteMet(f);
   bumpStat('talks', 1);

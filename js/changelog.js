@@ -18,6 +18,11 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'new', x: 'The Dream Gazette: a new front page every morning, the same story for every dreamer, with today\'s event, the town goal and any visitors underneath. Find it at the top of the Journal\'s Today page.' },
+  { t: 'new', x: 'Gossip: neighbours notice what you get up to (a big catch, a harvest, beating the district god, falling through a puddle) and bring it up when you walk over.' },
+  { t: 'new', x: 'Weather moments: a change of weather can bring a few special minutes, like a koi run in the moonrain, a star shower in the snow or a rainbow when the rain clears, each with its own small bonus.' },
+  { t: 'new', x: 'Town goal: one shared goal a week. You, your neighbours and the other dreamers all count toward it, with a reward at halfway and a card when it is done.' },
+  { t: 'new', x: 'Travelling visitors: on most days Moth the Pedlar (three cards for sale) or Quill the Wanderer (a match with a prize) turns up in one district.' },
 ];
 
 const RELEASES = [

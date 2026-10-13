@@ -140,7 +140,14 @@ function noteSeasonChange() {
 
 function weatherNow() { const c = (state.weather && state.weather.current) || 'clear'; return c === 'fog' ? 'cloudy' : c; }   // fog was removed: old saves read it as cloudy
 function weatherIs(kind) { return weatherNow() === kind; }
-function weatherFx() { return WEATHER_EFFECTS[weatherNow()] || {}; }
+// A weather moment (js/town-news.js) bends the weather's own perks for a few minutes: its numbers multiply, dailyBonus adds.
+function weatherFx() {
+  const base = WEATHER_EFFECTS[weatherNow()] || {}, m = typeof momentFx === 'function' ? momentFx() : null;
+  if (!m) return base;
+  const out = Object.assign({}, base);
+  Object.keys(m).forEach(k => { out[k] = k === 'dailyBonus' ? (out[k] || 0) + m[k] : (out[k] || 1) * m[k]; });
+  return out;
+}
 // "Now X, then Y in about N minutes" - minutes of active play, since the weather clock pauses while the game is closed.
 function forecastText() {
   const w = state.weather, now = WEATHER_KINDS[weatherNow()], nx = WEATHER_KINDS[w.next] ? w.next : null;
@@ -163,6 +170,7 @@ function weatherBoardHtml(quote) {
   h += row(WEATHER_KINDS[nowK].icon || '☀️', 'Now', WEATHER_KINDS[nowK].name, fxLine(nowK), nx && nx !== nowK ? '' : `~${mins} min more`);
   if (nx && nx !== nowK) h += row(WEATHER_KINDS[nx].icon || '☀️', `In ~${mins} min`, WEATHER_KINDS[nx].name, fxLine(nx), '');
   h += row(ev.icon, 'Today', ev.name, `<span>${ev.text}</span>`, '');
+  if (typeof townNewsBoardRows === 'function') h += townNewsBoardRows(row);   // the weather moment, the town goal and the Gazette (js/town-news.js)
   h += `<div class="wb-row wb-mood"><span class="wb-ico">${full ? '🎆' : '🎈'}</span><div class="wb-txt"><small>Town mood</small><b>${MOOD_NAMES[lv]}${full ? ' (full!)' : ''}</b><div class="wb-bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div></div>${full ? '' : `<em class="wb-tag">${n}/${MOOD_STEPS[lv]}</em>`}</div>`;
   return h + '</div>';
 }
@@ -244,6 +252,7 @@ function maybeRollWeather() {
       townLog.textContent = WEATHER_LOG[state.weather.current];
       const fx = weatherEffectLine(); if (fx) toast(fx);
     }
+    if (!first && state.weather.current !== prev && typeof momentOnWeather === 'function') momentOnWeather(prev, state.weather.current);   // a koi run, a rainbow... (js/town-news.js)
   }
 }
 
@@ -701,7 +710,7 @@ function renderEntities(data) {
 
 function renderTown(justMoved) {
   const key = state.currentDistrict, def = DISTRICTS[key], data = ensureDistrictData(key);
-  syncRival(); syncAtlas();
+  syncRival(); syncAtlas(); if (typeof syncVisitor === 'function') syncVisitor();
   tickItems(data);
   districtNameEl.textContent = def.name;
   const hudDistrictEl = document.getElementById('hudDistrict'); if (hudDistrictEl) hudDistrictEl.textContent = def.name;

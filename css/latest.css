@@ -2220,3 +2220,39 @@ body.pw-board #goalChip { display: none !important; }   /* the dice panel says w
 .ent.player.pw-swim { animation: pw-float 3.2s ease-in-out infinite; }
 @keyframes pw-float { 0%, 100% { margin-top: 0; } 50% { margin-top: -5px; } }
 @media (prefers-reduced-motion: reduce) { .town-view.pw-deep::after, .ent.player.pw-swim, .ent.pw-exit > span, .pw-actor.pw-folk.gift > span { animation: none; } }
+
+/* ============================================================
+   TOWN NEWS (build 250, js/town-news.js): the Dream Gazette, the town goal sheet, the Pedlar's stock and the rainbow.
+   Colours are theme tokens, so light and dark need nothing extra. The rainbow is a static gradient that only fades
+   (opacity transition, no looping animation), and is hidden inside the underwater puddle world.
+   ============================================================ */
+.tn-paper { display: flex; flex-direction: column; gap: 6px; }
+.tn-date { color: var(--ink-soft); font-size: 12px; letter-spacing: .04em; text-transform: uppercase; }
+.tn-head { margin: 0; font-family: var(--f-display); font-size: 21px; line-height: 1.2; color: var(--ink); }
+.tn-body { margin: 0; line-height: 1.5; color: var(--ink); }
+.tn-also { margin-top: 8px; padding: 10px 12px; border-radius: 14px; background: color-mix(in srgb, var(--ink) 5%, var(--stone)); border: 1px solid var(--stone-edge); }
+.tn-also small { display: block; color: var(--ink-soft); font-size: 12px; margin-bottom: 4px; }
+.tn-also p { margin: 4px 0; font-size: 14px; line-height: 1.4; color: var(--ink); }
+.tn-goal-name { margin: 0 0 8px; font-family: var(--f-display); font-size: 18px; color: var(--ink); }
+.tn-goal-bar { display: flex; height: 14px; border-radius: 999px; overflow: hidden; background: var(--track); }
+.tn-goal-bar i { display: block; height: 100%; }
+.tn-goal-bar .me, .tn-goal-key .me { background: var(--accent); }
+.tn-goal-bar .npc, .tn-goal-key .npc { background: var(--water); }
+.tn-goal-bar .oth, .tn-goal-key .oth { background: color-mix(in srgb, var(--water) 55%, var(--ink)); }
+.tn-goal-num { margin: 8px 0 4px; color: var(--ink); }
+.tn-goal-key { list-style: none; margin: 0 0 8px; padding: 0; display: flex; flex-direction: column; gap: 3px; font-size: 14px; color: var(--ink); }
+.tn-goal-key i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+.tn-goal-pay { margin: 0 0 8px; font-size: 14px; color: var(--ink); }
+.tn-greet { margin: 0 0 10px; font-style: italic; color: var(--ink); line-height: 1.45; }
+.tn-stock { display: flex; align-items: center; gap: 10px; padding: 8px 10px; margin-bottom: 6px; border-radius: 14px; background: color-mix(in srgb, var(--ink) 5%, var(--stone)); border: 1px solid var(--stone-edge); }
+.tn-stock.sold { opacity: .5; }
+.tn-st-art { font-size: 28px; width: 36px; text-align: center; flex: none; }
+.tn-st-t { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.tn-st-t b { color: var(--ink); }
+.tn-st-t small { color: var(--ink-soft); font-size: 12px; }
+.tn-stock em { font-style: normal; font-weight: 700; color: var(--ink); white-space: nowrap; }
+.tn-rainbow { position: absolute; left: -30%; right: -30%; top: -10%; height: 70%; z-index: 6; pointer-events: none; opacity: 0; transition: opacity 2.5s ease;
+  background: radial-gradient(ellipse 50% 100% at 50% 100%, transparent 64%, rgba(255, 92, 92, .30) 66%, rgba(255, 170, 70, .30) 68%, rgba(255, 232, 110, .28) 70%,
+    rgba(120, 220, 130, .26) 72%, rgba(100, 170, 255, .26) 74%, rgba(170, 120, 255, .24) 76%, transparent 78%); }
+.tn-rainbow.on { opacity: 1; }
+.town-view.pw-deep .tn-rainbow { display: none; }
