@@ -18,10 +18,22 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
-  { t:'new', x: 'More kinds of puddle world. A puddle might now drop you into a maze (find the way out before the timer ends, with only a few tiles lit around you and three neighbours racing to get out first), a board game (roll the dice to move, climb ladders, slide down snakes, dodge traps and win the flag while the neighbours play too), or a sunken city (swim through coral streets, meet the folk who live there and watch the fish go by). Finishing a maze or a board earns a card and Embers, more for first place.' },
 ];
 
 const RELEASES = [
+  {
+    id: 'beta-5', n: 5, date: '2026-10-13', title: 'Three new kinds of puddle world',
+    intro: 'A puddle no longer drops you into just one sort of place. Now it might be a maze, a board game or a sunken city.',
+    new: [
+      'Maze worlds. Find the way out before the timer ends. You only see a few tiles around you, and three neighbours are searching for the exit too. Cards are hidden in the dead ends, and finishing earns Embers and a card, more for coming first.',
+      'Board game worlds. A shoots-and-ladders board where the dice are the only way to move: climb ladders, slide down snakes, dodge traps, land on boosts and gifts, and race the neighbours to the flag.',
+      'Underwater worlds. Swim through a sunken coral city with fish drifting by, folk who live there (each has a gift card for you) and houses you can peek into.',
+    ],
+    better: [
+      'Puddle worlds never repeat the same kind twice in a row, so each fall into a puddle feels different.',
+    ],
+    fixed: [],
+  },
   {
     id: 'beta-4', n: 4, date: '2026-10-13', title: 'Puddle worlds, neighbours with lives and a home full of spirits',
     intro: 'Splash through a puddle and you might fall into a world of its own. Neighbours have their own days now, your cottage is yours to decorate and fill with spirits, and battles are easier to read.',

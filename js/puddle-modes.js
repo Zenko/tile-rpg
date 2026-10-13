@@ -114,8 +114,8 @@ PW_KINDS.maze = {
   build(w, data, m) {
     // three cards in the dead ends furthest from the start, one of them a treasure
     const walk = [], free = (x, y) => pwFree(m, x, y);
-    for (let y = 1; y < m.h - 1; y++) for (let x = 1; x < m.w - 1; x++) if (free(x, y) && PW_DIRS.filter(([dx, dy]) => free(x + dx, y + dy)).length === 1) walk.push({ x, y, d: Math.abs(x - m.spawn.x) + Math.abs(y - m.spawn.y) });
-    walk.sort((a, b) => b.d - a.d); let pool = walk.slice(0, Math.max(3, Math.ceil(walk.length / 2)));
+    for (let y = 1; y < m.h - 1; y++) for (let x = 1; x < m.w - 1; x++) if (free(x, y) && PW_DIRS.filter(([dx, dy]) => free(x + dx, y + dy)).length === 1) { const d = Math.abs(x - m.spawn.x) + Math.abs(y - m.spawn.y); if (d > 4) walk.push({ x, y, d }); }   // never right beside the start
+    walk.sort((a, b) => b.d - a.d); let pool = walk.slice(0, Math.max(3, Math.ceil(walk.length / 2)));   // (fewer than 3 when the maze has few far dead ends; topped up below)
     if (pool.length < 3) {   // a small maze with few dead ends: fill up from the open tiles furthest from the start
       const more = []; for (let y = 1; y < m.h - 1; y++) for (let x = 1; x < m.w - 1; x++) if (free(x, y) && !pool.some(p => p.x === x && p.y === y) && Math.abs(x - m.spawn.x) + Math.abs(y - m.spawn.y) > 4) more.push({ x, y, d: Math.abs(x - m.spawn.x) + Math.abs(y - m.spawn.y) });
       more.sort((a, b) => b.d - a.d); pool = pool.concat(more.slice(0, 6));
