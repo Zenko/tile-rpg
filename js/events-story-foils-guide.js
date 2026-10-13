@@ -306,6 +306,7 @@ document.getElementById('feedbackModalSubmit').addEventListener('click', () => {
 });
 
 loadState();
+if (typeof portalBoot === 'function') portalBoot();   // js/portal.js: a portal that closed while the game was away is gone
 pwBoot();          // js/puddle-worlds.js: a world that ended while the game was closed is gone; one still running is rebuilt from its seed
 ensureJournal();   // drops saved note drawings once (build 240), so an old save shrinks on its first load
 applyComfortPrefs();

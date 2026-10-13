@@ -227,6 +227,7 @@ function lifeStep(x, y) {
     bumpStat('puddles', 1);
     if (typeof pwMaybeEnter === 'function') pwMaybeEnter(x, y);   // js/puddle-worlds.js: now and then a puddle is a way in
   }
+  if (typeof portalStep === 'function') portalStep(x, y);          // js/portal.js: stepping onto an open portal takes you through
 }
 
 /* ---------------- everything drawn on the map (rebuilt by renderEntities every render) ---------------- */
@@ -235,6 +236,7 @@ function lifeRenderEntities(data, add) {
   townView.dataset.wx = wx;
   const l = lifeState(), lv = moodLevel(data);
   if (typeof pwRenderEntities === 'function') pwRenderEntities(data, add);   // js/puddle-worlds.js: what a puddle world draws (exit, board, actors)
+  if (typeof portalRender === 'function') portalRender(data, add);           // js/portal.js: an open portal
   if (!night && Object.keys(l.lit).length) l.lit = {};
   const nlList = [];
   m.props.forEach(p => {

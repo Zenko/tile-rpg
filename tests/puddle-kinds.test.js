@@ -4,7 +4,7 @@ module.exports = async (page, assert) => {
   await page.evaluate(() => { state.progress.level = 6; document.querySelectorAll('.overlay').forEach(o => o.classList.add('hidden')); PWB.speed = 0.04; });
   const enter = async kind => {
     await page.evaluate(k => { state.progress.pwEndedAt = 0; state.progress.puddleWorld = null; state.currentDistrict = 'square'; pwEnter(undefined, undefined, k); }, kind);
-    await until(() => state.currentDistrict === 'pw' && !document.querySelector('.travel-fade') && !!state.districtData.pw);
+    await until(() => state.currentDistrict === 'pw' && !document.querySelector('.travel-fade, .warp-fx') && !!state.districtData.pw);
   };
   const leaveQuiet = () => page.evaluate(() => { if (pwActive()) pwLeave('left', true); renderTown(); });
 
@@ -83,7 +83,7 @@ module.exports = async (page, assert) => {
   // her way out: the exit tile ends the world with a card and Embers (smaller when others got out first)
   const before = await page.evaluate(() => ({ cards: state.ownedCards.length, emb: state.progress.pebbles, outBy: pwActive().outBy.length }));
   await page.evaluate(() => { const m = getMap('pw'), ex = Object.keys(m.exits)[0].split(',').map(Number); state.playerPos = { x: ex[0], y: 1 }; crossExit(m.exits[ex[0] + ',' + ex[1]]); });
-  await until(() => state.currentDistrict === 'square' && !pwActive() && !document.querySelector('.travel-fade'));
+  await until(() => state.currentDistrict === 'square' && !pwActive() && !document.querySelector('.travel-fade, .warp-fx'));
   await until(() => state.ownedCards.length > 0 && !document.getElementById('pickupOverlay').classList.contains('hidden'), null, 6000);
   const after = await page.evaluate(() => ({ cards: state.ownedCards.length, emb: state.progress.pebbles, home: state.currentDistrict, world: pwActive(), fog: !!document.querySelector('.pw-fog'), layer: !!document.querySelector('.pw-layer'), wins: state.progress.totals.puddleWins }));
   assert.ok(after.home === 'square' && !after.world && !after.fog && !after.layer, 'out of the maze: back home, fog and actors gone'); assert.strictEqual(after.cards, before.cards + 1, 'a card for getting out');
@@ -92,7 +92,7 @@ module.exports = async (page, assert) => {
   // first one out: the best reward
   await enter('maze');
   const first = await page.evaluate(async () => { const e0 = state.progress.pebbles, m = getMap('pw'), ex = Object.keys(m.exits)[0].split(',').map(Number); state.playerPos = { x: ex[0], y: 1 }; crossExit(m.exits[ex[0] + ',' + ex[1]]); return e0; });
-  await until(() => state.currentDistrict === 'square' && !pwActive() && !document.querySelector('.travel-fade')); await until(f => state.progress.pebbles >= f + 10, first, 6000);
+  await until(() => state.currentDistrict === 'square' && !pwActive() && !document.querySelector('.travel-fade, .warp-fx')); await until(f => state.progress.pebbles >= f + 10, first, 6000);
   assert.strictEqual(await page.evaluate(() => state.progress.pebbles), first + 10, 'first one out earns 10 Embers');
   await page.evaluate(() => document.querySelectorAll('.overlay').forEach(o => o.classList.add('hidden')));
 
@@ -154,7 +154,7 @@ module.exports = async (page, assert) => {
   assert.deepStrictEqual(placed.rank, [1], 'a neighbour finishes first and the game goes on'); assert.strictEqual(placed.still, 'pw', 'she is still playing');
   const emb0 = await page.evaluate(() => state.progress.pebbles);
   await page.evaluate(() => { const g = pwActive().game; g.pos[0] = 37; g.turn = 0; PWB.busy = false; pwBoardRoll(0, 1); });
-  await until(() => state.currentDistrict === 'square' && !pwActive() && !document.querySelector('.travel-fade'));
+  await until(() => state.currentDistrict === 'square' && !pwActive() && !document.querySelector('.travel-fade, .warp-fx'));
   await until(e => state.progress.pebbles >= e + 6, emb0, 6000);
   const fin = await page.evaluate(() => ({ emb: state.progress.pebbles, dice: document.getElementById('pwDice').classList.contains('hidden'), cls: document.body.classList.contains('pw-board'), layer: !!document.querySelector('.pw-layer'), wins: state.progress.totals.puddleWins }));
   assert.strictEqual(fin.emb - emb0, 6, 'second place earns 6 Embers'); assert.ok(fin.dice && !fin.cls && !fin.layer, 'the board is cleaned away'); assert.strictEqual(fin.wins, 3, 'wins counted');
@@ -176,7 +176,7 @@ module.exports = async (page, assert) => {
   assert.deepStrictEqual(keep.pos, [9, 14], 'the squares survive a restart'); assert.ok(keep.on, 'and she is standing on hers');
   const cardsT = await page.evaluate(() => { PWB.speed = 1; return { c: state.ownedCards.length, e: state.progress.pebbles }; });
   await page.evaluate(() => { pwActive().endsAt = Date.now() - 1; pwTick(); });
-  await until(() => state.currentDistrict === 'square' && !pwActive() && !document.querySelector('.travel-fade'));
+  await until(() => state.currentDistrict === 'square' && !pwActive() && !document.querySelector('.travel-fade, .warp-fx'));
   assert.deepStrictEqual(await page.evaluate(() => ({ c: state.ownedCards.length, e: state.progress.pebbles })), cardsT, 'running out of time earns nothing extra');
   await page.evaluate(() => { PWB.speed = 0.04; });
 
@@ -233,7 +233,7 @@ module.exports = async (page, assert) => {
     const blocked = await page.evaluate(() => { const shown = [], real = toast; toast = m => { shown.push(m); }; try { travelToDistrict('market'); } finally { toast = real; } return { stayed: state.currentDistrict, msg: shown.join('|') }; });
     assert.ok(blocked.stayed === 'pw' && /ripple holds you/i.test(blocked.msg), kind + ': travel is blocked');
     await page.evaluate(() => { pwActive().endsAt = Date.now() - 1; pwTick(); });
-    await until(() => state.currentDistrict === 'square' && !pwActive() && !document.querySelector('.travel-fade'));
+    await until(() => state.currentDistrict === 'square' && !pwActive() && !document.querySelector('.travel-fade, .warp-fx'));
     const clean = await page.evaluate(() => ({ layer: !!document.querySelector('.pw-layer'), fog: !!document.querySelector('.pw-fog'), dice: !document.getElementById('pwDice').classList.contains('hidden'), body: document.body.classList.contains('pw-board'), deep: townView.classList.contains('pw-deep'), step: STEP_MS, data: !!state.districtData.pw }));
     assert.deepStrictEqual(clean, { layer: false, fog: false, dice: false, body: false, deep: false, step: stepBefore, data: false }, kind + ': nothing left behind: ' + JSON.stringify(clean));
   }

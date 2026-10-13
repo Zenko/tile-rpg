@@ -7,8 +7,8 @@ Draw using the Town Square palette (see the style guide, Colour -> Town palettes
 shows each match so you can fix a colour that landed on the wrong one. A black fill with partial opacity becomes the ground shadow (--tshadow)."""
 import re, sys, math, xml.etree.ElementTree as ET
 
-css = open('css/buildings.css', encoding='utf-8').read()
-m = re.search(r'\.town-view\[data-biome="meadow"\]\s*\{([^}]*)\}', css)
+css = open('css/theme.css', encoding='utf-8').read()   # every colour lives here since build 253 (the Town Square palette is .town-view[data-biome="meadow"])
+m = re.search(r'(?<![\w\]] )\.town-view\[data-biome="meadow"\]\s*\{([^}]*)\}', css)   # the dark palette, not the light-theme one
 PAL = {k: v.strip() for k, v in re.findall(r'--([a-z0-9-]+):\s*(#[0-9a-fA-F]{6})', m.group(1))}
 SKIP = {'ground', 'ground2', 'ground3', 'water', 'shore'}          # terrain colours are drawn by the tiles, not by sprites (water2 is used by wells/ripples)
 def rgb(h): h = h.lstrip('#'); return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))

@@ -108,7 +108,7 @@ module.exports = async (page, assert) => {
   });
   assert.ok(t.warn, 'the pill pulses in the last thirty seconds'); assert.strictEqual(t.heldByBattle, 'pw', 'a battle in progress keeps the world until it is over');
   await page.evaluate(() => pwTick());
-  await until(() => state.currentDistrict === 'square' && !pwActive() && !document.querySelector('.travel-fade'));
+  await until(() => state.currentDistrict === 'square' && !pwActive() && !document.querySelector('.travel-fade, .warp-fx'));
   const back = await page.evaluate(() => ({ district: state.currentDistrict, pos: state.playerPos, world: state.progress.puddleWorld, data: !!state.districtData.pw, cache: !!MAP_CACHE.pw, pill: document.getElementById('pillWorld').classList.contains('hidden'),
     name: DISTRICTS.pw.name, biome: townView.dataset.biome, ended: !!state.progress.pwEndedAt, again: pwCanStart(), tx: !!townWorld.querySelector('.player') }));
   assert.strictEqual(back.district, 'square', 'back where she came from'); assert.deepStrictEqual(back.pos, { x: enter.tile.x, y: enter.tile.y }, 'on the very tile she fell in from');
@@ -117,16 +117,16 @@ module.exports = async (page, assert) => {
 
   // ---- 7. climbing out early through the timer ----
   await page.evaluate(() => { state.progress.pwEndedAt = 0; pwEnter(); });
-  await until(() => state.currentDistrict === 'pw' && !document.querySelector('.travel-fade'));
+  await until(() => state.currentDistrict === 'pw' && !document.querySelector('.travel-fade, .warp-fx'));
   await page.$eval('#pillWorld', el => el.click());   // a DOM click: Playwright's click waits for the animated overlay to be "stable", which can take for ever on a busy machine
   assert.ok(await page.evaluate(() => !document.getElementById('confirmOverlay').classList.contains('hidden') && /Climb out/.test(document.getElementById('confirmTitle').textContent)), 'tapping the timer asks first');
   await page.$eval('#confirmOk', el => el.click());
-  await until(() => state.currentDistrict === 'square' && !pwActive() && !document.querySelector('.travel-fade'));
+  await until(() => state.currentDistrict === 'square' && !pwActive() && !document.querySelector('.travel-fade, .warp-fx'));
   assert.ok(await page.evaluate(() => state.currentDistrict === 'square' && !pwActive()), 'and then she is back');
 
   // ---- 8. a restart: a running world is rebuilt from its seed; one that ended while the game was closed is gone ----
   await page.evaluate(() => { state.progress.pwEndedAt = 0; pwEnter(); });
-  await until(() => state.currentDistrict === 'pw' && !document.querySelector('.travel-fade'));
+  await until(() => state.currentDistrict === 'pw' && !document.querySelector('.travel-fade, .warp-fx'));
   const before = await page.evaluate(() => { state.districtData.pw.items[0].collected = true; saveState(); flushSaveState(); return { rows: getMap('pw').rows.join('/'), name: pwActive().name, left: pwActive().endsAt - Date.now() }; });
   const same = await page.evaluate(() => { delete MAP_CACHE.pw; BIOME_OF.pw = 'meadow'; DISTRICTS.pw.name = 'x'; loadState(); pwBoot(); return { rows: getMap('pw').rows.join('/'), name: DISTRICTS.pw.name, district: state.currentDistrict, biome: BIOME_OF.pw, w: pwActive() && pwActive().biome, collected: state.districtData.pw.items[0].collected }; });
   assert.strictEqual(same.district, 'pw', 'still inside after a restart'); assert.strictEqual(same.rows, before.rows, 'the same map, rebuilt from the seed');

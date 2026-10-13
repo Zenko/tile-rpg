@@ -16,7 +16,8 @@
    Kinds of world (build 245): every world has a `kind`. 'explore' (below) is the original: wander and look for cards. js/puddle-modes.js adds
    'maze' (find the way out, racing neighbours), 'ladders' (a dice-only board game) and 'deep' (an underwater city). A kind is an entry in
    PW_KINDS with hooks: create, generate, build, enter, leave, boot, render, tap, exit, goal (see pwKind and the hook helpers below).
-   Tunables are the PW_* constants right below. Colour palettes: scripts/build-pw-biomes.py -> css/latest.css.
+   Tunables are the PW_* constants right below. Colour palettes: scripts/build-pw-biomes.py -> css/theme.css. The way in plays the warped-time transition (js/warp-fx.js);
+   a portal (js/portal.js) is a second way in, always open for a while, that calls pwEnter(x, y, undefined, 'portal').
    ============================================================ */
 const PW_KEY = 'pw';
 const PW_CHANCE = 0.15;                       // chance a newly splashed puddle is a way in
@@ -262,7 +263,7 @@ function pwMaybeEnter(x, y) {
   if (!pwCanStart() || Math.random() >= PW_CHANCE) return;
   setTimeout(() => { if (pwCanStart()) pwEnter(x, y); }, 520);   // let the splash play first
 }
-function pwEnter(x, y, forceKind) {
+function pwEnter(x, y, forceKind, via) {   // via: 'portal' (js/portal.js) changes the words, nothing else
   const w = pwNewWorld(forceKind); w.origin = { district: state.currentDistrict, x: x == null ? state.playerPos.x : x, y: y == null ? state.playerPos.y : y };
   w.map = pwGenerate(w);
   state.progress.puddleWorld = w; state.progress.pwLast = { biome: w.biome, shape: w.shape, kind: w.kind };
@@ -271,14 +272,18 @@ function pwEnter(x, y, forceKind) {
     cancelWalk();
     state.currentDistrict = PW_KEY; state.playerPos = Object.assign({}, getMap(PW_KEY).spawn);
     pwBuildData(); townBuiltFor = null; const k = pwKind(w); if (k.enter) k.enter(w);
-    bumpStat('puddleWorlds', 1); saveState(); renderTown(); if (typeof renderDistricts === 'function') renderDistricts(); switchTab('town');
-    townLog.textContent = `The puddle swallows you. ${w.sub}`;
-    toast(`🌀 You fell into the ${w.name}. ${w.intro || ''}`);
-    logEvent('🌀', `Fell through a puddle into the ${w.name}.`); if (typeof teleInc === 'function') teleInc('puddleWorld.kind.' + w.kind);
+    if (via !== 'portal') bumpStat('puddleWorlds', 1);   // a portal counts as portalsEntered instead (below)
+    saveState(); renderTown(); if (typeof renderDistricts === 'function') renderDistricts(); switchTab('town');
+    const portal = via === 'portal';
+    townLog.textContent = portal ? `The portal folds around you. ${w.sub}` : `The puddle swallows you. ${w.sub}`;
+    toast(`🌀 ${portal ? 'The portal carried you into' : 'You fell into'} the ${w.name}. ${w.intro || ''}`);
+    logEvent('🌀', portal ? `Stepped through a portal into the ${w.name}.` : `Fell through a puddle into the ${w.name}.`); if (typeof teleInc === 'function') teleInc('puddleWorld.kind.' + w.kind);
+    if (portal) { bumpStat('portalsEntered', 1); if (typeof teleInc === 'function') teleInc('puddleWorld.portal'); }
     if (typeof teleInc === 'function') teleInc('puddleWorld.entered');
     pwUpdatePill(); showTipOnce('puddleworld'); sfx('claim'); buzz(HAP.tap);
   };
-  withTravelTransition(PW_KEY, go, { sub: w.sub, icon: '🌀' });
+  // Warped time (js/warp-fx.js) on the way in; the plain fade if that file is missing.
+  (typeof warpTransition === 'function' ? warpTransition : withTravelTransition)(PW_KEY, go, { name: w.name, sub: w.sub, icon: '🌀' });
 }
 // The way out: the timer ran down, or the player chose to leave. `quiet` = no transition (used at start-up).
 function pwLeave(why, quiet, after) {   // why: 'faded' (the timer), 'left' (climbed out), 'done' (finished the world's goal); after: runs once she is back

@@ -708,7 +708,14 @@ const SFX = {
   heal:   () => { bell(660, 0, 0.5, 0.028); bell(880, 0.08, 0.6, 0.028); },
   spell:  () => { noiseBurst('bandpass', 2400, 5200, 0.28, 0.05); bell(988, 0.06, 0.8, 0.04); },
   skill:  () => { bell(587, 0, 0.6, 0.045); bell(880, 0.1, 0.9, 0.045); },
-  rankup: () => { [392, 523, 659, 784, 1047, 1319].forEach((f, i) => bell(f, i * 0.09, 1.2, 0.05)); noiseBurst('bandpass', 5600, 3000, 0.8, 0.014, 0.45); }
+  rankup: () => { [392, 523, 659, 784, 1047, 1319].forEach((f, i) => bell(f, i * 0.09, 1.2, 0.05)); noiseBurst('bandpass', 5600, 3000, 0.8, 0.014, 0.45); },
+  // Warped time (build 255, js/warp-fx.js): a tick-tock that speeds up as time bends, a long falling swoop under a rising
+  // whoosh, then two soft bells as the new world settles. Timed to the 0.9 s twist-in.
+  warp:   () => {
+    [0, 0.2, 0.36, 0.49, 0.59, 0.67, 0.73, 0.78, 0.82, 0.85].forEach((t, i) => wood(0.03, i % 2 ? 250 : 320, t));
+    bloop(880, 130, 1.0, 0.03); bloop(587, 88, 1.1, 0.02, 0.06); noiseBurst('bandpass', 500, 3600, 0.9, 0.04);
+    bell(1319, 0.9, 1.4, 0.028); bell(988, 0.98, 1.7, 0.024);
+  }
 };
 function sfx(name) { if (prefs.sound && SFX[name]) { try { SFX[name](); } catch (e) { /* ignore */ } } }
 

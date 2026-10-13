@@ -144,6 +144,7 @@ const GOSSIP_DEEDS = {
   puzzlesSolved:     { did: () => 'cracked the daily puzzle in the Reading Nook' },
   cupTrophies:       { did: () => `won the ${GAME.player.many}’ Cup`, big: true },
   puddleWorlds:      { did: () => 'fell straight through a puddle and came back', big: true },
+  portalsEntered:    { did: () => 'walked into a portal like it was a door', big: true },
   minigameGolds:     { did: () => 'took a gold medal at one of the house games' },
   favours:           { did: n => n > 1 ? `helped ${n} neighbours out` : 'did a neighbour a favour' },
   homeVisitors:      { did: () => 'had a spirit come calling at your cottage' },
