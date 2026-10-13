@@ -7,9 +7,9 @@
    How it fits the rest of the game:
    - One hidden district key, PW_KEY ('pw'). DISTRICTS.pw exists (so every `DISTRICTS[state.currentDistrict].name` still works) but is
      NOT enumerable, so Object.keys(DISTRICTS) - the world map, "visit every district", boss lists - never sees it.
-   - The world itself lives in state.progress.puddleWorld: { seed, name, sub, biome, shape, size, startedAt, endsAt, origin }.
-     The map is rebuilt from the seed by pwMapDef() (getMap in js/maps.js asks for it), so a reload in the middle of a world gives the
-     same map. What you can find lives in state.districtData.pw and is deleted when the world ends.
+   - The world itself lives in state.progress.puddleWorld: { seed, name, sub, biome, shape, size, startedAt, endsAt, origin, map }.
+     The map is generated from the seed once, when the world starts, and stored in the record (map = rows, props, spawn); getMap in
+     js/maps.js asks pwMapDef() for it, so a reload in the middle of a world gives exactly the same map. What you can find lives in state.districtData.pw and is deleted when the world ends.
    - Cards here do not vanish and respawn like the town's (items are `fixed`), the way home is blocked (pwBlocksTravel), and the
      way out is the timer, or tapping it to leave early.
    - Off in Cozy mode (a countdown is exactly the pressure that mode takes away).
@@ -152,8 +152,13 @@ const PW_BUILD = {
     for (let y = spawn.y; y > cy + 3; y--) g[y][spawn.x] = '=';
   }
 };
+// The map of a world is generated once, when it starts, and stored in the world record (w.map: rows, props, spawn). It is NOT rebuilt from
+// the seed on every load: a restart or a reload then always gives exactly the same map, whatever the browser does. pwGenerate is the generator.
 function pwMapDef(w) {
   w = w || pwActive() || { seed: 'none', shape: 'meadow', size: [15, 15] };
+  return w.map || pwGenerate(w);
+}
+function pwGenerate(w) {
   let best = null;
   for (let attempt = 0; attempt < 6 && !best; attempt++) {
     const shape = attempt < 4 ? w.shape : 'meadow';                     // a shape that came out too small falls back to a meadow
@@ -174,7 +179,9 @@ function pwMapDef(w) {
     const props = [], cand = [];
     for (let y = 2; y < H - 2; y++) for (let x = 2; x < W - 2; x++) if ('.,'.includes(g[y][x]) && seen.has(x + ',' + y) && Math.abs(x - spawn.x) + Math.abs(y - spawn.y) > 3
       && ![[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => g[y + dy][x + dx] === 'b')) cand.push({ x, y });
-    const kinds = Object.keys(PW_PROPS).sort(() => rnd() - 0.5).slice(0, 2 + Math.floor(rnd() * 2));
+    const kinds = Object.keys(PW_PROPS);   // a seeded Fisher-Yates shuffle (an inconsistent sort comparator is engine-dependent)
+    for (let i = kinds.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [kinds[i], kinds[j]] = [kinds[j], kinds[i]]; }
+    kinds.length = 2 + Math.floor(rnd() * 2);
     kinds.forEach((type, i) => {
       for (let t = 0; t < 40 && cand.length; t++) {
         const c = cand[Math.floor(rnd() * cand.length)];
@@ -218,6 +225,7 @@ function pwMaybeEnter(x, y) {
 }
 function pwEnter(x, y) {
   const w = pwNewWorld(); w.origin = { district: state.currentDistrict, x: x == null ? state.playerPos.x : x, y: y == null ? state.playerPos.y : y };
+  w.map = pwGenerate(w);
   state.progress.puddleWorld = w; state.progress.pwLast = { biome: w.biome, shape: w.shape };
   pwApply(w);
   const go = () => {

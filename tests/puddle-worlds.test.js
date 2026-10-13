@@ -8,14 +8,13 @@ module.exports = async (page, assert) => {
   assert.deepStrictEqual(hid.keys, ['square', 'market', 'harbor', 'garden'], 'the four real districts only');
   assert.ok(hid.has && !hid.listed && hid.values === 4, 'DISTRICTS.pw can be looked up but is not enumerable');
 
-  // ---- 2. maps: every shape, size and seed is a connected, walkable, deterministic world; different seeds differ ----
+  // ---- 2. maps: every shape, size and seed is a connected, walkable world; different seeds differ (a world's map is stored, so it need not be reproducible) ----
   const maps = await page.evaluate(() => {
     const bad = [], sigs = {}, sizes = [[15, 15], [17, 17], [19, 19], [15, 19], [19, 15]];
     for (const shape of Object.keys(PW_SHAPES)) {
       sigs[shape] = new Set();
       for (let i = 0; i < 12; i++) for (const size of sizes) {
-        const w = { seed: 't' + i, shape, size }, m = pwMapDef(w), again = pwMapDef(w), tag = `${shape}/${i}/${size}`;
-        if (m.rows.join('') !== again.rows.join('')) bad.push(tag + ' not deterministic');
+        const w = { seed: 't' + i, shape, size }, m = pwGenerate(w), tag = `${shape}/${i}/${size}`;
         if (m.rows.length !== size[1] || m.rows.some(r => r.length !== size[0])) bad.push(tag + ' wrong size');
         const open = (x, y) => !SOLID_TERRAIN.includes(m.rows[y][x]);
         if (!open(m.spawn.x, m.spawn.y)) bad.push(tag + ' spawn blocked');
@@ -83,6 +82,9 @@ module.exports = async (page, assert) => {
   assert.ok(inside.pill && /^\d:\d\d$/.test(inside.time), 'the countdown shows in the top bar: ' + inside.time);
   assert.strictEqual(inside.stat, 1, 'counted'); assert.ok(/fell through a puddle/i.test(inside.log), 'and written in the Journal log');
   assert.ok(!inside.listed && !inside.visited, 'it never becomes a visited district');
+  const stored = await page.evaluate(() => { const w = pwActive(), rows = getMap('pw').rows.join('/'); const same = w.map.rows.join('/') === rows;
+    w.seed = 'a-different-seed'; delete MAP_CACHE.pw; return { same, afterSeedChange: getMap('pw').rows.join('/') === rows, props: w.map.props.length === getMap('pw').props.length }; });
+  assert.ok(stored.same && stored.afterSeedChange && stored.props, 'the map is stored with the world: it does not depend on regenerating it: ' + JSON.stringify(stored));
 
   // ---- 5. inside: no leaving by the map, no new world on top, cards stay put ----
   const rules = await page.evaluate(() => {
