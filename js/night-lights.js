@@ -2,7 +2,7 @@
    NIGHT LIGHTS (a light map for the town)
    Night used to be one dark overlay (.town-sky, above the entities) with a single soft hole cut around the player. Now lit lamps, the
    Lantern Market owl and every building's window also cut warm holes in it, so the town reads as lit from several places instead of dim
-   with one torch. Prototype: pixi-fx-lab.html ("Night lights", where the darkness is a Pixi light map).
+   with one torch. Prototype: labs/pixi-fx-lab.html ("Night lights", where the darkness is a Pixi light map).
    How it works (and why it is a 2D canvas and not Pixi):
    - The entities are DOM and .town-sky is a DOM layer ABOVE them, so a canvas INSIDE .town-sky darkens them too. A WebGL layer behind them
      could not.

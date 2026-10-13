@@ -9,7 +9,7 @@
    keyword's icon text gets invisible marker characters appended, which this layer recognises.
    Two sources of replacements:
      ICON_ART / KW_ART below   the approved, committed ones (id -> file path). Empty until art is approved.
-     the Asset Lab preview     asset-lab.html can store a preview pack in this browser's localStorage ('tr-icon-preview'); while it is switched on,
+     the Asset Lab preview     labs/asset-lab.html can store a preview pack in this browser's localStorage ('tr-icon-preview'); while it is switched on,
                                the game uses it and shows an "Icon preview" pill with an Exit button. Only affects the browser that made it.
    ============================================================ */
 (function () {

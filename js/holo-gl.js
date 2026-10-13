@@ -2,7 +2,7 @@
    HOLO FOIL SHADER (PixiJS)
    The real-shader version of the foil in js/holo-foil.js. A Pixi canvas is laid over the revealed card, inside its face, and a
    fragment shader paints the foil on it: a rainbow that slides with the light, a diagonal sweep, a soft glare under the finger and
-   twinkling sparkles, stronger for each rarity step. Prototype: pixi-fx-lab.html ("Holo card").
+   twinkling sparkles, stronger for each rarity step. Prototype: labs/pixi-fx-lab.html ("Holo card").
    - The card itself is DOM, so the shader cannot touch its pixels; it draws a semi-transparent layer ABOVE the card. It uses plain alpha
      compositing (no CSS blend modes, which HANDOFF section 9 warns tear on phones).
    - It is driven by the same two custom properties as the CSS foil, --hx / --hy on the card face (read every frame from the computed style,

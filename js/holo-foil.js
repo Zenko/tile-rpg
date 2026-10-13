@@ -1,7 +1,7 @@
 /* =====================================================================================================================
    HOLO FOIL (CSS) for the card reveal / Card Details popup
    Ultra, Super, Mythic, Divine and Atlas cards get a rainbow foil that follows the finger (or sweeps on its own), a bright glare under it,
-   sparkles from Super up, and the whole card tilts a few degrees toward the touch. Prototype: pixi-fx-lab.html ("Holo card"); this is the
+   sparkles from Super up, and the whole card tilts a few degrees toward the touch. Prototype: labs/pixi-fx-lab.html ("Holo card"); this is the
    same look done in CSS, because a shader cannot paint on a DOM card.
    How it works: showCardReveal calls holoApply(face, tier), which adds .holo + .h<tier> to the card and three empty overlay spans (.holo-foil,
    .holo-glare, .holo-spark). The look is driven by two custom properties on the card, --hx and --hy (the light position, percent): the foil

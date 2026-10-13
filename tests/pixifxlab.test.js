@@ -1,10 +1,10 @@
-// pixi-fx-lab.html boots, builds all three prototypes (holo card, night lights + water, battle hit), survives a strike and a dissolve, and keeps its particle list drained. Skips itself when the machine has no WebGL.
+// labs/pixi-fx-lab.html boots, builds all three prototypes (holo card, night lights + water, battle hit), survives a strike and a dissolve, and keeps its particle list drained. Skips itself when the machine has no WebGL.
 const path = require('path');
 module.exports = async (page, assert) => {
   const lab = await page.context().newPage(), errors = [];
   lab.on('pageerror', e => errors.push(e.message));
   try {
-    await lab.goto('file://' + path.resolve(__dirname, '..', 'pixi-fx-lab.html'));
+    await lab.goto('file://' + path.resolve(__dirname, '..', 'labs/pixi-fx-lab.html'));
     await lab.waitForFunction(() => (window.__fx && window.__fx.ready) || getComputedStyle(document.getElementById('fxErr')).display !== 'none', null, { timeout: 30000 });
     if (await lab.evaluate(() => !window.__fx)) { console.log('      (no WebGL here: pixi fx lab test skipped)'); return; }
     for (const r of ['common', 'rare', 'ultra', 'super', 'mythic']) await lab.evaluate(r => __fx.setCardRarity(r), r);

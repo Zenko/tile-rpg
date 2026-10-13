@@ -2,6 +2,7 @@
 <html lang="en" class="sg-html">
 <head>
 <meta charset="UTF-8">
+<base href="../">   <!-- labs/ pages resolve every path from the repo root, as when they lived there -->
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tile RPG Asset Lab</title>
 <!-- Asset Lab: a sandbox for trying new art against the real game. It loads the game's own stylesheets, sprites and card data,
@@ -72,7 +73,7 @@ html.lab-noshadow .card-art-img, html.lab-noshadow .art-shadow, html.lab-noshado
 
 <header class="lab-top"><div class="lab-top-in">
   <div class="lab-brand">Asset Lab</div>
-  <nav class="lab-nav"><a href="#library">Library</a><a href="#card">One card</a><a href="#screens">In the game</a><a href="#set">Whole set</a><a href="#keywords">Keyword icons</a><a href="#icons">All icons</a><a href="#town">Town sprites</a><a href="#other">Portraits &amp; icon</a><a href="#export">Hand-off</a></nav>
+  <nav class="lab-nav"><a href="labs/asset-lab.html#library">Library</a><a href="labs/asset-lab.html#card">One card</a><a href="labs/asset-lab.html#screens">In the game</a><a href="labs/asset-lab.html#set">Whole set</a><a href="labs/asset-lab.html#keywords">Keyword icons</a><a href="labs/asset-lab.html#icons">All icons</a><a href="labs/asset-lab.html#town">Town sprites</a><a href="labs/asset-lab.html#other">Portraits &amp; icon</a><a href="labs/asset-lab.html#export">Hand-off</a></nav>
   <span class="lab-seg" id="shSeg" role="group" aria-label="Game drop shadow on art" title="The game adds a faint drop shadow to card art. Switch it off to see the raw art."><button id="shOn" class="on" type="button">Shadow on</button><button id="shOff" type="button">Off</button></span>
   <span class="lab-seg" id="themeSeg" role="group" aria-label="Preview theme"><button id="thDark" class="on" type="button">Dark</button><button id="thLight" type="button">Light</button></span>
 </div></header>

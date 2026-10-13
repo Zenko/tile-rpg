@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* Town map frame-time benchmark. Usage: node scripts/perf-town.js [--renderer=dom|canvas|pixi] [--seconds=8] [--map=square|big200]
-   (--renderer=pixi runs pixi-lab.html with auto-walk instead of the game, with --map choosing its map; the lab is software-rendered WebGL here)
+   (--renderer=pixi runs labs/pixi-lab.html with auto-walk instead of the game, with --map choosing its map; the lab is software-rendered WebGL here)
    Walks the player back and forth across Town Square while sampling requestAnimationFrame gaps, under a few weather
    and CPU-throttle combinations (CPU throttling is a rough stand-in for a mid-range phone: headless desktop Chromium
    alone says little about a real device). Prints p50/p95/max frame gap, dropped-frame share and DOM size.
@@ -29,7 +29,7 @@ const CASES = ALL_CASES.filter(c => !ONLY || (c.name + ' ' + c.cpu + 'x').includ
     const ctx = await browser.newContext({ viewport: { width: 400, height: 860 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true });
     const page = await ctx.newPage();
     page.on('dialog', d => d.accept().catch(() => {}));
-    if (RENDERER === 'pixi') await page.goto('file://' + path.resolve(__dirname, '..', 'pixi-lab.html') + `?panel=0&auto=1&map=${MAP}&weather=${c.weather}&time=${c.sky ? 'day' : 'night'}`);
+    if (RENDERER === 'pixi') await page.goto('file://' + path.resolve(__dirname, '..', 'labs/pixi-lab.html') + `?panel=0&auto=1&map=${MAP}&weather=${c.weather}&time=${c.sky ? 'day' : 'night'}`);
     else await page.goto('file://' + path.resolve(__dirname, '..', 'index.html') + (RENDERER ? '?renderer=' + RENDERER : ''));
     if (RENDERER === 'pixi') await page.waitForFunction(() => window.__lab && window.__lab.ready);
     await page.waitForTimeout(800);

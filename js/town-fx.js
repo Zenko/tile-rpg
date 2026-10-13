@@ -2,7 +2,7 @@
    TOWN EFFECTS ON WEBGL (PixiJS)
    Light and particles in the town that the DOM cannot do cheaply, drawn in the town's own Pixi scene (js/town-gl.js) in a layer above the
    ground and trees. The layer is in WORLD units (64 per tile) inside the Pixi world, so everything scrolls with the map and scales with the
-   camera for free. Prototype of the particles: pixi-lab.html ("Particle effects").
+   camera for free. Prototype of the particles: labs/pixi-lab.html ("Particle effects").
    - Fireflies at night (replaces the old screen-space DOM fireflies in js/player-fx.js, which now hide while this is drawing).
    - Leaves by day, coloured by season (green, pink petals in spring, orange and gold in autumn, none in winter), also replacing the DOM ones.
    - Embers rising from every lit lamp at night.

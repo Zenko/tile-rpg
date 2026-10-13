@@ -5,7 +5,7 @@
    does not replace them: slashes, shields, floaters, vignettes, shakes and the spell orb flight are untouched, and `btImpact` (the old DOM
    sparks) is what runs whenever this file returns false.
    The hit flash is a white additive rounded rectangle sized to the card or bar that was hit (a 'rect' particle with w / h stretch), drawn for 0.2 s.
-   Prototype and the full effect set: pixi-fx-lab.html (battle hit) and pixi-lab.html (particle effects).
+   Prototype and the full effect set: labs/pixi-fx-lab.html (battle hit) and labs/pixi-lab.html (particle effects).
    Rules:
    - Lazy and cheap. PixiJS is created by bfxWarm() when a battle starts (it needs the async vendor script), has NO ticker, and renders only
      from its own requestAnimationFrame loop while particles are alive, so an idle battle costs nothing.

@@ -262,7 +262,7 @@ function renderTalkBody() {
     e.main.classList.add('hidden');
   }
 }
-/* The neighbour screen (build 208; prototype: npc-screen-variants-lab.html, option B). The card takes over the screen: the
+/* The neighbour screen (build 208; prototype: labs/npc-screen-variants-lab.html, option B). The card takes over the screen: the
    neighbour (their drawn bust when the game has one, else their emoji) stands on a name and hearts bar with the speech bubble
    just above their head, and below it a grid of Chat / Play / Gift cards. A card opens its own list of choices with a Back.
    The live town shows through behind a soft scrim.

@@ -7,7 +7,7 @@
    What stays DOM, on purpose: every entity (player, neighbors, boss, cards, spirits, crops, decorations, companion, props, birds...),
    the buildings (.bld), the sky/vignette/weather layers and all the tap / look-around logic. They carry a lot of per-kind CSS and
    behaviour in other files, and there are only a few dozen of them.
-   How it fits together (see pixi-lab.html for the same drawing code in a standalone page):
+   How it fits together (see labs/pixi-lab.html for the same drawing code in a standalone page):
    - Ground tiles are drawn ONCE by Canvas2D into one atlas texture (3 grass tones, 16 path and 16 water edge masks) so they batch into one
      draw call. Sprites are the game's own SVG <symbol>s with their var(--token) colours replaced by the values computed on #townView for
      the current biome, season and theme, rasterised once. A change of any of those (a MutationObserver watches them) rebuilds the textures.

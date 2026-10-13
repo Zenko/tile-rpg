@@ -1,10 +1,10 @@
-// pixi-lab.html boots, draws the real town, switches maps, and keeps the scene small on a huge map. Skips itself when the machine has no WebGL.
+// labs/pixi-lab.html boots, draws the real town, switches maps, and keeps the scene small on a huge map. Skips itself when the machine has no WebGL.
 const path = require('path');
 module.exports = async (page, assert) => {
   const lab = await page.context().newPage(), errors = [];
   lab.on('pageerror', e => errors.push(e.message));
   try {
-    await lab.goto('file://' + path.resolve(__dirname, '..', 'pixi-lab.html') + '?panel=0&npcs=6');
+    await lab.goto('file://' + path.resolve(__dirname, '..', 'labs/pixi-lab.html') + '?panel=0&npcs=6');
     await lab.waitForFunction(() => (window.__lab && window.__lab.ready) || getComputedStyle(document.getElementById('plErr')).display !== 'none', null, { timeout: 30000 });
     if (await lab.evaluate(() => !window.__lab)) { console.log('      (no WebGL here: pixi lab test skipped)'); return; }
     const small = await lab.evaluate(() => ({ w: __lab.S.map.w, h: __lab.S.map.h, scene: __lab.app.stage.children.length, objs: __lab.world.children[1].children.length, ground: __lab.world.children[0].children.length }));

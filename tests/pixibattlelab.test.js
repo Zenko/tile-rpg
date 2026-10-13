@@ -1,4 +1,4 @@
-// pixi-battle-lab.html (options A and B for the battle screen) boots, plays an attack in beats for every family, knocks a card out, and drains its particles. Skips itself when there is no WebGL.
+// labs/pixi-battle-lab.html (options A and B for the battle screen) boots, plays an attack in beats for every family, knocks a card out, and drains its particles. Skips itself when there is no WebGL.
 const path = require('path');
 module.exports = async (page, assert) => {
   const lab = await page.context().newPage(), errors = [];
@@ -6,7 +6,7 @@ module.exports = async (page, assert) => {
   lab.on('console', m => m.type() === 'error' && !/gstatic|googleapis|fonts|ERR_|Failed to load resource/.test(m.text()) && errors.push(m.text()));
   try {
     await lab.setViewportSize({ width: 400, height: 860 });
-    await lab.goto('file://' + path.resolve(__dirname, '..', 'pixi-battle-lab.html'));
+    await lab.goto('file://' + path.resolve(__dirname, '..', 'labs/pixi-battle-lab.html'));
     await lab.waitForFunction(() => (window.__bl && window.__bl.ready) || getComputedStyle(document.getElementById('err')).display !== 'none', null, { timeout: 30000 });
     if (await lab.evaluate(() => !window.__bl)) { console.log('      (no WebGL here: pixi battle lab test skipped)'); return; }
     for (let i = 0; i < 4; i++) {   // one attacker per family (grove, stone, tide, wind), each into a different target
