@@ -10,6 +10,9 @@ module.exports = async (page, assert) => {
     Object.assign(GAME.player, { one: 'Zedwalker', many: 'Zedwalkers', lower: 'zedwalker', lowerMany: 'zedwalkers' });
     [PLACES, BOSSES, FAMILY_NAMES].forEach((o, i) => Object.keys(o).forEach(k => { o[k] = 'Zed' + ['place', 'boss', 'family'][i] + k; }));
     Object.keys(CAST).forEach(k => { CAST[k].name = 'Zed' + k; CAST[k].icon = '🦄'; });`;
+  // Neighbours already in a save keep the names they were given (that is save data, not text): start the town over, as a
+  // reskin with a fresh STORAGE_KEY would.
+  await page.evaluate(() => { state.districtData = {}; saveState(); });
   await page.route('**/js/game-config.js', r => r.fulfill({ contentType: 'application/javascript', body: src }));
   await page.reload(); await page.waitForTimeout(800);
   const oldRe = new RegExp('(?<![A-Za-z])(' + old.map(s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')(?![A-Za-zñ])');
