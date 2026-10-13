@@ -392,6 +392,7 @@ function syncToggles() {
   document.getElementById('charFxToggle').classList.toggle('on', prefs.charFx !== false);
   document.getElementById('bigTextToggle').classList.toggle('on', !!prefs.bigText);
   document.getElementById('notifsToggle').classList.toggle('on', notifsEnabled());
+  document.getElementById('weatherAlertsToggle').classList.toggle('on', notifsEnabled('weatherAlerts'));
   document.getElementById('presenceToggle').classList.toggle('on', !!prefs.sharePresence);
   document.getElementById('shareDeckToggle').classList.toggle('on', prefs.shareDeck !== false);
   document.getElementById('statsToggle').classList.toggle('on', prefs.shareStats !== false);

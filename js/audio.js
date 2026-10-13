@@ -1,7 +1,7 @@
 /* ============================================================
    PREFS, SOUND, HAPTICS, TOAST
    ============================================================ */
-let prefs = { sound: true, haptics: true, music: true, musicVol: 0.5, sfxVol: 0.7, notifs: false, sharePresence: true, presenceChosen: false, ambient: true, theme: 'dark' };   // sound = master mute for everything; notifs default off (needs a permission grant); sharePresence defaults ON until the player toggles it (presenceChosen)
+let prefs = { sound: true, haptics: true, music: true, musicVol: 0.5, sfxVol: 0.7, notifs: false, weatherAlerts: false, sharePresence: true, presenceChosen: false, ambient: true, theme: 'dark' };   // sound = master mute for everything; notifs default off (needs a permission grant); sharePresence defaults ON until the player toggles it (presenceChosen)
 try { const pr = JSON.parse(localStorage.getItem(PREFS_KEY) || 'null'); if (pr) prefs = Object.assign(prefs, pr); } catch (e) { /* ignore */ }
 // An older save stored the old default (off) without the player ever choosing it, so treat that as "not chosen yet" and use the new default.
 if (!prefs.presenceChosen) prefs.sharePresence = true;
@@ -35,15 +35,15 @@ function savePrefs() { try { localStorage.setItem(PREFS_KEY, JSON.stringify(pref
    other two. This needs no push infrastructure since it only ever fires from code already running in this
    tab - a genuinely closed/killed app still won't notify, same as any other client-only PWA feature.
    ============================================================ */
-function notifsEnabled() { return !!prefs.notifs && 'Notification' in window && Notification.permission === 'granted'; }
+function notifsEnabled(pref = 'notifs') { return !!prefs[pref] && 'Notification' in window && Notification.permission === 'granted'; }   // pref: 'notifs' (bread, boss) or 'weatherAlerts'
 async function requestNotifPermission() {
   if (!('Notification' in window)) { toast("This browser can't show notifications"); return false; }
   if (Notification.permission === 'granted') return true;
   if (Notification.permission === 'denied') { toast('Notifications are blocked - check your browser/site settings'); return false; }
   try { return (await Notification.requestPermission()) === 'granted'; } catch (e) { return false; }
 }
-function localNotify(title, body, tag) {
-  if (!notifsEnabled() || document.visibilityState === 'visible') return;   // already looking at it - no need to nag
+function localNotify(title, body, tag, pref = 'notifs') {
+  if (!notifsEnabled(pref) || document.visibilityState === 'visible') return;   // already looking at it - no need to nag
   try {
     if (navigator.serviceWorker && navigator.serviceWorker.ready) {
       navigator.serviceWorker.ready.then(reg => reg.showNotification(title, { body, tag, icon: 'assets/icon-192.png', badge: 'assets/icon-192.png' })).catch(() => {});

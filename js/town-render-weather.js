@@ -375,6 +375,34 @@ function tickSkyAndWeather() {
   syncWeatherAudio();   // cheap re-check: catches battle/scene entry+exit without hooking every transition
   if (++skyTicks % 6 === 0) saveState();   // persist the clock every ~30s so a refresh doesn't lose time-of-day
 }
+/* WEATHER ALERTS (setting "Weather alerts"). The weather clock is play time: advanceClock() ignores hidden time, so with the game in the
+   background nothing would ever change to tell the player about. While the alerts are on and the page is hidden, the weather clock
+   keeps running here instead (state.weather.elapsed only, the sky stays put), one timer set for the next change; each change shows a
+   local notification (localNotify, like bread and the boss - it cannot wake an app the phone has fully closed). Hidden time is capped
+   so a long freeze does not skip the weather ahead by hours. With the setting off nothing here runs and weather stays play time. */
+const WEATHER_AWAY_CAP_MS = 2 * 60 * 60 * 1000;
+let weatherAwayAt = 0, weatherAwayTimer = 0;
+function weatherAwayStop() { clearTimeout(weatherAwayTimer); weatherAwayTimer = 0; }
+function weatherAwayArm() {
+  weatherAwayStop();
+  if (!document.hidden || !notifsEnabled('weatherAlerts') || !state.weather) return;
+  const left = (state.weather.changesAt || 0) - (state.weather.elapsed || 0);
+  weatherAwayTimer = setTimeout(weatherAwayStep, Math.min(10 * 60 * 1000, Math.max(5000, left + 250)));
+}
+function weatherAwayStep() {
+  weatherAwayTimer = 0;
+  if (!document.hidden || !notifsEnabled('weatherAlerts')) return;
+  const now = Date.now(), prev = state.weather.current;
+  state.weather.elapsed = (state.weather.elapsed || 0) + Math.min(WEATHER_AWAY_CAP_MS, Math.max(0, now - weatherAwayAt)); weatherAwayAt = now;
+  maybeRollWeather();
+  if (state.weather.current !== prev) {
+    const k = WEATHER_KINDS[weatherNow()], fx = WEATHER_EFFECTS[weatherNow()];
+    localNotify(`${k.icon || '☀️'} ${k.name}`, `${WEATHER_LOG[state.weather.current]}${fx ? ' ' + fx.short + '.' : ''}`, 'weather', 'weatherAlerts');
+    saveState();
+  }
+  weatherAwayArm();
+}
+document.addEventListener('visibilitychange', () => { if (document.hidden) { weatherAwayAt = Date.now(); weatherAwayArm(); } else weatherAwayStop(); });
 setInterval(() => { if (!document.hidden) tickSkyAndWeather(); }, 5000);   // a hidden tab has nothing to draw or hear, and advanceClock ignores hidden time anyway
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { state.sky.lastTickAt = Date.now(); tickSkyAndWeather(); } });   // catch up the moment the tab is back
 

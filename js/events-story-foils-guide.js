@@ -313,6 +313,13 @@ document.getElementById('notifsToggle').addEventListener('click', async () => {
   toast('🔔 Notifications on');
   scheduleAllPendingNotifs();
 });
+document.getElementById('weatherAlertsToggle').addEventListener('click', async () => {
+  sfx('tap');
+  if (prefs.weatherAlerts) { prefs.weatherAlerts = false; savePrefs(); syncToggles(); weatherAwayStop(); return; }
+  if (!(await requestNotifPermission())) { syncToggles(); return; }
+  prefs.weatherAlerts = true; savePrefs(); syncToggles();
+  toast('🌦️ Weather alerts on');
+});
 document.getElementById('presenceToggle').addEventListener('click', () => {
   sfx('tap');
   prefs.sharePresence = !prefs.sharePresence; prefs.presenceChosen = true; savePrefs(); syncToggles();

@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'new', x: 'Weather alerts. A new switch in Settings, under Notify me, sends a notification when the weather turns while the game is in the background ("Moonrain starts to fall" and what it changes). With it on, the weather keeps moving while you are away; with it off, weather still only moves while you play. Like the bread and boss notifications, it cannot wake an app your phone has fully closed.' },
 ];
 
 const RELEASES = [
