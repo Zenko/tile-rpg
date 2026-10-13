@@ -1,0 +1,1401 @@
+/* css/theme.css - EVERY COLOUR IN THE GAME.
+   The one stylesheet to edit for a new look (HANDOFF section 5, "Reskinning"). Loaded first; the other six files in css/
+   only read these variables, and scripts/check.py fails if a hex colour or a colour variable is written anywhere else.
+
+   Two layers, the same idea as primitives and semantic variables in Figma:
+   1. PALETTE - plain colours used straight by a rule (`border-color: var(--c-amber-62)`), one per colour, named by hue and
+      lightness. Changing one changes every rule that uses it.
+   2. THEME TOKENS - the meaningful names (`--accent`, `--ink`, `--stone`, rarity colours, biome and building palettes)
+      and their light-theme and per-screen versions. The dark theme is the bare :root (also the fallback); the light
+      theme is :root[data-theme="light"]. (Fonts are not colours: --f-display / --f-ui stay at the top of css/base.css.)
+
+   Colours drawn by scripts (canvas weather, the WebGL town and effects, card art SVGs) are not CSS and are not here:
+   see the "Colours outside CSS" note in HANDOFF section 5. */
+
+/* ============================================================
+   1. PALETTE
+   ============================================================
+   Colours that rules use directly (`color: var(--c-amber-62)`). Named by hue and HSL lightness (0 = black, 100 = white;
+   -aNN = NN% opacity), so a name says roughly what the colour is, not where it is used. Change a value here and every
+   rule using it follows. Same in both themes: for a colour that should differ between light and dark, use or add a
+   token in section 2 instead. */
+:root {
+  /* grey */
+  --c-grey-100: #ffffff;
+  --c-grey-96: #f2f7fa;
+  --c-grey-96-2: #fbf8ef;
+  --c-grey-93: #e9edf1;
+  --c-grey-92: #e3f0ec;
+  --c-grey-89: #dcebe0;
+  --c-grey-82: #c9d2da;
+  --c-grey-53: #888888;
+  --c-grey-46: #6c7d79;
+  --c-grey-21: #2c3d3b;
+  --c-grey-20-5: #3b2b2f;
+  --c-grey-20-2: #2b3a35;
+  --c-grey-20-3: #3a2c2b;
+  --c-grey-20: #2a3a36;
+  --c-grey-20-4: #2a3a30;
+  --c-grey-18: #292535;
+  --c-grey-17: #232b34;
+  --c-grey-16: #2a2330;
+  --c-grey-14: #1d2a2c;
+  --c-grey-14-3: #2a1f21;
+  --c-grey-14-4: #2a1f25;
+  --c-grey-14-2: #1c2a24;
+  --c-grey-14-5: #1f2326;
+  --c-grey-13-3: #222222;
+  --c-grey-13: #1b2128;
+  --c-grey-13-2: #1e1b28;
+  --c-grey-13-a80: #1e1b28cc;
+  --c-grey-12-2: #1d1b24;
+  --c-grey-12: #1a2420;
+  --c-grey-12-3: #241a1e;
+  --c-grey-11: #1a1f1c;
+  --c-grey-10: #1f1a14;
+  --c-grey-9: #1b1417;
+  --c-grey-9-3: #12161b;
+  --c-grey-9-2: #14121a;
+  --c-grey-7-3: #17130f;
+  --c-grey-7: #0f1412;
+  --c-grey-7-2: #0a1418;
+  --c-grey-6-2: #0d160b;
+  --c-grey-6: #14100b;
+  --c-grey-6-3: #120d10;
+  --c-grey-6-4: #0e0c13;
+  --c-grey-6-a0: #0e0c1300;
+  --c-grey-5-2: #0b0a10;
+  --c-grey-5-a0: #0b0a1000;
+  --c-grey-5-a93: #0b0a10ee;
+  --c-grey-5-a94: #0b0a10f0;
+  --c-grey-5: #0d0a0c;
+  --c-grey-0: #000000;
+  --c-grey-0-a67: #000000aa;
+  /* red */
+  --c-red-90: #f3d9d6;
+  --c-red-82: #ffb4a3;
+  --c-red-81: #f0b4ae;
+  --c-red-76: #e0a8a3;
+  --c-red-70: #e08c84;
+  --c-red-68: #ff7a5a;
+  --c-red-66: #e86a6a;
+  --c-red-65: #e0776a;
+  --c-red-61: #c96f6f;
+  --c-red-60: #d8685c;
+  --c-red-56: #c26a5a;
+  --c-red-55: #e0493a;
+  --c-red-54: #c8534a;
+  --c-red-50: #ff0000;
+  --c-red-48: #a8504b;
+  --c-red-46: #b1423b;
+  --c-red-37: #8a3a34;
+  --c-red-33: #86222f;
+  --c-red-18: #4b1119;
+  /* orange */
+  --c-orange-92: #ffe1d6;
+  --c-orange-77: #e6b9a3;
+  --c-orange-77-2: #ffc78a;
+  --c-orange-75: #eea590;
+  --c-orange-74: #ff9a7a;
+  --c-orange-72: #e0a58f;
+  --c-orange-66: #ffb454;
+  --c-orange-66-a27: #ffb45444;
+  --c-orange-66-a40: #ffb45466;
+  --c-orange-66-a67: #ffb454aa;
+  --c-orange-66-a80: #ffb454cc;
+  --c-orange-63: #d9a066;
+  --c-orange-58: #b49a76;
+  --c-orange-58-2: #ff9a2a;
+  --c-orange-55-2: #ff7a1a;
+  --c-orange-55: #d98a3d;
+  --c-orange-52: #c8893f;
+  --c-orange-50: #b98547;
+  --c-orange-45: #b06a35;
+  --c-orange-44: #a8683a;
+  --c-orange-41: #7b6a55;
+  --c-orange-40: #a36a2a;
+  --c-orange-35: #7a5a3a;
+  --c-orange-31: #6b4f33;
+  --c-orange-29: #5a4c3c;
+  --c-orange-29-2: #5c4a38;
+  --c-orange-28: #5c4433;
+  --c-orange-26: #5a3f2a;
+  --c-orange-22: #4a3a26;
+  --c-orange-22-2: #46362a;
+  --c-orange-22-3: #4a3826;
+  --c-orange-22-4: #4a3226;
+  --c-orange-21: #4a3623;
+  --c-orange-18: #3a2a22;
+  --c-orange-18-3: #3a2f22;
+  --c-orange-18-2: #3a2d20;
+  --c-orange-15: #3a1a10;
+  --c-orange-13: #2a2118;
+  --c-orange-11: #2a1d0c;
+  --c-orange-9: #2a1a06;
+  /* amber */
+  --c-amber-96: #fffbea;
+  --c-amber-95: #fff8e3;
+  --c-amber-92: #fbf3dc;
+  --c-amber-92-2: #fff6d8;
+  --c-amber-92-3: #fff1d6;
+  --c-amber-90: #f0eadc;
+  --c-amber-89: #f4e8d0;
+  --c-amber-88-3: #fff3c4;
+  --c-amber-88-2: #efe8d2;
+  --c-amber-88: #f0e6cf;
+  --c-amber-86: #e8dfd0;
+  --c-amber-86-2: #fff3b8;
+  --c-amber-85: #e9dfc8;
+  --c-amber-85-2: #ffe9b0;
+  --c-amber-84: #e3ddcb;
+  --c-amber-83: #ffe9a8;
+  --c-amber-83-3: #f6e6b0;
+  --c-amber-83-2: #e8d9bd;
+  --c-amber-82: #ddd6c5;
+  --c-amber-82-2: #eadcb6;
+  --c-amber-81: #f6e3a8;
+  --c-amber-79-2: #d8d1bd;
+  --c-amber-79: #f6dc9c;
+  --c-amber-78: #d3ccba;
+  --c-amber-78-2: #e9d9a3;
+  --c-amber-77: #ffd98a;
+  --c-amber-77-2: #ffe08a;
+  --c-amber-77-3: #d9ccb0;
+  --c-amber-76: #f0cf94;
+  --c-amber-74: #ffd979;
+  --c-amber-72: #e8cb88;
+  --c-amber-72-2: #f3cf7a;
+  --c-amber-71-2: #f2d479;
+  --c-amber-71-a47: #f2d47977;
+  --c-amber-71-a80: #f2d479cc;
+  --c-amber-71: #cdbf9c;
+  --c-amber-71-3: #ffd96a;
+  --c-amber-70-2: #ffcf66;
+  --c-amber-70: #d9bf8b;
+  --c-amber-69: #ffd35f;
+  --c-amber-68: #f2cf6b;
+  --c-amber-68-3: #ffd25e;
+  --c-amber-68-2: #ffd35a;
+  --c-amber-66-2: #e8c46a;
+  --c-amber-66: #e6c06a;
+  --c-amber-65-3: #f2b45a;
+  --c-amber-65: #f0c05a;
+  --c-amber-65-2: #bfae8a;
+  --c-amber-64: #ffb347;
+  --c-amber-64-2: #b3aa92;
+  --c-amber-62: #b7a785;
+  --c-amber-60: #d9b45a;
+  --c-amber-59: #e2b64c;
+  --c-amber-58: #a89c80;
+  --c-amber-55: #d9a441;
+  --c-amber-55-2: #e0a43a;
+  --c-amber-50: #ffb000;
+  --c-amber-48: #c98a2e;
+  --c-amber-44: #b5832a;
+  --c-amber-32: #5a5547;
+  --c-amber-30: #8a6a10;
+  --c-amber-28: #7a5b17;
+  --c-amber-26: #6a4a1c;
+  --c-amber-26-2: #6a5a1c;
+  --c-amber-22: #453a2a;
+  --c-amber-21: #5a3d12;
+  --c-amber-18: #3a3322;
+  --c-amber-16: #4a3608;
+  --c-amber-16-2: #3a2e18;
+  --c-amber-15-2: #4a2f05;
+  --c-amber-15: #3a2a10;
+  --c-amber-14: #3a2d0e;
+  --c-amber-10: #2e2005;
+  --c-amber-9: #2b1d05;
+  /* yellow */
+  --c-yellow-85: #fff2b0;
+  --c-yellow-50: #ffff00;
+  --c-yellow-9: #2a2406;
+  /* lime */
+  --c-lime-83: #eaffa8;
+  --c-lime-79: #d3dcb8;
+  /* green */
+  --c-green-83: #b9f0c9;
+  --c-green-83-2: #bff0b8;
+  --c-green-72: #8fe0a0;
+  --c-green-72-2: #8de0a0;
+  --c-green-70: #8fd4a3;
+  --c-green-69: #5fffa8;
+  --c-green-66: #9fd67a;
+  --c-green-62: #6fcf86;
+  --c-green-62-2: #7fbf8a;
+  --c-green-59: #86b873;
+  --c-green-57: #5fc58a;
+  --c-green-53: #7fb35a;
+  --c-green-50: #00ff00;
+  --c-green-36: #3f7a52;
+  --c-green-35: #3f7350;
+  --c-green-30: #2d6a4a;
+  --c-green-23: #2f4a2a;
+  --c-green-22: #33422f;
+  --c-green-22-2: #28472f;
+  --c-green-18: #253624;
+  --c-green-15: #1c3324;
+  /* teal */
+  --c-teal-77: #b7d0c8;
+  --c-teal-75: #9be3c4;
+  --c-teal-67: #9fb9b1;
+  --c-teal-34: #2f7f73;
+  --c-teal-22: #2d4338;
+  /* cyan */
+  --c-cyan-88: #cfe9f1;
+  --c-cyan-85: #bfe6f2;
+  --c-cyan-85-2: #c3e6ec;
+  --c-cyan-79: #a8e0ec;
+  --c-cyan-70: #8fc9d6;
+  --c-cyan-69: #8bc4d6;
+  --c-cyan-68: #8fbccb;
+  --c-cyan-67: #8dbccb;
+  --c-cyan-67-2: #8fb8c8;
+  --c-cyan-64: #6fc3d6;
+  --c-cyan-55: #5fa3b8;
+  --c-cyan-50: #4f9db0;
+  --c-cyan-50-2: #00ffff;
+  --c-cyan-50-3: #5d8fa0;
+  --c-cyan-41: #3f7f94;
+  --c-cyan-36: #3b6a7b;
+  --c-cyan-34: #2b6a80;
+  --c-cyan-26: #29505e;
+  --c-cyan-26-2: #24505f;
+  --c-cyan-20: #1f3a46;
+  --c-cyan-20-2: #1f3a45;
+  --c-cyan-19: #16394a;
+  --c-cyan-17: #1f3038;
+  --c-cyan-16: #1f2d33;
+  --c-cyan-15: #1c2a2e;
+  --c-cyan-10: #0f1d24;
+  /* blue */
+  --c-blue-95: #e8f6ff;
+  --c-blue-94: #dfe7ff;
+  --c-blue-94-2: #dfe8ff;
+  --c-blue-93: #d9f2ff;
+  --c-blue-91: #cfd8ff;
+  --c-blue-90: #d8e2f3;
+  --c-blue-88: #cdd8f5;
+  --c-blue-79: #b3c1e0;
+  --c-blue-78: #a8cbe8;
+  --c-blue-75: #7fd2ff;
+  --c-blue-69: #a6b1bb;
+  --c-blue-69-2: #5fc8ff;
+  --c-blue-68: #7a8fe0;
+  --c-blue-67: #8fa4c9;
+  --c-blue-40: #556677;
+  --c-blue-34-2: #35607a;
+  --c-blue-34: #385c76;
+  --c-blue-27: #3a4552;
+  --c-blue-26: #2b3a5a;
+  --c-blue-23: #1c2459;
+  --c-blue-23-2: #26334d;
+  --c-blue-21-2: #2d3440;
+  --c-blue-21: #1b2150;
+  --c-blue-20: #2a323d;
+  --c-blue-18: #1c2740;
+  --c-blue-14: #0f1636;
+  --c-blue-10: #0b1d27;
+  --c-blue-9: #0c1220;
+  /* indigo */
+  --c-indigo-82: #c9bce8;
+  --c-indigo-77: #9b8cff;
+  --c-indigo-74: #a58bf0;
+  --c-indigo-68-2: #7c6cf0;
+  --c-indigo-68: #a8a1b8;
+  --c-indigo-59: #8a7bb0;
+  --c-indigo-56: #8a8498;
+  --c-indigo-50: #0000ff;
+  --c-indigo-38: #5a5470;
+  --c-indigo-33: #4a3f6b;
+  --c-indigo-32: #3b3470;
+  --c-indigo-31: #2c2c74;
+  --c-indigo-29: #3b2a6b;
+  --c-indigo-28: #382c63;
+  --c-indigo-25: #3a3549;
+  --c-indigo-23: #2d2350;
+  --c-indigo-19: #181a4a;
+  --c-indigo-17: #1d1740;
+  --c-indigo-15: #1f1836;
+  --c-indigo-12: #0f1030;
+  --c-indigo-12-2: #171229;
+  --c-indigo-8: #0d0a1f;
+  /* violet */
+  --c-violet-82: #cfc8dc;
+  --c-violet-75: #c28cf0;
+  --c-violet-72: #b48ee0;
+  --c-violet-69: #a85fff;
+  --c-violet-18: #2a2238;
+  --c-violet-15: #25103a;
+  /* purple */
+  --c-purple-66: #c27ad6;
+  --c-purple-50: #ff00ff;
+  /* pink */
+  --c-pink-91: #ffd1e3;
+  --c-pink-85: #f0c4d8;
+  --c-pink-83: #f0b8d8;
+  --c-pink-81: #f6a9c2;
+  --c-pink-80: #f0a8c8;
+  --c-pink-79: #eaa8c4;
+  --c-pink-75: #ff7fae;
+  --c-pink-71: #d98fb5;
+  --c-pink-69: #ff5fa8;
+  --c-pink-62: #c27a9c;
+  --c-pink-24: #46333a;
+}
+
+/* ============================================================
+   2. THEME TOKENS
+   ============================================================
+   Every colour variable the stylesheets read, moved here unchanged from the file named above each group (same
+   selectors, same @media, same order - a later block still overrides an earlier one, exactly as before). The light
+   theme is the :root[data-theme="light"] blocks; biome, building, rarity and battle palettes follow in file order. */
+
+/* ---------------- from css/base.css ---------------- */
+:root, :root[data-theme="light"] .town-map-wrap {
+  --bg-top: #1b2128;
+  --bg-bottom: #12161b;
+  --stone: #232b34;
+  --stone-edge: #333d48;
+  --water: #8dbccb;
+  --water-glow: #a6cfdb;
+  --water-ink: #7fb8c8;          /* sea-glass as readable text */
+  --on-water: #0f2a35;           /* text on a sea-glass fill */
+  --rc-a: #5b9fb2;               /* deeper blue-teal for common-rarity card faces and bars that carry white text */
+  --rc-b: #3f7f94;
+  --ink: #e9edf1;
+  --ink-soft: #a6b1bb;
+  --shadow: rgba(0, 0, 0, 0.35);
+  --overlay-bg: rgba(8, 11, 15, 0.6);
+  --board-bg: rgba(233, 237, 241, 0.06);
+  --hl: #ffffff;                 /* base for faint highlights on chrome (white on dark, ink on light) */
+  --track: rgba(0, 0, 0, 0.3);   /* empty part of a gauge */
+  --accent: #e8cb88;
+  --on-accent: #3a2a08;
+  --rare: #9a86c9;
+  --epic: #6a96c2;
+  --mythic: #c27a9c;
+  --divine: #d9b45a;
+  --atlas: #8f7ad9;
+  --win-glow: #6a9f7c;
+  --lose-glow: #b17a63;
+  --boss-glow: #b1615e;
+}
+:root[data-theme="light"] {
+  --bg-top: #f3ece0;
+  --bg-bottom: #e4eee9;
+  --stone: #fbf7ef;
+  --stone-edge: #ddd6c5;
+  --water: #8fc4b8;
+  --water-glow: #a6d3c9;
+  --water-ink: #3f7f78;
+  --on-water: #1f4540;
+  --rc-a: #5aa397;
+  --rc-b: #3f7f78;
+  --ink: #4b4a46;
+  --ink-soft: #6b6a64;
+  --shadow: rgba(75, 74, 70, 0.2);
+  --overlay-bg: rgba(58, 56, 50, 0.5);
+  --board-bg: rgba(75, 74, 70, 0.05);
+  --hl: #4b4a46;
+  --track: rgba(75, 74, 70, 0.14);
+  --accent: #b5832a;
+  --on-accent: #ffffff;
+}
+
+/* ---------------- from css/battle-town.css ---------------- */
+.sleeve-gilded { --sleeve-edge:#f2cf6b; }
+.sleeve-leafy { --sleeve-edge:#8fd49a; }
+.sleeve-starry { --sleeve-edge:#b9c3ff; }
+.sleeve-ember { --sleeve-edge:#ff9d5c; }
+.sleeve-tide { --sleeve-edge:#7fd0e8; }
+.sleeve-petal { --sleeve-edge:#f4a8c8; }
+
+/* ---------------- from css/buildings.css ---------------- */
+#sceneView[data-theme="warm"] {
+  --sc-wall: #5a4632;
+  --sc-floor: #3e2f22;
+  --sc-rug: #c96a52;
+  --sc-win: #d8c27a;
+}
+#sceneView[data-theme="cool"] {
+  --sc-wall: #39435a;
+  --sc-floor: #3a3129;
+  --sc-rug: #6f8fbf;
+  --sc-win: #d8c27a;
+}
+#sceneView[data-theme="dark"] {
+  --sc-wall: #3a3742;
+  --sc-floor: #26232b;
+  --sc-rug: #4d3f52;
+  --sc-win: #1f1d24;
+}
+/* biome palettes (one drawing set, recoloured) */
+.town-view[data-biome="meadow"] {
+  --ground:#2c3a2c;
+  --ground2:#2a382a;
+  --ground3:#2f3f2f;
+  --tuft:#4b6a47;
+  --path:#4a4331;
+  --path-edge:#3b3527;
+  --path-dot:#5d5540;
+  --leaf1:#2f6a48;
+  --leaf2:#3c8058;
+  --leaf3:#57a274;
+  --trunk:#5b4632;
+  --pine1:#20523d;
+  --pine2:#2c6a50;
+  --water:#2d5b70;
+  --water2:#4a86a0;
+  --shore:#5a5238;
+  --wall:#c9bda6;
+  --wall2:#a89b83;
+  --roof:#a5503d;
+  --roof2:#8a4231;
+  --door:#4f3624;
+  --window:#e0c574;
+  --stone:#76756f;
+  --stone2:#5c5b56;
+  --stone3:#8d8c85;
+  --flower1:#d97896;
+  --flower2:#dcbd58;
+  --flower3:#dedede;
+  --plank:#8e7148;
+  --plank2:#6f5836;
+  --lamp:#ffcf66;
+  --tshadow:rgba(0,0,0,.32);
+  --bread:#c08a4c;
+  --well-in:#1d2b33;
+  --cellar-in:#141218;
+}
+.town-view[data-biome="bazaar"] {
+  --ground:#3a3322;
+  --ground2:#352e1e;
+  --ground3:#3f3826;
+  --tuft:#5d5232;
+  --path:#4d4530;
+  --path-edge:#3f3826;
+  --path-dot:#615637;
+  --leaf1:#7a5a26;
+  --leaf2:#946c30;
+  --leaf3:#b08540;
+  --trunk:#5b4632;
+  --pine1:#5e4720;
+  --pine2:#755a2b;
+  --water:#2d5b70;
+  --water2:#4a86a0;
+  --shore:#5a5238;
+  --wall:#c9bda6;
+  --wall2:#a89b83;
+  --roof:#b06a35;
+  --roof2:#94572a;
+  --door:#4f3624;
+  --window:#e0c574;
+  --stone:#7a7565;
+  --stone2:#5f5b4e;
+  --stone3:#918b7a;
+  --flower1:#cf6f60;
+  --flower2:#dcbd58;
+  --flower3:#dedede;
+  --plank:#8e7148;
+  --plank2:#6f5836;
+  --lamp:#ffcf66;
+  --tshadow:rgba(0,0,0,.32);
+  --bread:#c08a4c;
+  --well-in:#1d2b33;
+  --cellar-in:#141218;
+}
+.town-view[data-biome="harbor"] {
+  --ground:#2a3634;
+  --ground2:#263230;
+  --ground3:#2f3c3a;
+  --tuft:#465f5a;
+  --path:#454438;
+  --path-edge:#38372d;
+  --path-dot:#57563f;
+  --leaf1:#2c6656;
+  --leaf2:#38796a;
+  --leaf3:#529a88;
+  --trunk:#5b4632;
+  --pine1:#1f4f48;
+  --pine2:#2a6459;
+  --water:#245068;
+  --water2:#3f7d99;
+  --shore:#565039;
+  --wall:#c9bda6;
+  --wall2:#a89b83;
+  --roof:#456f8c;
+  --roof2:#385c76;
+  --door:#4f3624;
+  --window:#e0c574;
+  --stone:#72787a;
+  --stone2:#585d5f;
+  --stone3:#898f91;
+  --flower1:#d97896;
+  --flower2:#dcbd58;
+  --flower3:#dedede;
+  --plank:#8e7148;
+  --plank2:#6f5836;
+  --lamp:#ffcf66;
+  --tshadow:rgba(0,0,0,.32);
+  --bread:#c08a4c;
+  --well-in:#1d2b33;
+  --cellar-in:#141218;
+}
+/* seasons recolour the foliage on every biome (summer keeps each biome's own greens) */
+.town-view[data-biome][data-season="spring"] {
+  --leaf1:#3f7d4f;
+  --leaf2:#4f9a62;
+  --leaf3:#f2a9c4;
+  --flower1:#f08cb0;
+  --flower3:#fff1f6;
+  --tuft:#5b8a55;
+}
+.town-view[data-biome][data-season="autumn"] {
+  --leaf1:#9a4a22;
+  --leaf2:#c2672b;
+  --leaf3:#e6a13e;
+  --pine1:#3b4f36;
+  --pine2:#4c6143;
+  --tuft:#8a7040;
+  --flower1:#d9822b;
+  --flower2:#b8452c;
+}
+.town-view[data-biome][data-season="winter"] {
+  --leaf1:#7f9491;
+  --leaf2:#a7bbb8;
+  --leaf3:#eef6f5;
+  --pine1:#2f4a44;
+  --pine2:#dfe9e8;
+  --tuft:#9fb0ad;
+  --flower1:#cfe3ea;
+  --flower2:#eaf2f4;
+  --flower3:#ffffff;
+  --ground3:#3b4745;
+}
+.town-view[data-biome="orchard"] {
+  --ground:#293a29;
+  --ground2:#253624;
+  --ground3:#2e422d;
+  --tuft:#486a44;
+  --path:#4a4331;
+  --path-edge:#3b3527;
+  --path-dot:#5d5540;
+  --leaf1:#31693a;
+  --leaf2:#3f8047;
+  --leaf3:#5ba566;
+  --trunk:#5b4632;
+  --pine1:#21533a;
+  --pine2:#2d6a4a;
+  --water:#2d5b70;
+  --water2:#4a86a0;
+  --shore:#5a5238;
+  --wall:#c9bda6;
+  --wall2:#a89b83;
+  --roof:#94507f;
+  --roof2:#7c4269;
+  --door:#4f3624;
+  --window:#e0c574;
+  --stone:#76756f;
+  --stone2:#5c5b56;
+  --stone3:#8d8c85;
+  --flower1:#d96f97;
+  --flower2:#dcbd58;
+  --flower3:#dedede;
+  --plank:#8e7148;
+  --plank2:#6f5836;
+  --lamp:#ffcf66;
+  --tshadow:rgba(0,0,0,.32);
+  --bread:#c08a4c;
+  --well-in:#1d2b33;
+  --cellar-in:#141218;
+}
+
+/* ---------------- from css/battle-v2.css ---------------- */
+#battleView .spirit.low { --ring: var(--lose-glow); }
+:root { --glass: color-mix(in srgb, var(--stone) 90%, transparent); }
+
+/* ---------------- from css/latest.css ---------------- */
+.overlay.wm-screen {
+  --wm-body: #33404d;
+  --wm-cloud: #fff;
+  --wm-top-square: #3c7a5c;
+  --wm-top-market: #7a5a3a;
+  --wm-top-harbor: #3a5f78;
+  --wm-top-garden: #4f6a3c;
+  --wm-leaf: #2f6a4c;
+  --wm-b1: #e8cb88;
+  --wm-b2: #8dbccb;
+  --wm-orb: #f4ecd0;
+  --wm-sky: radial-gradient(ellipse at 50% 12%, rgba(154,134,201,.22), transparent 60%), linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
+}
+:root[data-theme="light"] .overlay.wm-screen {
+  --wm-body: #cfc6af;
+  --wm-cloud: #fff;
+  --wm-top-square: #8fc4b8;
+  --wm-top-market: #e3c48a;
+  --wm-top-harbor: #a6d3c9;
+  --wm-top-garden: #bfd8a5;
+  --wm-leaf: #5aa397;
+  --wm-b1: #b5832a;
+  --wm-b2: #5aa397;
+  --wm-orb: #b5832a;
+  --wm-sky: radial-gradient(ellipse at 50% 12%, rgba(181,131,42,.20), transparent 58%), linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
+}
+/* ===== Storefront building screens (v1.77.0) =====
+   Ordinary building screens (.sc-std, set in renderScene) become a shop front: the interior fills the top with a
+   counter, the owner behind it, a shop sign on the counter and their speech in a bubble above; the choices sit in a
+   rounded sheet that rises from the bottom, with "head back out" as a quiet button at its foot. The stage runs under the
+   floating top bar. Mini-games, the memory game and the Card Shop counter (.mini-mode/.memory-mode/.shop-mode) are not
+   .sc-std and keep their compact layout. Everything that moves is transform/opacity. */
+#sceneView[data-theme="warm"] { --sc-counter: #6b4f33; }
+#sceneView[data-theme="cool"] { --sc-counter: #4a5570; }
+#sceneView[data-theme="dark"] { --sc-counter: #332f3a; }
+/* ===== Light theme: building screens and the town map (v1.79.0) =====
+   Building screens now follow the theme instead of staying dark: the sheet, speech and buttons use the light tokens
+   (nothing to override, since #sceneView no longer re-declares the dark ones) and the interior itself gets lighter
+   wall/floor/counter colours. The town map used to be dark green in both themes; in the light theme it now uses a
+   mid-tone palette (soft greens, sandy paths, brighter water) so it reads as daytime next to the cream bars, while
+   the dark theme keeps its deep colours. Names on the map keep their dark outline, so they stay readable on either. */
+:root[data-theme="light"] #sceneView[data-theme="warm"] {
+  --sc-wall: #d8ba8e;
+  --sc-floor: #b99063;
+  --sc-rug: #d9806a;
+  --sc-win: #f6e6a8;
+  --sc-counter: #c99c66;
+}
+:root[data-theme="light"] #sceneView[data-theme="cool"] {
+  --sc-wall: #a3b8d6;
+  --sc-floor: #b9a58d;
+  --sc-rug: #7f9fcf;
+  --sc-win: #f6e6a8;
+  --sc-counter: #8fa0bc;
+}
+:root[data-theme="light"] #sceneView[data-theme="dark"] {
+  --sc-wall: #7b758a;
+  --sc-floor: #5b566c;
+  --sc-rug: #7a6a84;
+  --sc-win: #d8d3e6;
+  --sc-counter: #4f4a5e;
+}
+:root[data-theme="light"] .town-view[data-biome="meadow"] {
+  --ground:#759c60;
+  --ground2:#6e955a;
+  --ground3:#7ba466;
+  --tuft:#97bd80;
+  --path:#c4ae82;
+  --path-edge:#a8946a;
+  --path-dot:#d3c19a;
+  --leaf1:#4f9467;
+  --leaf2:#62ab7b;
+  --leaf3:#85c79a;
+  --pine1:#3b7d5a;
+  --pine2:#4e956f;
+  --water:#5a98b8;
+  --water2:#86bcd4;
+  --shore:#d2c598;
+  --stone:#9c9b94;
+  --stone2:#7f7e78;
+  --stone3:#b4b3ab;
+  --plank:#a78655;
+  --plank2:#8a6c42;
+  --tshadow:rgba(40,50,30,.28);
+  --well-in:#2b3d46;
+}
+:root[data-theme="light"] .town-view[data-biome="bazaar"] {
+  --ground:#b39d6a;
+  --ground2:#ab9562;
+  --ground3:#b9a472;
+  --tuft:#c6b482;
+  --path:#d4c294;
+  --path-edge:#b9a678;
+  --path-dot:#e0d1ab;
+  --leaf1:#b58a3a;
+  --leaf2:#c99f4a;
+  --leaf3:#dcb866;
+  --pine1:#8b6a2c;
+  --pine2:#a07f3a;
+  --water:#5a98b8;
+  --water2:#86bcd4;
+  --shore:#d9ca9c;
+  --stone:#a39e8c;
+  --stone2:#86806f;
+  --stone3:#bab5a3;
+  --plank:#a78655;
+  --plank2:#8a6c42;
+  --tshadow:rgba(60,45,20,.28);
+}
+:root[data-theme="light"] .town-view[data-biome="harbor"] {
+  --ground:#7c9f8f;
+  --ground2:#749888;
+  --ground3:#85a898;
+  --tuft:#9fbfaf;
+  --path:#c9bb90;
+  --path-edge:#afa078;
+  --path-dot:#d8cca6;
+  --leaf1:#4a9482;
+  --leaf2:#5aa896;
+  --leaf3:#7cc4b2;
+  --pine1:#3b7d72;
+  --pine2:#4c9487;
+  --water:#4f8cb0;
+  --water2:#7db5d1;
+  --shore:#d4c8a0;
+  --stone:#9aa2a4;
+  --stone2:#7e8789;
+  --stone3:#b2babc;
+  --plank:#a78655;
+  --plank2:#8a6c42;
+  --tshadow:rgba(30,50,55,.28);
+}
+:root[data-theme="light"] .town-view[data-biome="orchard"] {
+  --ground:#729b5c;
+  --ground2:#6b9455;
+  --ground3:#79a363;
+  --tuft:#94bc7e;
+  --path:#c4ae82;
+  --path-edge:#a8946a;
+  --path-dot:#d3c19a;
+  --leaf1:#4d9a58;
+  --leaf2:#62b06d;
+  --leaf3:#86cc90;
+  --pine1:#3c8060;
+  --pine2:#4f9873;
+  --water:#5a98b8;
+  --water2:#86bcd4;
+  --shore:#d2c598;
+  --stone:#9c9b94;
+  --stone2:#7f7e78;
+  --stone3:#b4b3ab;
+  --plank:#a78655;
+  --plank2:#8a6c42;
+  --tshadow:rgba(40,50,30,.28);
+}
+:root[data-theme="light"] .town-view[data-biome][data-season="winter"] {
+  --ground3:#b9c9c4;
+  --tuft:#c8d6d2;
+  --leaf1:#98aeaa;
+  --leaf2:#b9cdc9;
+  --pine1:#5d8279;
+  --pine2:#e7f0ee;
+}
+/* Card art gets a faint drop shadow from the game (build 125), not from the art files: it is sized in em so it scales with the icon
+   (18 to 67 px), and tuned per theme so it lifts the picture off every rarity face without muddying small sizes. Designers should NOT
+   bake a shadow into their PNGs (a flat ground shadow under a standing creature is fine; it is part of the drawing). */
+:root { --art-sh: rgba(0, 0, 0, .34); }
+:root[data-theme="light"] { --art-sh: rgba(60, 40, 20, .24); }
+/* ==========================================================================================================
+   CARD FACE: "circle stack on paper" (build 135)
+   One look for every full card: battle hand and board (#battleView .card), the reveal popup and draft offers
+   (.reveal-card) and the collection / deck tiles (.alm-card.tile). The art sits on the card's own rarity colour,
+   the keywords are round badges stacked under the cost bubble, and a paper panel at the foot holds the name and
+   the attack / health numbers (or the Spell label). Sizes come from the card's own width: each face is a size
+   container, so `--u` (10cqw = one tenth of the card's width) scales the art, text and badges together at every
+   size, the same way the card-lab mockups did. In dark mode the panel is a deep shade of the rarity colour; in
+   light mode it is the cream surface (--stone). Descendants read --u, the card itself never does.
+   ========================================================================================================== */
+.rarity-common { --pc: var(--rc-b); --rg: linear-gradient(135deg, var(--rc-a), var(--rc-b)); }
+.rarity-rare { --pc: var(--rare); --rg: linear-gradient(135deg, #c9bce8, var(--rare)); }
+.rarity-ultra { --pc: var(--epic); --rg: linear-gradient(135deg, #a8cbe8, var(--epic)); }
+.rarity-super { --pc: var(--accent); --rg: linear-gradient(135deg, #f0cf94, var(--accent)); }
+.rarity-mythic { --pc: var(--mythic); --rg: linear-gradient(135deg, #eaa8c4, var(--mythic)); }
+#battleView .card, .reveal-card, .alm-card.tile { --panel: color-mix(in srgb, var(--pc, var(--rc-b)) 30%, #12171d); --hurt: #e8826f; }
+:root[data-theme="light"] #battleView .card, :root[data-theme="light"] .reveal-card, :root[data-theme="light"] .alm-card.tile { --panel: var(--stone); --hurt: #c0453d; }
+.rarity-divine { --pc: var(--divine); --rg: linear-gradient(135deg, #f6e6b0, var(--divine)); }
+.rarity-atlas { --pc: var(--atlas); --rg: linear-gradient(135deg, #a8e0ec, var(--atlas) 55%, #f0b8d8); }
+#sceneOverlay {
+  --sc-0: #0f141b;
+  --sc-1: #1b2531;
+  --sc-2: #2c3b4a;
+  --sc-ink: #e9edf1;
+  --sc-soft: #aab6c0;
+  --sc-gold: #e8cb88;
+  --sc-peach: #e9a98f;
+  --sc-violet: #9b8cc9;
+  --sc-mist: #8dbccb;
+}
+.altar-screen {
+  --g: #6fbf7b;
+  --st: #8aa3c0;
+  --ti: #3fb5bb;
+  --wi: #b596e6;
+}
+.as-c { --fc: #8a8498; }
+.as-c[data-fam="grove"] { --fc: var(--g); }
+.as-c[data-fam="stone"] { --fc: var(--st); }
+.as-c[data-fam="tide"] { --fc: var(--ti); }
+.as-c[data-fam="wind"] { --fc: var(--wi); }
+.hr-room, .hr-th {
+  --plank:#8e7148;
+  --plank2:#6f5836;
+  --trunk:#5b4632;
+  --door:#4f3624;
+  --window:#e0c574;
+  --wall:#c9bda6;
+  --wall2:#a89b83;
+  --roof:#a5503d;
+  --roof2:#8a4231;
+  --stone:#76756f;
+  --stone2:#5c5b56;
+  --stone3:#8d8c85;
+  --flower1:#d97896;
+  --flower2:#dcbd58;
+  --flower3:#dedede;
+  --lamp:#ffcf66;
+  --tshadow:rgba(0,0,0,.32);
+  --leaf1:#2f6a48;
+  --leaf2:#3c8058;
+  --leaf3:#57a274;
+  --water:#2d5b70;
+  --water2:#4a86a0;
+  --bread:#c08a4c;
+  --cloth:#7d6bb0;
+  --sky:#a9d3de;
+  --day:#d6e6d8;
+  --floor1:#7f6542;
+  --floor2:#7a6140;
+  --floor3:#846a46;
+  --wall-up:#a39278;
+  --wainscot:#5a452d;
+  --wall-side:#43341f;
+  --rug:#2f6068;
+  --rug2:#244a52;
+}
+/* Neighbour screen: the veil over the town was the theme's page colour, which is nearly white in the light theme. --tk-veil is a
+   slightly deeper sand there; dark theme keeps --bg-top. */
+#talkOverlay { --tk-veil: var(--bg-top); }
+:root[data-theme="light"] #talkOverlay { --tk-veil: color-mix(in srgb, var(--bg-top) 60%, #5c6855); }
+/* Light-theme battle: a sand surface a step deeper than --stone for every pill, button and card paper that sat on the green mat,
+   dark ink on it, and names on their own plates. The dark theme is untouched. */
+:root[data-theme="light"] #battleView {
+  --bt-surface: #e6dcc6;
+  --bt-edge: #c4b89c;
+  --bt-ink: #34332f;
+  --bt-ink-soft: #55534c;
+}
+/* card paper (name + stats panel): sand instead of near-white */
+:root[data-theme="light"] #battleView .card, :root[data-theme="light"] .reveal-card, :root[data-theme="light"] .alm-card.tile { --panel: #e9dfc9; }
+/* PW-BIOMES:START (generated by scripts/build-pw-biomes.py - edit that, not this) */
+.town-view[data-biome="pw-glass"], .town-view[data-biome="pw-glass"][data-season] {
+  --ground:#2a3b42;
+  --ground2:#26373e;
+  --ground3:#2f4249;
+  --tuft:#5a8c98;
+  --path:#44505f;
+  --path-edge:#36404d;
+  --path-dot:#566272;
+  --leaf1:#3f7f9a;
+  --leaf2:#5aa0b8;
+  --leaf3:#8fd0e0;
+  --trunk:#5b4632;
+  --pine1:#2d5f78;
+  --pine2:#3f7f9c;
+  --water:#3a4f94;
+  --water2:#6d8ad6;
+  --shore:#6f86a3;
+  --wall:#c9bda6;
+  --wall2:#a89b83;
+  --roof:#a5503d;
+  --roof2:#8a4231;
+  --door:#4f3624;
+  --window:#e0c574;
+  --stone:#7a8594;
+  --stone2:#5e6876;
+  --stone3:#929dac;
+  --flower1:#9bd8ff;
+  --flower2:#f2f8ff;
+  --flower3:#d4e6ff;
+  --plank:#8e7148;
+  --plank2:#6f5836;
+  --lamp:#bfe8ff;
+  --tshadow:rgba(0,0,0,.32);
+  --bread:#c08a4c;
+  --well-in:#1d2b33;
+  --cellar-in:#141218;
+}
+:root[data-theme="light"] .town-view[data-biome="pw-glass"], :root[data-theme="light"] .town-view[data-biome="pw-glass"][data-season] {
+  --ground:#698d9c;
+  --ground2:#638a9a;
+  --ground3:#7193a0;
+  --tuft:#abc5cb;
+  --path:#8f9cad;
+  --path-edge:#76869c;
+  --path-dot:#a6afbb;
+  --shore:#cdd5de;
+  --leaf1:#5e9db8;
+  --leaf2:#88b7c8;
+  --leaf3:#b9e0e9;
+  --pine1:#4281a0;
+  --pine2:#5f9db9;
+  --water:#6378bc;
+  --water2:#afbee6;
+  --stone:#b3b9c1;
+  --stone2:#939ba7;
+  --stone3:#c7ccd3;
+  --tshadow:rgba(30,30,40,.28);
+}
+.town-view[data-biome="pw-ember"], .town-view[data-biome="pw-ember"][data-season] {
+  --ground:#3b2a25;
+  --ground2:#372621;
+  --ground3:#40302a;
+  --tuft:#7a4a38;
+  --path:#52382c;
+  --path-edge:#432c22;
+  --path-dot:#6a4a3a;
+  --leaf1:#8a3d22;
+  --leaf2:#b5532a;
+  --leaf3:#e0803a;
+  --trunk:#5b4632;
+  --pine1:#5a2a1f;
+  --pine2:#7a3a28;
+  --water:#7a2f2a;
+  --water2:#d4643a;
+  --shore:#6a4a30;
+  --wall:#c9bda6;
+  --wall2:#a89b83;
+  --roof:#a5503d;
+  --roof2:#8a4231;
+  --door:#4f3624;
+  --window:#e0c574;
+  --stone:#80726a;
+  --stone2:#62554e;
+  --stone3:#988a81;
+  --flower1:#ffb347;
+  --flower2:#ff7a45;
+  --flower3:#ffe2b0;
+  --plank:#8e7148;
+  --plank2:#6f5836;
+  --lamp:#ff9a4a;
+  --tshadow:rgba(0,0,0,.32);
+  --bread:#c08a4c;
+  --well-in:#1d2b33;
+  --cellar-in:#141218;
+}
+:root[data-theme="light"] .town-view[data-biome="pw-ember"], :root[data-theme="light"] .town-view[data-biome="pw-ember"][data-season] {
+  --ground:#976e62;
+  --ground2:#94695d;
+  --ground3:#99776a;
+  --tuft:#bd8c79;
+  --path:#ac806b;
+  --path-edge:#9f6b55;
+  --path-dot:#b89685;
+  --shore:#bd9676;
+  --leaf1:#b55534;
+  --leaf2:#cf744d;
+  --leaf3:#e29d6b;
+  --pine1:#844132;
+  --pine2:#a4523c;
+  --water:#b24b44;
+  --water2:#df9b81;
+  --stone:#b0a6a0;
+  --stone2:#97877f;
+  --stone3:#c1b9b4;
+  --tshadow:rgba(30,30,40,.28);
+}
+.town-view[data-biome="pw-mirror"], .town-view[data-biome="pw-mirror"][data-season] {
+  --ground:#2f2840;
+  --ground2:#2b243b;
+  --ground3:#352d47;
+  --tuft:#6f5f9e;
+  --path:#473f58;
+  --path-edge:#393247;
+  --path-dot:#5c5272;
+  --leaf1:#6a4fa0;
+  --leaf2:#8667c4;
+  --leaf3:#b296e8;
+  --trunk:#5b4632;
+  --pine1:#4a3a7a;
+  --pine2:#5f4b96;
+  --water:#2d4a82;
+  --water2:#5f86cc;
+  --shore:#5a5278;
+  --wall:#c9bda6;
+  --wall2:#a89b83;
+  --roof:#a5503d;
+  --roof2:#8a4231;
+  --door:#4f3624;
+  --window:#e0c574;
+  --stone:#7c7890;
+  --stone2:#615d74;
+  --stone3:#9692aa;
+  --flower1:#f0a8e8;
+  --flower2:#ffe9a8;
+  --flower3:#ffffff;
+  --plank:#8e7148;
+  --plank2:#6f5836;
+  --lamp:#e8c8ff;
+  --tshadow:rgba(0,0,0,.32);
+  --bread:#c08a4c;
+  --well-in:#1d2b33;
+  --cellar-in:#141218;
+}
+:root[data-theme="light"] .town-view[data-biome="pw-mirror"], :root[data-theme="light"] .town-view[data-biome="pw-mirror"][data-season] {
+  --ground:#75669b;
+  --ground2:#716098;
+  --ground3:#7d6e9f;
+  --tuft:#bab3cf;
+  --path:#9288a8;
+  --path-edge:#7d7098;
+  --path-dot:#aaa2bb;
+  --shore:#aaa4bf;
+  --leaf1:#8b75b7;
+  --leaf2:#aa96d2;
+  --leaf3:#d1c2ef;
+  --pine1:#6551a0;
+  --pine2:#7f6db1;
+  --water:#486eb9;
+  --water2:#a0b6dd;
+  --stone:#b3b1bd;
+  --stone2:#9591a6;
+  --stone3:#c8c6d2;
+  --tshadow:rgba(30,30,40,.28);
+}
+.town-view[data-biome="pw-bloom"], .town-view[data-biome="pw-bloom"][data-season] {
+  --ground:#3b2c37;
+  --ground2:#372834;
+  --ground3:#403140;
+  --tuft:#84607c;
+  --path:#54404a;
+  --path-edge:#44333c;
+  --path-dot:#6c5360;
+  --leaf1:#b04a78;
+  --leaf2:#d0679a;
+  --leaf3:#f2a0c4;
+  --trunk:#5b4632;
+  --pine1:#7a3a5a;
+  --pine2:#96486c;
+  --water:#3a5a80;
+  --water2:#6c9fc8;
+  --shore:#7a6070;
+  --wall:#c9bda6;
+  --wall2:#a89b83;
+  --roof:#a5503d;
+  --roof2:#8a4231;
+  --door:#4f3624;
+  --window:#e0c574;
+  --stone:#84767e;
+  --stone2:#685b63;
+  --stone3:#9d8f97;
+  --flower1:#ffd166;
+  --flower2:#ff8fb8;
+  --flower3:#fff3f8;
+  --plank:#8e7148;
+  --plank2:#6f5836;
+  --lamp:#ffd9a0;
+  --tshadow:rgba(0,0,0,.32);
+  --bread:#c08a4c;
+  --well-in:#1d2b33;
+  --cellar-in:#141218;
+}
+:root[data-theme="light"] .town-view[data-biome="pw-bloom"], :root[data-theme="light"] .town-view[data-biome="pw-bloom"][data-season] {
+  --ground:#916f88;
+  --ground2:#8e6a87;
+  --ground3:#947694;
+  --tuft:#bfa9ba;
+  --path:#a38a96;
+  --path-edge:#937384;
+  --path-dot:#b6a2ac;
+  --shore:#c1b2bb;
+  --leaf1:#c17698;
+  --leaf2:#dc99b9;
+  --leaf3:#f4c2d8;
+  --pine1:#a05179;
+  --pine2:#b2698b;
+  --water:#5c82b0;
+  --water2:#aac6dc;
+  --stone:#b4acb1;
+  --stone2:#9b8e96;
+  --stone3:#c8c0c4;
+  --tshadow:rgba(30,30,40,.28);
+}
+.town-view[data-biome="pw-static"], .town-view[data-biome="pw-static"][data-season] {
+  --ground:#2b2f37;
+  --ground2:#272b33;
+  --ground3:#30353e;
+  --tuft:#5a6676;
+  --path:#3e4450;
+  --path-edge:#323842;
+  --path-dot:#505968;
+  --leaf1:#55606f;
+  --leaf2:#6e7b8c;
+  --leaf3:#95a3b6;
+  --trunk:#5b4632;
+  --pine1:#404a58;
+  --pine2:#556272;
+  --water:#2a3f58;
+  --water2:#4f7098;
+  --shore:#566070;
+  --wall:#c9bda6;
+  --wall2:#a89b83;
+  --roof:#a5503d;
+  --roof2:#8a4231;
+  --door:#4f3624;
+  --window:#e0c574;
+  --stone:#7d838c;
+  --stone2:#626870;
+  --stone3:#969ca6;
+  --flower1:#c8d4e4;
+  --flower2:#e8eef6;
+  --flower3:#ffffff;
+  --plank:#8e7148;
+  --plank2:#6f5836;
+  --lamp:#dce8ff;
+  --tshadow:rgba(0,0,0,.32);
+  --bread:#c08a4c;
+  --well-in:#1d2b33;
+  --cellar-in:#141218;
+}
+:root[data-theme="light"] .town-view[data-biome="pw-static"], :root[data-theme="light"] .town-view[data-biome="pw-static"][data-season] {
+  --ground:#6f798c;
+  --ground2:#6b7588;
+  --ground3:#757f92;
+  --tuft:#a0a9b5;
+  --path:#878fa0;
+  --path-edge:#717d91;
+  --path-dot:#9ea6b3;
+  --shore:#a6adb9;
+  --leaf1:#717e90;
+  --leaf2:#919aa7;
+  --leaf3:#b4bdca;
+  --pine1:#5b687a;
+  --pine2:#718093;
+  --water:#47678c;
+  --water2:#809ab9;
+  --stone:#b3b7bc;
+  --stone2:#969ba2;
+  --stone3:#c8cbd0;
+  --tshadow:rgba(30,30,40,.28);
+}
+.town-view[data-biome="pw-tide"], .town-view[data-biome="pw-tide"][data-season] {
+  --ground:#1f3239;
+  --ground2:#1b2e35;
+  --ground3:#24383f;
+  --tuft:#3f7070;
+  --path:#36483f;
+  --path-edge:#2b3a33;
+  --path-dot:#48594f;
+  --leaf1:#1f6a6a;
+  --leaf2:#2a8a86;
+  --leaf3:#4fc0b4;
+  --trunk:#5b4632;
+  --pine1:#1a4a52;
+  --pine2:#226068;
+  --water:#12405e;
+  --water2:#2b7ca6;
+  --shore:#3f5a50;
+  --wall:#c9bda6;
+  --wall2:#a89b83;
+  --roof:#a5503d;
+  --roof2:#8a4231;
+  --door:#4f3624;
+  --window:#e0c574;
+  --stone:#6a8088;
+  --stone2:#52666d;
+  --stone3:#82989f;
+  --flower1:#ff9eb5;
+  --flower2:#ffe08a;
+  --flower3:#e6fffa;
+  --plank:#8e7148;
+  --plank2:#6f5836;
+  --lamp:#9ff0e0;
+  --tshadow:rgba(0,0,0,.32);
+  --bread:#c08a4c;
+  --well-in:#1d2b33;
+  --cellar-in:#141218;
+}
+:root[data-theme="light"] .town-view[data-biome="pw-tide"], :root[data-theme="light"] .town-view[data-biome="pw-tide"][data-season] {
+  --ground:#588899;
+  --ground2:#528597;
+  --ground3:#5e8d9e;
+  --tuft:#80b4b4;
+  --path:#7c9b8c;
+  --path-edge:#698b7b;
+  --path-dot:#93a79b;
+  --shore:#88aa9d;
+  --leaf1:#319595;
+  --leaf2:#3db4af;
+  --leaf3:#78cac1;
+  --pine1:#2c717d;
+  --pine2:#358792;
+  --water:#246e9d;
+  --water2:#56a4cd;
+  --stone:#a3b0b5;
+  --stone2:#8499a1;
+  --stone3:#b7c2c6;
+  --tshadow:rgba(30,30,40,.28);
+}
+.town-view[data-biome="pw-reef"], .town-view[data-biome="pw-reef"][data-season] {
+  --ground:#2a4a52;
+  --ground2:#264650;
+  --ground3:#2f525b;
+  --tuft:#4f8f90;
+  --path:#3f6a74;
+  --path-edge:#335862;
+  --path-dot:#5a8590;
+  --leaf1:#d9647a;
+  --leaf2:#f08a7e;
+  --leaf3:#ffb4a0;
+  --trunk:#5b4632;
+  --pine1:#2f8f86;
+  --pine2:#40b0a0;
+  --water:#1d4f8a;
+  --water2:#3f8ad0;
+  --shore:#6fa0a0;
+  --wall:#c9bda6;
+  --wall2:#a89b83;
+  --roof:#a5503d;
+  --roof2:#8a4231;
+  --door:#4f3624;
+  --window:#e0c574;
+  --stone:#7aa0b0;
+  --stone2:#5e8392;
+  --stone3:#9ec0cc;
+  --flower1:#ffd166;
+  --flower2:#ff8fb8;
+  --flower3:#e6fffa;
+  --plank:#8e7148;
+  --plank2:#6f5836;
+  --lamp:#9ff0ff;
+  --tshadow:rgba(0,0,0,.32);
+  --bread:#c08a4c;
+  --well-in:#1d2b33;
+  --cellar-in:#141218;
+}
+:root[data-theme="light"] .town-view[data-biome="pw-reef"], :root[data-theme="light"] .town-view[data-biome="pw-reef"][data-season] {
+  --ground:#689fad;
+  --ground2:#609caf;
+  --ground3:#71a4b2;
+  --tuft:#9dc6c7;
+  --path:#8eb5be;
+  --path-edge:#72a4b2;
+  --path-dot:#b4c9cf;
+  --shore:#ccdcdc;
+  --leaf1:#e298a6;
+  --leaf2:#f4beb7;
+  --leaf3:#fcc8ba;
+  --pine1:#43b8ad;
+  --pine2:#6ac3b7;
+  --water:#3276c7;
+  --water2:#84b2dc;
+  --stone:#bbcdd5;
+  --stone2:#9ab2bc;
+  --stone3:#d1e0e6;
+  --tshadow:rgba(30,30,40,.28);
+}
+.town-view[data-biome="pw-abyss"], .town-view[data-biome="pw-abyss"][data-season] {
+  --ground:#1c2342;
+  --ground2:#181f3b;
+  --ground3:#212949;
+  --tuft:#3a4f94;
+  --path:#2b3560;
+  --path-edge:#222a4e;
+  --path-dot:#3a4678;
+  --leaf1:#5a3fa0;
+  --leaf2:#7b5ad0;
+  --leaf3:#a98cff;
+  --trunk:#5b4632;
+  --pine1:#1f6a8f;
+  --pine2:#2b8fb8;
+  --water:#101a3a;
+  --water2:#2a4a9a;
+  --shore:#3a4a7a;
+  --wall:#c9bda6;
+  --wall2:#a89b83;
+  --roof:#a5503d;
+  --roof2:#8a4231;
+  --door:#4f3624;
+  --window:#e0c574;
+  --stone:#6a7098;
+  --stone2:#505678;
+  --stone3:#8a90b8;
+  --flower1:#7af0ff;
+  --flower2:#ff7ad9;
+  --flower3:#e0f0ff;
+  --plank:#8e7148;
+  --plank2:#6f5836;
+  --lamp:#8af0ff;
+  --tshadow:rgba(0,0,0,.32);
+  --bread:#c08a4c;
+  --well-in:#1d2b33;
+  --cellar-in:#141218;
+}
+:root[data-theme="light"] .town-view[data-biome="pw-abyss"], :root[data-theme="light"] .town-view[data-biome="pw-abyss"][data-season] {
+  --ground:#4e5ea9;
+  --ground2:#485ba4;
+  --ground3:#5667ad;
+  --tuft:#8797cc;
+  --path:#6c7ab8;
+  --path-edge:#5162ad;
+  --path-dot:#8994c2;
+  --shore:#8a98c3;
+  --leaf1:#7a61bb;
+  --leaf2:#a38dda;
+  --leaf3:#cbbafc;
+  --pine1:#308dbb;
+  --pine2:#51abcf;
+  --water:#253976;
+  --water2:#4e71c8;
+  --stone:#a7abc1;
+  --stone2:#848aaa;
+  --stone3:#c4c7da;
+  --tshadow:rgba(30,30,40,.28);
+}
+.town-view[data-biome="pw-dusk"], .town-view[data-biome="pw-dusk"][data-season] {
+  --ground:#3a3128;
+  --ground2:#362d24;
+  --ground3:#3f362c;
+  --tuft:#7a6038;
+  --path:#55442f;
+  --path-edge:#453626;
+  --path-dot:#6c573c;
+  --leaf1:#8a6a2a;
+  --leaf2:#b08a3a;
+  --leaf3:#e0b85a;
+  --trunk:#5b4632;
+  --pine1:#5a4420;
+  --pine2:#7a5c2a;
+  --water:#3a4a6e;
+  --water2:#7e8fb8;
+  --shore:#6e5a3a;
+  --wall:#c9bda6;
+  --wall2:#a89b83;
+  --roof:#a5503d;
+  --roof2:#8a4231;
+  --door:#4f3624;
+  --window:#e0c574;
+  --stone:#82796c;
+  --stone2:#665e53;
+  --stone3:#9a9184;
+  --flower1:#ff9a5a;
+  --flower2:#ffd27a;
+  --flower3:#fff0cc;
+  --plank:#8e7148;
+  --plank2:#6f5836;
+  --lamp:#ffb860;
+  --tshadow:rgba(0,0,0,.32);
+  --bread:#c08a4c;
+  --well-in:#1d2b33;
+  --cellar-in:#141218;
+}
+:root[data-theme="light"] .town-view[data-biome="pw-dusk"], :root[data-theme="light"] .town-view[data-biome="pw-dusk"][data-season] {
+  --ground:#937e68;
+  --ground2:#907a63;
+  --ground3:#96836e;
+  --tuft:#bda379;
+  --path:#ac9271;
+  --path-edge:#9e7e5c;
+  --path-dot:#b9a488;
+  --shore:#bba786;
+  --leaf1:#b48c3d;
+  --leaf2:#c5a562;
+  --leaf3:#e4c989;
+  --pine1:#846534;
+  --pine2:#a37d3e;
+  --water:#596fa0;
+  --water2:#b4bdd4;
+  --stone:#b1aba3;
+  --stone2:#9a9185;
+  --stone3:#c3beb7;
+  --tshadow:rgba(30,30,40,.28);
+}

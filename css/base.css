@@ -1,61 +1,16 @@
 /* css/base.css - theme tokens, layout, panels, overlays, level-up, battle drama.
    The CSS files are one stylesheet cut into pieces in cascade order (index.html links them in this order): a later rule
    overrides an earlier one. Append new rules to latest.css unless you know nothing later overrides them. */
-/* Theme tokens. Two looks, switched by <html data-theme="dark|light"> (see applyTheme() in js/audio.js):
+/* Theme tokens (their colour values all live in css/theme.css since build 253; only color-scheme stays here).
+   Two looks, switched by <html data-theme="dark|light"> (see applyTheme() in js/audio.js):
    dark = "Slate glass", light = "Sand and sea glass". The dark values are on bare :root, so they are also
    the fallback. The town map keeps its night colours in the light theme (it re-declares the dark
    tokens on those containers); battles and building interiors follow the theme since v1.88.0 / v1.79.0. */
 :root, :root[data-theme="light"] .town-map-wrap {
   color-scheme: dark;
-  --bg-top: #1b2128;
-  --bg-bottom: #12161b;
-  --stone: #232b34;
-  --stone-edge: #333d48;
-  --water: #8dbccb;
-  --water-glow: #a6cfdb;
-  --water-ink: #7fb8c8;          /* sea-glass as readable text */
-  --on-water: #0f2a35;           /* text on a sea-glass fill */
-  --rc-a: #5b9fb2;               /* deeper blue-teal for common-rarity card faces and bars that carry white text */
-  --rc-b: #3f7f94;
-  --ink: #e9edf1;
-  --ink-soft: #a6b1bb;
-  --shadow: rgba(0, 0, 0, 0.35);
-  --overlay-bg: rgba(8, 11, 15, 0.6);
-  --board-bg: rgba(233, 237, 241, 0.06);
-  --hl: #ffffff;                 /* base for faint highlights on chrome (white on dark, ink on light) */
-  --track: rgba(0, 0, 0, 0.3);   /* empty part of a gauge */
-  --accent: #e8cb88;
-  --on-accent: #3a2a08;
-  --rare: #9a86c9;
-  --epic: #6a96c2;
-  --mythic: #c27a9c;
-  --divine: #d9b45a;
-  --atlas: #8f7ad9;
-  --win-glow: #6a9f7c;
-  --lose-glow: #b17a63;
-  --boss-glow: #b1615e;
 }
 :root[data-theme="light"] {
   color-scheme: light;
-  --bg-top: #f3ece0;
-  --bg-bottom: #e4eee9;
-  --stone: #fbf7ef;
-  --stone-edge: #ddd6c5;
-  --water: #8fc4b8;
-  --water-glow: #a6d3c9;
-  --water-ink: #3f7f78;
-  --on-water: #1f4540;
-  --rc-a: #5aa397;
-  --rc-b: #3f7f78;
-  --ink: #4b4a46;
-  --ink-soft: #6b6a64;
-  --shadow: rgba(75, 74, 70, 0.2);
-  --overlay-bg: rgba(58, 56, 50, 0.5);
-  --board-bg: rgba(75, 74, 70, 0.05);
-  --hl: #4b4a46;
-  --track: rgba(75, 74, 70, 0.14);
-  --accent: #b5832a;
-  --on-accent: #ffffff;
 }
 :root { --f-display: 'Newsreader', Georgia, 'Times New Roman', serif; --f-ui: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
 
@@ -94,8 +49,8 @@ input { -webkit-user-select: text; user-select: text; }
 .hud-portrait.av-glow { box-shadow: 0 2px 8px var(--shadow), inset 0 0 0 2px color-mix(in srgb, var(--hl) 14%, transparent), 0 0 8px 1px var(--av-glow-color, var(--water)); }
 .hud-portrait .a-emoji { font-size: 1.35rem; line-height: 1; }
 .lvl-badge { position: absolute; bottom: -3px; right: -3px; min-width: 16px; height: 16px; padding: 0 3px; border-radius: 999px;
-  background: var(--accent, #d98a3d); color: var(--on-accent); font-size: 0.58rem; font-weight: 800; display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.45); border: 1.5px solid var(--bg-top, #1a1f1c); line-height: 1; }
+  background: var(--accent, var(--c-orange-55)); color: var(--on-accent); font-size: 0.58rem; font-weight: 800; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.45); border: 1.5px solid var(--bg-top, var(--c-grey-11)); line-height: 1; }
 .hud-id-text { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 3px; min-width: 40px; text-align: left; flex-shrink: 1; }
 .hud-name { font-size: 0.86rem; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; }
 .hud-xp-bar { width: 100%; max-width: 74px; height: 4px; border-radius: 999px; background: var(--track); overflow: hidden; }
@@ -124,7 +79,7 @@ input { -webkit-user-select: text; user-select: text; }
 .hs-fill-cards { background: linear-gradient(90deg, rgba(217,160,102,0.45), rgba(217,160,102,0.22)); }
 .hs-fill-pebbles { background: linear-gradient(90deg, rgba(79,143,134,0.45), rgba(79,143,134,0.22)); }
 .hud-deck-fill { position: absolute; inset: 0; height: 100%; width: 0%; background: linear-gradient(90deg, var(--water), var(--water-glow)); border-radius: 0 999px 999px 0; transition: width 0.35s ease; }
-.hud-deck.deck-full .hud-deck-fill { background: linear-gradient(90deg, var(--win-glow), #8fd4a3); }
+.hud-deck.deck-full .hud-deck-fill { background: linear-gradient(90deg, var(--win-glow), var(--c-green-70)); }
 .hs-val { position: relative; z-index: 1; font-size: 0.76rem; }
 
 .hud-spacer { flex: 1; min-width: 4px; }
@@ -193,7 +148,7 @@ input { -webkit-user-select: text; user-select: text; }
 }
 .decoration-cancel-btn:active { transform: scale(0.94); }
 .town-tile.placeable {
-  outline: 3px solid var(--accent, #d98a3d); outline-offset: -3px; cursor: pointer;
+  outline: 3px solid var(--accent, var(--c-orange-55)); outline-offset: -3px; cursor: pointer;
   animation: placeable-pulse 1.4s ease-in-out infinite; z-index: 3;
 }
 .town-tile.placeable::after {
@@ -222,7 +177,7 @@ input { -webkit-user-select: text; user-select: text; }
 .radar-grid-mini .rd-tile { border-radius: 2px; background: rgba(255,255,255,0.16); position: relative; }
 .radar-grid-mini .rd-tile.on { background: var(--water); }
 .radar-grid-mini .rd-tile.locked { background: rgba(0,0,0,0.4); }
-.radar-grid-mini .rd-tile.current { background: var(--accent, #d98a3d); animation: pulse-dot 1.6s ease-in-out infinite; }
+.radar-grid-mini .rd-tile.current { background: var(--accent, var(--c-orange-55)); animation: pulse-dot 1.6s ease-in-out infinite; }
 
 .panel { text-align: left; }
 .panel-list { display: flex; flex-direction: column; gap: 8px; padding: 2px; }
@@ -260,7 +215,7 @@ input { -webkit-user-select: text; user-select: text; }
 }
 .deco-mini-btn:active { transform: scale(0.9); background: var(--stone-edge); }
 /* A little extra distance before Delete, and a distinct tone, so it doesn't sit flush against Move/Store. */
-.deco-mini-btn[data-del] { margin-left: 4px; color: #c26a5a; }
+.deco-mini-btn[data-del] { margin-left: 4px; color: var(--c-red-56); }
 
 /* Card art: an <img> dropped in via cardArtHtml() (data-and-engine.js) in place of a card's emoji icon.
    Sized in em so it fills whatever font-size the surrounding icon container already sets (.icon, .c-icon,
@@ -273,10 +228,10 @@ input { -webkit-user-select: text; user-select: text; }
 .card-mini .c-power { font-size: 0.68rem; font-weight: 700; color: white; }
 
 .rarity-common { background: linear-gradient(135deg, var(--rc-a), var(--rc-b)); }
-.rarity-rare { background: linear-gradient(135deg, #c9bce8, var(--rare)); }
-.rarity-ultra { background: linear-gradient(135deg, #a8cbe8, var(--epic)); }
-.rarity-super { background: linear-gradient(135deg, #f0cf94, var(--accent)); }
-.rarity-mythic { background: linear-gradient(135deg, #eaa8c4, var(--mythic)); box-shadow: 0 0 10px rgba(217, 143, 176, 0.5); }
+.rarity-rare { background: linear-gradient(135deg, var(--c-indigo-82), var(--rare)); }
+.rarity-ultra { background: linear-gradient(135deg, var(--c-blue-78), var(--epic)); }
+.rarity-super { background: linear-gradient(135deg, var(--c-amber-76), var(--accent)); }
+.rarity-mythic { background: linear-gradient(135deg, var(--c-pink-79), var(--mythic)); box-shadow: 0 0 10px rgba(217, 143, 176, 0.5); }
 
 .deck-count { font-size: 0.72rem; color: var(--ink-soft); margin-bottom: 10px; text-align: center; }
 
@@ -338,7 +293,7 @@ input { -webkit-user-select: text; user-select: text; }
 .avatar-preview.av-glow { box-shadow: 0 4px 14px var(--shadow), 0 0 14px 2px var(--av-glow-color, transparent); }
 .level-summary { margin: 0 0 12px; }
 .level-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 5px; }
-.level-badge-lg { background: var(--accent, #d98a3d); color: var(--on-accent); font-weight: 800; font-size: 0.78rem; padding: 2px 10px; border-radius: 999px; }
+.level-badge-lg { background: var(--accent, var(--c-orange-55)); color: var(--on-accent); font-weight: 800; font-size: 0.78rem; padding: 2px 10px; border-radius: 999px; }
 .level-xp-text { font-size: 0.72rem; color: var(--ink-soft); }
 .level-bar { height: 8px; border-radius: 999px; background: var(--track); overflow: hidden; max-width: 220px; margin: 0 auto; }
 .level-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--water), var(--water-glow, var(--water))); border-radius: 999px; transition: width 0.3s ease; }
@@ -608,7 +563,7 @@ body.in-battle .toast.show { transform: translateX(-50%) translateY(0); }
 .rarity-tag { display: inline-block; font-size: 0.68rem; padding: 3px 10px; border-radius: 999px; color: white; margin-bottom: 8px; letter-spacing: 0.04em; }
 .xp-gain-tag { display: inline-block; margin-top: 6px; font-size: 0.68rem; font-weight: 800; color: var(--on-water); background: var(--water); padding: 2px 9px; border-radius: 999px; }
 .rt-common { background: var(--rc-b); } .rt-rare { background: var(--rare); } .rt-ultra { background: var(--epic); }
-.rt-super { background: var(--accent); } .rt-mythic { background: var(--mythic); animation: shimmer 2s linear infinite; background-size: 200% 100%; background-image: linear-gradient(90deg, var(--mythic), #f0c4d8, var(--mythic)); }
+.rt-super { background: var(--accent); } .rt-mythic { background: var(--mythic); animation: shimmer 2s linear infinite; background-size: 200% 100%; background-image: linear-gradient(90deg, var(--mythic), var(--c-pink-85), var(--mythic)); }
 @keyframes shimmer { 0% { background-position: 0% 0; } 100% { background-position: 200% 0; } }
 
 .overlay-card.glow-rare { box-shadow: 0 0 0 2px var(--rare), 0 10px 40px rgba(0,0,0,0.2); }
@@ -629,15 +584,15 @@ body.in-battle .toast.show { transform: translateX(-50%) translateY(0); }
    rules don't reach here since this sits outside #battleView, so the essentials are restated at this scale. */
 .reveal-card-frame { display: flex; justify-content: center; margin: 4px 0 14px; }
 .reveal-card {
-  position: relative; width: 132px; aspect-ratio: 3 / 4; border-radius: 16px; color: #fff;
+  position: relative; width: 132px; aspect-ratio: 3 / 4; border-radius: 16px; color: var(--c-grey-100);
   display: flex; flex-direction: column; align-items: center; justify-content: space-between;
   padding: 10px 8px 8px; box-shadow: 0 6px 18px var(--shadow);
 }
 .reveal-card.rarity-common { background: linear-gradient(135deg, var(--rc-a), var(--rc-b)); }
-.reveal-card.rarity-rare { background: linear-gradient(135deg, #c9bce8, var(--rare)); }
-.reveal-card.rarity-ultra { background: linear-gradient(135deg, #a8cbe8, var(--epic)); }
-.reveal-card.rarity-super { background: linear-gradient(135deg, #f0cf94, var(--accent)); }
-.reveal-card.rarity-mythic { background: linear-gradient(135deg, #eaa8c4, var(--mythic)); box-shadow: 0 0 16px rgba(217,143,176,.55); }
+.reveal-card.rarity-rare { background: linear-gradient(135deg, var(--c-indigo-82), var(--rare)); }
+.reveal-card.rarity-ultra { background: linear-gradient(135deg, var(--c-blue-78), var(--epic)); }
+.reveal-card.rarity-super { background: linear-gradient(135deg, var(--c-amber-76), var(--accent)); }
+.reveal-card.rarity-mythic { background: linear-gradient(135deg, var(--c-pink-79), var(--mythic)); box-shadow: 0 0 16px rgba(217,143,176,.55); }
 .reveal-card .cost { position: absolute; top: -10px; left: -10px; width: 32px; height: 32px; border-radius: 50%; background: var(--ink); color: var(--stone); font-size: 1rem; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px var(--shadow); }
 .reveal-card .icon { font-size: 2.6rem; line-height: 1; margin-top: 10px; }
 .reveal-card .nm { font-size: 0.88rem; font-weight: 700; opacity: .95; text-align: center; line-height: 1.15; padding: 0 2px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -649,14 +604,14 @@ body.in-battle .toast.show { transform: translateX(-50%) translateY(0); }
 .reveal-card .spell-tag { margin-top: auto; font-size: 0.72rem; font-weight: 800; letter-spacing: .04em; background: rgba(0,0,0,.28); border-radius: 999px; padding: 3px 10px; }
 
 /* ===== Level-up celebration ===== */
-.level-up-card { text-align: center; box-shadow: 0 0 0 2px var(--accent, #d98a3d), 0 0 40px rgba(217,160,102,0.5); overflow: hidden; }
+.level-up-card { text-align: center; box-shadow: 0 0 0 2px var(--accent, var(--c-orange-55)), 0 0 40px rgba(217,160,102,0.5); overflow: hidden; }
 .level-up-rays { position: absolute; inset: -40%; z-index: 0; opacity: 0.5;
   background: conic-gradient(from 0deg, transparent 0deg, rgba(255,224,160,0.5) 8deg, transparent 20deg, transparent 40deg, rgba(255,224,160,0.5) 48deg, transparent 60deg, transparent 90deg, rgba(255,224,160,0.4) 98deg, transparent 110deg, transparent 150deg, rgba(255,224,160,0.5) 158deg, transparent 170deg, transparent 200deg, rgba(255,224,160,0.4) 208deg, transparent 220deg, transparent 260deg, rgba(255,224,160,0.5) 268deg, transparent 280deg, transparent 320deg, rgba(255,224,160,0.4) 328deg, transparent 340deg);
   animation: rays-spin 10s linear infinite; }
 @keyframes rays-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 .level-up-icon { font-size: 3.6rem; animation: level-icon-pop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1); filter: drop-shadow(0 0 14px rgba(255,207,102,0.8)); }
 @keyframes level-icon-pop { 0% { transform: scale(0.3) rotate(-25deg); opacity: 0; } 60% { transform: scale(1.15) rotate(6deg); opacity: 1; } 100% { transform: scale(1) rotate(0); } }
-.level-up-num { font-size: 2.6rem; font-weight: 900; color: var(--accent, #d98a3d); text-shadow: 0 2px 10px rgba(217,160,102,0.5); animation: level-num-pop 0.5s 0.15s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.level-up-num { font-size: 2.6rem; font-weight: 900; color: var(--accent, var(--c-orange-55)); text-shadow: 0 2px 10px rgba(217,160,102,0.5); animation: level-num-pop 0.5s 0.15s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
 @keyframes level-num-pop { 0% { transform: scale(0.4); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 /* ===== Battle drama ===== */
 

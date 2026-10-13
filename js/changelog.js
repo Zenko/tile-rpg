@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'better', x: 'Behind the scenes: every colour in the game\'s look now comes from one theme file, ready for a future redesign. Nothing changes on screen.' },
   { t: 'better', x: 'Behind the scenes: the game\'s cards, places, dialogue, story and quests now live in their own content files, apart from the code. Nothing changes on screen.' },
   { t: 'better', x: 'Behind the scenes: every name in the game (the town, its places, its people, the Embers) now comes from one settings file, ready for a future redesign. Nothing changes on screen.' },
   { t: 'new', x: 'The Dream Gazette: a new front page every morning, the same story for every dreamer, with today\'s event, the town goal and any visitors underneath. Find it at the top of the Journal\'s Today page.' },

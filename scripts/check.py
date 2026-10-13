@@ -141,6 +141,22 @@ else:
     man = json.load(open('manifest.json', encoding='utf-8'))
     if man.get('name') != cfg['GAME']['title']: fail(f'manifest.json "name" is "{man.get("name")}" but GAME.title is "{cfg["GAME"]["title"]}"')
 
+# 8. Every colour in the stylesheets lives in css/theme.css (HANDOFF §5 "Reskinning"): no hex colour, and no colour variable
+#    declared, in any other css/ file. A new colour goes into theme.css's palette (or a token there) and the rule reads var().
+css_hex = re.compile(r'/\*.*?\*/|url\((?:[^()"\']|"[^"]*"|\'[^\']*\')*\)|#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3,4})\b', re.S)
+css_colour_var = re.compile(r'(?<![\w-])(--[\w-]+)\s*:\s*[^;}]*?(#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\(|color-mix\()')
+for f in sorted(glob.glob('css/*.css')):
+    if f == 'css/theme.css': continue
+    s = open(f, encoding='utf-8').read()
+    for m in css_hex.finditer(s):
+        if m.group(0).startswith('#'): fail(f'{f}:{s.count(chr(10), 0, m.start()) + 1} has the colour {m.group(0)} - put it in css/theme.css and use var()')
+    for m in css_colour_var.finditer(re.sub(r'/\*.*?\*/', lambda c: ' ' * len(c.group(0)), s, flags=re.S)):
+        fail(f'{f}:{s.count(chr(10), 0, m.start()) + 1} declares the colour variable {m.group(1)} - colour variables live in css/theme.css')
+theme_vars = set(re.findall(r'(--[\w-]+)\s*:', open('css/theme.css', encoding='utf-8').read()))
+for f in sorted(glob.glob('css/*.css')):
+    for v in sorted(set(re.findall(r'var\(\s*(--c-[\w-]+)', open(f, encoding='utf-8').read())) - theme_vars):
+        fail(f'{f} reads {v}, which css/theme.css does not define')
+
 BIG = 1500   # a nudge, not a failure: past this a file is usually doing several jobs and wants splitting (see HANDOFF)
 for f in files + sorted(glob.glob('css/*.css')):
     n = sum(1 for _ in open(f, encoding='utf-8'))
