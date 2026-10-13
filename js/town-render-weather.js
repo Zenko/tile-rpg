@@ -600,7 +600,7 @@ function renderEntities(data) {
   data.items.forEach(it => {
     if (it.collected) return;
     const e = add('item', it.x, it.y, '<span>🃏</span>');
-    if (ITEM_DESPAWN_MS - (Date.now() - it.spawnedAt) < 6000) e.classList.add('despawning');
+    if (!it.fixed && ITEM_DESPAWN_MS - (Date.now() - it.spawnedAt) < 6000) e.classList.add('despawning');
   });
   const liveSpiritIds = new Set();
   (data.spirits || []).forEach(s => {
@@ -1216,6 +1216,7 @@ function beginPlacementUI(text) {
 function startPlacingDecoration(item, movingUid) {
   if (inScene && typeof shopModeActive === 'function' && shopModeActive()) closeScene();   // Place/Move from the Card Shop's Items: step back out to the map first
   if (inBattle || inScene) return;
+  if (typeof pwBlocksTravel === 'function' && pwBlocksTravel()) return;   // decorations would be lost with the world
   let movingOriginal = null, district = state.currentDistrict;
   if (movingUid) {
     const found = findDecoration(movingUid);

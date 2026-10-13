@@ -225,6 +225,7 @@ function lifeStep(x, y) {
   if (pud && pud.tiles.some(t => t.x === x && t.y === y) && !LIFE.splashed.has(pk)) {
     LIFE.splashed.add(pk); lifeFx('life-splash', x, y, '', 600); sfx('splash'); buzz(HAP.tap);
     bumpStat('puddles', 1);
+    if (typeof pwMaybeEnter === 'function') pwMaybeEnter(x, y);   // js/puddle-worlds.js: now and then a puddle is a way in
   }
 }
 

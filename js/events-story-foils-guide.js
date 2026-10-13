@@ -152,6 +152,7 @@ const GUIDE = [
     { icon: '🧶', name: 'Table mats', where: 'Card Shop → Customize, then Player → Customize', how: 'The cloth on your side of the battle table. Buy one with Embers, then pick it in your Customize tab.' },
     { icon: '🎨', name: 'Themes', where: 'Tap your avatar → Settings → Appearance', how: 'Dark (sea glass), Light (sand and sea glass) or Auto, which follows your device. The map, battles and interiors stay dark either way.' },
     { icon: '🪑', name: 'Things to do in town', where: 'Benches, wells, lamps, trees, water, puddles', how: 'Sit, wish, light lamps after dark, shake trees, skip stones, splash in the rain, scatter the birds. The Square, Market, Harbor and Garden each have an activity too: busking, haggling, hauling nets and watering plants.' },
+    { icon: '🌀', name: 'Puddle worlds', where: 'Puddles in the rain', how: 'Now and then a puddle you splash through is a way into a small world that lasts only a few minutes. Every one is different, with its own look, hidden cards and spirits. The timer in the top bar counts down; tap it to climb out early. When it runs out the world is gone and you are back where you fell in. Not in Cozy mode.' },
     { icon: '🎈', name: 'Town mood', where: 'Shown on signs and prop menus', how: 'Every interaction fills the district\'s mood. At 10, 25 and 50 it dresses up for good: balloons, flower pots, then lamps that glow all night.' },
     { icon: '✨', name: 'Night critters', where: 'Every district, after dark', how: 'Tap a glowing critter to catch it. Trade them at the Lantern Market.' },
     { icon: '👻', name: 'Companions', where: 'Character → Companion', how: 'Any card you own, any neighbour (at full hearts) or boss you have met, and Rook can walk with you, once you are high enough level. Each lends small perks and your bond with each is kept. Tap your companion to go for a walk, calm down, spar, play tic-tac-toe or Spirit Trumps, play Hide and Seek, chat, pet, talk or duel.' },
@@ -402,6 +403,7 @@ document.getElementById('feedbackModalSubmit').addEventListener('click', () => {
 });
 
 loadState();
+pwBoot();          // js/puddle-worlds.js: a world that ended while the game was closed is gone; one still running is rebuilt from its seed
 ensureJournal();   // drops saved note drawings once (build 240), so an old save shrinks on its first load
 applyComfortPrefs();
 ensureQuests();

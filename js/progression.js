@@ -42,6 +42,7 @@ const TIPS = {
   forecast:   { icon: '🪧', title: 'The weather board', text: 'Signs show the forecast. Weather changes play: clear pays a little extra on daily tasks, cloudy doubles spirit XP, rain helps fishing and growing, storms boost Flicker cards, snow toughens bosses for richer prizes.' },
   events:     { icon: '📅', title: 'Daily town events', text: "One event runs each day, shown next to the district name - a Thought Fishing Derby, Market Day, Harvest Fair and more, each bending the rules a little in your favor." },
   foils:      { icon: '✨', title: 'Reborn cards', text: 'A Reborn card is a spirit that faded as an Echo and came back, purely a collector\'s chase - the same card, just shimmering. Your Reborn total shows at the top of Cards → Sets and in your cottage trophy case.' },
+  puddleworld: { icon: '🌀', title: 'A puddle swallowed you', text: 'Splash through enough puddles in the rain and one of them leads somewhere else: a little world that only lasts a few minutes. Look around for hidden cards and spirits before the timer in the top bar runs out. Then the world is gone and you are back where you fell in. Tap the timer if you want to climb out early.' },
   townlife:   { icon: '🪑', title: 'Things to do around town', text: 'Props do things now: sit on benches, make a wish at wells, light lamps after dark, haggle, haul nets, water plants or busk for tips. Shake trees, skip stones, splash through puddles in the rain. Everything nudges the district\'s town mood - fill it up and the district dresses itself up for good.' },
   character:  { icon: '🧑', title: 'Your character', text: 'You and your companion stand on a backdrop you choose. Check your stats here, change how you look in Look, and see your bag, milestones and companion. Tap the 🎨 to jump to the backdrops, and tap a milestone with a 🏷️ title to wear it. Settings are behind your avatar at the top.' },
   fishing:    { icon: '🎣', title: 'Thought Fishing', text: 'Pick a bait that suits the fish you want, then cast and watch the shadow: its size hints at the catch. When it bites, tap to hook it, then hold the button to reel. Keep the marker in the green and ease off when the fish runs. Nothing is lost if it gets away. Prefer simpler? Turn on Easy reeling in Settings.' },
@@ -76,7 +77,7 @@ const XP_PER_STAT = {
   breadBaked: 8, breadShared: 10, spellsCast: 3, seedsPlanted: 3, seedsFound: 5, cropsHarvested: 5, rivalWins: 60,
   minigamesPlayed: 5, minigameGolds: 10, talks: 1, foilsFound: 20,
   donations: 6, expeditionsDone: 25, tradesDone: 15, cardsGifted: 10, challengesWon: 40, setsCompleted: 60, masteryRanks: 15, charmsSet: 2,
-  tossWins: 2, knacksUsed: 3, draftWins: 20, draftClears: 60, ghostWins: 6, townActs: 3, townGames: 8, puddles: 1, stonesSkipped: 1,
+  tossWins: 2, knacksUsed: 3, draftWins: 20, draftClears: 60, ghostWins: 6, townActs: 3, townGames: 8, puddles: 1, puddleWorlds: 8, stonesSkipped: 1,
   dishesCooked: 10, dishesGiven: 10, snacksEaten: 2, puzzlesSolved: 40, cupRoundsWon: 30, cupTrophies: 100, bugsCaught: 8, lettersRead: 2, homeVisitors: 30,
 };
 /* ============================================================

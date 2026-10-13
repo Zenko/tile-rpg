@@ -347,9 +347,9 @@ function townSignature() {
   const now = Date.now();
   // Captures everything that can visibly change on its own: item presence/position and the fade-warning window
   const itemSig = data.items.map(it => {
-    const fading = !it.collected && (ITEM_DESPAWN_MS - (now - it.spawnedAt)) < 6000;
-    const respawnDue = it.collected && it.collectedAt && (now - it.collectedAt) >= ITEM_RESPAWN_MS;
-    const despawnDue = !it.collected && (now - it.spawnedAt) >= ITEM_DESPAWN_MS;
+    const fading = !it.fixed && !it.collected && (ITEM_DESPAWN_MS - (now - it.spawnedAt)) < 6000;
+    const respawnDue = !it.fixed && it.collected && it.collectedAt && (now - it.collectedAt) >= ITEM_RESPAWN_MS;
+    const despawnDue = !it.fixed && !it.collected && (now - it.spawnedAt) >= ITEM_DESPAWN_MS;
     return [it.x, it.y, it.collected, fading, respawnDue, despawnDue].join(':');
   }).join('|');
   const npcSig = data.npcs.map(n => {

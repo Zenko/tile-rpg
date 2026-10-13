@@ -601,7 +601,7 @@ function tickItems(data) {
   let changed = false;
 
   data.items.forEach(it => {
-    if (!it.collected && it.spawnedAt && (now - it.spawnedAt) >= ITEM_DESPAWN_MS) {
+    if (!it.fixed && !it.collected && it.spawnedAt && (now - it.spawnedAt) >= ITEM_DESPAWN_MS) {
       it.collected = true;
       it.collectedAt = now;
       it.despawnedUncollected = true;
@@ -610,7 +610,7 @@ function tickItems(data) {
   });
 
   data.items.forEach(it => {
-    if (it.collected && it.collectedAt && (now - it.collectedAt) >= ITEM_RESPAWN_MS) {
+    if (!it.fixed && it.collected && it.collectedAt && (now - it.collectedAt) >= ITEM_RESPAWN_MS) {   // `fixed` = a puddle world's card: it stays until found or until the world ends
       const spot = findFreeTile(data);
       it.x = spot.x;
       it.y = spot.y;

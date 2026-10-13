@@ -118,7 +118,7 @@ const MAP_CACHE = {};
 function getMap(key) {
   if (MAP_CACHE[key]) { refreshFishTiles(MAP_CACHE[key], key); return MAP_CACHE[key]; }
   const HAND_MAPS = { square: MAP_SQUARE, market: MAP_MARKET };
-  const def = HAND_MAPS[key] || proceduralMap(key);
+  const def = key === 'pw' && typeof pwMapDef === 'function' ? pwMapDef() : (HAND_MAPS[key] || proceduralMap(key));   // 'pw' = the current puddle world (js/puddle-worlds.js)
   const m = { key, w: def.w, h: def.h, rows: def.rows.slice(), spawn: def.spawn, biome: BIOME_OF[key] || 'meadow', buildings: [], props: def.props.map(p => Object.assign({}, p)), solid: [], entries: {}, exits: {} };
   (EXITS_BY_DISTRICT[key] || []).forEach(exit => {
     const t = edgeTileFor(m, exit.dir, exit.at);

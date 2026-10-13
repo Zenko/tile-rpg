@@ -161,14 +161,14 @@ document.getElementById('worldMapOverlay').addEventListener('keydown', e => {
    the midpoint; if reduced motion is on, the swap happens at once with only a brief fade. */
 let travelFading = false;
 const TRAVEL_ICON = { square: '⛲', market: '🏪', harbor: '⚓', garden: '🌻' };
-function withTravelTransition(key, swap) {
+function withTravelTransition(key, swap, opts) {   // opts: { sub, icon } override the small text and the icon (puddle worlds use both)
   const def = DISTRICTS[key];
   if (travelFading || !def) { swap(); return; }
   travelFading = true;
   const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   const el = document.createElement('div');
   el.className = 'travel-fade theme-' + def.theme;
-  el.innerHTML = `<div class="tf-inner"><div class="tf-icon">${TRAVEL_ICON[key] || '🗺️'}</div><div class="tf-name">${def.name}</div><div class="tf-sub">${state.visitedDistricts.includes(key) ? 'Heading over…' : 'A new place…'}</div></div>`;
+  el.innerHTML = `<div class="tf-inner"><div class="tf-icon">${(opts && opts.icon) || TRAVEL_ICON[key] || '🗺️'}</div><div class="tf-name">${def.name}</div><div class="tf-sub">${opts && opts.sub ? escapeHtml(opts.sub) : state.visitedDistricts.includes(key) ? 'Heading over…' : 'A new place…'}</div></div>`;
   document.body.appendChild(el);
   requestAnimationFrame(() => el.classList.add('on'));
   setTimeout(() => {
@@ -202,6 +202,7 @@ function crossExitNow(exit, def) {
   sfx('claim'); buzz(HAP.tap);
 }
 function travelToDistrict(key) {
+  if (typeof pwBlocksTravel === 'function' && pwBlocksTravel()) return;   // js/puddle-worlds.js: a puddle world holds you until its timer ends
   if (key !== state.currentDistrict) withTravelTransition(key, () => travelToDistrictNow(key));
   else travelToDistrictNow(key);
 }

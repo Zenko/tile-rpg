@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t:'new', x: 'Puddle worlds: when it rains, any puddle you splash through might swallow you and drop you into a small, different world - its own look, layout, hidden cards and spirits. A timer in the top bar counts down a few minutes; when it runs out the world disappears and you are back where you fell in. Tap the timer to climb out early. Off in Cozy mode.' },
   { t:'better', x: 'If your device ever cannot store your save, or the cloud backup is refused, the game now tells you instead of quietly stopping. Saved drawings from the old Theories page are cleared out of your save (your written notes stay), which makes saves much smaller.' },
   { t:'better', x: 'Journal -> Theories now only keeps what the Atlas has told you. Notes and drawings are paused for now (they were making saves too big); anything you wrote is still safe in your save.' },
   { t:'better', x: 'Lighter on your battery: the game stops its background checks (weather, mail, the boss clock) while the app is hidden and catches up the moment you come back. Start-up also carries less: the old Before Beta notes now load only when you open them.' },

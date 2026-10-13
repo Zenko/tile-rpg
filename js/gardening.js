@@ -65,6 +65,7 @@ function startPlanting(seedId) {
   const s = seedDef(seedId);
   if (!s || seedCount(seedId) <= 0 || inBattle || inScene) return;
   if (cropsIn().length >= PLOT_MAX) { toast(`All ${PLOT_MAX} garden plots are in use`); return; }
+  if (typeof pwBlocksTravel === 'function' && pwBlocksTravel()) return;   // planting walks you to the Square; not from inside a puddle world
   placingDecoration = { item: { icon: s.icon, name: s.name + ' seed' }, district: 'square', seed: seedId };
   goToDistrictFor('square');
   beginPlacementUI(`Planting ${s.icon} ${s.name} - tap a glowing patch of ground`);
