@@ -18,10 +18,18 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
-  { t:'new', x: 'Weather alerts. A new switch in Settings, under Notify me, sends a notification when the weather turns while the game is in the background ("Moonrain starts to fall" and what it changes). With it on, the weather keeps moving while you are away; with it off, weather still only moves while you play. Like the bread and boss notifications, it cannot wake an app your phone has fully closed.' },
 ];
 
 const RELEASES = [
+  {
+    id: 'beta-6', n: 6, date: '2026-10-13', title: 'Weather alerts',
+    intro: 'Get a nudge when the weather turns, even while the game is in the background.',
+    new: [
+      'Weather alerts. A new switch in Settings, under Notify me, sends a notification when the weather turns while the game is in the background ("Moonrain starts to fall" and what it changes). With it on, the weather keeps moving while you are away; with it off, weather still only moves while you play. Like the bread and boss notifications, it cannot wake an app your phone has fully closed.',
+    ],
+    better: [],
+    fixed: [],
+  },
   {
     id: 'beta-5', n: 5, date: '2026-10-13', title: 'Three new kinds of puddle world',
     intro: 'A puddle no longer drops you into just one sort of place. Now it might be a maze, a board game or a sunken city.',
