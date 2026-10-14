@@ -919,3 +919,11 @@
 .ent.life-portal[data-fam="wind"]  { --portal-rim: #e6ddff; --portal-swirl-a: #9b86ff; --portal-swirl-b: #f2f6ff; --portal-glow: rgba(190, 175, 255, 0.55); --portal-core: #1b1438; }
 /* The Daily Rift's gold portal (build 259, js/daily-rift.js). */
 .ent.life-portal.daily { --portal-rim: #ffe7a3; --portal-swirl-a: #e8b23a; --portal-swirl-b: #fff3c4; --portal-glow: rgba(255, 210, 110, 0.6); --portal-core: #2b1d05; }
+/* Time-stop worlds (build 260, js/puddle-still.js). */
+:root {
+  --still-veil: #8ea4b8;                  /* blended over the ground in "color" mode: drains it to a cold grey-blue */
+  --still-drop: rgba(205, 228, 255, 0.85); /* the rain hanging in the air */
+  --still-mote-a: #fff6c9;                /* a mote's bright middle */
+  --still-mote-b: #7fe3ff;                /* and its glow */
+  --still-ice: rgba(190, 220, 255, 0.55); /* the rim of frost round a frozen neighbour */
+}

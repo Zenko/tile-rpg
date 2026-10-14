@@ -15,7 +15,8 @@
    - Off in Cozy mode (a countdown is exactly the pressure that mode takes away).
    Kinds of world (build 245): every world has a `kind`. 'explore' (below) is the original: wander and look for cards. js/puddle-modes.js adds
    'maze' (find the way out, racing neighbours), 'ladders' (a dice-only board game) and 'deep' (an underwater city). A kind is an entry in
-   PW_KINDS with hooks: create, generate, build, enter, leave, boot, render, tap, exit, goal (see pwKind and the hook helpers below).
+   PW_KINDS with hooks: create, generate, build, enter, leave, boot, render, tap, exit, goal, and step (each step she takes; build 260)
+   (see pwKind and the hook helpers below). js/puddle-still.js adds 'still', the time-stop world.
    Tunables are the PW_* constants right below. Colour palettes: scripts/build-pw-biomes.py -> css/theme.css. The way in plays the warped-time transition (js/warp-fx.js);
    a portal (js/portal.js) is a second way in, always open for a while, that calls pwEnter(x, y, undefined, 'portal').
    ============================================================ */
@@ -370,6 +371,7 @@ function pwRenderEntities(data, add) {   // from lifeRenderEntities (town-life.j
   if (!pwInside()) { pwLayerClear(); return; }
   const w = pwActive(), k = pwKind(w); if (k.render) k.render(w, data, add);
 }
+function pwStep(x, y) { if (!pwInside()) return; const w = pwActive(), k = pwKind(w); if (k.step) k.step(w, x, y); }   // every step she takes inside a world (from lifeStep)
 function pwHandleTap(tx, ty) { if (!pwInside()) return false; const w = pwActive(), k = pwKind(w); return !!(k.tap && k.tap(w, tx, ty)); }   // true = the tap is used up
 function pwReachedExit(exit) { if (!exit || !exit.pw) return false; const w = pwActive(), k = pwKind(w); if (w && k.exit) k.exit(w); return true; }   // from crossExit (world-map.js)
 function pwGoal() {   // the goal pill at the top: what this world is about

@@ -2288,3 +2288,27 @@ body.pw-board #goalChip { display: none !important; }   /* the dice panel says w
 #riftList .dr-score { white-space: nowrap; }
 #riftList .dr-none { color: var(--ink-soft); }
 .ent.life-portal.daily .pt-glow { animation-duration: 1.8s; }
+
+/* ---- TIME-STOP (build 260, js/puddle-still.js): the 'still' puddle world. A veil drains the ground's colour (above the ground,
+   below everything standing), rain hangs as still streaks, folk are grey and frosted, only the motes move. .pw-still-late
+   (last 10 steps) makes the rain tremble; .pw-thaw lets it all fall and the colour come back. Colours: --still-*. ---- */
+.pw-still-air { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 0; }
+.pw-still-veil { position: absolute; inset: 0; background: var(--still-veil); mix-blend-mode: color; opacity: .85; transition: opacity 1.4s ease; }
+.pw-still-air .sd { position: absolute; width: 2px; height: calc(var(--t) * var(--l)); border-radius: 2px; background: linear-gradient(transparent, var(--still-drop)); transform: rotate(14deg); z-index: 900; opacity: .8; }
+.pw-still-air .sb { position: absolute; font-size: calc(var(--t) * .38); font-style: normal; z-index: 901; filter: grayscale(1) brightness(1.15); transform: rotate(-12deg); }
+.town-view.pw-still .ent.pw-frozen { flex-direction: column; }
+.town-view.pw-still .ent.pw-frozen span { font-size: calc(var(--t) * .62); line-height: 1; filter: grayscale(1) brightness(1.08) drop-shadow(0 0 3px var(--still-ice)); transform: rotate(-7deg) translateY(-6%); transition: filter 1.2s ease, transform 1.2s ease; }
+.town-view.pw-still .ent.pw-frozen b { font-size: calc(var(--t) * .2); font-weight: 600; color: var(--c-grey-100); opacity: .7; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
+.ent.pw-mote span { width: 46%; height: 46%; border-radius: 50%; background: radial-gradient(circle, var(--still-mote-a) 0 30%, var(--still-mote-b) 60%, transparent 72%); box-shadow: 0 0 14px var(--still-mote-b); animation: still-mote 1.6s ease-in-out infinite; }
+.lfx.pw-mote-pop span, .pw-mote-pop span { font-size: calc(var(--t) * .5); animation: still-pop .7s ease-out forwards; }
+.town-view.pw-still-late .pw-still-air .sd { animation: still-tremble .18s steps(2, end) infinite; }
+.town-view.pw-thaw .pw-still-veil { opacity: 0; }
+.town-view.pw-thaw .pw-still-air .sd { animation: still-fall .9s cubic-bezier(.4, 0, 1, 1) forwards; }
+.town-view.pw-thaw .pw-still-air .sb { animation: still-fly 1.2s ease-in forwards; }
+.town-view.pw-thaw .ent.pw-frozen span { filter: none; transform: none; }
+@keyframes still-mote { 0%, 100% { transform: translateY(0) scale(.92); opacity: .85; } 50% { transform: translateY(-14%) scale(1.06); opacity: 1; } }
+@keyframes still-pop { from { transform: scale(.6); opacity: 1; } to { transform: translateY(-60%) scale(1.5); opacity: 0; } }
+@keyframes still-tremble { 0% { transform: rotate(14deg) translateY(0); } 100% { transform: rotate(14deg) translateY(1px); } }
+@keyframes still-fall { to { transform: rotate(14deg) translateY(calc(var(--t) * 3)); opacity: 0; } }
+@keyframes still-fly { to { transform: translate(calc(var(--t) * 3), calc(var(--t) * -2)) rotate(0deg); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .ent.pw-mote span, .town-view.pw-still-late .pw-still-air .sd { animation: none; } }

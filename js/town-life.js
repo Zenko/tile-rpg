@@ -227,6 +227,7 @@ function lifeStep(x, y) {
     bumpStat('puddles', 1);
     if (typeof pwMaybeEnter === 'function') pwMaybeEnter(x, y);   // js/puddle-worlds.js: now and then a puddle is a way in
   }
+  if (typeof pwStep === 'function') pwStep(x, y);                  // js/puddle-worlds.js: a world kind that counts steps (the time-stop world)
   if (typeof portalStep === 'function') portalStep(x, y);          // js/portal.js: stepping onto an open portal takes you through
   if (typeof dailyRiftStep === 'function') dailyRiftStep(x, y);    // js/daily-rift.js: and onto today's gold one
 }
