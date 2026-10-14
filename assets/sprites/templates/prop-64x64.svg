@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <title>Prop / tree / decoration - 64 x 64 (1 tile) template. One map tile. Props, trees, rocks, hedges, lamps, signs. Draw inside ART using the palette in town-palette.svg, hide GUIDES, export the frame as SVG, then run scripts/svg-to-sprite.py.</title>
+  <g id="ART - draw here">
+    <ellipse id="ground shadow (keep)" cx="32" cy="59" rx="15" ry="4" fill="#000000" fill-opacity="0.32"/>
+  </g>
+  <g id="GUIDES - hide before export" font-family="Arial, sans-serif">
+  <rect x="0.25" y="0.25" width="63.5" height="63.5" fill="none" stroke="#ff2e88" stroke-width="0.5"/>
+  <rect x="4" y="4" width="56" height="56" fill="none" stroke="#ff2e88" stroke-width="0.4" stroke-opacity="0.5" stroke-dasharray="1 2"/>
+  <line x1="0" y1="59" x2="64" y2="59" stroke="#ff2e88" stroke-width="0.5" stroke-opacity="0.7"/>
+  <text x="61" y="57.5" font-size="3.5" fill="#ff2e88" text-anchor="end">ground line</text>
+  <text x="3" y="7" font-size="4" fill="#ff2e88">64 x 64 (1 tile)</text>
+  </g>
+</svg>

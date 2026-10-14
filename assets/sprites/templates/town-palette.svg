@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="780" height="790" viewBox="0 0 780 790" font-family="Arial, sans-serif">
+  <title>Town palette swatches for drawing town sprites. Reference only - not a sprite.</title>
+  <rect width="780" height="790" fill="#1f2a1f"/>
+    <text x="24" y="40" font-size="22" font-weight="700" fill="#e8e2d4">Town palette (Town Square / meadow, dark)</text>
+  <text x="24" y="64" font-size="12" fill="#b9b2a2">Draw with these exact hex values. The converter turns each into its theme variable, so the sprite recolours itself per district and for light mode.</text>
+  <text x="24" y="82" font-size="12" fill="#b9b2a2">Ground shadow: black #000000 at 32% fill opacity. Numbered names (leaf1/2/3, stone/2/3) are shades of one material.</text>
+  <text x="24" y="112" font-size="14" font-weight="700" fill="#e8e2d4">Foliage</text>
+  <rect x="24" y="124" width="72" height="72" rx="8" fill="#2f6a48" stroke="#ffffff" stroke-opacity="0.15"/>
+  <text x="24" y="212" font-size="11" font-weight="700" fill="#e8e2d4">--leaf1</text>
+  <text x="24" y="226" font-size="11" fill="#b9b2a2">#2f6a48</text>
+  <rect x="110" y="124" width="72" height="72" rx="8" fill="#3c8058" stroke="#ffffff" stroke-opacity="0.15"/>
+  <text x="110" y="212" font-size="11" font-weight="700" fill="#e8e2d4">--leaf2</text>
+  <text x="110" y="226" font-size="11" fill="#b9b2a2">#3c8058</text>
+  <rect x="196" y="124" width="72" height="72" rx="8" fill="#57a274" stroke="#ffffff" stroke-opacity="0.15"/>
+  <text x="196" y="212" font-size="11" font-weight="700" fill="#e8e2d4">--leaf3</text>
+  <text x="196" y="226" font-size="11" fill="#b9b2a2">#57a274</text>
+  <rect x="282" y="124" width="72" height="72" rx="8" fill="#20523d" stroke="#ffffff" stroke-opacity="0.15"/>
+  <text x="282" y="212" font-size="11" font-weight="700" fill="#e8e2d4">--pine1</text>
+  <text x="282" y="226" font-size="11" fill="#b9b2a2">#20523d</text>
+  <rect x="368" y="124" width="72" height="72" rx="8" fill="#2c6a50" stroke="#ffffff" stroke-opacity="0.15"/>
+  <text x="368" y="212" font-size="11" font-weight="700" fill="#e8e2d4">--pine2</text>
+  <text x="368" y="226" font-size="11" fill="#b9b2a2">#2c6a50</text>
+  <rect x="454" y="124" width="72" height="72" rx="8" fill="#4b6a47" stroke="#ffffff" stroke-opacity="0.15"/>
+  <text x="454" y="212" font-size="11" font-weight="700" fill="#e8e2d4">--tuft</text>
+  <text x="454" y="226" font-size="11" fill="#b9b2a2">#4b6a47</text>
+  <rect x="540" y="124" width="72" height="72" rx="8" fill="#5b4632" stroke="#ffffff" stroke-opacity="0.15"/>
+  <text x="540" y="212" font-size="11" font-weight="700" fill="#e8e2d4">--trunk</text>
+  <text x="540" y="226" font-size="11" fill="#b9b2a2">#5b4632</text>
+  <text x="24" y="248" font-size="14" font-weight="700" fill="#e8e2d4">Buildings</text>
+  <rect x="24" y="260" width="72" height="72" rx="8" fill="#c9bda6" stroke="#ffffff" stroke-opacity="0.15"/>
+  <text x="24" y="348" font-size="11" font-weight="700" fill="#e8e2d4">--wall</text>
+  <text x="24" y="362" font-size="11" fill="#b9b2a2">#c9bda6</text>
+  <rect x="110" y="260" width="72" height="72" rx="8" fill="#a89b83" stroke="#ffffff" stroke-opacity="0.15"/>
+  <text x="110" y="348" font-size="11" font-weight="700" fill="#e8e2d4">--wall2</text>
+  <text x="110" y="362" font-size="11" fill="#b9b2a2">#a89b83</text>
+  <rect x="196" y="260" width="72" height="72" rx="8" fill="#a5503d" stroke="#ffffff" stroke-opacity="0.15"/>
+  <text x="196" y="348" font-size="11" font-weight="700" fill="#e8e2d4">--roof</text>
+  <text x="196" y="362" font-size="11" fill="#b9b2a2">#a5503d</text>
+  <rect x="282" y="260" width="72" height="72" rx="8" fill="#8a4231" stroke="#ffffff" stroke-opacity="0.15"/>
+  <text x="282" y="348" font-size="11" font-weight="700" fill="#e8e2d4">--roof2</text>
+  <text x="282" y="362" font-size="11" fill="#b9b2a2">#8a4231</text>
+  <rect x="368" y="260" width="72" height="72" rx="8" fill="#4f3624" stroke="#ffffff" stroke-opacity="0.15"/>
+  <text x="368" y="348" font-size="11" font-weight="700" fill="#e8e2d4">--door</text>
+  <text x="368" y="362" font-size="11" fill="#b9b2a2">#4f3624</text>
+  <rect x="454" y="260" width="72" height="72" rx="8" fill="#e0c574" stroke="#ffffff" stroke-opacity="0.15"/>
+  <text x="454" y="348" font-size="11" font-weight="700" fill="#e8e2d4">--window</text>
+  <text x="454" y="362" font-size="11" fill="#b9b2a2">#e0c574</text>
+  <rect x="540" y="260" width="72" height="72" rx="8" fill="#ffcf66" stroke="#ffffff" stroke-opacity="0.15"/>
+  <text x="540" y="348" font-size="11" font-weight="700" fill="#e8e2d4">--lamp</text>
+  <text x="540" y="362" font-size="11" fill="#b9b2a2">#ffcf66</text>
+  <text x="24" y="384" font-size="14" font-weight="700" fill="#e8e2d4">Stone &amp; wood</text>
+  <rect x="24" y="396" width="72" height="72" rx="8" fill="#76756f" stroke="#ffffff" stroke-opacity="0.15"/>
+  <text x="24" y="484" font-size="11" font-weight="700" fill="#e8e2d4">--stone</text>
+  <text x="24" y="498" font-size="11" fill="#b9b2a2">#76756f</text>
+  <rect x="110" y="396" width="72" height="72" rx="8" fill="#5c5b56" stroke="#ffffff" stroke-opacity="0.15"/>
+  <text x="110" y="484" font-size="11" font-weight="700" fill="#e8e2d4">--stone2</text>
+  <text x="110" y="498" font-size="11" fill="#b9b2a2">#5c5b56</text>
+  <rect x="196" y="396" width="72" height="72" rx="8" fill="#8d8c85" stroke="#ffffff" stroke-opacity="0.15"/>
+  <text x="196" y="484" font-size="11" font-weight="700" fill="#e8e2d4">--stone3</text>
+  <text x="196" y="498" font-size="11" fill="#b9b2a2">#8d8c85</text>
+  <rect x="282" y="396" width="72" height="72" rx="8" fill="#8e7148" stroke="#ffffff" stroke-opacity="0.15"/>
+  <text x="282" y="484" font-size="11" font-weight="700" fill="#e8e2d4">--plank</text>
+  <text x="282" y="498" font-size="11" fill="#b9b2a2">#8e7148</text>
+  <rect x="368" y="396" width="72" height="72" rx="8" fill="#6f5836" stroke="#ffffff" stroke-opacity="0.15"/>
+  <text x="368" y="484" font-size="11" font-weight="700" fill="#e8e2d4">--plank2</text>
+  <text x="368" y="498" font-size="11" fill="#b9b2a2">#6f5836</text>
+  <rect x="454" y="396" width="72" height="72" rx="8" fill="#4a4331" stroke="#ffffff" stroke-opacity="0.15"/>
+  <text x="454" y="484" font-size="11" font-weight="700" fill="#e8e2d4">--path</text>
+  <text x="454" y="498" font-size="11" fill="#b9b2a2">#4a4331</text>
+  <rect x="540" y="396" width="72" height="72" rx="8" fill="#3b3527" stroke="#ffffff" stroke-opacity="0.15"/>
+  <text x="540" y="484" font-size="11" font-weight="700" fill="#e8e2d4">--path-edge</text>
+  <text x="540" y="498" font-size="11" fill="#b9b2a2">#3b3527</text>
+  <rect x="626" y="396" width="72" height="72" rx="8" fill="#5d5540" stroke="#ffffff" stroke-opacity="0.15"/>
+  <text x="626" y="484" font-size="11" font-weight="700" fill="#e8e2d4">--path-dot</text>
+  <text x="626" y="498" font-size="11" fill="#b9b2a2">#5d5540</text>
+  <text x="24" y="520" font-size="14" font-weight="700" fill="#e8e2d4">Accents &amp; special</text>
+  <rect x="24" y="532" width="72" height="72" rx="8" fill="#d97896" stroke="#ffffff" stroke-opacity="0.15"/>
+  <text x="24" y="620" font-size="11" font-weight="700" fill="#e8e2d4">--flower1</text>
+  <text x="24" y="634" font-size="11" fill="#b9b2a2">#d97896</text>
+  <rect x="110" y="532" width="72" height="72" rx="8" fill="#dcbd58" stroke="#ffffff" stroke-opacity="0.15"/>
+  <text x="110" y="620" font-size="11" font-weight="700" fill="#e8e2d4">--flower2</text>
+  <text x="110" y="634" font-size="11" fill="#b9b2a2">#dcbd58</text>
+  <rect x="196" y="532" width="72" height="72" rx="8" fill="#dedede" stroke="#ffffff" stroke-opacity="0.15"/>
+  <text x="196" y="620" font-size="11" font-weight="700" fill="#e8e2d4">--flower3</text>
+  <text x="196" y="634" font-size="11" fill="#b9b2a2">#dedede</text>
+  <rect x="282" y="532" width="72" height="72" rx="8" fill="#c08a4c" stroke="#ffffff" stroke-opacity="0.15"/>
+  <text x="282" y="620" font-size="11" font-weight="700" fill="#e8e2d4">--bread</text>
+  <text x="282" y="634" font-size="11" fill="#b9b2a2">#c08a4c</text>
+  <rect x="368" y="532" width="72" height="72" rx="8" fill="#4a86a0" stroke="#ffffff" stroke-opacity="0.15"/>
+  <text x="368" y="620" font-size="11" font-weight="700" fill="#e8e2d4">--water2</text>
+  <text x="368" y="634" font-size="11" fill="#b9b2a2">#4a86a0</text>
+  <rect x="454" y="532" width="72" height="72" rx="8" fill="#1d2b33" stroke="#ffffff" stroke-opacity="0.15"/>
+  <text x="454" y="620" font-size="11" font-weight="700" fill="#e8e2d4">--well-in</text>
+  <text x="454" y="634" font-size="11" fill="#b9b2a2">#1d2b33</text>
+  <rect x="540" y="532" width="72" height="72" rx="8" fill="#141218" stroke="#ffffff" stroke-opacity="0.15"/>
+  <text x="540" y="620" font-size="11" font-weight="700" fill="#e8e2d4">--cellar-in</text>
+  <text x="540" y="634" font-size="11" fill="#b9b2a2">#141218</text>
+  <text x="24" y="656" font-size="14" font-weight="700" fill="#e8e2d4">Ground shadow</text>
+  <rect x="24" y="668" width="72" height="72" rx="8" fill="#76756f"/><ellipse cx="60" cy="716" rx="28" ry="8" fill="#000000" fill-opacity="0.32"/>
+  <text x="24" y="756" font-size="11" font-weight="700" fill="#e8e2d4">--tshadow</text><text x="24" y="770" font-size="11" fill="#b9b2a2">#000000 @ 32%</text>
+</svg>

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <title>Ground overlay tile - 64 x 64 (seamless) template. Overlay detail drawn on top of a terrain tile (like s-cobble, s-pebbles, s-tuft). No shadow. Must tile seamlessly. Draw inside ART using the palette in town-palette.svg, hide GUIDES, export the frame as SVG, then run scripts/svg-to-sprite.py.</title>
+  <g id="ART - draw here">
+    
+  </g>
+  <g id="GUIDES - hide before export" font-family="Arial, sans-serif">
+  <rect x="0.25" y="0.25" width="63.5" height="63.5" fill="none" stroke="#ff2e88" stroke-width="0.5"/>
+  <rect x="0" y="0" width="8" height="8" fill="#ff2e88" fill-opacity="0.15"/>
+  <rect x="56" y="0" width="8" height="8" fill="#ff2e88" fill-opacity="0.15"/>
+  <rect x="0" y="56" width="8" height="8" fill="#ff2e88" fill-opacity="0.15"/>
+  <rect x="56" y="56" width="8" height="8" fill="#ff2e88" fill-opacity="0.15"/>
+  <text x="32.0" y="30.0" font-size="3.5" fill="#ff2e88" text-anchor="middle">edges must wrap:</text><text x="32.0" y="35.0" font-size="3.5" fill="#ff2e88" text-anchor="middle">left = right, top = bottom</text>
+  <text x="3" y="7" font-size="4" fill="#ff2e88">64 x 64 (seamless)</text>
+  </g>
+</svg>

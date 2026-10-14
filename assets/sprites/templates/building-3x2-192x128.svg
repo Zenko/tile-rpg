@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="128" viewBox="0 0 192 128">
+  <title>Building 3 x 2 - 192 x 128 template. Same footprint as the bakery. Door column 1 (middle) by default. Draw inside ART using the palette in town-palette.svg, hide GUIDES, export the frame as SVG, then run scripts/svg-to-sprite.py.</title>
+  <g id="ART - draw here">
+    <ellipse id="ground shadow (keep)" cx="96" cy="122" rx="86" ry="6" fill="#000000" fill-opacity="0.32"/>
+  </g>
+  <g id="GUIDES - hide before export" font-family="Arial, sans-serif">
+  <rect x="0.25" y="0.25" width="191.5" height="127.5" fill="none" stroke="#ff2e88" stroke-width="0.5"/>
+  <line x1="64" y1="0" x2="64" y2="128" stroke="#ff2e88" stroke-width="0.5" stroke-dasharray="2 2"/>
+  <line x1="128" y1="0" x2="128" y2="128" stroke="#ff2e88" stroke-width="0.5" stroke-dasharray="2 2"/>
+  <line x1="0" y1="64" x2="192" y2="64" stroke="#ff2e88" stroke-width="0.5" stroke-dasharray="2 2"/>
+  <rect x="4" y="4" width="184" height="120" fill="none" stroke="#ff2e88" stroke-width="0.4" stroke-opacity="0.5" stroke-dasharray="1 2"/>
+  <line x1="0" y1="122" x2="192" y2="122" stroke="#ff2e88" stroke-width="0.5" stroke-opacity="0.7"/>
+  <text x="189" y="120.5" font-size="3.5" fill="#ff2e88" text-anchor="end">ground line</text>
+  <rect x="64" y="64" width="64" height="64" fill="#ff2e88" fill-opacity="0.07"/>
+  <text x="96" y="116" font-size="4" fill="#ff2e88" text-anchor="middle">door column</text>
+  <text x="3" y="7" font-size="4" fill="#ff2e88">Building 3 x 2 - 192 x 128</text>
+  </g>
+</svg>
