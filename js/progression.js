@@ -430,13 +430,13 @@ function seasonalPick(pool) {
 // Ambient town finds (ground items, hidden finds): almost always common, rarely a rare - the exciting
 // pulls are meant to come from battles, not from strolling around. Weighted toward cards already owned
 // so the Almanac fills out with duplicates instead of racing to one-of-everything.
-function rollTownFindRarity() { return Math.random() < 0.12 ? 'rare' : 'common'; }
-function weightedTownCardId(rarity) {
+function rollTownFindRarity() { return Math.random() < 0.06 ? 'rare' : 'common'; }   // 12% until build 262
+function weightedTownCardId(rarity, ownedWeight) {   // ownedWeight: how much likelier a card you own is (4; ground cards use 8)
   const pool = cardPool(rarity);
   const usePool = pool.length ? pool : cardPool('common');
   const owned = new Set(state.ownedCards);
   const weighted = [];
-  usePool.forEach(c => { const w = (owned.has(c.id) ? 4 : 1) * (inSeason(c.id) ? 3 : 1); for (let i = 0; i < w; i++) weighted.push(c.id); });
+  usePool.forEach(c => { const w = (owned.has(c.id) ? (ownedWeight || 4) : 1) * (inSeason(c.id) ? 3 : 1); for (let i = 0; i < w; i++) weighted.push(c.id); });
   return weighted[Math.floor(Math.random() * weighted.length)];
 }
 

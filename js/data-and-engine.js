@@ -4,8 +4,11 @@ const PREFS_KEY = 'quiet-commons-prefs';
 const TOWN_SIZE = 6;
 const DECK_SIZE = 12;   // must equal BattleEngine.RULES.deck
 const MAX_COPIES = 2;   // must equal BattleEngine.RULES.copies
-const ITEM_DESPAWN_MS = 30000;
-const ITEM_RESPAWN_MS = 20000;
+const ITEM_DESPAWN_MS = 45000;          // a card on the ground fades if nobody picks it up in this long
+const ITEM_RESPAWN_MS = 60000;          // and a new one appears this long after the last was taken or faded...
+const ITEM_RESPAWN_JITTER_MS = 40000;   // ...plus up to this much more, different per card, so they never come back in lockstep (build 262)
+const ITEM_MIN_GAP = 5;                 // ground cards keep at least this many steps apart
+const ITEM_SAME_CARD = 0.35;            // the chance a respawned common is the same card that lay there before
 const NPC_RESPAWN_MS = 180000;
 
 // Embers: earned by releasing spare copies, spent on card packs.

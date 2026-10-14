@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'better', x: 'Cards on the ground are spread further apart and come back less often (a minute or more after one is taken). They are mostly commons now, and often the same card again, so doubles for crafting are easier to collect.' },
   { t: 'better', x: 'Crafting earns XP now, with new crafting milestones and quests. A craft can also crack: the cards turn into Embers instead, and a fail meter makes every fail in a row pay more until a craft works.' },
   { t: 'new', x: 'Crafting companions: a companion whose card has Seed halves your crafting fails, adds XP and skill chance, and can make the card come out Reborn.' },
   { t: 'new', x: 'Time-stop worlds: a puddle or a portal can drop you into a moment that has stopped - rain hanging in the air, neighbours frozen mid-step. Time only moves when you do: 45 steps, then it starts again. Gather the glowing motes before it does.' },

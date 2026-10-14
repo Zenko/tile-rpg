@@ -783,8 +783,8 @@ function ensureDistrictData(key) {
   const bs = take({ isBoss: true });
   const boss = { id: 'boss-' + key, name: DISTRICTS[key].boss, x: bs.x, y: bs.y, deck: buildDeckForOpponent(DECK_SIZE, true), rewardCard: randomCardId(rollRewardRarity(true)), defeated: false, isBoss: true };
   for (let i = 0; i < 3; i++) {
-    const s = take();
-    items.push({ id: 'item-' + key + '-' + i, x: s.x, y: s.y, cardId: weightedTownCardId(rollTownFindRarity()), collected: false, spawnedAt: Date.now(), collectedAt: null });
+    const s = findItemSpot({ npcs, boss, items, decorations: [], buildings: {} }, null, key); taken.add(s.x + ',' + s.y);   // spread out (build 262)
+    items.push({ id: 'item-' + key + '-' + i, x: s.x, y: s.y, cardId: townGroundCardId(items.length ? items[items.length - 1].cardId : null), collected: false, spawnedAt: Date.now(), collectedAt: null });
   }
   state.districtData[key] = { npcs, boss, items, spirits: null, scenery: [], buildings: {}, decorations: [] };
   ensureSpirits(key, state.districtData[key]);
@@ -793,6 +793,30 @@ function ensureDistrictData(key) {
 function findFreeTile(data, walker) {
   const m = getMap(state.currentDistrict), taken = occupiedSet(data);
   return pickSpot(m, taken, data, walker);
+}
+// Ground cards (build 262): when one is due back (ITEM_RESPAWN_MS plus a per-card jitter worked out from its id and when it went,
+// so it needs no saved field), and where: a free tile at least ITEM_MIN_GAP steps from every other card lying out.
+function itemRespawnDue(it, now) {
+  if (it.fixed || !it.collected || !it.collectedAt) return false;
+  let h = 0; const k = it.id + ':' + it.collectedAt; for (let i = 0; i < k.length; i++) h = (h * 31 + k.charCodeAt(i)) >>> 0;
+  return (now - it.collectedAt) >= ITEM_RESPAWN_MS + (h % ITEM_RESPAWN_JITTER_MS);
+}
+function findItemSpot(data, except, key) {
+  const m = getMap(key || state.currentDistrict), taken = occupiedSet(data);
+  if (!key || key === state.currentDistrict) taken.add(state.playerPos.x + ',' + state.playerPos.y);   // never under her feet
+  const live = (data.items || []).filter(o => o !== except && !o.collected);
+  const gap = s => live.reduce((g, o) => Math.min(g, Math.abs(o.x - s.x) + Math.abs(o.y - s.y)), 99);
+  let best = null;
+  for (let i = 0; i < 24; i++) {
+    const s = pickSpot(m, taken, data, null); if (!best || gap(s) > gap(best)) best = s;
+    if (gap(best) >= ITEM_MIN_GAP) break;
+  }
+  return best;
+}
+// The card for a ground spot: mostly commons, strongly the ones you already have, and often the same card again.
+function townGroundCardId(prev) {
+  if (prev && Math.random() < ITEM_SAME_CARD && cardDef(prev) && cardDef(prev).rarity === 'common') return prev;
+  return weightedTownCardId(rollTownFindRarity(), 8);
 }
 function generateTiles() { /* maps are compiled on demand by getMap() */ }
 function isAdjacent(x, y) { return Math.abs(x - state.playerPos.x) + Math.abs(y - state.playerPos.y) === 1; }

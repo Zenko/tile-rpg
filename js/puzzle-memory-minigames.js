@@ -610,14 +610,14 @@ function tickItems(data) {
   });
 
   data.items.forEach(it => {
-    if (!it.fixed && it.collected && it.collectedAt && (now - it.collectedAt) >= ITEM_RESPAWN_MS) {   // `fixed` = a puddle world's card: it stays until found or until the world ends
-      const spot = findFreeTile(data);
+    if (itemRespawnDue(it, now)) {   // `fixed` = a puddle world's card: it stays until found or until the world ends
+      const spot = findItemSpot(data, it);   // spread out, at least ITEM_MIN_GAP from the others (build 262)
       it.x = spot.x;
       it.y = spot.y;
       it.collected = false;
       it.collectedAt = null;
       it.despawnedUncollected = false;
-      it.cardId = weightedTownCardId(rollTownFindRarity());
+      it.cardId = townGroundCardId(it.cardId);   // mostly commons, often the same card again
       it.spawnedAt = now;
       changed = true;
     }
