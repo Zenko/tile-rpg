@@ -184,21 +184,29 @@ function miniCardHtml(def) {
 // The odds under each craft (build 261): skill chance, fail chance, the fail meter and a crafting companion's help.
 // rarity: of the card on the forge, or of the cards in the trade. The chances scale with it (CRAFT.raritySkill / rarityFail),
 // and a strip underneath shows every rarity's chances, this one lit, so the trade-off is plain before you craft.
-function craftOddsHtml(kind, rarity) {
+function craftOddsHtml(kind, rarity, may) {
+  // Kept short on purpose (build 267): the two chances, then the streak and the fail meter as one row of pips. Everything that
+  // explains them (every rarity's chances, the forge, what the pips mean) folds away under "How the odds work".
   const pct = n => Math.round(n * 100), meter = craftMeter(), next = Math.min(CRAFT.meterMax, meter + 1);
   const pips = Array.from({ length: CRAFT.meterMax }, (_, i) => `<i class="${i < meter ? 'on' : ''}"></i>`).join('');
-  const c = state.companion, help = craftHelped() && c ? `<div class="cr-help">🔨 ${escapeHtml(c.name)} steadies your hands: half the fails, +50% XP, more skills, a chance of Reborn</div>` : '';
+  const c = state.companion, help = craftHelped() && c ? `<div class="cr-help">🔨 ${escapeHtml(c.name)} is helping: half the fails, more skills and XP</div>` : '';
   const odds = craftOdds(kind, rarity), skill = odds.skill, fail = odds.fail, heat = craftHeat();
   const flames = Array.from({ length: CRAFT.heatMax }, (_, i) => `<i class="${i < heat ? 'on' : ''}"></i>`).join('');
-  const streak = `<div class="cr-heat${odds.master ? ' ready' : ''}" title="Every craft that works heats the forge; a crack cools it"><span>🔥 Hot streak</span><span class="cr-flames">${flames}</span><small>${odds.master ? 'Masterwork ready: it cannot crack, double skill chance' : `${CRAFT.heatMax - heat} more for a Masterwork`}</small></div>`;
-  const g = FORGE_GRADES[0], forgeNote = `<div class="cr-forgenote">🔨 You strike the iron yourself: a ${g.label} forge cuts the fail chance to ${Math.round(g.fail * 100)}% of this and adds ${Math.round((g.skill - 1) * 100)}% to the skill chance.</div>`;
+  const g = FORGE_GRADES[0];
   const rars = kind === 'trade' ? CRAFT_RARITIES.filter(r => nextRarity(r)) : CRAFT_RARITIES;   // mythic has nothing to trade up into
   const table = `<div class="cr-rarodds" role="table" aria-label="Chances by rarity">${rars.map(r => `<div class="cr-ro${r === rarity ? ' on' : ''}" role="row"><b role="cell"><i class="rarity-${r}" aria-hidden="true"></i>${RARITY_LABEL[r]}</b><span role="cell" title="Skill chance">✨ ${pct(craftSkillChance(kind, r))}%</span><span role="cell" class="f" title="Fail chance">💥 ${pct(craftFailChance(kind, r))}%</span></div>`).join('')}</div>`;
-  return `<div class="cr-meter"><span>✨ Skill chance</span><div class="cr-bar"><i style="width:${pct(skill)}%"></i></div><b>${pct(skill)}%</b></div>
-    <div class="cr-meter fail"><span>💥 Fail chance</span><div class="cr-bar"><i style="width:${pct(fail)}%"></i></div><b>${pct(fail)}%</b></div>
-    <div class="cr-rarnote">${rarity ? `${RARITY_LABEL[rarity][0].toUpperCase() + RARITY_LABEL[rarity].slice(1)} cards` : 'By rarity'}: the commoner the card, the likelier a skill and the less it cracks.</div>${table}
-    ${forgeNote}${streak}
-    <div class="cr-failmeter" title="Each fail in a row fills it; a success empties it"><span>Fail meter</span><span class="cr-pips">${pips}</span><small>a fail pays x${craftFailMultiplier(next)} in ${GAME.currency.many}</small></div>${help}`;
+  return `<div class="cr-meter"><span>✨ Skill</span><div class="cr-bar"><i style="width:${pct(skill)}%"></i></div><b>${pct(skill)}%</b></div>
+    <div class="cr-meter fail"><span>💥 Fail</span><div class="cr-bar"><i style="width:${pct(fail)}%"></i></div><b>${pct(fail)}%</b></div>
+    <div class="cr-trackers">
+      <span class="cr-heat${odds.master ? ' ready' : ''}" title="Hot streak: every craft that works heats the forge, a crack cools it">🔥 Streak <span class="cr-flames">${flames}</span>${odds.master ? '<b>Masterwork!</b>' : ''}</span>
+      <span class="cr-failmeter" title="Fail meter: each fail in a row fills it and makes the next fail pay more">Fail meter <span class="cr-pips">${pips}</span></span>
+    </div>${may ? `<div class="cr-may">${may}</div>` : ''}${help}
+    <details class="cr-more"><summary>How the odds work</summary>
+      <div class="cr-rarnote">The commoner the card, the likelier a skill and the less it cracks.</div>${table}
+      <div class="cr-forgenote">🔨 <b>The forge:</b> you strike the iron three times. A ${g.label} forge cuts the fail chance to ${pct(g.fail)}% of the above and adds ${pct(g.skill - 1)}% to the skill chance.</div>
+      <div class="cr-forgenote">🔥 <b>Hot streak:</b> every craft that works adds a flame (a ${g.label} one adds two); a crack puts it out. ${odds.master ? 'It is full: this craft is a Masterwork that cannot crack, with double the skill chance.' : `${CRAFT.heatMax - heat} more and the next craft is a Masterwork that cannot crack.`}</div>
+      <div class="cr-forgenote">💥 <b>Fail meter:</b> each fail in a row fills a pip and the next fail pays more: right now x${craftFailMultiplier(next)} in ${GAME.currency.many}. A success empties it.</div>
+    </details>`;
 }
 function renderCraft() {
   const box = document.getElementById('craftView');
@@ -231,16 +239,13 @@ function renderCraft() {
           <div class="cr-forge-arrow" aria-hidden="true">➜</div>
           <div class="cr-tile cr-result">${cardTileHtml(rid, 1)}</div>
         </div>
-        <div class="cr-forge-name">${def.name} +</div>
-        <div class="cr-forge-delta">${refineStat === 'p' ? `Power <b>${def.power} → ${def.power + 1}</b>` : `Health <b>${def.grit} → ${def.grit + 1}</b>`}</div>
         <div class="cr-stat-pick">
           <button data-stat="p" class="${refineStat === 'p' ? 'on' : ''}" ${why.p ? 'disabled' : ''} aria-label="Plus one power"><span>+1 ⚔ Power</span><small>${def.power} → ${def.power + 1}</small></button>
           <button data-stat="g" class="${refineStat === 'g' ? 'on' : ''}" ${why.g ? 'disabled' : ''} aria-label="Plus one health"><span>+1 ♥ Health</span><small>${def.grit} → ${def.grit + 1}</small></button>
         </div>
-        ${craftOddsHtml('refine', def.rarity)}
-        <div class="cr-may">${skills.length ? `May gain: ${skills.map(k => KW[k].icon).join(' ')}` : 'No skill possible: it already has 2'}</div>
         <button class="btn cr-ready" data-refine="${id}" data-stat="${refineStat}" ${block ? 'disabled' : ''}>Refine 2 into 1</button>
         ${block ? `<div class="cr-empty">${block}</div>` : ''}
+        ${craftOddsHtml('refine', def.rarity, skills.length ? `May gain ${skills.map(k => KW[k].icon).join(' ')}` : 'It already has 2 skills')}
       </div>
       <div class="cr-title">Ready to refine</div>
       <div class="cr-strip">${refinable.map(rid2 => {

@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'better', x: 'A tidier Workshop: the Refine button now sits right under the Power / Health choice, with just the skill and fail chances and one row for your streak and fail meter beneath it. The full odds table and how the forge works fold away under "How the odds work".' },
   { t: 'better', x: 'Portals can now open anywhere in town, not just beside you. When one opens the screen ripples in its colours with a deep whoomph, and an arrow at the edge of the map points the way until you find it.' },
   { t: 'new', x: 'Portal stones: in the Workshop\'s new Portal page, feed spare rare cards (or better) into the rift. Once it is fully charged, ignite it at the forge for a chance of a portal stone - overcharge it or strike the iron well for a better chance. The rift takes on the family that fed it most. Open a stone from the Workshop or your Pantry and its portal appears right beside you.' },
   { t: 'new', x: 'The forge: refining and trading up now ask you to strike the iron yourself. Tap when the spark is in the glow, three times - a Flawless forge means fewer fails and more skills. Rarer cards have a narrower glow. Skip it any time for the plain chances.' },

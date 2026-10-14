@@ -2451,3 +2451,19 @@ body.pw-board #goalChip { display: none !important; }   /* the dice panel says w
 .pc-feed .cr-gridcard { position: relative; }
 .pc-plus { position: absolute; right: 2px; bottom: 2px; padding: 1px 6px; border-radius: 8px; background: var(--portal-core); color: var(--portal-rim); font-size: .72rem; font-weight: 700; box-shadow: 0 0 0 1px var(--portal-rim); }
 @media (prefers-reduced-motion: reduce) { .pc-orb { animation: none; } .pc-fill { transition: none; } }
+
+/* ---- CRAFT ODDS, COMPACT (build 267): the button sits right under the stat choice; the two chances, one row of pips for the
+   hot streak and the fail meter, and everything that explains them folded under "How the odds work". ---- */
+.cr-forge { gap: 8px; }
+.cr-forge .cr-may { width: 100%; margin: 0; text-align: center; font-size: .76rem; }
+.cr-trackers { display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; font-size: .8rem; color: var(--ink-soft); }
+.cr-trackers .cr-heat, .cr-trackers .cr-failmeter { display: inline-flex; align-items: center; gap: 6px; width: auto; }
+.cr-trackers .cr-heat b { color: var(--forge-master); font-size: .74rem; }
+.cr-trackers .cr-pips i { width: 10px; height: 10px; }
+.cr-more { width: 100%; font-size: .78rem; color: var(--ink-soft); }
+.cr-more summary { cursor: pointer; padding: 6px 0; color: var(--ink); font-weight: 600; list-style: none; text-align: center; }
+.cr-more summary::-webkit-details-marker { display: none; }
+.cr-more summary::after { content: ' ▾'; color: var(--ink-soft); }
+.cr-more[open] summary::after { content: ' ▴'; }
+.cr-more > * + * { margin-top: 8px; }
+.cr-more .cr-forgenote b { color: var(--ink); font-weight: 600; }
