@@ -3,6 +3,7 @@ module.exports = async (page, assert) => {
   await page.evaluate(() => {
     state.ownedCards = []; ['sprout', 'sprout', 'sprout', 'sprout', 'origami-crane', 'origami-crane'].forEach(id => { if (cardDef(id)) state.ownedCards.push(id); });
     CARD_POOL.slice(0, 12).forEach(c => state.ownedCards.push(c.id, c.id, c.id));
+    CRAFT.refineFail = 0; CRAFT.tradeFail = 0;   // a craft can crack (build 261); this test is about the page, so no cracks
     state.deck = []; refineOpenId = null; refineStat = 'p'; craftMode = 'refine'; saveState(); switchTab('collection'); setCardsView('craft');
   });
   await page.waitForTimeout(300);

@@ -31,7 +31,9 @@ module.exports = async (page, assert) => {
   assert.strictEqual(again, 0, 'nothing new, nothing paid');
 
   // ---- 3. a full row: four family portals -> the lotus souvenir and Embers, once ----
-  const before = await page.evaluate(() => ({ lotus: decorationInventoryCount('rift-lotus'), rows: state.progress.totals.riftRows || 0 }));
+  // the other rows are marked done first: each visit's shape is random, so the shapes row could otherwise fill up here too
+  const before = await page.evaluate(() => { const r = riftState(); RIFT_ROWS.forEach(row => { if (row.id !== 'families') r.done[row.id] = r.done[row.id] || Date.now(); });
+    return { lotus: decorationInventoryCount('rift-lotus'), rows: state.progress.totals.riftRows || 0 }; });
   for (const f of ['grove', 'stone', 'tide', 'wind']) { await visit('explore', f, 'portal'); await leave('faded', 0); }
   const full = await page.evaluate(() => ({ lotus: decorationInventoryCount('rift-lotus'), rows: state.progress.totals.riftRows || 0, done: !!riftState().done.families,
     count: riftRowCount(RIFT_ROWS.find(r => r.id === 'families')) }));
