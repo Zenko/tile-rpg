@@ -7,7 +7,7 @@
    picks a grade from FORGE_GRADES (js/shop-economy.js) that scales this craft's fail and skill chances, and a Flawless forge
    heats the hot streak twice as much. Skip forges it as Rough: the plain chances, nothing lost.
 
-   - forgeOpen({ kind, rarity, title }, done) builds #forgeSheet on first use and calls done(gradeId) once, when the forge is
+   - forgeOpen({ kind, rarity, title, summary }, done) builds #forgeSheet on first use and calls done(gradeId) once, when the forge is
      finished (or skipped); closing it with the X cancels the craft (done is not called).
    - forgeStrike(pos) is one strike; pos (0..1) is where the spark is, read from the animation unless a test passes one.
    - The spark is a CSS transform driven by requestAnimationFrame; nothing runs while the sheet is closed.
@@ -70,8 +70,8 @@ function forgeMarksHtml() {
 function forgeOpen(opts, done) {
   const el = forgeSheetEl(), rarity = opts.rarity || 'common';
   if (forgeRun && forgeRun.raf) cancelAnimationFrame(forgeRun.raf);
-  forgeRun = { kind: opts.kind || 'refine', rarity, done, strike: 0, points: 0, marks: [], centre: null, speed: FORGE_SPEED, band: FORGE_BAND[rarity] || FORGE_BAND.common, t0: performance.now(), raf: 0, over: false };
-  const master = craftMasterReady();
+  forgeRun = { kind: opts.kind || 'refine', rarity, done, summary: opts.summary || null, strike: 0, points: 0, marks: [], centre: null, speed: FORGE_SPEED, band: FORGE_BAND[rarity] || FORGE_BAND.common, t0: performance.now(), raf: 0, over: false };
+  const master = forgeRun.kind !== 'portal' && craftMasterReady();   // a Masterwork is for cards, not the rift
   el.querySelector('#fgTitle').textContent = master ? 'A Masterwork: strike the iron' : (opts.title || 'Strike the iron');
   el.querySelector('.fg-sub').textContent = `Tap when the spark is in the glow, three times. ${RARITY_LABEL[rarity][0].toUpperCase() + RARITY_LABEL[rarity].slice(1)} iron: ${rarity === 'common' ? 'a wide glow' : rarity === 'rare' ? 'a fair glow' : 'a narrow glow'}.`;
   el.querySelector('.fg-msg').textContent = '';
@@ -107,8 +107,8 @@ function forgeFinish(gradeId, skipped) {
   const el = forgeSheetEl(), g = forgeGradeById(gradeId), pct = n => Math.round(n * 100);
   const base = craftOdds(r.kind, r.rarity, 'rough'), now = craftOdds(r.kind, r.rarity, g.id);
   el.querySelector('.fg-hit').disabled = true; el.querySelector('.fg-skip').disabled = true;
-  el.querySelector('.fg-msg').innerHTML = skipped ? 'Forged as it comes: the plain chances.'
-    : `<b>${g.icon} ${g.label}!</b> 💥 ${pct(base.fail)}% → ${pct(now.fail)}% · ✨ ${pct(base.skill)}% → ${pct(now.skill)}%`;
+  el.querySelector('.fg-msg').innerHTML = skipped ? 'Forged as it comes: the plain chances.'   // opts.summary: a forge that is not a card craft says what the grade did (js/portal-craft.js)
+    : `<b>${g.icon} ${g.label}!</b> ` + (r.summary ? r.summary(g.id) : `💥 ${pct(base.fail)}% → ${pct(now.fail)}% · ✨ ${pct(base.skill)}% → ${pct(now.skill)}%`);
   if (!skipped && g.id === 'flawless') sfx('gift');
   const done = r.done;
   setTimeout(() => { forgeClose(true); if (done) done(g.id); }, skipped ? 200 : 1100);

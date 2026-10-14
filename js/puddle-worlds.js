@@ -288,12 +288,12 @@ PW_KINDS.explore = {
 
 /* ---------------- going in and coming out ---------------- */
 function pwBusy() { return inBattle || !!storyCur || (typeof inScene !== 'undefined' && inScene) || travelFading; }
-function pwCanStart() {
+function pwCanStart(anyTime) {   // anyTime: skip the cooldown after the last world (a portal she crafted herself)
   if (pwActive() || pwBusy() || document.hidden || prefs.cozy) return false;
   if (!state.currentDistrict || state.currentDistrict === PW_KEY || !Object.prototype.hasOwnProperty.call(DISTRICTS, state.currentDistrict)) return false;
   if (typeof ensureLevel === 'function' && ensureLevel().level < PW_MIN_LEVEL) return false;
   if (typeof CWALK !== 'undefined' && CWALK && CWALK.on) return false;
-  return Date.now() - (state.progress.pwEndedAt || 0) >= PW_COOLDOWN_MS;
+  return anyTime || Date.now() - (state.progress.pwEndedAt || 0) >= PW_COOLDOWN_MS;
 }
 // Called from the puddle splash in js/town-life.js (once per newly splashed puddle).
 function pwMaybeEnter(x, y) {

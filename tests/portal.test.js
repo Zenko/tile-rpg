@@ -11,15 +11,27 @@ module.exports = async (page, assert) => {
   await page.evaluate(() => { state.progress.level = 5; state.progress.xp = Math.max(state.progress.xp || 0, 1); });
   await fresh();
 
-  // ---- 1. it opens a few steps away, on screen, somewhere she can walk to, and is drawn there ----
+  // ---- 1. it opens out of view (build 266), somewhere she can walk to, with a ripple, a sound and a compass pointing the way ----
   const o = await page.evaluate(() => {
+    window.__sfx = []; if (!window.__realSfx) window.__realSfx = sfx; sfx = n => { window.__sfx.push(n); };
     const ok = portalOpen(), p = state.progress.portal, me = state.playerPos, m = getMap('square');
-    const el = document.querySelector('.ent.life-portal:not(.daily)');
-    return { ok, p, dx: Math.abs(p.x - me.x), dy: Math.abs(p.y - me.y), ground: !m.solid[p.y][p.x], drawn: !!el && +el.dataset.x === p.x && +el.dataset.y === p.y,
-      life: p.until - p.openedAt === PORTAL_LIFE_MS, path: !!findPath(m, ensureDistrictData('square'), me, (x, y) => x === p.x && y === p.y) };
+    const el = document.querySelector('.ent.life-portal:not(.daily)'), fx = document.getElementById('portalFx'), cp = document.getElementById('portalCompass');
+    const out = { ok, p, dx: Math.abs(p.x - me.x), dy: Math.abs(p.y - me.y), ground: !m.solid[p.y][p.x], drawn: !!el && +el.dataset.x === p.x && +el.dataset.y === p.y,
+      life: p.until - p.openedAt === PORTAL_LIFE_MS, path: !!findPath(m, ensureDistrictData('square'), me, (x, y) => x === p.x && y === p.y),
+      fx: !!fx && fx.dataset.fam === p.family, sound: window.__sfx.includes('portal'), compass: !!cp && cp.dataset.fam === p.family, log: townLog.textContent };
+    sfx = window.__realSfx; return out;
   });
   assert.ok(o.ok && o.p && o.p.district === 'square', 'a portal opened in this district');
-  assert.ok(o.dx <= 3 && o.dy <= 5 && o.dx + o.dy >= 3, `on screen and a few steps away (dx ${o.dx}, dy ${o.dy})`);
+  assert.ok(o.dx > 3 || o.dy > 5, `out of view, so it has to be found (dx ${o.dx}, dy ${o.dy})`);
+  assert.ok(o.fx && o.sound, 'the screen ripples in its colours and it sounds');
+  assert.ok(o.compass, 'a compass at the edge of the view points to it');
+  assert.match(o.log, /to the (north|south|east|west)/, 'and the words say which way: ' + o.log);
+  // walking into view hides the compass
+  await page.evaluate(() => { const p = state.progress.portal; state.playerPos = { x: p.x, y: p.y + 2 }; renderTown(); });
+  await page.waitForTimeout(400);   // the camera follows her
+  const near = await page.evaluate(() => { portalCompass(); return !!document.getElementById('portalCompass'); });
+  assert.strictEqual(near, false, 'the compass goes once the portal is in view');
+  await page.evaluate(() => { state.playerPos = Object.assign({}, getMap('square').spawn); renderTown(); });
   assert.ok(o.ground && o.path, 'on walkable ground she can reach');
   assert.ok(o.drawn, 'drawn on its tile');
   assert.ok(o.life, 'stays open for PORTAL_LIFE_MS');

@@ -18,6 +18,8 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'better', x: 'Portals can now open anywhere in town, not just beside you. When one opens the screen ripples in its colours with a deep whoomph, and an arrow at the edge of the map points the way until you find it.' },
+  { t: 'new', x: 'Portal stones: in the Workshop\'s new Portal page, feed spare rare cards (or better) into the rift. Once it is fully charged, ignite it at the forge for a chance of a portal stone - overcharge it or strike the iron well for a better chance. The rift takes on the family that fed it most. Open a stone from the Workshop or your Pantry and its portal appears right beside you.' },
   { t: 'new', x: 'The forge: refining and trading up now ask you to strike the iron yourself. Tap when the spark is in the glow, three times - a Flawless forge means fewer fails and more skills. Rarer cards have a narrower glow. Skip it any time for the plain chances.' },
   { t: 'new', x: 'Hot streak: every craft that works heats the forge, and a crack cools it. Five in a row and your next craft is a Masterwork: it cannot crack and is twice as likely to gain a skill.' },
   { t: 'better', x: 'Puddles in the rain are a way into a puddle world half the time now (it used to be about one in seven).' },

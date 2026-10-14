@@ -711,6 +711,12 @@ const SFX = {
   rankup: () => { [392, 523, 659, 784, 1047, 1319].forEach((f, i) => bell(f, i * 0.09, 1.2, 0.05)); noiseBurst('bandpass', 5600, 3000, 0.8, 0.014, 0.45); },
   // Warped time (build 255, js/warp-fx.js): a tick-tock that speeds up as time bends, a long falling swoop under a rising
   // whoosh, then two soft bells as the new world settles. Timed to the 0.9 s twist-in.
+  // A portal opening (build 266, js/portal.js): a deep whoomph as the air folds, a rising swirl, then a high shimmer.
+  portal: () => {
+    bloop(70, 150, 0.7, 0.05); noiseBurst('lowpass', 300, 900, 0.6, 0.05);
+    bloop(220, 660, 0.9, 0.025, 0.15); noiseBurst('bandpass', 900, 4200, 0.9, 0.03, 0.2);
+    [1175, 1568, 1976].forEach((f, i) => bell(f, 0.55 + i * 0.09, 1.2, 0.022));
+  },
   warp:   () => {
     [0, 0.2, 0.36, 0.49, 0.59, 0.67, 0.73, 0.78, 0.82, 0.85].forEach((t, i) => wood(0.03, i % 2 ? 250 : 320, t));
     bloop(880, 130, 1.0, 0.03); bloop(587, 88, 1.1, 0.02, 0.06); noiseBurst('bandpass', 500, 3600, 0.9, 0.04);

@@ -191,6 +191,7 @@ function charDrawBag(box) {
   add('Seeds', SEEDS.filter(s => seedCount(s.id) > 0).map(s => invRow(s.icon, escapeHtml(s.name), seedCount(s.id), escapeHtml(s.desc), '🌱 Plant', goTown(() => startPlanting(s.id)))));
   const jar = bugState().jar;
   add('Glow Jar', Object.keys(jar).filter(id => jar[id] > 0 && bugDef(id)).map(id => invRow(bugDef(id).icon, escapeHtml(bugDef(id).name), jar[id], 'Caught at night. Also works as fishing bait.')));
+  if (typeof portalForge === 'function') add('Portal stones', portalForge().stones.map((st, i) => invRow(FAMILIES[st.family].icon, `${escapeHtml(FAMILIES[st.family].name)} portal stone`, 1, `Opens a ${escapeHtml(FAMILIES[st.family].name)} portal right beside you. Forged in the Workshop.`, '🌀 Open', goTown(() => setTimeout(() => usePortalStone(i), 120)))));
   add('Decorations', DECORATION_ITEMS.filter(d => decorationInventoryCount(d.id) > 0).map(d => invRow(d.icon, escapeHtml(d.name), decorationInventoryCount(d.id), escapeHtml(d.desc), '📍 Place', goTown(() => startPlacingDecoration(d)))));
   if (!any) { const e = document.createElement('div'); e.className = 'panel-desc'; e.style.padding = '10px 4px'; e.textContent = 'Your pantry is empty. Harvest crops, catch fish or bugs, bake bread, and what you gather shows up here.'; box.appendChild(e); }
 }

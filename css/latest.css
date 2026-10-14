@@ -2404,3 +2404,50 @@ body.pw-board #goalChip { display: none !important; }   /* the dice panel says w
 .cr-heat.ready .cr-flames i.on { background: var(--forge-master); border-color: var(--forge-master); animation: fg-flicker 1.2s ease-in-out infinite; }
 @keyframes fg-flicker { 0%, 100% { opacity: 1; } 50% { opacity: .65; } }
 @media (prefers-reduced-motion: reduce) { .fg-band { transition: none; } .fg-iron.hit-perfect, .fg-iron.hit-good, .fg-iron.hit-miss, .cr-heat.ready .cr-flames i.on { animation: none; } }
+
+/* ---- PORTAL OPENING + COMPASS (build 266, js/portal.js). The ripple comes from the side the portal lies on (--fx-x/--fx-y);
+   colours are the portal's (--portal-*, a family's through .portal-fam[data-fam] in css/theme.css). ---- */
+.portal-fx { position: fixed; inset: 0; z-index: 70; pointer-events: none; overflow: hidden; }
+.portal-fx .pfx-ring { position: absolute; left: var(--fx-x, 50%); top: var(--fx-y, 50%); width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%;
+  border: 5px solid var(--portal-rim); box-shadow: 0 0 24px 6px var(--portal-glow), inset 0 0 20px 4px var(--portal-swirl-a); opacity: 0; animation: pfx-ring 1.5s cubic-bezier(.2,.7,.3,1) forwards; }
+.portal-fx .pfx-ring.r2 { border-color: var(--portal-swirl-b); animation-delay: .22s; }
+.portal-fx .pfx-edge { position: absolute; inset: 0; box-shadow: inset 0 0 120px 40px var(--portal-glow), inset 0 0 0 4px var(--portal-rim);
+  background: radial-gradient(circle at var(--fx-x, 50%) var(--fx-y, 50%), var(--portal-glow), transparent 55%); opacity: 0; animation: pfx-edge 2s ease-out forwards; }
+@keyframes pfx-ring { 0% { transform: scale(.2); opacity: 1; } 70% { opacity: .7; } 100% { transform: scale(24); opacity: 0; } }
+@keyframes pfx-edge { 0% { opacity: 0; } 18% { opacity: 1; } 100% { opacity: 0; } }
+.portal-compass { position: absolute; z-index: 6; width: 52px; height: 52px; margin: -26px 0 0 -26px; padding: 0; border: 0; border-radius: 50%; display: grid; place-items: center;
+  background: var(--portal-core); box-shadow: 0 0 0 2px var(--portal-rim), 0 0 calc(8px + 22px * var(--warm, 0)) var(--portal-glow); cursor: pointer; animation: pc-pulse 1.6s ease-in-out infinite; }
+.portal-compass .pc-arrow { position: absolute; inset: -14px; transform: rotate(var(--a, 0deg)); pointer-events: none; }
+.portal-compass .pc-arrow::after { content: ''; position: absolute; right: 0; top: 50%; margin-top: -8px; border-style: solid; border-width: 8px 0 8px 12px; border-color: transparent transparent transparent var(--portal-rim); filter: drop-shadow(0 0 4px var(--portal-glow)); }
+.portal-compass .pc-fam { font-size: 20px; line-height: 1; }
+@keyframes pc-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(calc(1.04 + .08 * var(--warm, 0))); } }
+@media (prefers-reduced-motion: reduce) { .portal-fx .pfx-ring { display: none; } .portal-compass { animation: none; } }
+
+/* ---- PORTAL CRAFTING (build 266, js/portal-craft.js): the rift's charge (a mark at a full charge, the rest is overcharge),
+   its attunement, the stones and the cards to feed it. ---- */
+.cr-mode button small { margin-left: 4px; padding: 0 6px; border-radius: 8px; background: var(--portal-swirl-a); color: var(--portal-spark); font-size: .7rem; }
+.pc-meter { margin: 10px 0 6px; }
+.pc-bar { position: relative; height: 16px; border-radius: 8px; background: var(--board-bg); overflow: hidden; box-shadow: inset 0 0 0 1px var(--stone-edge); }
+.pc-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 8px; background: linear-gradient(90deg, var(--portal-swirl-a), var(--portal-swirl-b)); box-shadow: 0 0 12px var(--portal-glow); transition: width .4s ease; }
+.pc-mark { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--portal-rim); }
+.pc-nums { display: flex; justify-content: space-between; gap: 8px; margin-top: 4px; font-size: .78rem; color: var(--ink-soft); }
+.pc-nums b { color: var(--ink); }
+.pc-att { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin: 6px 0 10px; font-size: .8rem; color: var(--ink-soft); }
+.pc-att > b { color: var(--ink); }
+.pc-fams { display: inline-flex; gap: 6px; margin-left: auto; }
+.pc-fam { display: inline-flex; flex-direction: column; align-items: center; min-width: 36px; padding: 3px 4px; border-radius: 10px; background: var(--board-bg); font-size: 1rem; line-height: 1.1; }
+.pc-fam small { font-size: .62rem; color: var(--ink-soft); }
+.pc-fam.on { box-shadow: 0 0 0 2px var(--portal-rim), 0 0 10px var(--portal-glow); }
+.pc-ignite { margin-bottom: 14px; }
+.pc-ignite .btn { width: 100%; min-height: 48px; }
+.pc-stones { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+.pc-stone { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 14px; background: var(--board-bg); box-shadow: inset 0 0 0 1px var(--stone-edge); }
+.pc-stone > div { flex: 1; display: flex; flex-direction: column; }
+.pc-stone small { color: var(--ink-soft); font-size: .74rem; }
+.pc-stone .btn { min-height: 44px; }
+.pc-orb { width: 40px; height: 40px; flex: none; display: grid; place-items: center; border-radius: 50%; font-size: 1.1rem;
+  background: radial-gradient(circle, var(--portal-core) 30%, var(--portal-swirl-a) 70%, var(--portal-swirl-b)); box-shadow: 0 0 0 2px var(--portal-rim), 0 0 14px var(--portal-glow); animation: pc-spin 6s linear infinite; }
+@keyframes pc-spin { to { transform: rotate(360deg); } }
+.pc-feed .cr-gridcard { position: relative; }
+.pc-plus { position: absolute; right: 2px; bottom: 2px; padding: 1px 6px; border-radius: 8px; background: var(--portal-core); color: var(--portal-rim); font-size: .72rem; font-weight: 700; box-shadow: 0 0 0 1px var(--portal-rim); }
+@media (prefers-reduced-motion: reduce) { .pc-orb { animation: none; } .pc-fill { transition: none; } }

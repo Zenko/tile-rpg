@@ -172,7 +172,7 @@ function setShopView(view) {
 let craftSel = { rarity: 'common', picks: [] };
 let refineOpenId = null;   // the card on the forge (the Refine stage); a card sheet's Refine button sets it before opening the Workshop
 let refineStat = 'p';      // 'p' | 'g': which stat the forge preview and the Refine button use
-let craftMode = 'refine';  // 'refine' | 'trade': the two halves of the Workshop, switched by the buttons under the intro
+let craftMode = 'refine';  // 'refine' | 'trade' | 'portal' (js/portal-craft.js): the pages of the Workshop, switched by the buttons under the intro
 
 function aOrAn(label) { return (/^[aeiou]/i.test(label) ? 'an ' : 'a ') + label; }
 
@@ -208,6 +208,7 @@ function renderCraft() {
     <div class="cr-mode" role="tablist">
       <button class="${craftMode === 'refine' ? 'on' : ''}" data-mode="refine" role="tab" aria-selected="${craftMode === 'refine'}">🔨 Refine</button>
       <button class="${craftMode === 'trade' ? 'on' : ''}" data-mode="trade" role="tab" aria-selected="${craftMode === 'trade'}">🔁 Trade up</button>
+      <button class="${craftMode === 'portal' ? 'on' : ''}" data-mode="portal" role="tab" aria-selected="${craftMode === 'portal'}">🌀 Portal${portalForge().stones.length ? ` <small>${portalForge().stones.length}</small>` : ''}</button>
     </div>`;
 
   // ----- Refine: "the Forge". One stage shows the two copies going in and the stronger card coming out; a strip below picks the card. -----
@@ -307,6 +308,7 @@ function renderCraft() {
   dock.appendChild(go);
   const odds = document.createElement('div'); odds.className = 'cr-odds'; odds.innerHTML = craftOddsHtml('trade', craftSel.rarity); trade.appendChild(odds);
   if (craftMode === 'trade') box.appendChild(trade);
+  if (craftMode === 'portal') box.appendChild(portalCraftSection());   // js/portal-craft.js (build 266)
 
   // ----- events -----
   box.querySelectorAll('[data-mode]').forEach(btn => btn.addEventListener('click', () => {
