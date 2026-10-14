@@ -14,7 +14,7 @@ module.exports = async (page, assert) => {
   // ---- 1. it opens a few steps away, on screen, somewhere she can walk to, and is drawn there ----
   const o = await page.evaluate(() => {
     const ok = portalOpen(), p = state.progress.portal, me = state.playerPos, m = getMap('square');
-    const el = document.querySelector('.ent.life-portal');
+    const el = document.querySelector('.ent.life-portal:not(.daily)');
     return { ok, p, dx: Math.abs(p.x - me.x), dy: Math.abs(p.y - me.y), ground: !m.solid[p.y][p.x], drawn: !!el && +el.dataset.x === p.x && +el.dataset.y === p.y,
       life: p.until - p.openedAt === PORTAL_LIFE_MS, path: !!findPath(m, ensureDistrictData('square'), me, (x, y) => x === p.x && y === p.y) };
   });
@@ -36,9 +36,9 @@ module.exports = async (page, assert) => {
   assert.deepStrictEqual(gates, { second: false, cozy: false, cooldown: false, free: true }, 'opens only when nothing stops it');
 
   // ---- 3. it flickers in its last minute and closes when its time is up ----
-  const closing = await page.evaluate(() => { state.progress.portal.until = Date.now() + 30000; renderTown(); return document.querySelector('.ent.life-portal').classList.contains('closing'); });
+  const closing = await page.evaluate(() => { state.progress.portal.until = Date.now() + 30000; renderTown(); return document.querySelector('.ent.life-portal:not(.daily)').classList.contains('closing'); });
   assert.ok(closing, 'flickers in its last minute');
-  const shut = await page.evaluate(() => { state.progress.portal.until = Date.now() - 1; portalTick(); return { gone: !state.progress.portal, el: !!document.querySelector('.ent.life-portal'), ended: Date.now() - state.progress.portalEndedAt < 5000 }; });
+  const shut = await page.evaluate(() => { state.progress.portal.until = Date.now() - 1; portalTick(); return { gone: !state.progress.portal, el: !!document.querySelector('.ent.life-portal:not(.daily)'), ended: Date.now() - state.progress.portalEndedAt < 5000 }; });
   assert.deepStrictEqual(shut, { gone: true, el: false, ended: true }, 'closed, no longer drawn, cooldown started');
 
   // ---- 4. a portal that closed while the game was away is gone at start-up ----
@@ -61,13 +61,14 @@ module.exports = async (page, assert) => {
   // ---- 5b. family portals: every portal has a family, shows it, and its world is that family's ----
   const fam = await page.evaluate(() => {
     const w = pwActive();
-    return { family: w.family, name: w.name, biome: w.biome, cards: state.districtData.pw.items.filter(i => i.cardId).map(i => CARD_FAMILY[i.cardId]),   // cards only: a maze's key is an item too
+    return { family: w.family, name: w.name, biome: w.biome, kind: w.kind, cards: state.districtData.pw.items.filter(i => i.cardId).map(i => CARD_FAMILY[i.cardId]),
+      detail: state.districtData.pw.items.map(i => `${i.id}:${i.cardId}:${CARD_FAMILY[i.cardId]}:${i.collected ? 'got' : ''}`).join(' '),   // cards only: a maze's key is an item too
       given: Array.from({ length: 20 }, () => CARD_FAMILY[pwCardId('rare')]) };
   });
   assert.ok(['grove', 'stone', 'tide', 'wind'].includes(fam.family), 'the portal\'s world has a family');
   assert.ok(fam.name.startsWith(FAMILY_NAME_OF(fam.family)), `named for its family (${fam.name})`);
   function FAMILY_NAME_OF(f) { return { grove: 'Brote', stone: 'Recuerdo', tide: 'Deriva', wind: 'Susurro' }[f]; }
-  assert.ok(fam.cards.length && fam.cards.every(f => f === fam.family), 'every hidden card is of that family');
+  assert.ok(fam.cards.every(f => f === fam.family), `every hidden card (a ladders world hides none) is of that family (${fam.family}, ${fam.kind}: ${fam.detail})`);
   assert.ok(fam.given.every(f => f === fam.family), 'every card the world hands out is of that family');
   const look = await page.evaluate(() => {
     const save = { w: state.progress.puddleWorld, d: state.currentDistrict, pos: Object.assign({}, state.playerPos) };
@@ -75,7 +76,7 @@ module.exports = async (page, assert) => {
     ['grove', 'stone', 'tide', 'wind'].forEach(f => {
       state.progress.puddleWorld = null; state.currentDistrict = 'square'; state.playerPos = Object.assign({}, getMap('square').spawn);
       state.progress.portal = null; state.progress.portalEndedAt = 0;
-      portalOpen(f); const el = document.querySelector('.ent.life-portal');
+      portalOpen(f); const el = document.querySelector('.ent.life-portal:not(.daily)');
       out[f] = { fam: el && el.dataset.fam, icon: !!(el && el.querySelector('.pt-fam')), rim: el && getComputedStyle(el).getPropertyValue('--portal-rim').trim() };
     });
     state.progress.portal = null; state.progress.puddleWorld = save.w; state.currentDistrict = save.d; state.playerPos = save.pos; renderTown();

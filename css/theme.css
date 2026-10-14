@@ -917,3 +917,5 @@
 .ent.life-portal[data-fam="stone"] { --portal-rim: #f1d9a0; --portal-swirl-a: #c79a52; --portal-swirl-b: #8c8a84; --portal-glow: rgba(230, 190, 120, 0.5); --portal-core: #2a2014; }
 .ent.life-portal[data-fam="tide"]  { --portal-rim: #a8e6ff; --portal-swirl-a: #2f8fe0; --portal-swirl-b: #4fe0cf; --portal-glow: rgba(80, 170, 240, 0.55); --portal-core: #071d33; }
 .ent.life-portal[data-fam="wind"]  { --portal-rim: #e6ddff; --portal-swirl-a: #9b86ff; --portal-swirl-b: #f2f6ff; --portal-glow: rgba(190, 175, 255, 0.55); --portal-core: #1b1438; }
+/* The Daily Rift's gold portal (build 259, js/daily-rift.js). */
+.ent.life-portal.daily { --portal-rim: #ffe7a3; --portal-swirl-a: #e8b23a; --portal-swirl-b: #fff3c4; --portal-glow: rgba(255, 210, 110, 0.6); --portal-core: #2b1d05; }

@@ -45,6 +45,7 @@ const TIPS = {
   forecast:   { icon: '🪧', title: 'The weather board', text: 'Signs show the forecast. Weather changes play: clear pays a little extra on daily tasks, cloudy doubles spirit XP, rain helps fishing and growing, storms boost Flicker cards, snow toughens bosses for richer prizes.' },
   events:     { icon: '📅', title: 'Daily town events', text: "One event runs each day, shown next to the district name - a Thought Fishing Derby, Market Day, Harvest Fair and more, each bending the rules a little in your favor." },
   foils:      { icon: '✨', title: 'Reborn cards', text: 'A Reborn card is a spirit that faded as an Echo and came back, purely a collector\'s chase - the same card, just shimmering. Your Reborn total shows at the top of Cards → Sets and in your cottage trophy case.' },
+  dailyrift:  { icon: '⭐', title: 'Today\'s rift', text: 'A gold portal stands by the fountain: the Daily Rift. Everyone gets the same world behind it today. You have one try: find every card before it closes, and see how the other testers did in Journal → Rifts.' },
   portal:     { icon: '🌀', title: 'A portal opened', text: 'Now and then a portal opens a few steps away from you, in any weather. It stays open for a good while, then folds shut. Each portal belongs to a card family (its colour and the icon above it say which): walk onto it and it takes you into that family\'s little world, where every card hidden is one of theirs.' },
   puddleworld: { icon: '🌀', title: 'A puddle swallowed you', text: 'Splash through enough puddles in the rain and one of them leads somewhere else: a little world that only lasts a few minutes. Some are places to explore for hidden cards, some are mazes to find your way out of, some are board games where only the dice move you, and some are underwater. Watch the timer in the top bar: when it runs out the world is gone and you are back where you fell in. Tap the timer if you want to climb out early.' },
   townnews:   { icon: '📰', title: 'The Dream Gazette', text: `A new front page every morning, the same for every ${GAME.player.lower} in town. It also lists today's event, any weather moment, the town goal and who is visiting. Find it at the top of the Journal's Today page.` },
@@ -70,6 +71,7 @@ const GUIDE = [
     { icon: '🧶', name: 'Table mats', where: 'Card Shop → Customize, then Player → Customize', how: `The cloth on your side of the battle table. Buy one with ${GAME.currency.many}, then pick it in your Customize tab.` },
     { icon: '🎨', name: 'Themes', where: 'Tap your avatar → Settings → Appearance', how: 'Dark (sea glass), Light (sand and sea glass) or Auto, which follows your device. The map, battles and interiors stay dark either way.' },
     { icon: '🪑', name: 'Things to do in town', where: 'Benches, wells, lamps, trees, water, puddles', how: 'Sit, wish, light lamps after dark, shake trees, skip stones, splash in the rain, scatter the birds. The Square, Market, Harbor and Garden each have an activity too: busking, haggling, hauling nets and watering plants.' },
+    { icon: '⭐', name: 'The Daily Rift', where: `By the fountain in ${PLACES.square}`, how: 'A gold portal, once a day. The world behind it is made from the date, so every tester gets the same one: the same map, the same hidden cards in the same places. One try, four minutes: the score is how many cards you find, then how fast you find them all. Results are shared in Journal → Rifts (your name only if you share that you are playing).' },
     { icon: '🗺️', name: 'Rift Map', where: 'Journal → Rifts', how: `Every puddle world you visit is collected: the kinds of world, their palettes, the shapes of a wander world and the four family portals. Something new pays a few ${GAME.currency.many}; a full row pays more and leaves you a souvenir to place in town or in your cottage. Below the rows, your recent worlds and what you found in them.` },
     { icon: '🌀', name: 'Portals', where: 'Anywhere in town, now and then', how: 'A shimmering doorway opens a few steps from you and stays open for about twelve minutes before it folds shut (it flickers in its last minute). Each one belongs to a card family, shown by its colour and the icon above it, and leads into that family\'s world: its colours, its name, and only its cards hidden inside (the treasure at least rare). The family of the district you are in turns up most often. Only one is open at a time, and never while you are already in a world.' },
     { icon: '🌀', name: 'Puddle worlds', where: 'Puddles in the rain', how: 'Now and then a puddle you splash through is a way into a small world that lasts only a few minutes. Every one is different, with its own look: explore for hidden cards, find your way out of a maze before the others, play a board game where only the dice move you, or swim through a sunken city. The timer in the top bar counts down; tap it to climb out early. When it runs out the world is gone and you are back where you fell in. Not in Cozy mode.' },
@@ -142,7 +144,7 @@ const GUIDE = [
   ] },
 ];
 // Items added in the v1.81-1.89 releases wear a NEW tag until they have been opened once (state.progress.guideSeen).
-const GUIDE_NEW = ['Rift Map', 'Portals', 'The Dream Gazette', 'Gossip', 'Weather moments', 'Town goal', 'Travelling visitors', 'Your glow and sparkles', `${CAST.guide.name} points the way`, 'Who goes first', 'Card families', 'New keywords', 'The world in battle', `${GAME.player.one}’s Gift`, 'Draft Run', 'Lingering duels', `${GAME.currency.many} and soft limits`];
+const GUIDE_NEW = ['The Daily Rift', 'Rift Map', 'Portals', 'The Dream Gazette', 'Gossip', 'Weather moments', 'Town goal', 'Travelling visitors', 'Your glow and sparkles', `${CAST.guide.name} points the way`, 'Who goes first', 'Card families', 'New keywords', 'The world in battle', `${GAME.player.one}’s Gift`, 'Draft Run', 'Lingering duels', `${GAME.currency.many} and soft limits`];
 
 // ---- used by js/quests.js ----
 // The "wander" line: one quest at every 500-step rung up to 10,000, escalating rewards for the grind -
@@ -220,6 +222,7 @@ const QUEST_POOL = [
 ];
 // Same shape as QUEST_POOL, but with week-sized goals and better rewards to match the longer commitment.
 const WEEKLY_QUEST_POOL = [
+  { id: 'w_daily3',   icon: '⭐', name: 'Try 3 Daily Rifts',           goal: 3,   stat: 'dailyRifts',      reward: 'super' },
   { id: 'w_portal2',  icon: '🌀', name: 'Step through 2 portals',      goal: 2,   stat: 'portalsEntered',  reward: 'super' },
   { id: 'w_find50',   icon: '🎒', name: 'Find 50 cards on the ground', goal: 50,  stat: 'cardsFound',      reward: 'super' },
   { id: 'w_find100',  icon: '🏺', name: 'Find 100 cards on the ground', goal: 100, stat: 'cardsFound',     reward: 'mythic' },
@@ -272,6 +275,8 @@ const ACHIEVEMENTS = [
   { id: 'puddles-10',  icon: '🌧️', name: '10 puddles splashed', test: () => (state.progress.totals.puddles || 0) >= 10 },
   { id: 'puddle-world', icon: '🌀', name: 'Fell through a puddle', test: () => (state.progress.totals.puddleWorlds || 0) >= 1 },
   { id: 'portal-1',     icon: '🌀', name: 'Stepped through a portal', test: () => (state.progress.totals.portalsEntered || 0) >= 1 },
+  { id: 'daily-rift',   icon: '⭐', name: 'Tried the Daily Rift', test: () => (state.progress.totals.dailyRifts || 0) >= 1 },
+  { id: 'daily-rift-7', icon: '⭐', name: 'Seven Daily Rifts', test: () => (state.progress.totals.dailyRifts || 0) >= 7 },
   { id: 'rift-row',     icon: '🗺️', name: 'A full row in the Rift Map', test: () => (state.progress.totals.riftRows || 0) >= 1 },
   { id: 'rift-all',     icon: '🗺️', name: 'The whole Rift Map', test: () => (state.progress.totals.riftRows || 0) >= 4 },
   { id: 'portal-5',     icon: '🌀', name: 'Five portals', test: () => (state.progress.totals.portalsEntered || 0) >= 5 },

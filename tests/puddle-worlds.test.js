@@ -73,7 +73,7 @@ module.exports = async (page, assert) => {
     const w = pwActive(), d = state.districtData.pw, hud = document.getElementById('pillWorld');
     return { district: state.currentDistrict, origin: w && w.origin, mins: w && (w.endsAt - w.startedAt) / 60000, name: w && w.name, nameLookup: DISTRICTS.pw.name, biomeAttr: townView.dataset.biome, biome: w && w.biome,
       items: d.items.length, fixed: d.items.every(i => i.fixed), treasures: d.items.filter(i => i.treasure).length, spirits: d.spirits.length, npcs: d.npcs.length, boss: d.boss, pill: !hud.classList.contains('hidden'), time: document.getElementById('pwTime').textContent,
-      stat: state.progress.totals.puddleWorlds, log: state.progress.eventLog[0] && state.progress.eventLog[0].text, listed: Object.keys(DISTRICTS).includes('pw'), visited: state.visitedDistricts.includes('pw'), hudName: document.getElementById('hudDistrict').textContent };
+      stat: state.progress.totals.puddleWorlds, log: state.progress.eventLog.slice(0, 3).map(e => e.text).join(' / '), listed: Object.keys(DISTRICTS).includes('pw'), visited: state.visitedDistricts.includes('pw'), hudName: document.getElementById('hudDistrict').textContent };
   });
   assert.strictEqual(inside.district, 'pw', 'the puddle took her in');
   assert.deepStrictEqual(inside.origin, { district: 'square', x: enter.tile.x, y: enter.tile.y }, 'it remembers exactly where she fell in from');
@@ -82,7 +82,7 @@ module.exports = async (page, assert) => {
   assert.strictEqual(inside.biomeAttr, inside.biome, 'the town view wears the world\'s palette');
   assert.ok(inside.items === 6 && inside.fixed && inside.treasures === 1 && inside.spirits === 3 && inside.npcs === 0 && inside.boss === null, 'six hidden cards (one treasure), three spirits, nobody to fight: ' + JSON.stringify(inside));
   assert.ok(inside.pill && /^\d:\d\d$/.test(inside.time), 'the countdown shows in the top bar: ' + inside.time);
-  assert.strictEqual(inside.stat, 1, 'counted'); assert.ok(/fell through a puddle/i.test(inside.log), 'and written in the Journal log');
+  assert.strictEqual(inside.stat, 1, 'counted'); assert.ok(/fell through a puddle/i.test(inside.log), 'and written in the Journal log (among the newest: the Rift Map may log a find right after)');
   assert.ok(!inside.listed && !inside.visited, 'it never becomes a visited district');
   const stored = await page.evaluate(() => { const w = pwActive(), rows = getMap('pw').rows.join('/'); const same = w.map.rows.join('/') === rows;
     w.seed = 'a-different-seed'; delete MAP_CACHE.pw; return { same, afterSeedChange: getMap('pw').rows.join('/') === rows, props: w.map.props.length === getMap('pw').props.length }; });

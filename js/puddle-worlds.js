@@ -98,6 +98,13 @@ function pwFamilize(w, fam) {
   w.name = oldWord && w.name.startsWith(oldWord + ' ') ? FAMILIES[fam].name + w.name.slice(oldWord.length) : FAMILIES[fam].name + ' ' + w.name;
   return w;
 }
+// Runs fn with Math.random replaced by a generator seeded from `seed` (put back afterwards, whatever happens), so code that rolls
+// with Math.random (pickSpot, the card picks) gives the same result for everyone. Used for the Daily Rift (js/daily-rift.js).
+function pwWithSeed(seed, fn) {
+  const real = Math.random, rnd = seeded(seed);
+  Math.random = rnd;
+  try { return fn(); } finally { Math.random = real; }
+}
 // The card a world hides or hands out: in a family world, one of that family (unowned ones three times as likely), else the town's usual pick.
 function pwCardId(rarity) {
   const w = pwActive(), fam = w && w.family;
@@ -105,7 +112,7 @@ function pwCardId(rarity) {
   let pool = [];
   for (let i = RARITY_ORDER.indexOf(rarity); i >= 0 && !pool.length; i--) pool = cardPool(RARITY_ORDER[i]).filter(c => CARD_FAMILY[c.id] === fam);
   if (!pool.length) return weightedTownCardId(rarity);
-  const owned = new Set(state.ownedCards), bag = [];
+  const owned = new Set(w.daily ? [] : state.ownedCards), bag = [];   // the Daily Rift hides the same cards for everyone
   pool.forEach(c => { for (let k = owned.has(c.id) ? 1 : 3; k > 0; k--) bag.push(c.id); });
   return bag[Math.floor(Math.random() * bag.length)];
 }
@@ -223,7 +230,8 @@ function pwGenerateExplore(w) {
 function pwBuildData() {
   const w = pwActive(), m = getMap(PW_KEY), data = { npcs: [], boss: null, items: [], spirits: null, scenery: [], buildings: {}, decorations: [], pw: true };
   state.districtData[PW_KEY] = data;
-  pwKind(w).build(w, data, m);
+  if (w && w.daily) pwWithSeed('pw-items-' + w.seed, () => pwKind(w).build(w, data, m));   // the Daily Rift: the same spots and cards for everyone
+  else pwKind(w).build(w, data, m);
   return data;
 }
 // Shared by the kinds: n hidden cards on open ground (the last one a proper reward roll when `treasure`), never on `taken`.
@@ -292,7 +300,11 @@ function pwMaybeEnter(x, y) {
   setTimeout(() => { if (pwCanStart()) pwEnter(x, y); }, 520);   // let the splash play first
 }
 function pwEnter(x, y, forceKind, via, family) {   // via: 'portal' (js/portal.js) changes the words; family: a family portal's world (above)
-  const w = pwFamilize(pwNewWorld(forceKind), family); w.origin = { district: state.currentDistrict, x: x == null ? state.playerPos.x : x, y: y == null ? state.playerPos.y : y };
+  pwEnterWorld(pwFamilize(pwNewWorld(forceKind), family), x, y, via);
+}
+// Enters a world record that is already made (pwEnter's, or the Daily Rift's from js/daily-rift.js). via: undefined (a puddle), 'portal', 'daily'.
+function pwEnterWorld(w, x, y, via) {
+  w.origin = { district: state.currentDistrict, x: x == null ? state.playerPos.x : x, y: y == null ? state.playerPos.y : y };
   w.map = pwGenerate(w);
   state.progress.puddleWorld = w; state.progress.pwLast = { biome: w.biome, shape: w.shape, kind: w.kind };
   pwApply(w);
@@ -300,13 +312,14 @@ function pwEnter(x, y, forceKind, via, family) {   // via: 'portal' (js/portal.j
     cancelWalk();
     state.currentDistrict = PW_KEY; state.playerPos = Object.assign({}, getMap(PW_KEY).spawn);
     pwBuildData(); townBuiltFor = null; const k = pwKind(w); if (k.enter) k.enter(w);
-    if (via !== 'portal') bumpStat('puddleWorlds', 1);   // a portal counts as portalsEntered instead (below)
+    if (!via) bumpStat('puddleWorlds', 1);   // a portal counts as portalsEntered, the Daily Rift as dailyRifts (below)
     saveState(); renderTown(); if (typeof renderDistricts === 'function') renderDistricts(); switchTab('town');
-    const portal = via === 'portal';
-    townLog.textContent = portal ? `The portal folds around you. ${w.sub}` : `The puddle swallows you. ${w.sub}`;
-    toast(`🌀 ${portal ? 'The portal carried you into' : 'You fell into'} the ${w.name}. ${w.intro || ''}`);
-    logEvent('🌀', portal ? `Stepped through a portal into the ${w.name}.` : `Fell through a puddle into the ${w.name}.`); if (typeof teleInc === 'function') teleInc('puddleWorld.kind.' + w.kind);
-    if (portal) { bumpStat('portalsEntered', 1); if (typeof teleInc === 'function') teleInc('puddleWorld.portal'); }
+    const portal = via === 'portal' || via === 'daily';
+    townLog.textContent = via === 'daily' ? `Today's rift opens around you. ${w.sub}` : portal ? `The portal folds around you. ${w.sub}` : `The puddle swallows you. ${w.sub}`;
+    toast(`🌀 ${via === 'daily' ? 'Today\'s rift: the' : portal ? 'The portal carried you into the' : 'You fell into the'} ${w.name}. ${w.intro || ''}`);
+    logEvent('🌀', via === 'daily' ? `Went into today's rift, the ${w.name}.` : portal ? `Stepped through a portal into the ${w.name}.` : `Fell through a puddle into the ${w.name}.`); if (typeof teleInc === 'function') teleInc('puddleWorld.kind.' + w.kind);
+    if (via === 'portal') { bumpStat('portalsEntered', 1); if (typeof teleInc === 'function') teleInc('puddleWorld.portal'); }
+    if (via === 'daily') { bumpStat('dailyRifts', 1); if (typeof teleInc === 'function') teleInc('puddleWorld.daily'); }
     if (typeof riftNoteEnter === 'function') riftNoteEnter(w, via);   // js/rift-atlas.js: the Journal's collection of worlds
     if (typeof teleInc === 'function') teleInc('puddleWorld.entered');
     pwUpdatePill(); showTipOnce('puddleworld'); sfx('claim'); buzz(HAP.tap);
@@ -321,6 +334,7 @@ function pwLeave(why, quiet, after) {   // why: 'faded' (the timer), 'left' (cli
   const back = () => {
     const found = Math.max(0, state.ownedCards.length - (w.cards0 || 0)), k = pwKind(w);
     if (typeof riftNoteLeave === 'function') riftNoteLeave(w, why, found);   // js/rift-atlas.js
+    if (typeof dailyRiftLeave === 'function') dailyRiftLeave(w);             // js/daily-rift.js: today's result and the board
     if (k.leave) { try { k.leave(w); } catch (e) { /* cleanup only */ } }
     pwLayerClear();
     delete state.districtData[PW_KEY]; delete LIFE.puddles[PW_KEY]; delete LIFE.birds[PW_KEY];

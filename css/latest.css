@@ -2274,3 +2274,17 @@ body.pw-board #goalChip { display: none !important; }   /* the dice panel says w
 #riftList .ra-log small { color: var(--ink-soft); font-size: .78rem; }
 #riftList .ra-log time { color: var(--ink-soft); font-size: .76rem; white-space: nowrap; }
 #riftList .ra-empty { color: var(--ink-soft); font-size: .86rem; }
+
+/* ---- DAILY RIFT (build 259, js/daily-rift.js): today's card at the top of Journal -> Rifts and its board. The gold portal itself
+   is the PORTAL block above with .daily (colours in css/theme.css). ---- */
+#riftList .dr-card { border-color: color-mix(in srgb, var(--accent) 55%, var(--stone-edge)); }
+#riftList .dr-status { margin: 0 0 8px; font-size: .86rem; line-height: 1.4; color: var(--ink-soft); }
+#riftList .dr-status b { color: var(--ink); }
+#riftList .dr-board { list-style: none; margin: 0; padding: 0; }
+#riftList .dr-board li { display: flex; align-items: center; gap: 10px; padding: 6px 4px; border-top: 1px solid var(--stone-edge); font-size: .86rem; }
+#riftList .dr-board li.me { font-weight: 700; color: var(--accent); }
+#riftList .dr-rank { width: 1.4em; text-align: right; color: var(--ink-soft); }
+#riftList .dr-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#riftList .dr-score { white-space: nowrap; }
+#riftList .dr-none { color: var(--ink-soft); }
+.ent.life-portal.daily .pt-glow { animation-duration: 1.8s; }

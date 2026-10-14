@@ -43,7 +43,7 @@ function riftNoteEnter(w, via) {
   if (!w) return;
   const r = riftState(), now = Date.now(), fresh = [];
   r.visits++;
-  r.log.unshift({ name: w.name, kind: w.kind, biome: w.biome, family: w.family || null, via: via === 'portal' ? 'portal' : 'puddle', at: now, found: 0, end: null });
+  r.log.unshift({ name: w.name, kind: w.kind, biome: w.biome, family: w.family || null, via: via === 'portal' || via === 'daily' ? via : 'puddle', at: now, found: 0, end: null });
   r.log.length = Math.min(r.log.length, RIFT_LOG_MAX);
   RIFT_ROWS.forEach(row => {
     const key = row.of(w); if (!key || r.seen[row.id][key]) return;
@@ -96,7 +96,7 @@ function renderRiftAtlas() {
   const recent = r.log.length ? r.log.map(e => {
     const fam = e.family && FAMILIES[e.family] ? FAMILIES[e.family].icon + ' ' : '';
     const end = !e.end ? 'still open' : e.end === 'done' ? 'finished' : e.end === 'left' ? 'climbed out' : 'faded';
-    return `<li><span class="ra-ico">${RIFT_KIND_ICON[e.kind] || '🌀'}</span><div><b>${fam}${esc(e.name)}</b><small>${e.via === 'portal' ? 'Through a portal' : 'Through a puddle'} · ${end}${e.found ? ` · ${e.found} new card${e.found === 1 ? '' : 's'}` : ''}</small></div><time>${riftWhen(e.at)}</time></li>`;
+    return `<li><span class="ra-ico">${RIFT_KIND_ICON[e.kind] || '🌀'}</span><div><b>${fam}${esc(e.name)}</b><small>${e.via === 'daily' ? 'The Daily Rift' : e.via === 'portal' ? 'Through a portal' : 'Through a puddle'} · ${end}${e.found ? ` · ${e.found} new card${e.found === 1 ? '' : 's'}` : ''}</small></div><time>${riftWhen(e.at)}</time></li>`;
   }).join('') : `<li class="ra-empty">No worlds yet. Splash through puddles in the rain, or walk into a portal when one opens.</li>`;
-  el.innerHTML = `<p class="ra-intro">${r.visits} world${r.visits === 1 ? '' : 's'} visited. Something new in a row pays ${RIFT_NEW_PEBBLES} 🫧; a full row pays more and leaves you a souvenir to place in town or in your cottage.</p>${rows}<h3 class="ra-h">Recent worlds</h3><ul class="ra-log">${recent}</ul>`;
+  el.innerHTML = (typeof dailyRiftHtml === 'function' ? dailyRiftHtml() : '') + `<p class="ra-intro">${r.visits} world${r.visits === 1 ? '' : 's'} visited. Something new in a row pays ${RIFT_NEW_PEBBLES} 🫧; a full row pays more and leaves you a souvenir to place in town or in your cottage.</p>${rows}<h3 class="ra-h">Recent worlds</h3><ul class="ra-log">${recent}</ul>`;
 }

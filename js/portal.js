@@ -106,7 +106,7 @@ function portalTick() {
   if (p) {
     if (now >= p.until) { if (!(typeof pwBusy === 'function' && pwBusy())) portalClose('faded'); return; }
     if (p.until - now <= PORTAL_CLOSING_MS && p.district === state.currentDistrict && typeof townWorld !== 'undefined' && townWorld) {
-      const el = townWorld.querySelector('.ent.life-portal'); if (el && !el.classList.contains('closing')) el.classList.add('closing');
+      const el = townWorld.querySelector('.ent.life-portal:not(.daily)'); if (el && !el.classList.contains('closing')) el.classList.add('closing');
     }
     return;
   }
