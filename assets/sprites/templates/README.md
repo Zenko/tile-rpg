@@ -21,3 +21,16 @@ Workflow:
 4. `python3 scripts/svg-to-sprite.py my-thing.svg p-my-thing --check` to see each colour's mapping, then without `--check` to print the `<symbol>` for `assets/sprites.js`.
 
 Worked example: `../example-mailbox-design.svg` -> `../example-mailbox-game.txt`.
+
+## Painting on a tablet (Infinite Painter, Procreate, etc.)
+
+`painting/` has the same templates as transparent PNGs at 4x (256 px per tile), sized for raster painting apps:
+
+| Canvas | Layers to import |
+|---|---|
+| 256 x 256 | `prop-256x256-guides.png`, `prop-256x256-shadow.png` |
+| 256 x 256 | `ground-tile-256x256-guides.png` |
+| 512 x 512 | `building-2x2-512x512-guides.png`, `building-2x2-512x512-shadow.png` |
+| 768 x 512 | `building-3x2-768x512-guides.png`, `building-3x2-768x512-shadow.png` |
+
+Make a canvas of that size, import the guides as the top layer (lock it, lower its opacity), keep the shadow layer at the bottom, and paint between them. Hide the guides before exporting a transparent PNG. Import `town-palette.png` as a reference image to eyedrop colours from. The game's town sprites are vector, so painted art needs a conversion step before it goes in.
