@@ -34,3 +34,11 @@ Worked example: `../example-mailbox-design.svg` -> `../example-mailbox-game.txt`
 | 768 x 512 | `building-3x2-768x512-guides.png`, `building-3x2-768x512-shadow.png` |
 
 Make a canvas of that size, import the guides as the top layer (lock it, lower its opacity), keep the shadow layer at the bottom, and paint between them. Hide the guides before exporting a transparent PNG. Import `town-palette.png` as a reference image to eyedrop colours from. The game's town sprites are vector, so painted art needs a conversion step before it goes in.
+
+## Icons
+
+`icon-128x128.svg` (vector) and `painting/icon-512x512-guides.png` (4x, for painting apps) are the template for UI icons. The game's spec: **128 x 128 transparent PNG**, named `icon-<name>.png` after the icon it replaces (the style guide's Icons section lists every name; keyword icons are `kw-<keyword>.png`).
+- Keep the subject inside the dashed 80% box. Keyword icons sit in a round badge, so keep those inside the inner 70% box and the circle.
+- Bold, simple silhouettes with 2-3 tones plus a highlight. They are seen at 16-40 px: check them that small, on both dark and light.
+- No baked-in drop shadow (the game adds one), no thin outlines, text, or pure black/white edges.
+- Try a new icon in `labs/asset-lab.html#icons` before it goes into `assets/icons/`.

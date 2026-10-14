@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <title>UI icon template, 128 x 128. Draw inside ART, hide GUIDES, export a transparent PNG named icon-&lt;name&gt;.png (keyword icons: kw-&lt;keyword&gt;.png).</title>
+  <g id="ART - draw here">
+  </g>
+  <g id="GUIDES - hide before export" font-family="Arial, sans-serif" fill="none">
+    <rect x="0.4" y="0.4" width="127.2" height="127.2" stroke="#ff2e88" stroke-width="0.8"/>
+    <rect x="12.8" y="12.8" width="102.4" height="102.4" stroke="#ff2e88" stroke-width="0.8" stroke-dasharray="3 3"/>
+    <rect x="19.2" y="19.2" width="89.6" height="89.6" stroke="#ff2e88" stroke-opacity="0.5" stroke-width="0.6" stroke-dasharray="1 3"/>
+    <circle cx="64" cy="64" r="63.6" stroke="#ff2e88" stroke-opacity="0.35" stroke-width="0.8"/>
+    <line x1="64" y1="0" x2="64" y2="128" stroke="#ff2e88" stroke-opacity="0.2" stroke-width="0.5"/>
+    <line x1="0" y1="64" x2="128" y2="64" stroke="#ff2e88" stroke-opacity="0.2" stroke-width="0.5"/>
+    <text x="14" y="10" font-size="5.5" fill="#ff2e88">80% safe area (UI icons)</text>
+    <text x="64" y="124" font-size="4.5" fill="#ff2e88" fill-opacity="0.8" text-anchor="middle">inner 70% + circle: keyword icons (round badge)</text>
+  </g>
+</svg>
