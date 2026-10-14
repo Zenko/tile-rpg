@@ -2312,3 +2312,13 @@ body.pw-board #goalChip { display: none !important; }   /* the dice panel says w
 @keyframes still-fall { to { transform: rotate(14deg) translateY(calc(var(--t) * 3)); opacity: 0; } }
 @keyframes still-fly { to { transform: translate(calc(var(--t) * 3), calc(var(--t) * -2)) rotate(0deg); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .ent.pw-mote span, .town-view.pw-still-late .pw-still-air .sd { animation: none; } }
+
+/* ---- CRAFT FAILS (build 261, js/shop-economy.js): the fail chance bar, the fail meter's pips and a crafting companion's note. ---- */
+.cr-meter.fail .cr-bar i { background: var(--lose-glow); }
+.cr-failmeter { display: flex; align-items: center; gap: 8px; width: 100%; font-size: .78rem; color: var(--ink-soft); }
+.cr-failmeter .cr-pips { display: inline-flex; gap: 4px; }
+.cr-failmeter .cr-pips i { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid var(--lose-glow); }
+.cr-failmeter .cr-pips i.on { background: var(--lose-glow); box-shadow: 0 0 6px var(--lose-glow); }
+.cr-failmeter small { margin-left: auto; }
+.cr-help { width: 100%; font-size: .78rem; color: var(--accent); }
+.cr-odds { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }

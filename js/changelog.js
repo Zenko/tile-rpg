@@ -18,6 +18,8 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'better', x: 'Crafting earns XP now, with new crafting milestones and quests. A craft can also crack: the cards turn into Embers instead, and a fail meter makes every fail in a row pay more until a craft works.' },
+  { t: 'new', x: 'Crafting companions: a companion whose card has Seed halves your crafting fails, adds XP and skill chance, and can make the card come out Reborn.' },
   { t: 'new', x: 'Time-stop worlds: a puddle or a portal can drop you into a moment that has stopped - rain hanging in the air, neighbours frozen mid-step. Time only moves when you do: 45 steps, then it starts again. Gather the glowing motes before it does.' },
   { t: 'new', x: 'The Daily Rift: a gold portal by the fountain, once a day. Everyone gets the same world behind it that day - the same map and the same hidden cards in the same places. One try, four minutes: find every card, as fast as you can, and see how the other testers did in Journal → Rifts.' },
   { t: 'new', x: 'The Rift Map (Journal → Rifts): every puddle world you visit is collected - the kinds of world, their palettes, the shapes and the four family portals - with your recent worlds and what you found in them. Something new pays a few Embers, and a full row leaves you a souvenir to place in town or in your cottage.' },

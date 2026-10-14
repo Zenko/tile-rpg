@@ -97,8 +97,9 @@ const COMPANION_PERKS = {
   chest:   { icon: '🗝️', text: 'Hidden chests turn up more often' },
   fish:    { icon: '🎣', text: 'Fish bite sooner' },
   xp:      { icon: '⭐', text: '+10% XP from everything' },
+  craft:   { icon: '🔨', text: 'Steadier crafting: half the fails, +50% crafting XP, more skills and a chance of Reborn' },
 };
-const KW_PERK = { guard: 'spirit', thorns: 'spirit', swift: 'finds', mend: 'crops', bloom: 'harvest', shield: 'chest', echo: 'fish', drain: 'fish', rally: 'xp' };
+const KW_PERK = { guard: 'spirit', thorns: 'spirit', swift: 'finds', mend: 'crops', bloom: 'harvest', shield: 'chest', echo: 'fish', drain: 'fish', rally: 'xp', seed: 'craft' };
 const DISTRICT_PERK = { square: 'xp', market: 'harvest', harbor: 'fish', garden: 'crops' };
 const BOSS_PERK = { square: 'spirit', market: 'chest', harbor: 'fish', garden: 'crops' };
 // Dreamer level needed. Cards by rarity (spells add `spell` levels on top), neighbours by district, bosses much later.

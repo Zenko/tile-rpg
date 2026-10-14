@@ -6,13 +6,47 @@
    Refine  : 2 copies of a plain card become 1 stronger version (+1 power or +1 health you choose), sometimes with a skill.
    Trade up: 3 cards of one rarity become 1 random card of the next rarity, sometimes with a skill.
    Nothing costs Embers; the cards are the price. Skills come from a small pool because simulation showed that
-   Flicker and Haze hand out too much power for free (see the notes with the game). */
+   Flicker and Haze hand out too much power for free (see the notes with the game).
+   Build 261: a craft earns XP (bumpStat 'crafts', 'craftSkills'), and it can FAIL (refineFail / tradeFail): the cards are used up
+   and turn into Embers instead. Every fail in a row fills the fail meter (state.progress.craftMeter, up to meterMax), and each
+   step raises what a fail pays (meterStep); a success empties it. A companion with the 'craft' perk (js/afterdark-companion-cards.js,
+   cards whose first keyword is seed) halves the fail chance, adds half again to the XP and the skill chance, and gives the new
+   card a perkFoilChance of coming out Reborn. A fail never happens when losing the cards would break the full-deck promise. */
 const CRAFT = {
   skills: ['guard', 'mend', 'bloom', 'echo', 'thorns', 'drain'],
   refineSkillChance: 0.30,
   tradeSkillChance: 0.40,
-  tradeCount: 3
+  tradeCount: 3,
+  refineFail: 0.15, tradeFail: 0.20,      // the chance a craft cracks
+  meterMax: 4, meterStep: 0.5,            // a fail pays the base x (1 + meterStep x the meter after it): x1.5 up to x3
+  failBase: 2, failMin: 4,                // base = failBase x the cards' release value, never under failMin
+  perkFailMul: 0.5, perkSkillMul: 1.5, perkXpMul: 0.5, perkFoilChance: 0.06
 };
+const craftHelped = () => typeof hasPerk === 'function' && hasPerk('craft');
+function craftFailChance(kind) { const base = kind === 'trade' ? CRAFT.tradeFail : CRAFT.refineFail; return craftHelped() ? base * CRAFT.perkFailMul : base; }
+function craftSkillChance(kind) { const base = kind === 'trade' ? CRAFT.tradeSkillChance : CRAFT.refineSkillChance; return Math.min(0.9, craftHelped() ? base * CRAFT.perkSkillMul : base); }
+function craftMeter() { return Math.max(0, Math.min(CRAFT.meterMax, state.progress.craftMeter || 0)); }
+function craftFailMultiplier(meterAfter) { return 1 + CRAFT.meterStep * meterAfter; }
+// What a fail made of these cards pays at the given meter (after the fail is counted).
+function craftFailPayout(removed, meterAfter) {
+  const value = Object.keys(removed).reduce((n, id) => { const d = cardDef(id); return n + removed[id] * ((d && RELEASE_VALUE[d.rarity]) || 1); }, 0);
+  return Math.round(Math.max(CRAFT.failMin, CRAFT.failBase * value) * craftFailMultiplier(meterAfter));
+}
+// The craft cracked: the cards are gone, Embers instead, and the meter goes up.
+function craftFail(kind, removed) {
+  Object.keys(removed).forEach(id => removeCopies(id, removed[id]));
+  const meter = Math.min(CRAFT.meterMax, craftMeter() + 1), pay = craftFailPayout(removed, meter);
+  state.progress.craftMeter = meter;
+  repairDeckAfterCraft(null);
+  addPebbles(pay, 'craft-fail');
+  bumpStat('craftFails', 1);
+  if (meter >= CRAFT.meterMax) bumpStat('craftMeterFull', 1);
+  logEvent('💥', `A ${kind === 'trade' ? 'trade-up' : 'refine'} cracked and crumbled into ${pay} ${currencyName(pay)}.`);
+  toast(`💥 The craft cracked! The cards crumble into 🫧 ${pay} ${currencyName(pay)} · fail meter ${meter}/${CRAFT.meterMax}${meter < CRAFT.meterMax ? `, next fail pays x${craftFailMultiplier(meter + 1)}` : ' (full)'}`);
+  sfx('tie'); buzz(HAP.soft);
+  updateHud(); checkAchievements();
+  return { failed: true, pebbles: pay, meter };
+}
 
 function craftableSkills(id) {
   const d = cardDef(id);
@@ -51,16 +85,28 @@ function repairDeckAfterCraft(newId) {
   return freed > 0;
 }
 
-function finishCraft(resultId, skill, heading) {
+function finishCraft(resultId, skill, heading, rng) {
+  rng = rng || Math.random;
   state.progress.crafted += 1;
   if (skill) state.progress.skillsCrafted += 1;
+  state.progress.craftMeter = 0;   // a success empties the fail meter
+  // XP (build 261): through bumpStat like everything else, half again with a crafting companion
+  const helped = craftHelped(), xp = XP_PER_STAT.crafts + (skill ? XP_PER_STAT.craftSkills : 0);
+  bumpStat('crafts', 1); if (skill) bumpStat('craftSkills', 1);
+  let bonus = 0;
+  if (helped) { bonus = Math.round(xp * CRAFT.perkXpMul); addXP(bonus); bumpStat('craftsHelped', 1); }
+  let reborn = false;
+  if (helped && rng() < CRAFT.perkFoilChance) {   // a crafting companion's chance of a Reborn
+    const f = foils(); f[resultId] = (f[resultId] || 0) + 1; reborn = true;
+    bumpStat('foilsFound', 1); bumpStat('craftFoils', 1);
+  }
   saveState();
   updateHud();
   bumpPill('pillCards');
   const def = cardDef(resultId);
-  const note = skill ? `✨ It gained a skill: ${KW[skill].icon} ${KW[skill].name}!` : '';
-  logEvent(def.icon, `Crafted ${def.name}${skill ? ` with ${KW[skill].name}` : ''}.`);
-  showCardReveal(resultId, heading, true, note);
+  const note = [skill ? `✨ It gained a skill: ${KW[skill].icon} ${KW[skill].name}!` : '', reborn ? '🌟 It came out Reborn!' : ''].filter(Boolean).join(' ');
+  logEvent(def.icon, `Crafted ${def.name}${skill ? ` with ${KW[skill].name}` : ''}${reborn ? ' (Reborn)' : ''}.`);
+  showCardReveal(resultId, heading, true, note, xp + bonus);
   if (skill) { sfx('mythic'); buzz(HAP.big); }
   checkAchievements();
 }
@@ -103,8 +149,9 @@ function tradeBlockReason(picks) {
 function refineCard(id, stat, rng) {
   rng = rng || Math.random;
   if (refineBlockReason(id, stat)) return false;
+  if (rng() < craftFailChance('refine') && keepsFullDeck({ [id]: 2 }, [])) return craftFail('refine', { [id]: 2 });
   let skills = craftableSkills(id);
-  let skill = (skills.length && rng() < CRAFT.refineSkillChance) ? skills[Math.floor(rng() * skills.length)] : '';
+  let skill = (skills.length && rng() < craftSkillChance('refine')) ? skills[Math.floor(rng() * skills.length)] : '';
   let resultId = BattleEngine.variantId(id, stat, skill);
   if (!cardDef(resultId)) return false;
   // the gate above was checked without the skill; if the skilled version would somehow break the deck rule, hand out the plain one
@@ -114,7 +161,7 @@ function refineCard(id, stat, rng) {
   state.ownedCards.push(resultId);
   noteCardsFound(1);
   const deckChanged = repairDeckAfterCraft(resultId);
-  finishCraft(resultId, skill, 'Refined!');
+  finishCraft(resultId, skill, 'Refined!', rng);
   if (deckChanged) toast('🎴 Your deck was updated with the new card');
   return { id: resultId, skill, deckChanged };
 }
@@ -128,16 +175,17 @@ function tradeUp(picks, rng) {
   picks.forEach(id => { need[id] = (need[id] || 0) + 1; });
   const pool = cardPool(target);
   if (!pool.length) return false;
+  if (rng() < craftFailChance('trade') && keepsFullDeck(need, [])) return craftFail('trade', need);
   const base = pool[Math.floor(rng() * pool.length)].id;
   const skills = craftableSkills(base);
-  const skill = (skills.length && rng() < CRAFT.tradeSkillChance) ? skills[Math.floor(rng() * skills.length)] : '';
+  const skill = (skills.length && rng() < craftSkillChance('trade')) ? skills[Math.floor(rng() * skills.length)] : '';
   const resultId = skill ? BattleEngine.variantId(base, '', skill) : base;
   Object.keys(need).forEach(id => removeCopies(id, need[id]));
   state.progress.discovered = Array.from(new Set((state.progress.discovered || []).concat(picks.map(BattleEngine.baseIdOf))));
   const isNew = !discoveredSet().has(base);
   state.ownedCards.push(resultId);
   noteCardsFound(1);
-  finishCraft(resultId, skill, 'Traded up!');
+  finishCraft(resultId, skill, 'Traded up!', rng);
   if (isNew) toast('📖 New entry in your Index');
   return { id: resultId, skill, base, isNew };
 }

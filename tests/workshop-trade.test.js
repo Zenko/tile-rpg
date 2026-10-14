@@ -3,6 +3,7 @@ module.exports = async (page, assert) => {
   await page.evaluate(() => {
     Object.keys(TIPS).forEach(k => { tipsSeen()[k] = true; });
     state.ownedCards = []; state.deck = [];
+    CRAFT.tradeFail = 0; CRAFT.refineFail = 0;   // this test is about the screen, not the odds (tests/craft-xp.test.js covers fails)
     const commons = CARD_POOL.filter(c => c.rarity === 'common' && !c.spell && !c.exclusive).slice(0, 4);
     commons.forEach(c => state.ownedCards.push(c.id, c.id));
     craftMode = 'trade'; craftSel = { rarity: 'common', picks: [] };

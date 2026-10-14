@@ -124,7 +124,7 @@ const GUIDE = [
   ] },
   { section: 'Collecting', items: [
     { icon: '🛍️', name: 'Packs & decorations', where: `${PLACES.market} → Card Shop`, how: `Spend ${GAME.currency.many} on packs, sleeves, cosmetics and decorations for any district. Until ${PLACES.market} opens, tap your 🫧 ${GAME.currency.many} counter to browse.` },
-    { icon: '🔨', name: 'Workshop', where: 'Cards → Craft', how: 'Refine two copies into a stronger card, or trade three up a rarity.' },
+    { icon: '🔨', name: 'Workshop', where: 'Cards → Craft', how: `Refine two copies into a stronger card, or trade three up a rarity. Every craft earns XP. Now and then one cracks: the cards turn into ${GAME.currency.many} instead, and the fail meter fills, so each fail in a row pays more (up to three times as much) until a craft works. A companion whose card has Seed (or a neighbour who loves crafting) steadies your hands: half the fails, more XP, more skills and a chance the card comes out Reborn.` },
     { icon: '🧩', name: 'Index & sets', where: 'Cards → Sets', how: 'Eight themed sets that give lasting bonuses when complete, and an Index of every card in the game.' },
     { icon: '✦', name: 'Charms & mastery', where: 'Cards → My Cards', how: 'Charm cards for town perks; cards you play earn ★ mastery (★★★: +1 health in battle).' },
     { icon: '🤝', name: 'Trading board', where: `The sign in ${PLACES.market}`, how: 'Three trades a day for spare cards.', lock: () => needs('market') },
@@ -160,6 +160,7 @@ const QUEST_POOL = [
   { id: 'draft2',   icon: '🎴', name: 'Win 2 matches in a Draft Run', goal: 2, stat: 'draftWins', reward: 'rare' },
   { id: 'knack1',   icon: '✨', name: `Use your ${GAME.player.one}’s Gift in a match`, goal: 1, stat: 'knacksUsed', reward: 'common' },
   { id: 'find2',    icon: '🍂', name: 'Find 2 cards on the ground',   goal: 2,  stat: 'cardsFound',      reward: 'common' },
+  { id: 'craft2',   icon: '🔨', name: 'Craft 2 cards in the Workshop', goal: 2, stat: 'crafts',         reward: 'common' },
   { id: 'find3',    icon: '🃏', name: 'Find 3 cards on the ground',   goal: 3,  stat: 'cardsFound',      reward: 'rare' },
   { id: 'find5',    icon: '✨', name: 'Find 5 cards on the ground',   goal: 5,  stat: 'cardsFound',      reward: 'ultra' },
   { id: 'find8',    icon: '💰', name: 'Find 8 cards on the ground',   goal: 8,  stat: 'cardsFound',      reward: 'super' },
@@ -223,6 +224,7 @@ const QUEST_POOL = [
 ];
 // Same shape as QUEST_POOL, but with week-sized goals and better rewards to match the longer commitment.
 const WEEKLY_QUEST_POOL = [
+  { id: 'w_craft8',   icon: '⚒️', name: 'Craft 8 cards in the Workshop', goal: 8, stat: 'crafts',          reward: 'super' },
   { id: 'w_daily3',   icon: '⭐', name: 'Try 3 Daily Rifts',           goal: 3,   stat: 'dailyRifts',      reward: 'super' },
   { id: 'w_portal2',  icon: '🌀', name: 'Step through 2 portals',      goal: 2,   stat: 'portalsEntered',  reward: 'super' },
   { id: 'w_find50',   icon: '🎒', name: 'Find 50 cards on the ground', goal: 50,  stat: 'cardsFound',      reward: 'super' },
@@ -361,6 +363,12 @@ const ACHIEVEMENTS = [
   { id: 'packs-25',    icon: '🎡', name: '25 packs opened',  test: () => state.progress.packsOpened >= 25 },
   { id: 'packs-50',    icon: '🎢', name: '50 packs opened',  test: () => state.progress.packsOpened >= 50 },
   { id: 'crafted-25',  icon: '⚙️', name: '25 crafts',        test: () => state.progress.crafted >= 25 },
+  { id: 'crafted-50',  icon: '🏭', name: '50 crafts',        test: () => state.progress.crafted >= 50 },
+  { id: 'crafted-100', icon: '🏆', name: '100 crafts',       test: () => state.progress.crafted >= 100 },
+  { id: 'craft-fail',  icon: '💥', name: 'Nothing ventured', test: () => (state.progress.totals.craftFails || 0) >= 1 },
+  { id: 'craft-meter', icon: '🔥', name: 'Fail meter full',  test: () => (state.progress.totals.craftMeterFull || 0) >= 1 },
+  { id: 'craft-foil',  icon: '🌟', name: 'Reborn at the anvil', test: () => (state.progress.totals.craftFoils || 0) >= 1 },
+  { id: 'craft-help',  icon: '🔨', name: 'Helping hands: 5 crafts with a crafting companion', test: () => (state.progress.totals.craftsHelped || 0) >= 5 },
   { id: 'skills-10',   icon: '🎋', name: '10 lucky skills',  test: () => state.progress.skillsCrafted >= 10 },
   { id: 'released-100', icon: '🌀', name: '100 released',    test: () => state.progress.released >= 100 },
   { id: 'deck-master-25', icon: '🪡', name: '25 deck edits', test: () => state.progress.deckEdits >= 25 },
@@ -439,6 +447,7 @@ const TITLES = [
   { ach: 'favours-10',    name: 'Good Neighbor' },
   { ach: 'chest-5',       name: 'Treasure Hunter' },
   { ach: 'crafted-10',    name: 'Tinkerer' },
+  { ach: 'crafted-50',    name: 'Master Crafter' },
   { ach: 'mythic-find',   name: `Mythic ${GAME.player.one}` },
   { ach: 'spells-50',     name: 'Spellweaver' },
   { ach: 'cellar-10',     name: 'Deep Delver' },

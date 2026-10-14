@@ -181,11 +181,20 @@ function miniCardHtml(def) {
       <span class="c-cost">${def.cost}</span><span class="c-icon">${cardArtHtml(def)}</span><span class="c-power">${cardStatsText(def)}</span></div>`;
 }
 
+// The odds under each craft (build 261): skill chance, fail chance, the fail meter and a crafting companion's help.
+function craftOddsHtml(kind) {
+  const pct = n => Math.round(n * 100), meter = craftMeter(), next = Math.min(CRAFT.meterMax, meter + 1);
+  const pips = Array.from({ length: CRAFT.meterMax }, (_, i) => `<i class="${i < meter ? 'on' : ''}"></i>`).join('');
+  const c = state.companion, help = craftHelped() && c ? `<div class="cr-help">🔨 ${escapeHtml(c.name)} steadies your hands: half the fails, +50% XP, more skills, a chance of Reborn</div>` : '';
+  return `<div class="cr-meter"><span>✨ Skill chance</span><div class="cr-bar"><i style="width:${pct(craftSkillChance(kind))}%"></i></div><b>${pct(craftSkillChance(kind))}%</b></div>
+    <div class="cr-meter fail"><span>💥 Fail chance</span><div class="cr-bar"><i style="width:${pct(craftFailChance(kind))}%"></i></div><b>${pct(craftFailChance(kind))}%</b></div>
+    <div class="cr-failmeter" title="Each fail in a row fills it; a success empties it"><span>Fail meter</span><span class="cr-pips">${pips}</span><small>a fail pays x${craftFailMultiplier(next)} in ${GAME.currency.many}</small></div>${help}`;
+}
 function renderCraft() {
   const box = document.getElementById('craftView');
   const counts = ownedCardCounts();
   const pct = n => Math.round(n * 100);
-  box.innerHTML = `<div class="cr-intro">Combine cards into something better. <b>Nothing here costs ${GAME.currency.many}</b>: the cards are the price.</div>
+  box.innerHTML = `<div class="cr-intro">Combine cards into something better. <b>Nothing here costs ${GAME.currency.many}</b>: the cards are the price. Now and then a craft cracks: the cards turn into ${GAME.currency.many}, more for every fail in a row.</div>
     <div class="cr-mode" role="tablist">
       <button class="${craftMode === 'refine' ? 'on' : ''}" data-mode="refine" role="tab" aria-selected="${craftMode === 'refine'}">🔨 Refine</button>
       <button class="${craftMode === 'trade' ? 'on' : ''}" data-mode="trade" role="tab" aria-selected="${craftMode === 'trade'}">🔁 Trade up</button>
@@ -217,7 +226,7 @@ function renderCraft() {
           <button data-stat="p" class="${refineStat === 'p' ? 'on' : ''}" ${why.p ? 'disabled' : ''} aria-label="Plus one power"><span>+1 ⚔ Power</span><small>${def.power} → ${def.power + 1}</small></button>
           <button data-stat="g" class="${refineStat === 'g' ? 'on' : ''}" ${why.g ? 'disabled' : ''} aria-label="Plus one health"><span>+1 ♥ Health</span><small>${def.grit} → ${def.grit + 1}</small></button>
         </div>
-        <div class="cr-meter"><span>✨ Skill chance</span><div class="cr-bar"><i style="width:${pct(CRAFT.refineSkillChance)}%"></i></div><b>${pct(CRAFT.refineSkillChance)}%</b></div>
+        ${craftOddsHtml('refine')}
         <div class="cr-may">${skills.length ? `May gain: ${skills.map(k => KW[k].icon).join(' ')}` : 'No skill possible: it already has 2'}</div>
         <button class="btn cr-ready" data-refine="${id}" data-stat="${refineStat}" ${block ? 'disabled' : ''}>Refine 2 into 1</button>
         ${block ? `<div class="cr-empty">${block}</div>` : ''}
@@ -241,7 +250,7 @@ function renderCraft() {
   trade.className = 'cr-section';
   const avail = r => Object.keys(counts).filter(id => cardDef(id).rarity === r).reduce((n, id) => n + tradable(id), 0);
   trade.innerHTML = `<div class="cr-title">🔁 Trade up</div>
-    <div class="cr-desc">Combine <b>${CRAFT.tradeCount} cards of one rarity</b> into <b>1 random card of the next rarity</b>, with a <b>${pct(CRAFT.tradeSkillChance)}% chance it comes with a skill</b>. Cards in your deck are never used.</div>
+    <div class="cr-desc">Combine <b>${CRAFT.tradeCount} cards of one rarity</b> into <b>1 random card of the next rarity</b>, with a <b>${pct(craftSkillChance('trade'))}% chance it comes with a skill</b> (and a ${pct(craftFailChance('trade'))}% chance it cracks into ${GAME.currency.many} instead). Cards in your deck are never used.</div>
     <div class="cr-chips">${steps.map(r => `<button class="cr-chip${r === craftSel.rarity ? ' active' : ''}${avail(r) < CRAFT.tradeCount ? ' short' : ''}" data-rar="${r}" title="${avail(r) < CRAFT.tradeCount ? `Needs ${CRAFT.tradeCount - avail(r)} more spare ${RARITY_LABEL[r].toLowerCase()} card${CRAFT.tradeCount - avail(r) === 1 ? '' : 's'}` : 'Ready to trade'}">${RARITY_LABEL[r]} <small>${avail(r)}/${CRAFT.tradeCount}</small></button>`).join('')}</div>`;
   const target = nextRarity(craftSel.rarity);
   const tray = document.createElement('div');
@@ -286,6 +295,7 @@ function renderCraft() {
   const ready = need === 0 && !whyNot;
   go.innerHTML = `<button class="btn${ready ? ' cr-ready' : ''}" id="craftGo" ${ready ? '' : 'disabled'}>${need === 0 ? `Combine into ${aOrAn(RARITY_LABEL[target])} card` : `Pick ${need} more`}</button>${whyNot ? `<div class="cr-empty">${whyNot}</div>` : ''}`;
   dock.appendChild(go);
+  const odds = document.createElement('div'); odds.className = 'cr-odds'; odds.innerHTML = craftOddsHtml('trade'); trade.appendChild(odds);
   if (craftMode === 'trade') box.appendChild(trade);
 
   // ----- events -----
