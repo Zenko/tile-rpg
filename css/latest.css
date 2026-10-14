@@ -2245,3 +2245,6 @@ body.pw-board #goalChip { display: none !important; }   /* the dice panel says w
 @keyframes wf-min-fwd { 0% { transform: rotate(0deg); } 53% { transform: rotate(2880deg); } 100% { transform: rotate(3240deg); } }
 @keyframes wf-twist-fwd { 0% { transform: none; filter: none; } 40% { transform: rotate(6deg) scale(1.12) skewX(-4deg); filter: hue-rotate(-40deg) saturate(1.3); } 100% { transform: rotate(32deg) scale(1.9) skewX(6deg); filter: hue-rotate(-160deg) saturate(1.8) blur(6px); } }
 @keyframes wf-untwist-fwd { 0% { transform: rotate(-28deg) scale(1.8) skewX(-5deg); filter: hue-rotate(140deg) saturate(1.6) blur(5px); } 60% { transform: rotate(3deg) scale(1.03); filter: hue-rotate(15deg) blur(0); } 100% { transform: none; filter: none; } }
+/* Family portals (build 257): the family's icon bobs above the doorway. */
+.ent.life-portal .pt-fam { left: 50%; bottom: 112%; transform: translateX(-50%); font-size: calc(var(--t) * .34); line-height: 1; filter: drop-shadow(0 0 4px var(--portal-glow)); animation: pt-bob 2.2s ease-in-out infinite; }
+@keyframes pt-bob { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, -4px); } }

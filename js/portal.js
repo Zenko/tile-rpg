@@ -13,7 +13,11 @@
    - Hooks (typeof-guarded there): lifeRenderEntities (js/town-life.js) calls portalRender to draw it, lifeStep calls
      portalStep when you step on a tile. Entering goes through pwEnter(x, y, undefined, 'portal'), so the warped-time
      transition (js/warp-fx.js) plays for portals and puddles alike.
-   Look: the PORTAL block at the end of css/latest.css; colours are the --portal-* tokens in css/theme.css.
+   - Family portals (build 257): every portal belongs to one card family (portal.family; the district's own family is twice as
+     likely). Its colours and the icon floating above it say which, and its world is that family's (pwFamilize in
+     js/puddle-worlds.js: palette, name and every card inside). A portal saved before build 257 has no family and leads to a
+     plain world.
+   Look: the PORTAL block at the end of css/latest.css; colours are the --portal-* tokens in css/theme.css (one set per family).
    ============================================================ */
 const PORTAL_LIFE_MS = 12 * 60 * 1000;      // how long a portal stays open
 const PORTAL_CLOSING_MS = 60 * 1000;        // it flickers for its last minute
@@ -48,14 +52,20 @@ function portalPickSpot() {
   return spots.slice(0, 12).find(s => findPath(m, data, me, (x, y) => x === s.x && y === s.y)) || null;
 }
 
-function portalOpen() {
+// Which family a new portal belongs to: the district's own family counts twice.
+function portalPickFamily(district) {
+  const bag = [];
+  Object.keys(FAMILIES).forEach(f => { bag.push(f); if (FAMILIES[f].district === district) bag.push(f); });
+  return bag[Math.floor(Math.random() * bag.length)];
+}
+function portalOpen(family) {
   const s = portalPickSpot(); if (!s) return false;
-  const now = Date.now();
-  state.progress.portal = { district: state.currentDistrict, x: s.x, y: s.y, openedAt: now, until: now + PORTAL_LIFE_MS };
+  const now = Date.now(), fam = FAMILIES[family] ? family : portalPickFamily(state.currentDistrict), f = FAMILIES[fam];
+  state.progress.portal = { district: state.currentDistrict, x: s.x, y: s.y, openedAt: now, until: now + PORTAL_LIFE_MS, family: fam };
   bumpStat('portalsSeen', 1); saveState(); renderTown();
-  townLog.textContent = 'The air folds over on itself a few steps away. A portal has opened.';
-  toast('🌀 A portal has opened nearby. It will not stay open for ever.');
-  logEvent('🌀', `A portal opened in ${DISTRICTS[state.currentDistrict].name}.`);
+  townLog.textContent = `The air folds over on itself a few steps away. A ${f.name} portal has opened.`;
+  toast(`${f.icon} A ${f.name} portal has opened nearby: ${f.name} cards wait on the other side. It will not stay open for ever.`);
+  logEvent('🌀', `A ${f.name} portal opened in ${DISTRICTS[state.currentDistrict].name}.`);
   if (typeof teleInc === 'function') teleInc('portal.opened');
   sfx('wish'); buzz(HAP.tap); showTipOnce('portal');
   return true;
@@ -74,16 +84,20 @@ function portalClose(why) {   // why: 'faded' (its time ran out) or 'used'
 // From lifeRenderEntities: draws the portal on its tile (it stands, so it uses the normal row stacking, not the ground's).
 function portalRender(data, add) {
   const p = portalHere(); if (!p) return;
-  const el = add('life-portal', p.x, p.y, '<span class="pt-glow"></span><span class="pt-swirl"></span><span class="pt-core"></span><i></i><i></i><i></i>');
+  const f = FAMILIES[p.family];
+  const el = add('life-portal', p.x, p.y, '<span class="pt-glow"></span><span class="pt-swirl"></span><span class="pt-core"></span><i></i><i></i><i></i>' +
+    (f ? `<span class="pt-fam" title="${f.name}">${f.icon}</span>` : ''));
+  if (el && f) el.dataset.fam = p.family;
   if (el && p.until - Date.now() <= PORTAL_CLOSING_MS) el.classList.add('closing');
 }
 // From lifeStep: stepping onto the portal takes you through.
 function portalStep(x, y) {
   const p = portalHere(); if (!p || p.x !== x || p.y !== y) return;
   if (typeof pwCanStart !== 'function' || !pwCanStart()) { toast('🌀 The portal hums, but will not let you through just now.'); return; }
+  const fam = p.family;
   portalClose('used');
   sfx('splash'); buzz(HAP.tap);
-  setTimeout(() => { if (pwCanStart()) pwEnter(x, y, undefined, 'portal'); }, 250);
+  setTimeout(() => { if (pwCanStart()) pwEnter(x, y, undefined, 'portal', fam); }, 250);
 }
 
 function portalTick() {

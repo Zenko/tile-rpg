@@ -120,7 +120,7 @@ PW_KINDS.maze = {
       const more = []; for (let y = 1; y < m.h - 1; y++) for (let x = 1; x < m.w - 1; x++) if (free(x, y) && !pool.some(p => p.x === x && p.y === y) && Math.abs(x - m.spawn.x) + Math.abs(y - m.spawn.y) > 4) more.push({ x, y, d: Math.abs(x - m.spawn.x) + Math.abs(y - m.spawn.y) });
       more.sort((a, b) => b.d - a.d); pool = pool.concat(more.slice(0, 6));
     }
-    pwPickFrom(pool, 3).forEach((s, i) => data.items.push({ id: 'item-pw-' + i, x: s.x, y: s.y, cardId: weightedTownCardId(i === 2 ? rollRewardRarity(false) : (Math.random() < 0.35 ? 'rare' : 'common')),
+    pwPickFrom(pool, 3).forEach((s, i) => data.items.push({ id: 'item-pw-' + i, x: s.x, y: s.y, cardId: pwCardId(i === 2 ? rollRewardRarity(false) : (Math.random() < 0.35 ? 'rare' : 'common')),
       collected: false, spawnedAt: 0, collectedAt: null, fixed: true, treasure: i === 2 }));
     data.spirits = [];
     const now = Date.now();
@@ -150,7 +150,7 @@ PW_KINDS.maze = {
     bumpStat('puddleWins', 1);
     pwLeave('done', false, () => {
       addPebbles(emb, 'puddle-world'); toast(`🌀 ${first ? 'First one out! ' : ''}+${emb} ${GAME.currency.many}`);
-      pwGiveCard(weightedTownCardId(first ? rollRewardRarity(false) : (Math.random() < 0.5 ? 'rare' : 'common')), first ? 'First one out of the maze' : 'Out of the maze');
+      pwGiveCard(pwCardId(first ? rollRewardRarity(false) : (Math.random() < 0.5 ? 'rare' : 'common')), first ? 'First one out of the maze' : 'Out of the maze');
     });
   },
   goal(w) { return { icon: '🧭', text: 'Find the way out of the maze', hint: 'You can only see a little way ahead. The way out is a gap in the top wall, and the others are looking for it too.' }; },
@@ -266,7 +266,7 @@ function pwBoardLanded(w, who) {
     if (sp === 'boost') { toast(`${PW_BOARD_SPECIAL[sp].icon} A gust of wind pushes ${who === 0 ? 'you' : name} forward 3!`); pwSet(() => { pwBoardPlace(w, who, Math.min(N - 1, g.pos[who] + 3)); pwSet(finish, 450); }, 600); return; }
     if (sp === 'skip') { g.skip[who] = 1; toast(`💤 ${name} nod${verb === 's' ? 's' : ''} off and will miss the next turn.`); pwSet(finish, 700); return; }
     if (sp === 'gift') {
-      if (who === 0 && !(g.gifted || (g.gifted = {}))[g.pos[0]]) { g.gifted[g.pos[0]] = 1; saveState(); pwSet(() => { pwGiveCard(weightedTownCardId(Math.random() < 0.35 ? 'rare' : 'common'), 'A gift on the board'); pwSet(finish, 600); }, 500); return; }
+      if (who === 0 && !(g.gifted || (g.gifted = {}))[g.pos[0]]) { g.gifted[g.pos[0]] = 1; saveState(); pwSet(() => { pwGiveCard(pwCardId(Math.random() < 0.35 ? 'rare' : 'common'), 'A gift on the board'); pwSet(finish, 600); }, 500); return; }
       toast(`🎁 ${name} open${verb === 's' ? 's' : ''} a gift box.`); pwSet(finish, 600); return;
     }
     finish();
@@ -281,7 +281,7 @@ function pwBoardWin(w, place) {
   bumpStat('puddleWins', 1); PWB.busy = true;
   pwLeave('done', false, () => {
     addPebbles(emb, 'puddle-world'); toast(`🌀 ${place === 1 ? 'You won the board! ' : place === 2 ? 'Second place. ' : 'You finished. '}+${emb} ${GAME.currency.many}`);
-    pwGiveCard(weightedTownCardId(place === 1 ? rollRewardRarity(false) : (Math.random() < 0.5 ? 'rare' : 'common')), place === 1 ? 'Winner of the board' : 'A prize from the board');
+    pwGiveCard(pwCardId(place === 1 ? rollRewardRarity(false) : (Math.random() < 0.5 ? 'rare' : 'common')), place === 1 ? 'Winner of the board' : 'A prize from the board');
   });
 }
 document.addEventListener('visibilitychange', () => { if (!document.hidden) pwBoardNext(); });   // the game waits while the app is hidden
@@ -404,7 +404,7 @@ function pwFolkTalk(f) {
   if (!pwInside()) return;
   const lines = PW_DEEP_LINES;
   lifeFx('npc-bubble', f.x, f.y, `<span>${f.given ? lines[Math.floor(Math.random() * lines.length)] : PW_DEEP_GIFT[Math.floor(Math.random() * PW_DEEP_GIFT.length)]}</span>`, 2600); sfx('tap');
-  if (!f.given) { f.given = true; saveState(); pwDeepSync(pwActive()); setTimeout(() => pwGiveCard(weightedTownCardId(Math.random() < 0.35 ? 'rare' : 'common'), `A gift from ${f.name}`), 900); }
+  if (!f.given) { f.given = true; saveState(); pwDeepSync(pwActive()); setTimeout(() => pwGiveCard(pwCardId(Math.random() < 0.35 ? 'rare' : 'common'), `A gift from ${f.name}`), 900); }
 }
 
 PW_KINDS.deep = {

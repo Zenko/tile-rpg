@@ -912,3 +912,8 @@
   --warp-light: #d9c8ff;                 /* the clock, the rings and the text */
   --warp-flash: #fff6e3;                 /* the turn, when the world is swapped */
 }
+/* Family portals (build 257): each card family's portal colours. Set on the portal itself, so they only change that one. */
+.ent.life-portal[data-fam="grove"] { --portal-rim: #c8f5a6; --portal-swirl-a: #4fb86a; --portal-swirl-b: #d7f07a; --portal-glow: rgba(110, 210, 120, 0.55); --portal-core: #0f2a17; }
+.ent.life-portal[data-fam="stone"] { --portal-rim: #f1d9a0; --portal-swirl-a: #c79a52; --portal-swirl-b: #8c8a84; --portal-glow: rgba(230, 190, 120, 0.5); --portal-core: #2a2014; }
+.ent.life-portal[data-fam="tide"]  { --portal-rim: #a8e6ff; --portal-swirl-a: #2f8fe0; --portal-swirl-b: #4fe0cf; --portal-glow: rgba(80, 170, 240, 0.55); --portal-core: #071d33; }
+.ent.life-portal[data-fam="wind"]  { --portal-rim: #e6ddff; --portal-swirl-a: #9b86ff; --portal-swirl-b: #f2f6ff; --portal-glow: rgba(190, 175, 255, 0.55); --portal-core: #1b1438; }

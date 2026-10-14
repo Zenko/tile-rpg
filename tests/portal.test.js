@@ -58,6 +58,34 @@ module.exports = async (page, assert) => {
   assert.ok(inside.d === 'pw' && inside.world && !inside.portal && !inside.busy, 'through the portal into a world; the portal is used up');
   assert.deepStrictEqual([inside.portals - before.portals, inside.puddles - before.puddles], [1, 0], 'counted as a portal, not a puddle');
 
+  // ---- 5b. family portals: every portal has a family, shows it, and its world is that family's ----
+  const fam = await page.evaluate(() => {
+    const w = pwActive();
+    return { family: w.family, name: w.name, biome: w.biome, cards: state.districtData.pw.items.filter(i => i.cardId).map(i => CARD_FAMILY[i.cardId]),   // cards only: a maze's key is an item too
+      given: Array.from({ length: 20 }, () => CARD_FAMILY[pwCardId('rare')]) };
+  });
+  assert.ok(['grove', 'stone', 'tide', 'wind'].includes(fam.family), 'the portal\'s world has a family');
+  assert.ok(fam.name.startsWith(FAMILY_NAME_OF(fam.family)), `named for its family (${fam.name})`);
+  function FAMILY_NAME_OF(f) { return { grove: 'Brote', stone: 'Recuerdo', tide: 'Deriva', wind: 'Susurro' }[f]; }
+  assert.ok(fam.cards.length && fam.cards.every(f => f === fam.family), 'every hidden card is of that family');
+  assert.ok(fam.given.every(f => f === fam.family), 'every card the world hands out is of that family');
+  const look = await page.evaluate(() => {
+    const save = { w: state.progress.puddleWorld, d: state.currentDistrict, pos: Object.assign({}, state.playerPos) };
+    const out = {};
+    ['grove', 'stone', 'tide', 'wind'].forEach(f => {
+      state.progress.puddleWorld = null; state.currentDistrict = 'square'; state.playerPos = Object.assign({}, getMap('square').spawn);
+      state.progress.portal = null; state.progress.portalEndedAt = 0;
+      portalOpen(f); const el = document.querySelector('.ent.life-portal');
+      out[f] = { fam: el && el.dataset.fam, icon: !!(el && el.querySelector('.pt-fam')), rim: el && getComputedStyle(el).getPropertyValue('--portal-rim').trim() };
+    });
+    state.progress.portal = null; state.progress.puddleWorld = save.w; state.currentDistrict = save.d; state.playerPos = save.pos; renderTown();
+    const bag = {}; for (let i = 0; i < 400; i++) { const f = portalPickFamily('harbor'); bag[f] = (bag[f] || 0) + 1; }
+    return { out, bag };
+  });
+  ['grove', 'stone', 'tide', 'wind'].forEach(f => assert.ok(look.out[f].fam === f && look.out[f].icon, `${f} portal is marked and shows its icon`));
+  assert.strictEqual(new Set(Object.values(look.out).map(o => o.rim)).size, 4, 'each family has its own colours');
+  assert.ok(look.bag.tide > look.bag.grove && look.bag.tide > look.bag.stone && look.bag.tide > look.bag.wind, 'the district\'s own family (Harbor: tide) is the likeliest');
+
   // ---- 6. the way back out warps too, with time running forward ----
   await page.evaluate(() => pwLeave('left'));
   await until(() => !!document.querySelector('.warp-fx'), null, 3000);

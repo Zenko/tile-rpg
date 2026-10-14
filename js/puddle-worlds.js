@@ -84,6 +84,32 @@ function pwApply(w) {
   delete MAP_CACHE[PW_KEY];
 }
 
+/* ---------------- family worlds (build 257) ----------------
+   A family portal (js/portal.js) leads to a world of one card family: its palette (PW_FAMILY_BIOME; deep worlds keep their
+   underwater one), its family's name in place of the palette word ("Brote Hollow"), and every card hidden or given inside is
+   that family's (pwCardId, used by every kind instead of weightedTownCardId), the treasure at least rare. w.family is saved
+   with the world, so a reload keeps it. A world from a plain puddle has no family and works exactly as before. */
+const PW_FAMILY_BIOME = { grove: 'pw-bloom', stone: 'pw-static', tide: 'pw-tide', wind: 'pw-glass' };
+function pwFamilize(w, fam) {
+  if (!fam || !FAMILIES[fam]) return w;
+  const oldWord = (PW_BIOMES.find(b => b.id === w.biome) || {}).word;
+  w.family = fam;
+  if (!(PW_BIOMES.find(b => b.id === w.biome) || {}).deep) w.biome = PW_FAMILY_BIOME[fam];
+  w.name = oldWord && w.name.startsWith(oldWord + ' ') ? FAMILIES[fam].name + w.name.slice(oldWord.length) : FAMILIES[fam].name + ' ' + w.name;
+  return w;
+}
+// The card a world hides or hands out: in a family world, one of that family (unowned ones three times as likely), else the town's usual pick.
+function pwCardId(rarity) {
+  const w = pwActive(), fam = w && w.family;
+  if (!fam) return weightedTownCardId(rarity);
+  let pool = [];
+  for (let i = RARITY_ORDER.indexOf(rarity); i >= 0 && !pool.length; i--) pool = cardPool(RARITY_ORDER[i]).filter(c => CARD_FAMILY[c.id] === fam);
+  if (!pool.length) return weightedTownCardId(rarity);
+  const owned = new Set(state.ownedCards), bag = [];
+  pool.forEach(c => { for (let k = owned.has(c.id) ? 1 : 3; k > 0; k--) bag.push(c.id); });
+  return bag[Math.floor(Math.random() * bag.length)];
+}
+
 /* ---------------- the map: six shapes, all from one seed ---------------- */
 // g = grid of single characters (see js/maps.js for the legend), edited in place. Each shape only fills the inside; the border and the
 // guarantee that everything you can stand on is joined to the arrival spot are done afterwards for all of them.
@@ -205,8 +231,10 @@ function pwScatterItems(data, m, n, treasure, taken) {
   taken = taken || new Set([m.spawn.x + ',' + m.spawn.y]);
   for (let i = 0; i < n; i++) {
     const s = pickSpot(m, taken, data, null); taken.add(s.x + ',' + s.y);
-    const isTreasure = treasure && i === n - 1, rarity = isTreasure ? rollRewardRarity(false) : (Math.random() < 0.35 ? 'rare' : 'common');
-    data.items.push({ id: 'item-pw-' + data.items.length, x: s.x, y: s.y, cardId: weightedTownCardId(rarity), collected: false, spawnedAt: 0, collectedAt: null, fixed: true, treasure: isTreasure });
+    const isTreasure = treasure && i === n - 1, fam = !!(pwActive() && pwActive().family);
+    let rarity = isTreasure ? rollRewardRarity(false) : (Math.random() < 0.35 ? 'rare' : 'common');
+    if (isTreasure && fam && rarity === 'common') rarity = 'rare';   // a family world's treasure is at least rare
+    data.items.push({ id: 'item-pw-' + data.items.length, x: s.x, y: s.y, cardId: pwCardId(rarity), collected: false, spawnedAt: 0, collectedAt: null, fixed: true, treasure: isTreasure });
   }
 }
 // A card given outright (a reward, a gift): the same pickup sheet as a hidden card.
@@ -263,8 +291,8 @@ function pwMaybeEnter(x, y) {
   if (!pwCanStart() || Math.random() >= PW_CHANCE) return;
   setTimeout(() => { if (pwCanStart()) pwEnter(x, y); }, 520);   // let the splash play first
 }
-function pwEnter(x, y, forceKind, via) {   // via: 'portal' (js/portal.js) changes the words, nothing else
-  const w = pwNewWorld(forceKind); w.origin = { district: state.currentDistrict, x: x == null ? state.playerPos.x : x, y: y == null ? state.playerPos.y : y };
+function pwEnter(x, y, forceKind, via, family) {   // via: 'portal' (js/portal.js) changes the words; family: a family portal's world (above)
+  const w = pwFamilize(pwNewWorld(forceKind), family); w.origin = { district: state.currentDistrict, x: x == null ? state.playerPos.x : x, y: y == null ? state.playerPos.y : y };
   w.map = pwGenerate(w);
   state.progress.puddleWorld = w; state.progress.pwLast = { biome: w.biome, shape: w.shape, kind: w.kind };
   pwApply(w);
