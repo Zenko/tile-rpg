@@ -2234,3 +2234,14 @@ body.pw-board #goalChip { display: none !important; }   /* the dice panel says w
 @keyframes wf-flash { 0%, 44% { opacity: 0; } 53% { opacity: .9; } 70% { opacity: 0; } 100% { opacity: 0; } }
 @keyframes wf-twist { 0% { transform: none; filter: none; } 40% { transform: rotate(-6deg) scale(1.12) skewX(4deg); filter: hue-rotate(40deg) saturate(1.3); } 100% { transform: rotate(-32deg) scale(1.9) skewX(-6deg); filter: hue-rotate(160deg) saturate(1.8) blur(6px); } }
 @keyframes wf-untwist { 0% { transform: rotate(28deg) scale(1.8) skewX(5deg); filter: hue-rotate(-140deg) saturate(1.6) blur(5px); } 60% { transform: rotate(-3deg) scale(1.03); filter: hue-rotate(-15deg) blur(0); } 100% { transform: none; filter: none; } }
+/* The way back out of a world (warpTransition(..., { forward: true })): time runs forward - hands clockwise, vortex and map turning the other way. */
+.warp-fx.fwd .wf-vortex { animation-name: wf-spin-fwd; }
+.warp-fx.fwd .wf-hour { animation-name: wf-hour-fwd; }
+.warp-fx.fwd .wf-min { animation-name: wf-min-fwd; }
+.town-map-wrap.warp-fwd.warp-twist { animation-name: wf-twist-fwd; }
+.town-map-wrap.warp-fwd.warp-untwist { animation-name: wf-untwist-fwd; }
+@keyframes wf-spin-fwd { 0% { transform: rotate(0deg) scale(.6); } 53% { transform: rotate(540deg) scale(1); } 100% { transform: rotate(760deg) scale(1.3); } }
+@keyframes wf-hour-fwd { 0% { transform: rotate(0deg); } 53% { transform: rotate(330deg); } 100% { transform: rotate(360deg); } }
+@keyframes wf-min-fwd { 0% { transform: rotate(0deg); } 53% { transform: rotate(2880deg); } 100% { transform: rotate(3240deg); } }
+@keyframes wf-twist-fwd { 0% { transform: none; filter: none; } 40% { transform: rotate(6deg) scale(1.12) skewX(-4deg); filter: hue-rotate(-40deg) saturate(1.3); } 100% { transform: rotate(32deg) scale(1.9) skewX(6deg); filter: hue-rotate(-160deg) saturate(1.8) blur(6px); } }
+@keyframes wf-untwist-fwd { 0% { transform: rotate(-28deg) scale(1.8) skewX(-5deg); filter: hue-rotate(140deg) saturate(1.6) blur(5px); } 60% { transform: rotate(3deg) scale(1.03); filter: hue-rotate(15deg) blur(0); } 100% { transform: none; filter: none; } }

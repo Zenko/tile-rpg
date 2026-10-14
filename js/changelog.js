@@ -19,7 +19,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
   { t: 'new', x: 'Portals: now and then a shimmering portal opens a few steps away from you, in any weather. It stays open for about twelve minutes (it flickers when it is about to close). Walk onto it and it always takes you into a puddle world.' },
-  { t: 'better', x: 'Falling into a puddle world (through a puddle or a portal) now warps time: the town twists into a spiral, a clock spins its hands backwards and the new world unwinds into place.' },
+  { t: 'better', x: 'Falling into a puddle world (through a puddle or a portal) now warps time: the town twists into a spiral, a clock spins its hands backwards and the new world unwinds into place. Coming back out warps too, with time running forward.' },
   { t: 'better', x: 'Behind the scenes: every colour in the game\'s look now comes from one theme file, ready for a future redesign. Nothing changes on screen.' },
   { t: 'better', x: 'Behind the scenes: the game\'s cards, places, dialogue, story and quests now live in their own content files, apart from the code. Nothing changes on screen.' },
   { t: 'better', x: 'Behind the scenes: every name in the game (the town, its places, its people, the Embers) now comes from one settings file, ready for a future redesign. Nothing changes on screen.' },

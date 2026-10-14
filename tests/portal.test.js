@@ -58,8 +58,16 @@ module.exports = async (page, assert) => {
   assert.ok(inside.d === 'pw' && inside.world && !inside.portal && !inside.busy, 'through the portal into a world; the portal is used up');
   assert.deepStrictEqual([inside.portals - before.portals, inside.puddles - before.puddles], [1, 0], 'counted as a portal, not a puddle');
 
-  // ---- 6. with reduced motion the way in is the plain travel fade ----
-  await page.evaluate(() => { pwLeave('left', true); renderTown(); });
+  // ---- 6. the way back out warps too, with time running forward ----
+  await page.evaluate(() => pwLeave('left'));
+  await until(() => !!document.querySelector('.warp-fx'), null, 3000);
+  const out = await page.evaluate(() => ({ fwd: !!document.querySelector('.warp-fx.fwd'), map: !!document.querySelector('.town-map-wrap.warp-fwd') }));
+  assert.ok(out.fwd && out.map, 'leaving a world plays the forward warp');
+  await until(() => state.currentDistrict === 'square' && !pwActive() && !document.querySelector('.travel-fade, .warp-fx'));
+  const back = await page.evaluate(() => ({ d: state.currentDistrict, world: !!pwActive(), busy: travelFading, left: !!document.querySelector('.town-map-wrap.warp-twist, .town-map-wrap.warp-untwist, .town-map-wrap.warp-fwd') }));
+  assert.deepStrictEqual(back, { d: 'square', world: false, busy: false, left: false }, 'back in town, nothing left over');
+
+  // ---- 7. with reduced motion the way in is the plain travel fade ----
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await fresh();
   await page.evaluate(() => { state.progress.pwEndedAt = 0; pwEnter(); });

@@ -311,7 +311,8 @@ function pwLeave(why, quiet, after) {   // why: 'faded' (the timer), 'left' (cli
     pwUpdatePill();
     if (after && !quiet) setTimeout(after, 700);
   };
-  if (quiet) back(); else withTravelTransition(origin.district, back, { sub: 'Back where you started…', icon: '🌀' });
+  // Warped time on the way out too (js/warp-fx.js), running forward this time: the clock catches up and the twist unwinds the other way.
+  if (quiet) back(); else (typeof warpTransition === 'function' ? warpTransition : withTravelTransition)(origin.district, back, { name: DISTRICTS[origin.district].name, sub: 'Back where you started…', icon: '🌀', forward: true });
 }
 function pwBlocksTravel() {
   if (!pwActive()) return false;
