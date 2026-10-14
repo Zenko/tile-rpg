@@ -215,13 +215,15 @@ PW_KINDS.sketch = {
   },
   generate: pwGenerateExplore,
   build(w, data, m) {
-    const shapes = pwPickFrom(Object.keys(SK_SHAPES), SK_STONES), taken = new Set([m.spawn.x + ',' + m.spawn.y]), placed = [];
+    const shapes = pwPickFrom(Object.keys(SK_SHAPES), SK_STONES), placed = [];
+    const choices = spotChoices(m, new Set([m.spawn.x + ',' + m.spawn.y]), data, null);   // one flood of the map, not one per try
+    const gap = s => placed.reduce((a, o) => Math.min(a, Math.abs(o.x - s.x) + Math.abs(o.y - s.y)), 99);
+    data.stones = [];
     shapes.forEach((shape, i) => {
-      let best = null;
-      for (let k = 0; k < 20; k++) { const s = pickSpot(m, taken, data, null), g = placed.reduce((a, o) => Math.min(a, Math.abs(o.x - s.x) + Math.abs(o.y - s.y)), 99); if (!best || g > best.g) best = { s, g }; if (g >= 4) break; }
-      taken.add(best.s.x + ',' + best.s.y); placed.push(best.s);
-      data.items = data.items || [];
-      (data.stones = data.stones || []).push({ id: 'stone' + i, x: best.s.x, y: best.s.y, shape, done: false, stars: 0, path: null });
+      const open = choices.filter(s => gap(s) > 0), apart = open.filter(s => gap(s) >= 4);
+      const s = apart.length ? apart[Math.floor(Math.random() * apart.length)] : open.length ? open.reduce((b, o) => (gap(o) > gap(b) ? o : b)) : { x: m.spawn.x, y: m.spawn.y + 1 };
+      placed.push(s);
+      data.stones.push({ id: 'stone' + i, x: s.x, y: s.y, shape, done: false, stars: 0, path: null });
     });
     data.spirits = [];
   },

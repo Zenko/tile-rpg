@@ -125,7 +125,7 @@ module.exports = async (page, assert) => {
   assert.ok(menu.quick.some(q => /Chat/.test(q)) && menu.quick.some(q => /Pet/.test(q)) && menu.quick.some(q => /Look/.test(q)));
 
   // ----- the Character page and the picker -----
-  await page.evaluate(() => { document.getElementById('testHideOverlays') && document.getElementById('testHideOverlays').remove(); document.querySelectorAll('.overlay').forEach(o => o.classList.add('hidden')); switchTab('character'); charSetView('pals'); });
+  await page.evaluate(() => { Object.keys(TIPS).forEach(k => { tipsSeen()[k] = true; }); tipQueue.length = 0; document.getElementById('testHideOverlays') && document.getElementById('testHideOverlays').remove(); document.querySelectorAll('.overlay').forEach(o => o.classList.add('hidden')); switchTab('character'); charSetView('pals'); });
   await page.waitForTimeout(350);
   assert.ok(await page.locator('.cp-hero').isVisible(), 'the companion page should show the hero');
   await page.click('#cpChange'); await page.waitForTimeout(300);

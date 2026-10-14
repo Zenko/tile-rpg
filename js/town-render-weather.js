@@ -728,7 +728,9 @@ function renderTown(justMoved) {
 window.addEventListener('resize', () => { if (!inBattle && !inScene) renderTown(); });
 
 /* ---------------- district data: neighbors, boss, cards ---------------- */
-function pickSpot(m, taken, data, walker) {
+// Every tile pickSpot would choose from (the best tier: roomy for a walker, else safe, else just free). It floods the map once
+// per tile, so callers that want several tries (spread-out ground cards, sketch stones) take this list once and choose from it.
+function spotChoices(m, taken, data, walker) {
   const free = [], safe = [], roomy = [];
   const baseline = data ? cutOffCount(m, data, null, null) : 0;
   for (let y = 0; y < m.h; y++) for (let x = 0; x < m.w; x++) {
@@ -742,7 +744,10 @@ function pickSpot(m, taken, data, walker) {
     // A walker also needs somewhere to walk to: at least two open neighbors, so it never starts boxed in.
     if (walker && stepOptionsFrom(m, data, walker, x, y) >= 2) roomy.push({ x, y });
   }
-  const from = walker && roomy.length ? roomy : (safe.length ? safe : free);
+  return walker && roomy.length ? roomy : (safe.length ? safe : free);
+}
+function pickSpot(m, taken, data, walker) {
+  const from = spotChoices(m, taken, data, walker);
   return from.length ? from[Math.floor(Math.random() * from.length)] : { x: m.spawn.x, y: m.spawn.y };
 }
 // SPIRIT_STORIES: in content/dialogue.js (the game's words and data, kept apart from the code)
@@ -806,12 +811,10 @@ function findItemSpot(data, except, key) {
   if (!key || key === state.currentDistrict) taken.add(state.playerPos.x + ',' + state.playerPos.y);   // never under her feet
   const live = (data.items || []).filter(o => o !== except && !o.collected);
   const gap = s => live.reduce((g, o) => Math.min(g, Math.abs(o.x - s.x) + Math.abs(o.y - s.y)), 99);
-  let best = null;
-  for (let i = 0; i < 24; i++) {
-    const s = pickSpot(m, taken, data, null); if (!best || gap(s) > gap(best)) best = s;
-    if (gap(best) >= ITEM_MIN_GAP) break;
-  }
-  return best;
+  const from = spotChoices(m, taken, data, null); if (!from.length) return { x: m.spawn.x, y: m.spawn.y };
+  const roomy = from.filter(s => gap(s) >= ITEM_MIN_GAP);
+  if (roomy.length) return roomy[Math.floor(Math.random() * roomy.length)];
+  return from.reduce((b, s) => (gap(s) > gap(b) ? s : b));   // a crowded map: as far from the others as it gets
 }
 // The card for a ground spot: mostly commons, strongly the ones you already have, and often the same card again.
 function townGroundCardId(prev) {
