@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'better', x: 'Crafting odds now follow rarity: commoner cards gain a skill more often and crack less, rarer cards risk more. The Workshop shows the skill and fail chance for every rarity, with the one you are crafting lit up.' },
   { t: 'new', x: 'Sketchbook worlds: a puddle or a portal can drop you onto an unfinished page. Each sketch stone asks for a shape - a full moon, a star, a wave - and shows it for a moment; then draw it from memory in one stroke. The better your drawing, the more stars, and every drawing you get right brings the colour back and stays on the page.' },
   { t: 'better', x: 'Cards on the ground are spread further apart and come back less often (a minute or more after one is taken). They are mostly commons now, and often the same card again, so doubles for crafting are easier to collect.' },
   { t: 'better', x: 'Crafting earns XP now, with new crafting milestones and quests. A craft can also crack: the cards turn into Embers instead, and a fail meter makes every fail in a row pay more until a craft works.' },

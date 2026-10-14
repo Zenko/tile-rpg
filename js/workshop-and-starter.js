@@ -182,12 +182,18 @@ function miniCardHtml(def) {
 }
 
 // The odds under each craft (build 261): skill chance, fail chance, the fail meter and a crafting companion's help.
-function craftOddsHtml(kind) {
+// rarity: of the card on the forge, or of the cards in the trade. The chances scale with it (CRAFT.raritySkill / rarityFail),
+// and a strip underneath shows every rarity's chances, this one lit, so the trade-off is plain before you craft.
+function craftOddsHtml(kind, rarity) {
   const pct = n => Math.round(n * 100), meter = craftMeter(), next = Math.min(CRAFT.meterMax, meter + 1);
   const pips = Array.from({ length: CRAFT.meterMax }, (_, i) => `<i class="${i < meter ? 'on' : ''}"></i>`).join('');
   const c = state.companion, help = craftHelped() && c ? `<div class="cr-help">🔨 ${escapeHtml(c.name)} steadies your hands: half the fails, +50% XP, more skills, a chance of Reborn</div>` : '';
-  return `<div class="cr-meter"><span>✨ Skill chance</span><div class="cr-bar"><i style="width:${pct(craftSkillChance(kind))}%"></i></div><b>${pct(craftSkillChance(kind))}%</b></div>
-    <div class="cr-meter fail"><span>💥 Fail chance</span><div class="cr-bar"><i style="width:${pct(craftFailChance(kind))}%"></i></div><b>${pct(craftFailChance(kind))}%</b></div>
+  const skill = craftSkillChance(kind, rarity), fail = craftFailChance(kind, rarity);
+  const rars = kind === 'trade' ? CRAFT_RARITIES.filter(r => nextRarity(r)) : CRAFT_RARITIES;   // mythic has nothing to trade up into
+  const table = `<div class="cr-rarodds" role="table" aria-label="Chances by rarity">${rars.map(r => `<div class="cr-ro${r === rarity ? ' on' : ''}" role="row"><b role="cell"><i class="rarity-${r}" aria-hidden="true"></i>${RARITY_LABEL[r]}</b><span role="cell" title="Skill chance">✨ ${pct(craftSkillChance(kind, r))}%</span><span role="cell" class="f" title="Fail chance">💥 ${pct(craftFailChance(kind, r))}%</span></div>`).join('')}</div>`;
+  return `<div class="cr-meter"><span>✨ Skill chance</span><div class="cr-bar"><i style="width:${pct(skill)}%"></i></div><b>${pct(skill)}%</b></div>
+    <div class="cr-meter fail"><span>💥 Fail chance</span><div class="cr-bar"><i style="width:${pct(fail)}%"></i></div><b>${pct(fail)}%</b></div>
+    <div class="cr-rarnote">${rarity ? `${RARITY_LABEL[rarity][0].toUpperCase() + RARITY_LABEL[rarity].slice(1)} cards` : 'By rarity'}: the commoner the card, the likelier a skill and the less it cracks.</div>${table}
     <div class="cr-failmeter" title="Each fail in a row fills it; a success empties it"><span>Fail meter</span><span class="cr-pips">${pips}</span><small>a fail pays x${craftFailMultiplier(next)} in ${GAME.currency.many}</small></div>${help}`;
 }
 function renderCraft() {
@@ -226,7 +232,7 @@ function renderCraft() {
           <button data-stat="p" class="${refineStat === 'p' ? 'on' : ''}" ${why.p ? 'disabled' : ''} aria-label="Plus one power"><span>+1 ⚔ Power</span><small>${def.power} → ${def.power + 1}</small></button>
           <button data-stat="g" class="${refineStat === 'g' ? 'on' : ''}" ${why.g ? 'disabled' : ''} aria-label="Plus one health"><span>+1 ♥ Health</span><small>${def.grit} → ${def.grit + 1}</small></button>
         </div>
-        ${craftOddsHtml('refine')}
+        ${craftOddsHtml('refine', def.rarity)}
         <div class="cr-may">${skills.length ? `May gain: ${skills.map(k => KW[k].icon).join(' ')}` : 'No skill possible: it already has 2'}</div>
         <button class="btn cr-ready" data-refine="${id}" data-stat="${refineStat}" ${block ? 'disabled' : ''}>Refine 2 into 1</button>
         ${block ? `<div class="cr-empty">${block}</div>` : ''}
@@ -250,7 +256,7 @@ function renderCraft() {
   trade.className = 'cr-section';
   const avail = r => Object.keys(counts).filter(id => cardDef(id).rarity === r).reduce((n, id) => n + tradable(id), 0);
   trade.innerHTML = `<div class="cr-title">🔁 Trade up</div>
-    <div class="cr-desc">Combine <b>${CRAFT.tradeCount} cards of one rarity</b> into <b>1 random card of the next rarity</b>, with a <b>${pct(craftSkillChance('trade'))}% chance it comes with a skill</b> (and a ${pct(craftFailChance('trade'))}% chance it cracks into ${GAME.currency.many} instead). Cards in your deck are never used.</div>
+    <div class="cr-desc">Combine <b>${CRAFT.tradeCount} cards of one rarity</b> into <b>1 random card of the next rarity</b>, with a <b>${pct(craftSkillChance('trade', craftSel.rarity))}% chance it comes with a skill</b> (and a ${pct(craftFailChance('trade', craftSel.rarity))}% chance it cracks into ${GAME.currency.many} instead) for ${RARITY_LABEL[craftSel.rarity].toLowerCase()} cards. Commoner cards are safer and likelier to gain a skill. Cards in your deck are never used.</div>
     <div class="cr-chips">${steps.map(r => `<button class="cr-chip${r === craftSel.rarity ? ' active' : ''}${avail(r) < CRAFT.tradeCount ? ' short' : ''}" data-rar="${r}" title="${avail(r) < CRAFT.tradeCount ? `Needs ${CRAFT.tradeCount - avail(r)} more spare ${RARITY_LABEL[r].toLowerCase()} card${CRAFT.tradeCount - avail(r) === 1 ? '' : 's'}` : 'Ready to trade'}">${RARITY_LABEL[r]} <small>${avail(r)}/${CRAFT.tradeCount}</small></button>`).join('')}</div>`;
   const target = nextRarity(craftSel.rarity);
   const tray = document.createElement('div');
@@ -295,7 +301,7 @@ function renderCraft() {
   const ready = need === 0 && !whyNot;
   go.innerHTML = `<button class="btn${ready ? ' cr-ready' : ''}" id="craftGo" ${ready ? '' : 'disabled'}>${need === 0 ? `Combine into ${aOrAn(RARITY_LABEL[target])} card` : `Pick ${need} more`}</button>${whyNot ? `<div class="cr-empty">${whyNot}</div>` : ''}`;
   dock.appendChild(go);
-  const odds = document.createElement('div'); odds.className = 'cr-odds'; odds.innerHTML = craftOddsHtml('trade'); trade.appendChild(odds);
+  const odds = document.createElement('div'); odds.className = 'cr-odds'; odds.innerHTML = craftOddsHtml('trade', craftSel.rarity); trade.appendChild(odds);
   if (craftMode === 'trade') box.appendChild(trade);
 
   // ----- events -----

@@ -71,10 +71,27 @@ module.exports = async (page, assert) => {
   assert.ok(helped.xp.includes(6) && helped.xp.includes(3), 'the craft XP plus half again: ' + JSON.stringify(helped.xp));
   assert.ok(helped.reborn && helped.helped >= 1, 'the crafted card came out Reborn');
 
+  // ---- 5b. the chances follow rarity: commoner cards gain skills more and crack less (build 264) ----
+  const rar = await page.evaluate(() => {
+    const keep = state.companion; state.companion = null; const rs = CRAFT_RARITIES, out = {};
+    ['refine', 'trade'].forEach(k => { out[k] = { skill: rs.map(r => craftSkillChance(k, r)), fail: rs.map(r => craftFailChance(k, r)) }; });
+    // a roll of 0.08 cracks an ultra refine (15%) but not a common one (6%)
+    const com = CARD_POOL.find(c => c.rarity === 'common' && !c.spell && !c.exclusive && !c.crafted), ult = CARD_POOL.find(c => c.rarity === 'ultra' && !c.spell && !c.exclusive && !c.crafted);
+    state.ownedCards.push(com.id, com.id, ult.id, ult.id); state.progress.craftMeter = 0;
+    const one = id => { let i = 0; const l = [0.08, 0.99, 0.99]; return refineCard(id, 'p', () => (i < l.length ? l[i++] : 0.99)); };
+    const res = { out, common: !!one(com.id).failed, ultra: !!one(ult.id).failed }; state.companion = keep; return res;
+  });
+  ['refine', 'trade'].forEach(k => {
+    const { skill, fail } = rar.out[k];
+    assert.ok(skill.every((v, i) => i === 0 || v < skill[i - 1]), `${k}: the skill chance falls as the rarity rises: ${skill}`);
+    assert.ok(fail.every((v, i) => i === 0 || v > fail[i - 1]), `${k}: the fail chance rises with the rarity: ${fail}`);
+  });
+  assert.deepStrictEqual([rar.common, rar.ultra], [false, true], 'the same roll holds for a common and cracks an ultra');
+
   // ---- 6. the Workshop shows the odds and the meter ----
   const ui = await page.evaluate(() => { state.progress.craftMeter = 2; craftMode = 'refine'; switchTab('collection'); setCardsView('craft'); renderCraft();
-    return { fail: !!document.querySelector('#craftView .cr-meter.fail'), pips: document.querySelectorAll('#craftView .cr-pips i.on').length, help: !!document.querySelector('#craftView .cr-help') }; });
-  assert.deepStrictEqual(ui, { fail: true, pips: 2, help: true }, 'fail chance, two lit pips and the companion\'s note');
+    return { fail: !!document.querySelector('#craftView .cr-meter.fail'), pips: document.querySelectorAll('#craftView .cr-pips i.on').length, help: !!document.querySelector('#craftView .cr-help'), rows: document.querySelectorAll('#craftView .cr-rarodds .cr-ro').length, lit: document.querySelectorAll('#craftView .cr-rarodds .cr-ro.on').length }; });
+  assert.deepStrictEqual(ui, { fail: true, pips: 2, help: true, rows: 5, lit: 1 }, 'fail chance, two lit pips, the companion\'s note and the chances for every rarity, the forge card\'s lit');
 
   await page.evaluate(() => { addXP = window.__realAddXP; state.companion = null; state.progress.craftMeter = 0; CRAFT.tradeFail = 0.2; CRAFT.refineFail = 0.15; switchTab('town'); });
 };

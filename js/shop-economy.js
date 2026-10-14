@@ -20,11 +20,23 @@ const CRAFT = {
   refineFail: 0.15, tradeFail: 0.20,      // the chance a craft cracks
   meterMax: 4, meterStep: 0.5,            // a fail pays the base x (1 + meterStep x the meter after it): x1.5 up to x3
   failBase: 2, failMin: 4,                // base = failBase x the cards' release value, never under failMin
-  perkFailMul: 0.5, perkSkillMul: 1.5, perkXpMul: 0.5, perkFoilChance: 0.06
+  perkFailMul: 0.5, perkSkillMul: 1.5, perkXpMul: 0.5, perkFoilChance: 0.06,
+  // By the rarity of the cards going in (build 264): the commoner the card, the likelier a skill and the rarer a crack.
+  // Each multiplies the base chances above (so an ultra is the base, a common gets 1.35x the skill and 0.4x the fails).
+  raritySkill: { common: 1.35, rare: 1.1, ultra: 0.85, super: 0.6, mythic: 0.4 },
+  rarityFail: { common: 0.4, rare: 0.7, ultra: 1, super: 1.4, mythic: 1.9 }
 };
+const CRAFT_RARITIES = ['common', 'rare', 'ultra', 'super', 'mythic'];
 const craftHelped = () => typeof hasPerk === 'function' && hasPerk('craft');
-function craftFailChance(kind) { const base = kind === 'trade' ? CRAFT.tradeFail : CRAFT.refineFail; return craftHelped() ? base * CRAFT.perkFailMul : base; }
-function craftSkillChance(kind) { const base = kind === 'trade' ? CRAFT.tradeSkillChance : CRAFT.refineSkillChance; return Math.min(0.9, craftHelped() ? base * CRAFT.perkSkillMul : base); }
+// rarity: of the card being refined, or of the three going into a trade-up. Left out = the base chance (no rarity scaling).
+function craftFailChance(kind, rarity) {
+  const base = (kind === 'trade' ? CRAFT.tradeFail : CRAFT.refineFail) * ((rarity && CRAFT.rarityFail[rarity]) || 1);
+  return Math.min(0.9, craftHelped() ? base * CRAFT.perkFailMul : base);
+}
+function craftSkillChance(kind, rarity) {
+  const base = (kind === 'trade' ? CRAFT.tradeSkillChance : CRAFT.refineSkillChance) * ((rarity && CRAFT.raritySkill[rarity]) || 1);
+  return Math.min(0.9, craftHelped() ? base * CRAFT.perkSkillMul : base);
+}
 function craftMeter() { return Math.max(0, Math.min(CRAFT.meterMax, state.progress.craftMeter || 0)); }
 function craftFailMultiplier(meterAfter) { return 1 + CRAFT.meterStep * meterAfter; }
 // What a fail made of these cards pays at the given meter (after the fail is counted).
@@ -149,9 +161,10 @@ function tradeBlockReason(picks) {
 function refineCard(id, stat, rng) {
   rng = rng || Math.random;
   if (refineBlockReason(id, stat)) return false;
-  if (rng() < craftFailChance('refine') && keepsFullDeck({ [id]: 2 }, [])) return craftFail('refine', { [id]: 2 });
+  const rar = cardDef(id).rarity;
+  if (rng() < craftFailChance('refine', rar) && keepsFullDeck({ [id]: 2 }, [])) return craftFail('refine', { [id]: 2 });
   let skills = craftableSkills(id);
-  let skill = (skills.length && rng() < craftSkillChance('refine')) ? skills[Math.floor(rng() * skills.length)] : '';
+  let skill = (skills.length && rng() < craftSkillChance('refine', rar)) ? skills[Math.floor(rng() * skills.length)] : '';
   let resultId = BattleEngine.variantId(id, stat, skill);
   if (!cardDef(resultId)) return false;
   // the gate above was checked without the skill; if the skilled version would somehow break the deck rule, hand out the plain one
@@ -175,10 +188,11 @@ function tradeUp(picks, rng) {
   picks.forEach(id => { need[id] = (need[id] || 0) + 1; });
   const pool = cardPool(target);
   if (!pool.length) return false;
-  if (rng() < craftFailChance('trade') && keepsFullDeck(need, [])) return craftFail('trade', need);
+  const rar = cardDef(picks[0]).rarity;
+  if (rng() < craftFailChance('trade', rar) && keepsFullDeck(need, [])) return craftFail('trade', need);
   const base = pool[Math.floor(rng() * pool.length)].id;
   const skills = craftableSkills(base);
-  const skill = (skills.length && rng() < craftSkillChance('trade')) ? skills[Math.floor(rng() * skills.length)] : '';
+  const skill = (skills.length && rng() < craftSkillChance('trade', rar)) ? skills[Math.floor(rng() * skills.length)] : '';
   const resultId = skill ? BattleEngine.variantId(base, '', skill) : base;
   Object.keys(need).forEach(id => removeCopies(id, need[id]));
   state.progress.discovered = Array.from(new Set((state.progress.discovered || []).concat(picks.map(BattleEngine.baseIdOf))));
