@@ -8,7 +8,7 @@ module.exports = async (page, assert) => {
   };
   const leaveQuiet = () => page.evaluate(() => { if (pwActive()) pwLeave('left', true); renderTown(); });
 
-  // ---- 1. kinds: all five exist (the time-stop world is tested in puddle-still.test.js), are picked in turn (never the same twice running), and look right ----
+  // ---- 1. kinds: all six exist (time-stop: puddle-still.test.js, sketchbook: puddle-sketch.test.js), are picked in turn (never the same twice running), and look right ----
   const kinds = await page.evaluate(() => {
     const out = { names: Object.keys(PW_KINDS), hooks: {}, repeat: 0, seen: {}, bad: [] };
     for (const k of out.names) out.hooks[k] = ['create', 'generate', 'build', 'goal'].every(h => typeof PW_KINDS[k][h] === 'function');
@@ -17,13 +17,13 @@ module.exports = async (page, assert) => {
       const w = pwNewWorld(); out.seen[w.kind] = (out.seen[w.kind] || 0) + 1; if (w.kind === last) out.repeat++;
       const biome = PW_BIOMES.find(b => b.id === w.biome), mins = (w.endsAt - w.startedAt) / 60000;
       if (!biome || !!biome.deep !== (w.kind === 'deep')) out.bad.push(w.kind + ' biome ' + w.biome);
-      const range = { explore: [4, 7], maze: [5, 7], ladders: [5, 7], deep: [6, 8], still: [8, 8] }[w.kind];
+      const range = { explore: [4, 7], maze: [5, 7], ladders: [5, 7], deep: [6, 8], still: [8, 8], sketch: [8, 8] }[w.kind];
       if (!(mins >= range[0] && mins <= range[1] + 0.01)) out.bad.push(w.kind + ' minutes ' + mins);
       if (!w.name || !w.intro) out.bad.push(w.kind + ' name/intro');
     }
     state.progress.pwLast = null; return out;
   });
-  assert.deepStrictEqual(kinds.names.sort(), ['deep', 'explore', 'ladders', 'maze', 'still'], 'five kinds of world');
+  assert.deepStrictEqual(kinds.names.sort(), ['deep', 'explore', 'ladders', 'maze', 'sketch', 'still'], 'six kinds of world');
   assert.ok(Object.values(kinds.hooks).every(Boolean), 'each kind has its hooks: ' + JSON.stringify(kinds.hooks));
   assert.strictEqual(kinds.repeat, 0, 'never the same kind twice in a row');
   Object.values(kinds.seen).forEach(n => assert.ok(n > 40, 'every kind turns up: ' + JSON.stringify(kinds.seen)));

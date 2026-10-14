@@ -71,6 +71,7 @@ const GUIDE = [
     { icon: '🧶', name: 'Table mats', where: 'Card Shop → Customize, then Player → Customize', how: `The cloth on your side of the battle table. Buy one with ${GAME.currency.many}, then pick it in your Customize tab.` },
     { icon: '🎨', name: 'Themes', where: 'Tap your avatar → Settings → Appearance', how: 'Dark (sea glass), Light (sand and sea glass) or Auto, which follows your device. The map, battles and interiors stay dark either way.' },
     { icon: '🪑', name: 'Things to do in town', where: 'Benches, wells, lamps, trees, water, puddles', how: 'Sit, wish, light lamps after dark, shake trees, skip stones, splash in the rain, scatter the birds. The Square, Market, Harbor and Garden each have an activity too: busking, haggling, hauling nets and watering plants.' },
+    { icon: '✏️', name: 'Sketchbook worlds', where: 'Behind a puddle or a portal, now and then', how: `An unfinished page: five sketch stones each ask for a drawing (a full moon, a star, a lightning bolt...). Tap one: the shape glows for a moment, then draw it from memory in one stroke. The closer it is, the more stars (up to three), and your drawing is inked onto the stone for good. Ink all five for ${GAME.currency.many} and a card, better with more stars. Peek if you forget the shape.` },
     { icon: '⏸️', name: 'Time-stop worlds', where: 'Behind a puddle or a portal, now and then', how: `A moment that has stopped: rain hangs in the air and the neighbours are frozen mid-step. Time only moves when you do: 45 steps, then it starts again. Gather the glowing motes before it does - a few ${GAME.currency.many} each, and a card that is better the more you find.` },
     { icon: '⭐', name: 'The Daily Rift', where: `By the fountain in ${PLACES.square}`, how: 'A gold portal, once a day. The world behind it is made from the date, so every tester gets the same one: the same map, the same hidden cards in the same places. One try, four minutes: the score is how many cards you find, then how fast you find them all. Results are shared in Journal → Rifts (your name only if you share that you are playing).' },
     { icon: '🗺️', name: 'Rift Map', where: 'Journal → Rifts', how: `Every puddle world you visit is collected: the kinds of world, their palettes, the shapes of a wander world and the four family portals. Something new pays a few ${GAME.currency.many}; a full row pays more and leaves you a souvenir to place in town or in your cottage. Below the rows, your recent worlds and what you found in them.` },
@@ -145,7 +146,7 @@ const GUIDE = [
   ] },
 ];
 // Items added in the v1.81-1.89 releases wear a NEW tag until they have been opened once (state.progress.guideSeen).
-const GUIDE_NEW = ['Time-stop worlds', 'The Daily Rift', 'Rift Map', 'Portals', 'The Dream Gazette', 'Gossip', 'Weather moments', 'Town goal', 'Travelling visitors', 'Your glow and sparkles', `${CAST.guide.name} points the way`, 'Who goes first', 'Card families', 'New keywords', 'The world in battle', `${GAME.player.one}’s Gift`, 'Draft Run', 'Lingering duels', `${GAME.currency.many} and soft limits`];
+const GUIDE_NEW = ['Sketchbook worlds', 'Time-stop worlds', 'The Daily Rift', 'Rift Map', 'Portals', 'The Dream Gazette', 'Gossip', 'Weather moments', 'Town goal', 'Travelling visitors', 'Your glow and sparkles', `${CAST.guide.name} points the way`, 'Who goes first', 'Card families', 'New keywords', 'The world in battle', `${GAME.player.one}’s Gift`, 'Draft Run', 'Lingering duels', `${GAME.currency.many} and soft limits`];
 
 // ---- used by js/quests.js ----
 // The "wander" line: one quest at every 500-step rung up to 10,000, escalating rewards for the grind -
@@ -278,6 +279,9 @@ const ACHIEVEMENTS = [
   { id: 'puddles-10',  icon: '🌧️', name: '10 puddles splashed', test: () => (state.progress.totals.puddles || 0) >= 10 },
   { id: 'puddle-world', icon: '🌀', name: 'Fell through a puddle', test: () => (state.progress.totals.puddleWorlds || 0) >= 1 },
   { id: 'portal-1',     icon: '🌀', name: 'Stepped through a portal', test: () => (state.progress.totals.portalsEntered || 0) >= 1 },
+  { id: 'sketch-1',     icon: '✏️', name: 'First drawing come to life', test: () => (state.progress.totals.sketches || 0) >= 1 },
+  { id: 'sketch-3star', icon: '🌟', name: 'A three-star drawing', test: () => (state.progress.totals.sketchPerfect || 0) >= 1 },
+  { id: 'sketch-book',  icon: '📔', name: 'A finished sketchbook', test: () => (state.progress.totals.sketchClears || 0) >= 1 },
   { id: 'still-all',    icon: '⏸️', name: 'Every mote in a stopped moment', test: () => (state.progress.totals.stillClears || 0) >= 1 },
   { id: 'still-50',     icon: '✨', name: '50 motes gathered', test: () => (state.progress.totals.stillMotes || 0) >= 50 },
   { id: 'daily-rift',   icon: '⭐', name: 'Tried the Daily Rift', test: () => (state.progress.totals.dailyRifts || 0) >= 1 },

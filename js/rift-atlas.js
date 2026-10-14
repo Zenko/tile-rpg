@@ -14,8 +14,8 @@
    Look: the RIFT ATLAS block at the end of css/latest.css. tests/rift-atlas.test.js.
    ============================================================ */
 const RIFT_NEW_PEBBLES = 2, RIFT_LOG_MAX = 12;
-const RIFT_KIND_LABEL = { explore: 'Wander', maze: 'Maze', ladders: 'Ladders', deep: 'The deep', still: 'Time-stop' };
-const RIFT_KIND_ICON = { explore: '🔎', maze: '🧭', ladders: '🎲', deep: '🐠', still: '⏸️' };
+const RIFT_KIND_LABEL = { explore: 'Wander', maze: 'Maze', ladders: 'Ladders', deep: 'The deep', still: 'Time-stop', sketch: 'Sketchbook' };
+const RIFT_KIND_ICON = { explore: '🔎', maze: '🧭', ladders: '🎲', deep: '🐠', still: '⏸️', sketch: '✏️' };
 const RIFT_BIOME_ICON = { 'pw-glass': '🔷', 'pw-ember': '🔥', 'pw-mirror': '🪞', 'pw-bloom': '🌸', 'pw-static': '⚡', 'pw-tide': '🌊', 'pw-dusk': '🌆', 'pw-reef': '🪸', 'pw-abyss': '🌑' };
 const RIFT_ROWS = [
   { id: 'kinds', title: 'Kinds of world', souvenir: 'rift-hourglass', pebbles: 30,

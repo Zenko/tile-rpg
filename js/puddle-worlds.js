@@ -16,7 +16,7 @@
    Kinds of world (build 245): every world has a `kind`. 'explore' (below) is the original: wander and look for cards. js/puddle-modes.js adds
    'maze' (find the way out, racing neighbours), 'ladders' (a dice-only board game) and 'deep' (an underwater city). A kind is an entry in
    PW_KINDS with hooks: create, generate, build, enter, leave, boot, render, tap, exit, goal, and step (each step she takes; build 260)
-   (see pwKind and the hook helpers below). js/puddle-still.js adds 'still', the time-stop world.
+   (see pwKind and the hook helpers below). js/puddle-still.js adds 'still', the time-stop world; js/puddle-sketch.js adds 'sketch', the drawing world.
    Tunables are the PW_* constants right below. Colour palettes: scripts/build-pw-biomes.py -> css/theme.css. The way in plays the warped-time transition (js/warp-fx.js);
    a portal (js/portal.js) is a second way in, always open for a while, that calls pwEnter(x, y, undefined, 'portal').
    ============================================================ */

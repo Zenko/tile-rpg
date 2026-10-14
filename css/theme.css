@@ -927,3 +927,10 @@
   --still-mote-b: #7fe3ff;                /* and its glow */
   --still-ice: rgba(190, 220, 255, 0.55); /* the rim of frost round a frozen neighbour */
 }
+/* Sketchbook worlds (build 263, js/puddle-sketch.js). */
+:root {
+  --sketch-paper: #f4ecd8;                 /* the unfinished page laid over the world, lifted stone by stone */
+  --sketch-ink: #2c4a8a;                   /* the stroke while you draw */
+  --sketch-glow: #8fd3ff;                  /* a finished drawing glowing on its stone */
+  --sketch-ghost: rgba(44, 74, 138, 0.35); /* the shape shown for a moment before you draw */
+}
