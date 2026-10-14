@@ -2248,3 +2248,29 @@ body.pw-board #goalChip { display: none !important; }   /* the dice panel says w
 /* Family portals (build 257): the family's icon bobs above the doorway. */
 .ent.life-portal .pt-fam { left: 50%; bottom: 112%; transform: translateX(-50%); font-size: calc(var(--t) * .34); line-height: 1; filter: drop-shadow(0 0 4px var(--portal-glow)); animation: pt-bob 2.2s ease-in-out infinite; }
 @keyframes pt-bob { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, -4px); } }
+
+/* ---- RIFT MAP (build 258, js/rift-atlas.js): Journal -> Rifts. A row per collection (chips: found / ❔), its count and its
+   souvenir, then the recent worlds. Theme tokens only, so it follows light and dark. ---- */
+#riftList { padding: 4px 2px 18px; }
+#riftList .ra-intro { margin: 2px 4px 12px; font-size: .86rem; color: var(--ink-soft); line-height: 1.4; }
+#riftList .ra-row { background: var(--stone); border: 1px solid var(--stone-edge); border-radius: 16px; padding: 10px 12px 12px; margin-bottom: 10px; }
+#riftList .ra-row header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+#riftList .ra-row h3 { margin: 0; flex: 1; font-family: var(--f-display); font-weight: 500; font-size: 1.05rem; }
+#riftList .ra-count { font-size: .8rem; font-weight: 700; color: var(--ink-soft); }
+#riftList .ra-prize { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 999px; font-size: 1rem; background: color-mix(in srgb, var(--accent) 14%, transparent); opacity: .55; filter: grayscale(.7); }
+#riftList .ra-prize small { font-size: .72rem; font-weight: 700; color: var(--ink-soft); }
+#riftList .ra-prize.won { opacity: 1; filter: none; background: color-mix(in srgb, var(--accent) 26%, transparent); }
+#riftList .ra-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+#riftList .ra-chip { display: inline-flex; align-items: center; gap: 5px; min-height: 32px; padding: 4px 10px 4px 7px; border-radius: 999px; border: 1px dashed var(--stone-edge); color: var(--ink-soft); font-size: .8rem; }
+#riftList .ra-chip b { font-weight: 400; font-size: 1rem; line-height: 1; }
+#riftList .ra-chip em { font-style: normal; }
+#riftList .ra-chip.got { border-style: solid; color: var(--ink); background: var(--board-bg); }
+#riftList .ra-h { margin: 16px 4px 6px; font-family: var(--f-display); font-weight: 500; font-size: 1.05rem; }
+#riftList .ra-log { list-style: none; margin: 0; padding: 0; }
+#riftList .ra-log li { display: flex; align-items: center; gap: 10px; padding: 9px 6px; border-bottom: 1px solid var(--stone-edge); }
+#riftList .ra-log li:last-child { border-bottom: 0; }
+#riftList .ra-log .ra-ico { font-size: 1.3rem; width: 1.6em; text-align: center; }
+#riftList .ra-log div { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+#riftList .ra-log small { color: var(--ink-soft); font-size: .78rem; }
+#riftList .ra-log time { color: var(--ink-soft); font-size: .76rem; white-space: nowrap; }
+#riftList .ra-empty { color: var(--ink-soft); font-size: .86rem; }

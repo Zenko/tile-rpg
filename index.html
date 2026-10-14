@@ -245,6 +245,7 @@
             <button class="seg-btn" id="segEventLog" role="tab">Log</button>
             <button class="seg-btn" id="segBattles" role="tab">Battles</button>
             <button class="seg-btn" id="segJAlmanac" role="tab">Almanac</button>
+            <button class="seg-btn" id="segRifts" role="tab">Rifts</button>
             <button class="seg-btn" id="segPeople" role="tab">Neighbours</button>
             <button class="seg-btn" id="segNotes" role="tab">Theories</button>
           </div>
@@ -256,6 +257,9 @@
         <div id="eventLogView" class="hidden">
           <div class="jchips" id="logChips" role="group" aria-label="Filter the log"></div>
           <div id="eventLogList"></div>
+        </div>
+        <div id="riftView" class="hidden">
+          <div id="riftList"></div>
         </div>
         <div id="peopleView" class="hidden">
           <div id="peopleList"></div>
@@ -887,6 +891,7 @@ pixiReady.catch(function () {});
 <script src="js/puddle-worlds.js"></script>
 <script src="js/puddle-modes.js"></script>
 <script src="js/portal.js"></script>
+<script src="js/rift-atlas.js"></script>
 <script src="js/summoning.js"></script>
 <script src="js/altar-screen.js"></script>
 <script src="js/atlas.js"></script>

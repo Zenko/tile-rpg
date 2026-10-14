@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'new', x: 'The Rift Map (Journal → Rifts): every puddle world you visit is collected - the kinds of world, their palettes, the shapes and the four family portals - with your recent worlds and what you found in them. Something new pays a few Embers, and a full row leaves you a souvenir to place in town or in your cottage.' },
   { t: 'new', x: 'Portals: now and then a shimmering portal opens a few steps away from you, in any weather. It stays open for about twelve minutes (it flickers when it is about to close). Walk onto it and it always takes you into a puddle world. Every portal belongs to a card family: its colour and icon show which, and its world is that family\'s, with only their cards hidden inside.' },
   { t: 'better', x: 'Falling into a puddle world (through a puddle or a portal) now warps time: the town twists into a spiral, a clock spins its hands backwards and the new world unwinds into place. Coming back out warps too, with time running forward.' },
   { t: 'better', x: 'Behind the scenes: every colour in the game\'s look now comes from one theme file, ready for a future redesign. Nothing changes on screen.' },

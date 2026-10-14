@@ -307,6 +307,7 @@ function pwEnter(x, y, forceKind, via, family) {   // via: 'portal' (js/portal.j
     toast(`🌀 ${portal ? 'The portal carried you into' : 'You fell into'} the ${w.name}. ${w.intro || ''}`);
     logEvent('🌀', portal ? `Stepped through a portal into the ${w.name}.` : `Fell through a puddle into the ${w.name}.`); if (typeof teleInc === 'function') teleInc('puddleWorld.kind.' + w.kind);
     if (portal) { bumpStat('portalsEntered', 1); if (typeof teleInc === 'function') teleInc('puddleWorld.portal'); }
+    if (typeof riftNoteEnter === 'function') riftNoteEnter(w, via);   // js/rift-atlas.js: the Journal's collection of worlds
     if (typeof teleInc === 'function') teleInc('puddleWorld.entered');
     pwUpdatePill(); showTipOnce('puddleworld'); sfx('claim'); buzz(HAP.tap);
   };
@@ -319,6 +320,7 @@ function pwLeave(why, quiet, after) {   // why: 'faded' (the timer), 'left' (cli
   const origin = w.origin && Object.prototype.hasOwnProperty.call(DISTRICTS, w.origin.district) && w.origin.district !== PW_KEY ? w.origin : { district: 'square', x: null, y: null };
   const back = () => {
     const found = Math.max(0, state.ownedCards.length - (w.cards0 || 0)), k = pwKind(w);
+    if (typeof riftNoteLeave === 'function') riftNoteLeave(w, why, found);   // js/rift-atlas.js
     if (k.leave) { try { k.leave(w); } catch (e) { /* cleanup only */ } }
     pwLayerClear();
     delete state.districtData[PW_KEY]; delete LIFE.puddles[PW_KEY]; delete LIFE.birds[PW_KEY];

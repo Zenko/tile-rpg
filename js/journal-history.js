@@ -72,6 +72,7 @@ const JOURNAL_SEGMENTS = {
   eventlog: { btn: 'segEventLog', view: 'eventLogView' },
   battles: { btn: 'segBattles', view: 'battlesView' },
   almanac: { btn: 'segJAlmanac', view: 'almanacView' },
+  rifts: { btn: 'segRifts', view: 'riftView' },
   people: { btn: 'segPeople', view: 'peopleView' },
   notes: { btn: 'segNotes', view: 'notesView' },
 };
@@ -81,6 +82,7 @@ function renderJournal() {
   else if (jSeg === 'eventlog') renderLog();
   else if (jSeg === 'battles') renderBattleLog();
   else if (jSeg === 'almanac') renderJournalAlmanac();
+  else if (jSeg === 'rifts') { if (typeof renderRiftAtlas === 'function') renderRiftAtlas(); }   // js/rift-atlas.js
   else if (jSeg === 'people') renderPeople();
   else if (jSeg === 'notes') renderAtlasHints();   // Theories now only keeps what the Atlas has said (notes and drawings are paused, see HANDOFF)
   updateJournalBadge();

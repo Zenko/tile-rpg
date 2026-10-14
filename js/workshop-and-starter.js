@@ -502,7 +502,7 @@ function renderItems() {
   chips.innerHTML = ITEM_CATS.map(c => `<button class="cr-chip${c.id === itemsCat ? ' active' : ''}" data-cat="${c.id}">${c.icon} ${c.label}</button>`).join('');
   box.appendChild(chips);
 
-  const shopItems = DECORATION_ITEMS.filter(item => !item.museum && !item.atlas && (itemsCat === 'all' || item.cat === itemsCat));
+  const shopItems = DECORATION_ITEMS.filter(item => !item.museum && !item.atlas && !item.rift && (itemsCat === 'all' || item.cat === itemsCat));
   const night = isNightNow();
   shopItems.forEach(item => {
     const lockedToNight = item.night && !night, lockedLevel = item.level && ensureLevel().level < item.level;

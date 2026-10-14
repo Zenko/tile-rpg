@@ -46,6 +46,11 @@ const DECORATION_ITEMS = [
   { id: 'atlas-compass', name: 'Compass Rose', icon: '🧭', cost: 150, desc: 'It always points at something you meant to find.', cat: 'ornament', atlas: true },
   { id: 'atlas-lantern', name: 'Map Lantern', icon: '🏮', cost: 180, desc: 'Lights up the parts of the ground nobody has drawn yet.', cat: 'ornament', atlas: true },
   { id: 'dream-globe', name: 'Dream Globe', icon: '🌐', cost: 240, desc: 'Turn it and a different dream faces you.', cat: 'ornament', atlas: true },
+  // Rift Atlas souvenirs (js/rift-atlas.js): one for each finished row, never sold in the shop
+  { id: 'rift-hourglass', name: 'Bent Hourglass', icon: '⏳', cost: 120, desc: 'Its sand falls sideways, then upward, then not at all.', cat: 'ornament', rift: true },
+  { id: 'rift-prism', name: 'World Prism', icon: '🔮', cost: 160, desc: 'Turn it and the light inside takes the colour of somewhere you have been.', cat: 'lighting', rift: true },
+  { id: 'rift-planet', name: 'Pocket World', icon: '🪐', cost: 120, desc: 'A world small enough to hold, still turning slowly.', cat: 'ornament', rift: true },
+  { id: 'rift-lotus', name: 'Four-Family Lotus', icon: '🪷', cost: 160, desc: 'One petal for each family. It opens a little wider near a portal.', cat: 'plant', rift: true },
   { id: 'star-chart', name: 'Star Chart', icon: '🌌', cost: 320, desc: 'Every star on it is a place you almost went.', cat: 'ornament', atlas: true }
 ];
 

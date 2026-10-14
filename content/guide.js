@@ -70,6 +70,7 @@ const GUIDE = [
     { icon: '🧶', name: 'Table mats', where: 'Card Shop → Customize, then Player → Customize', how: `The cloth on your side of the battle table. Buy one with ${GAME.currency.many}, then pick it in your Customize tab.` },
     { icon: '🎨', name: 'Themes', where: 'Tap your avatar → Settings → Appearance', how: 'Dark (sea glass), Light (sand and sea glass) or Auto, which follows your device. The map, battles and interiors stay dark either way.' },
     { icon: '🪑', name: 'Things to do in town', where: 'Benches, wells, lamps, trees, water, puddles', how: 'Sit, wish, light lamps after dark, shake trees, skip stones, splash in the rain, scatter the birds. The Square, Market, Harbor and Garden each have an activity too: busking, haggling, hauling nets and watering plants.' },
+    { icon: '🗺️', name: 'Rift Map', where: 'Journal → Rifts', how: `Every puddle world you visit is collected: the kinds of world, their palettes, the shapes of a wander world and the four family portals. Something new pays a few ${GAME.currency.many}; a full row pays more and leaves you a souvenir to place in town or in your cottage. Below the rows, your recent worlds and what you found in them.` },
     { icon: '🌀', name: 'Portals', where: 'Anywhere in town, now and then', how: 'A shimmering doorway opens a few steps from you and stays open for about twelve minutes before it folds shut (it flickers in its last minute). Each one belongs to a card family, shown by its colour and the icon above it, and leads into that family\'s world: its colours, its name, and only its cards hidden inside (the treasure at least rare). The family of the district you are in turns up most often. Only one is open at a time, and never while you are already in a world.' },
     { icon: '🌀', name: 'Puddle worlds', where: 'Puddles in the rain', how: 'Now and then a puddle you splash through is a way into a small world that lasts only a few minutes. Every one is different, with its own look: explore for hidden cards, find your way out of a maze before the others, play a board game where only the dice move you, or swim through a sunken city. The timer in the top bar counts down; tap it to climb out early. When it runs out the world is gone and you are back where you fell in. Not in Cozy mode.' },
     { icon: '📰', name: 'The Dream Gazette', where: 'Journal → Today · the weather board', how: `A new front page every morning, the same story for every ${GAME.player.lower}. Below it: today's event, any weather moment, the town goal and who is visiting town.` },
@@ -141,7 +142,7 @@ const GUIDE = [
   ] },
 ];
 // Items added in the v1.81-1.89 releases wear a NEW tag until they have been opened once (state.progress.guideSeen).
-const GUIDE_NEW = ['Portals', 'The Dream Gazette', 'Gossip', 'Weather moments', 'Town goal', 'Travelling visitors', 'Your glow and sparkles', `${CAST.guide.name} points the way`, 'Who goes first', 'Card families', 'New keywords', 'The world in battle', `${GAME.player.one}’s Gift`, 'Draft Run', 'Lingering duels', `${GAME.currency.many} and soft limits`];
+const GUIDE_NEW = ['Rift Map', 'Portals', 'The Dream Gazette', 'Gossip', 'Weather moments', 'Town goal', 'Travelling visitors', 'Your glow and sparkles', `${CAST.guide.name} points the way`, 'Who goes first', 'Card families', 'New keywords', 'The world in battle', `${GAME.player.one}’s Gift`, 'Draft Run', 'Lingering duels', `${GAME.currency.many} and soft limits`];
 
 // ---- used by js/quests.js ----
 // The "wander" line: one quest at every 500-step rung up to 10,000, escalating rewards for the grind -
@@ -271,6 +272,8 @@ const ACHIEVEMENTS = [
   { id: 'puddles-10',  icon: '🌧️', name: '10 puddles splashed', test: () => (state.progress.totals.puddles || 0) >= 10 },
   { id: 'puddle-world', icon: '🌀', name: 'Fell through a puddle', test: () => (state.progress.totals.puddleWorlds || 0) >= 1 },
   { id: 'portal-1',     icon: '🌀', name: 'Stepped through a portal', test: () => (state.progress.totals.portalsEntered || 0) >= 1 },
+  { id: 'rift-row',     icon: '🗺️', name: 'A full row in the Rift Map', test: () => (state.progress.totals.riftRows || 0) >= 1 },
+  { id: 'rift-all',     icon: '🗺️', name: 'The whole Rift Map', test: () => (state.progress.totals.riftRows || 0) >= 4 },
   { id: 'portal-5',     icon: '🌀', name: 'Five portals', test: () => (state.progress.totals.portalsEntered || 0) >= 5 },
   { id: 'puddle-world-5', icon: '🌀', name: 'Five puddle worlds', test: () => (state.progress.totals.puddleWorlds || 0) >= 5 },
   { id: 'puddle-win',   icon: '🏁', name: 'Won a puddle world', test: () => (state.progress.totals.puddleWins || 0) >= 1 },
