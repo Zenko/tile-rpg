@@ -18,11 +18,11 @@ module.exports = async (page, assert) => {
     const el = document.querySelector('.ent.life-portal:not(.daily)'), fx = document.getElementById('portalFx'), cp = document.getElementById('portalCompass');
     const out = { ok, p, dx: Math.abs(p.x - me.x), dy: Math.abs(p.y - me.y), ground: !m.solid[p.y][p.x], drawn: !!el && +el.dataset.x === p.x && +el.dataset.y === p.y,
       life: p.until - p.openedAt === PORTAL_LIFE_MS, path: !!findPath(m, ensureDistrictData('square'), me, (x, y) => x === p.x && y === p.y),
-      fx: !!fx && fx.dataset.fam === p.family, sound: window.__sfx.includes('portal'), compass: !!cp && cp.dataset.fam === p.family, log: townLog.textContent };
+      fx: !!fx && fx.dataset.fam === p.family, inView: portalInView(p.x, p.y), hidden: p.hidden, sound: window.__sfx.includes('portal'), compass: !!cp && cp.dataset.fam === p.family, log: townLog.textContent };
     sfx = window.__realSfx; return out;
   });
   assert.ok(o.ok && o.p && o.p.district === 'square', 'a portal opened in this district');
-  assert.ok(o.dx > 3 || o.dy > 5, `out of view, so it has to be found (dx ${o.dx}, dy ${o.dy})`);
+  assert.ok(!o.inView && o.hidden, `out of view, so it has to be found (dx ${o.dx}, dy ${o.dy})`);
   assert.ok(o.fx && o.sound, 'the screen ripples in its colours and it sounds');
   assert.ok(o.compass, 'a compass at the edge of the view points to it');
   assert.match(o.log, /to the (north|south|east|west)/, 'and the words say which way: ' + o.log);

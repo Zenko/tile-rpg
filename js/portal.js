@@ -44,14 +44,17 @@ function portalCanOpen() {
 // A plain walkable ground tile she can reach, free of anything standing on it. near: a few steps away and on screen (a portal
 // stone, js/portal-craft.js); otherwise anywhere in the district, out of view when it can be (build 266: finding it is the fun).
 const PORTAL_VIEW = { x: 3, y: 5 };   // about what the camera shows around her: further than this is off screen
-const portalInView = (x, y) => Math.abs(x - state.playerPos.x) <= PORTAL_VIEW.x && Math.abs(y - state.playerPos.y) <= PORTAL_VIEW.y;
-// For the compass: is the drawn portal really on screen (the camera stops at the map's edges, so the tile sum can be wrong)?
-function portalOnScreen(p) {
-  const view = typeof townView !== 'undefined' && townView, el = typeof townWorld !== 'undefined' && townWorld && townWorld.querySelector('.ent.life-portal:not(.daily)');
-  if (!view || !el) return portalInView(p.x, p.y);
-  const v = view.getBoundingClientRect(), r = el.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-  if (!r.width && !r.height) return portalInView(p.x, p.y);
-  return cx > v.left + 20 && cx < v.right - 20 && cy > v.top + v.height * 0.16 && cy < v.bottom - v.height * 0.2;
+// Is this tile on screen with the camera at rest on her? The same sums as updateCamera (js/town-render-weather.js): centred on
+// her in the band between the top bar and the dock, but stopped at the map's edges, so near an edge a tile far from her can
+// still be in view. Before the town has a size it falls back to a plain box round her (PORTAL_VIEW).
+function portalInView(x, y) {
+  const view = typeof townView !== 'undefined' && townView, t = typeof tilePx !== 'undefined' ? tilePx : 0;
+  if (!view || !view.clientWidth || !t) return Math.abs(x - state.playerPos.x) <= PORTAL_VIEW.x && Math.abs(y - state.playerPos.y) <= PORTAL_VIEW.y;
+  const m = getMap(state.currentDistrict), vw = view.clientWidth, vh = view.clientHeight, padT = CAM_PAD_TOP, padB = CAM_PAD_BOTTOM;
+  const cx = Math.min(0, Math.max(vw - m.w * t, vw / 2 - (state.playerPos.x + 0.5) * t));
+  const cy = Math.min(padT, Math.max(vh - m.h * t - padB, (padT + vh - padB) / 2 - (state.playerPos.y + 0.5) * t));
+  const px = (x + 0.5) * t + cx, py = (y + 0.5) * t + cy;
+  return px > t * 0.5 && px < vw - t * 0.5 && py > padT + t * 0.3 && py < vh - padB - t * 0.3;
 }
 function portalPickSpot(near) {
   const d = state.currentDistrict, m = getMap(d), data = ensureDistrictData(d); if (!m || !data) return null;
@@ -119,7 +122,7 @@ function portalScreenFx(fam, x, y) {
 function portalCompass() {
   const view = typeof townView !== 'undefined' ? townView : null; if (!view) return;
   let el = document.getElementById('portalCompass');
-  const p = portalHere(), show = p && !p.daily && portalTownShowing() && !portalOnScreen(p) && state.currentDistrict !== (typeof PW_KEY !== 'undefined' ? PW_KEY : '');
+  const p = portalHere(), show = p && !p.daily && portalTownShowing() && !portalInView(p.x, p.y) && state.currentDistrict !== (typeof PW_KEY !== 'undefined' ? PW_KEY : '');
   if (!show) { if (el) el.remove(); return; }
   if (!el) {
     el = document.createElement('button'); el.type = 'button'; el.id = 'portalCompass'; el.className = 'portal-compass portal-fam';

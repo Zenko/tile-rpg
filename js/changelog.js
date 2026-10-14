@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'fixed', x: 'Near the edge of a district, a portal that opened "out of sight" could actually be on screen while the compass still pointed at it. Out of sight now means truly off screen.' },
   { t: 'better', x: 'Trade up now looks like Refine: the three slots and the result in one panel, the rarity to trade right under them, then the button and the odds. The cards to pick are listed below.' },
   { t: 'better', x: 'A tidier Workshop: the Refine button now sits right under the Power / Health choice, with just the skill and fail chances and one row for your streak and fail meter beneath it. The full odds table and how the forge works fold away under "How the odds work".' },
   { t: 'better', x: 'Portals can now open anywhere in town, not just beside you. When one opens the screen ripples in its colours with a deep whoomph, and an arrow at the edge of the map points the way until you find it.' },
