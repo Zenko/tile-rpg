@@ -48,7 +48,7 @@ module.exports = async (page, assert) => {
   await page.evaluate(() => { document.querySelectorAll('.overlay').forEach(o => o.classList.add('hidden')); switchTab('journal'); });
   await page.waitForTimeout(200);
   await page.evaluate(() => switchJournalSegment('rifts'));
-  const ui = await page.evaluate(() => ({ shown: !document.getElementById('riftView').classList.contains('hidden'), rows: document.querySelectorAll('#riftList .ra-row').length,
+  const ui = await page.evaluate(() => ({ shown: !document.getElementById('riftView').classList.contains('hidden'), rows: document.querySelectorAll('#riftList .ra-row:not(.dr-card)').length,   // the Daily Rift card on top (js/daily-rift.js) is not a collection row
     got: document.querySelectorAll('#riftList .ra-chip.got').length, won: document.querySelectorAll('#riftList .ra-prize.won').length, recent: document.querySelectorAll('#riftList .ra-log li').length,
     text: document.getElementById('riftList').innerText }));
   assert.ok(ui.shown && ui.rows === 4, 'the Rifts page shows four rows');
