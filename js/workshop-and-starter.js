@@ -265,10 +265,11 @@ function renderCraft() {
   const trade = document.createElement('div');
   trade.className = 'cr-section';
   const avail = r => Object.keys(counts).filter(id => cardDef(id).rarity === r).reduce((n, id) => n + tradable(id), 0);
-  trade.innerHTML = `<div class="cr-title">🔁 Trade up</div>
-    <div class="cr-desc">Combine <b>${CRAFT.tradeCount} cards of one rarity</b> into <b>1 random card of the next rarity</b>, with a <b>${pct(craftSkillChance('trade', craftSel.rarity))}% chance it comes with a skill</b> (and a ${pct(craftFailChance('trade', craftSel.rarity))}% chance it cracks into ${GAME.currency.many} instead) for ${RARITY_LABEL[craftSel.rarity].toLowerCase()} cards. Commoner cards are safer and likelier to gain a skill. Cards in your deck are never used.</div>
-    <div class="cr-chips">${steps.map(r => `<button class="cr-chip${r === craftSel.rarity ? ' active' : ''}${avail(r) < CRAFT.tradeCount ? ' short' : ''}" data-rar="${r}" title="${avail(r) < CRAFT.tradeCount ? `Needs ${CRAFT.tradeCount - avail(r)} more spare ${RARITY_LABEL[r].toLowerCase()} card${CRAFT.tradeCount - avail(r) === 1 ? '' : 's'}` : 'Ready to trade'}">${RARITY_LABEL[r]} <small>${avail(r)}/${CRAFT.tradeCount}</small></button>`).join('')}</div>`;
-  const target = nextRarity(craftSel.rarity);
+  // Laid out like the Refine page (build 268): one panel with the three slots and the result, the rarity choice where Refine has
+  // Power / Health, the button, then the compact odds; the cards to pick come below it.
+  const target = nextRarity(craftSel.rarity), short = r => RARITY_LABEL[r].split(' ')[0].replace(/^./, ch => ch.toUpperCase());
+  const panel = document.createElement('div');
+  panel.className = 'cr-forge cr-trade';
   const tray = document.createElement('div');
   tray.className = 'cr-tray';
   for (let i = 0; i < CRAFT.tradeCount; i++) {
@@ -278,16 +279,32 @@ function renderCraft() {
       : `<div class="cr-tslot${i === craftSel.picks.length ? ' next' : ''}"><span>?</span></div>`;
   }
   tray.innerHTML += `<div class="cr-forge-arrow" aria-hidden="true">➜</div><div class="cr-tslot cr-tresult rarity-${target}"><span>❓</span><b>${RARITY_LABEL[target]}</b></div>`;
-  const dock = document.createElement('div');
-  dock.className = 'cr-dock';
-  dock.appendChild(tray);
-  trade.appendChild(dock);
+  panel.appendChild(tray);
+  const pick = document.createElement('div');
+  pick.className = 'cr-stat-pick cr-rar-pick';
+  pick.setAttribute('role', 'tablist'); pick.setAttribute('aria-label', 'Rarity to trade');
+  pick.innerHTML = steps.map(r => `<button class="${r === craftSel.rarity ? 'on' : ''}${avail(r) < CRAFT.tradeCount ? ' short' : ''}" data-rar="${r}" role="tab" aria-selected="${r === craftSel.rarity}" title="${avail(r) < CRAFT.tradeCount ? `Needs ${CRAFT.tradeCount - avail(r)} more spare ${RARITY_LABEL[r]} card${CRAFT.tradeCount - avail(r) === 1 ? '' : 's'}` : `3 ${RARITY_LABEL[r]} into 1 ${RARITY_LABEL[nextRarity(r)]}`}"><span>${short(r)}</span><small>${avail(r)} spare</small></button>`).join('');
+  panel.appendChild(pick);
+  const need = CRAFT.tradeCount - craftSel.picks.length;
+  const whyNot = need === 0 ? tradeBlockReason(craftSel.picks) : '';
+  const ready = need === 0 && !whyNot;
+  const go = document.createElement('div');
+  go.className = 'cr-go';
+  go.innerHTML = `<button class="btn${ready ? ' cr-ready' : ''}" id="craftGo" ${ready ? '' : 'disabled'}>${need === 0 ? `Combine into ${aOrAn(RARITY_LABEL[target])} card` : `Pick ${need} more ${RARITY_LABEL[craftSel.rarity]} card${need === 1 ? '' : 's'}`}</button>${whyNot ? `<div class="cr-empty">${whyNot}</div>` : ''}`;
+  panel.appendChild(go);
+  const odds = document.createElement('div'); odds.className = 'cr-odds';
+  odds.innerHTML = craftOddsHtml('trade', craftSel.rarity, `3 ${RARITY_LABEL[craftSel.rarity]} cards → 1 random ${RARITY_LABEL[target]} card`);
+  odds.querySelector('.cr-more').insertAdjacentHTML('beforeend', `<div class="cr-forgenote">🔁 <b>Trade up:</b> combine ${CRAFT.tradeCount} cards of one rarity into 1 random card of the next. Cards in your deck are never used.</div>`);
+  panel.appendChild(odds);
+  trade.appendChild(panel);
 
   const list = Object.keys(counts).filter(id => cardDef(id).rarity === craftSel.rarity && tradable(id) > 0)
     .sort((a, b) => (cardDef(a).crafted ? 1 : 0) - (cardDef(b).crafted ? 1 : 0) || cardDef(a).cost - cardDef(b).cost || (a < b ? -1 : 1));
+  const title = document.createElement('div'); title.className = 'cr-title'; title.textContent = `Pick ${CRAFT.tradeCount} ${RARITY_LABEL[craftSel.rarity]} cards`;
+  trade.appendChild(title);
   if (!list.length) {
     const empty = document.createElement('div'); empty.className = 'cr-empty';
-    empty.textContent = `No spare ${RARITY_LABEL[craftSel.rarity].toLowerCase()} cards outside your deck yet. Collect ${CRAFT.tradeCount} spares to trade up.`;
+    empty.textContent = `No spare ${RARITY_LABEL[craftSel.rarity]} cards outside your deck yet. Collect ${CRAFT.tradeCount} spares to trade up.`;
     trade.appendChild(empty);
   } else {
     const grid = document.createElement('div');
@@ -304,14 +321,6 @@ function renderCraft() {
     });
     trade.appendChild(grid);
   }
-  const need = CRAFT.tradeCount - craftSel.picks.length;
-  const whyNot = need === 0 ? tradeBlockReason(craftSel.picks) : '';
-  const go = document.createElement('div');
-  go.className = 'cr-go';
-  const ready = need === 0 && !whyNot;
-  go.innerHTML = `<button class="btn${ready ? ' cr-ready' : ''}" id="craftGo" ${ready ? '' : 'disabled'}>${need === 0 ? `Combine into ${aOrAn(RARITY_LABEL[target])} card` : `Pick ${need} more`}</button>${whyNot ? `<div class="cr-empty">${whyNot}</div>` : ''}`;
-  dock.appendChild(go);
-  const odds = document.createElement('div'); odds.className = 'cr-odds'; odds.innerHTML = craftOddsHtml('trade', craftSel.rarity); trade.appendChild(odds);
   if (craftMode === 'trade') box.appendChild(trade);
   if (craftMode === 'portal') box.appendChild(portalCraftSection());   // js/portal-craft.js (build 266)
 

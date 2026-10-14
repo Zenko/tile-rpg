@@ -24,7 +24,7 @@ module.exports = async (page, assert) => {
   // Trade up mode
   await page.evaluate(() => { const t = document.getElementById('testHideOverlays'); if (t) t.remove(); });
   await page.click('.cr-mode [data-mode="trade"]');
-  assert.ok(await page.locator('.cr-tray').count() === 1 && await page.locator('.cr-forge').count() === 0, 'trade up should show the tray, not the forge');
+  assert.ok(await page.locator('.cr-tray').count() === 1 && await page.locator('.cr-forge:not(.cr-trade)').count() === 0 && await page.locator('.cr-trade .cr-rar-pick button').count() === 4, 'trade up shows its tray and rarity choice, not the refine forge');
   await page.click('.cr-mode [data-mode="refine"]');
   assert.ok(await page.locator('.cr-forge, .cr-empty').count() >= 1);
 };

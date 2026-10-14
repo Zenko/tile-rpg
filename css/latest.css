@@ -2467,3 +2467,12 @@ body.pw-board #goalChip { display: none !important; }   /* the dice panel says w
 .cr-more[open] summary::after { content: ' ▴'; }
 .cr-more > * + * { margin-top: 8px; }
 .cr-more .cr-forgenote b { color: var(--ink); font-weight: 600; }
+/* Trade up laid out like the Refine page (build 268): the rarity choice sits where Power / Health does, four across. */
+.cr-trade .cr-tray { gap: 6px; margin: 2px 0 4px; }
+.cr-rar-pick { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.cr-rar-pick button { min-height: 52px; padding: 4px 2px; font-size: .82rem; }
+.cr-rar-pick button small { font-size: .66rem; }
+.cr-rar-pick button.short:not(.on) { opacity: .6; }
+.cr-trade .cr-go { width: 100%; }
+.cr-trade .cr-go .btn { width: 100%; min-height: 48px; }
+.cr-trade .cr-odds { width: 100%; margin-top: 0; gap: 8px; }
