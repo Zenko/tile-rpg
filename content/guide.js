@@ -125,7 +125,7 @@ const GUIDE = [
   ] },
   { section: 'Collecting', items: [
     { icon: '🛍️', name: 'Packs & decorations', where: `${PLACES.market} → Card Shop`, how: `Spend ${GAME.currency.many} on packs, sleeves, cosmetics and decorations for any district. Until ${PLACES.market} opens, tap your 🫧 ${GAME.currency.many} counter to browse.` },
-    { icon: '🔨', name: 'Workshop', where: 'Cards → Craft', how: `Refine two copies into a stronger card, or trade three up a rarity. Every craft earns XP. Commoner cards are safer: they gain a skill more often and crack less, while rarer cards risk more (the Workshop shows the chances for every rarity). Now and then one cracks: the cards turn into ${GAME.currency.many} instead, and the fail meter fills, so each fail in a row pays more (up to three times as much) until a craft works. A companion whose card has Seed (or a neighbour who loves crafting) steadies your hands: half the fails, more XP, more skills and a chance the card comes out Reborn.` },
+    { icon: '🔨', name: 'Workshop', where: 'Cards → Craft', how: `Refine two copies into a stronger card, or trade three up a rarity. Every craft earns XP. Commoner cards are safer: they gain a skill more often and crack less, while rarer cards risk more (the Workshop shows the chances for every rarity). You strike the iron yourself: tap when the spark is in the glow, three times, and a Flawless forge cuts the fails and raises the skill chance (rarer iron has a narrower glow). Every craft that works heats the hot streak; five in a row make the next craft a Masterwork that cannot crack. Now and then one cracks: the cards turn into ${GAME.currency.many} instead, and the fail meter fills, so each fail in a row pays more (up to three times as much) until a craft works. A companion whose card has Seed (or a neighbour who loves crafting) steadies your hands: half the fails, more XP, more skills and a chance the card comes out Reborn.` },
     { icon: '🧩', name: 'Index & sets', where: 'Cards → Sets', how: 'Eight themed sets that give lasting bonuses when complete, and an Index of every card in the game.' },
     { icon: '✦', name: 'Charms & mastery', where: 'Cards → My Cards', how: 'Charm cards for town perks; cards you play earn ★ mastery (★★★: +1 health in battle).' },
     { icon: '🤝', name: 'Trading board', where: `The sign in ${PLACES.market}`, how: 'Three trades a day for spare cards.', lock: () => needs('market') },
@@ -371,6 +371,9 @@ const ACHIEVEMENTS = [
   { id: 'crafted-100', icon: '🏆', name: '100 crafts',       test: () => state.progress.crafted >= 100 },
   { id: 'craft-fail',  icon: '💥', name: 'Nothing ventured', test: () => (state.progress.totals.craftFails || 0) >= 1 },
   { id: 'craft-meter', icon: '🔥', name: 'Fail meter full',  test: () => (state.progress.totals.craftMeterFull || 0) >= 1 },
+  { id: 'forge-flawless', icon: '🌟', name: 'Flawless: three perfect strikes at the forge', test: () => (state.progress.totals.forgeFlawless || 0) >= 1 },
+  { id: 'masterwork-1', icon: '🔥', name: 'Masterwork: a craft from a white-hot forge', test: () => (state.progress.totals.masterworks || 0) >= 1 },
+  { id: 'masterwork-5', icon: '⚒️', name: 'Master smith: 5 Masterworks', test: () => (state.progress.totals.masterworks || 0) >= 5 },
   { id: 'craft-foil',  icon: '🌟', name: 'Reborn at the anvil', test: () => (state.progress.totals.craftFoils || 0) >= 1 },
   { id: 'craft-help',  icon: '🔨', name: 'Helping hands: 5 crafts with a crafting companion', test: () => (state.progress.totals.craftsHelped || 0) >= 5 },
   { id: 'skills-10',   icon: '🎋', name: '10 lucky skills',  test: () => state.progress.skillsCrafted >= 10 },

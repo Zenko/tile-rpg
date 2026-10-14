@@ -934,3 +934,12 @@
   --sketch-glow: #8fd3ff;                  /* a finished drawing glowing on its stone */
   --sketch-ghost: rgba(44, 74, 138, 0.35); /* the shape shown for a moment before you draw */
 }
+/* The forge and the hot streak (build 265, js/craft-forge.js). */
+:root {
+  --forge-iron: #3a2a26;                   /* the cold strip of iron the spark slides along */
+  --forge-glow: rgba(255, 140, 60, 0.55);  /* the band to strike in */
+  --forge-core: #ffd27a;                   /* its bright core: a Perfect strike */
+  --forge-spark: #fff4d6;                  /* the spark */
+  --forge-heat: #ff7a3c;                   /* a lit flame of the hot streak */
+  --forge-master: #ffc94d;                 /* a Masterwork ready */
+}

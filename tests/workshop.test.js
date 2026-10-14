@@ -17,7 +17,7 @@ module.exports = async (page, assert) => {
   await page.click('.cr-stat-pick [data-stat="g"]');
   assert.strictEqual(await page.getAttribute('.cr-forge > .btn', 'data-stat'), 'g');
   const before = await page.evaluate(id => state.ownedCards.filter(c => c === id).length, second);
-  await page.click('.cr-forge > .btn'); await page.waitForTimeout(450);
+  await page.click('.cr-forge > .btn'); await page.click('#forgeSheet .fg-skip'); await page.waitForTimeout(600);   // the forge opens (js/craft-forge.js); Skip forges at the plain chances
   await page.evaluate(() => { const o = document.getElementById('pickupOverlay'); if (o) o.classList.add('hidden'); const r = document.querySelector('.reveal-overlay'); if (r) r.classList.add('hidden'); });
   assert.strictEqual(await page.evaluate(id => state.ownedCards.filter(c => c === id).length, second), before - 2, 'refining should use two copies');
   assert.ok(await page.evaluate(id => state.ownedCards.some(c => c.startsWith(id + '~g')), second), 'refined card missing');

@@ -18,6 +18,9 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'new', x: 'The forge: refining and trading up now ask you to strike the iron yourself. Tap when the spark is in the glow, three times - a Flawless forge means fewer fails and more skills. Rarer cards have a narrower glow. Skip it any time for the plain chances.' },
+  { t: 'new', x: 'Hot streak: every craft that works heats the forge, and a crack cools it. Five in a row and your next craft is a Masterwork: it cannot crack and is twice as likely to gain a skill.' },
+  { t: 'better', x: 'Puddles in the rain are a way into a puddle world half the time now (it used to be about one in seven).' },
   { t: 'better', x: 'Crafting odds now follow rarity: commoner cards gain a skill more often and crack less, rarer cards risk more. The Workshop shows the skill and fail chance for every rarity, with the one you are crafting lit up.' },
   { t: 'new', x: 'Sketchbook worlds: a puddle or a portal can drop you onto an unfinished page. Each sketch stone asks for a shape - a full moon, a star, a wave - and shows it for a moment; then draw it from memory in one stroke. The better your drawing, the more stars, and every drawing you get right brings the colour back and stays on the page.' },
   { t: 'better', x: 'Cards on the ground are spread further apart and come back less often (a minute or more after one is taken). They are mostly commons now, and often the same card again, so doubles for crafting are easier to collect.' },

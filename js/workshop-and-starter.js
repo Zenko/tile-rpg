@@ -188,12 +188,16 @@ function craftOddsHtml(kind, rarity) {
   const pct = n => Math.round(n * 100), meter = craftMeter(), next = Math.min(CRAFT.meterMax, meter + 1);
   const pips = Array.from({ length: CRAFT.meterMax }, (_, i) => `<i class="${i < meter ? 'on' : ''}"></i>`).join('');
   const c = state.companion, help = craftHelped() && c ? `<div class="cr-help">🔨 ${escapeHtml(c.name)} steadies your hands: half the fails, +50% XP, more skills, a chance of Reborn</div>` : '';
-  const skill = craftSkillChance(kind, rarity), fail = craftFailChance(kind, rarity);
+  const odds = craftOdds(kind, rarity), skill = odds.skill, fail = odds.fail, heat = craftHeat();
+  const flames = Array.from({ length: CRAFT.heatMax }, (_, i) => `<i class="${i < heat ? 'on' : ''}"></i>`).join('');
+  const streak = `<div class="cr-heat${odds.master ? ' ready' : ''}" title="Every craft that works heats the forge; a crack cools it"><span>🔥 Hot streak</span><span class="cr-flames">${flames}</span><small>${odds.master ? 'Masterwork ready: it cannot crack, double skill chance' : `${CRAFT.heatMax - heat} more for a Masterwork`}</small></div>`;
+  const g = FORGE_GRADES[0], forgeNote = `<div class="cr-forgenote">🔨 You strike the iron yourself: a ${g.label} forge cuts the fail chance to ${Math.round(g.fail * 100)}% of this and adds ${Math.round((g.skill - 1) * 100)}% to the skill chance.</div>`;
   const rars = kind === 'trade' ? CRAFT_RARITIES.filter(r => nextRarity(r)) : CRAFT_RARITIES;   // mythic has nothing to trade up into
   const table = `<div class="cr-rarodds" role="table" aria-label="Chances by rarity">${rars.map(r => `<div class="cr-ro${r === rarity ? ' on' : ''}" role="row"><b role="cell"><i class="rarity-${r}" aria-hidden="true"></i>${RARITY_LABEL[r]}</b><span role="cell" title="Skill chance">✨ ${pct(craftSkillChance(kind, r))}%</span><span role="cell" class="f" title="Fail chance">💥 ${pct(craftFailChance(kind, r))}%</span></div>`).join('')}</div>`;
   return `<div class="cr-meter"><span>✨ Skill chance</span><div class="cr-bar"><i style="width:${pct(skill)}%"></i></div><b>${pct(skill)}%</b></div>
     <div class="cr-meter fail"><span>💥 Fail chance</span><div class="cr-bar"><i style="width:${pct(fail)}%"></i></div><b>${pct(fail)}%</b></div>
     <div class="cr-rarnote">${rarity ? `${RARITY_LABEL[rarity][0].toUpperCase() + RARITY_LABEL[rarity].slice(1)} cards` : 'By rarity'}: the commoner the card, the likelier a skill and the less it cracks.</div>${table}
+    ${forgeNote}${streak}
     <div class="cr-failmeter" title="Each fail in a row fills it; a success empties it"><span>Fail meter</span><span class="cr-pips">${pips}</span><small>a fail pays x${craftFailMultiplier(next)} in ${GAME.currency.many}</small></div>${help}`;
 }
 function renderCraft() {
@@ -318,8 +322,12 @@ function renderCraft() {
   box.querySelectorAll('button[data-refine]').forEach(btn => btn.addEventListener('click', e => {
     e.stopPropagation();
     ensureAudio();
-    if (!refineCard(btn.dataset.refine, btn.dataset.stat)) { toast('That cannot be refined right now'); sfx('tie'); }
-    renderCraft();
+    const id = btn.dataset.refine, stat = btn.dataset.stat;
+    if (refineBlockReason(id, stat)) { toast('That cannot be refined right now'); sfx('tie'); return; }
+    forgeOpen({ kind: 'refine', rarity: cardDef(id).rarity, title: `Refine ${cardDef(id).name}` }, grade => {   // js/craft-forge.js
+      if (!refineCard(id, stat, null, grade)) { toast('That cannot be refined right now'); sfx('tie'); }
+      renderCraft();
+    });
   }));
   box.querySelectorAll('[data-rar]').forEach(btn => btn.addEventListener('click', () => {
     sfx('nav'); buzz(HAP.tap); craftSel = { rarity: btn.dataset.rar, picks: [] }; renderCraft();
@@ -337,9 +345,12 @@ function renderCraft() {
     if (craftSel.picks.length !== CRAFT.tradeCount) return;
     ensureAudio();
     const picks = craftSel.picks.slice();
-    craftSel.picks = [];
-    if (!tradeUp(picks)) { toast('That trade is not possible right now'); sfx('tie'); }
-    renderCraft();
+    if (tradeBlockReason(picks)) { toast('That trade is not possible right now'); sfx('tie'); return; }
+    forgeOpen({ kind: 'trade', rarity: cardDef(picks[0]).rarity, title: 'Trade up' }, grade => {
+      craftSel.picks = [];
+      if (!tradeUp(picks, null, grade)) { toast('That trade is not possible right now'); sfx('tie'); }
+      renderCraft();
+    });
   });
 }
 

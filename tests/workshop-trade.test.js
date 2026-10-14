@@ -20,6 +20,6 @@ module.exports = async (page, assert) => {
   assert.strictEqual(await page.evaluate(() => craftSel.picks.length), 3);
   await page.evaluate(() => { const t = document.getElementById('testHideOverlays'); if (t) t.remove(); const tip = document.getElementById('tipOverlay'); if (tip) tip.classList.add('hidden'); });
   const before = await page.evaluate(() => state.ownedCards.length);
-  await page.click('#craftGo'); await page.waitForTimeout(400);
+  await page.click('#craftGo'); await page.click('#forgeSheet .fg-skip'); await page.waitForTimeout(600);   // through the forge, skipped
   assert.strictEqual(await page.evaluate(() => state.ownedCards.length), before - 2, 'three cards in, one out');
 };

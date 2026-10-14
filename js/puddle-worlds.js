@@ -21,7 +21,7 @@
    a portal (js/portal.js) is a second way in, always open for a while, that calls pwEnter(x, y, undefined, 'portal').
    ============================================================ */
 const PW_KEY = 'pw';
-const PW_CHANCE = 0.15;                       // chance a newly splashed puddle is a way in
+const PW_CHANCE = 0.5;                        // chance a newly splashed puddle is a way in (0.15 until build 265)
 const PW_MIN_LEVEL = 2;                       // not for the very first minutes of play
 const PW_MIN_MS = 4 * 60 * 1000, PW_MAX_MS = 7 * 60 * 1000;   // how long a world lasts
 const PW_COOLDOWN_MS = 4 * 60 * 1000;         // after one ends, no new one for this long

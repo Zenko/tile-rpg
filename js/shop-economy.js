@@ -24,8 +24,35 @@ const CRAFT = {
   // By the rarity of the cards going in (build 264): the commoner the card, the likelier a skill and the rarer a crack.
   // Each multiplies the base chances above (so an ultra is the base, a common gets 1.35x the skill and 0.4x the fails).
   raritySkill: { common: 1.35, rare: 1.1, ultra: 0.85, super: 0.6, mythic: 0.4 },
-  rarityFail: { common: 0.4, rare: 0.7, ultra: 1, super: 1.4, mythic: 1.9 }
+  rarityFail: { common: 0.4, rare: 0.7, ultra: 1, super: 1.4, mythic: 1.9 },
+  // Hot streak (build 265): every craft that works heats the forge (a Flawless strike twice as much), a crack cools it right
+  // down, and it cools one notch every heatCoolMs on its own. At heatMax the next craft is a Masterwork: it cannot crack,
+  // its skill chance is doubled and it earns XP again on top. Then the forge starts cold.
+  heatMax: 5, heatCoolMs: 10 * 60 * 1000, masterSkillMul: 2, masterXpMul: 1
 };
+// The forge (build 265, js/craft-forge.js): three hammer strikes, 2 points for a perfect one, 1 for a good one. The total picks
+// the grade, which scales this craft's fail and skill chances. Skipping the forge counts as Rough (the plain chances).
+const FORGE_GRADES = [
+  { id: 'flawless', min: 6, label: 'Flawless', icon: '🌟', fail: 0.4, skill: 1.4 },
+  { id: 'clean', min: 4, label: 'Clean', icon: '🔨', fail: 0.7, skill: 1.2 },
+  { id: 'rough', min: 2, label: 'Rough', icon: '🪨', fail: 1, skill: 1 },
+  { id: 'botched', min: 0, label: 'Botched', icon: '💢', fail: 1.3, skill: 0.85 }
+];
+function forgeGrade(points) { return FORGE_GRADES.find(g => points >= g.min); }
+function forgeGradeById(id) { return FORGE_GRADES.find(g => g.id === id) || FORGE_GRADES[2]; }
+function craftHeat() {
+  const p = state.progress, cooled = Math.floor((Date.now() - (p.craftHeatAt || 0)) / CRAFT.heatCoolMs);
+  return Math.max(0, Math.min(CRAFT.heatMax, (p.craftHeat || 0) - Math.max(0, cooled)));
+}
+function setCraftHeat(n) { state.progress.craftHeat = Math.max(0, Math.min(CRAFT.heatMax, n)); state.progress.craftHeatAt = Date.now(); }
+const craftMasterReady = () => craftHeat() >= CRAFT.heatMax;
+// This craft's real chances, after the rarity, the companion, the forge grade and a Masterwork.
+function craftOdds(kind, rarity, grade) {
+  const g = forgeGradeById(grade), master = craftMasterReady();
+  return { master, grade: g.id,
+    fail: master ? 0 : Math.min(0.9, craftFailChance(kind, rarity) * g.fail),
+    skill: Math.min(0.9, craftSkillChance(kind, rarity) * g.skill * (master ? CRAFT.masterSkillMul : 1)) };
+}
 const CRAFT_RARITIES = ['common', 'rare', 'ultra', 'super', 'mythic'];
 const craftHelped = () => typeof hasPerk === 'function' && hasPerk('craft');
 // rarity: of the card being refined, or of the three going into a trade-up. Left out = the base chance (no rarity scaling).
@@ -49,6 +76,7 @@ function craftFail(kind, removed) {
   Object.keys(removed).forEach(id => removeCopies(id, removed[id]));
   const meter = Math.min(CRAFT.meterMax, craftMeter() + 1), pay = craftFailPayout(removed, meter);
   state.progress.craftMeter = meter;
+  setCraftHeat(0);   // a crack cools the forge
   repairDeckAfterCraft(null);
   addPebbles(pay, 'craft-fail');
   bumpStat('craftFails', 1);
@@ -97,16 +125,20 @@ function repairDeckAfterCraft(newId) {
   return freed > 0;
 }
 
-function finishCraft(resultId, skill, heading, rng) {
-  rng = rng || Math.random;
+function finishCraft(resultId, skill, heading, rng, odds) {
+  rng = rng || Math.random; odds = odds || { master: false, grade: 'rough' };
   state.progress.crafted += 1;
   if (skill) state.progress.skillsCrafted += 1;
   state.progress.craftMeter = 0;   // a success empties the fail meter
+  // the hot streak: a Masterwork spends it, anything else heats the forge (a Flawless strike twice)
+  if (odds.master) setCraftHeat(0); else setCraftHeat(craftHeat() + (odds.grade === 'flawless' ? 2 : 1));
+  if (odds.grade === 'flawless') bumpStat('forgeFlawless', 1);
   // XP (build 261): through bumpStat like everything else, half again with a crafting companion
   const helped = craftHelped(), xp = XP_PER_STAT.crafts + (skill ? XP_PER_STAT.craftSkills : 0);
   bumpStat('crafts', 1); if (skill) bumpStat('craftSkills', 1);
   let bonus = 0;
   if (helped) { bonus = Math.round(xp * CRAFT.perkXpMul); addXP(bonus); bumpStat('craftsHelped', 1); }
+  if (odds.master) { const mx = Math.round(xp * CRAFT.masterXpMul); addXP(mx); bonus += mx; bumpStat('masterworks', 1); }
   let reborn = false;
   if (helped && rng() < CRAFT.perkFoilChance) {   // a crafting companion's chance of a Reborn
     const f = foils(); f[resultId] = (f[resultId] || 0) + 1; reborn = true;
@@ -116,7 +148,9 @@ function finishCraft(resultId, skill, heading, rng) {
   updateHud();
   bumpPill('pillCards');
   const def = cardDef(resultId);
-  const note = [skill ? `✨ It gained a skill: ${KW[skill].icon} ${KW[skill].name}!` : '', reborn ? '🌟 It came out Reborn!' : ''].filter(Boolean).join(' ');
+  const g = forgeGradeById(odds.grade), hot = craftHeat();
+  const note = [odds.master ? '🔥 A Masterwork!' : '', skill ? `✨ It gained a skill: ${KW[skill].icon} ${KW[skill].name}!` : '', reborn ? '🌟 It came out Reborn!' : '',
+    odds.grade !== 'rough' ? `${g.icon} ${g.label} forging.` : '', !odds.master ? (hot >= CRAFT.heatMax ? '🔥 The forge is white-hot: your next craft is a Masterwork.' : `🔥 Hot streak ${hot}/${CRAFT.heatMax}.`) : ''].filter(Boolean).join(' ');
   logEvent(def.icon, `Crafted ${def.name}${skill ? ` with ${KW[skill].name}` : ''}${reborn ? ' (Reborn)' : ''}.`);
   showCardReveal(resultId, heading, true, note, xp + bonus);
   if (skill) { sfx('mythic'); buzz(HAP.big); }
@@ -158,13 +192,14 @@ function tradeBlockReason(picks) {
 }
 
 // stat: 'p' (+1 power) or 'g' (+1 health). rng is injectable so tests can prove the odds.
-function refineCard(id, stat, rng) {
+// grade: the forge's grade for this craft (FORGE_GRADES id; left out = 'rough', the plain chances).
+function refineCard(id, stat, rng, grade) {
   rng = rng || Math.random;
   if (refineBlockReason(id, stat)) return false;
-  const rar = cardDef(id).rarity;
-  if (rng() < craftFailChance('refine', rar) && keepsFullDeck({ [id]: 2 }, [])) return craftFail('refine', { [id]: 2 });
+  const odds = craftOdds('refine', cardDef(id).rarity, grade);
+  if (rng() < odds.fail && keepsFullDeck({ [id]: 2 }, [])) return craftFail('refine', { [id]: 2 });
   let skills = craftableSkills(id);
-  let skill = (skills.length && rng() < craftSkillChance('refine', rar)) ? skills[Math.floor(rng() * skills.length)] : '';
+  let skill = (skills.length && rng() < odds.skill) ? skills[Math.floor(rng() * skills.length)] : '';
   let resultId = BattleEngine.variantId(id, stat, skill);
   if (!cardDef(resultId)) return false;
   // the gate above was checked without the skill; if the skilled version would somehow break the deck rule, hand out the plain one
@@ -174,13 +209,13 @@ function refineCard(id, stat, rng) {
   state.ownedCards.push(resultId);
   noteCardsFound(1);
   const deckChanged = repairDeckAfterCraft(resultId);
-  finishCraft(resultId, skill, 'Refined!', rng);
+  finishCraft(resultId, skill, odds.master ? 'Masterwork!' : 'Refined!', rng, odds);
   if (deckChanged) toast('🎴 Your deck was updated with the new card');
-  return { id: resultId, skill, deckChanged };
+  return { id: resultId, skill, deckChanged, master: odds.master, grade: odds.grade };
 }
 
 // picks: three card ids of one rarity, taken from copies that are not in the deck.
-function tradeUp(picks, rng) {
+function tradeUp(picks, rng, grade) {
   rng = rng || Math.random;
   if (tradeBlockReason(picks)) return false;
   const target = nextRarity(cardDef(picks[0]).rarity);
@@ -188,19 +223,19 @@ function tradeUp(picks, rng) {
   picks.forEach(id => { need[id] = (need[id] || 0) + 1; });
   const pool = cardPool(target);
   if (!pool.length) return false;
-  const rar = cardDef(picks[0]).rarity;
-  if (rng() < craftFailChance('trade', rar) && keepsFullDeck(need, [])) return craftFail('trade', need);
+  const odds = craftOdds('trade', cardDef(picks[0]).rarity, grade);
+  if (rng() < odds.fail && keepsFullDeck(need, [])) return craftFail('trade', need);
   const base = pool[Math.floor(rng() * pool.length)].id;
   const skills = craftableSkills(base);
-  const skill = (skills.length && rng() < craftSkillChance('trade', rar)) ? skills[Math.floor(rng() * skills.length)] : '';
+  const skill = (skills.length && rng() < odds.skill) ? skills[Math.floor(rng() * skills.length)] : '';
   const resultId = skill ? BattleEngine.variantId(base, '', skill) : base;
   Object.keys(need).forEach(id => removeCopies(id, need[id]));
   state.progress.discovered = Array.from(new Set((state.progress.discovered || []).concat(picks.map(BattleEngine.baseIdOf))));
   const isNew = !discoveredSet().has(base);
   state.ownedCards.push(resultId);
   noteCardsFound(1);
-  finishCraft(resultId, skill, 'Traded up!', rng);
+  finishCraft(resultId, skill, odds.master ? 'Masterwork!' : 'Traded up!', rng, odds);
   if (isNew) toast('📖 New entry in your Index');
-  return { id: resultId, skill, base, isNew };
+  return { id: resultId, skill, base, isNew, master: odds.master, grade: odds.grade };
 }
 

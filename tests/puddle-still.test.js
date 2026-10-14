@@ -21,7 +21,8 @@ module.exports = async (page, assert) => {
   // ---- 2. a step costs one step of stillness; stepping on a mote gathers it ----
   const s = await page.evaluate(() => {
     const d = state.districtData.pw, mo = d.motes[0], w = pwActive();
-    pwStep(1, 1); const afterPlain = w.stepsLeft;
+    let px = 1; while (d.motes.some(o => o.x === px && o.y === 1)) px++;   // a plain step, on a tile with no mote
+    pwStep(px, 1); const afterPlain = w.stepsLeft;
     pwStep(mo.x, mo.y);
     return { afterPlain, after: w.stepsLeft, got: w.got, mote: mo.got, el: !!document.querySelector(`.ent.pw-mote[data-x="${mo.x}"][data-y="${mo.y}"]`), goal: nextGoal().text };
   });
@@ -34,7 +35,7 @@ module.exports = async (page, assert) => {
 
   // ---- 4. the last step: time thaws, the world lets her go, the motes are paid for ----
   const peb0 = await page.evaluate(() => state.progress.pebbles), m0 = await page.evaluate(() => state.progress.totals.stillMotes || 0);
-  await page.evaluate(() => { const w = pwActive(); w.stepsLeft = 1; pwStep(1, 1); });
+  await page.evaluate(() => { const w = pwActive(), d = state.districtData.pw; let px = 1; while (d.motes.some(o => !o.got && o.x === px && o.y === 1)) px++; w.stepsLeft = 1; pwStep(px, 1); });
   const thaw = await page.evaluate(() => ({ thawing: !!pwActive().thawing, cls: document.getElementById('townGrid').classList.contains('pw-thaw') }));
   assert.ok(thaw.thawing && thaw.cls, 'time starts again');
   await until(() => state.currentDistrict === 'square' && !pwActive() && !document.querySelector('.travel-fade, .warp-fx'), null, 10000);
