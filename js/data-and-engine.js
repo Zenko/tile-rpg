@@ -197,7 +197,7 @@ function cardFaceHtml(def) {
    - No retaliation: a card that survives a hit does not hit back.                                                       */
 const BattleEngine = (function () {
   'use strict';
-  const RULES = { spirit: 20, board: 4, hand: 3, ecap: 5, secondBonus: 1, secondBonusTurns: 2, faceCap: 4, mend: 1, echo: 2, handMax: 7, turnCap: 60, deck: 12, copies: 2 };
+  const RULES = { spirit: 20, board: 4, hand: 3, ecap: 5, secondBonus: 1, secondBonusTurns: 2, faceCap: 4, mend: 1, drain: 2, rally: 1, bloom: 1, thorns: 1, echo: 2, handMax: 7, turnCap: 60, deck: 12, copies: 2 };
 
   const KEYWORDS = {
     guard:  { icon: '🛡️', name: 'Watch',  text: 'Enemies must attack Watch cards first.' },
@@ -620,7 +620,7 @@ const BattleEngine = (function () {
     emit(G, 'play', { who, card: c });
     passiveOnPlay(G, who, c);
     if (c.kw.includes('echo')) { const dmg = RULES.echo + ((G.mods && G.mods.echoBonus) || 0); op.spirit -= dmg; emit(G, 'spirit', { who: 1 - who, delta: -dmg, source: c, echo: true }); }
-    if (c.kw.includes('rally')) me.board.forEach(x => { if (x !== c) { x.power++; emit(G, 'buff', { who, uid: x.uid, amt: 1, rally: true }); } });
+    if (c.kw.includes('rally')) me.board.forEach(x => { if (x !== c) { x.power += RULES.rally; emit(G, 'buff', { who, uid: x.uid, amt: RULES.rally, rally: true }); } });
     if (c.kw.includes('kin')) {
       const fam = familyOf(c.id), n = fam ? me.board.filter(x => x !== c && familyOf(x.id) === fam).length : 0;
       if (n) { c.power += n; c.grit += n; c.hp += n; emit(G, 'kin', { who, uid: c.uid, n }); }
@@ -791,7 +791,7 @@ const BattleEngine = (function () {
     if (!legal.some(t => t.kind === target.kind && (t.kind === 'spirit' || t.uid === target.uid)))
       return { ok: false, why: guards(op).length ? 'A Watch must be attacked first' : 'Invalid target' };
 
-    if (a.kw.includes('bloom')) { a.power++; emit(G, 'grow', { card: a }); }
+    if (a.kw.includes('bloom')) { a.power += RULES.bloom; emit(G, 'grow', { card: a }); }
     a.attacks++;
     if (target.kind === 'spirit') {
       const dmg = Math.min(a.power, RULES.faceCap);
@@ -804,10 +804,10 @@ const BattleEngine = (function () {
       if (t.shield) { t.shield = false; dmg = 0; blocked = true; } else t.hp -= dmg;
       emit(G, 'attack', { who, attacker: a, target: { kind: 'card', uid: t.uid }, dmg, blocked });
       if (t.hp <= 0) fall(G, 1 - who, t);
-      if (t.kw.includes('thorns') && me.board.includes(a)) zap(G, who, a, 1, false, 'thorns');         // thorns prick back, even as they fall
+      if (t.kw.includes('thorns') && me.board.includes(a)) zap(G, who, a, RULES.thorns, false, 'thorns');         // thorns prick back, even as they fall
     }
     if (a.kw.includes('drain') && me.spirit < me.maxSpirit) {
-      const heal = Math.min(2, me.maxSpirit - me.spirit); me.spirit += heal; emit(G, 'spirit', { who, delta: heal, source: a });
+      const heal = Math.min(RULES.drain, me.maxSpirit - me.spirit); me.spirit += heal; emit(G, 'spirit', { who, delta: heal, source: a });
     }
     checkEnd(G);
     return { ok: true };
