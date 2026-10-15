@@ -135,6 +135,23 @@ const CARD_ART = [
   'marea-lenta',
   'ensueno',
   'the-atlas',
+  'evergreen-sentry',
+  'ladybug',
+  'clay-jar',
+  'drift-ice',
+  'warm-tea',
+  'lotus-pool',
+  'slow-snail',
+  'chime-wind',
+  'dusk-moth',
+  'parade-balloon',
+  'drifting-cloud',
+  'first-light',
+  'wild-growth',
+  'hold-fast',
+  'tidepool',
+  'gathering-storm',
+  'last-light',
   'market-cat',
   'lamplighter',
   'pebble-golem',
@@ -450,7 +467,13 @@ const BattleEngine = (function () {
     'stone-skin':   { needs: 'guard', value: 7, text: 'Your Watch cards gain +2 health and +1 power.' },
     'undertow':     { value: 7, text: "Return every enemy card that costs 2 or less to its owner's hand." },
     'quickstep':    { needs: 'own', value: 7, text: 'Your cards that just arrived can attack right away.' },
-    'picnic':       { value: 8, text: 'Restore 5 Calm and draw a card.' }
+    'picnic':       { value: 8, text: 'Restore 5 Calm and draw a card.' },
+    // Family spells (build 271): stronger the more of their family you have on the board.
+    'wild-growth':     { family: 'grove', value: 7, text: 'Grow a 1/2 Afterthought for each Grove card on your board (as many as fit).' },
+    'hold-fast':       { family: 'stone', value: 7, text: 'Each Stone card on your board gains +2 health.' },
+    'tidepool':        { value: 7, text: 'Draw a card, and restore 1 Calm for each Tide card on your board.' },
+    'gathering-storm': { family: 'wind', value: 9, text: 'Deal 1 damage to every enemy card for each Wind card on your board (at most 2).' },
+    'last-light':      { target: 'enemy', value: 8, text: 'Deal 3 damage to an enemy card. If it falls, draw a card.' }
   };
 
   /* ---------- Card definitions, including crafted variants ----------
@@ -579,6 +602,7 @@ const BattleEngine = (function () {
       if (fx.needs === 'own' && !me.board.length) return { ok: false, why: 'You need a card on the board first' };
       if (fx.needs === 'room' && me.board.length >= RULES.board) return { ok: false, why: 'Your board is full' };
       if (fx.needs === 'guard' && !me.board.some(x => x.kw.includes('guard'))) return { ok: false, why: 'You need a Watch card on the board' };
+      if (fx.family && !me.board.some(x => familyOf(x.id) === fx.family)) return { ok: false, why: `You need a ${FAMILIES[fx.family].name} card on the board` };
       return { ok: true };
     }
     if (me.board.length >= RULES.board) return { ok: false, why: 'Your board is full' };
@@ -637,6 +661,7 @@ const BattleEngine = (function () {
     return c;
   }
   function familyOf(id) { return CARD_FAMILY[baseIdOf(id)] || null; }
+  function famCount(pl, fam) { return pl.board.filter(x => familyOf(x.id) === fam).length; }
   // Lull: the card can't attack until its owner's next turn is over.
   function lullCard(G, side, t) { if (!t) return; t.lull = 1; emit(G, 'lull', { who: side, uid: t.uid }); }
   function spellDamageSpirit(G, side, n, card) { G.p[side].spirit -= n; emit(G, 'spirit', { who: side, delta: -n, source: card, spell: true }); }
@@ -689,6 +714,15 @@ const BattleEngine = (function () {
         if (heal > 0) { me.spirit += heal; emit(G, 'spirit', { who, delta: heal, source: c }); }
         draw(G, me); break;
       }
+      case 'wild-growth': for (let n = famCount(me, 'grove'); n > 0; n--) summon(G, who, 'seedling'); break;
+      case 'hold-fast': me.board.forEach(x => { if (familyOf(x.id) === 'stone') { x.grit += 2; x.hp += 2; emit(G, 'buff', { who, uid: x.uid, amt: 2, skin: true }); } }); break;
+      case 'tidepool': {
+        const heal = Math.min(famCount(me, 'tide'), me.maxSpirit - me.spirit);
+        if (heal > 0) { me.spirit += heal; emit(G, 'spirit', { who, delta: heal, source: c }); }
+        draw(G, me); break;
+      }
+      case 'gathering-storm': { const dmg = Math.min(2, famCount(me, 'wind')); op.board.slice().forEach(x => zap(G, 1 - who, x, dmg)); break; }
+      case 'last-light': zap(G, 1 - who, t, 3); if (!op.board.includes(t)) draw(G, me); break;
     }
     checkEnd(G);
     return { ok: true };
@@ -721,6 +755,14 @@ const BattleEngine = (function () {
       case 'undertow': { const n = op.board.filter(x => x.cost <= 2).length; return { score: n >= 2 ? n * 1.4 : n ? 0.8 : 0 }; }
       case 'quickstep': { const n = me.board.filter(x => !x.ready && !x.lull).length; return { score: n * 1.7 }; }
       case 'picnic': { const heal = Math.min(5, me.maxSpirit - me.spirit); return { score: heal >= 3 ? 1.2 + heal * 0.7 : me.deck.length && me.hand.length <= 2 ? 1.5 : 0 }; }
+      case 'wild-growth': { const n = Math.min(famCount(me, 'grove'), RULES.board - me.board.length); return { score: n >= 2 ? 2.8 : n === 1 ? 1.3 : 0 }; }
+      case 'hold-fast': { const n = famCount(me, 'stone'); return { score: n ? 1.2 + n * 1.2 : 0 }; }
+      case 'tidepool': { const heal = Math.min(famCount(me, 'tide'), me.maxSpirit - me.spirit); return { score: (me.deck.length ? (me.hand.length <= 3 ? 2.2 : 1.2) : 0) + heal * 0.8 }; }
+      case 'gathering-storm': { const dmg = Math.min(2, famCount(me, 'wind')); const k = op.board.filter(x => !x.shield && x.hp <= dmg); return { score: dmg ? (k.length * 2.6 + op.board.length * 0.5 * dmg) / 1.5 : 0 }; }
+      case 'last-light': {
+        const k = bestBy(killable(3)); if (k) return { score: 2.6 + valueOf(k) / 3, target: k };
+        const t = bestBy(op.board.filter(x => !x.shield)); return { score: t ? 1.2 : 0, target: t };
+      }
     }
     return { score: 0 };
   }

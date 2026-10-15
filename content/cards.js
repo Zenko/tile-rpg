@@ -10,17 +10,17 @@
 
 // ---- used by js/data-and-engine.js ----
 const CARD_POOL = [
-  { id: 'sprout', name: 'Sprout', icon: '🌱', rarity: 'common', cost: 1, power: 1, grit: 1, kw: ['bloom'] },
+  { id: 'sprout', name: 'Sprout', icon: '🌱', rarity: 'common', cost: 1, power: 2, grit: 1, kw: ['bloom'] },
   { id: 'pebble', name: 'Worry Stone', icon: '🪨', rarity: 'common', cost: 1, power: 2, grit: 1, kw: ['guard'] },
   { id: 'droplet', name: 'Droplet', icon: '💧', rarity: 'common', cost: 1, power: 1, grit: 4, kw: ['mend'] },
-  { id: 'toadstool', name: 'Toadstool', icon: '🍄', rarity: 'common', cost: 2, power: 3, grit: 2, kw: ['guard'] },
-  { id: 'bubble', name: 'Dream Bubble', icon: '🫧', rarity: 'common', cost: 2, power: 2, grit: 1, kw: ['shield'] },
-  { id: 'flintstone', name: 'Flint', icon: '🔥', rarity: 'common', cost: 2, power: 1, grit: 1, kw: ['swift'] },
+  { id: 'toadstool', name: 'Toadstool', icon: '🍄', rarity: 'common', cost: 2, power: 4, grit: 2, kw: ['guard'] },
+  { id: 'bubble', name: 'Dream Bubble', icon: '🫧', rarity: 'common', cost: 2, power: 2, grit: 2, kw: ['shield'] },
+  { id: 'flintstone', name: 'Flint', icon: '🔥', rarity: 'common', cost: 2, power: 2, grit: 1, kw: ['swift'] },
 
   { id: 'blossom', name: 'Blossom', icon: '🌸', rarity: 'rare', cost: 3, power: 4, grit: 4, kw: ['bloom'] },
   { id: 'geode', name: 'Memory Geode', icon: '💎', rarity: 'rare', cost: 3, power: 4, grit: 5, kw: ['guard'] },
   { id: 'tide', name: 'Gentle Wave', icon: '🌊', rarity: 'rare', cost: 3, power: 4, grit: 4, kw: ['echo'] },
-  { id: 'feather', name: 'Drifting Feather', icon: '🪶', rarity: 'rare', cost: 2, power: 2, grit: 1, kw: ['swift'] },
+  { id: 'feather', name: 'Drifting Feather', icon: '🪶', rarity: 'rare', cost: 2, power: 1, grit: 2, kw: ['swift'] },
 
   { id: 'dove', name: 'Letter Dove', icon: '🕊️', rarity: 'ultra', cost: 3, power: 2, grit: 4, kw: ['mend', 'swift'] },
   { id: 'crystal-spire', name: 'Memory Spire', icon: '🔷', rarity: 'ultra', cost: 4, power: 6, grit: 2, kw: ['shield'] },
@@ -29,55 +29,55 @@ const CARD_POOL = [
 
   { id: 'moonstone', name: 'Moonstone', icon: '🔮', rarity: 'super', cost: 4, power: 5, grit: 7, kw: ['shield'] },
 
-  { id: 'aurora-stag', name: 'Dawn Stag', icon: '🦌', rarity: 'mythic', cost: 5, power: 11, grit: 10, kw: ['bloom'] },
-  { id: 'deep-current', name: 'Slow Current', icon: '🐋', rarity: 'mythic', cost: 5, power: 9, grit: 9, kw: ['mend'] },
+  { id: 'aurora-stag', name: 'Dawn Stag', icon: '🦌', rarity: 'mythic', cost: 5, power: 9, grit: 9, kw: ['bloom'] },
+  { id: 'deep-current', name: 'Slow Current', icon: '🐋', rarity: 'mythic', cost: 5, power: 8, grit: 8, kw: ['mend'] },
   { id: 'mountain-heart', name: 'Mountain of Memory', icon: '⛰️', rarity: 'mythic', cost: 5, power: 9, grit: 9, kw: ['guard'] },
-  { id: 'origami-crane', name: 'Origami Crane', icon: '🪽', rarity: 'common', cost: 1, power: 1, grit: 1, kw: ['swift'] },
-  { id: 'rice-cake', name: 'Rice Cake', icon: '🍡', rarity: 'common', cost: 2, power: 2, grit: 3, kw: ['guard'] },
+  { id: 'origami-crane', name: 'Origami Crane', icon: '🪽', rarity: 'common', cost: 1, power: 2, grit: 1, kw: ['swift'] },
+  { id: 'rice-cake', name: 'Rice Cake', icon: '🍡', rarity: 'common', cost: 2, power: 3, grit: 3, kw: ['guard'] },
   { id: 'paper-fan', name: 'Paper Fan', icon: '🪭', rarity: 'common', cost: 2, power: 3, grit: 1, kw: ['echo'] },
   { id: 'torii-gate', name: 'Torii Gate', icon: '⛩️', rarity: 'rare', cost: 3, power: 4, grit: 5, kw: ['guard'] },
   { id: 'folding-screen', name: 'Folding Screen', icon: '🎏', rarity: 'rare', cost: 3, power: 3, grit: 4, kw: ['shield'] },
   { id: 'temple-bell', name: 'Temple Bell', icon: '🔔', rarity: 'rare', cost: 3, power: 4, grit: 4, kw: ['echo'] },
   { id: 'stone-lantern', name: 'Night Lamp', icon: '🗼', rarity: 'ultra', cost: 3, power: 5, grit: 5, kw: ['guard'] },
   { id: 'koi-ascending', name: 'Koi Ascending', icon: '🐉', rarity: 'rare', cost: 3, power: 3, grit: 5, kw: ['mend'] },
-  { id: 'cherry-blossom-storm', name: 'Blossom Drift', icon: '🍃', rarity: 'ultra', cost: 4, power: 5, grit: 5, kw: ['bloom'] },
+  { id: 'cherry-blossom-storm', name: 'Blossom Drift', icon: '🍃', rarity: 'ultra', cost: 4, power: 6, grit: 5, kw: ['bloom'] },
 
-  { id: 'acorn', name: 'Acorn', icon: '🌰', rarity: 'common', cost: 1, power: 1, grit: 4, kw: ['mend'] },
-  { id: 'firefly', name: 'Firefly', icon: '🪲', rarity: 'common', cost: 2, power: 2, grit: 1, kw: ['swift'] },
+  { id: 'acorn', name: 'Acorn', icon: '🌰', rarity: 'common', cost: 1, power: 2, grit: 2, kw: ['mend'] },
+  { id: 'firefly', name: 'Firefly', icon: '🪲', rarity: 'common', cost: 2, power: 2, grit: 2, kw: ['swift'] },
 
-  { id: 'hollow-log', name: 'Hollow Log', icon: '🪵', rarity: 'rare', cost: 3, power: 3, grit: 5, kw: ['shield'] },
+  { id: 'hollow-log', name: 'Hollow Log', icon: '🪵', rarity: 'rare', cost: 3, power: 3, grit: 4, kw: ['shield'] },
   { id: 'foxglove', name: 'Foxglove', icon: '🌷', rarity: 'rare', cost: 3, power: 3, grit: 5, kw: ['mend'] },
   { id: 'old-kettle', name: 'Old Kettle', icon: '🫖', rarity: 'rare', cost: 3, power: 4, grit: 4, kw: ['mend'] },
 
   { id: 'heron', name: 'Sleepwalking Heron', icon: '🦢', rarity: 'ultra', cost: 4, power: 6, grit: 5, kw: ['mend'] },
   { id: 'hedgehog', name: 'Sleepy Hedgehog', icon: '🦔', rarity: 'ultra', cost: 3, power: 5, grit: 5, kw: ['guard'] },
-  { id: 'paper-boat', name: 'Paper Boat', icon: '⛵', rarity: 'ultra', cost: 3, power: 3, grit: 3, kw: ['swift', 'echo'] },
+  { id: 'paper-boat', name: 'Paper Boat', icon: '⛵', rarity: 'ultra', cost: 3, power: 4, grit: 3, kw: ['swift', 'echo'] },
   { id: 'glass-float', name: 'Glass Float', icon: '🔵', rarity: 'ultra', cost: 4, power: 5, grit: 5, kw: ['shield'] },
-  { id: 'lantern-fish', name: 'Lantern Fish', icon: '🐠', rarity: 'ultra', cost: 3, power: 3, grit: 4, kw: ['echo'] },
+  { id: 'lantern-fish', name: 'Lantern Fish', icon: '🐠', rarity: 'ultra', cost: 3, power: 4, grit: 4, kw: ['echo'] },
 
   { id: 'silver-fox', name: 'Whisper Fox', icon: '🦊', rarity: 'super', cost: 4, power: 6, grit: 4, kw: ['swift'] },
   { id: 'wishing-well', name: 'Wishing Well', icon: '⭐', rarity: 'super', cost: 4, power: 6, grit: 6, kw: ['mend'] },
-  { id: 'storm-lily', name: 'Moonrain Lily', icon: '🌼', rarity: 'super', cost: 4, power: 7, grit: 6, kw: ['bloom'] },
-  { id: 'copper-kettle-spirit', name: 'Hearth Spirit', icon: '👻', rarity: 'super', cost: 4, power: 5, grit: 6, kw: ['shield'] },
-  { id: 'jade-turtle', name: 'Ageless Turtle', icon: '🐢', rarity: 'super', cost: 4, power: 7, grit: 7, kw: ['guard'] },
-  { id: 'river-otter', name: 'Drifting Otter', icon: '🦦', rarity: 'super', cost: 4, power: 6, grit: 7, kw: ['mend'] },
+  { id: 'storm-lily', name: 'Moonrain Lily', icon: '🌼', rarity: 'super', cost: 4, power: 6, grit: 6, kw: ['bloom'] },
+  { id: 'copper-kettle-spirit', name: 'Hearth Spirit', icon: '👻', rarity: 'super', cost: 4, power: 5, grit: 5, kw: ['shield'] },
+  { id: 'jade-turtle', name: 'Ageless Turtle', icon: '🐢', rarity: 'super', cost: 4, power: 7, grit: 6, kw: ['guard'] },
+  { id: 'river-otter', name: 'Drifting Otter', icon: '🦦', rarity: 'super', cost: 4, power: 6, grit: 6, kw: ['mend'] },
 
   { id: 'sky-whale', name: 'Whisper Whale', icon: '🐳', rarity: 'mythic', cost: 5, power: 9, grit: 8, kw: ['mend'] },
-  { id: 'moon-dragon', name: 'Moonwhisper Dragon', icon: '🐲', rarity: 'mythic', cost: 5, power: 7, grit: 7, kw: ['swift'] },
-  { id: 'thundering-ram', name: 'Stormkeeper Ram', icon: '🐏', rarity: 'mythic', cost: 5, power: 10, grit: 10, kw: ['guard'] },
-  { id: 'void-koi', name: 'Starless Koi', icon: '🐟', rarity: 'mythic', cost: 5, power: 10, grit: 10, kw: ['echo'] },
-  { id: 'sunken-leviathan', name: 'Drowsy Leviathan', icon: '🐙', rarity: 'mythic', cost: 5, power: 10, grit: 10, kw: ['guard'] },
+  { id: 'moon-dragon', name: 'Moonwhisper Dragon', icon: '🐲', rarity: 'mythic', cost: 5, power: 7, grit: 6, kw: ['swift'] },
+  { id: 'thundering-ram', name: 'Stormkeeper Ram', icon: '🐏', rarity: 'mythic', cost: 5, power: 9, grit: 9, kw: ['guard'] },
+  { id: 'void-koi', name: 'Starless Koi', icon: '🐟', rarity: 'mythic', cost: 5, power: 10, grit: 8, kw: ['echo'] },
+  { id: 'sunken-leviathan', name: 'Drowsy Leviathan', icon: '🐙', rarity: 'mythic', cost: 5, power: 9, grit: 9, kw: ['guard'] },
 
   // Briar, Chorus and Sip
-  { id: 'bramble', name: 'Bramble', icon: '🥀', rarity: 'common', cost: 1, power: 2, grit: 2, kw: ['thorns'] },
-  { id: 'morning-bugle', name: 'Morning Bugle', icon: '📯', rarity: 'common', cost: 2, power: 1, grit: 1, kw: ['rally'] },
-  { id: 'dusk-bat', name: 'Dusk Bat', icon: '🦇', rarity: 'common', cost: 2, power: 3, grit: 2, kw: ['drain'] },
-  { id: 'village-banner', name: 'Market Banner', icon: '🚩', rarity: 'rare', cost: 3, power: 3, grit: 4, kw: ['rally'] },
+  { id: 'bramble', name: 'Bramble', icon: '🥀', rarity: 'common', cost: 1, power: 1, grit: 4, kw: ['thorns'] },
+  { id: 'morning-bugle', name: 'Morning Bugle', icon: '📯', rarity: 'common', cost: 2, power: 2, grit: 2, kw: ['rally'] },
+  { id: 'dusk-bat', name: 'Dusk Bat', icon: '🦇', rarity: 'common', cost: 2, power: 3, grit: 3, kw: ['drain'] },
+  { id: 'village-banner', name: 'Market Banner', icon: '🚩', rarity: 'rare', cost: 3, power: 3, grit: 3, kw: ['rally'] },
   { id: 'whirlpool', name: 'Whirlpool', icon: '🌀', rarity: 'rare', cost: 3, power: 4, grit: 4, kw: ['drain'] },
   { id: 'cactus-keeper', name: 'Briar Keeper', icon: '🌵', rarity: 'ultra', cost: 3, power: 3, grit: 5, kw: ['thorns', 'guard'] },
-  { id: 'lion-dancer', name: 'Lantern Dancer', icon: '🦁', rarity: 'super', cost: 4, power: 5, grit: 4, kw: ['rally', 'swift'] },
+  { id: 'lion-dancer', name: 'Lantern Dancer', icon: '🦁', rarity: 'super', cost: 4, power: 6, grit: 4, kw: ['rally', 'swift'] },
   { id: 'mist-wraith', name: 'Mist Wisp', icon: '🌫️', rarity: 'super', cost: 4, power: 4, grit: 5, kw: ['drain', 'shield'] },
-  { id: 'bramble-king', name: 'Briar King', icon: '👑', rarity: 'mythic', cost: 5, power: 9, grit: 9, kw: ['thorns', 'rally'] },
+  { id: 'bramble-king', name: 'Briar King', icon: '👑', rarity: 'mythic', cost: 5, power: 8, grit: 8, kw: ['thorns', 'rally'] },
 
   // Spells: played from the hand for an instant effect, never take a board slot. `spell` names the effect in BattleEngine.SPELLS.
   { id: 'spark', name: 'Spark', icon: '⚡', rarity: 'common', cost: 1, power: 0, grit: 0, kw: [], spell: 'spark' },
@@ -98,27 +98,27 @@ const CARD_POOL = [
   // v1.82.0 - four families (CARD_FAMILY below), one per district, and the Echo / Lull / Kin / Sting keywords. Appended at the
   // end on purpose: deck share codes store cards by their position in this list.
   // Grove (El Jardín Lúcido): Echo leaves an Afterthought behind, Kin grows with its family.
-  { id: 'seedpod', name: 'Seedpod', icon: '🫘', rarity: 'common', cost: 1, power: 1, grit: 1, kw: ['seed'] },
-  { id: 'moss-hare', name: 'Moss Hare', icon: '🐇', rarity: 'rare', cost: 3, power: 3, grit: 4, kw: ['kin'] },
+  { id: 'seedpod', name: 'Seedpod', icon: '🫘', rarity: 'common', cost: 1, power: 1, grit: 2, kw: ['seed'] },
+  { id: 'moss-hare', name: 'Moss Hare', icon: '🐇', rarity: 'rare', cost: 3, power: 4, grit: 4, kw: ['kin'] },
   { id: 'dandelion', name: 'Dandelion Wish', icon: '🏵️', rarity: 'rare', cost: 3, power: 2, grit: 5, kw: ['seed', 'bloom'] },
   { id: 'oak-warden', name: 'Warden of Roots', icon: '🌳', rarity: 'super', cost: 4, power: 7, grit: 6, kw: ['seed', 'guard'] },
-  { id: 'world-tree', name: 'The Dreaming Tree', icon: '🎄', rarity: 'mythic', cost: 5, power: 9, grit: 10, kw: ['seed', 'kin'] },
+  { id: 'world-tree', name: 'The Dreaming Tree', icon: '🎄', rarity: 'mythic', cost: 5, power: 8, grit: 10, kw: ['seed', 'kin'] },
   // Stone (El Umbral): steady bodies that dig the small things out.
-  { id: 'stone-hen', name: 'Stone Hen', icon: '🐔', rarity: 'common', cost: 2, power: 2, grit: 3, kw: ['kin'] },
+  { id: 'stone-hen', name: 'Stone Hen', icon: '🐔', rarity: 'common', cost: 2, power: 1, grit: 3, kw: ['kin'] },
   { id: 'cliff-goat', name: 'Cliff Goat', icon: '🐐', rarity: 'rare', cost: 3, power: 4, grit: 5, kw: ['guard', 'kin'] },
-  { id: 'badger', name: 'Badger', icon: '🦡', rarity: 'rare', cost: 3, power: 4, grit: 2, kw: ['sting'] },
+  { id: 'badger', name: 'Badger', icon: '🦡', rarity: 'rare', cost: 3, power: 4, grit: 4, kw: ['sting'] },
   { id: 'quarry-bear', name: 'Stonedigger Bear', icon: '🐻', rarity: 'ultra', cost: 4, power: 4, grit: 7, kw: ['sting', 'guard'] },
-  { id: 'mossy-titan', name: 'Mossmind Titan', icon: '🗻', rarity: 'mythic', cost: 5, power: 8, grit: 10, kw: ['guard', 'kin'] },
+  { id: 'mossy-titan', name: 'Mossmind Titan', icon: '🗻', rarity: 'mythic', cost: 5, power: 7, grit: 10, kw: ['guard', 'kin'] },
   // Tide (La Orilla del Arrullo): Lull holds the enemy's best card back for a turn.
   { id: 'hermit-crab', name: 'Hermit Crab', icon: '🦀', rarity: 'common', cost: 2, power: 2, grit: 2, kw: ['lull'] },
   { id: 'puffer', name: 'Puffer', icon: '🐡', rarity: 'common', cost: 2, power: 3, grit: 2, kw: ['thorns'] },
   { id: 'harbor-seal', name: 'Shore Seal', icon: '🦭', rarity: 'rare', cost: 3, power: 3, grit: 4, kw: ['lull'] },
-  { id: 'moon-jelly', name: 'Moon Jelly', icon: '🪼', rarity: 'ultra', cost: 3, power: 3, grit: 2, kw: ['lull', 'shield'] },
+  { id: 'moon-jelly', name: 'Moon Jelly', icon: '🪼', rarity: 'ultra', cost: 3, power: 3, grit: 5, kw: ['lull', 'shield'] },
   { id: 'tide-caller', name: 'Tide Caller', icon: '🐚', rarity: 'ultra', cost: 4, power: 4, grit: 5, kw: ['lull', 'mend'] },
-  { id: 'kraken', name: 'Lullaby Kraken', icon: '🦑', rarity: 'mythic', cost: 5, power: 7, grit: 8, kw: ['lull', 'drain'] },
+  { id: 'kraken', name: 'Lullaby Kraken', icon: '🦑', rarity: 'mythic', cost: 5, power: 6, grit: 8, kw: ['lull', 'drain'] },
   // Wind (El Mercado de Susurros): fast cards that sting on the way in.
-  { id: 'honeybee', name: 'Honeybee', icon: '🐝', rarity: 'common', cost: 2, power: 2, grit: 1, kw: ['sting'] },
-  { id: 'market-sparrow', name: 'Market Sparrow', icon: '🐦', rarity: 'rare', cost: 3, power: 3, grit: 2, kw: ['swift', 'sting'] },
+  { id: 'honeybee', name: 'Honeybee', icon: '🐝', rarity: 'common', cost: 2, power: 2, grit: 2, kw: ['sting'] },
+  { id: 'market-sparrow', name: 'Market Sparrow', icon: '🐦', rarity: 'rare', cost: 3, power: 2, grit: 2, kw: ['swift', 'sting'] },
   { id: 'kite-runner', name: 'Kite Runner', icon: '🪁', rarity: 'ultra', cost: 3, power: 2, grit: 4, kw: ['swift', 'kin'] },
   // New spells (effects in BattleEngine.SPELLS)
   { id: 'chill', name: 'Chill', icon: '❄️', rarity: 'common', cost: 1, power: 0, grit: 0, kw: [], spell: 'chill' },
@@ -135,6 +135,25 @@ const CARD_POOL = [
   { id: 'marea-lenta', name: BOSSES.harbor, icon: '🪸', rarity: 'divine', cost: 5, power: 8, grit: 8, kw: ['mend', 'lull'], exclusive: 'summon' },
   { id: 'ensueno', name: BOSSES.garden, icon: '💭', rarity: 'divine', cost: 5, power: 14, grit: 13, kw: ['seed', 'bloom'], exclusive: 'summon' },
   { id: 'the-atlas', name: `The ${CAST.atlas.name}`, icon: '🗺️', rarity: 'atlas', cost: 5, power: 10, grit: 12, kw: ['guard'], exclusive: 'summon' },
+  // Build 271 - more of the thin keywords (Briar, Chorus, Sip, Sting, Lull) and five family spells. Appended at the end on purpose.
+  { id: 'evergreen-sentry', name: 'Evergreen Sentry', icon: '🌲', rarity: 'rare', cost: 3, power: 4, grit: 4, kw: ['thorns'] },
+  { id: 'ladybug', name: 'Ladybug', icon: '🐞', rarity: 'common', cost: 1, power: 2, grit: 1, kw: ['sting'] },
+  { id: 'clay-jar', name: 'Clay Jar', icon: '🏺', rarity: 'rare', cost: 3, power: 4, grit: 4, kw: ['thorns'] },
+  { id: 'drift-ice', name: 'Drift Ice', icon: '🧊', rarity: 'ultra', cost: 3, power: 3, grit: 4, kw: ['thorns', 'shield'] },
+  { id: 'warm-tea', name: 'Warm Tea', icon: '🍵', rarity: 'rare', cost: 3, power: 3, grit: 5, kw: ['drain'] },
+  { id: 'lotus-pool', name: 'Lotus Pool', icon: '🪷', rarity: 'super', cost: 4, power: 6, grit: 6, kw: ['drain', 'mend'] },
+  { id: 'slow-snail', name: 'Slow Snail', icon: '🐌', rarity: 'common', cost: 2, power: 2, grit: 2, kw: ['lull'] },
+  { id: 'chime-wind', name: 'Wind Chime', icon: '🎐', rarity: 'common', cost: 2, power: 1, grit: 3, kw: ['rally'] },
+  { id: 'dusk-moth', name: 'Dusk Moth', icon: '🦋', rarity: 'common', cost: 2, power: 2, grit: 3, kw: ['drain'] },
+  { id: 'parade-balloon', name: 'Parade Balloon', icon: '🎈', rarity: 'rare', cost: 3, power: 2, grit: 4, kw: ['rally'] },
+  { id: 'drifting-cloud', name: 'Drifting Cloud', icon: '☁️', rarity: 'rare', cost: 3, power: 3, grit: 4, kw: ['lull'] },
+  { id: 'first-light', name: 'First Light', icon: '🌅', rarity: 'super', cost: 4, power: 5, grit: 5, kw: ['rally', 'drain'] },
+  // Family spells: each does more the more of its family you have on the board (effects in BattleEngine.SPELLS)
+  { id: 'wild-growth', name: 'Wild Growth', icon: '🌻', rarity: 'rare', cost: 2, power: 0, grit: 0, kw: [], spell: 'wild-growth' },
+  { id: 'hold-fast', name: 'Hold Fast', icon: '🛡️', rarity: 'rare', cost: 2, power: 0, grit: 0, kw: [], spell: 'hold-fast' },
+  { id: 'tidepool', name: 'Tidepool', icon: '🌧️', rarity: 'rare', cost: 2, power: 0, grit: 0, kw: [], spell: 'tidepool' },
+  { id: 'gathering-storm', name: 'Gathering Storm', icon: '⛈️', rarity: 'ultra', cost: 3, power: 0, grit: 0, kw: [], spell: 'gathering-storm' },
+  { id: 'last-light', name: 'Last Light', icon: '🕯️', rarity: 'ultra', cost: 2, power: 0, grit: 0, kw: [], spell: 'last-light' },
 ];
 /* Foe cards: unique cards that only opponents carry (neighbors, bosses, cellar floors). They are deliberately NOT in
    CARD_POOL - so they never show up in packs, the Index, deck codes or rewards - but defOf() knows them, so the battle
@@ -167,10 +186,10 @@ const FAMILIES = {
 };
 const CARD_FAMILY = (() => {
   const lists = {
-    grove: 'sprout blossom toadstool cherry-blossom-storm acorn firefly hollow-log foxglove hedgehog storm-lily aurora-stag bramble cactus-keeper bramble-king glowworm seedpod moss-hare dandelion oak-warden world-tree ensueno',
-    stone: 'pebble flintstone geode crystal-spire moonstone mountain-heart rice-cake torii-gate stone-lantern old-kettle copper-kettle-spirit jade-turtle thundering-ram echo-cavern deep-wyrm stone-hen cliff-goat badger quarry-bear mossy-titan duermevela',
-    tide: 'droplet bubble tide koi-ascending deep-current whirlpool lantern-fish glass-float river-otter void-koi sunken-leviathan wishing-well heron paper-boat hermit-crab puffer harbor-seal moon-jelly tide-caller kraken marea-lenta',
-    wind: 'feather dove gale origami-crane paper-fan folding-screen temple-bell sky-whale moon-dragon lion-dancer morning-bugle dusk-bat village-banner silver-fox ember-fox rooks-ace mist-wraith honeybee market-sparrow kite-runner murmullo'
+    grove: 'sprout blossom toadstool cherry-blossom-storm acorn firefly hollow-log foxglove hedgehog storm-lily aurora-stag bramble cactus-keeper bramble-king glowworm seedpod moss-hare dandelion oak-warden world-tree ensueno evergreen-sentry ladybug',
+    stone: 'pebble flintstone geode crystal-spire moonstone mountain-heart rice-cake torii-gate stone-lantern old-kettle copper-kettle-spirit jade-turtle thundering-ram echo-cavern deep-wyrm stone-hen cliff-goat badger quarry-bear mossy-titan duermevela clay-jar',
+    tide: 'droplet bubble tide koi-ascending deep-current whirlpool lantern-fish glass-float river-otter void-koi sunken-leviathan wishing-well heron paper-boat hermit-crab puffer harbor-seal moon-jelly tide-caller kraken marea-lenta drift-ice warm-tea lotus-pool slow-snail',
+    wind: 'feather dove gale origami-crane paper-fan folding-screen temple-bell sky-whale moon-dragon lion-dancer morning-bugle dusk-bat village-banner silver-fox ember-fox rooks-ace mist-wraith honeybee market-sparrow kite-runner murmullo chime-wind dusk-moth parade-balloon drifting-cloud first-light'
   };
   const m = {};
   Object.keys(lists).forEach(f => lists[f].split(' ').forEach(id => { m[id] = f; }));
