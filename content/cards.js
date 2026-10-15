@@ -144,7 +144,7 @@ const CARD_POOL = [
   { id: 'lotus-pool', name: 'Lotus Pool', icon: '🪷', rarity: 'super', cost: 4, power: 6, grit: 6, kw: ['drain', 'mend'] },
   { id: 'slow-snail', name: 'Slow Snail', icon: '🐌', rarity: 'common', cost: 2, power: 2, grit: 2, kw: ['lull'] },
   { id: 'chime-wind', name: 'Wind Chime', icon: '🎐', rarity: 'common', cost: 2, power: 1, grit: 3, kw: ['rally'] },
-  { id: 'dusk-moth', name: 'Dusk Moth', icon: '🦋', rarity: 'common', cost: 2, power: 2, grit: 3, kw: ['drain'] },
+  { id: 'dusk-moth', name: 'Dusk Wing', icon: '🦋', rarity: 'common', cost: 2, power: 2, grit: 3, kw: ['drain'] },
   { id: 'parade-balloon', name: 'Parade Balloon', icon: '🎈', rarity: 'rare', cost: 3, power: 2, grit: 4, kw: ['rally'] },
   { id: 'drifting-cloud', name: 'Drifting Cloud', icon: '☁️', rarity: 'rare', cost: 3, power: 3, grit: 4, kw: ['lull'] },
   { id: 'first-light', name: 'First Light', icon: '🌅', rarity: 'super', cost: 4, power: 5, grit: 5, kw: ['rally', 'drain'] },
