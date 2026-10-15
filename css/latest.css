@@ -2476,3 +2476,29 @@ body.pw-board #goalChip { display: none !important; }   /* the dice panel says w
 .cr-trade .cr-go { width: 100%; }
 .cr-trade .cr-go .btn { width: 100%; min-height: 48px; }
 .cr-trade .cr-odds { width: 100%; margin-top: 0; gap: 8px; }
+
+/* ---- WISHES: the Starlight row in the Shop and the wish sheet (js/wishes.js). Colours are theme tokens. ---- */
+.wish-wallet { margin-top: 2px; }
+.wish-wallet .panel-action { flex: none; margin-left: 10px; }
+.ws-sheet { position: fixed; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center; padding: 16px; background: var(--overlay-bg); }
+.ws-sheet.hidden { display: none; }
+.ws-card { width: min(100%, 400px); max-height: min(86vh, 640px); display: flex; flex-direction: column; background: var(--stone); border: 1px solid var(--stone-edge); border-radius: 20px; padding: 14px; box-shadow: 0 12px 40px var(--shadow); }
+.ws-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.ws-head .ws-icon { font-size: 1.8rem; }
+.ws-head div { flex: 1; display: flex; flex-direction: column; }
+.ws-head b { font-family: var(--f-display); font-weight: 500; font-size: 1.2rem; }
+.ws-head small { color: var(--ink-soft); font-size: .8rem; line-height: 1.3; }
+.ws-x { width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--board-bg); color: var(--ink); font-size: 1.1rem; }
+.ws-tabs { display: flex; gap: 4px; margin-bottom: 8px; }
+.ws-tab { flex: 1; min-height: 44px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; border: 1px solid var(--stone-edge); border-radius: 12px; background: var(--board-bg); color: var(--ink-soft); font-size: .68rem; line-height: 1.1; }
+.ws-tab small { font-size: .62rem; opacity: .8; }
+.ws-tab.can { color: var(--ink); }
+.ws-tab.active { border-color: var(--accent); color: var(--ink); box-shadow: inset 0 0 0 1px var(--accent); }
+.ws-list { overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding: 2px; }
+.ws-row { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 6px 10px; border: 1px solid var(--stone-edge); border-left: 4px solid var(--pc, var(--rc-b)); border-radius: 12px; background: var(--board-bg); color: var(--ink); text-align: left; }
+.ws-row.cant { opacity: .55; }
+.ws-art { font-size: 1.7rem; width: 2rem; text-align: center; }
+.ws-name { flex: 1; display: flex; flex-direction: column; }
+.ws-name small { color: var(--ink-soft); font-size: .72rem; }
+.ws-name em { color: var(--accent); font-style: normal; }
+.ws-cost { font-weight: 600; font-size: .85rem; white-space: nowrap; }

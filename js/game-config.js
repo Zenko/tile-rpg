@@ -30,6 +30,7 @@ const GAME = {
   title: 'Tile RPG',                                  // tab title, version line, feedback mail, signs in town
   tagline: 'a calm card-collecting town',             // after the title in the browser tab
   currency: { one: 'Ember', many: 'Embers' },          // the money (its icon is the 🫧 emoji, swapped for art by js/icon-swap.js)
+  starlight: { name: 'Starlight', icon: '✨' },        // what duplicate pack cards pay, spent on wishes (js/wishes.js)
   player: { one: 'Dreamer', many: 'Dreamers', lower: 'dreamer', lowerMany: 'dreamers' }   // what the game calls you
 };
 // "3 Embers" / "1 Ember", for counts built at run time.

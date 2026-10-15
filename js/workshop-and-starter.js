@@ -100,6 +100,7 @@ function buyPack(packId, price) {
   spendPebbles(cost, 'packs');
   const id = randomCardId(rollPackRarity(pack), pack.only);
   const isNew = !state.ownedCards.includes(id);
+  const stars = isNew ? 0 : awardStarlight(id);   // a duplicate also pays Starlight toward a wish (js/wishes.js)
   state.ownedCards.push(id);
   noteCardsFound(1);
   state.progress.packsOpened += 1;
@@ -109,6 +110,7 @@ function buyPack(packId, price) {
   bumpPill('pillCards');
   showCardReveal(id, `${pack.name}`, true, null, 0, { flip: true, isNew });
   if (isNew) toast('📖 New entry in your Index');
+  else if (stars) toast(`${GAME.starlight.icon} +${stars} ${GAME.starlight.name}`);
   checkAchievements();
   return id;
 }
@@ -383,6 +385,7 @@ function renderPacks() {
       ${spares > 0 ? '<button class="panel-action active" id="goRelease">Release</button>' : ''}
     </div>`;
 
+  box.insertAdjacentHTML('beforeend', wishPanelHtml());
   if (eventIs('market-day')) box.insertAdjacentHTML('beforeend', '<div class="event-banner">🛍️ Market Day: every pack is 20% off today!</div>');
   PACKS.forEach(pack => {
     const price = packPrice(pack), can = peb >= price;
@@ -409,6 +412,8 @@ function renderPacks() {
   note.textContent = "Packs always cost more than a release pays, so it's a slow, calm trade. Nothing here ever expires.";
   box.appendChild(note);
 
+  const gw = document.getElementById('goWish');
+  if (gw) gw.addEventListener('click', () => openWishSheet());
   const go = document.getElementById('goRelease');
   if (go) go.addEventListener('click', () => { sfx('nav'); buzz(HAP.tap); switchTab('collection'); setCardsView('mine'); });
 }
