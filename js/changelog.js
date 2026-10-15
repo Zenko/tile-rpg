@@ -18,6 +18,8 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'better', x: 'Rest cards now restore 2 Calm at the end of your turn (it was 1), and Chorus gives your other cards +2 power when played (it was +1). Both were the weakest keywords in play. Bloom cards (Blossom, Dandelion Wish, Blossom Drift, Moonrain Lily) hit a little harder, and Dusk Moth, Parade Balloon and Market Sparrow got a point of power so the Wind family keeps up with Stone.' },
+  { t: 'better', x: 'Wind and Stone are now much closer: in the battle report Wind decks win about half their games against a mix of decks, where before they trailed Stone by 15 points.' },
   { t: 'fixed', x: 'The Suggest deck button no longer puts a family spell (Wild Growth, Hold Fast, Gathering Storm...) into a deck that has no cards of that family to power it, and a deck built around one family now brings its own spell.' },
   { t: 'new', x: 'Starlight and wishes: when a pack gives you a card you already own, you keep it and it also pays Starlight (as much as releasing it would pay in Embers). Spend Starlight in the Shop on a wish: pick any card you can get from packs and it is yours. Rarer cards cost more, so a long unlucky streak always ends somewhere.' },
   { t: 'new', x: 'Twelve new cards for the thinner keywords (Briar, Chorus, Sip, Sting and Lull) across all four families, and five new spells that grow stronger the more of their family you have out: Wild Growth, Hold Fast, Tidepool, Gathering Storm and Last Light.' },

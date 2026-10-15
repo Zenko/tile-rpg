@@ -17,7 +17,7 @@ const CARD_POOL = [
   { id: 'bubble', name: 'Dream Bubble', icon: '🫧', rarity: 'common', cost: 2, power: 2, grit: 2, kw: ['shield'] },
   { id: 'flintstone', name: 'Flint', icon: '🔥', rarity: 'common', cost: 2, power: 1, grit: 2, kw: ['swift'] },
 
-  { id: 'blossom', name: 'Blossom', icon: '🌸', rarity: 'rare', cost: 3, power: 4, grit: 4, kw: ['bloom'] },
+  { id: 'blossom', name: 'Blossom', icon: '🌸', rarity: 'rare', cost: 3, power: 5, grit: 4, kw: ['bloom'] },
   { id: 'geode', name: 'Memory Geode', icon: '💎', rarity: 'rare', cost: 3, power: 4, grit: 6, kw: ['guard'] },
   { id: 'tide', name: 'Gentle Wave', icon: '🌊', rarity: 'rare', cost: 3, power: 4, grit: 4, kw: ['echo'] },
   { id: 'feather', name: 'Drifting Feather', icon: '🪶', rarity: 'rare', cost: 2, power: 1, grit: 2, kw: ['swift'] },
@@ -40,7 +40,7 @@ const CARD_POOL = [
   { id: 'temple-bell', name: 'Temple Bell', icon: '🔔', rarity: 'rare', cost: 3, power: 4, grit: 4, kw: ['echo'] },
   { id: 'stone-lantern', name: 'Night Lamp', icon: '🗼', rarity: 'ultra', cost: 3, power: 6, grit: 5, kw: ['guard'] },
   { id: 'koi-ascending', name: 'Koi Ascending', icon: '🐉', rarity: 'rare', cost: 3, power: 3, grit: 5, kw: ['mend'] },
-  { id: 'cherry-blossom-storm', name: 'Blossom Drift', icon: '🍃', rarity: 'ultra', cost: 4, power: 6, grit: 6, kw: ['bloom'] },
+  { id: 'cherry-blossom-storm', name: 'Blossom Drift', icon: '🍃', rarity: 'ultra', cost: 4, power: 7, grit: 6, kw: ['bloom'] },
 
   { id: 'acorn', name: 'Acorn', icon: '🌰', rarity: 'common', cost: 1, power: 2, grit: 2, kw: ['mend'] },
   { id: 'firefly', name: 'Firefly', icon: '🪲', rarity: 'common', cost: 2, power: 1, grit: 3, kw: ['swift'] },
@@ -57,7 +57,7 @@ const CARD_POOL = [
 
   { id: 'silver-fox', name: 'Whisper Fox', icon: '🦊', rarity: 'super', cost: 4, power: 6, grit: 4, kw: ['swift'] },
   { id: 'wishing-well', name: 'Wishing Well', icon: '⭐', rarity: 'super', cost: 4, power: 7, grit: 6, kw: ['mend'] },
-  { id: 'storm-lily', name: 'Moonrain Lily', icon: '🌼', rarity: 'super', cost: 4, power: 7, grit: 7, kw: ['bloom'] },
+  { id: 'storm-lily', name: 'Moonrain Lily', icon: '🌼', rarity: 'super', cost: 4, power: 8, grit: 7, kw: ['bloom'] },
   { id: 'copper-kettle-spirit', name: 'Hearth Spirit', icon: '👻', rarity: 'super', cost: 4, power: 5, grit: 5, kw: ['shield'] },
   { id: 'jade-turtle', name: 'Ageless Turtle', icon: '🐢', rarity: 'super', cost: 4, power: 8, grit: 7, kw: ['guard'] },
   { id: 'river-otter', name: 'Drifting Otter', icon: '🦦', rarity: 'super', cost: 4, power: 7, grit: 6, kw: ['mend'] },
@@ -70,7 +70,7 @@ const CARD_POOL = [
 
   // Briar, Chorus and Sip
   { id: 'bramble', name: 'Bramble', icon: '🥀', rarity: 'common', cost: 1, power: 2, grit: 2, kw: ['thorns'] },
-  { id: 'morning-bugle', name: 'Morning Bugle', icon: '📯', rarity: 'common', cost: 2, power: 2, grit: 2, kw: ['rally'] },
+  { id: 'morning-bugle', name: 'Morning Bugle', icon: '📯', rarity: 'common', cost: 2, power: 2, grit: 1, kw: ['rally'] },
   { id: 'dusk-bat', name: 'Dusk Bat', icon: '🦇', rarity: 'common', cost: 2, power: 3, grit: 3, kw: ['drain'] },
   { id: 'village-banner', name: 'Market Banner', icon: '🚩', rarity: 'rare', cost: 3, power: 3, grit: 3, kw: ['rally'] },
   { id: 'whirlpool', name: 'Whirlpool', icon: '🌀', rarity: 'rare', cost: 3, power: 4, grit: 4, kw: ['drain'] },
@@ -100,7 +100,7 @@ const CARD_POOL = [
   // Grove (El Jardín Lúcido): Echo leaves an Afterthought behind, Kin grows with its family.
   { id: 'seedpod', name: 'Seedpod', icon: '🫘', rarity: 'common', cost: 1, power: 1, grit: 2, kw: ['seed'] },
   { id: 'moss-hare', name: 'Moss Hare', icon: '🐇', rarity: 'rare', cost: 3, power: 4, grit: 4, kw: ['kin'] },
-  { id: 'dandelion', name: 'Dandelion Wish', icon: '🏵️', rarity: 'rare', cost: 3, power: 2, grit: 5, kw: ['seed', 'bloom'] },
+  { id: 'dandelion', name: 'Dandelion Wish', icon: '🏵️', rarity: 'rare', cost: 3, power: 3, grit: 5, kw: ['seed', 'bloom'] },
   { id: 'oak-warden', name: 'Warden of Roots', icon: '🌳', rarity: 'super', cost: 4, power: 7, grit: 7, kw: ['seed', 'guard'] },
   { id: 'world-tree', name: 'The Dreaming Tree', icon: '🎄', rarity: 'mythic', cost: 5, power: 10, grit: 10, kw: ['seed', 'kin'] },
   // Stone (El Umbral): steady bodies that dig the small things out.
@@ -118,7 +118,7 @@ const CARD_POOL = [
   { id: 'kraken', name: 'Lullaby Kraken', icon: '🦑', rarity: 'mythic', cost: 5, power: 7, grit: 8, kw: ['lull', 'drain'] },
   // Wind (El Mercado de Susurros): fast cards that sting on the way in.
   { id: 'honeybee', name: 'Honeybee', icon: '🐝', rarity: 'common', cost: 2, power: 2, grit: 2, kw: ['sting'] },
-  { id: 'market-sparrow', name: 'Market Sparrow', icon: '🐦', rarity: 'rare', cost: 3, power: 2, grit: 2, kw: ['swift', 'sting'] },
+  { id: 'market-sparrow', name: 'Market Sparrow', icon: '🐦', rarity: 'rare', cost: 3, power: 3, grit: 2, kw: ['swift', 'sting'] },
   { id: 'kite-runner', name: 'Kite Runner', icon: '🪁', rarity: 'ultra', cost: 3, power: 2, grit: 4, kw: ['swift', 'kin'] },
   // New spells (effects in BattleEngine.SPELLS)
   { id: 'chill', name: 'Chill', icon: '❄️', rarity: 'common', cost: 1, power: 0, grit: 0, kw: [], spell: 'chill' },
@@ -143,9 +143,9 @@ const CARD_POOL = [
   { id: 'warm-tea', name: 'Warm Tea', icon: '🍵', rarity: 'rare', cost: 3, power: 3, grit: 5, kw: ['drain'] },
   { id: 'lotus-pool', name: 'Lotus Pool', icon: '🪷', rarity: 'super', cost: 4, power: 6, grit: 6, kw: ['drain', 'mend'] },
   { id: 'slow-snail', name: 'Slow Snail', icon: '🐌', rarity: 'common', cost: 2, power: 1, grit: 3, kw: ['lull'] },
-  { id: 'chime-wind', name: 'Wind Chime', icon: '🎐', rarity: 'common', cost: 2, power: 1, grit: 3, kw: ['rally'] },
-  { id: 'dusk-moth', name: 'Dusk Wing', icon: '🦋', rarity: 'common', cost: 2, power: 3, grit: 2, kw: ['drain'] },
-  { id: 'parade-balloon', name: 'Parade Balloon', icon: '🎈', rarity: 'rare', cost: 3, power: 2, grit: 4, kw: ['rally'] },
+  { id: 'chime-wind', name: 'Wind Chime', icon: '🎐', rarity: 'common', cost: 2, power: 1, grit: 2, kw: ['rally'] },
+  { id: 'dusk-moth', name: 'Dusk Wing', icon: '🦋', rarity: 'common', cost: 2, power: 4, grit: 2, kw: ['drain'] },
+  { id: 'parade-balloon', name: 'Parade Balloon', icon: '🎈', rarity: 'rare', cost: 3, power: 3, grit: 4, kw: ['rally'] },
   { id: 'drifting-cloud', name: 'Drifting Cloud', icon: '☁️', rarity: 'rare', cost: 3, power: 3, grit: 4, kw: ['lull'] },
   { id: 'first-light', name: 'First Light', icon: '🌅', rarity: 'super', cost: 4, power: 6, grit: 5, kw: ['rally', 'drain'] },
   // Family spells: each does more the more of its family you have on the board (effects in BattleEngine.SPELLS)

@@ -197,17 +197,17 @@ function cardFaceHtml(def) {
    - No retaliation: a card that survives a hit does not hit back.                                                       */
 const BattleEngine = (function () {
   'use strict';
-  const RULES = { spirit: 20, board: 4, hand: 3, ecap: 5, secondBonus: 1, secondBonusTurns: 2, faceCap: 4, mend: 1, drain: 2, rally: 1, bloom: 1, thorns: 1, echo: 2, handMax: 7, turnCap: 60, deck: 12, copies: 2 };
+  const RULES = { spirit: 20, board: 4, hand: 3, ecap: 5, secondBonus: 1, secondBonusTurns: 2, faceCap: 4, mend: 2, drain: 2, rally: 2, bloom: 1, thorns: 1, echo: 2, handMax: 7, turnCap: 60, deck: 12, copies: 2 };
 
   const KEYWORDS = {
     guard:  { icon: '🛡️', name: 'Watch',  text: 'Enemies must attack Watch cards first.' },
     swift:  { icon: '💨', name: 'Flicker',  text: 'Can attack the turn it arrives.' },
-    mend:   { icon: '🌿', name: 'Rest',   text: 'At the end of your turn, restore 1 Calm.' },
+    mend:   { icon: '🌿', name: 'Rest',   text: 'At the end of your turn, restore 2 Calm.' },
     bloom:  { icon: '🌸', name: 'Bloom',  text: 'Gains +1 power each time it attacks.' },
     shield: { icon: '🫧', name: 'Haze', text: 'Ignores the first damage it takes.' },
     echo:   { icon: '🔔', name: 'Startle',   text: 'When played, deals 2 damage to enemy Calm.' },
     thorns: { icon: '🌵', name: 'Briar', text: 'Deals 1 damage back to any card that attacks it.' },
-    rally:  { icon: '📯', name: 'Chorus',  text: 'When played, your other cards gain +1 power.' },
+    rally:  { icon: '📯', name: 'Chorus',  text: 'When played, your other cards gain +2 power.' },
     drain:  { icon: '🌀', name: 'Sip',  text: 'Each time it attacks, restore 2 Calm.' },
     seed:   { icon: '🌰', name: 'Echo',   text: 'When it falls, a 1/2 Afterthought grows in its place.' },
     lull:   { icon: '😴', name: 'Lull',   text: "When played, the enemy's strongest card can't attack on its next turn." },
