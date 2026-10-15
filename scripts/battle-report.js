@@ -1,0 +1,70 @@
+// A battle report for the whole card pool: how the game plays, not how one card scores. AI against AI (smart both sides), fixed seeds, both seats.
+//   A. What each rarity is worth   3 cards of a rarity swapped into an ordinary deck: do rarer cards actually help?
+//   B. Families            the best deck each family can build, against the others and against a panel of random decks
+//   C. Keywords            the best deck built around each keyword against the same panel
+//   D. Shape of a game     who goes first, how long games last, how often a game stalls, how often spells are cast
+// usage: node scripts/battle-report.js [games per pairing=300]      (about a minute; same seeds every run, so two runs are comparable)
+const { BattleEngine: BE, CARD_POOL } = require('../server/load-engine')();
+const N = +process.argv[2] || 300;
+const base = CARD_POOL.filter(c => !c.exclusive && !c.foe);
+const RANK = ['common', 'rare', 'ultra', 'super', 'mythic'];
+const deckFrom = cards => { const counts = {}; cards.forEach(c => { counts[c.id] = 2; }); return BE.suggestDeck(counts); };
+// win rate of deckA over deckB across N games, half in each seat
+function duel(a, b, n) {
+  let w = 0;
+  for (let i = 0; i < n; i++) { const side = i % 2, r = BE.simulate(5000 + i, side === 0 ? a : b, side === 0 ? b : a, {}); if (r.G.winner === side ? 1 : 0) w++; }
+  return w / n * 100;
+}
+const pct = x => (x.toFixed(0) + '%').padStart(5);
+const all = deckFrom(base);
+// A single reference deck makes an archetype look good or bad by accident, so families and keywords are measured against a panel of 30 varied random decks (50% = as good as a random deck).
+let ps = 31337; const prnd = () => (ps = (ps * 1664525 + 1013904223) >>> 0) / 4294967296;
+const panel = []; while (panel.length < 30) { const d = []; while (d.length < 12) { const c = base[Math.floor(prnd() * base.length)]; if (d.filter(x => x === c.id).length < 2) d.push(c.id); } panel.push(d); }
+const vsPanel = deck => panel.reduce((a, d) => a + duel(deck, d, Math.max(4, Math.round(N / 25))), 0) / panel.length;
+
+console.log('A. WHAT EACH RARITY IS WORTH (a random deck with 3 cards of the rarity slotted in, against the same deck without them; 50% = no help)');
+let rs = 4711; const rr = () => (rs = (rs * 1664525 + 1013904223) >>> 0) / 4294967296, pickFrom = a => a[Math.floor(rr() * a.length)];
+const creatures = base.filter(c => !c.spell);
+const randFrom = (pool, n, d) => { while (d.length < n) { const c = pickFrom(pool); if (d.filter(x => x === c.id).length < 2) d.push(c.id); } return d; };
+RANK.forEach(r => {
+  const rarityPool = creatures.filter(c => c.rarity === r); let w = 0, g = 0;
+  for (let i = 0; i < N * 2; i++) {
+    const plain = randFrom(creatures.filter(c => c.rarity === 'common' || c.rarity === 'rare'), 12, []);      // an ordinary common-and-rare deck
+    const boosted = randFrom(rarityPool, 3, []).concat(plain.slice(3));   // 3 of the rarity replace 3 of its cards
+    const side = i % 2; g++; if (BE.simulate(20000 + i, side === 0 ? boosted : plain, side === 0 ? plain : boosted, {}).G.winner === side) w++;
+  }
+  console.log('  ' + (r + ' x3').padEnd(12) + pct(w / g * 100));
+});
+
+console.log('\nB. FAMILIES (best deck of each family; spells included)');
+const fam = id => BE.familyOf(id);
+const fams = ['grove', 'stone', 'tide', 'wind'].map(f => ({ f, deck: deckFrom(base.filter(c => fam(c.id) === f || c.spell)) }));
+console.log(' '.repeat(10) + fams.map(c => c.f.padStart(8)).join('') + '   vs 30 random decks');
+fams.forEach(r => console.log(r.f.padEnd(10) + fams.map(c => (r === c ? '-' : pct(duel(r.deck, c.deck, N))).padStart(8)).join('') + pct(vsPanel(r.deck)).padStart(18)));
+
+console.log('\nC. KEYWORDS (a deck built around one keyword, against 30 random decks; 50% = an average deck)');
+Object.keys(BE.KEYWORDS).forEach(k => {
+  const cards = base.filter(c => c.kw.includes(k)); if (cards.length < 6) return;
+  const deck = deckFrom(cards.concat(base.filter(c => !c.kw.includes(k) && !c.spell && c.kw.length === 0)));   // the keyword's cards first, plain bodies to fill
+  console.log((BE.KEYWORDS[k].name + ' (' + cards.length + ' cards)').padEnd(24) + pct(vsPanel(deck)));
+});
+
+console.log('  (reference: the all-cards deck scores ' + pct(vsPanel(all)).trim() + ' against the panel)');
+console.log('\nD. SHAPE OF A GAME (random 12-card decks, same seeds each run)');
+let s = 99; const rnd = () => (s = (s * 1664525 + 1013904223) >>> 0) / 4294967296;
+const randDeck = () => { const d = []; while (d.length < 12) { const c = base[Math.floor(rnd() * base.length)]; if (d.filter(x => x === c.id).length < 2) d.push(c.id); } return d; };
+let first = 0, turns = [], stuck = 0, inDeck = 0, cast = 0;
+for (let i = 0; i < N * 2; i++) {
+  const a = randDeck(), b = randDeck(), G = BE.simulate(9000 + i, a, b, {}).G;
+  inDeck += a.concat(b).filter(id => BE.defOf(id).spell).length;
+  cast += (G.events || []).filter(e => e.type === 'spell').length;
+  if (!G.over) { stuck++; continue; }
+  if (G.winner === G.first) first++;
+  turns.push(G.turn);
+}
+turns.sort((x, y) => x - y);
+const played = turns.length;
+console.log(`  first player wins ${(first / played * 100).toFixed(1)}%   (the second seat gets a catch-up bonus; about 50 is the aim)`);
+console.log(`  turns per game: median ${turns[played >> 1]}, 10th pct ${turns[Math.floor(played * .1)]}, 90th pct ${turns[Math.floor(played * .9)]}, over 25 turns ${(turns.filter(t => t > 25).length / played * 100).toFixed(1)}%`);
+console.log(`  games that never ended (stalled): ${stuck}`);
+console.log(`  spells: ${inDeck} in decks, ${cast} cast (${inDeck ? (cast / inDeck * 100).toFixed(0) : 0}% of the spells in a deck are cast during a game)`);

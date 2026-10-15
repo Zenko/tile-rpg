@@ -964,7 +964,10 @@ const BattleEngine = (function () {
     const quota = { lo: 6, mid: 4, hi: 2 };
     // A deck needs bodies on the board, so the curve pass takes at most 3 spells.
     let spells = deck.filter(id => defOf(id).spell).length;
-    const room = id => !defOf(id).spell || spells < 3;
+    // A family spell does nothing without cards of its family on the board: the curve pass leaves them out, and one is added at the end
+    // (in place of the weakest card of another family) only if the finished deck holds four or more cards of its family.
+    const isFamSpell = id => { const d = defOf(id); return !!(d.spell && SPELLS[d.spell].family); };
+    const room = id => !defOf(id).spell || (spells < 3 && !isFamSpell(id));
     deck.forEach(id => { quota[bucket(id)]--; });
     ['lo', 'mid', 'hi'].forEach(b => {
       const pool = ids.filter(id => bucket(id) === b).sort((x, y) => score(y) - score(x));
@@ -972,7 +975,16 @@ const BattleEngine = (function () {
     });
     // Anything still empty (a small collection): best remaining cards, cheapest first among equals
     const rest = ids.slice().sort((x, y) => score(y) - score(x) || defOf(x).cost - defOf(y).cost);
-    for (const id of rest) { while (deck.length < RULES.deck && free(id)) add(id); }
+    for (const id of rest) { while (deck.length < RULES.deck && free(id) && !isFamSpell(id)) add(id); }
+    for (const id of ids.filter(isFamSpell).sort((x, y) => score(y) - score(x))) {
+      const fam = SPELLS[defOf(id).spell].family;
+      if (!free(id) || deck.filter(x => familyOf(x) === fam).length < 4) continue;
+      const full = deck.filter(x => defOf(x).spell).length >= 3;   // at the three-spell cap it takes a spell's place, otherwise a body's
+      const out = deck.filter(x => (full ? !!defOf(x).spell : !defOf(x).spell) && familyOf(x) !== fam && !isFamSpell(x)).sort((x, y) => score(x) - score(y))[0];
+      if (out === undefined) continue;
+      deck.splice(deck.indexOf(out), 1, id); used[out]--; used[id] = (used[id] || 0) + 1;
+    }
+    for (const id of rest) { while (deck.length < RULES.deck && free(id)) add(id); }   // a tiny collection takes whatever is left
     return deck;
   }
 

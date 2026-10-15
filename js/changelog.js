@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'fixed', x: 'The Suggest deck button no longer puts a family spell (Wild Growth, Hold Fast, Gathering Storm...) into a deck that has no cards of that family to power it, and a deck built around one family now brings its own spell.' },
   { t: 'new', x: 'Starlight and wishes: when a pack gives you a card you already own, you keep it and it also pays Starlight (as much as releasing it would pay in Embers). Spend Starlight in the Shop on a wish: pick any card you can get from packs and it is yours. Rarer cards cost more, so a long unlucky streak always ends somewhere.' },
   { t: 'new', x: 'Twelve new cards for the thinner keywords (Briar, Chorus, Sip, Sting and Lull) across all four families, and five new spells that grow stronger the more of their family you have out: Wild Growth, Hold Fast, Tidepool, Gathering Storm and Last Light.' },
   { t: 'better', x: 'Rarer cards now feel rarer. Rare, ultra, super and mythic cards were no stronger in play than commons, so their numbers have been raised where they lagged, and a few over-strong cards (Moon Jelly, Paper Boat, the cheap Flicker commons) were brought down.' },
