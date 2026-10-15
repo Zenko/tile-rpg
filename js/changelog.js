@@ -18,6 +18,12 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'new', x: 'Starlight and wishes: when a pack gives you a card you already own, you keep it and it also pays Starlight (as much as releasing it would pay in Embers). Spend Starlight in the Shop on a wish: pick any card you can get from packs and it is yours. Rarer cards cost more, so a long unlucky streak always ends somewhere.' },
+  { t: 'new', x: 'Twelve new cards for the thinner keywords (Briar, Chorus, Sip, Sting and Lull) across all four families, and five new spells that grow stronger the more of their family you have out: Wild Growth, Hold Fast, Tidepool, Gathering Storm and Last Light.' },
+  { t: 'better', x: 'Rarer cards now feel rarer. Rare, ultra, super and mythic cards were no stronger in play than commons, so their numbers have been raised where they lagged, and a few over-strong cards (Moon Jelly, Paper Boat, the cheap Flicker commons) were brought down.' },
+  { t: 'better', x: 'Watch cards were the weakest family of cards in every rarity; their health and power have been raised, and a rare is never worse than a common you could have found instead.' },
+  { t: 'better', x: 'Most spells were too weak to be worth a slot, so several are cheaper or stronger (Harvest, Picnic, Rain Shower, Stone Skin, Undertow, Thunderclap, Quickstep).' },
+  { t: 'better', x: 'Cards that shared a picture now have their own: Flint, Overgrowth, Moonlit Tide, Second Wind, Gust, Undertow, Picnic, Forgotten Wyrm and a silver Whisper Fox.' },
   { t: 'fixed', x: 'Near the edge of a district, a portal that opened "out of sight" could actually be on screen while the compass still pointed at it. Out of sight now means truly off screen.' },
   { t: 'better', x: 'Trade up now looks like Refine: the three slots and the result in one panel, the rarity to trade right under them, then the button and the odds. The cards to pick are listed below.' },
   { t: 'better', x: 'A tidier Workshop: the Refine button now sits right under the Power / Health choice, with just the skill and fail chances and one row for your streak and fail meter beneath it. The full odds table and how the forge works fold away under "How the odds work".' },

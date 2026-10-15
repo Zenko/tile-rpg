@@ -20,7 +20,7 @@ module.exports = async (page, assert) => {
     out.wishable = wishableCards().length; out.badWishable = wishableCards().filter(c => c.exclusive || c.foe || c.rarity === 'divine' || c.rarity === 'atlas').length;
     return out;
   });
-  assert.strictEqual(r.common, 1, 'a common duplicate pays 1'); assert.strictEqual(r.newCard, 0, 'a new card pays nothing'); assert.strictEqual(r.rare, 3, 'a rare duplicate pays 3');
+  assert.strictEqual(r.common, 1, 'a common duplicate pays 1'); assert.strictEqual(r.newCard, 1, 'a new card pays nothing (still the 1 from before)'); assert.strictEqual(r.rare, 4, 'a rare duplicate pays 3 more');
   assert.strictEqual(r.owned, 2, 'both pulls are kept');
   assert.strictEqual(r.tooPoor, false, 'one short is not enough'); assert.ok(r.wish, 'a common wish costs 15'); assert.strictEqual(r.after, 1); assert.strictEqual(r.left, 0); assert.strictEqual(r.wishes, 1);
   assert.ok(!r.exclusive && !r.god && !r.foe && !r.unknown, 'earned and foe cards cannot be wished for'); assert.strictEqual(r.badWishable, 0); assert.ok(r.wishable > 60);

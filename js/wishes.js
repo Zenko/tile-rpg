@@ -68,17 +68,17 @@ function drawWishSheet() {
   el.querySelector('.ws-sub').textContent = `${have} ${GAME.starlight.name} · duplicates from packs add to it`;
   const tabs = el.querySelector('.ws-tabs');
   tabs.innerHTML = Object.keys(WISH_COST).map(r => `<button type="button" role="tab" class="ws-tab${r === wishRarity ? ' active' : ''}${have >= WISH_COST[r] ? ' can' : ''}" data-r="${r}" aria-selected="${r === wishRarity}">${RARITY_LABEL[r]}<small>${WISH_COST[r]}</small></button>`).join('');
-  onAll(tabs, '.ws-tab', b => b.addEventListener('click', () => { wishRarity = b.dataset.r; sfx('nav'); drawWishSheet(); }));
+  onAll(tabs, '.ws-tab', b => { wishRarity = b.dataset.r; sfx('nav'); drawWishSheet(); });
   const cost = WISH_COST[wishRarity], can = have >= cost;
   const cards = wishableCards().filter(c => c.rarity === wishRarity).sort((a, b) => (owned[a.id] ? 1 : 0) - (owned[b.id] ? 1 : 0) || a.name.localeCompare(b.name));
   el.querySelector('.ws-list').innerHTML = cards.map(c => `<button type="button" class="ws-row rarity-${c.rarity}${can ? '' : ' cant'}" data-id="${c.id}" ${can ? '' : 'disabled'}>
       <span class="ws-art">${cardArtHtml(c)}</span>
       <span class="ws-name"><b>${c.name}</b><small>${c.spell ? 'Spell' : `${c.power}/${c.grit}`} · ${c.cost}⚡${owned[c.id] ? ` · own ×${owned[c.id]}` : ' · <em>new</em>'}</small></span>
       <span class="ws-cost">${GAME.starlight.icon} ${cost}</span></button>`).join('');
-  onAll(el.querySelector('.ws-list'), '.ws-row', b => b.addEventListener('click', () => {
+  onAll(el.querySelector('.ws-list'), '.ws-row', b => {
     const def = cardDef(b.dataset.id);
     askConfirm({ title: 'Make this wish?', text: `Spend ${cost} ${GAME.starlight.name} to wish for ${def.name}.`, ok: 'Wish' }, () => makeWish(b.dataset.id));
-  }));
+  });
 }
 
 function openWishSheet() {

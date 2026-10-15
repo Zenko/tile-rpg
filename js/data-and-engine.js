@@ -454,7 +454,7 @@ const BattleEngine = (function () {
      value          : how much deck-builders and the AI like it. */
   const SPELLS = {
     'spark':        { target: 'enemy', value: 5,  text: 'Deal 2 damage to an enemy card.' },
-    'rain-shower':  { value: 4,  text: 'Restore 2 Calm and heal each of your cards by 1.' },
+    'rain-shower':  { value: 5,  text: 'Restore 3 Calm and heal each of your cards by 2.' },
     'harvest':      { value: 6,  text: 'Draw 2 cards.' },
     'gust':         { target: 'enemy', value: 7,  text: "Return an enemy card to its owner's hand." },
     'sunbeam':      { needs: 'own', value: 6, text: 'Your cards on the board gain +1 power.' },
@@ -467,13 +467,13 @@ const BattleEngine = (function () {
     'stone-skin':   { needs: 'guard', value: 7, text: 'Your Watch cards gain +2 health and +1 power.' },
     'undertow':     { value: 7, text: "Return every enemy card that costs 2 or less to its owner's hand." },
     'quickstep':    { needs: 'own', value: 7, text: 'Your cards that just arrived can attack right away.' },
-    'picnic':       { value: 8, text: 'Restore 5 Calm and draw a card.' },
+    'picnic':       { value: 8, text: 'Restore 5 Calm and draw 2 cards.' },
     // Family spells (build 271): stronger the more of their family you have on the board.
     'wild-growth':     { family: 'grove', value: 7, text: 'Grow a 1/2 Afterthought for each Grove card on your board (as many as fit).' },
-    'hold-fast':       { family: 'stone', value: 7, text: 'Each Stone card on your board gains +2 health.' },
+    'hold-fast':       { family: 'stone', value: 7, text: 'Each Stone card on your board gains +2 health and +1 power.' },
     'tidepool':        { value: 7, text: 'Draw a card, and restore 1 Calm for each Tide card on your board.' },
     'gathering-storm': { family: 'wind', value: 9, text: 'Deal 1 damage to every enemy card for each Wind card on your board (at most 2).' },
-    'last-light':      { target: 'enemy', value: 8, text: 'Deal 3 damage to an enemy card. If it falls, draw a card.' }
+    'last-light':      { target: 'enemy', value: 8, text: 'Deal 4 damage to an enemy card. If it falls, draw a card.' }
   };
 
   /* ---------- Card definitions, including crafted variants ----------
@@ -680,9 +680,9 @@ const BattleEngine = (function () {
     switch (c.spell) {
       case 'spark': zap(G, 1 - who, t, 2); break;
       case 'rain-shower': {
-        const heal = Math.min(2, me.maxSpirit - me.spirit);
+        const heal = Math.min(3, me.maxSpirit - me.spirit);
         if (heal > 0) { me.spirit += heal; emit(G, 'spirit', { who, delta: heal, source: c }); }
-        me.board.forEach(x => { if (x.hp < x.grit) { x.hp++; emit(G, 'mendcard', { who, uid: x.uid, amt: 1 }); } });
+        me.board.forEach(x => { if (x.hp < x.grit) { const a = Math.min(2, x.grit - x.hp); x.hp += a; emit(G, 'mendcard', { who, uid: x.uid, amt: a }); } });
         break;
       }
       case 'harvest': draw(G, me); draw(G, me); break;
@@ -712,17 +712,17 @@ const BattleEngine = (function () {
       case 'picnic': {
         const heal = Math.min(5, me.maxSpirit - me.spirit);
         if (heal > 0) { me.spirit += heal; emit(G, 'spirit', { who, delta: heal, source: c }); }
-        draw(G, me); break;
+        draw(G, me); draw(G, me); break;
       }
       case 'wild-growth': for (let n = famCount(me, 'grove'); n > 0; n--) summon(G, who, 'seedling'); break;
-      case 'hold-fast': me.board.forEach(x => { if (familyOf(x.id) === 'stone') { x.grit += 2; x.hp += 2; emit(G, 'buff', { who, uid: x.uid, amt: 2, skin: true }); } }); break;
+      case 'hold-fast': me.board.forEach(x => { if (familyOf(x.id) === 'stone') { x.grit += 2; x.hp += 2; x.power += 1; emit(G, 'buff', { who, uid: x.uid, amt: 2, skin: true }); } }); break;
       case 'tidepool': {
         const heal = Math.min(famCount(me, 'tide'), me.maxSpirit - me.spirit);
         if (heal > 0) { me.spirit += heal; emit(G, 'spirit', { who, delta: heal, source: c }); }
         draw(G, me); break;
       }
       case 'gathering-storm': { const dmg = Math.min(2, famCount(me, 'wind')); op.board.slice().forEach(x => zap(G, 1 - who, x, dmg)); break; }
-      case 'last-light': zap(G, 1 - who, t, 3); if (!op.board.includes(t)) draw(G, me); break;
+      case 'last-light': zap(G, 1 - who, t, 4); if (!op.board.includes(t)) draw(G, me); break;
     }
     checkEnd(G);
     return { ok: true };
@@ -738,7 +738,7 @@ const BattleEngine = (function () {
         const k = bestBy(killable(2)); if (k) return { score: 2 + valueOf(k) / 3, target: k };
         const t = bestBy(op.board.filter(x => !x.shield)) || bestBy(op.board); return { score: t ? (t.shield ? 0.6 : 1.4) : 0, target: t };
       }
-      case 'rain-shower': { const s = Math.min(2, me.maxSpirit - me.spirit) + me.board.filter(x => x.hp < x.grit).length; return { score: s >= 2 ? s : 0 }; }
+      case 'rain-shower': { const s = Math.min(3, me.maxSpirit - me.spirit) + me.board.filter(x => x.hp < x.grit).length; return { score: s >= 2 ? s : 0 }; }
       case 'harvest': return { score: me.deck.length ? (me.hand.length <= 3 ? 3.2 : 1.6) : 0 };
       case 'gust': { const t = bestBy(op.board); return { score: t ? valueOf(t) / 3 : 0, target: t }; }
       case 'sunbeam': return { score: me.board.length * 1.3 };
@@ -760,7 +760,7 @@ const BattleEngine = (function () {
       case 'tidepool': { const heal = Math.min(famCount(me, 'tide'), me.maxSpirit - me.spirit); return { score: (me.deck.length ? (me.hand.length <= 3 ? 2.2 : 1.2) : 0) + heal * 0.8 }; }
       case 'gathering-storm': { const dmg = Math.min(2, famCount(me, 'wind')); const k = op.board.filter(x => !x.shield && x.hp <= dmg); return { score: dmg ? (k.length * 2.6 + op.board.length * 0.5 * dmg) / 1.5 : 0 }; }
       case 'last-light': {
-        const k = bestBy(killable(3)); if (k) return { score: 2.6 + valueOf(k) / 3, target: k };
+        const k = bestBy(killable(4)); if (k) return { score: 2.6 + valueOf(k) / 3, target: k };
         const t = bestBy(op.board.filter(x => !x.shield)); return { score: t ? 1.2 : 0, target: t };
       }
     }
