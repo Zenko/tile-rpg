@@ -462,11 +462,10 @@ function settleMastery(won) {
   Object.keys(played).forEach(b => addMastery(b, played[b] + (won ? 1 : 0)));
 }
 
-/* ---------------- the museum: donate spare copies to fill six wings ---------------- */
-// Removed for Beta 1 (the Card Museum is gone from the map, and comes back later as the Hall of Spirits). The wings are rebuilt from
-// the kept cards when it returns; until then the museum code below stays dormant.
-const MUSEUM_WINGS = [];
-const WING_PEBBLES = 30;
+/* ---------------- the Hall of Spirits (build 276): donate spare copies to fill five wings ---------------- */
+// The Card Museum left in Beta 1 and returns as the Hall of Spirits, in Market Row. The wings are in content/cards.js (MUSEUM_WINGS).
+// Expeditions (below) stay dormant: nothing opens them.
+const WING_PEBBLES = 60, WING_STARLIGHT = 10;
 function museumState() { const p = state.progress; if (!p.museum || typeof p.museum !== 'object') p.museum = { donated: {}, wings: {} }; return p.museum; }
 function wingDef(id) { return MUSEUM_WINGS.find(w => w.id === id); }
 function wingProgress(w) { const d = museumState().donated; return w.cards.filter(id => d[id]).length; }
@@ -481,14 +480,14 @@ function donateCard(id) {
   let text = `${d.icon} ${d.name} takes its place in the ${w.name}. The curator beams. (+2 🫧)`;
   if (w && !ms.wings[w.id] && wingProgress(w) === w.cards.length) {
     ms.wings[w.id] = Date.now();
-    addPebbles(WING_PEBBLES, 'museum');
+    addPebbles(WING_PEBBLES, 'museum'); state.progress.starlight = starlight() + WING_STARLIGHT;
     state.decorationInventory[w.deco] = decorationInventoryCount(w.deco) + 1;
     const deco = DECORATION_ITEMS.find(x => x.id === w.deco);
-    toast(`${w.icon} The ${w.name} is complete!`); logEvent(w.icon, `Completed the museum's ${w.name}.`);
-    text += ` The ${w.name} is complete! You receive 🫧 ${WING_PEBBLES} and a ${deco.icon} ${deco.name} for your decorations.`;
+    toast(`${w.icon} The ${w.name} is complete!`); logEvent(w.icon, `Completed the Hall of Spirits' ${w.name}.`);
+    text += ` The ${w.name} is complete! You receive 🫧 ${WING_PEBBLES}, ${WING_STARLIGHT} ${GAME.starlight.name} and a ${deco.icon} ${deco.name} for your decorations.`;
     sfx('mythic'); buzz(HAP.big);
   } else sfx('claim');
-  logEvent('🏛️', `Donated ${d.name} to the museum.`);
+  logEvent('🏛️', `Donated ${d.name} to the Hall of Spirits.`);
   saveState(); updateHud(); checkAchievements();
   return text;
 }

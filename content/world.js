@@ -85,11 +85,9 @@ const INTERIORS = {
               { id: 'atlas-battle', label: `⚔️ Challenge the ${CAST.atlas.name}`, kind: 'atlas-battle' },
               { id: 'atlas-games', label: '🎲 Play something harder', kind: 'atlas-games' },
               { id: 'atlas-shop', label: `🛍️ What the ${CAST.atlas.name} keeps`, kind: 'atlas-shop' }] },
-  museum: { title: 'The Card Museum', who: CAST.curator.icon, name: `Curator ${CAST.curator.name}`, theme: 'cool',
-    greet: () => `Welcome! Every card has a story, and we would love to keep one of each. Spare copies only - we never take your last. ${MUSEUM_WINGS.filter(w => museumState().wings[w.id]).length}/${MUSEUM_WINGS.length} wings complete.`,
-    actions: [{ id: 'wings', label: '🏛️ Donate to the wings', kind: 'wings' },
-              { id: 'exped', kind: 'exped', view: () => { const es = expedState(), home = es.active.filter(t => Date.now() >= t.ends).length;
-                  return { label: `🧭 Expeditions${home ? ` · ${home} team${home === 1 ? '' : 's'} home!` : es.active.length ? ` · ${es.active.length} away` : ''}` }; } }] },
+  museum: { title: 'The Hall of Spirits', who: CAST.curator.icon, name: `Curator ${CAST.curator.name}`, theme: 'cool',
+    greet: () => `Welcome to the Hall. Every spirit here was once someone's spare, and now it has a place of its own. Spare copies only - we never take your last. ${MUSEUM_WINGS.filter(w => museumState().wings[w.id]).length}/${MUSEUM_WINGS.length} wings complete.`,
+    actions: [{ id: 'wings', label: '🏛️ Visit the wings', kind: 'wings' }] },   // expeditions (js/afterdark-companion-cards.js) stay dormant
   // ----- the four buildings that used to be locked -----
   bakery: { title: `${CAST.baker.name}'s Bakery`, who: CAST.baker.icon, name: CAST.baker.name, theme: 'warm',
     greet: () => `The oven is warm and the dough is rising. The bread tastes like a memory you cannot quite place, so bake a loaf and share it with a neighbor. ${breadLine()}`,

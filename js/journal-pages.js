@@ -13,7 +13,7 @@ const JPLACES = {
   nook: { scene: 'nook', district: 'square', name: 'the Reading Nook' },
   cup: { scene: 'cup', district: 'square', name: 'the fountain' },
   cellar: { scene: 'cellar', district: 'square', name: 'the cellar' },
-  museum: { scene: 'museum', district: 'market', name: 'the Card Museum' },
+  museum: { scene: 'museum', district: 'market', name: 'the Hall of Spirits' },
   shop: { scene: 'card-shop', district: 'market', name: 'the Card Shop' },
   lantern: { scene: 'lantern', district: 'market', name: `${CAST.nightVendor.name}'s Lantern Market` },
   net: { scene: 'harbor-hut', district: 'harbor', name: `${CAST.netMender.name}'s Net Loft` },

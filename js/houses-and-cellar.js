@@ -732,7 +732,7 @@ function sceneAction(actId) {
   if (actId === 'mg-again' && mini) { miniStart(mini.id, mini.atlas); return; }
   if (actId === 'noop') return;
   if (scene.id === 'trades') { if (actId.startsWith('trade:')) { scene.text = doTrade(+actId.slice(6)); renderScene(); } return; }
-  if (actId.startsWith('wing:')) { scene.mode = 'wing'; scene.wing = actId.slice(5); const w = wingDef(scene.wing); scene.text = `${w.icon} ${w.name}: ${wingProgress(w)}/${w.cards.length} donated. Complete it for 🫧 ${WING_PEBBLES} and a keepsake.`; sfx('tap'); renderScene(); return; }
+  if (actId.startsWith('wing:')) { scene.mode = 'wing'; scene.wing = actId.slice(5); const w = wingDef(scene.wing); scene.text = `${w.icon} ${w.name}: ${wingProgress(w)}/${w.cards.length} donated. Complete it for 🫧 ${WING_PEBBLES}, ${WING_STARLIGHT} ${GAME.starlight.name} and a keepsake.`; sfx('tap'); renderScene(); return; }
   if (actId === 'wings-back') { scene.mode = 'wings'; scene.text = 'Which wing shall we visit?'; renderScene(); return; }
   if (actId.startsWith('donate:')) { scene.text = donateCard(actId.slice(7)); renderScene(); return; }
   if (actId.startsWith('donateall:')) { const w = wingDef(actId.slice(10)); let last = ''; w.cards.filter(canDonate).forEach(id => { last = donateCard(id); }); scene.text = last; renderScene(); return; }

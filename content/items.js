@@ -46,6 +46,12 @@ const DECORATION_ITEMS = [
   { id: 'atlas-compass', name: 'Compass Rose', icon: '🧭', cost: 150, desc: 'It always points at something you meant to find.', cat: 'ornament', atlas: true },
   { id: 'atlas-lantern', name: 'Map Lantern', icon: '🏮', cost: 180, desc: 'Lights up the parts of the ground nobody has drawn yet.', cat: 'ornament', atlas: true },
   { id: 'dream-globe', name: 'Dream Globe', icon: '🌐', cost: 240, desc: 'Turn it and a different dream faces you.', cat: 'ornament', atlas: true },
+  // Hall of Spirits keepsakes (js/afterdark-companion-cards.js): one for each finished wing, never sold in the shop
+  { id: 'hall-grove', name: `${FAMILY_NAMES.grove} Planter`, icon: '🪴', cost: 60, desc: 'A little pot that grows whatever the Grove last dreamed about.', cat: 'plant', museum: true },
+  { id: 'hall-stone', name: `${FAMILY_NAMES.stone} Urn`, icon: '🏺', cost: 60, desc: 'Cool to the touch. It holds a memory, nothing else.', cat: 'ornament', museum: true },
+  { id: 'hall-tide', name: `${FAMILY_NAMES.tide} Shell Lamp`, icon: '🐚', cost: 60, desc: 'Hold it to your ear and it hums a lullaby.', cat: 'lighting', museum: true },
+  { id: 'hall-wind', name: `${FAMILY_NAMES.wind} Wind Chime`, icon: '🎐', cost: 60, desc: 'It rings for whispers you have not heard yet.', cat: 'ornament', museum: true },
+  { id: 'hall-lullaby', name: 'Lullaby Scroll', icon: '📜', cost: 60, desc: 'Every spell you have kept, in a hand that gets sleepier toward the end.', cat: 'ornament', museum: true },
   // Rift Atlas souvenirs (js/rift-atlas.js): one for each finished row, never sold in the shop
   { id: 'rift-hourglass', name: 'Bent Hourglass', icon: '⏳', cost: 120, desc: 'Its sand falls sideways, then upward, then not at all.', cat: 'ornament', rift: true },
   { id: 'rift-prism', name: 'World Prism', icon: '🔮', cost: 160, desc: 'Turn it and the light inside takes the colour of somewhere you have been.', cat: 'lighting', rift: true },

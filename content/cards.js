@@ -229,6 +229,19 @@ const CARD_SETS = [
   { id: 'spells',   name: 'Book of Lullabies', icon: '📜', cards: CARD_POOL.filter(c => c.spell).map(c => c.id),                             kind: 'startDraw',   val: 1,    text: 'Draw 1 extra card at the start of matches' },
 ];
 
+// ---- used by js/afterdark-companion-cards.js (the Hall of Spirits, build 276) ----
+/* Five wings of eight cards each, one per family plus the spells: two commons, two rares, two ultras, a super and a mythic (the spell wing
+   climbs the same ladder), so the first half fills from everyday spares and the last cards are the ones worth hunting. Donating a spare copy
+   puts it in the Hall for good (the Hall never takes the last copy, or one the deck needs). A finished wing pays Embers, Starlight and its
+   keepsake decoration (`deco`, a DECORATION_ITEMS entry with museum: true). */
+const MUSEUM_WINGS = [
+  { id: 'grove', name: `${FAMILY_NAMES.grove} Wing`, icon: FAMILIES.grove.icon, deco: 'hall-grove', cards: ['sprout', 'acorn', 'blossom', 'foxglove', 'hedgehog', 'cherry-blossom-storm', 'storm-lily', 'aurora-stag'] },
+  { id: 'stone', name: `${FAMILY_NAMES.stone} Wing`, icon: FAMILIES.stone.icon, deco: 'hall-stone', cards: ['pebble', 'rice-cake', 'geode', 'torii-gate', 'stone-lantern', 'crystal-spire', 'jade-turtle', 'mountain-heart'] },
+  { id: 'tide',  name: `${FAMILY_NAMES.tide} Wing`,  icon: FAMILIES.tide.icon,  deco: 'hall-tide',  cards: ['droplet', 'bubble', 'tide', 'koi-ascending', 'lantern-fish', 'glass-float', 'river-otter', 'deep-current'] },
+  { id: 'wind',  name: `${FAMILY_NAMES.wind} Wing`,  icon: FAMILIES.wind.icon,  deco: 'hall-wind',  cards: ['origami-crane', 'paper-fan', 'temple-bell', 'folding-screen', 'dove', 'gale', 'silver-fox', 'sky-whale'] },
+  { id: 'lullaby', name: 'Wing of Lullabies', icon: '📜', deco: 'hall-lullaby', cards: ['spark', 'rain-shower', 'harvest', 'gust', 'sunbeam', 'thunderclap', 'moonlit-tide', 'starfall'] },
+];
+
 // ---- used by js/tarot.js ----
 const ARCANA = [
   { n: '0',     name: 'The Fool',           card: 'aurora-stag',       kind: 'startDraw',      val: 1,    up: 'New beginnings, a light step.',          rev: 'Rushing in without looking.' },

@@ -60,7 +60,7 @@ const CAST = {
   fortuneTeller: { name: 'Brume',   icon: '🐈‍⬛' },       // "Madame Brume": daily Fate readings
   netMender:     { name: 'Tam',     icon: '🦦' },        // the Net Loft (harbor)
   glassKeeper:   { name: 'Iris',    icon: '🐌' },        // the Glasshouse (garden)
-  curator:       { name: 'Paz',     icon: '🦚' },        // "Curator Paz": the Card Museum (dormant)
+  curator:       { name: 'Paz',     icon: '🦚' },        // "Curator Paz": the Hall of Spirits (Market Row)
   pedlar:        { name: 'Moth',    icon: '🧳' },        // "Moth the Pedlar": a travelling visitor who sells cards
   wanderer:      { name: 'Quill',   icon: '🎒' }         // "Quill the Wanderer": a travelling visitor who duels
 };
