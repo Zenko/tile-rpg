@@ -2,17 +2,18 @@
 //   A. What each rarity is worth   3 cards of a rarity swapped into an ordinary deck: do rarer cards actually help?
 //   B. Families            the best deck each family can build, against the others and against a panel of random decks
 //   C. Keywords            the best deck built around each keyword against the same panel
+//   E. Weekly rules       each rule's aimed-at deck with and without the rule, against the same panel: it should help that deck, not make it unbeatable
 //   D. Shape of a game     who goes first, how long games last, how often a game stalls, how often spells are cast
 // usage: node scripts/battle-report.js [games per pairing=300]      (about a minute; same seeds every run, so two runs are comparable)
-const { BattleEngine: BE, CARD_POOL } = require('../server/load-engine')();
+const { BattleEngine: BE, CARD_POOL, WEEKLY_RULES } = require('../server/load-engine')();
 const N = +process.argv[2] || 300;
 const base = CARD_POOL.filter(c => !c.exclusive && !c.foe);
 const RANK = ['common', 'rare', 'ultra', 'super', 'mythic'];
 const deckFrom = cards => { const counts = {}; cards.forEach(c => { counts[c.id] = 2; }); return BE.suggestDeck(counts); };
 // win rate of deckA over deckB across N games, half in each seat
-function duel(a, b, n) {
+function duel(a, b, n, mods) {
   let w = 0;
-  for (let i = 0; i < n; i++) { const side = i % 2, r = BE.simulate(5000 + i, side === 0 ? a : b, side === 0 ? b : a, {}); if (r.G.winner === side ? 1 : 0) w++; }
+  for (let i = 0; i < n; i++) { const side = i % 2, r = BE.simulate(5000 + i, side === 0 ? a : b, side === 0 ? b : a, mods ? { opts: { mods } } : {}); if (r.G.winner === side ? 1 : 0) w++; }
   return w / n * 100;
 }
 const pct = x => (x.toFixed(0) + '%').padStart(5);
@@ -20,7 +21,7 @@ const all = deckFrom(base);
 // A single reference deck makes an archetype look good or bad by accident, so families and keywords are measured against a panel of 30 varied random decks (50% = as good as a random deck).
 let ps = 31337; const prnd = () => (ps = (ps * 1664525 + 1013904223) >>> 0) / 4294967296;
 const panel = []; while (panel.length < 30) { const d = []; while (d.length < 12) { const c = base[Math.floor(prnd() * base.length)]; if (d.filter(x => x === c.id).length < 2) d.push(c.id); } panel.push(d); }
-const vsPanel = deck => panel.reduce((a, d) => a + duel(deck, d, Math.max(4, Math.round(N / 25))), 0) / panel.length;
+const vsPanel = (deck, mods) => panel.reduce((a, d) => a + duel(deck, d, Math.max(4, Math.round(N / 25)), mods), 0) / panel.length;
 
 console.log('A. WHAT EACH RARITY IS WORTH (a random deck with 3 cards of the rarity slotted in, against the same deck without them; 50% = no help)');
 let rs = 4711; const rr = () => (rs = (rs * 1664525 + 1013904223) >>> 0) / 4294967296, pickFrom = a => a[Math.floor(rr() * a.length)];
@@ -68,3 +69,12 @@ console.log(`  first player wins ${(first / played * 100).toFixed(1)}%   (the se
 console.log(`  turns per game: median ${turns[played >> 1]}, 10th pct ${turns[Math.floor(played * .1)]}, 90th pct ${turns[Math.floor(played * .9)]}, over 25 turns ${(turns.filter(t => t > 25).length / played * 100).toFixed(1)}%`);
 console.log(`  games that never ended (stalled): ${stuck}`);
 console.log(`  spells: ${inDeck} in decks, ${cast} cast (${inDeck ? (cast / inDeck * 100).toFixed(0) : 0}% of the spells in a deck are cast during a game)`);
+
+console.log('\nE. WEEKLY RULES (the deck each rule is aimed at, against the panel, without and with the rule; both sides get the rule)');
+const kwOf = r => { const m = r.mods; return m.swiftBonus ? 'swift' : m.mendBonus ? 'mend' : m.shieldHp ? 'shield' : m.bloomStart ? 'bloom' : m.echoBonus ? 'echo' : m.guardHp ? 'guard' : m.thornsBonus ? 'thorns' : m.drainBonus ? 'drain' : m.rallyBonus ? 'rally' : m.kwHp ? Object.keys(m.kwHp)[0] : m.kwPower ? Object.keys(m.kwPower)[0] : null; };
+WEEKLY_RULES.forEach(r => {
+  const k = kwOf(r), f = r.mods.weekFam && r.mods.weekFam.family;
+  const deck = f ? deckFrom(base.filter(c => fam(c.id) === f || c.spell)) : deckFrom(base.filter(c => c.kw.includes(k)).concat(base.filter(c => !c.kw.includes(k) && !c.spell && c.kw.length === 0)));
+  const off = vsPanel(deck), on = vsPanel(deck, r.mods);
+  console.log('  ' + r.name.padEnd(18) + (f || BE.KEYWORDS[k].name).padEnd(10) + pct(off) + ' ->' + pct(on) + '  (' + (on - off >= 0 ? '+' : '') + (on - off).toFixed(0) + ')');
+});

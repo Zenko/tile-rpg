@@ -513,8 +513,11 @@ const BattleEngine = (function () {
     if (mods && mods.addKw && !kw.includes(mods.addKw) && d.cost <= (mods.addKwMaxCost || 99)) kw.push(mods.addKw);
     mods = mods || {};
     const fam = mods.famHp ? CARD_FAMILY[baseIdOf(id)] === mods.famHp.family : false;
-    const grit = d.grit + (mods.guardHp && kw.includes('guard') ? mods.guardHp : 0) + (mods.shieldHp && kw.includes('shield') ? mods.shieldHp : 0) + (fam ? mods.famHp.hp : 0);
-    return { uid, id, cost: d.cost, power: d.power + (swift && mods.swiftBonus ? mods.swiftBonus : 0) + (mods.bloomStart && kw.includes('bloom') ? mods.bloomStart : 0), grit, hp: grit, kw,
+    // the weekly rule's generic boosts: kwPower / kwHp { keyword: n } for every keyword the card has, weekFam { family, power, hp } for a whole family
+    const wf = mods.weekFam && CARD_FAMILY[baseIdOf(id)] === mods.weekFam.family && (!mods.weekFam.maxCost || d.cost <= mods.weekFam.maxCost) ? mods.weekFam : null;
+    let kwP = 0, kwG = 0; if (!mods.kwMaxCost || d.cost <= mods.kwMaxCost) kw.forEach(k => { kwP += (mods.kwPower && mods.kwPower[k]) || 0; kwG += (mods.kwHp && mods.kwHp[k]) || 0; });
+    const grit = d.grit + (mods.guardHp && kw.includes('guard') ? mods.guardHp : 0) + (mods.shieldHp && kw.includes('shield') ? mods.shieldHp : 0) + (fam ? mods.famHp.hp : 0) + kwG + (wf ? wf.hp || 0 : 0);
+    return { uid, id, cost: d.cost, power: d.power + (swift && mods.swiftBonus ? mods.swiftBonus : 0) + (mods.bloomStart && kw.includes('bloom') ? mods.bloomStart : 0) + kwP + (wf ? wf.power || 0 : 0), grit, hp: grit, kw,
              shield: kw.includes('shield'), ready: swift, attacks: 0, lull: 0 };
   }
 
@@ -523,7 +526,9 @@ const BattleEngine = (function () {
   /* opts.spirit = [spiritForPlayer0, spiritForPlayer1] lets friendly opponents start with less Calm.
      opts.mods   = the world's effect on a match, the same for both sides (battleWorld() in js/battle-ui.js builds it):
                    swiftBonus (+power to Flicker), bloomStart (+power to Bloom), shieldHp (+health to Haze), mendBonus (Rest restores
-                   more), echoBonus (Startle hits harder) and famHp { family, hp } (a district's "home turf": its family is tougher).
+                   more), echoBonus (Startle hits harder), famHp { family, hp } (a district's "home turf": its family is tougher), and the weekly rule's
+                   thornsBonus / drainBonus / rallyBonus (Briar, Sip and Chorus stronger), kwPower / kwHp { keyword: n } (+power / +health to every card
+                   with that keyword, only those costing up to kwMaxCost when it is set) and weekFam { family, power, hp, maxCost } (a whole family stronger, optionally only its cards up to maxCost).
      opts.twist  = { side, kind } - a district boss's rule twist (see TWISTS).
      opts.knack  = [idForPlayer0, idForPlayer1] - Dreamer’s Gift choices (see KNACKS); only the player uses one.
      opts.first  = 0 or 1 - who takes the first turn (the coin/dice toss). The other seat is "second" and gets the catch-up
@@ -620,7 +625,7 @@ const BattleEngine = (function () {
     emit(G, 'play', { who, card: c });
     passiveOnPlay(G, who, c);
     if (c.kw.includes('echo')) { const dmg = RULES.echo + ((G.mods && G.mods.echoBonus) || 0); op.spirit -= dmg; emit(G, 'spirit', { who: 1 - who, delta: -dmg, source: c, echo: true }); }
-    if (c.kw.includes('rally')) me.board.forEach(x => { if (x !== c) { x.power += RULES.rally; emit(G, 'buff', { who, uid: x.uid, amt: RULES.rally, rally: true }); } });
+    if (c.kw.includes('rally')) me.board.forEach(x => { if (x !== c) { x.power += RULES.rally + rallyBonus(G); emit(G, 'buff', { who, uid: x.uid, amt: RULES.rally + rallyBonus(G), rally: true }); } });
     if (c.kw.includes('kin')) {
       const fam = familyOf(c.id), n = fam ? me.board.filter(x => x !== c && familyOf(x.id) === fam).length : 0;
       if (n) { c.power += n; c.grit += n; c.hp += n; emit(G, 'kin', { who, uid: c.uid, n }); }
@@ -661,6 +666,7 @@ const BattleEngine = (function () {
     return c;
   }
   function familyOf(id) { return CARD_FAMILY[baseIdOf(id)] || null; }
+  function rallyBonus(G) { return (G.mods && G.mods.rallyBonus) || 0; }
   function famCount(pl, fam) { return pl.board.filter(x => familyOf(x.id) === fam).length; }
   // Lull: the card can't attack until its owner's next turn is over.
   function lullCard(G, side, t) { if (!t) return; t.lull = 1; emit(G, 'lull', { who: side, uid: t.uid }); }
@@ -804,10 +810,10 @@ const BattleEngine = (function () {
       if (t.shield) { t.shield = false; dmg = 0; blocked = true; } else t.hp -= dmg;
       emit(G, 'attack', { who, attacker: a, target: { kind: 'card', uid: t.uid }, dmg, blocked });
       if (t.hp <= 0) fall(G, 1 - who, t);
-      if (t.kw.includes('thorns') && me.board.includes(a)) zap(G, who, a, RULES.thorns, false, 'thorns');         // thorns prick back, even as they fall
+      if (t.kw.includes('thorns') && me.board.includes(a)) zap(G, who, a, RULES.thorns + ((G.mods && G.mods.thornsBonus) || 0), false, 'thorns');         // thorns prick back, even as they fall
     }
     if (a.kw.includes('drain') && me.spirit < me.maxSpirit) {
-      const heal = Math.min(RULES.drain, me.maxSpirit - me.spirit); me.spirit += heal; emit(G, 'spirit', { who, delta: heal, source: a });
+      const heal = Math.min(RULES.drain + ((G.mods && G.mods.drainBonus) || 0), me.maxSpirit - me.spirit); me.spirit += heal; emit(G, 'spirit', { who, delta: heal, source: a });
     }
     checkEnd(G);
     return { ok: true };

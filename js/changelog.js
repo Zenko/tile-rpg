@@ -18,6 +18,8 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'new', x: 'Eleven new weekly rules. The rule that bends every match for a week now rotates through 17: a week for each family (Brote, Recuerdo, Deriva, Susurro) and one for each keyword that was too quiet (Briar, Chorus, Sip, Lull, Kin, Sting and Echo), on top of the old six. It is the same for both sides, so it is a reason to build a different deck that week.' },
+  { t: 'better', x: 'Gale Week was far too strong for Flicker decks (they won about nine in ten games), so it now boosts only Flicker cards that cost 2 or less. Wall Week now gives cheap Haze cards +1 power instead of +1 health, which barely did anything.' },
   { t: 'better', x: 'Rest cards now restore 2 Calm at the end of your turn (it was 1), and Chorus gives your other cards +2 power when played (it was +1). Both were the weakest keywords in play. Bloom cards (Blossom, Dandelion Wish, Blossom Drift, Moonrain Lily) hit a little harder, and Dusk Moth, Parade Balloon and Market Sparrow got a point of power so the Wind family keeps up with Stone.' },
   { t: 'better', x: 'Wind and Stone are now much closer: in the battle report Wind decks win about half their games against a mix of decks, where before they trailed Stone by 15 points.' },
   { t: 'fixed', x: 'The Suggest deck button no longer puts a family spell (Wild Growth, Hold Fast, Gathering Storm...) into a deck that has no cards of that family to power it, and a deck built around one family now brings its own spell.' },
