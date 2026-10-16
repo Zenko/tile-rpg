@@ -223,13 +223,16 @@ function charDrawPals(box) {
       <div class="cp-bond"><span class="cp-bond-bar">${[1, 2, 3].map(i => `<i class="${lv >= i ? 'on' : ''}"></i>`).join('')}</span><span class="cp-bond-name">${CP_BOND_NAMES[lv]}</span></div>
       <div class="cp-bond-note">${next === undefined ? 'As close as it gets.' : `${Math.floor(c.bond || 0)} / ${next} · wins, catches and pats bring you closer. At the next step its perk grows.`}</div>
       <div class="cp-stats"><div><b>${d}</b>day${d === 1 ? '' : 's'} together</div><div><b>${c.wins || 0}</b>wins together</div><div><b>${c.catches || 0}</b>catches together</div></div>
+      ${companionMemories(c, true).length ? `<div class="cp-mem" id="cpMem">${companionMemories(c, true).map(t => `<p>${escapeHtml(t)}</p>`).join('')}</div>` : ''}
       <div class="cp-acts"><button class="btn btn-ghost" id="cpChat">💬 Chat</button><button class="btn btn-ghost" id="cpPet">🤚 Pet</button></div>
+      ${lv < 2 ? '<div class="cp-bond-note">At bond 2 they start bringing you something every day.</div>' : companionGiftReady(c) ? '<button class="btn" id="cpGift">🎁 See what they brought</button>' : '<div class="cp-bond-note">They brought you something today. Come back tomorrow.</div>'}
       <button class="btn" id="cpDo">Do something together</button>
       <div class="panel-desc cp-hint">Go for a walk, calm down, spar, play a game, hide and seek. You can also tap them in town.</div>`;
     box.appendChild(card);
     const say = card.querySelector('#cpSay');
     card.querySelector('#cpChat').addEventListener('click', () => { sfx('tap'); buzz(HAP.tap); say.textContent = companionLine(c); });
     card.querySelector('#cpDo').addEventListener('click', () => { openCompanionMenu(); });
+    const gb = card.querySelector('#cpGift'); if (gb) gb.addEventListener('click', () => { const t = companionGift(); if (t) { say.textContent = t; renderCharacterTab(); } });
     card.querySelector('#cpPet').addEventListener('click', () => { const t = petCompanion(); say.textContent = t; renderCharacterTab(); });
     const row = document.createElement('div'); row.className = 'cp-bottom';
     row.innerHTML = `<button class="btn" id="cpChange">Change companion</button><button class="btn btn-ghost" id="cpBye">Say goodbye</button>`;

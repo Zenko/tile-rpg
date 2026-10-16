@@ -2502,3 +2502,8 @@ body.pw-board #goalChip { display: none !important; }   /* the dice panel says w
 .ws-name small { color: var(--ink-soft); font-size: .72rem; }
 .ws-name em { color: var(--accent); font-style: normal; }
 .ws-cost { font-weight: 600; font-size: .85rem; white-space: nowrap; }
+
+/* ---- COMPANION MEMORIES (build 277): what the companion remembers, under its stats on the Companion page ---- */
+.cp-mem { margin: 4px 0 8px; padding: 8px 10px; border-radius: 12px; background: var(--board-bg); border: 1px solid var(--stone-edge); text-align: left; }
+.cp-mem p { margin: 0 0 4px; font-size: .78rem; line-height: 1.4; color: var(--ink-soft); font-style: italic; }
+.cp-mem p:last-child { margin-bottom: 0; }

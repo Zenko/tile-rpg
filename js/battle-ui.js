@@ -1108,7 +1108,7 @@ function btFinish() {
   if (won && !yielded && !battle.dungeon && !battle.neutral) noteBattleResult(true, battle.playedKw || []);
   if (battle.spellsCast) bumpStat('spellsCast', battle.spellsCast);
   if (!battle.puzzle && !battle.neutral) settleMastery(won && !yielded);
-  const winPeb = won && !yielded && !battle.puzzle && !battle.neutral ? cardBonus('winPebbles') + (eventIs('tourney') ? 3 : 0) : 0;
+  const winPeb = won && !yielded && !battle.puzzle && !battle.neutral ? cardBonus('winPebbles') + (hasPerk('bounty') ? 1 : 0) + (eventIs('tourney') ? 3 : 0) : 0;
   if (winPeb) { addPebbles(winPeb, 'charms'); setTimeout(() => toast(`🏅 Win bonus: +${winPeb} 🫧`), 1200); }
   btRender();
   setTimeout(() => btShowResult(won, yielded), won ? 500 : 300);

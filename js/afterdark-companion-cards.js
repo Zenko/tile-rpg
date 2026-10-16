@@ -98,8 +98,12 @@ const COMPANION_PERKS = {
   fish:    { icon: '🎣', text: 'Fish bite sooner' },
   xp:      { icon: '⭐', text: '+10% XP from everything' },
   craft:   { icon: '🔨', text: 'Steadier crafting: half the fails, +50% crafting XP, more skills and a chance of Reborn' },
+  // Build 277: the three keywords that came after the first perks (Sting, Kin, Lull) had none and fell back to XP
+  bounty:  { icon: '🏅', text: `+1 ${GAME.currency.one} for every match you win` },
+  medals:  { icon: '🎖️', text: `+1 ${GAME.currency.one} for every mini-game medal` },
+  hearth:  { icon: '🍞', text: 'Bread bakes 20% faster' },
 };
-const KW_PERK = { guard: 'spirit', thorns: 'spirit', swift: 'finds', mend: 'crops', bloom: 'harvest', shield: 'chest', echo: 'fish', drain: 'fish', rally: 'xp', seed: 'craft' };
+const KW_PERK = { guard: 'spirit', thorns: 'spirit', swift: 'finds', mend: 'crops', bloom: 'harvest', shield: 'chest', echo: 'fish', drain: 'fish', rally: 'xp', seed: 'craft', sting: 'bounty', kin: 'medals', lull: 'hearth' };
 const DISTRICT_PERK = { square: 'xp', market: 'harvest', harbor: 'fish', garden: 'crops' };
 const BOSS_PERK = { square: 'spirit', market: 'chest', harbor: 'fish', garden: 'crops' };
 // Dreamer level needed. Cards by rarity (spells add `spell` levels on top), neighbours by district, bosses much later.
@@ -318,13 +322,39 @@ function renderCompanionBox() {
 }
 
 /* ---------- things to do with your companion ---------- */
-function companionDay() { const p = state.progress, t = todayKey(); if (!p.companionDay || p.companionDay.day !== t) p.companionDay = { day: t, pets: 0 }; return p.companionDay; }
+function companionDay() { const p = state.progress, t = todayKey(); if (!p.companionDay || p.companionDay.day !== t) p.companionDay = { day: t, pets: 0, gift: false }; return p.companionDay; }
 function companionFloat(emoji) {
   if (!townWorld || !state.companionPos) return;
   const e = document.createElement('div'); e.className = 'ent comp-float'; e.style.setProperty('--x', state.companionPos.x); e.style.setProperty('--y', state.companionPos.y); e.style.zIndex = 900;
   e.innerHTML = `<span>${emoji}</span>`; townWorld.appendChild(e); setTimeout(() => e.remove(), 1200);
   const s = townWorld.querySelector('.ent.companion > span');
   if (s) { s.classList.remove('comp-hop'); void s.offsetWidth; s.classList.add('comp-hop'); }
+}
+/* ---------- memories and the daily gift (build 277) ----------
+   A companion remembers what you did together (days, wins, catches: all already counted per companion) and from bond 2 brings you a small
+   gift once a day: a few Embers, a little XP and now and then a common card. The gift is the same for every companion kind; its flavour line
+   comes from its main perk. Nothing here is saved beyond state.progress.companionDay.gift. */
+function companionCounts(c) { c = c || state.companion; return c ? { days: typeof charDaysTogether === 'function' ? charDaysTogether(c) : 0, wins: c.wins || 0, catches: c.catches || 0 } : { days: 0, wins: 0, catches: 0 }; }
+// Every memory line the companion has earned, newest of each count last; `latestOnly` keeps just the highest line of each count.
+function companionMemories(c, latestOnly) {
+  const n = companionCounts(c), earned = COMPANION_MEMORIES.filter(m => n[m.need] >= m.min);
+  const keep = latestOnly ? ['days', 'wins', 'catches'].map(k => earned.filter(m => m.need === k).pop()).filter(Boolean) : earned;
+  return keep.map(m => m.text.replace(/\{n\}/g, n[m.need]));
+}
+function companionGiftReady(c) { c = c || state.companion; return !!c && bondLevel(c) >= 2 && !companionDay().gift; }
+function companionGift() {
+  const c = state.companion; if (!companionGiftReady(c)) return '';
+  const bl = bondLevel(c), embers = 2 + bl * 2;
+  companionDay().gift = true;
+  addPebbles(embers, 'companion'); addXP(10);
+  let cardId = null;
+  if (Math.random() < (bl >= 3 ? 0.25 : 0.15)) { cardId = randomCardId('common'); state.ownedCards.push(cardId); noteCardsFound(1); }
+  const how = COMPANION_GIFT_LINES[c.perk] || 'found this for you';
+  sfx('gift'); buzz(HAP.found); companionFloat('🎁');
+  logEvent(c.icon, `${c.name} brought a gift: ${embers} ${GAME.currency.many}${cardId ? ` and ${cardDef(cardId).name}` : ''}.`);
+  saveState(); updateHud(); if (cardId) bumpPill('pillCards');
+  if (cardId) setTimeout(() => showCardReveal(cardId, `A gift from ${c.name}`, true, null, 0, { flip: false, isNew: ownedCardCounts()[cardId] === 1 }), 250);
+  return `${c.name} ${how}. 🎁 +${embers} ${GAME.currency.many}${cardId ? ` and a ${cardDef(cardId).name} card` : ''}.`;
 }
 // Up to three pats a day each bring you a little closer. Returns what to say.
 function petCompanion() {

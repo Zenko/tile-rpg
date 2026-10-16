@@ -21,7 +21,7 @@ function companionPlayerName() { return (state.character && state.character.name
 function companionTalk(c) {
   c = c || state.companion; if (!c) return '';
   const kind = companionKind(c), spell = kind === 'card' && cardDef(c.cardId) && cardDef(c.cardId).spell, T = COMPANION_TALK;
-  const pool = [...T.any, ...(T[weatherNow()] || []), ...(isNightNow() ? T.night : []), ...(T.places[state.currentDistrict] || []), ...companionPerks(c).flatMap(k => T.perk[k] || []), ...(T.kind[spell ? 'spell' : kind] || []), ...(bondLevel(c) >= 3 ? T.bond : [])];
+  const pool = [...T.any, ...(T[weatherNow()] || []), ...(isNightNow() ? T.night : []), ...(T.places[state.currentDistrict] || []), ...companionPerks(c).flatMap(k => T.perk[k] || []), ...(T.kind[spell ? 'spell' : kind] || []), ...(bondLevel(c) >= 3 ? T.bond : []), ...(typeof companionMemories === 'function' ? companionMemories(c) : [])];
   let line, tries = 0;
   do { line = pool[Math.floor(Math.random() * pool.length)]; tries++; } while (companionRecent.includes(line) && tries < 12);
   companionRecent.push(line); if (companionRecent.length > 8) companionRecent.shift();

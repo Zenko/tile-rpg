@@ -7,6 +7,25 @@
 
 // ---- used by js/companion-activities.js ----
 /* ---------- what they say: first person, short, a little different every time ---------- */
+/* Build 277. Things a companion remembers about the two of you: each line unlocks when its count (days together, wins together, catches together)
+   reaches `min`; {n} is that count. They join its chat, and the Companion page shows the latest one for each count. */
+const COMPANION_MEMORIES = [
+  { need: 'days', min: 3,   text: 'We have walked together for {n} days. I have been counting, quietly.' },
+  { need: 'days', min: 14,  text: '{n} days already. I know your footsteps now.' },
+  { need: 'days', min: 60,  text: '{n} days side by side. I cannot picture the town without you in it.' },
+  { need: 'wins', min: 3,   text: 'That is {n} wins together. I only watched, but I felt every one.' },
+  { need: 'wins', min: 12,  text: '{n} wins! I was there for each of them, you know.' },
+  { need: 'wins', min: 30,  text: '{n} wins together. They should write that down somewhere.' },
+  { need: 'catches', min: 3,  text: '{n} fish caught while I held the net. Well, stood near it.' },
+  { need: 'catches', min: 12, text: '{n} catches. The water recognises us now.' },
+  { need: 'catches', min: 30, text: '{n} catches together. The fish must talk about us.' },
+];
+/* What a companion brings once a day from bond 2 (companionGift in js/afterdark-companion-cards.js), by its main perk. */
+const COMPANION_GIFT_LINES = {
+  spirit: 'found this on the steps, humming to itself', finds: 'spotted this under a bush and just knew', crops: 'dug this up by the garden fence', harvest: 'gathered this from the market floor',
+  chest: 'worked this loose from an old lock', fish: 'fished this out of a puddle, proudly', xp: 'learned something today and wanted to share it', craft: 'sanded this down all morning for you',
+  bounty: 'kept this from our last win', medals: 'polished this up from our last game', hearth: 'baked this and tried very hard not to eat it',
+};
 const COMPANION_TALK = {
   any: ['This is nice.', 'I like walking with you.', 'Do you ever just listen to the town?', 'No hurry, is there?', 'I could do this all day.', 'You walk at a good pace.', 'I was hoping you would come by.', 'Thank you for bringing me.', 'Everything feels a little brighter with company.', 'I noticed something small just now. I forgot what.'],
   clear: ['What a bright day.', 'The light on the stones is lovely today.', 'Not a cloud to worry about.'],
@@ -29,6 +48,9 @@ const COMPANION_TALK = {
     chest: ['Somewhere a lock is waiting for a key.', 'I have a feeling about chests today.'],
     fish: ['The fish are talking. It sounds like bubbles.', 'We should visit the water later.'],
     xp: ['You are getting better at all of this.', 'Every day you learn a little more.'],
+    bounty: ['A win always feels a little heavier in the pocket.', 'I like it when we come home with something.'],
+    medals: ['Medals look best on you.', 'Another game? I will keep score.'],
+    hearth: ['Is that bread I smell, or hope?', 'The oven likes us today, I can tell.'],
   },
   kind: {
     card: ['Being a card is mostly waiting. This is better.', 'I used to be in a deck. Now I get to walk.', 'My picture looks good in this light, I think.'],

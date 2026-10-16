@@ -24,8 +24,8 @@ module.exports = async (page, assert) => {
   assert.ok(await page.evaluate(id => state.ownedCards.some(c => c.startsWith(id + '~g')), second), 'refined card missing');
   // Trade up mode
   await page.evaluate(() => { const t = document.getElementById('testHideOverlays'); if (t) t.remove(); });
-  await page.click('.cr-mode [data-mode="trade"]');
+  await page.evaluate(() => document.querySelector('.cr-mode [data-mode="trade"]').click());   // a plain click: the strip redraws after a refine, which made Playwright's "stable" wait time out about half the time
   assert.ok(await page.locator('.cr-tray').count() === 1 && await page.locator('.cr-forge:not(.cr-trade)').count() === 0 && await page.locator('.cr-trade .cr-rar-pick button').count() === 4, 'trade up shows its tray and rarity choice, not the refine forge');
-  await page.click('.cr-mode [data-mode="refine"]');
+  await page.evaluate(() => document.querySelector('.cr-mode [data-mode="refine"]').click());
   assert.ok(await page.locator('.cr-forge, .cr-empty').count() >= 1);
 };

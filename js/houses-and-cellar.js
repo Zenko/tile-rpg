@@ -16,7 +16,7 @@ function ovenView() {
   if (left > 0) return { label: `⏳ In the oven… ${fmtClock(left)}`, disabled: true };
   return { label: '🍞 Take out the fresh loaf' };
 }
-function bakeMs() { return Math.round(BAKE_MS * (1 - Math.min(0.5, cardBonus('bake'))) * (eventIs('baking-day') ? 0.5 : 1)); }
+function bakeMs() { return Math.round(BAKE_MS * (1 - Math.min(0.5, cardBonus('bake') + (hasPerk('hearth') ? 0.2 : 0))) * (eventIs('baking-day') ? 0.5 : 1)); }
 function fmtClock(ms) { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; }
 function ovenAction() {
   const ov = ovenState();

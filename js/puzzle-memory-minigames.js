@@ -306,7 +306,7 @@ function awardMinigameResult(id, score) {
     if (tier === 'gold') { ms.golds++; bumpStat('minigameGolds', 1); }
     if (ms.rewarded < MINI_DAILY_REWARDED) {
       ms.rewarded++;
-      const peb = (def.pebbles ? def.pebbles(score) : TIER_PEBBLES[tier]) + cardBonus('miniPebbles');
+      const peb = (def.pebbles ? def.pebbles(score) : TIER_PEBBLES[tier]) + cardBonus('miniPebbles') + (hasPerk('medals') ? 1 : 0);
       if (peb) addPebbles(peb, 'minigames');
       if (tier === 'gold' && Math.random() < MINI_GOLD_CARD_ODDS) { cardId = randomCardId(memoryRollRarity()); state.ownedCards.push(cardId); bumpStat('cardsFound', 1); bumpPill('pillCards'); }
       rewardText = `+${peb} 🫧${cardId ? ' and a card!' : ''}`;

@@ -37,6 +37,7 @@ const BOND_AT = [0, 12, 40];
 const BOND_PERK = {   // companion perk -> [stat kind, bonus at bond 2, bonus at bond 3]
   spirit: ['startSpirit', 1, 2], finds: ['finds', 0.10, 0.20], crops: ['crops', 0.08, 0.16], harvest: ['harvestPebbles', 1, 2],
   chest: ['chest', 0.10, 0.20], fish: ['fish', 0.08, 0.16], xp: ['xp', 0.05, 0.10],
+  bounty: ['winPebbles', 1, 2], medals: ['miniPebbles', 1, 2], hearth: ['bake', 0.10, 0.20],
 };
 const BOND_FROM = { battlesWon: 3, bossesWon: 6, fishCaught: 1, cropsHarvested: 1, steps: 0.02 };
 
