@@ -90,6 +90,7 @@ function startBattleNow(opponent, first) {
   const weather = weatherNow(), fx = weatherFx();
   if (isBoss && fx.bossSpirit) profile.spirit += fx.bossSpirit;
   const companionSpirit = hasPerk('spirit') && !opponent.puzzle && !neutral;
+  const cheerInfo = companionCheerFor(opponent, neutral);       // the companion's once-per-match cheer (bond 2 and up)
   // Plain neighbors and district bosses get a fresh deck each fight, scaled to how many wins you have (their stored deck
   // predates enhanced and unique foe cards). Every other kind of opponent brings its own deck.
   const plainFoe = !opponent.dungeon && !opponent.cup && !opponent.draft && !opponent.ghost && !opponent.challenge && !opponent.signature && !opponent.isRival && !opponent.puzzle && !opponent.trial && !opponent.spar && !opponent.visitor;
@@ -125,7 +126,7 @@ function startBattleNow(opponent, first) {
   }
   else {
     G = BattleEngine.newGame(myDeck.slice(), oppDeck.slice(), Math.random, { spirit: [BattleEngine.RULES.spirit, profile.spirit], mods: world.mods,
-      twist: twistKind ? { side: 1, kind: twistKind } : null, startSpirit: opponent.startSpirit ? [opponent.startSpirit, null] : null, first, knack: [currentKnackId(), null], fate: [neutral ? null : currentFateId(), opponent.fate || null], spread: [neutral ? null : currentSpread(), opponent.spread || null], passive: [neutral || opponent.puzzle ? null : archetypePassive(), null], passiveTier: [archetypeTier(), null] });
+      twist: twistKind ? { side: 1, kind: twistKind } : null, startSpirit: opponent.startSpirit ? [opponent.startSpirit, null] : null, first, knack: [currentKnackId(), null], cheer: [cheerInfo ? cheerInfo.perk : null, null], cheerTier: [cheerInfo ? cheerInfo.tier : 1, null], fate: [neutral ? null : currentFateId(), opponent.fate || null], spread: [neutral ? null : currentSpread(), opponent.spread || null], passive: [neutral || opponent.puzzle ? null : archetypePassive(), null], passiveTier: [archetypeTier(), null] });
     BattleEngine.startTurn(G);
     if (opponent.aiStyle) G.aiStyles = [null, opponent.aiStyle];
     if (profile.shift) G.aiShift = [0, profile.shift];     // adaptive difficulty's fine step (js/adaptive.js)
@@ -140,7 +141,7 @@ function startBattleNow(opponent, first) {
   G.events.length = 0;
 
   inBattle = true;
-  battle = { npc: opponent, isBoss, first, neutral, G, profile, weather, sel: null, busy: false, ended: false, rewarded: false, yieldArmed: false, token: ++battleToken, startedAt: Date.now() };
+  battle = { npc: opponent, isBoss, first, neutral, G, cheerInfo, profile, weather, sel: null, busy: false, ended: false, rewarded: false, yieldArmed: false, token: ++battleToken, startedAt: Date.now() };
   const chip = [weather === 'snow' ? (isBoss ? '❄️ Boss +2 Calm · richer prize' : '❄️ Richer prize') : '', ...world.chips].filter(Boolean).join(' · ');
   const tw = twistKind ? BattleEngine.TWISTS[twistKind] : null;
   btGet('btWeather').textContent = opponent.puzzle ? '🧩 Ending your turn resets the board' : [tw ? `${tw.icon} ${tw.text}` : '', opponent.trial ? '🔮 Brings a Fate and a Spread' : '', (G.p[0].passive ? (d => `${d.icon} ${d.name}: ${d.text}`)(passiveDef(G.p[0].passive, G.p[0].passiveTier)) : ''), chip, plainFoe ? '✦ Seasoned deck' : ''].filter(Boolean).join(' · ');
@@ -343,6 +344,47 @@ async function btDoFate() {
   const r = BattleEngine.useFate(battle.G, 0);
   if (!r.ok) { btToast(r.why); return; }
   battle.busy = true; bumpStat('fatesUsed', 1); saveState();
+  await btAnimate(btFlush(battle.G), token);
+  if (!btAlive(token)) return;
+  battle.busy = false;
+  if (battle.G.over) return btFinish();
+  btRender();
+}
+
+/* ---------- Companion cheer (build 278): your companion's once-per-match power ----------
+   Bond 2 and up; the effect comes from the companion's main perk (BattleEngine.CHEERS). Not in neutral matches, puzzles or spars. */
+function companionCheerFor(opponent, neutral) {
+  const c = state.companion;
+  if (!c || bondLevel(c) < 2 || neutral || opponent.puzzle || opponent.spar || !BattleEngine.CHEERS[c.perk]) return null;
+  return { perk: c.perk, tier: bondLevel(c) >= 3 ? 2 : 1, name: c.name, icon: c.icon };
+}
+function btRenderCheer() {
+  const b = btGet('btCheer'); if (!b || !battle) return;
+  const G = battle.G, pl = G.p[0], ch = pl.cheer && BattleEngine.CHEERS[pl.cheer];
+  b.classList.toggle('hidden', !ch || !!battle.puzzle);
+  if (!ch) return;
+  const chk = BattleEngine.cheerReady(G, 0);
+  b.textContent = ch.icon;
+  b.classList.toggle('ready', chk.ok && !battle.busy);
+  b.classList.toggle('used', !!pl.cheerUsed);
+  b.setAttribute('aria-label', `${battle.cheerInfo ? battle.cheerInfo.name : 'Your companion'} cheers: ${pl.cheerUsed ? 'used' : chk.ok ? 'ready' : chk.why}`);
+}
+function btShowCheerTip() {
+  if (!battle || battle.G.over) return;
+  const G = battle.G, pl = G.p[0], ch = pl.cheer && BattleEngine.CHEERS[pl.cheer], info = battle.cheerInfo; if (!ch) return;
+  const chk = BattleEngine.cheerReady(G, 0), ok = chk.ok && !battle.busy, tip = btGet('btTip');
+  tip.innerHTML = `<div class="t-h"><span class="ic">${ch.icon}</span><b>${escapeHtml(info ? info.name : 'Your companion')} cheers</b><small>Your companion · once per match${pl.cheerTier === 2 ? ' · bond 3' : ''}</small></div>
+    <div class="kw">${ch.text(pl.cheerTier === 2 ? 2 : 1)}</div>
+    ${pl.cheerUsed ? '<div class="kw" style="color:var(--ink-soft)">Already used this match.</div>' : ok ? '<button class="btn knack-use" id="btCheerUse" type="button">Use it now</button>' : `<div class="hint">${chk.why}.</div>`}`;
+  tip.classList.add('show', 'interactive'); battleView.classList.add('tip-open'); btPlaceTip();
+  const use = btGet('btCheerUse'); if (use) use.addEventListener('click', btDoCheer);
+}
+async function btDoCheer() {
+  if (!battle || battle.busy || battle.G.over) return;
+  const token = battle.token; btHideTip(); battle.sel = null;
+  const r = BattleEngine.useCheer(battle.G, 0);
+  if (!r.ok) { btToast(r.why); return; }
+  battle.busy = true; bumpStat('cheersUsed', 1); saveState();
   await btAnimate(btFlush(battle.G), token);
   if (!btAlive(token)) return;
   battle.busy = false;
@@ -613,7 +655,7 @@ function btCoach() {
   el.textContent = t;
 }
 
-function btRender(o) { o = o || {}; btRenderKnack(); btRenderFate(); btRenderBars(); btSyncSnackBadge(); btRenderGems(); btRenderBoards(o.entering); btRenderHand(o.drawn, o.dealAll); btCoach(); }
+function btRender(o) { o = o || {}; btRenderKnack(); btRenderFate(); btRenderCheer(); btRenderBars(); btSyncSnackBadge(); btRenderGems(); btRenderBoards(o.entering); btRenderHand(o.drawn, o.dealAll); btCoach(); }
 
 /* ---------------- card info sheet ---------------- */
 function btShowTip(c, hint) {
@@ -980,6 +1022,11 @@ async function btAnimate(evs, token) {
       btRender(); btSpellFlash({ icon: f.icon, name: f.name, rarity: 'ultra' });
       btSetMsg(`${e.who === 0 ? 'You draw' : 'The enemy draws'} ${f.icon} ${f.name}`);
       sfx('mythic'); buzz(HAP.play); await btWait(620);
+    } else if (e.type === 'cheer') {
+      const ch = battle.cheerInfo;
+      btRender(); btSpellFlash({ icon: ch ? ch.icon : '📣', name: ch ? `${ch.name} cheers` : 'A cheer', rarity: 'rare' });
+      btSetMsg(`${ch ? ch.name : 'Your companion'} cheers you on`);
+      sfx('rare'); buzz(HAP.play); await btWait(560);
     } else if (e.type === 'shieldup') {
       btRender();
       const t = document.querySelector(`#battleView .card[data-uid="${e.uid}"]`);
@@ -1308,6 +1355,7 @@ btGet('btHelp').addEventListener('click', btShowHelp);
 btGet('btYield').addEventListener('click', btYield);
 btGet('btKnack').addEventListener('click', () => { ensureAudio(); if (btGet('btTip').classList.contains('interactive')) btHideTip(); else btShowKnackTip(); });
 btGet('btFate').addEventListener('click', () => { ensureAudio(); if (btGet('btTip').classList.contains('interactive')) btHideTip(); else btShowFateTip(); });
+btGet('btCheer').addEventListener('click', () => { ensureAudio(); if (btGet('btTip').classList.contains('interactive')) btHideTip(); else btShowCheerTip(); });
 btGet('btHelpClose').addEventListener('click', () => { btGet('btHelpOverlay').classList.add('hidden'); btOpponentOpens(); });
 btGet('mulliganKeepBtn').addEventListener('click', () => { ensureAudio(); btCloseMulligan(); });
 // Tap a loadout header to open its row (one at a time); tapping the open one closes it. Rows are always in the DOM, so this only flips a class.
@@ -1327,7 +1375,7 @@ btGet('mulliganSwapBtn').addEventListener('click', () => {
 // Tap outside to deselect. This runs in the CAPTURE phase, before the tapped card's own handler re-renders the board:
 // afterwards the tapped element is detached from the page, and would wrongly look like a tap outside.
 document.addEventListener('click', e => {
-  if (battle && inBattle && btGet('btTip').classList.contains('interactive') && !e.target.closest('#btTip') && !e.target.closest('#btKnack') && !e.target.closest('#btFate')) btHideTip();   // tap away from the Gift sheet
+  if (battle && inBattle && btGet('btTip').classList.contains('interactive') && !e.target.closest('#btTip') && !e.target.closest('#btKnack') && !e.target.closest('#btFate') && !e.target.closest('#btCheer')) btHideTip();   // tap away from the Gift sheet
   if (!battle || !inBattle || !battle.sel) return;
   if (e.target.closest('#battleView .card') || e.target.closest('#btOppBar') || e.target.closest('#btAtkFace') || e.target.closest('#btTip') || e.target.closest('#btEnd')) return;
   battle.sel = null; btHideTip(); btRender();

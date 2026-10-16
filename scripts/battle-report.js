@@ -2,10 +2,11 @@
 //   A. What each rarity is worth   3 cards of a rarity swapped into an ordinary deck: do rarer cards actually help?
 //   B. Families            the best deck each family can build, against the others and against a panel of random decks
 //   C. Keywords            the best deck built around each keyword against the same panel
+//   F. Companion cheers   each cheer's win-rate gain for a random deck (bond 2 and bond 3), the aim is about +1 to +3 and +2 to +5
 //   E. Weekly rules       each rule's aimed-at deck with and without the rule, against the same panel: it should help that deck, not make it unbeatable
 //   D. Shape of a game     who goes first, how long games last, how often a game stalls, how often spells are cast
 // usage: node scripts/battle-report.js [games per pairing=300]      (about a minute; same seeds every run, so two runs are comparable)
-const { BattleEngine: BE, CARD_POOL, WEEKLY_RULES } = require('../server/load-engine')();
+const { BattleEngine: BE, CARD_POOL, WEEKLY_RULES } = require('../server/load-engine')();   // the engine's CHEERS are read from BE
 const N = +process.argv[2] || 300;
 const base = CARD_POOL.filter(c => !c.exclusive && !c.foe);
 const RANK = ['common', 'rare', 'ultra', 'super', 'mythic'];
@@ -78,3 +79,14 @@ WEEKLY_RULES.forEach(r => {
   const off = vsPanel(deck), on = vsPanel(deck, r.mods);
   console.log('  ' + r.name.padEnd(18) + (f || BE.KEYWORDS[k].name).padEnd(10) + pct(off) + ' ->' + pct(on) + '  (' + (on - off >= 0 ? '+' : '') + (on - off).toFixed(0) + ')');
 });
+
+console.log('\nF. COMPANION CHEERS (a random deck with the cheer against the same deck without it, same seeds, both seats; the AI uses it at the end of its turn)');
+{
+  let cs = 2024; const cr = () => (cs = (cs * 1664525 + 1013904223) >>> 0) / 4294967296;
+  const cd = () => { const d = []; while (d.length < 12) { const c = base[Math.floor(cr() * base.length)]; if (d.filter(x => x === c.id).length < 2) d.push(c.id); } return d; };
+  const pairs = []; for (let i = 0; i < Math.max(300, N * 2); i++) pairs.push([cd(), cd()]);
+  const rate = (perk, tier) => { let w = 0; pairs.forEach(([a, b], i) => { const side = i % 2, opts = perk ? { opts: { cheer: side === 0 ? [perk, null] : [null, perk], cheerTier: side === 0 ? [tier, null] : [null, tier] } } : {};
+    if (BE.simulate(30000 + i, a, b, opts).G.winner === side) w++; }); return w / pairs.length * 100; };
+  const off = rate(null);
+  Object.keys(BE.CHEERS).forEach(k => console.log('  ' + (BE.CHEERS[k].icon + ' ' + k).padEnd(12) + [1, 2].map(t => { const on = rate(k, t); return 'bond ' + (t + 1) + ': ' + (on - off >= 0 ? '+' : '') + (on - off).toFixed(1); }).join('   ')));
+}

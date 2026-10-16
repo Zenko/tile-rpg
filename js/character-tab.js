@@ -225,7 +225,8 @@ function charDrawPals(box) {
       <div class="cp-stats"><div><b>${d}</b>day${d === 1 ? '' : 's'} together</div><div><b>${c.wins || 0}</b>wins together</div><div><b>${c.catches || 0}</b>catches together</div></div>
       ${companionMemories(c, true).length ? `<div class="cp-mem" id="cpMem">${companionMemories(c, true).map(t => `<p>${escapeHtml(t)}</p>`).join('')}</div>` : ''}
       <div class="cp-acts"><button class="btn btn-ghost" id="cpChat">💬 Chat</button><button class="btn btn-ghost" id="cpPet">🤚 Pet</button></div>
-      ${lv < 2 ? '<div class="cp-bond-note">At bond 2 they start bringing you something every day.</div>' : companionGiftReady(c) ? '<button class="btn" id="cpGift">🎁 See what they brought</button>' : '<div class="cp-bond-note">They brought you something today. Come back tomorrow.</div>'}
+      ${BattleEngine.CHEERS[c.perk] ? `<div class="cp-bond-note">${lv < 2 ? 'At bond 2 they cheer you on in battle, once per match' : 'In battle, once per match, they cheer'}: ${BattleEngine.CHEERS[c.perk].icon} ${BattleEngine.CHEERS[c.perk].text(lv >= 3 ? 2 : 1)}</div>` : ''}
+      ${lv < 2 ? '<div class="cp-bond-note">At bond 2 they also start bringing you something every day.</div>' : companionGiftReady(c) ? '<button class="btn" id="cpGift">🎁 See what they brought</button>' : '<div class="cp-bond-note">They brought you something today. Come back tomorrow.</div>'}
       <button class="btn" id="cpDo">Do something together</button>
       <div class="panel-desc cp-hint">Go for a walk, calm down, spar, play a game, hide and seek. You can also tap them in town.</div>`;
     box.appendChild(card);

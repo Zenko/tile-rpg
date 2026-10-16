@@ -271,6 +271,75 @@ const BattleEngine = (function () {
     return { ok: true };
   }
 
+  /* ---------- Companion cheer (build 278) ----------
+     A third once-per-match power, lent by your companion (bond 2 or higher) and chosen by its MAIN PERK (the keys are the ids in
+     COMPANION_PERKS, js/afterdark-companion-cards.js). Free, no aiming, from your own turn `from`; each effect is smaller than a Fate
+     (it costs nothing), and bond 3 is tier 2: the same idea, a step stronger. Neighbors have none. Not used in neutral matches (puzzles,
+     drafts, the cellar). Tuned with scripts/battle-report.js section F: a win-rate gain of about +2 to +6 at bond 2 and +3 to +8 at bond 3. */
+  const CHEERS = {
+    spirit:  { icon: '🛡️', from: 3, text: t => `Restore ${t === 1 ? 4 : 7} Calm.` },
+    finds:   { icon: '👀', from: 3, text: t => `Take the most expensive card from your deck into your hand, and draw a card${t === 2 ? '. Restore 3 Calm' : ''}.` },
+    crops:   { icon: '🌱', from: 4, text: t => `Every card of yours gains +1 health${t === 2 ? ' and heals 2' : ''}.` },
+    harvest: { icon: '🧺', from: 5, text: t => `Gain ${t === 1 ? '1 energy' : '2 energy'} this turn.` },
+    chest:   { icon: '🗝️', from: 7, text: t => t === 1 ? 'Your strongest card gains a Haze.' : 'Your two strongest cards gain a Haze.' },
+    fish:    { icon: '🎣', from: 3, text: t => `Deal ${t === 1 ? 3 : 5} damage to enemy Calm.` },
+    xp:      { icon: '⭐', from: 4, text: t => `Your strongest card gains +${t} power.` },
+    craft:   { icon: '🔨', from: 3, text: t => `Heal your most hurt card by ${t === 1 ? 5 : 9}.` },
+    bounty:  { icon: '🏅', from: 5, text: t => `Deal ${t} damage to the enemy card with the least health.` },
+    medals:  { icon: '🎖️', from: 7, text: t => t === 1 ? 'One card that just arrived can attack right away.' : 'Two cards that just arrived can attack right away.' },
+    hearth:  { icon: '🍞', from: 7, text: t => t === 1 ? "The enemy's strongest card can't attack on its next turn." : "The enemy's strongest card can't attack on its next turn. Restore 2 Calm." },
+  };
+  // Would a person use it now? (used by the AI in simulations: a heal when nothing is hurt, a strike with nothing to hit, is held back)
+  function cheerWorthIt(G, who) {
+    const me = G.p[who], op = G.p[1 - who], t = me.cheerTier === 2 ? 2 : 1;
+    switch (me.cheer) {
+      case 'spirit': return me.maxSpirit - me.spirit >= (t === 1 ? 3 : 5);
+      case 'craft': return me.board.some(x => x.grit - x.hp >= 3);
+      case 'finds': return me.hand.length <= 4 && me.deck.length > 0;
+      case 'crops': case 'xp': case 'chest': return me.board.length > 0;
+      case 'medals': return me.board.some(x => !x.ready);
+      case 'bounty': case 'hearth': return op.board.length > 0;
+      default: return true;
+    }
+  }
+  function cheerReady(G, who) {
+    const pl = G.p[who], c = pl.cheer && CHEERS[pl.cheer];
+    if (!c) return { ok: false, why: 'No companion to cheer' };
+    if (G.over || G.active !== who) return { ok: false, why: 'Not your turn' };
+    if (pl.cheerUsed) return { ok: false, why: 'Already used this match' };
+    if (pl.turns < c.from) return { ok: false, why: `Ready on your turn ${c.from}` };
+    return { ok: true };
+  }
+  function useCheer(G, who) {
+    const chk = cheerReady(G, who); if (!chk.ok) return chk;
+    const me = G.p[who], op = G.p[1 - who], id = me.cheer, t = me.cheerTier === 2 ? 2 : 1;
+    const byPower = b => b.slice().sort((x, y) => y.power - x.power || y.hp - x.hp);
+    const heal = (side, n) => { const pl = G.p[side], h = Math.min(n, pl.maxSpirit - pl.spirit); if (h > 0) { pl.spirit += h; emit(G, 'spirit', { who: side, delta: h }); } };
+    const buff = (x, p, h) => { x.power += p; x.grit += h; x.hp += h; emit(G, 'buff', { who, uid: x.uid, amt: Math.max(p, h) }); };
+    const shield = x => { if (x && !x.shield) { x.shield = true; emit(G, 'shieldup', { who, uid: x.uid }); } };
+    me.cheerUsed = true;
+    emit(G, 'cheer', { who, id, tier: t });
+    switch (id) {
+      case 'spirit': heal(who, t === 1 ? 4 : 7); break;
+      case 'finds': {
+        if (me.hand.length < RULES.handMax && me.deck.length) { let bi = 0; me.deck.forEach((c, i) => { if (c.cost > me.deck[bi].cost) bi = i; }); const c = me.deck.splice(bi, 1)[0]; me.hand.push(c); emit(G, 'draw', { who, card: c }); }
+        draw(G, me); if (t === 2) heal(who, 3);
+        break;
+      }
+      case 'crops': me.board.forEach(x => { buff(x, 0, 1); if (t === 2) { const a = Math.min(2, x.grit - x.hp); if (a > 0) { x.hp += a; emit(G, 'mendcard', { who, uid: x.uid, amt: a }); } } }); break;
+      case 'harvest': me.energy += t; break;
+      case 'chest': byPower(me.board).slice(0, t).forEach(shield); break;
+      case 'fish': { const dmg = t === 1 ? 3 : 5; op.spirit -= dmg; emit(G, 'spirit', { who: 1 - who, delta: -dmg, spell: true }); break; }
+      case 'xp': { const x = byPower(me.board)[0]; if (x) buff(x, t, 0); break; }
+      case 'craft': { const x = me.board.slice().sort((a, b) => (b.grit - b.hp) - (a.grit - a.hp))[0]; if (x && x.grit > x.hp) { const a = Math.min(t === 1 ? 5 : 9, x.grit - x.hp); x.hp += a; emit(G, 'mendcard', { who, uid: x.uid, amt: a }); } break; }
+      case 'bounty': { const x = op.board.slice().sort((a, b) => a.hp - b.hp || b.power - a.power)[0]; if (x) zap(G, 1 - who, x, t, false, 'cheer'); break; }
+      case 'medals': byPower(me.board.filter(x => !x.ready)).reverse().slice(0, t).forEach(x => { x.ready = true; emit(G, 'readied', { who, uid: x.uid }); }); break;
+      case 'hearth': { const x = byPower(op.board)[0]; if (x) lullCard(G, 1 - who, x); if (t === 2) heal(who, 2); break; }
+    }
+    checkEnd(G);
+    return { ok: true };
+  }
+
   /* ---------- Fate: the Arcana powers (build 111) ----------
      A second once-per-match power, taken from one of the Fates the player has attuned (js/tarot.js maps each Arcana to
      one of these ids). Like the Gift it is free, needs no aiming and is used from the player's own turn `from`; unlike the
@@ -531,6 +600,7 @@ const BattleEngine = (function () {
                    with that keyword, only those costing up to kwMaxCost when it is set) and weekFam { family, power, hp, maxCost } (a whole family stronger, optionally only its cards up to maxCost).
      opts.twist  = { side, kind } - a district boss's rule twist (see TWISTS).
      opts.knack  = [idForPlayer0, idForPlayer1] - Dreamer’s Gift choices (see KNACKS); only the player uses one.
+     opts.cheer  = [perkForPlayer0, perkForPlayer1] and opts.cheerTier = [1 or 2, ...] - a companion's cheer (see CHEERS); only the player uses one.
      opts.first  = 0 or 1 - who takes the first turn (the coin/dice toss). The other seat is "second" and gets the catch-up
                    bonus: +1 card and +1 energy on its first turns. Old puzzle snapshots have no G.first, so it reads as 0. */
   function newGame(deckA, deckB, rng, opts) {
@@ -550,6 +620,7 @@ const BattleEngine = (function () {
     G.uid = uid;                                   // later cards (Afterthoughts) keep numbering from here
     (opts.knack || []).forEach((id, i) => { if (id && KNACKS[id]) G.p[i].knack = id; });
     (opts.fate || []).forEach((id, i) => { if (id && FATES[id]) G.p[i].fate = id; });
+    (opts.cheer || []).forEach((id, i) => { if (id && CHEERS[id]) { G.p[i].cheer = id; G.p[i].cheerTier = (opts.cheerTier || [])[i] === 2 ? 2 : 1; } });
     (opts.passive || []).forEach((f, i) => { if (f && PASSIVES[f]) { G.p[i].passive = f; G.p[i].passiveTier = (opts.passiveTier || [])[i] === 1 ? 1 : 2; applyPassiveBuild(G.p[i]); } });
     G.p.forEach((pl, i) => { const n = RULES.hand + (i !== first ? 1 : 0); for (let k = 0; k < n; k++) draw(G, pl, true); });
     (opts.spread || []).forEach((ids, i) => { if (ids) layoutSpread(G, i, ids); });
@@ -946,9 +1017,10 @@ const BattleEngine = (function () {
   /* Whole AI turn at once: used by tests and simulations. The UI uses aiNextAction() step by step. */
   function aiTurn(G, who, level) {
     const steps = [];
+    if (G.p[who].cheer === 'harvest' && cheerReady(G, who).ok && useCheer(G, who).ok) steps.push({ type: 'cheer' });   // extra energy is only worth anything before the plays
     for (let i = 0; i < 40 && !G.over; i++) {
       const a = aiNextAction(G, who, level);
-      if (a.type === 'end') { if (G.p[who].fate && fateReady(G, who).ok && useFate(G, who).ok) { steps.push({ type: 'fate' }); continue; } break; }   // a foe with a Fate uses it once it has nothing better to do
+      if (a.type === 'end') { if (G.p[who].fate && fateReady(G, who).ok && useFate(G, who).ok) { steps.push({ type: 'fate' }); continue; } if (G.p[who].cheer && cheerReady(G, who).ok && cheerWorthIt(G, who) && useCheer(G, who).ok) { steps.push({ type: 'cheer' }); continue; } break; }   // a foe with a Fate uses it once it has nothing better to do
       steps.push(a); applyAction(G, who, a);
     }
     return steps;
@@ -998,7 +1070,7 @@ const BattleEngine = (function () {
      makeRng(seed) is a small seeded generator (mulberry32; a string seed is hashed first), so the same seed always gives the same
      shuffles. A match is fully described by a record { seed, decks: [A, B], opts, actions }, where an action is one of
        { type: 'start' } (once, first) | { type: 'mulligan', who } | { type: 'play', who, uid, target } |
-       { type: 'attack', who, uid, target } | { type: 'knack', who } | { type: 'fate', who } | { type: 'end', who }.
+       { type: 'attack', who, uid, target } | { type: 'knack', who } | { type: 'fate', who } | { type: 'cheer', who } | { type: 'end', who }.
      replay(record) rebuilds the game from the seed and re-applies the actions, so a server can referee a match by checking the
      moves it receives against the same rules the client runs, and a finished match can be replayed move by move.
      simulate() plays a whole AI-vs-AI match and returns its record. Keep every random draw in the rules on G.rng and every AI
@@ -1020,6 +1092,7 @@ const BattleEngine = (function () {
       case 'play': case 'attack': return applyAction(G, a.who, a);
       case 'knack': return useKnack(G, a.who);
       case 'fate': return useFate(G, a.who);
+      case 'cheer': return useCheer(G, a.who);
       case 'end': endTurn(G, a.who); return { ok: true };
     }
     return { ok: false, why: 'unknown action ' + a.type };
@@ -1047,7 +1120,7 @@ const BattleEngine = (function () {
     return { G, record: rec };
   }
 
-  return { makeRng, step, replay, simulate, AI_STYLES, RULES, KEYWORDS, SPELLS, TWISTS, KNACKS, knackReady, setKnack, useKnack, FATES, fateReady, setFate, useFate, spreadBonus, layoutSpread, SPREAD_RULES, PASSIVES, MINORS, PASSIVE_RULES, MINOR_RULES, MAX_KEYWORDS, defOf, baseIdOf, variantId, suggestDeck, makeCard, familyOf, newGame, startTurn, canPlay, playCard, spellNeedsTarget, legalTargets, attack, endTurn, forfeit, boost, mulligan, aiNextAction, applyAction, aiTurn, guards, valueOf };
+  return { makeRng, step, replay, simulate, AI_STYLES, RULES, KEYWORDS, SPELLS, TWISTS, KNACKS, knackReady, setKnack, useKnack, FATES, fateReady, setFate, useFate, CHEERS, cheerReady, cheerWorthIt, useCheer, spreadBonus, layoutSpread, SPREAD_RULES, PASSIVES, MINORS, PASSIVE_RULES, MINOR_RULES, MAX_KEYWORDS, defOf, baseIdOf, variantId, suggestDeck, makeCard, familyOf, newGame, startTurn, canPlay, playCard, spellNeedsTarget, legalTargets, attack, endTurn, forfeit, boost, mulligan, aiNextAction, applyAction, aiTurn, guards, valueOf };
 })();
 /* END BATTLE ENGINE */
 

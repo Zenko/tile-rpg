@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'new', x: 'Your companion cheers you on in battle. From bond 2 (Trusted) a third button sits next to your Gift and your Fate: once per match, from your turn 3 or later, your companion does something small and useful for free. What it does comes from its main perk (a Bounty companion strikes the weakest enemy card, a Hearth companion puts the strongest to sleep, a Spirit companion restores Calm and so on), and at bond 3 (Inseparable) it is a step stronger. The Companion page says what yours does.' },
   { t: 'new', x: 'Companions now bring you something. From bond 2 (Trusted) your companion has a gift for you once a day: a few Embers, a little XP and now and then a common card. Open the Companion page and tap "See what they brought".' },
   { t: 'new', x: 'Companions remember. Once you have walked together a few days, won a few matches or caught a few fish, they say so in their chat, and the Companion page shows what they remember for days, wins and catches.' },
   { t: 'better', x: 'Cards with Sting, Kin or Lull used to give a companion nothing but plain XP. Now Sting gives +1 Ember for every match you win, Kin gives +1 Ember for every mini-game medal, and Lull makes bread bake 20% faster. Each grows with the bond.' },
