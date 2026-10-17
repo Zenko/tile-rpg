@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'better', x: 'Haze and Briar cards were the weakest to build around, so a few got sturdier: Folding Screen hits for 4, Hollow Log and Bramble have 1 more health, and the Evergreen Sentry has 5 health.' },
   { t: 'better', x: 'Updates download less. When a new version comes out, the game now fetches only the files that changed instead of everything again, and the player pictures moved out of the main script into small image files, so the first load is about 300 KB lighter and the town shows sooner.' },
   { t: 'better', x: 'Easier on a phone. Small buttons now have a 44px area for your thumb without looking any bigger: the Embers pill, the Cards, Journal and Character tabs, the round battle buttons, Release and Make a wish, the pin stars. You can also pinch to zoom the menus now, and the smallest labels (the bottom tabs, the level badge, the clock, town name tags, pack descriptions) are no longer under 11px.' },
   { t: 'better', x: 'Battles on a short phone: the line of effects under the board (weather, the weekly rule, home turf, your passive) folds into its first effect and a "+N" you can tap to open, which gives the board about 60px back. In a crowded hand every card now shows its health as well as its power, stacked when there are six or seven.' },

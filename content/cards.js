@@ -14,7 +14,7 @@ const CARD_POOL = [
   { id: 'pebble', name: 'Worry Stone', icon: '🪨', rarity: 'common', cost: 1, power: 2, grit: 1, kw: ['guard'] },
   { id: 'droplet', name: 'Droplet', icon: '💧', rarity: 'common', cost: 1, power: 2, grit: 2, kw: ['mend'] },
   { id: 'toadstool', name: 'Toadstool', icon: '🍄', rarity: 'common', cost: 2, power: 3, grit: 3, kw: ['guard'] },
-  { id: 'bubble', name: 'Dream Bubble', icon: '🫧', rarity: 'common', cost: 2, power: 2, grit: 2, kw: ['shield'] },
+  { id: 'bubble', name: 'Dream Bubble', icon: '🫧', rarity: 'common', cost: 2, power: 2, grit: 3, kw: ['shield'] },
   { id: 'flintstone', name: 'Flint', icon: '🔥', rarity: 'common', cost: 2, power: 1, grit: 2, kw: ['swift'] },
 
   { id: 'blossom', name: 'Blossom', icon: '🌸', rarity: 'rare', cost: 3, power: 5, grit: 4, kw: ['bloom'] },
@@ -36,7 +36,7 @@ const CARD_POOL = [
   { id: 'rice-cake', name: 'Rice Cake', icon: '🍡', rarity: 'common', cost: 2, power: 3, grit: 3, kw: ['guard'] },
   { id: 'paper-fan', name: 'Paper Fan', icon: '🪭', rarity: 'common', cost: 2, power: 3, grit: 1, kw: ['echo'] },
   { id: 'torii-gate', name: 'Torii Gate', icon: '⛩️', rarity: 'rare', cost: 3, power: 4, grit: 6, kw: ['guard'] },
-  { id: 'folding-screen', name: 'Folding Screen', icon: '🎏', rarity: 'rare', cost: 3, power: 3, grit: 4, kw: ['shield'] },
+  { id: 'folding-screen', name: 'Folding Screen', icon: '🎏', rarity: 'rare', cost: 3, power: 4, grit: 4, kw: ['shield'] },
   { id: 'temple-bell', name: 'Temple Bell', icon: '🔔', rarity: 'rare', cost: 3, power: 4, grit: 4, kw: ['echo'] },
   { id: 'stone-lantern', name: 'Night Lamp', icon: '🗼', rarity: 'ultra', cost: 3, power: 6, grit: 5, kw: ['guard'] },
   { id: 'koi-ascending', name: 'Koi Ascending', icon: '🐉', rarity: 'rare', cost: 3, power: 3, grit: 5, kw: ['mend'] },
@@ -45,7 +45,7 @@ const CARD_POOL = [
   { id: 'acorn', name: 'Acorn', icon: '🌰', rarity: 'common', cost: 1, power: 2, grit: 2, kw: ['mend'] },
   { id: 'firefly', name: 'Firefly', icon: '🪲', rarity: 'common', cost: 2, power: 1, grit: 3, kw: ['swift'] },
 
-  { id: 'hollow-log', name: 'Hollow Log', icon: '🪵', rarity: 'rare', cost: 3, power: 3, grit: 4, kw: ['shield'] },
+  { id: 'hollow-log', name: 'Hollow Log', icon: '🪵', rarity: 'rare', cost: 3, power: 3, grit: 5, kw: ['shield'] },
   { id: 'foxglove', name: 'Foxglove', icon: '🌷', rarity: 'rare', cost: 3, power: 3, grit: 5, kw: ['mend'] },
   { id: 'old-kettle', name: 'Old Kettle', icon: '🫖', rarity: 'rare', cost: 3, power: 4, grit: 4, kw: ['mend'] },
 
@@ -69,7 +69,7 @@ const CARD_POOL = [
   { id: 'sunken-leviathan', name: 'Drowsy Leviathan', icon: '🐙', rarity: 'mythic', cost: 5, power: 10, grit: 10, kw: ['guard'] },
 
   // Briar, Chorus and Sip
-  { id: 'bramble', name: 'Bramble', icon: '🥀', rarity: 'common', cost: 1, power: 2, grit: 2, kw: ['thorns'] },
+  { id: 'bramble', name: 'Bramble', icon: '🥀', rarity: 'common', cost: 1, power: 2, grit: 3, kw: ['thorns'] },
   { id: 'morning-bugle', name: 'Morning Bugle', icon: '📯', rarity: 'common', cost: 2, power: 2, grit: 1, kw: ['rally'] },
   { id: 'dusk-bat', name: 'Dusk Bat', icon: '🦇', rarity: 'common', cost: 2, power: 3, grit: 3, kw: ['drain'] },
   { id: 'village-banner', name: 'Market Banner', icon: '🚩', rarity: 'rare', cost: 3, power: 3, grit: 3, kw: ['rally'] },
@@ -136,7 +136,7 @@ const CARD_POOL = [
   { id: 'ensueno', name: BOSSES.garden, icon: '💭', rarity: 'divine', cost: 5, power: 14, grit: 13, kw: ['seed', 'bloom'], exclusive: 'summon' },
   { id: 'the-atlas', name: `The ${CAST.atlas.name}`, icon: '🗺️', rarity: 'atlas', cost: 5, power: 10, grit: 12, kw: ['guard'], exclusive: 'summon' },
   // Build 271 - more of the thin keywords (Briar, Chorus, Sip, Sting, Lull) and five family spells. Appended at the end on purpose.
-  { id: 'evergreen-sentry', name: 'Evergreen Sentry', icon: '🌲', rarity: 'rare', cost: 3, power: 4, grit: 4, kw: ['thorns'] },
+  { id: 'evergreen-sentry', name: 'Evergreen Sentry', icon: '🌲', rarity: 'rare', cost: 3, power: 4, grit: 5, kw: ['thorns'] },
   { id: 'ladybug', name: 'Ladybug', icon: '🐞', rarity: 'common', cost: 1, power: 2, grit: 1, kw: ['sting'] },
   { id: 'clay-jar', name: 'Clay Jar', icon: '🏺', rarity: 'rare', cost: 3, power: 4, grit: 4, kw: ['thorns'] },
   { id: 'drift-ice', name: 'Drift Ice', icon: '🧊', rarity: 'ultra', cost: 3, power: 3, grit: 4, kw: ['thorns', 'shield'] },
