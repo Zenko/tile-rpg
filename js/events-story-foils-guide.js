@@ -31,7 +31,7 @@ function noteTodayEvent() {
   logEvent(ev.icon, `Today in town: ${ev.name}. ${ev.text}`);
   showTipOnce('events');
 }
-function packPrice(pack) { return Math.round(pack.cost * (eventIs('market-day') ? 0.8 : 1)); }
+function packPrice(pack) { return Math.round(pack.cost * (eventIs('market-day') ? 0.8 : 1) * (1 - Math.min(0.15, cardBonus('packDiscount')))); }   // Merchant skill, up to 15% off
 
 /* ============================================================
    GETTING STARTED: a short guided path for someone new to town

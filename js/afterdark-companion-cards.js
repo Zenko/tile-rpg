@@ -233,7 +233,7 @@ function companionSaveBond(c) { if (c) bondsStore()[companionKey(c)] = { bond: c
 function companionGrow(pts) {
   const c = state.companion; if (!c || !pts) return;
   const before = bondLevel(c);
-  c.bond = (c.bond || 0) + pts;
+  c.bond = (c.bond || 0) + pts * (1 + cardBonus('bondRate'));   // Caretaker skill and Walking boots
   const after = bondLevel(c);
   if (after > before) {
     toast(`${c.icon} ${c.name} feels closer to you (bond ${after}): their perk${companionPerks(c).length > 1 ? 's' : ''} grew`);
@@ -344,7 +344,7 @@ function companionMemories(c, latestOnly) {
 function companionGiftReady(c) { c = c || state.companion; return !!c && bondLevel(c) >= 2 && !companionDay().gift; }
 function companionGift() {
   const c = state.companion; if (!companionGiftReady(c)) return '';
-  const bl = bondLevel(c), embers = 2 + bl * 2;
+  const bl = bondLevel(c), embers = 2 + bl * 2 + Math.round(cardBonus('giftEmbers'));
   companionDay().gift = true;
   addPebbles(embers, 'companion'); addXP(10);
   let cardId = null;

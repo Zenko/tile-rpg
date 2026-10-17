@@ -137,6 +137,8 @@ function startBattleNow(opponent, first) {
     if (sp || dr) BattleEngine.boost(G, 0, { spirit: sp, draw: dr });
     // ★★★ mastered cards arrive a little tougher
     G.p[0].deck.concat(G.p[0].hand).forEach(c => { if (!c.spell && masteryRank(c.id) >= 3) { c.grit++; c.hp++; } });
+    // Tactician: cards that cost little (and at Mastery II every card) start a point tougher
+    const hpTier = Math.round(cardBonus('startHp')); if (hpTier > 0) G.p[0].deck.concat(G.p[0].hand).forEach(c => { if (!c.spell && (hpTier >= 4 || c.cost <= hpTier + 1)) { c.grit++; c.hp++; } });
   }
   G.events.length = 0;
 

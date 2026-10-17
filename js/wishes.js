@@ -18,7 +18,7 @@ function wishableCards() { return CARD_POOL.filter(c => !c.exclusive && !c.foe &
 
 // A pack just gave `id`, and the Dreamer already had a copy. Returns the Starlight it earned.
 function awardStarlight(id) {
-  const def = cardDef(id), n = (def && RELEASE_VALUE[def.rarity]) || 0;
+  const def = cardDef(id), base = (def && RELEASE_VALUE[def.rarity]) || 0, n = base ? base + Math.max(cardBonus('starlight') > 0 ? 1 : 0, Math.round(base * cardBonus('starlight'))) : 0;   // Stargazer skill and Star-glass: a share more, at least 1 more
   if (n > 0) { state.progress.starlight = starlight() + n; }
   return n;
 }

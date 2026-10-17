@@ -1,7 +1,8 @@
 /* ============================================================
    PATH: SKILLS, GEAR AND COMPANION BOND (build 99)
-   The RPG layer. Every level from 2 up gives one skill point to spend in four branches (Angler, Gardener, Duelist,
-   Wanderer, five ranks each). Three tools (rod, watering can, lantern) are upgraded with Embers. A companion grows
+   The RPG layer. Every level from 2 up gives one skill point to spend in ten branches (Angler, Gardener, Duelist, Wanderer,
+   Baker, Player, Merchant, Caretaker, Tactician, Stargazer). Ranks 1-5 cost one point each; Mastery I and II (ranks 6 and 7) cost two
+   and add a new effect instead of more of the same (a branch's ranks 1-5 can sit at a cap, e.g. bite speed). Eight tools are upgraded with Embers. A companion grows
    closer to you as you win matches and catch fish and reaches bond levels 2 and 3, which strengthen its perk.
 
    None of this adds a new hook to the game's systems: everything is summed by kind in skillBonus(kind), which
@@ -9,20 +10,48 @@
    chests, XP, battle starts and win Embers all pick it up through the hooks they had.
    Saved in state.progress.skills / .gear (and state.companion.bond), created lazily - older saves just start at zero.
    ============================================================ */
-const SKILL_MAX_RANK = 5;
+const SKILL_MAX_RANK = 5, SKILL_MASTERY_RANK = 7, SKILL_MASTERY_COST = 2;   // ranks 6 and 7 are Mastery I and II
 const SKILL_BRANCHES = [
   { id: 'angler',   icon: '🎣', name: 'Angler',   blurb: 'Fish bite sooner',
     perks: r => [{ kind: 'fish', val: 0.04 * r }],
-    text: r => `Fish bite ${4 * r}% sooner` },
+    text: r => `Fish bite ${4 * r}% sooner`,
+    mastery: m => [{ kind: 'fishPebbles', val: m }], mtext: m => `+${m} ${currencyName(m)} for every fish you keep` },
   { id: 'gardener', icon: '🌱', name: 'Gardener', blurb: 'Crops grow faster and pay more',
     perks: r => [{ kind: 'crops', val: 0.04 * r }, { kind: 'harvestPebbles', val: Math.floor(r / 2) }],
-    text: r => `Crops grow ${4 * r}% faster${r >= 2 ? `, +${Math.floor(r / 2)} ${currencyName(Math.floor(r / 2))} per harvest` : ''}` },
+    text: r => `Crops grow ${4 * r}% faster${r >= 2 ? `, +${Math.floor(r / 2)} ${currencyName(Math.floor(r / 2))} per harvest` : ''}`,
+    mastery: m => [{ kind: 'harvestPebbles', val: m }], mtext: m => `+${m} more ${currencyName(m)} per harvest` },
   { id: 'duelist',  icon: '⚔️', name: 'Duelist',  blurb: 'A better start in every match',
     perks: r => [{ kind: 'startSpirit', val: Math.floor(r / 2) }, { kind: 'winPebbles', val: r >= 3 ? 1 : 0 }, { kind: 'startDraw', val: r >= 5 ? 1 : 0 }],
-    text: r => r < 2 ? 'Unlocks at rank 2' : `+${Math.floor(r / 2)} Calm at the start${r >= 3 ? `, +1 ${GAME.currency.one} per win` : ''}${r >= 5 ? ', draw 1 extra card' : ''}` },
+    text: r => r < 2 ? 'Unlocks at rank 2' : `+${Math.floor(r / 2)} Calm at the start${r >= 3 ? `, +1 ${GAME.currency.one} per win` : ''}${r >= 5 ? ', draw 1 extra card' : ''}`,
+    mastery: m => [{ kind: 'startSpirit', val: m }], mtext: m => `+${m} more Calm at the start` },
   { id: 'wanderer', icon: '🧭', name: 'Wanderer', blurb: 'Sharper eyes and quicker learning',
     perks: r => [{ kind: 'finds', val: 0.06 * r }, { kind: 'chest', val: 0.04 * r }, { kind: 'xp', val: 0.02 * r }],
-    text: r => `Finds +${6 * r}%, chests +${4 * r}%, XP +${2 * r}%` },
+    text: r => `Finds +${6 * r}%, chests +${4 * r}%, XP +${2 * r}%`,
+    mastery: m => [{ kind: 'xp', val: 0.04 * m }], mtext: m => `XP +${4 * m}% more` },
+  { id: 'baker',    icon: '🍞', name: 'Baker',    blurb: 'Bread bakes faster',
+    perks: r => [{ kind: 'bake', val: 0.05 * r }, { kind: 'breadPebbles', val: Math.floor(r / 2) }],
+    text: r => `Bread bakes ${5 * r}% faster${r >= 2 ? `, a spare loaf sells for +${Math.floor(r / 2)}` : ''}`,
+    mastery: m => [{ kind: 'breadPebbles', val: 2 * m }], mtext: m => `A spare loaf sells for +${2 * m} more` },
+  { id: 'player',   icon: '🎲', name: 'Player',   blurb: 'Mini-games pay more',
+    perks: r => [{ kind: 'miniPebbles', val: Math.ceil(r / 2) }],
+    text: r => `+${Math.ceil(r / 2)} ${currencyName(Math.ceil(r / 2))} for every mini-game medal`,
+    mastery: m => [{ kind: 'miniPebbles', val: m }], mtext: m => `+${m} more per medal` },
+  { id: 'merchant', icon: '🪙', name: 'Merchant', blurb: 'Packs cost less',
+    perks: r => [{ kind: 'packDiscount', val: 0.02 * r }],
+    text: r => `Packs cost ${2 * r}% less`,
+    mastery: m => [{ kind: 'packDiscount', val: 0.025 * m }], mtext: m => `Packs cost ${2.5 * m}% less again` },
+  { id: 'caretaker', icon: '🤝', name: 'Caretaker', blurb: 'Your companion grows closer, faster',
+    perks: r => [{ kind: 'bondRate', val: 0.1 * r }, { kind: 'giftEmbers', val: Math.floor(r / 2) }],
+    text: r => `Bond grows ${10 * r}% faster${r >= 2 ? `, the daily gift has +${Math.floor(r / 2)}` : ''}`,
+    mastery: m => [{ kind: 'bondRate', val: 0.15 * m }, { kind: 'giftEmbers', val: m }], mtext: m => `Bond +${15 * m}% faster, gift +${m}` },
+  { id: 'tactician', icon: '🛡️', name: 'Tactician', blurb: 'Your first plays arrive tougher',
+    perks: r => [{ kind: 'startHp', val: Math.floor(r / 2) }],
+    text: r => r < 2 ? 'Unlocks at rank 2' : `Cards costing ${Math.floor(r / 2) + 1} or less start with +1 health`,
+    mastery: m => [{ kind: 'startHp', val: m }], mtext: m => m >= 2 ? 'Every card starts with +1 health' : 'Cards costing 4 or less start with +1 health' },
+  { id: 'stargazer', icon: '✨', name: 'Stargazer', blurb: 'Duplicates pay more Starlight',
+    perks: r => [{ kind: 'starlight', val: 0.1 * r }],
+    text: r => `A duplicate from a pack pays ${10 * r}% more ${GAME.starlight.name}`,
+    mastery: m => [{ kind: 'starlight', val: 0.15 * m }], mtext: m => `${15 * m}% more again` },
 ];
 const GEAR = [
   { id: 'rod',     icon: '🎣', name: 'Thought Fishing rod',  tiers: [{ cost: 60, level: 3, name: 'Willow rod' }, { cost: 150, level: 8, name: 'Bamboo rod' }, { cost: 320, level: 15, name: 'Silver rod' }],
@@ -31,6 +60,16 @@ const GEAR = [
     perks: t => [{ kind: 'crops', val: 0.06 * t }], text: t => `Crops grow ${6 * t}% faster` },
   { id: 'lantern', icon: '🏮', name: 'Lantern',      tiers: [{ cost: 60, level: 3, name: 'Paper lantern' }, { cost: 150, level: 8, name: 'Brass lantern' }, { cost: 320, level: 15, name: 'Star lantern' }],
     perks: t => [{ kind: 'finds', val: 0.08 * t }, { kind: 'chest', val: 0.04 * t }], text: t => `Finds +${8 * t}%, chests +${4 * t}%` },
+  { id: 'peel',    icon: '🥖', name: 'Bread peel',   tiers: [{ cost: 80, level: 5, name: 'Wooden peel' }, { cost: 200, level: 11, name: 'Iron peel' }, { cost: 420, level: 18, name: 'Copper peel' }],
+    perks: t => [{ kind: 'bake', val: 0.08 * t }], text: t => `Bread bakes ${8 * t}% faster` },
+  { id: 'basket',  icon: '🧺', name: 'Basket',       tiers: [{ cost: 80, level: 5, name: 'Wicker basket' }, { cost: 200, level: 11, name: 'Willow basket' }, { cost: 420, level: 18, name: 'Gilded basket' }],
+    perks: t => [{ kind: 'harvestPebbles', val: Math.ceil(t / 2) }], text: t => `+${Math.ceil(t / 2)} ${currencyName(Math.ceil(t / 2))} per harvest` },
+  { id: 'case',    icon: '🎴', name: 'Card case',    tiers: [{ cost: 100, level: 6, name: 'Paper sleeve' }, { cost: 240, level: 12, name: 'Wooden case' }, { cost: 480, level: 19, name: 'Lacquer case' }],
+    perks: t => [{ kind: 'winPebbles', val: t >= 2 ? 1 : 0 }, { kind: 'startSpirit', val: t >= 3 ? 1 : 0 }], text: t => t < 2 ? 'Tidier decks (nothing yet)' : `+1 ${GAME.currency.one} per win${t >= 3 ? ', +1 Calm at the start' : ''}` },
+  { id: 'boots',   icon: '🥾', name: 'Walking boots', tiers: [{ cost: 80, level: 5, name: 'Cloth boots' }, { cost: 200, level: 11, name: 'Leather boots' }, { cost: 420, level: 18, name: 'Cloud boots' }],
+    perks: t => [{ kind: 'xp', val: 0.03 * t }, { kind: 'bondRate', val: 0.05 * t }], text: t => `XP +${3 * t}%, bond grows ${5 * t}% faster` },
+  { id: 'glass',   icon: '🔭', name: 'Star-glass',   tiers: [{ cost: 120, level: 7, name: 'Cardboard tube' }, { cost: 280, level: 13, name: 'Brass glass' }, { cost: 520, level: 20, name: 'Moon glass' }],
+    perks: t => [{ kind: 'starlight', val: 0.1 * t }, { kind: 'finds', val: 0.04 * t }], text: t => `Finds +${4 * t}%, duplicates pay ${10 * t}% more ${GAME.starlight.name}` },
 ];
 // A companion's bond: wins and catches bring you closer. Level 2 and 3 add a second helping of its perk.
 const BOND_AT = [0, 12, 40];
@@ -43,9 +82,12 @@ const BOND_FROM = { battlesWon: 3, bossesWon: 6, fishCaught: 1, cropsHarvested: 
 
 function skillState() { const p = state.progress; if (!p.skills || typeof p.skills !== 'object') p.skills = {}; return p.skills; }
 function gearState() { const p = state.progress; if (!p.gear || typeof p.gear !== 'object') p.gear = {}; return p.gear; }
-function skillRank(id) { return Math.max(0, Math.min(SKILL_MAX_RANK, Math.floor(skillState()[id]) || 0)); }
+function skillRank(id) { return Math.max(0, Math.min(SKILL_MASTERY_RANK, Math.floor(skillState()[id]) || 0)); }
+// What the next rank costs: one point up to rank 5, then two for each Mastery rank. Points spent on a rank are the sum of those.
+function skillCost(rank) { return rank > SKILL_MAX_RANK ? SKILL_MASTERY_COST : 1; }
+function skillRankCost(r) { return Math.min(r, SKILL_MAX_RANK) + Math.max(0, r - SKILL_MAX_RANK) * SKILL_MASTERY_COST; }
 function skillPointsTotal() { return Math.max(0, (ensureLevel().level || 1) - 1); }
-function skillPointsSpent() { return SKILL_BRANCHES.reduce((n, b) => n + skillRank(b.id), 0); }
+function skillPointsSpent() { return SKILL_BRANCHES.reduce((n, b) => n + skillRankCost(skillRank(b.id)), 0); }
 function skillPointsLeft() { return Math.max(0, skillPointsTotal() - skillPointsSpent()); }
 function gearTier(id) { const g = GEAR.find(x => x.id === id); return g ? Math.max(0, Math.min(g.tiers.length, Math.floor(gearState()[id]) || 0)) : 0; }
 function bondLevel(c) { const b = (c && c.bond) || 0; return BOND_AT.filter(t => b >= t).length; }
@@ -53,7 +95,7 @@ function bondLevel(c) { const b = (c && c.bond) || 0; return BOND_AT.filter(t =>
 // Everything above, summed by kind. Called by cardBonus().
 function skillBonus(kind) {
   let v = 0;
-  SKILL_BRANCHES.forEach(b => { const r = skillRank(b.id); if (r) b.perks(r).forEach(p => { if (p.kind === kind) v += p.val; }); });
+  SKILL_BRANCHES.forEach(b => { const r = skillRank(b.id); if (r) b.perks(Math.min(r, SKILL_MAX_RANK)).forEach(p => { if (p.kind === kind) v += p.val; }); if (r > SKILL_MAX_RANK) b.mastery(r - SKILL_MAX_RANK).forEach(p => { if (p.kind === kind) v += p.val; }); });
   GEAR.forEach(g => { const t = gearTier(g.id); if (t) g.perks(t).forEach(p => { if (p.kind === kind) v += p.val; }); });
   const c = state.companion, bl = bondLevel(c);
   if (c && bl >= 2) companionPerks(c).forEach(pk => { const bp = BOND_PERK[pk]; if (bp && bp[0] === kind) v += bp[bl - 1]; });   // bond 2 adds bp[1], bond 3 adds bp[2], for each of their perks
@@ -65,12 +107,15 @@ function skillBonus(kind) {
 
 function buySkill(id) {
   const b = SKILL_BRANCHES.find(x => x.id === id);
-  if (!b || skillRank(id) >= SKILL_MAX_RANK || skillPointsLeft() < 1) { sfx('tie'); return false; }
+  if (!b || skillRank(id) >= SKILL_MASTERY_RANK || skillPointsLeft() < skillCost(skillRank(id) + 1)) { sfx('tie'); return false; }
   skillState()[id] = skillRank(id) + 1; saveState(); sfx('skill'); buzz(HAP.found); refreshGoalChip(true);   // the town pill must stop saying "1 skill point" at once
-  toast(`${b.icon} ${b.name} rank ${skillRank(id)}: ${b.text(skillRank(id))}`);
-  logEvent(b.icon, `${b.name} reached rank ${skillRank(id)}.`);
+  toast(`${b.icon} ${b.name} ${skillRankName(b, skillRank(id))}: ${skillRankText(b, skillRank(id))}`);
+  logEvent(b.icon, `${b.name} reached ${skillRankName(b, skillRank(id)).toLowerCase()}.`);
   return true;
 }
+// Ranks 1-5 read as 'rank n'; the two above them are Mastery I and II, whose text is the new effect on its own.
+function skillRankName(b, r) { return r > SKILL_MAX_RANK ? 'Mastery ' + 'I'.repeat(r - SKILL_MAX_RANK) : 'rank ' + r; }
+function skillRankText(b, r) { return r > SKILL_MAX_RANK ? b.mtext(r - SKILL_MAX_RANK) : b.text(r); }
 function resetSkills() { state.progress.skills = {}; saveState(); refreshGoalChip(true); sfx('nav'); buzz(HAP.tap); toast('Skill points returned. Spend them however you like.'); }
 function gearBlock(g) {
   const t = gearTier(g.id), next = g.tiers[t];
@@ -109,12 +154,12 @@ function charDrawPath(box) {
   charSection(box, 'Skills');
   const list = document.createElement('div'); list.className = 'pt-list';
   list.innerHTML = SKILL_BRANCHES.map(b => {
-    const r = skillRank(b.id), max = r >= SKILL_MAX_RANK;
-    return `<div class="pt-card"><span class="pt-ico">${b.icon}</span>
-      <div class="pt-body"><div class="pt-name">${b.name}<span class="pt-rank">Rank ${r}/${SKILL_MAX_RANK}</span></div>
-      <div class="pt-pips">${pipsHtml(r, SKILL_MAX_RANK)}</div>
-      <div class="pt-text">${r ? b.text(r) : b.blurb}${!max ? `<small>Next: ${b.text(r + 1)}</small>` : ''}</div></div>
-      <button type="button" class="pt-add" data-skill="${b.id}" aria-label="Add a point to ${b.name}" ${max || !left ? 'disabled' : ''}>${max ? '✓' : '+'}</button></div>`;
+    const r = skillRank(b.id), max = r >= SKILL_MASTERY_RANK, cost = max ? 0 : skillCost(r + 1), mastery = r >= SKILL_MAX_RANK;
+    return `<div class="pt-card${mastery ? ' mastered' : ''}"><span class="pt-ico">${b.icon}</span>
+      <div class="pt-body"><div class="pt-name">${b.name}<span class="pt-rank">${r > SKILL_MAX_RANK ? skillRankName(b, r) : `Rank ${r}/${SKILL_MAX_RANK}`}</span></div>
+      <div class="pt-pips">${pipsHtml(Math.min(r, SKILL_MAX_RANK), SKILL_MAX_RANK)}${mastery ? pipsHtml(r - SKILL_MAX_RANK, SKILL_MASTERY_RANK - SKILL_MAX_RANK).replace(/pt-pip/g, 'pt-pip mastery') : ''}</div>
+      <div class="pt-text">${r ? skillRankText(b, r) : b.blurb}${!max ? `<small>${r >= SKILL_MAX_RANK ? 'Mastery' : 'Next'} (${cost} point${cost === 1 ? '' : 's'}): ${skillRankText(b, r + 1)}</small>` : ''}</div></div>
+      <button type="button" class="pt-add" data-skill="${b.id}" aria-label="${max ? b.name + ' is fully mastered' : `Spend ${cost} point${cost === 1 ? '' : 's'} on ${b.name}`}" ${max || left < cost ? 'disabled' : ''}>${max ? '✓' : cost > 1 ? '+' + cost : '+'}</button></div>`;
   }).join('');
   onAll(list, '[data-skill]', b => { if (buySkill(b.dataset.skill)) drawCharBody(); });
   box.appendChild(list);

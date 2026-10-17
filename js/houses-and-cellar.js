@@ -28,7 +28,7 @@ function ovenAction() {
   if (Date.now() - ov.startedAt < (ov.ms || BAKE_MS)) return 'Not yet. It smells wonderful, though.';
   ov.startedAt = null;
   bumpStat('breadBaked', 1);
-  if (breadCount() >= BREAD_MAX) { addPebbles(4, 'bread'); toast(`🫧 +4 ${GAME.currency.many}`); saveState(); return `Your basket is already full, so ${CAST.baker.name} buys this loaf back for 4 ${GAME.currency.many}.`; }
+  if (breadCount() >= BREAD_MAX) { const sale = 4 + Math.round(cardBonus('breadPebbles')); addPebbles(sale, 'bread'); toast(`🫧 +${sale} ${GAME.currency.many}`); saveState(); return `Your basket is already full, so ${CAST.baker.name} buys this loaf back for ${sale} ${GAME.currency.many}.`; }
   state.progress.bread = breadCount() + 1; saveState();
   toast('🍞 +1 loaf'); sfx('claim'); buzz(HAP.found);
   logEvent('🍞', 'Baked a loaf of bread at the bakery.');

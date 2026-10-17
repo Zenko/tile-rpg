@@ -624,6 +624,9 @@ body.in-battle .screen { padding-top: 0; }
 .pt-pips { display: flex; gap: 4px; margin: 6px 0; }
 .pt-pip { width: 18px; height: 6px; border-radius: 3px; background: var(--track); }
 .pt-pip.on { background: var(--water); }
+.pt-pip.mastery { background: color-mix(in srgb, var(--accent) 22%, var(--track)); }
+.pt-pip.mastery.on { background: var(--accent); }
+.pt-card.mastered { border-color: color-mix(in srgb, var(--accent) 55%, var(--stone-edge)); }
 .pt-text { font-size: .82rem; line-height: 1.45; }
 .pt-text small { display: block; margin-top: 2px; font-size: .74rem; color: var(--ink-soft); }
 .pt-add, .pt-buy { flex: none; min-width: 48px; min-height: 48px; padding: 0 12px; border-radius: 16px; border: 0; background: var(--water); color: var(--on-water); font: inherit; font-size: 1.3rem; font-weight: 800; cursor: pointer; }
