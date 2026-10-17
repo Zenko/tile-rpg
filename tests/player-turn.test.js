@@ -34,7 +34,7 @@ module.exports = async (page, assert) => {
   await page.evaluate(() => playerLookAt({ x: state.playerPos.x + 1, y: state.playerPos.y + 1 }));
   await lookIs(['turn', null, '45']);
   assert.deepStrictEqual((await look()).slice(0, 1).concat((await look())[2]), ['turn', '45'], 'looking diagonally down-right is 45 degrees');
-  assert.ok(await page.evaluate(() => playerEl.querySelector('.pl-turn-img').src === playerArt().turn[3]), 'with that turn picture');
+  assert.ok(await page.evaluate(() => playerEl.querySelector('.pl-turn-img').getAttribute('src') === playerArt().turn[3]), 'with that turn picture');
   await page.evaluate(() => positionPlayer(false));
   assert.strictEqual((await look())[2], '45', 'a redraw keeps the look direction');
   await page.evaluate(() => playerLookAt({ x: state.playerPos.x - 3, y: state.playerPos.y }));

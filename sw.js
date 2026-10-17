@@ -45,13 +45,56 @@ async function precacheArt(cache, urls) {
   await Promise.allSettled([...art].map(u => cache.add(new Request(u, { cache: 'reload' }))));
 }
 
+/* ---------- Incremental installs (build 281) ----------
+   A new build used to download every file again (cache: 'reload'), a megabyte and a half or more for a change that touched three files.
+   scripts/check.py now writes asset-hashes.json, a short fingerprint for every file this worker precaches, and each cache keeps a copy of
+   the fingerprints it was built from (HASHES_KEY). On install the worker finds the previous cache, copies every file whose fingerprint did
+   not change, and downloads only the rest (still with cache: 'reload', for the GitHub Pages max-age reason above). Anything unusual -
+   no asset-hashes.json, no previous cache with fingerprints, a file missing from it - falls back to downloading that file, and no
+   asset-hashes.json at all falls back to the old full install below. tests/assethashes.test.js keeps the file honest. */
+const HASHES_KEY = './__asset-hashes';
+async function loadHashes() {
+  try {
+    const res = await fetch('./asset-hashes.json', { cache: 'reload' }); if (!res.ok) return null;
+    const j = await res.json();
+    return j && j.core && typeof j.core === 'object' && Object.keys(j.core).length ? j : null;
+  } catch (e) { return null; }
+}
+async function previousCache() {
+  try {
+    const names = (await caches.keys()).filter(n => n.startsWith('tile-rpg-') && n !== CACHE_NAME);
+    names.sort((a, b) => (parseInt(b.split('-v')[1], 10) || 0) - (parseInt(a.split('-v')[1], 10) || 0));       // newest first
+    for (const n of names) { const c = await caches.open(n), r = await c.match(HASHES_KEY); if (r) return { cache: c, hashes: await r.json() }; }
+  } catch (e) { /* no usable previous cache: everything is downloaded */ }
+  return null;
+}
+// Copies each unchanged file from the previous cache into the new one and returns the urls that still have to be downloaded.
+async function reuseUnchanged(cache, prev, urls, hashes) {
+  const todo = [];
+  for (const u of urls) {
+    let old = null;
+    if (prev && prev.hashes[u] && prev.hashes[u] === hashes[u]) { try { old = await prev.cache.match(u); } catch (e) { old = null; } }
+    if (old && old.ok) { await cache.put(u, old); } else todo.push(u);
+  }
+  return todo;
+}
+async function installIncremental(hashes) {
+  const cache = await caches.open(CACHE_NAME), prev = await previousCache(), art = hashes.art || {}, all = Object.assign({}, art, hashes.core);
+  const coreTodo = await reuseUnchanged(cache, prev, Object.keys(hashes.core), all);
+  await cache.addAll(coreTodo.map(u => new Request(u, { cache: 'reload' })));                                  // all or nothing, as before
+  const artTodo = await reuseUnchanged(cache, prev, Object.keys(art), all);
+  await Promise.allSettled(artTodo.map(u => cache.add(new Request(u, { cache: 'reload' }))));                 // pictures are best effort, as before
+  await cache.put(HASHES_KEY, new Response(JSON.stringify(all), { headers: { 'content-type': 'application/json' } }));
+}
+
 self.addEventListener('install', event => {
   event.waitUntil(
-    buildPrecacheUrls()
-      // cache: 'reload' skips the browser's own HTTP cache. GitHub Pages sends max-age=600, so without it a new
-      // service worker could precache the *previous* publish's CSS/JS if the phone had fetched them in the last
-      // ten minutes - the new version would then "install" while still showing the old screens.
-      .then(urls => caches.open(CACHE_NAME).then(cache => cache.addAll(urls.map(u => new Request(u, { cache: 'reload' }))).then(() => precacheArt(cache, urls))))
+    loadHashes().then(hashes => hashes ? installIncremental(hashes) :
+      buildPrecacheUrls()
+        // cache: 'reload' skips the browser's own HTTP cache. GitHub Pages sends max-age=600, so without it a new
+        // service worker could precache the *previous* publish's CSS/JS if the phone had fetched them in the last
+        // ten minutes - the new version would then "install" while still showing the old screens.
+        .then(urls => caches.open(CACHE_NAME).then(cache => cache.addAll(urls.map(u => new Request(u, { cache: 'reload' }))).then(() => precacheArt(cache, urls)))))
       .then(() => self.skipWaiting())
   );
 });

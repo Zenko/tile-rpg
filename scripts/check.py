@@ -65,10 +65,31 @@ else:
 # art-manifest.json: every card picture / icon the scripts name, so sw.js can precache them without re-downloading and
 # scanning every script at install time. Same pattern sw.js used; only files that exist are listed. Rewritten when it changes.
 import json
-art = sorted({m for src in list(allsrc.values()) + [html] for m in re.findall(r'assets/(?:icons|cards)/[\w.-]+\.png', src) if os.path.exists(m)})
+art = sorted({m for src in list(allsrc.values()) + [html] for m in re.findall(r'assets/(?:icons|cards|player-gen)/[\w.-]+\.png', src) if os.path.exists(m)})
 new = json.dumps(art, indent=0) + '\n'
 if not os.path.exists('art-manifest.json') or open('art-manifest.json').read() != new:
     open('art-manifest.json', 'w').write(new); print(f'wrote art-manifest.json ({len(art)} pictures)')
+
+# asset-hashes.json: a short content fingerprint of every file the service worker precaches (the same list sw.js builds: the
+# <script src> / <link href> files in index.html, manifest.json and its icons, and the pictures in art-manifest.json). On a new build the worker
+# downloads only the files whose fingerprint changed and copies the rest from the previous cache (sw.js, HANDOFF section 2). It is rewritten when it
+# changes - COMMIT IT WITH THE PUBLISH: a stale file here would keep players on an old copy of a changed file, and tests/assethashes.test.js fails if it is stale.
+import hashlib
+def _fp(path):
+    return hashlib.sha1(open(path, 'rb').read()).hexdigest()[:10]
+def _local(raw):
+    return None if re.match(r'^(https?:)?//', raw, re.I) or raw.startswith(('data:', 'mailto:')) else raw
+_core = {'./': _fp('index.html'), './index.html': _fp('index.html'), './manifest.json': _fp('manifest.json')}
+for _m in re.finditer(r'<(?:script|link)\b[^>]*?(?:src|href)="([^"]+)"[^>]*>', html, re.I):
+    _u = _local(_m.group(1))
+    if _u and os.path.exists(_u.split('?')[0].lstrip('./') or 'index.html'): _core['./' + re.sub(r'^\.?/', '', _u)] = _fp(_u.split('?')[0])
+for _i in json.load(open('manifest.json')).get('icons', []):
+    _u = _local(_i['src'])
+    if _u and os.path.exists(_u): _core['./' + re.sub(r'^\.?/', '', _u)] = _fp(_u)
+_art = {'./' + u: _fp(u) for u in art}
+_new = json.dumps({'core': _core, 'art': _art}, indent=0, sort_keys=True) + '\n'
+if not os.path.exists('asset-hashes.json') or open('asset-hashes.json').read() != _new:
+    open('asset-hashes.json', 'w').write(_new); print(f'wrote asset-hashes.json ({len(_core)} files, {len(_art)} pictures)')
 
 # 7. The names players see live in js/game-config.js (HANDOFF §5 "Reskinning"). A name typed straight into a string in js/
 #    (or content/) would not change when the config does, so it fails here. Comments may say anything; a line that really means the plain

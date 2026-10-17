@@ -77,6 +77,12 @@ function applyPlayerSprite(el, character, animate) {
 const FACE_DEG = { down: 0, right: 90, up: 180, left: 270 };
 const DEG_FACE = { 0: 'down', 90: 'right', 180: 'up', 270: 'left' };
 const normDeg = d => ((Math.round(d / 15) * 15) % 360 + 360) % 360;
+// The pictures are files now (assets/player-gen/, build 281), not data: URIs, so the 24 turn pictures (set one at a time while she turns on the spot)
+// are fetched ahead when the browser is idle, and a turn never waits on a picture. Only the character in use: the others load when picked.
+function preloadPlayerArt() {
+  try { const art = playerSpriteReady() && playerArt(); if (!art) return; [art.face].concat(art.turn || []).forEach(u => { if (typeof u === 'string') { const i = new Image(); i.src = u; } }); } catch (e) { /* preloading is a courtesy */ }
+}
+setTimeout(() => (window.requestIdleCallback || (f => setTimeout(f, 300)))(preloadPlayerArt), 1500);
 function artTurns(art) { return !!(art && art.turn && art.turn.length === 24 && art.views.right); }
 function sprAngle(spr) { return spr.dataset.ang !== undefined ? +spr.dataset.ang : (FACE_DEG[spr.dataset.view] || 0); }
 function sprShow(spr, art, deg) {
@@ -85,7 +91,7 @@ function sprShow(spr, art, deg) {
   const v = spr.querySelector('.pl-view[data-v="turn"]'); if (!v) return;
   const uri = art.turn[deg / 15], img = v.querySelector('.pl-turn-img'), tint = v.querySelector('.pl-tint');
   if (img.getAttribute('src') !== uri) img.src = uri;
-  tint.style.webkitMaskImage = tint.style.maskImage = `url(${uri})`;     // the time-of-day tint follows the picture
+  if (location.protocol !== 'file:') tint.style.webkitMaskImage = tint.style.maskImage = `url(${uri})`;     // the time-of-day tint follows the picture (a mask is fetched in CORS mode: not from file://, where the tint just stays put)
   spr.dataset.view = 'turn'; spr.dataset.flip = '';
 }
 function sprTurnTo(spr, art, goal, animate) {
