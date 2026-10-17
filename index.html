@@ -192,6 +192,12 @@
                 <button id="cloudBackupBtn" class="btn btn-ghost">🔗 Back up</button>
                 <button id="cloudRestoreBtn" class="btn btn-ghost">📥 Restore</button>
               </div>
+              <div class="st-row"><span class="st-ico">💾</span><span class="st-label">Save file<small>Keep a copy of your game on this device, or load one back in. Works without an account</small></span></div>
+              <div class="st-block st-pair">
+                <button id="saveFileExportBtn" class="btn btn-ghost">⬇️ Save to file</button>
+                <button id="saveFileImportBtn" class="btn btn-ghost">⬆️ Load from file</button>
+                <input type="file" id="saveFileInput" accept=".json,application/json" class="hidden" aria-label="Choose a save file">
+              </div>
               <div class="st-row"><span class="st-ico">📊</span><span class="st-label"><span data-game="GAME.currency.one">Ember</span> ledger<small>Where your <span data-game="GAME.currency.many">Embers</span> came from</small></span><button class="btn btn-ghost st-small" id="econToggle" type="button">Show</button></div>
               <div class="panel-desc hidden st-econ" id="econPanel"></div>
             </div>
@@ -869,6 +875,7 @@ pixiReady.catch(function () {});
 <script src="js/craft-forge.js"></script>
 <script src="js/portal-craft.js"></script>
 <script src="js/collection-tools.js"></script>
+<script src="js/save-file.js"></script>
 <script src="js/journal-history.js"></script>
 <script src="js/build.js"></script>
 <link rel="prefetch" href="js/changelog-archive.js" as="script">

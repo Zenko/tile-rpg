@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'new', x: 'Save to a file. Settings, Your save now has "Save to file" and "Load from file": keep a copy of your game on your device, or move it to another browser, with no account or connection. Loading asks first and keeps a copy of the game it replaces.' },
   { t: 'better', x: 'Haze and Briar cards were the weakest to build around, so a few got sturdier: Folding Screen hits for 4, Hollow Log and Bramble have 1 more health, and the Evergreen Sentry has 5 health.' },
   { t: 'better', x: 'Updates download less. When a new version comes out, the game now fetches only the files that changed instead of everything again, and the player pictures moved out of the main script into small image files, so the first load is about 300 KB lighter and the town shows sooner.' },
   { t: 'better', x: 'Easier on a phone. Small buttons now have a 44px area for your thumb without looking any bigger: the Embers pill, the Cards, Journal and Character tabs, the round battle buttons, Release and Make a wish, the pin stars. You can also pinch to zoom the menus now, and the smallest labels (the bottom tabs, the level badge, the clock, town name tags, pack descriptions) are no longer under 11px.' },
