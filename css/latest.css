@@ -2514,3 +2514,37 @@ body.pw-board #goalChip { display: none !important; }   /* the dice panel says w
 #btYouBar:has(#btCheer:not(.hidden)) .bt-mini { width: 34px; height: 34px; font-size: .9rem; }
 /* on a narrow phone with all three power buttons, the "?" help button gives way so the Calm number is not cut off (the first-time help still opens by itself) */
 @media (max-width: 380px) { #btYouBar:has(#btCheer:not(.hidden)) #btHelp { display: none; } }
+
+/* ---- TOUCH TARGETS (build 280): small controls get an invisible 44px hit area, so a thumb can hit them without them looking any bigger.
+   scripts/mobile-audit.js measures the effective size by probing taps; tests/mobile.test.js guards the ones below. ---- */
+.hud-pill, .bt-mini, .jgo, .seg-btn, .hud-stat[role="button"], .panel-action, .title-chip, .claim-more, #deckRename { position: relative; }
+.hud-pill::after, .hud-stat[role="button"]::after, .bt-mini::after, .jgo::after, .ch-paint::after, .ps-pin::after, #journalHelpBtn::after, .panel-action::after, .title-chip::after, .claim-more::after, #deckRename::after { content: ''; position: absolute; left: 50%; top: 50%; width: max(100%, 44px); height: max(100%, 44px); transform: translate(-50%, -50%); }
+.seg-btn::after { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: max(100%, 44px); transform: translateY(-50%); }
+.seg.seg-scroll { padding-block: 4px; }   /* the scrolling tab strips clip to their own box, so give the 44px hit area room */
+.jgo { min-height: 44px; }
+.title-chip { min-height: 44px; }   /* chips wrap in rows with little gap, so they are made 44px tall instead of padded */
+.profile-stat .ps-pin { width: 44px; height: 44px; display: flex; align-items: flex-start; justify-content: flex-end; padding: 7px 9px 0 0; }   /* same star, in a 44px button */
+
+/* ---- READABLE TEXT (build 280): UI labels are never under 11px (they were 9 to 10.9px); the Index's small card tiles keep scaling with their card but not below 9px ---- */
+.tab-btn > span:not(.t-icon) { font-size: 11px; }
+.lvl-badge { font-size: 11px; }
+.amb-time, .hud-ambient-sub .amb-time, .hud-ambient-sub .amb-weather { font-size: 11px; }
+.dk-slot-n, .ent-name, .ch-plate, .ch-pins > span, .col .lbl, .bn-group { font-size: 11px; }
+.alm-card.tile .ac-name, .alm-card.tile .ac-power, .alm-card.tile .ac-cost { font-size: max(9px, calc(var(--u) * .95)); }
+#hudLevelBadge, .ps-label, .more-in-shop { font-size: 11px; }
+.pack .pk-desc, .alm-card .ac-count, .alm-card .ac-in, .alm-card.tile .ac-count, .alm-card.tile .ac-in, .pack .btn s, .profile-stat .ps-label { font-size: 11px; }
+
+/* ---- BATTLE EFFECTS LINE, FOLDED (build 280): first effect plus "+N" on a short phone, tap to open ---- */
+#battleView .bt-weather.folded { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; cursor: pointer; padding: 3px 10px; min-height: 28px; }
+#battleView .bt-weather .bw-first { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#battleView .bt-weather .bw-all { text-align: left; line-height: 1.35; }
+#battleView .bt-weather .bw-more { flex: none; font-weight: 700; color: var(--accent); }
+#battleView .bt-weather.folded.open { align-items: flex-start; border-radius: 12px; }
+#battleView .bt-weather.folded { position: relative; }
+#battleView .bt-weather.folded::after { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 44px; transform: translateY(-50%); }
+
+/* ---- HAND READABILITY (build 280): the stack shows only each card's left edge, so power AND health sit side by side at the left (they were at opposite ends, so health was always hidden) ---- */
+#battleView #btHand .hcard:not(:last-child) .stats { justify-content: flex-start; gap: calc(var(--u) * .9); }
+/* a crowded hand (6 or 7 cards) leaves each covered card about 40px: stack power over health there and drop the name, which is cut off anyway */
+#battleView #btHand[style*="--hn: 7"] .hcard:not(:last-child) .nm, #battleView #btHand[style*="--hn: 6"] .hcard:not(:last-child) .nm { display: none; }
+#battleView #btHand[style*="--hn: 7"] .hcard:not(:last-child) .stats, #battleView #btHand[style*="--hn: 6"] .hcard:not(:last-child) .stats { flex-direction: column; align-items: flex-start; gap: calc(var(--u) * .35); font-size: calc(var(--u) * 1.15); }

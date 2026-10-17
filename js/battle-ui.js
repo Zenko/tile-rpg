@@ -144,7 +144,7 @@ function startBattleNow(opponent, first) {
   battle = { npc: opponent, isBoss, first, neutral, G, cheerInfo, profile, weather, sel: null, busy: false, ended: false, rewarded: false, yieldArmed: false, token: ++battleToken, startedAt: Date.now() };
   const chip = [weather === 'snow' ? (isBoss ? '❄️ Boss +2 Calm · richer prize' : '❄️ Richer prize') : '', ...world.chips].filter(Boolean).join(' · ');
   const tw = twistKind ? BattleEngine.TWISTS[twistKind] : null;
-  btGet('btWeather').textContent = opponent.puzzle ? '🧩 Ending your turn resets the board' : [tw ? `${tw.icon} ${tw.text}` : '', opponent.trial ? '🔮 Brings a Fate and a Spread' : '', (G.p[0].passive ? (d => `${d.icon} ${d.name}: ${d.text}`)(passiveDef(G.p[0].passive, G.p[0].passiveTier)) : ''), chip, plainFoe ? '✦ Seasoned deck' : ''].filter(Boolean).join(' · ');
+  btSetChips(opponent.puzzle ? ['🧩 Ending your turn resets the board'] : [tw ? `${tw.icon} ${tw.text}` : '', opponent.trial ? '🔮 Brings a Fate and a Spread' : '', (G.p[0].passive ? (d => `${d.icon} ${d.name}: ${d.text}`)(passiveDef(G.p[0].passive, G.p[0].passiveTier)) : ''), chip, plainFoe ? '✦ Seasoned deck' : ''].filter(Boolean));
   battle.puzzle = !!opponent.puzzle;
 
   townPanel.classList.add('hidden');
@@ -655,6 +655,21 @@ function btCoach() {
   el.textContent = t;
 }
 
+/* The line of effects under the board (weather, the weekly rule, home turf, a passive, ...) can hold five or six of them. On a short phone
+   it folds to its first effect and a "+N" (tap to open); on a tall screen it stays open as before (build 280). */
+function btSetChips(list) {
+  const el = btGet('btWeather'); if (!el) return;
+  el._chips = list; el.classList.remove('open', 'folded');
+  if (!list.length) { el.textContent = ''; el.removeAttribute('role'); el.removeAttribute('tabindex'); return; }
+  if (list.length > 1 && innerHeight < 780) { el.classList.add('folded'); btDrawChips(); } else { el.textContent = list.join(' · '); el.removeAttribute('role'); el.removeAttribute('tabindex'); el.removeAttribute('aria-expanded'); }
+}
+function btDrawChips() {
+  const el = btGet('btWeather'), list = el._chips || []; if (!el.classList.contains('folded')) return;
+  const open = el.classList.contains('open');
+  el.setAttribute('role', 'button'); el.tabIndex = 0; el.setAttribute('aria-expanded', open ? 'true' : 'false');
+  el.innerHTML = open ? `<span class="bw-all">${list.map(escapeHtml).join('<br>')}</span><b class="bw-more">▴</b>` : `<span class="bw-first">${escapeHtml(list[0])}</span><b class="bw-more">+${list.length - 1} ▾</b>`;
+}
+function btToggleChips() { const el = btGet('btWeather'); if (!el || !el.classList.contains('folded')) return; el.classList.toggle('open'); btDrawChips(); sfx('tap'); }
 function btRender(o) { o = o || {}; btRenderKnack(); btRenderFate(); btRenderCheer(); btRenderBars(); btSyncSnackBadge(); btRenderGems(); btRenderBoards(o.entering); btRenderHand(o.drawn, o.dealAll); btCoach(); }
 
 /* ---------------- card info sheet ---------------- */
@@ -1355,6 +1370,8 @@ btGet('btHelp').addEventListener('click', btShowHelp);
 btGet('btYield').addEventListener('click', btYield);
 btGet('btKnack').addEventListener('click', () => { ensureAudio(); if (btGet('btTip').classList.contains('interactive')) btHideTip(); else btShowKnackTip(); });
 btGet('btFate').addEventListener('click', () => { ensureAudio(); if (btGet('btTip').classList.contains('interactive')) btHideTip(); else btShowFateTip(); });
+btGet('btWeather').addEventListener('click', btToggleChips);
+btGet('btWeather').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); btToggleChips(); } });
 btGet('btCheer').addEventListener('click', () => { ensureAudio(); if (btGet('btTip').classList.contains('interactive')) btHideTip(); else btShowCheerTip(); });
 btGet('btHelpClose').addEventListener('click', () => { btGet('btHelpOverlay').classList.add('hidden'); btOpponentOpens(); });
 btGet('mulliganKeepBtn').addEventListener('click', () => { ensureAudio(); btCloseMulligan(); });
