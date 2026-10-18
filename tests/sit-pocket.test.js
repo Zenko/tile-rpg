@@ -21,7 +21,7 @@ module.exports = async function (page) {
   });
   assert.strictEqual(tab.tab, 'town', 'it switches to the town first'); assert.ok(tab.started, 'and then starts');
   // full art as default on small cards
-  const id = await page.evaluate(() => CARD_POOL.map(c => c.id).find(i => hasFullArt(cardDef(i))));
+  const id = await page.evaluate(() => CARD_POOL.map(c => c.id).find(i => hasDrawnArt(cardDef(i))));
   assert.ok(id, 'a card with full art exists');
   const bg = await page.evaluate(i => { const d = cardDef(i), h = document.createElement('div'); h.innerHTML = miniCardHtml(d); document.body.appendChild(h); return new Promise(r => setTimeout(() => { const ok = !!h.querySelector('.card-mini.fa > .fa-scene img') && !!h.querySelector('.card-mini.fa .fa-hero img') && !h.querySelector('img.fa-small'); h.remove(); r(ok); }, 100)); }, id);
   assert.ok(bg, 'a mini card with full art is dressed exactly like the popup: scene behind, subject in front');
