@@ -1,0 +1,78 @@
+/* css/landscape.css - the phone held sideways (build 285). Loaded last. Nothing here applies upright or on a roomy screen:
+   the game stays the 460px column it always was, and only a SHORT landscape screen (a phone on its side) gets this layout.
+   The idea: the dock turns into a rail on the left so the screen's height goes to the map, and the battle stops stacking
+   (opponent / table / you / hand) and lays out across: your side on the left, the table in the middle, your hand under it.
+   No colours in here (css/theme.css has them all). Test: tests/landscape.test.js. Design notes: HANDOFF "Landscape". */
+@media (orientation: landscape) and (max-height: 560px) {
+  :root { --hud-h: 60px; --dock-h: 0px; --rail-w: 74px; --rail-gap: calc(var(--rail-w) + 16px + env(safe-area-inset-left, 0px)); }
+  .app { max-width: none; }
+
+  /* the dock becomes a rail, the sliding pill moves up and down */
+  .bottom-nav { left: calc(8px + env(safe-area-inset-left, 0px)); right: auto; top: 8px; bottom: 8px; width: var(--rail-w); flex-direction: column; padding: 5px; border-radius: 26px; }
+  .bottom-nav::before { left: 5px; right: 5px; top: 5px; bottom: auto; width: auto; height: calc((100% - 10px) / 5); transform: translate3d(0, calc(var(--i) * 100%), 0); }
+  #bottomNav .tab-btn { flex: 1 1 0; height: auto; min-height: 44px; }
+  #bottomNav .tab-btn .dot { top: 4px; left: calc(50% + 10px); }
+
+  /* the town: the top bar only needs to be as wide as its content, everything else clears the rail */
+  .hud { left: var(--rail-gap); right: auto; width: min(430px, calc(100% - var(--rail-gap) - 76px)); top: 8px; }
+  .screen { padding: calc(var(--hud-h) + 10px) 12px 12px var(--rail-gap); }
+  #townPanel { padding: 0; }
+  .goal-chip { left: var(--rail-gap); top: calc(var(--hud-h) + 12px); }
+  .town-info { left: var(--rail-gap); right: 12px; bottom: 10px; }
+  #decorationHint, #hideseekHint { left: var(--rail-gap); }
+  .map-radar-btn { right: calc(12px + env(safe-area-inset-right, 0px)); }
+  .toast { bottom: 14px; }
+  .comp-walk-pill { bottom: 14px; }
+  #sceneView { padding-top: calc(var(--hud-h) + 2px); }
+
+  /* sheets and drawers are 460px upright; sideways they can be a little wider and start beside the rail */
+  .player-menu, .inv-panel, .jsheet, .calm, .fish-scene { max-width: 620px; }
+  /* ---------- the battle, laid out across ----------
+     left: the opponent at the top and you at the bottom (with your Gift, Fate, Cheer and the rest), middle: the table, with your hand under
+     it, right of the hand: the energy gems and End turn. Everything keeps its id and its handlers; only where it sits changes. */
+  #battleView { display: grid; grid-template-columns: 188px minmax(0, 1fr) 122px; grid-template-rows: 28px minmax(0, 1fr) 112px; padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) 0 calc(var(--rail-w) * 0 + env(safe-area-inset-left, 0px)); }
+  #battleView.hidden { display: none !important; }
+  #battleView > .side { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 6px 8px; padding: 8px 10px; width: 100%; min-width: 0; z-index: 3; }
+  #battleView #btOppBar { grid-area: 1 / 1 / 3 / 2; align-self: start; }
+  #battleView #btYouBar { grid-area: 2 / 1 / 4 / 2; align-self: end; margin: 0; }
+  #battleView #btYouBar .nmv { flex: 1 1 calc(100% - 60px); }
+  #battleView .spirit { width: 46px; height: 46px; }
+  #battleView .nmv { flex: 1 1 0; min-width: 0; }
+  #battleView .nmv .who { font-size: .98rem; }
+  #battleView .ohand { margin-left: 0; padding-right: 0; min-height: 36px; flex: 1 1 100%; }
+  #battleView .divider { grid-area: 1 / 2 / 2 / 4; min-height: 0; align-self: center; padding: 0 4px; }
+  #battleView .field { grid-area: 2 / 2 / 3 / 4; min-height: 0; padding: 0 4px; }
+  #battleView .table { width: min(100%, 410px); transform: rotateX(10deg); padding: 3px 6px; }
+  #battleView .coach { grid-area: 2 / 1 / 3 / 2; align-self: center; justify-self: stretch; margin: 0 8px; text-align: left; border-radius: 14px; font-size: .7rem; line-height: 1.3; pointer-events: none; }
+  #battleView .coach:not(:empty) { max-width: none; width: auto; padding: 5px 10px; }
+  #battleView .handwrap { display: contents; }
+  #battleView .hand { grid-area: 3 / 2 / 4 / 3; height: 112px; padding-top: 6px; align-self: end; justify-self: stretch; min-width: 0; }
+  #battleView .energy { grid-area: 3 / 3 / 4 / 4; flex-direction: column-reverse; align-items: stretch; justify-content: flex-end; gap: 8px; padding: 6px 10px 12px 4px; position: relative; z-index: 2; }
+  #battleView #btGems { flex-wrap: wrap; justify-content: center; gap: 4px; }
+  #battleView #btGems .gem { width: 18px; height: 18px; }
+  #battleView .tip { left: 200px; right: 130px; bottom: 120px; }
+
+  /* wide lists of cards: as many columns as fit instead of the three that fit upright */
+  .alm-row { grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); }
+
+  /* a building's inside: the room on the left, what it says and what you can do on the right (upright the actions are a sheet under the room) */
+  #sceneView.sc-std { display: grid; grid-template-columns: 42% minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); --sc-stage-h: 100%; padding: 0; }
+  #sceneView.sc-std .sc-stage { grid-area: 1 / 1 / 3 / 2; height: 100%; }
+  #sceneView.sc-std .sc-head { top: auto; bottom: calc(26% + 12px); right: auto; width: 100%; }
+  #sceneView.sc-std .sc-pips { display: none; }
+  #sceneView.sc-std .sc-bubble { grid-area: 1 / 2; position: relative; left: auto; right: auto; top: auto; width: auto; max-width: none; transform: none; margin: calc(var(--hud-h) + 6px) calc(12px + env(safe-area-inset-right, 0px)) 8px 12px; padding: 9px 14px; font-size: .84rem; line-height: 1.4; text-align: left; }
+  #sceneView.sc-std .sc-bubble::after { display: none; }
+  #sceneView.sc-std .sc-actions { grid-area: 2 / 2; margin: 0 calc(12px + env(safe-area-inset-right, 0px)) 10px 12px; padding: 10px; border: 1px solid var(--stone-edge); border-radius: 18px; box-shadow: none; gap: 8px; }
+  #sceneView.sc-std .sc-actions::before { display: none; }
+  #sceneView.sc-std .sc-btn { min-height: 48px; }
+  #sceneView.sc-std .sc-shop-host { grid-area: 2 / 2; }
+
+  /* the Character page: you on the left (it stays put), the tabs and what they hold on the right */
+  #characterPanel { display: grid; grid-template-columns: 252px minmax(0, 1fr); gap: 0 12px; align-items: start; }
+  #characterPanel .ch-stage, #characterPanel .ch-stage.compact { position: sticky; top: 0; height: min(288px, calc(100vh - var(--hud-h) - 28px)); border-radius: 22px; }
+  #characterPanel .ch-stage.compact .ch-top { opacity: 1; pointer-events: auto; }
+  #characterPanel .ch-stage.compact .ch-actors { bottom: 22px; transform: none; }
+  #characterPanel .ch-stage.compact .ch-ground { transform: none; }
+  #characterPanel .ch-stage.compact .ch-paint { bottom: 10px; width: 44px; height: 44px; font-size: 1.2rem; }
+  #characterPanel .ch-drawer { min-width: 0; }
+}

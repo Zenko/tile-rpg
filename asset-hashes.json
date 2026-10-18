@@ -314,7 +314,7 @@
 "./assets/player-gen/ff0163e89778.png": "ff0163e897"
 },
 "core": {
-"./": "10d21174cc",
+"./": "2cefbdcaa9",
 "./assets/icon-180.png": "843ce9dca7",
 "./assets/icon-192.png": "f9bb875172",
 "./assets/icon-512.png": "4d1c45834b",
@@ -331,10 +331,11 @@
 "./css/battle-town.css": "45baaf40fa",
 "./css/battle-v2.css": "25eedab233",
 "./css/buildings.css": "5fb3416228",
+"./css/landscape.css": "ec86af5d73",
 "./css/latest.css": "0cff44e6bd",
 "./css/screens.css": "113c64489a",
 "./css/theme.css": "ba577aea05",
-"./index.html": "10d21174cc",
+"./index.html": "2cefbdcaa9",
 "./js/adaptive.js": "65d0d0b7c4",
 "./js/afterdark-companion-cards.js": "120caaf712",
 "./js/altar-screen.js": "cf75396c5e",
@@ -344,12 +345,12 @@
 "./js/battle-toss.js": "06393ddd43",
 "./js/battle-ui.js": "8fa6eac9ca",
 "./js/binder.js": "007b5a330a",
-"./js/build.js": "552291d378",
+"./js/build.js": "80c0835fbd",
 "./js/calm.js": "562da418cc",
 "./js/cellar-crawl.js": "ad1ba3205a",
 "./js/cellar-run.js": "50ff97bf09",
 "./js/changelog-archive.js": "5f55d47d09",
-"./js/changelog.js": "91d9dfb9b7",
+"./js/changelog.js": "c9075c4746",
 "./js/character-tab.js": "548095c800",
 "./js/cloud-save.js": "9b24adbc83",
 "./js/coach.js": "b4b09cc355",
@@ -414,7 +415,7 @@
 "./js/town-gl.js": "584a4219a0",
 "./js/town-life.js": "7d7c1f15d0",
 "./js/town-news.js": "9df1720d6a",
-"./js/town-render-weather.js": "5d441fdbde",
+"./js/town-render-weather.js": "1c9b8b5af8",
 "./js/trials.js": "ccbc37fdbd",
 "./js/ui-polish.js": "4092a52ef9",
 "./js/warp-fx.js": "0c8ce6bd66",
@@ -423,6 +424,6 @@
 "./js/wishes.js": "40b44c978a",
 "./js/workshop-and-starter.js": "b1850b333a",
 "./js/world-map.js": "9b590af986",
-"./manifest.json": "257358314f"
+"./manifest.json": "580687b4ec"
 }
 }
