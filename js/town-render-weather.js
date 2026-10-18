@@ -4,9 +4,7 @@
 const townView = document.getElementById('townGrid');
 const VIEW_COLS = 7; let STEP_MS = 170;   // `let`: a walk with your companion slows it down while it lasts (js/companion-activities.js)
 let viewRows = 7;
-let CAM_PAD_TOP = 70, CAM_PAD_BOTTOM = 96, CAM_PAD_LEFT = 0;   // px of the map hidden behind the floating top pill and bottom dock (sideways: the pill and the rail on the left, see css/landscape.css)
-// A phone held sideways: short and wide. Matches the media query that css/landscape.css uses, so the two always agree.
-function isShortLandscape() { return !!(window.matchMedia && window.matchMedia('(orientation: landscape) and (max-height: 560px)').matches); }
+const CAM_PAD_TOP = 70, CAM_PAD_BOTTOM = 96;   // px of the map hidden behind the floating top pill and bottom dock
 let townWorld = null, townBuiltFor = null, tilePx = 48, playerEl = null, walkToken = 0;
 // Rebuilt every renderEntities() call (elements don't survive a rebuild), so the wander ticks in
 // js/neighbors-bosses.js can look an npc/boss/spirit's element up by id instead of re-querying the DOM
@@ -523,10 +521,7 @@ function layoutTown() {
   // The map runs full bleed behind the floating top pill and bottom dock (v1.65.0), so it fills its whole wrapper.
   const wrap = townView.parentElement, vw = wrap ? wrap.clientWidth : 0, vh = wrap ? wrap.clientHeight : 0;
   if (!vw || !vh || townView.offsetParent === null) return false;
-  const side = isShortLandscape();
-  CAM_PAD_TOP = side ? 62 : 70; CAM_PAD_BOTTOM = side ? 10 : 96; CAM_PAD_LEFT = side ? 82 : 0;
-  // upright the map is seven tiles wide; sideways that would make a tile 120px, so the height sets it instead (about five rows)
-  tilePx = side ? Math.max(48, Math.min(Math.ceil(vw / 11), Math.round(vh / 5))) : Math.max(38, Math.ceil(vw / VIEW_COLS));
+  tilePx = Math.max(38, Math.ceil(vw / VIEW_COLS));
   viewRows = Math.max(6, Math.ceil(vh / tilePx));
   townView.style.setProperty('--t', tilePx + 'px');
   townView.style.width = vw + 'px';
@@ -551,7 +546,7 @@ function updateCamera(animate) {
   // The floating pill and dock cover the top and bottom of the map: centre on the visible band between them, and let
   // the map scroll a little past its edges so the first and last rows can be brought clear of them.
   const padT = CAM_PAD_TOP, padB = CAM_PAD_BOTTOM;
-  let cx = (CAM_PAD_LEFT + vw) / 2 - (state.playerPos.x + 0.5) * tilePx, cy = (padT + vh - padB) / 2 - (state.playerPos.y + 0.5) * tilePx;
+  let cx = vw / 2 - (state.playerPos.x + 0.5) * tilePx, cy = (padT + vh - padB) / 2 - (state.playerPos.y + 0.5) * tilePx;
   cx = Math.min(0, Math.max(vw - m.w * tilePx, cx)); cy = Math.min(padT, Math.max(vh - m.h * tilePx - padB, cy));
   if (camFree && (camFree.district !== state.currentDistrict || inScene || inBattle)) camRelease();   // a dragged camera only lives in the district and view it was dragged in
   if (camFree) { const b = camBounds(); cx = Math.min(b.maxX, Math.max(b.minX, camFree.cx)); cy = Math.min(b.maxY, Math.max(b.minY, camFree.cy)); animate = false; }
