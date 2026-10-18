@@ -66,8 +66,9 @@ function battleWorld(opponent, weather) {
   ['swiftBonus', 'bloomStart', 'shieldHp', 'mendBonus'].forEach(k => { if (fx[k]) mods[k] = fx[k]; });
   if (fx.battle) chips.push(fx.battle);
   if (skyPhase().isNight) { mods.echoBonus = 1; chips.push('🌙 Night: Startle hits +1'); }
-  if (typeof applyWeeklyRule === 'function' && !opponent.playerDeck) applyWeeklyRule(mods, chips);
-  const fam = districtFamily(state.currentDistrict);
+  if (typeof applyWeeklyRule === 'function' && !opponent.playerDeck && !opponent.depth) applyWeeklyRule(mods, chips);
+  if (opponent.depth) { Object.assign(mods, depthMods(opponent.district, opponent.depth)); depthRuleText(opponent.district, opponent.depth).forEach(t => chips.push(`${GAME.depth.icon} ${t}`)); }   // a Depth fight: its own rule, not the week's (js/depth.js)
+  const fam = districtFamily(opponent.district || state.currentDistrict);
   if (fam) { mods.famHp = { family: fam, hp: 1 }; chips.push(`${FAMILIES[fam].icon} ${FAMILIES[fam].name} home turf +1♥`); }
   return { mods, chips };
 }
@@ -93,7 +94,7 @@ function startBattleNow(opponent, first) {
   const cheerInfo = companionCheerFor(opponent, neutral);       // the companion's once-per-match cheer (bond 2 and up)
   // Plain neighbors and district bosses get a fresh deck each fight, scaled to how many wins you have (their stored deck
   // predates enhanced and unique foe cards). Every other kind of opponent brings its own deck.
-  const plainFoe = !opponent.dungeon && !opponent.cup && !opponent.draft && !opponent.ghost && !opponent.challenge && !opponent.signature && !opponent.isRival && !opponent.puzzle && !opponent.trial && !opponent.spar && !opponent.visitor;
+  const plainFoe = !opponent.depth && !opponent.dungeon && !opponent.cup && !opponent.draft && !opponent.ghost && !opponent.challenge && !opponent.signature && !opponent.isRival && !opponent.puzzle && !opponent.trial && !opponent.spar && !opponent.visitor;
   opponent.adaptive = !!plainFoe;                       // a plain neighbour or boss: its result counts towards, and is shaped by, your recent form (js/adaptive.js)
   opponent.tilt = plainFoe && typeof adaptTilt === 'function' ? adaptTilt() : null;   // for the playtest counters (js/telemetry.js)
   const mood = plainFoe && typeof adaptApply === 'function' ? adaptApply(profile, opponent, isBoss) : '';
@@ -411,7 +412,7 @@ function btOpponentOpens() {
 function setupBattleBackdrop(opponent, isBoss) {
   const bv = document.getElementById('battleView');
   bv.classList.toggle('bt-boss', isBoss);
-  const districtKey = (opponent.dungeon && opponent.dungeon.district) || state.currentDistrict || 'square';
+  const districtKey = (opponent.dungeon && opponent.dungeon.district) || opponent.district || state.currentDistrict || 'square';
   const biome = BIOME_OF[districtKey] || 'meadow';
   bv.dataset.btBiome = biome;
   // Borrow the district's real palette from the town view's own computed styles, so battle backgrounds
@@ -1227,6 +1228,8 @@ function btShowResult(won, yielded) {
     rivalWin();
   } else if (won && !battle.rewarded && npc.signature) {
     signatureWin();
+  } else if (won && !battle.rewarded && npc.depth) {
+    depthWin();   // js/depth.js
   } else if (won && !battle.rewarded) {
     battle.rewarded = true;
     buryFighter(npc); if (!npc.isBoss) { dropRequestsFor(npc); addFriendship(npc, FRIEND_POINTS.win, 'win'); }

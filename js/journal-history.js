@@ -171,6 +171,7 @@ function battleSparkline(log) {
   return `<svg viewBox="0 0 312 34" width="100%" height="34" role="img" aria-label="Your last ${r.length} results, oldest first"><polyline points="${pts.map(p => p.join(',')).join(' ')}" fill="none" stroke="var(--stone-edge)" stroke-width="2"/>${pts.map((p, i) => `<circle cx="${p[0]}" cy="${p[1]}" r="${i === pts.length - 1 ? 5 : 3.5}" fill="${r[i].won ? 'var(--win-glow)' : 'var(--lose-glow)'}"/>`).join('')}</svg>`;
 }
 function renderBattleLog() {
+  if (typeof drawDepthCard === 'function') drawDepthCard();   // the second lap (js/depth.js)
   const p = state.progress, r = p.record || { won: 0, lost: 0, streak: 0, best: 0 }, total = r.won + r.lost, log = battleLog();
   document.getElementById('battleStats').innerHTML = `
     <div class="bl-stat"><b>${r.won}–${r.lost}</b><span>won–lost</span></div>

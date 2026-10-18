@@ -54,11 +54,11 @@ const SKILL_BRANCHES = [
     mastery: m => [{ kind: 'starlight', val: 0.15 * m }], mtext: m => `${15 * m}% more again` },
 ];
 const GEAR = [
-  { id: 'rod',     icon: '🎣', name: 'Thought Fishing rod',  tiers: [{ cost: 60, level: 3, name: 'Willow rod' }, { cost: 150, level: 8, name: 'Bamboo rod' }, { cost: 320, level: 15, name: 'Silver rod' }],
-    perks: t => [{ kind: 'fish', val: 0.06 * t }], text: t => `Fish bite ${6 * t}% sooner` },
-  { id: 'can',     icon: '🚿', name: 'Watering can', tiers: [{ cost: 60, level: 3, name: 'Tin can' }, { cost: 150, level: 8, name: 'Copper can' }, { cost: 320, level: 15, name: 'Rain-glass can' }],
-    perks: t => [{ kind: 'crops', val: 0.06 * t }], text: t => `Crops grow ${6 * t}% faster` },
-  { id: 'lantern', icon: '🏮', name: 'Lantern',      tiers: [{ cost: 60, level: 3, name: 'Paper lantern' }, { cost: 150, level: 8, name: 'Brass lantern' }, { cost: 320, level: 15, name: 'Star lantern' }],
+  { id: 'rod',     icon: '🎣', name: 'Thought Fishing rod',  tiers: [{ cost: 60, level: 3, name: 'Willow rod' }, { cost: 150, level: 8, name: 'Bamboo rod' }, { cost: 320, level: 15, name: 'Silver rod' }, { cost: 600, level: 20, name: 'Dream rod', depth: ['harbor', 2] }],
+    perks: t => [{ kind: 'fish', val: 0.06 * Math.min(t, 3) }, { kind: 'fishPebbles', val: t >= 4 ? 1 : 0 }], text: t => `Fish bite ${6 * Math.min(t, 3)}% sooner${t >= 4 ? `, +1 ${GAME.currency.one} for every fish you keep` : ''}` },
+  { id: 'can',     icon: '🚿', name: 'Watering can', tiers: [{ cost: 60, level: 3, name: 'Tin can' }, { cost: 150, level: 8, name: 'Copper can' }, { cost: 320, level: 15, name: 'Rain-glass can' }, { cost: 600, level: 20, name: 'Dew-glass can', depth: ['garden', 2] }],
+    perks: t => [{ kind: 'crops', val: 0.06 * t }, { kind: 'harvestPebbles', val: t >= 4 ? 1 : 0 }], text: t => `Crops grow ${6 * t}% faster${t >= 4 ? `, +1 ${GAME.currency.one} per harvest` : ''}` },
+  { id: 'lantern', icon: '🏮', name: 'Lantern',      tiers: [{ cost: 60, level: 3, name: 'Paper lantern' }, { cost: 150, level: 8, name: 'Brass lantern' }, { cost: 320, level: 15, name: 'Star lantern' }, { cost: 600, level: 20, name: 'Dream lantern', depth: ['market', 2] }],
     perks: t => [{ kind: 'finds', val: 0.08 * t }, { kind: 'chest', val: 0.04 * t }], text: t => `Finds +${8 * t}%, chests +${4 * t}%` },
   { id: 'peel',    icon: '🥖', name: 'Bread peel',   tiers: [{ cost: 80, level: 5, name: 'Wooden peel' }, { cost: 200, level: 11, name: 'Iron peel' }, { cost: 420, level: 18, name: 'Copper peel' }],
     perks: t => [{ kind: 'bake', val: 0.08 * t }], text: t => `Bread bakes ${8 * t}% faster` },
@@ -121,6 +121,7 @@ function gearBlock(g) {
   const t = gearTier(g.id), next = g.tiers[t];
   if (!next) return '';
   if ((ensureLevel().level || 1) < next.level) return `Needs Lv ${next.level}`;
+  if (next.depth && typeof depthCleared === 'function' && depthCleared(next.depth[0]) < next.depth[1]) return `Needs ${GAME.depth.name} ${next.depth[1]}`;   // the second lap (js/depth.js)
   if (state.progress.pebbles < next.cost) return `Needs 🫧 ${next.cost}`;
   return '';
 }
@@ -175,7 +176,7 @@ function charDrawPath(box) {
     return `<div class="pt-card"><span class="pt-ico">${g.icon}</span>
       <div class="pt-body"><div class="pt-name">${cur ? cur.name : g.name}<span class="pt-rank">Tier ${t}/${g.tiers.length}</span></div>
       <div class="pt-pips">${pipsHtml(t, g.tiers.length)}</div>
-      <div class="pt-text">${t ? g.text(t) : 'Not upgraded yet'}${next ? `<small>Next: ${next.name}, ${g.text(t + 1)}</small>` : ''}</div></div>
+      <div class="pt-text">${t ? g.text(t) : 'Not upgraded yet'}${next ? `<small>Next: ${next.name}, ${g.text(t + 1)}${next.depth ? ` (clear ${GAME.depth.name} ${next.depth[1]} in ${PLACES[next.depth[0]]})` : ''}</small>` : ''}</div></div>
       ${next ? `<button type="button" class="pt-buy" data-gear="${g.id}" ${block ? 'disabled' : ''}>${block || `🫧 ${next.cost}`}</button>` : '<span class="pt-done">Maxed</span>'}</div>`;
   }).join('');
   onAll(gl, '[data-gear]', b => { if (buyGear(b.dataset.gear)) drawCharBody(); });

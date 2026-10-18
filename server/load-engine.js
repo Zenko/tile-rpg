@@ -10,6 +10,6 @@ module.exports = function loadEngine() {
   const ctx = vm.createContext({ console });
   // const/let at the top of the file are not properties of the context, so the exports are collected in the same script.
   // As in index.html: js/game-config.js (the names players see), then the card data in content/cards.js, then the engine.
-  vm.runInContext(js('game-config.js') + '\n;' + js('content/cards.js') + '\n;' + js('data-and-engine.js') + '\n;' + js('weekly-rule.js') + '\n;this.__engine = { BattleEngine, CARD_POOL, defOf: BattleEngine.defOf, WEEKLY_RULES };', ctx, { filename: 'js/data-and-engine.js' });
+  vm.runInContext(js('game-config.js') + '\n;' + js('content/cards.js') + '\n;' + js('data-and-engine.js') + '\n;' + js('weekly-rule.js') + '\n;' + js('depth-rules.js') + '\n;this.__engine = { BattleEngine, CARD_POOL, defOf: BattleEngine.defOf, WEEKLY_RULES, DEPTH_MAX, DEPTH_RARITY, depthProfile, depthMods, depthDeck };', ctx, { filename: 'js/data-and-engine.js' });
   return ctx.__engine;
 };

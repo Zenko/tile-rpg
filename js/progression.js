@@ -358,6 +358,7 @@ function rewardFloor(isBoss) { return isBoss ? 'super' : 'rare'; }
 const BOSS_TWIST = { square: 'roots', market: 'wall', harbor: 'tide', garden: 'bloom' };
 function bossTwistFor(opponent) {
   if (opponent && opponent.atlas) return opponent.atlas.twist;     // the Atlas's challenges (js/atlas.js)
+  if (opponent && opponent.depth && opponent.district) return BOSS_TWIST[opponent.district] || null;   // a Depth fight keeps the boss's own twist (js/depth.js)
   if (!opponent || !opponent.isBoss || opponent.dungeon || !/^boss-/.test(opponent.id || '')) return null;
   return BOSS_TWIST[opponent.id.slice(5)] || null;
 }

@@ -4,9 +4,10 @@
 //   C. Keywords            the best deck built around each keyword against the same panel
 //   F. Companion cheers   each cheer's win-rate gain for a random deck (bond 2 and bond 3), the aim is about +1 to +3 and +2 to +5
 //   E. Weekly rules       each rule's aimed-at deck with and without the rule, against the same panel: it should help that deck, not make it unbeatable
+//   G. Depth (the second lap)   a family deck against a district boss at Depth 0 to 5: the aim is a steady fall of about 5 to 7 points a Depth, from about 50% at Depth 1 to 25% at Depth 5 (the all-cards deck runs about 15 points higher)
 //   D. Shape of a game     who goes first, how long games last, how often a game stalls, how often spells are cast
 // usage: node scripts/battle-report.js [games per pairing=300]      (about a minute; same seeds every run, so two runs are comparable)
-const { BattleEngine: BE, CARD_POOL, WEEKLY_RULES } = require('../server/load-engine')();   // the engine's CHEERS are read from BE
+const { BattleEngine: BE, CARD_POOL, WEEKLY_RULES, DEPTH_MAX, depthProfile, depthMods, depthDeck } = require('../server/load-engine')();   // the engine's CHEERS are read from BE
 const N = +process.argv[2] || 300;
 const base = CARD_POOL.filter(c => !c.exclusive && !c.foe);
 const RANK = ['common', 'rare', 'ultra', 'super', 'mythic'];
@@ -90,3 +91,25 @@ console.log('\nF. COMPANION CHEERS (a random deck with the cheer against the sam
   const off = rate(null);
   Object.keys(BE.CHEERS).forEach(k => console.log('  ' + (BE.CHEERS[k].icon + ' ' + k).padEnd(12) + [1, 2].map(t => { const on = rate(k, t); return 'bond ' + (t + 1) + ': ' + (on - off >= 0 ? '+' : '') + (on - off).toFixed(1); }).join('   ')));
 }
+
+console.log('\nG. DEPTH (the second lap: a district boss at Depth 0-5, smart AI; the player brings the best deck a family can build, or the all-cards deck; both seats)');
+const depthFam = { square: 'stone', market: 'wind', harbor: 'tide', garden: 'grove' };
+const bestOf = fams.map(c => c.deck), strong = { 'all cards': all }; fams.forEach(c => { strong[c.f + ' deck'] = c.deck; });
+const depthWin = (mine, district, depth, games) => {
+  let w = 0, rs2 = 777 + depth * 31; const r2 = () => (rs2 = (rs2 * 1664525 + 1013904223) >>> 0) / 4294967296;
+  const prof = depthProfile(depth, true), mods = depthMods(district, depth);
+  for (let i = 0; i < games; i++) {
+    const boss = depthDeck(base, r2, depth, depthFam[district]), side = i % 2, sp = side === 0 ? [20, prof.spirit] : [prof.spirit, 20];
+    const r = BE.simulate(41000 + i, side === 0 ? mine : boss, side === 0 ? boss : mine, { opts: { spirit: sp, mods } });
+    if (r.G.winner === side) w++;
+  }
+  return w / games * 100;
+};
+const games = Math.max(40, Math.round(N / 2));
+console.log(' '.repeat(14) + Array.from({ length: DEPTH_MAX + 1 }, (_, d) => ('D' + d).padStart(6)).join(''));
+Object.keys(strong).forEach(name => {
+  const row = Array.from({ length: DEPTH_MAX + 1 }, (_, d) => Object.keys(depthFam).reduce((a, k) => a + depthWin(strong[name], k, d, games), 0) / 4);
+  console.log(name.padEnd(14) + row.map(x => pct(x).padStart(6)).join(''));
+});
+const avgRow = Array.from({ length: DEPTH_MAX + 1 }, (_, d) => panel.slice(0, 6).reduce((a, p) => a + Object.keys(depthFam).reduce((b, k) => b + depthWin(p, k, d, Math.max(10, games / 4)), 0) / 4, 0) / 6);
+console.log('random deck'.padEnd(14) + avgRow.map(x => pct(x).padStart(6)).join(''));

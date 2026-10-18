@@ -195,3 +195,19 @@ const VISITORS = {
   pedlar:   { name: `${CAST.pedlar.name} the Pedlar`, icon: CAST.pedlar.icon, greet: 'Oh, a customer! I only pass through once in a while, so take a look. Everything here is one of a kind, today only.' },
   wanderer: { name: `${CAST.wanderer.name} the Wanderer`, icon: CAST.wanderer.icon, greet: 'I walk from town to town with one deck and play whoever will have me. Fancy a match? Beat me and I will leave you a card from my bag.' },
 };
+
+// ---- used by js/depth.js (the second lap). The numbers behind these are in js/depth-rules.js (DEPTH_MODS). ----
+const DEPTH_RULE_TEXT = {
+  square: ['Watch cards +1 health', 'Haze cards +1 health'],
+  market: ['Flicker cards +1 power', 'Startle hits 1 harder'],
+  harbor: ['Rest restores 1 more Calm', 'Sip restores 1 more Calm'],
+  garden: ['Bloom cards +1 power', 'Briar pricks 1 harder'],
+};
+// What the first clear of each Depth pays: Embers, Starlight and the rarity floor of the card prize (the rarest of a roll and this).
+const DEPTH_FIRST_CLEAR = [null,
+  { embers: 40,  starlight: 10, card: 'ultra' },
+  { embers: 80,  starlight: 20, card: 'ultra' },
+  { embers: 120, starlight: 30, card: 'super' },
+  { embers: 160, starlight: 40, card: 'super' },
+  { embers: 240, starlight: 60, card: 'mythic' },
+];

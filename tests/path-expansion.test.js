@@ -5,7 +5,7 @@ module.exports = async (page, assert) => {
     state.progress.skills = {}; state.progress.gear = {}; state.progress.level = 100; state.companion = null;
     out.branches = SKILL_BRANCHES.length; out.gear = GEAR.length;
     out.complete = SKILL_BRANCHES.every(b => b.mastery && b.mtext && [1, 2].every(m => typeof b.mtext(m) === 'string') && [1, 2, 3, 4, 5].every(r => typeof b.text(r) === 'string' && b.perks(r).length));
-    out.gearText = GEAR.every(g => g.tiers.length === 3 && [1, 2, 3].every(t => typeof g.text(t) === 'string'));
+    out.gearText = GEAR.every(g => g.tiers.length >= 3 && g.tiers.every((x, i) => typeof g.text(i + 1) === 'string'));
     out.total = skillPointsTotal();
     // cost: ranks 1-5 one point each, then two each
     const costs = []; SKILL_BRANCHES[0] && (() => { const id = SKILL_BRANCHES[0].id; for (let i = 0; i < 8; i++) { const before = skillPointsSpent(); const ok = buySkill(id); costs.push(ok ? skillPointsSpent() - before : 0); } })();
