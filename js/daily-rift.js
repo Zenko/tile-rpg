@@ -85,6 +85,11 @@ function dailyRiftLeave(w) {
   st.ms = w.allAt ? w.allAt - w.startedAt : Math.min(DAILY_RIFT_MS, Date.now() - w.startedAt);
   const pay = cards * 2 + (cards && cards === items.length ? 6 : 0);
   if (pay) addPebbles(pay, 'dailyRift');
+  if (cards && cards === items.length) {   // every card found: the Rift Walker, and after ten such days the Rift Cartographer
+    bumpStat('dailyRiftsFull', 1);
+    const k = worldCardId('rift', 'walker') || ((state.progress.totals.dailyRiftsFull || 0) >= 10 ? worldCardId('rift', 'cartographer') : null);
+    if (k) setTimeout(() => giveSpecialCard(k, 'A keepsake from the Daily Rift'), 2500);
+  }
   logEvent('⭐', `Today's rift: ${cards} of ${items.length} cards${cards === items.length && cards ? ` in ${pwFmt(st.ms)}` : ''}.`);
   saveState(); dailyRiftPush();
 }

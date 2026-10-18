@@ -10,7 +10,7 @@ The full to-do list, rarest first, is in [ART-LIST.md](ART-LIST.md).
 
 | | |
 |---|---|
-| Size | **512 × 512 px**, square. The game draws it in a square **64% of the card's width**, centred: about 38–50 px on the battle board, 47 px in the hand, 67–82 px in My Cards, 102 px in the reveal (and 16–20 px inline in text) |
+| Size | **512 × 512 px**, square. Since build 288 every card is full art: the game draws the picture across the top ~70% of the card, inside the card's edge, on a scene made in CSS from the card's family (js/full-art.js, `--fa-*` in css/theme.css), with the name panel over the foot. It is also used at 16–20 px inline in text. Mythic, divine and Atlas cards can have drawn `assets/cards/full/` files on top of this |
 | Format | PNG with a **transparent background** (no card frame - the game draws the rarity-coloured card around it) |
 | Safe area | Keep the subject inside the central ~80%, and let it **fill** most of that: because the art is drawn at 64% of the card width, a small subject looks tiny. Aim for 300 px or more across |
 | Style | Bold, simple silhouettes read best at small sizes. Test it at 40px (the board size) |

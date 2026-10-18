@@ -1,16 +1,17 @@
 /* ============================================================
-   FULL ART: a bigger, more detailed picture for the rarest cards.
-   Mythic, divine and Atlas cards that are listed in FULL_ART show a "full bleed" card: a painted scene fills the whole card and a detailed
-   subject stands in front of it, breaking out past the card's edge. It is used in two places only, both of them large:
-     - the card reveal / Card Details popup (showCardReveal in js/gardening.js)
-     - the attack preview in battle (btAnimate in js/battle-ui.js): the attacking card flies to the middle, strikes, then flies back
-   Full art is the only look of a listed card, at every size (board, hand, tiles, deck lists, draft offers): js/data-and-engine.js cardArtHtml
-   returns the subject and the observer below dresses the card around it. A card that is not listed here looks exactly as it always did.
-   Each card has two files in assets/cards/full/:
-     <id>-scene.svg   the backdrop, 100 x 108, fills the card (cropped to fit)
-     <id>-hero.svg    the subject, 100 x 100 on a transparent background; it may reach past the edges of its square
-   PNG or WebP files of the same names work too if you change the extension in FULL_ART_EXT. To add a card: draw both, drop them in, add the
-   id to FULL_ART. Only the rarities in FULL_ART_RARITIES are eligible, whatever the list says.
+   FULL ART: every card is a full bleed card.
+   A painted scene fills the whole card and the card's picture stands in front of it, kept inside the card's edge (the cost bubble, keyword
+   badges and counts are the only things that hang over it). There are two kinds of scene:
+     - drawn: the mythic, divine and Atlas cards listed in FULL_ART have a hand drawn scene and a more detailed subject of their own, two files
+       in assets/cards/full/:  <id>-scene.svg  the backdrop, 100 x 108, fills the card (cropped to fit)
+                               <id>-hero.svg   the subject, 100 x 100 on a transparent background (PNG or WebP work too if you change FULL_ART_EXT)
+       These cards also get the attack preview in battle (btAnimate in js/battle-ui.js): the attacking card flies to the middle, strikes, then flies back.
+     - auto: every other card (and any card added later) uses its own picture (assets/cards/<id>.png) as the subject on a scene made in CSS from
+       its family and where it comes from (the FULL ART block at the end of css/latest.css; colours in css/theme.css: --fa-*). Nothing to draw: a new
+       card gets the full look the moment it has a picture, and a card with only an emoji shows the emoji large.
+   It is the only look of a card, at every size (board, hand, tiles, deck lists, draft offers, the Card Details popup): js/data-and-engine.js
+   cardArtHtml returns the subject marked `fa-small` and the observer below dresses the card around it. To give a card hand drawn art: draw both
+   files, drop them in, add the id to FULL_ART (only the rarities in FULL_ART_RARITIES are eligible, whatever the list says).
    The attack preview is skipped under reduced motion and when "Fast battles" is on, and a tap on it skips it.
    ============================================================ */
 const FULL_ART_RARITIES = ['mythic', 'divine', 'atlas'];
@@ -23,31 +24,46 @@ const FULL_ART = [
   'duermevela', 'marea-lenta', 'ensueno'
 ];
 
-function hasFullArt(def) {
+// A card with hand drawn files (a listed mythic, divine or Atlas card): it also gets the attack preview in battle.
+function hasDrawnArt(def) {
   return !!def && FULL_ART_RARITIES.includes(def.rarity) && FULL_ART.includes(BattleEngine.baseIdOf(def.id));
+}
+// Every card is full art. Drawn cards use their files, the rest use their own picture on a CSS scene.
+function hasFullArt(def) { return !!def; }
+// The attributes the CSS scene reads: the card's family and what hands it out ("exclusive": boss, portal, puddle, cellar, rift, milestone ...).
+function fullArtAttrs(def) {
+  const id = BattleEngine.baseIdOf(def.id), base = cardDef(id) || def;
+  return `data-fam="${def.spell ? 'spell' : (CARD_FAMILY[id] || 'none')}" data-src="${escapeHtml(base.exclusive || (base.foe ? 'foe' : ''))}"`;
 }
 
 function fullArtUrl(def, part) { return `assets/cards/full/${BattleEngine.baseIdOf(def.id)}-${part}.${FULL_ART_EXT}`; }
 
-// Full art is the ONLY look of a card that has it, at every size. cardArtHtml (js/data-and-engine.js) hands out the detailed subject as
-// img.fa-small; this dresses whatever card face holds one in exactly the face the popup has (scene filling the card, subject standing out of
-// it, translucent name panel, all from the same .fa rules), so battle cards, tiles, deck trays, the Workshop, the Almanac, sets, draft offers and
-// the inspect sheet match the Card Details view. One observer on the page, so no template needs to know.
+// Full art is the ONLY look of a card, at every size. cardArtHtml (js/data-and-engine.js) hands out the card's picture as .fa-small (an img, or
+// a span for an emoji); this dresses whatever card face holds one in exactly the face the popup has (scene filling the card, the picture
+// inside it, translucent name panel, all from the same .fa rules), so battle cards, tiles, deck trays, the Workshop, the Almanac, sets, draft
+// offers and the inspect sheet match the Card Details view. One observer on the page, so no template needs to know.
 const FULL_ART_HOLDERS = '#battleView .card, .alm-card, .card-mini, .ins-card, .draft-opt .reveal-card';
 const FULL_ART_ICONS = '.icon, .ac-icon, .c-icon, .ins-icon';
-function fullArtDress(img) {
-  const card = img.closest(FULL_ART_HOLDERS), icon = img.closest(FULL_ART_ICONS);
-  if (!card || !icon || card.classList.contains('fa')) return;
-  const src = img.getAttribute('src'), alt = img.getAttribute('alt') || '';
-  card.classList.add('fa');
-  card.insertAdjacentHTML('afterbegin', `<div class="fa-scene"><img src="${src.replace('-hero.', '-scene.')}" alt="" draggable="false"></div>`);
-  icon.innerHTML = `<div class="fa-hero"><img src="${src}" alt="${alt}" draggable="false"></div>`;
+function fullArtSubject(el) {
+  if (el.tagName === 'IMG') return `<img src="${el.getAttribute('src')}" alt="${el.getAttribute('alt') || ''}" draggable="false">`;
+  return `<span class="card-emoji">${el.textContent}</span>`;
 }
-function fullArtDecorate(root) { if (root && root.nodeType === 1) root.querySelectorAll('img.fa-small').forEach(fullArtDress); }
+function fullArtScene(el) {
+  if (el.classList.contains('fa-auto')) return `<div class="fa-scene fa-auto-scene" data-fam="${el.dataset.fam || 'none'}" data-src="${el.dataset.src || ''}"></div>`;
+  return `<div class="fa-scene"><img src="${el.getAttribute('src').replace('-hero.', '-scene.')}" alt="" draggable="false"></div>`;
+}
+function fullArtDress(el) {
+  const card = el.closest(FULL_ART_HOLDERS), icon = el.closest(FULL_ART_ICONS);
+  if (!card || !icon || card.classList.contains('fa')) return;
+  card.classList.add('fa');
+  card.insertAdjacentHTML('afterbegin', fullArtScene(el));
+  icon.innerHTML = `<div class="fa-hero">${fullArtSubject(el)}</div>`;
+}
+function fullArtDecorate(root) { if (root && root.nodeType === 1) root.querySelectorAll('.fa-small').forEach(fullArtDress); }
 if (typeof MutationObserver === 'function') {
   new MutationObserver(list => list.forEach(m => m.addedNodes.forEach(n => {
     if (n.nodeType !== 1) return;
-    if (n.matches('img.fa-small')) fullArtDress(n); else if (n.querySelector('img.fa-small')) fullArtDecorate(n);
+    if (n.matches('.fa-small')) fullArtDress(n); else if (n.querySelector('.fa-small')) fullArtDecorate(n);
   }))).observe(document.documentElement, { childList: true, subtree: true });
 }
 
@@ -55,10 +71,11 @@ if (typeof MutationObserver === 'function') {
 function fullArtApply(face, def) {
   if (!face || !hasFullArt(def)) return false;
   const icon = face.querySelector('.icon'); if (!icon) return false;
-  const id = BattleEngine.baseIdOf(def.id), base = `assets/cards/full/${id}-`;
+  const sub = icon.querySelector('.fa-small') || icon.firstElementChild;
+  if (!sub) return false;
   face.classList.add('fa');
-  face.insertAdjacentHTML('afterbegin', `<div class="fa-scene"><img src="${base}scene.${FULL_ART_EXT}" alt="" draggable="false"></div>`);
-  icon.innerHTML = `<div class="fa-hero"><img src="${base}hero.${FULL_ART_EXT}" alt="${escapeHtml(def.name)}" draggable="false"></div>`;
+  face.insertAdjacentHTML('afterbegin', fullArtScene(sub));
+  icon.innerHTML = `<div class="fa-hero">${fullArtSubject(sub)}</div>`;
   return true;
 }
 
@@ -69,7 +86,7 @@ function fullArtApply(face, def) {
 function btAttackPreview(e, token) {
   return new Promise(resolve => {
     const def = cardDef(e.attacker.id);
-    if (!hasFullArt(def) || prefs.fast || !btMotionOk() || typeof battleView === 'undefined' || !battleView.animate) return resolve();
+    if (!hasDrawnArt(def) || prefs.fast || !btMotionOk() || typeof battleView === 'undefined' || !battleView.animate) return resolve();
     const src = document.querySelector(`#battleView .card[data-uid="${e.attacker.uid}"]`);
     if (!src) return resolve();
     const up = e.who === 0, dir = up ? -1 : 1;                         // you attack up the screen, the opponent attacks down it

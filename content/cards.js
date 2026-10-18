@@ -154,6 +154,66 @@ const CARD_POOL = [
   { id: 'tidepool', name: 'Tidepool', icon: '🌧️', rarity: 'rare', cost: 1, power: 0, grit: 0, kw: [], spell: 'tidepool' },
   { id: 'gathering-storm', name: 'Gathering Storm', icon: '⛈️', rarity: 'ultra', cost: 2, power: 0, grit: 0, kw: [], spell: 'gathering-storm' },
   { id: 'last-light', name: 'Last Light', icon: '🕯️', rarity: 'ultra', cost: 1, power: 0, grit: 0, kw: [], spell: 'last-light' },
+  /* Build 288 - cards you cannot find on the map. Every one is `exclusive`, so no pack, ground find, prize or ordinary opponent deck
+     ever produces them; the thing named in `exclusive` hands them out (EXCLUSIVE_HINT, BOSS_CARDS, WORLD_CARDS and MILESTONE_CARDS below).
+       boss       a district boss fields them; once that boss has been beaten they will trade them (js/npc-trade.js)
+       portal     the treasure at the end of a family portal's world (js/portal.js, js/puddle-worlds.js)
+       puddle     a keepsake from each kind of puddle world (js/puddle-modes.js, puddle-sketch.js, puddle-still.js)
+       cellar     what the cellar's deep guardians leave behind (CELLAR_PRIZES, js/houses-and-cellar.js)
+       rift       the Daily Rift (js/daily-rift.js)
+       milestone  a reward for one of the hardest milestones (checkAchievements, js/quests.js)
+     Appended at the end on purpose: deck share codes store cards by their position in this list. */
+  // Bosses: two supers and a mythic each, in their district's family
+  { id: 'door-cat', name: `${BOSSES.square}'s Cat`, icon: '🐈‍⬛', rarity: 'super', cost: 4, power: 5, grit: 8, kw: ['guard', 'thorns'], exclusive: 'boss' },
+  { id: 'sleepers-lantern', name: `Sleeper's Lantern`, icon: '🔦', rarity: 'super', cost: 4, power: 7, grit: 7, kw: ['kin', 'guard'], exclusive: 'boss' },
+  { id: 'last-door', name: 'The Last Door', icon: '🏛️', rarity: 'mythic', cost: 5, power: 8, grit: 11, kw: ['guard', 'shield'], exclusive: 'boss' },
+  { id: 'whisper-courier', name: 'Whisper Courier', icon: '🎒', rarity: 'super', cost: 4, power: 7, grit: 4, kw: ['swift', 'sting'], exclusive: 'boss' },
+  { id: 'rumour-wing', name: 'Rumour Wing', icon: '🦋', rarity: 'super', cost: 4, power: 6, grit: 5, kw: ['swift', 'drain'], exclusive: 'boss' },
+  { id: 'hushed-chorus', name: 'The Hushed Chorus', icon: '🎸', rarity: 'mythic', cost: 5, power: 9, grit: 8, kw: ['swift', 'rally'], exclusive: 'boss' },
+  { id: 'slack-warden', name: 'Slackwater Warden', icon: '🧓', rarity: 'super', cost: 4, power: 5, grit: 8, kw: ['lull', 'mend'], exclusive: 'boss' },
+  { id: 'lullaby-pearl', name: 'Lullaby Pearl', icon: '💤', rarity: 'super', cost: 4, power: 5, grit: 6, kw: ['lull', 'shield'], exclusive: 'boss' },
+  { id: 'undertow-choir', name: 'The Undertow', icon: '🌀', rarity: 'mythic', cost: 5, power: 8, grit: 10, kw: ['lull', 'drain'], exclusive: 'boss' },
+  { id: 'daydream-bloom', name: 'Daydream Bloom', icon: '🪴', rarity: 'super', cost: 4, power: 7, grit: 6, kw: ['seed', 'bloom'], exclusive: 'boss' },
+  { id: 'gentle-briar', name: 'Gentle Briar', icon: '🍀', rarity: 'super', cost: 4, power: 6, grit: 7, kw: ['seed', 'thorns'], exclusive: 'boss' },
+  { id: 'waking-orchard', name: 'The Waking Orchard', icon: '🌳', rarity: 'mythic', cost: 5, power: 9, grit: 9, kw: ['seed', 'kin'], exclusive: 'boss' },
+  // Portals: the treasure at the end of a world entered through a family's portal
+  { id: 'portal-verdant', name: 'Verdant Doorway', icon: '🎋', rarity: 'super', cost: 4, power: 6, grit: 7, kw: ['seed', 'guard'], exclusive: 'portal' },
+  { id: 'portal-hollow', name: 'Hollow Archway', icon: '🏰', rarity: 'super', cost: 4, power: 5, grit: 8, kw: ['guard', 'sting'], exclusive: 'portal' },
+  { id: 'portal-tidemirror', name: 'Tidemirror', icon: '🖼️', rarity: 'super', cost: 4, power: 5, grit: 7, kw: ['lull', 'mend'], exclusive: 'portal' },
+  { id: 'portal-galegate', name: 'Gale Gateway', icon: '🎪', rarity: 'super', cost: 4, power: 7, grit: 4, kw: ['swift', 'kin'], exclusive: 'portal' },
+  // Puddle worlds: one keepsake for each kind of world
+  { id: 'puddle-sprite', name: 'Puddle Sprite', icon: '🌈', rarity: 'ultra', cost: 3, power: 4, grit: 4, kw: ['swift', 'mend'], exclusive: 'puddle' },
+  { id: 'thread-spinner', name: 'Thread Spinner', icon: '🧵', rarity: 'super', cost: 4, power: 7, grit: 7, kw: ['guard', 'echo'], exclusive: 'puddle' },
+  { id: 'dicebound-serpent', name: 'Dicebound Serpent', icon: '🎲', rarity: 'super', cost: 4, power: 7, grit: 5, kw: ['swift', 'thorns'], exclusive: 'puddle' },
+  { id: 'drowned-bell', name: 'Drowned Bell', icon: '🔔', rarity: 'super', cost: 4, power: 5, grit: 7, kw: ['echo', 'lull'], exclusive: 'puddle' },
+  { id: 'living-sketch', name: 'Living Sketch', icon: '✏️', rarity: 'super', cost: 4, power: 6, grit: 6, kw: ['echo', 'shield'], exclusive: 'puddle' },
+  { id: 'frozen-moment', name: 'Frozen Moment', icon: '🌕', rarity: 'super', cost: 4, power: 4, grit: 9, kw: ['shield', 'lull'], exclusive: 'puddle' },
+  // The cellar's deep guardians
+  { id: 'watcher-eye', name: 'Eye of the Watcher', icon: '👁️', rarity: 'super', cost: 4, power: 7, grit: 7, kw: ['guard', 'echo'], exclusive: 'cellar' },
+  { id: 'candle-wraith', name: 'Candlewick Wraith', icon: '💀', rarity: 'super', cost: 4, power: 6, grit: 5, kw: ['drain', 'mend'], exclusive: 'cellar' },
+  { id: 'hollow-king', name: 'King Beneath the Roots', icon: '🎩', rarity: 'mythic', cost: 5, power: 9, grit: 10, kw: ['guard', 'bloom'], exclusive: 'cellar' },
+  // The Daily Rift
+  { id: 'rift-walker', name: 'Rift Walker', icon: '🌌', rarity: 'super', cost: 4, power: 6, grit: 6, kw: ['swift', 'echo'], exclusive: 'rift' },
+  { id: 'rift-cartographer', name: 'Rift Cartographer', icon: '🗺️', rarity: 'mythic', cost: 5, power: 8, grit: 9, kw: ['echo', 'seed'], exclusive: 'rift' },
+  // Milestones: the hardest ones pay a card nobody else has (MILESTONE_CARDS)
+  { id: 'unbroken-champion', name: 'Unbroken Champion', icon: '🏆', rarity: 'mythic', cost: 5, power: 9, grit: 10, kw: ['guard', 'rally'], exclusive: 'milestone' },
+  { id: 'endless-walker', name: 'Endless Walker', icon: '👣', rarity: 'super', cost: 4, power: 6, grit: 6, kw: ['swift', 'mend'], exclusive: 'milestone' },
+  { id: 'anglers-dream', name: `Angler's Dream`, icon: '🎣', rarity: 'mythic', cost: 5, power: 8, grit: 9, kw: ['mend', 'lull'], exclusive: 'milestone' },
+  { id: 'starcaught-koi', name: 'Starcaught Koi', icon: '🐠', rarity: 'super', cost: 4, power: 5, grit: 7, kw: ['mend', 'echo'], exclusive: 'milestone' },
+  { id: 'gilded-marble', name: 'Gilded Marble', icon: '🥇', rarity: 'super', cost: 4, power: 6, grit: 6, kw: ['shield', 'echo'], exclusive: 'milestone' },
+  { id: 'lampbearer', name: 'Lampbearer', icon: '💡', rarity: 'mythic', cost: 5, power: 9, grit: 9, kw: ['guard', 'drain'], exclusive: 'milestone' },
+  { id: 'anvil-spirit', name: 'Anvil Spirit', icon: '⚙️', rarity: 'super', cost: 4, power: 7, grit: 7, kw: ['guard', 'thorns'], exclusive: 'milestone' },
+  { id: 'archivist-owl', name: 'Archivist Owl', icon: '🦉', rarity: 'mythic', cost: 5, power: 8, grit: 10, kw: ['echo', 'shield'], exclusive: 'milestone' },
+  { id: 'hoard-keeper', name: 'Hoard Keeper', icon: '🧰', rarity: 'super', cost: 4, power: 7, grit: 7, kw: ['guard', 'rally'], exclusive: 'milestone' },
+  { id: 'myth-weaver', name: 'Myth Weaver', icon: '🧶', rarity: 'mythic', cost: 5, power: 9, grit: 9, kw: ['echo', 'bloom'], exclusive: 'milestone' },
+  { id: 'crown-of-dreams', name: `${GAME.player.one}'s Crown`, icon: '👑', rarity: 'mythic', cost: 5, power: 9, grit: 9, kw: ['rally', 'shield'], exclusive: 'milestone' },
+  { id: 'cartographers-compass', name: `Cartographer's Compass`, icon: '🧭', rarity: 'mythic', cost: 5, power: 8, grit: 9, kw: ['swift', 'echo'], exclusive: 'milestone' },
+  { id: 'hearthkeeper', name: 'Hearthkeeper', icon: '🏠', rarity: 'super', cost: 4, power: 6, grit: 8, kw: ['mend', 'guard'], exclusive: 'milestone' },
+  { id: 'evergreen-sun', name: 'Evergreen Sun', icon: '☀️', rarity: 'super', cost: 4, power: 7, grit: 6, kw: ['bloom', 'rally'], exclusive: 'milestone' },
+  { id: 'tireless-courier', name: 'Tireless Courier', icon: '📮', rarity: 'super', cost: 4, power: 7, grit: 5, kw: ['swift', 'rally'], exclusive: 'milestone' },
+  { id: 'festival-marshal', name: 'Festival Marshal', icon: '🎗️', rarity: 'super', cost: 4, power: 6, grit: 6, kw: ['rally', 'drain'], exclusive: 'milestone' },
+  { id: 'set-spirit', name: 'Spirit of the Sets', icon: '🧩', rarity: 'super', cost: 4, power: 5, grit: 6, kw: ['shield', 'mend'], exclusive: 'milestone' },
+  { id: 'prism-fox', name: 'Prism Fox', icon: '🦊', rarity: 'super', cost: 4, power: 7, grit: 5, kw: ['swift', 'bloom'], exclusive: 'milestone' },
 ];
 /* Foe cards: unique cards that only opponents carry (neighbors, bosses, cellar floors). They are deliberately NOT in
    CARD_POOL - so they never show up in packs, the Index, deck codes or rewards - but defOf() knows them, so the battle
@@ -186,16 +246,43 @@ const FAMILIES = {
 };
 const CARD_FAMILY = (() => {
   const lists = {
-    grove: 'sprout blossom toadstool cherry-blossom-storm acorn firefly hollow-log foxglove hedgehog storm-lily aurora-stag bramble cactus-keeper bramble-king glowworm seedpod moss-hare dandelion oak-warden world-tree ensueno evergreen-sentry ladybug',
-    stone: 'pebble flintstone geode crystal-spire moonstone mountain-heart rice-cake torii-gate stone-lantern old-kettle copper-kettle-spirit jade-turtle thundering-ram echo-cavern deep-wyrm stone-hen cliff-goat badger quarry-bear mossy-titan duermevela clay-jar',
-    tide: 'droplet bubble tide koi-ascending deep-current whirlpool lantern-fish glass-float river-otter void-koi sunken-leviathan wishing-well heron paper-boat hermit-crab puffer harbor-seal moon-jelly tide-caller kraken marea-lenta drift-ice warm-tea lotus-pool slow-snail',
-    wind: 'feather dove gale origami-crane paper-fan folding-screen temple-bell sky-whale moon-dragon lion-dancer morning-bugle dusk-bat village-banner silver-fox ember-fox rooks-ace mist-wraith honeybee market-sparrow kite-runner murmullo chime-wind dusk-moth parade-balloon drifting-cloud first-light'
+    grove: 'sprout blossom toadstool cherry-blossom-storm acorn firefly hollow-log foxglove hedgehog storm-lily aurora-stag bramble cactus-keeper bramble-king glowworm seedpod moss-hare dandelion oak-warden world-tree ensueno evergreen-sentry ladybug daydream-bloom gentle-briar waking-orchard portal-verdant hollow-king candle-wraith evergreen-sun myth-weaver crown-of-dreams',
+    stone: 'pebble flintstone geode crystal-spire moonstone mountain-heart rice-cake torii-gate stone-lantern old-kettle copper-kettle-spirit jade-turtle thundering-ram echo-cavern deep-wyrm stone-hen cliff-goat badger quarry-bear mossy-titan duermevela clay-jar door-cat sleepers-lantern last-door portal-hollow thread-spinner frozen-moment watcher-eye unbroken-champion anvil-spirit lampbearer archivist-owl hoard-keeper hearthkeeper gilded-marble festival-marshal',
+    tide: 'droplet bubble tide koi-ascending deep-current whirlpool lantern-fish glass-float river-otter void-koi sunken-leviathan wishing-well heron paper-boat hermit-crab puffer harbor-seal moon-jelly tide-caller kraken marea-lenta drift-ice warm-tea lotus-pool slow-snail slack-warden lullaby-pearl undertow-choir portal-tidemirror puddle-sprite drowned-bell anglers-dream starcaught-koi set-spirit',
+    wind: 'feather dove gale origami-crane paper-fan folding-screen temple-bell sky-whale moon-dragon lion-dancer morning-bugle dusk-bat village-banner silver-fox ember-fox rooks-ace mist-wraith honeybee market-sparrow kite-runner murmullo chime-wind dusk-moth parade-balloon drifting-cloud first-light whisper-courier rumour-wing hushed-chorus portal-galegate dicebound-serpent living-sketch rift-walker rift-cartographer endless-walker cartographers-compass tireless-courier prism-fox'
   };
   const m = {};
   Object.keys(lists).forEach(f => lists[f].split(' ').forEach(id => { m[id] = f; }));
   return m;
 })();
-const EXCLUSIVE_HINT = { cellar: 'found deep in the cellar', rival: "a rival's final prize", summon: 'earned at the altar' };
+const EXCLUSIVE_HINT = { cellar: 'found deep in the cellar', rival: "a rival's final prize", summon: 'earned at the altar', boss: 'a boss trades it once beaten', portal: 'the treasure behind a portal', puddle: 'a keepsake from a puddle world', rift: 'earned in the Daily Rift', milestone: 'a reward for a hard milestone' };
+// Each district boss fields these (two supers and a mythic, in the district's family) and, once beaten, trades them (js/npc-trade.js).
+const BOSS_CARDS = {
+  square: ['door-cat', 'sleepers-lantern', 'last-door'],
+  market: ['whisper-courier', 'rumour-wing', 'hushed-chorus'],
+  harbor: ['slack-warden', 'lullaby-pearl', 'undertow-choir'],
+  garden: ['daydream-bloom', 'gentle-briar', 'waking-orchard']
+};
+// Cards handed out by the special worlds that are not the town map. portal: by the family of the portal; puddle: by the kind of puddle world
+// (PW_KINDS); cellar: the guardians' prizes in order (CELLAR_PRIZES in js/houses-and-cellar.js builds on this); rift: the Daily Rift.
+const WORLD_CARDS = {
+  portal: { grove: 'portal-verdant', stone: 'portal-hollow', tide: 'portal-tidemirror', wind: 'portal-galegate' },
+  puddle: { explore: 'puddle-sprite', maze: 'thread-spinner', ladders: 'dicebound-serpent', deep: 'drowned-bell', sketch: 'living-sketch', still: 'frozen-moment' },
+  cellar: ['watcher-eye', 'candle-wraith', 'hollow-king'],
+  rift: { walker: 'rift-walker', cartographer: 'rift-cartographer' }
+};
+// Milestone id (ACHIEVEMENTS in content/guide.js) -> the card it pays when it is first reached. These are the hard ones.
+const MILESTONE_CARDS = {
+  'wins-200': 'unbroken-champion', 'steps-10000': 'endless-walker', 'fish-log-full': 'anglers-dream', 'legend-fish': 'starcaught-koi',
+  'mini-all-gold': 'gilded-marble', 'cellar-20': 'lampbearer', 'masterwork-5': 'anvil-spirit', 'index-90': 'archivist-owl',
+  'collector-150': 'hoard-keeper', 'mythic-x10': 'myth-weaver', 'boss-all': 'crown-of-dreams', 'atlas-all': 'cartographers-compass',
+  'true-local': 'hearthkeeper', 'streak-30': 'evergreen-sun', 'quests-150': 'tireless-courier', 'cup-4': 'festival-marshal',
+  'set-all': 'set-spirit', 'foil-10': 'prism-fox'
+};
+// The Index goals (half, 75%, 90%: content/guide.js) count the cards that can be found; the special cards are a bonus on top, so they do not move the goalposts.
+const SPECIAL_CARD_IDS = new Set([].concat(...Object.values(BOSS_CARDS), Object.values(WORLD_CARDS.portal), Object.values(WORLD_CARDS.puddle), WORLD_CARDS.cellar, Object.values(WORLD_CARDS.rift), Object.values(MILESTONE_CARDS)));
+const INDEX_GOAL = CARD_POOL.filter(c => !SPECIAL_CARD_IDS.has(c.id)).length;
+
 const RARITY_LABEL = { common: 'common', rare: 'rare', ultra: 'ultra rare', super: 'super ultra rare', mythic: 'mythic', divine: 'divine', atlas: 'atlas' };
 // Pack odds are flat on purpose: they must NOT scale with wins, or a veteran's packs would
 // out-pay their own cost and release-and-rebuy would become free money (checked by simulation).

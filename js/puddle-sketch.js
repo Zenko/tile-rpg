@@ -200,7 +200,8 @@ function skFinish(w) {
       const peb = 6 + stars;
       addPebbles(peb, 'puddle-world'); toast(`✏️ ${stars}/${max} stars · +${peb} ${currencyName(peb)}`);
       const roll = rollRewardRarity(false), rarity = stars >= 13 ? (roll === 'common' ? 'rare' : roll) : stars >= 9 ? 'rare' : 'common';
-      pwGiveCard(pwCardId(rarity), stars >= 13 ? 'A masterpiece' : 'The finished sketchbook');
+      const ks = stars >= 9 ? worldCardId('puddle', 'sketch') : null;   // a good sketchbook brings the sketch's own card, once
+      pwGiveCard(ks || pwCardId(rarity), ks ? 'A keepsake from the sketchbook' : stars >= 13 ? 'A masterpiece' : 'The finished sketchbook');
     });
   }, 1400);
 }

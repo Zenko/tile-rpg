@@ -213,11 +213,11 @@ const DEEP_FOES = [
   { name: 'Old Bones',       icon: '💀', kw: 'shield', blurb: 'Something rattles in a heap of dust.' },
 ];
 const DEEP_GUARDIANS = [
-  { name: 'The Watcher Below', icon: '👁️', kw: 'guard', blurb: 'One great eye opens in the rock and follows you.' },
-  { name: 'The Forgotten Wyrm',     icon: '🐉', kw: 'bloom', blurb: 'The floor trembles. Something very large is breathing.' },
+  { name: 'The Watcher Below', icon: '👁️', kw: 'guard', cards: ['watcher-eye', 'candle-wraith', 'watcher-eye', 'candle-wraith'], blurb: 'One great eye opens in the rock and follows you.' },
+  { name: 'The Forgotten Wyrm',     icon: '🐉', kw: 'bloom', cards: ['hollow-king', 'deep-wyrm', 'deep-wyrm'], blurb: 'The floor trembles. Something very large is breathing.' },
 ];
 // The prizes only the deep gives up, handed out by guardians in this order (then at random once you have them all).
-const CELLAR_PRIZES = ['glowworm', 'echo-cavern', 'deep-wyrm'];
+const CELLAR_PRIZES = ['glowworm', 'echo-cavern', 'deep-wyrm'].concat(WORLD_CARDS.cellar);
 function isDeepFloor(i) { return i >= CELLAR.floors.length; }
 function cellarFloor(i) {
   if (!isDeepFloor(i)) return CELLAR.floors[i];
@@ -238,8 +238,9 @@ function deepDeck(fl) {
   }
   const counts = {}; pool.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
   // Depth adds more unique foe cards and more enhanced "+" cards, with extra keywords becoming likelier.
-  return foeEnhanceDeck(BattleEngine.suggestDeck(counts), 4, fl.name,
+  const deck = foeEnhanceDeck(BattleEngine.suggestDeck(counts), 4, fl.name,
     { foeCount: Math.min(2, 1 + Math.floor(d / 5)), enhanced: Math.min(5, 1 + Math.floor(d / 2)), skill: Math.min(0.5, 0.2 + d * 0.03) });
+  return fl.cards ? swapInCards(deck, fl.cards) : deck;   // a guardian fields the cards it drops
 }
 function cellarState() {
   const st = buildingState('cellar');

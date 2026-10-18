@@ -243,7 +243,8 @@ function pwScatterItems(data, m, n, treasure, taken) {
     const isTreasure = treasure && i === n - 1, fam = !!(pwActive() && pwActive().family);
     let rarity = isTreasure ? rollRewardRarity(false) : (Math.random() < 0.35 ? 'rare' : 'common');
     if (isTreasure && fam && rarity === 'common') rarity = 'rare';   // a family world's treasure is at least rare
-    data.items.push({ id: 'item-pw-' + data.items.length, x: s.x, y: s.y, cardId: pwCardId(rarity), collected: false, spawnedAt: 0, collectedAt: null, fixed: true, treasure: isTreasure });
+    const w = pwActive(), portalCard = isTreasure && w && w.family && w.via === 'portal' && !w.daily ? worldCardId('portal', w.family) : null;   // the portal's own card, the first time
+    data.items.push({ id: 'item-pw-' + data.items.length, x: s.x, y: s.y, cardId: portalCard || pwCardId(rarity), collected: false, spawnedAt: 0, collectedAt: null, fixed: true, treasure: isTreasure });
   }
 }
 // A card given outright (a reward, a gift): the same pickup sheet as a hidden card.
@@ -306,6 +307,7 @@ function pwEnter(x, y, forceKind, via, family) {   // via: 'portal' (js/portal.j
 // Enters a world record that is already made (pwEnter's, or the Daily Rift's from js/daily-rift.js). via: undefined (a puddle), 'portal', 'daily'.
 function pwEnterWorld(w, x, y, via) {
   w.origin = { district: state.currentDistrict, x: x == null ? state.playerPos.x : x, y: y == null ? state.playerPos.y : y };
+  w.via = via || null;   // a family portal's world hides that portal's own card (pwScatterItems)
   w.map = pwGenerate(w);
   state.progress.puddleWorld = w; state.progress.pwLast = { biome: w.biome, shape: w.shape, kind: w.kind };
   pwApply(w);
@@ -334,6 +336,7 @@ function pwLeave(why, quiet, after) {   // why: 'faded' (the timer), 'left' (cli
   const origin = w.origin && Object.prototype.hasOwnProperty.call(DISTRICTS, w.origin.district) && w.origin.district !== PW_KEY ? w.origin : { district: 'square', x: null, y: null };
   const back = () => {
     const found = Math.max(0, state.ownedCards.length - (w.cards0 || 0)), k = pwKind(w);
+    const dd = state.districtData[PW_KEY], cleared = w.kind === 'explore' && !w.daily && !!(dd && dd.items && dd.items.length && dd.items.every(i => i.collected));   // every hidden card found
     if (typeof riftNoteLeave === 'function') riftNoteLeave(w, why, found);   // js/rift-atlas.js
     if (typeof dailyRiftLeave === 'function') dailyRiftLeave(w);             // js/daily-rift.js: today's result and the board
     if (k.leave) { try { k.leave(w); } catch (e) { /* cleanup only */ } }
@@ -354,6 +357,8 @@ function pwLeave(why, quiet, after) {   // why: 'faded' (the timer), 'left' (cli
     }
     if (typeof teleInc === 'function') teleInc('puddleWorld.' + why);
     pwUpdatePill();
+    const keep = cleared && !quiet ? worldCardId('puddle', 'explore') : null;
+    if (keep) setTimeout(() => giveSpecialCard(keep, 'A keepsake: every hidden card found'), 1500);
     if (after && !quiet) setTimeout(after, 700);
   };
   // Warped time on the way out too (js/warp-fx.js), running forward this time: the clock catches up and the twist unwinds the other way.

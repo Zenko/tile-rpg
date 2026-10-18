@@ -186,6 +186,16 @@ function checkAchievements() {
       sfx('claim'); buzz(HAP.found);
     }
   });
+  // The hardest milestones also pay a card nobody else has (MILESTONE_CARDS, content/cards.js). Checked on every call, not only when a milestone
+  // is first reached, so a player who reached one before the card existed still gets it.
+  const got = pr.milestoneCards || (pr.milestoneCards = {});
+  Object.keys(MILESTONE_CARDS).forEach(id => {
+    if (!pr.achievements.includes(id) || got[id]) return;
+    got[id] = true; anyNew = true;
+    const a = ACHIEVEMENTS.find(x => x.id === id);
+    giveSpecialCard(MILESTONE_CARDS[id], `Milestone: ${a ? a.name : id}`);
+    logEvent('🏅', `A milestone card: ${cardDef(MILESTONE_CARDS[id]).name}.`);
+  });
   if (anyNew) saveState();
   updateQuestBadge();
   if (!questsPanel.classList.contains('hidden')) renderQuests();

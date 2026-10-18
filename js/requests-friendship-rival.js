@@ -281,13 +281,15 @@ function renderTalkView() {
   const f = talkTo; if (!f) return;
   const card = document.getElementById('talkCard');
   const chatOn = talkVisible('talkTopics') || talkVisible('talkMain'), giftOn = ['talkGift', 'talkDish', 'talkCardGift'].some(talkVisible);
-  if (f._thanks || (talkView === 'chat' && !chatOn) || (talkView === 'gift' && !giftOn)) talkView = 'home';   // a thank-you is spoken over the grid
+  const tradeOn = typeof npcTradeKind === 'function' && !!npcTradeKind(f);   // everyone but Rook, the Atlas and visitors (js/npc-trade.js)
+  if (f._thanks || (talkView === 'chat' && !chatOn) || (talkView === 'gift' && !giftOn) || (talkView === 'trade' && !tradeOn)) talkView = 'home';   // a thank-you is spoken over the grid
   card.dataset.view = talkView;
   const r = reqState().list[f.id], waiting = !f.isRival && !f._thanks && !!r && (r.state === 'open' || (r.state === 'active' && requestDone(r)));
   const cats = [];
   if (chatOn) cats.push({ go: 'chat', ico: '💬', lb: 'Chat', sub: f._tk ? f._tk.next : 'Have a word', main: true, badge: waiting ? '1' : '' });
   cats.push({ go: 'play', ico: '⚔️', lb: 'Play', sub: f.isRival ? 'A duel' : 'Matches' });
   if (giftOn) cats.push({ go: 'gift', ico: '🎁', lb: 'Gift', sub: f._tk ? `Loves ${f._tk.loves}` : 'Something small' });
+  if (tradeOn && !f._thanks) cats.push({ go: 'trade', ico: '🤝', lb: 'Trade', sub: tradeCatSub(f) });
   const html = cats.map((c, i) => `<button type="button" class="tk-cat${c.main ? ' main' : ''}" style="--n:${i}" data-go="${c.go}">${c.badge ? `<span class="badge">${c.badge}</span>` : ''}<span class="ico">${c.ico}</span><span><span class="lb">${c.lb}</span><small>${escapeHtml(c.sub)}</small></span></button>`).join('');
   if (html !== talkCatsSig) { talkCatsSig = html; document.getElementById('talkCats').innerHTML = html; }
   card.querySelectorAll('.tk-pane').forEach(p => {
@@ -296,9 +298,10 @@ function renderTalkView() {
     const first = on && [...p.querySelectorAll('.btn')].find(b => !b.classList.contains('hidden'));
     if (first && !first.disabled) first.classList.add('tk-primary');
   });
-  document.getElementById('talkSubTitle').textContent = { chat: 'Chat', play: 'Play', gift: 'Gift' }[talkView] || '';
+  document.getElementById('talkSubTitle').textContent = { chat: 'Chat', play: 'Play', gift: 'Gift', trade: 'Trade' }[talkView] || '';
+  if (talkView === 'trade') renderTradePane(f);
 }
-function talkGo(view) { if (!talkTo) return; talkView = view; sfx('nav'); renderTalkView(); }
+function talkGo(view) { if (!talkTo) return; talkView = view; sfx('nav'); if (view === 'trade') tradeOpened(talkTo); renderTalkView(); }
 document.getElementById('talkCard').addEventListener('click', e => {
   const g = e.target.closest('[data-go]'); if (g) { talkGo(g.dataset.go); return; }
   if (e.target.closest('#talkBack')) talkGo('home');

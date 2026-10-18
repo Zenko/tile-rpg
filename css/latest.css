@@ -1214,16 +1214,18 @@ body.in-story .toast { opacity: 0; }
 
 /* ==========================================================================================================
    FULL ART (js/full-art.js)
-   Mythic, divine and Atlas cards with files in assets/cards/full/ get a full bleed face where the card is shown large: the card reveal /
-   Card Details popup and the attack preview in battle. A painted scene (.fa-scene) fills the whole card, the subject (.fa-hero) stands in
-   front of it and is allowed past the card's edge, and the name panel turns translucent so the scene shows through it. Everything sizes from
-   the card's own width (cqw), like the rest of the card face, so one set of rules serves the popup and the preview.
+   Every card is a full bleed card: a scene (.fa-scene) fills the whole card behind the picture, the picture (.fa-hero) stands in front of it
+   and stays inside the card, and the name panel turns translucent so the scene shows through it. Cards with hand drawn files (mythic, divine,
+   Atlas) use an img scene and a drawn subject; every other card uses an auto scene (.fa-auto-scene, made here from data-fam and data-src,
+   colours in css/theme.css: --fa-*) and its own picture. Everything sizes in the card's own width (cqw), so one set of rules serves the
+   board, the hand, the tiles, the popup and the attack preview. The cost bubble, keyword badges and counts are the only things that hang
+   over the edge.
    ========================================================================================================== */
 .fa { overflow: visible; }
 .reveal-card.fa .icon, #battleView .card.fa .icon, .alm-card.fa .ac-icon, .card-mini.fa .c-icon, .ins-card.fa .ins-icon { position: static; }
 .fa .cost, .fa .kws, .fa .ac-cost, .fa .ac-kw, .fa .c-cost, .fa .ins-cost, .fa .c-power { z-index: 6; }
 .card-mini.fa .c-power { position: relative; text-shadow: 0 1px 2px rgba(0, 0, 0, .7); color: var(--c-grey-100); }
-.reveal-card.fa .nm { font-size: calc(var(--u) * .8); }   /* the full art popup is a little narrower per letter than it looks: "Mountain of Memory" must fit */
+.reveal-card.fa .nm { font-size: calc(var(--u) * .8); }   /* "Mountain of Memory" and "Cartographer's Compass" must fit */
 .fa .paper, .fa .ac-paper {
   position: relative; z-index: 4;
   background: linear-gradient(to top, color-mix(in srgb, var(--panel) 94%, transparent), color-mix(in srgb, var(--panel) 60%, transparent));
@@ -1231,10 +1233,46 @@ body.in-story .toast { opacity: 0; }
 :root[data-theme="light"] .fa .paper, :root[data-theme="light"] .fa .ac-paper { background: linear-gradient(to top, color-mix(in srgb, var(--panel) 97%, transparent), color-mix(in srgb, var(--panel) 82%, transparent)); }
 .fa-scene { position: absolute; inset: 0; z-index: 0; overflow: hidden; border-radius: inherit; pointer-events: none; }
 .fa-scene img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.fa-hero { position: absolute; z-index: 2; left: -6%; top: -4%; width: 112%; aspect-ratio: 1; pointer-events: none; filter: drop-shadow(0 .9cqw 1.1cqw rgba(0, 0, 0, .4)); }
-.fa-hero img { display: block; width: 100%; height: 100%; }
-/* the popup: a little larger than a plain card so the scene has room, and space above for the subject to rise into */
-.reveal-card-frame.has-fa { margin-top: 24px; margin-bottom: 16px; }
+/* the subject: inside the card, above the name panel */
+.fa-hero { position: absolute; z-index: 2; left: 4%; top: 3%; width: 92%; height: 70%; display: flex; align-items: center; justify-content: center; overflow: hidden; pointer-events: none; filter: drop-shadow(0 .9cqw 1.1cqw rgba(0, 0, 0, .4)); }
+.fa-hero img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.fa-hero .card-emoji { font-size: 38cqw; line-height: 1; }
+
+/* auto scenes: the family colours, a soft light behind the subject and a darker foot where the name panel sits */
+.fa-auto-scene {
+  --fa-a: var(--fa-none-a); --fa-b: var(--fa-none-b);
+  background:
+    radial-gradient(58% 42% at 50% 36%, color-mix(in srgb, var(--fa-light) 62%, transparent), transparent 72%),
+    radial-gradient(120% 55% at 50% 108%, color-mix(in srgb, var(--fa-b) 70%, transparent), transparent 75%),
+    linear-gradient(168deg, var(--fa-a), color-mix(in srgb, var(--fa-a) 55%, var(--pc, var(--fa-b))));
+}
+.fa-auto-scene[data-fam="grove"] { --fa-a: var(--fa-grove-a); --fa-b: var(--fa-grove-b); }
+.fa-auto-scene[data-fam="stone"] { --fa-a: var(--fa-stone-a); --fa-b: var(--fa-stone-b); }
+.fa-auto-scene[data-fam="tide"] { --fa-a: var(--fa-tide-a); --fa-b: var(--fa-tide-b); }
+.fa-auto-scene[data-fam="wind"] { --fa-a: var(--fa-wind-a); --fa-b: var(--fa-wind-b); }
+.fa-auto-scene[data-fam="spell"] { --fa-a: var(--fa-spell-a); --fa-b: var(--fa-spell-b); }
+.fa-auto-scene::before { content: ''; position: absolute; inset: 0; pointer-events: none; }
+/* where the card comes from: a pattern over the scene (cards from the map have none) */
+.fa-auto-scene[data-src="boss"]::before, .fa-auto-scene[data-src="milestone"]::before {
+  background: repeating-conic-gradient(from 0deg at 50% 38%, color-mix(in srgb, var(--fa-gold) 26%, transparent) 0 5deg, transparent 5deg 15deg);
+  -webkit-mask: radial-gradient(circle at 50% 38%, var(--c-grey-0) 8%, transparent 70%); mask: radial-gradient(circle at 50% 38%, var(--c-grey-0) 8%, transparent 70%);
+}
+.fa-auto-scene[data-src="portal"]::before, .fa-auto-scene[data-src="rift"]::before {
+  background: repeating-conic-gradient(from 20deg at 50% 40%, color-mix(in srgb, var(--fa-portal) 38%, transparent) 0 18deg, transparent 18deg 36deg),
+    radial-gradient(circle at 50% 40%, transparent 34%, color-mix(in srgb, var(--fa-dark) 55%, transparent) 100%);
+  -webkit-mask: radial-gradient(circle at 50% 40%, var(--c-grey-0) 10%, transparent 78%); mask: radial-gradient(circle at 50% 40%, var(--c-grey-0) 10%, transparent 78%);
+}
+.fa-auto-scene[data-src="puddle"]::before {
+  background: repeating-radial-gradient(circle at 50% 44%, color-mix(in srgb, var(--fa-ripple) 38%, transparent) 0 1.2cqw, transparent 1.2cqw 8cqw);
+  -webkit-mask: radial-gradient(circle at 50% 44%, var(--c-grey-0) 20%, transparent 80%); mask: radial-gradient(circle at 50% 44%, var(--c-grey-0) 20%, transparent 80%);
+}
+.fa-auto-scene[data-src="cellar"]::before { background: radial-gradient(circle at 50% 40%, transparent 22%, color-mix(in srgb, var(--fa-dark) 78%, transparent) 100%); }
+.fa-auto-scene[data-src="foe"]::before { background: radial-gradient(circle at 50% 40%, transparent 40%, color-mix(in srgb, var(--fa-dark) 45%, transparent) 100%); }
+.fa-auto-scene[data-src="rift"]::after, .fa-auto-scene[data-src="milestone"]::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .7;
+  background: radial-gradient(circle at 18% 22%, var(--fa-gold) 0 .7cqw, transparent 1cqw), radial-gradient(circle at 82% 30%, var(--fa-gold) 0 .9cqw, transparent 1.3cqw), radial-gradient(circle at 70% 12%, var(--fa-gold) 0 .5cqw, transparent .8cqw), radial-gradient(circle at 26% 58%, var(--fa-gold) 0 .6cqw, transparent .9cqw);
+}
+/* the popup: a plain card, now a little larger so the scene has room */
 .reveal-card-frame .reveal-card.fa { width: min(220px, 60vw); }
 
 /* the attack preview: the attacking card lifts to the middle of the field, strikes toward its target, then returns (btAttackPreview) */
@@ -1657,7 +1695,6 @@ body.no-charfx .pl-tint, body.no-charfx .pl-wet, body.no-charfx .pl-frost, body.
 /* Card details sheet: the card itself is shown large (full art when the card has it), details centred underneath */
 .cs-card { margin: 4px 0 12px; }
 .cs-card .reveal-card { width: min(230px, 62vw); }
-.cs-card.has-fa { margin-top: 26px; }
 .cs-card.has-fa .reveal-card { width: min(230px, 62vw); }
 .cs-info { align-items: center; text-align: center; }
 .cs-name { font-size: 1.3rem; }
@@ -2568,3 +2605,19 @@ body.pw-board #goalChip { display: none !important; }   /* the dice panel says w
 .dp-chip.done { color: var(--ink); background: color-mix(in srgb, var(--water) 22%, var(--stone)); }
 .dp-chip.next { border-color: var(--accent); color: var(--ink); box-shadow: inset 0 0 0 1px var(--accent); }
 .dp-chip:disabled { opacity: .45; }
+
+/* ==========================================================================================================
+   TRADE (js/npc-trade.js): the Trade card on the Talk screen. Offers and your spare cards are the same list rows as the Chat topics
+   (.talk-topic); each has a small card picture on its rarity colour, a name and a line under it.
+   ========================================================================================================== */
+#talkCard .tk-pane .tr-box { display: flex; flex-direction: column; gap: 10px; }
+#talkCard .tk-pane .tr-box .talk-sub { margin: 0; text-align: left; }
+#talkCard .tr-offer { padding-left: 12px; text-align: left; }
+.tr-art { flex: none; width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center; background: var(--rg); font-size: 1.5rem; line-height: 1; overflow: hidden; }
+.tr-art .card-art-img { width: 90%; height: 90%; object-fit: contain; vertical-align: baseline; }
+.tr-t { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; text-align: left; }
+.tr-t b { font-size: .95rem; line-height: 1.15; }
+.tr-t small { font-size: .72rem; font-weight: 600; color: var(--ink-soft); line-height: 1.2; }
+#talkCard .tr-offer em { margin-left: auto; font-style: normal; font-size: .72rem; font-weight: 800; color: var(--ink-soft); }
+#talkCard .tr-offer:disabled { opacity: .55; cursor: default; }
+#talkCard .tr-offer:disabled::after { display: none; }

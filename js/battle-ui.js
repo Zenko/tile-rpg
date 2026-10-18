@@ -102,7 +102,8 @@ function startBattleNow(opponent, first) {
   opponent.aiStyle = plainFoe && typeof npcAiStyle === 'function' ? npcAiStyle(opponent) : null;   // a habit of play: aggressive, defensive, tricky or greedy
   const plan = plainFoe && !isBoss && typeof npcDeckPlan === 'function' ? npcDeckPlan(opponent) : null;   // what this neighbour wants in their deck today (js/npc-brain.js)
   opponent.deckNote = [plan ? plan.note : '', mood].filter(Boolean).join(' ');
-  let oppDeck = plainFoe ? buildDeckForOpponent(DECK_SIZE, isBoss, null, opponent.name, state.currentDistrict, null, plan)   // a district's folk favour its family
+  let oppDeck = plainFoe ? (isBoss && BOSS_CARDS[state.currentDistrict] ? buildBossDeck(state.currentDistrict, opponent.name)   // a boss fields its own cards (BOSS_CARDS)
+      : buildDeckForOpponent(DECK_SIZE, isBoss, null, opponent.name, state.currentDistrict, null, plan))   // a district's folk favour its family
     : (Array.isArray(opponent.deck) && opponent.deck.length === DECK_SIZE) ? opponent.deck : buildDeckForOpponent(DECK_SIZE, isBoss);
   if (opponent.isRival && typeof rookAdaptDeck === 'function') {   // Rook has been watching how you play (js/rival-learns.js)
     const ad = rookAdaptDeck(oppDeck, rivalState().chapter);

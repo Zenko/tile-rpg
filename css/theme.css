@@ -943,3 +943,22 @@
   --forge-heat: #ff7a3c;                   /* a lit flame of the hot streak */
   --forge-master: #ffc94d;                 /* a Masterwork ready */
 }
+
+/* ==========================================================================================================
+   FULL ART SCENES (js/full-art.js, the FULL ART block of css/latest.css)
+   Every card is full art. A card without hand drawn files gets a scene made in CSS from its family (--fa-<family>-a at the top, -b at the
+   foot) and, for the cards you cannot find on the map, a pattern for where it comes from (portal, puddle, cellar, boss, rift, milestone).
+   ========================================================================================================== */
+:root {
+  --fa-grove-a: #1f5a3a; --fa-grove-b: #a8d97a;
+  --fa-stone-a: #3a4660; --fa-stone-b: #d8c79c;
+  --fa-tide-a: #144a6e; --fa-tide-b: #8fdcd8;
+  --fa-wind-a: #4a3f94; --fa-wind-b: #f0c4e2;
+  --fa-spell-a: #2e2470; --fa-spell-b: #f0d88a;
+  --fa-none-a: #3a4256; --fa-none-b: #b9c4d6;
+  --fa-light: #fff6d8;      /* the soft light behind the subject */
+  --fa-gold: #ffe08a;       /* rays behind boss and milestone cards, sparkle on rift cards */
+  --fa-dark: #0b0f1c;       /* the dark at the edges of cellar and rift scenes */
+  --fa-ripple: #d8f4ff;     /* rings behind puddle cards */
+  --fa-portal: #c9a6ff;     /* the swirl behind portal cards */
+}

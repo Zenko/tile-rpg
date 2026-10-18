@@ -24,7 +24,7 @@ function depthTotalCleared() { return Object.keys(DISTRICTS).reduce((n, d) => n 
 function depthOpponent(district, depth) {
   const fam = districtFamily(district), pool = CARD_POOL.filter(c => !c.exclusive && !c.foe && !c.token);
   return { id: 'depth-' + district, name: BOSSES[district], icon: DISTRICTS[district].bossIcon, isBoss: true, depth, district, rewardCard: null,
-    deck: depthDeck(pool, Math.random, depth, fam), profile: depthProfile(depth, true), defeated: false };
+    deck: swapInCards(depthDeck(pool, Math.random, depth, fam), bossSignatureIds(district, Math.min(5, depth + 1))), profile: depthProfile(depth, true), defeated: false };   // and the boss's own cards, more of them the deeper it goes
 }
 function depthRuleText(district, depth) { return (DEPTH_RULE_TEXT[district] || []).filter((t, i) => depth >= 2 + i * 2); }
 function depthSummary(district, depth) {

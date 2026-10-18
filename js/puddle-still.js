@@ -51,7 +51,8 @@ function pwStillEnd(w, all) {
       const peb = n * 2 + (all ? 8 : 0);
       if (peb) { addPebbles(peb, 'puddle-world'); toast(`✨ ${n} of ${motes} motes · +${peb} ${currencyName(peb)}`); }
       const rarity = all ? rollRewardRarity(false) : n >= 7 ? 'rare' : n >= 4 ? 'common' : null;
-      if (rarity) pwGiveCard(pwCardId(all && rarity === 'common' ? 'rare' : rarity), all ? 'Every mote gathered' : 'Gathered from a stopped moment');
+      const ks = all ? worldCardId('puddle', 'still') : null;   // every mote gathered brings the stopped moment's own card, once
+      if (rarity) pwGiveCard(ks || pwCardId(all && rarity === 'common' ? 'rare' : rarity), ks ? 'A keepsake from a stopped moment' : all ? 'Every mote gathered' : 'Gathered from a stopped moment');
     });
   }, 1700);
 }

@@ -152,6 +152,51 @@ const CARD_ART = [
   'tidepool',
   'gathering-storm',
   'last-light',
+  'door-cat',
+  'sleepers-lantern',
+  'last-door',
+  'whisper-courier',
+  'rumour-wing',
+  'hushed-chorus',
+  'slack-warden',
+  'lullaby-pearl',
+  'undertow-choir',
+  'daydream-bloom',
+  'gentle-briar',
+  'waking-orchard',
+  'portal-verdant',
+  'portal-hollow',
+  'portal-tidemirror',
+  'portal-galegate',
+  'puddle-sprite',
+  'thread-spinner',
+  'dicebound-serpent',
+  'drowned-bell',
+  'living-sketch',
+  'frozen-moment',
+  'watcher-eye',
+  'candle-wraith',
+  'hollow-king',
+  'rift-walker',
+  'rift-cartographer',
+  'unbroken-champion',
+  'endless-walker',
+  'anglers-dream',
+  'starcaught-koi',
+  'gilded-marble',
+  'lampbearer',
+  'anvil-spirit',
+  'archivist-owl',
+  'hoard-keeper',
+  'myth-weaver',
+  'crown-of-dreams',
+  'cartographers-compass',
+  'hearthkeeper',
+  'evergreen-sun',
+  'tireless-courier',
+  'festival-marshal',
+  'set-spirit',
+  'prism-fox',
   'market-cat',
   'lamplighter',
   'pebble-golem',
@@ -168,7 +213,14 @@ const CARD_ART = [
 ];
 CARD_POOL.concat(FOE_CARDS, TOKEN_CARDS).forEach(c => { if (CARD_ART.includes(c.id) && !c.art) c.art = 'assets/cards/' + c.id + '.png'; });
 function cardArtHtml(def, cls) {
-  if (typeof hasFullArt === 'function' && hasFullArt(def)) return `<img class="card-art-img fa-small${cls ? ' ' + cls : ''}" src="${fullArtUrl(def, 'hero')}" alt="${escapeHtml(def.name)}">`;   // full art is the default look (js/full-art.js)
+  // every card is full art (js/full-art.js): a drawn card hands out its detailed subject, any other its own picture, both marked fa-small
+  if (typeof hasFullArt === 'function' && hasFullArt(def)) {
+    const c = `${cls ? ' ' + cls : ''}`, at = fullArtAttrs(def);
+    if (hasDrawnArt(def)) return `<img class="card-art-img fa-small${c}" ${at} src="${fullArtUrl(def, 'hero')}" alt="${escapeHtml(def.name)}">`;
+    return def.art
+      ? `<img class="card-art-img fa-small fa-auto${c}" ${at} src="${def.art}" alt="${escapeHtml(def.name)}">`
+      : `<span class="card-emoji fa-small fa-auto${c}" ${at}>${def.icon}</span>`;
+  }
   return def.art
     ? `<img class="card-art-img${cls ? ' ' + cls : ''}" src="${def.art}" alt="${escapeHtml(def.name)}">`
     : `<span class="card-emoji${cls ? ' ' + cls : ''}">${def.icon}</span>`;

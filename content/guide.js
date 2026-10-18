@@ -38,6 +38,8 @@ const TIPS = {
   spells:     { icon: '✨', title: 'Spell cards', text: 'Spells are cast from your hand for an instant effect and never take a board slot. Aimed spells ignore Watch.' },
   museum:      { icon: '🏛️', title: 'The Hall of Spirits', text: `Donate spare copies of cards to fill five wings of eight spirits each: one for every family and one for spells. The Hall never takes your last copy or one your deck uses. Each finished wing pays ${GAME.currency.many} and ${GAME.starlight.name}, and gives a keepsake decoration.` },
   expeditions: { icon: '🧭', title: 'Expeditions', text: 'Send up to three spare cards away for a while - two teams at once. Flicker cards travel faster, Watch cards keep the team safe, Startle cards find treasure, and stronger teams bring back more. Your cards come home with loot and a little mastery.' },
+  npctrade:    { icon: '🤝', title: 'Trading with neighbours', text: `Everyone you talk to will swap cards with you: pick Trade, choose one of the three cards they would part with today, then give a spare copy of the same rarity or better. A card with their favourite keyword makes them happiest. A boss will only trade once you have beaten them, and only their own super rare and mythic cards, for a spare super rare or better.` },
+  specialcards: { icon: '🌌', title: 'Cards you cannot find on the map', text: 'Some cards are never in packs or on the ground: a portal hides its own card, every kind of puddle world sends you home with a keepsake, the deep cellar guardians drop theirs, the Daily Rift pays one, the hardest milestones each pay a card, and every boss fields cards of their own. Look for the hint on a card you do not own yet in the Index.' },
   trades:      { icon: '🤝', title: 'The trading board', text: 'Three new offers every morning: swap a spare for a card you have never had, bundle three spares for a rarer card, or sell one to a collector for three times its release value.' },
   challenges:  { icon: '🎯', title: 'Deck challenges', text: 'Three rules a day, like "only commons" or "no two cards the same". Win with a deck that follows the rule for a card prize. Keep a deck slot for challenges so switching is quick.' },
   minigames:  { icon: '🎲', title: 'Mini-games', text: `Every house has a little game. Earn a bronze, silver or gold medal; the first three medals in each game every day pay ${GAME.currency.many}, and gold can turn up a card. Play as much as you like after that.` },
@@ -94,6 +96,7 @@ const GUIDE = [
     { icon: '💞', name: 'Friendship', where: 'Tap any neighbor', how: 'Favours, gifts (bread, dishes, cards they love) and wins earn hearts. 3 hearts: signature match. 5: a keepsake.' },
     { icon: '🎭', name: `${CAST.rival.name}, your rival`, where: 'A different district each time', how: 'Appears after your first win. Eight chapters, each harder, with a unique final prize.', lock: () => (state.progress.totals.battlesWon || 0) >= 1 ? '' : 'Appears after your first win' },
     { icon: '📬', name: 'Letters', where: `Your cottage mailbox (${PLACES.square})`, how: 'Neighbors write to you, sometimes with a gift.' },
+    { icon: '🤝', name: 'Trading with neighbours', where: 'Tap a neighbour → Trade', how: 'Three cards a day to swap for a spare of the same rarity or better. Bosses trade their own super rare and mythic cards once you have beaten them.' },
   ] },
   { section: 'Card battles', items: [
     { icon: '👻', name: 'Lingering duels', where: "Player menu → Social → Who's Playing → Duel", how: `Other testers' current decks can be played against as ghosts - the game plays their 12 cards for them. Beat a ghost for a few ${GAME.currency.many} (once per ghost a day). Your own deck is shared the same way; turn it off with 'Let testers duel my deck' in Settings.` },
@@ -130,6 +133,7 @@ const GUIDE = [
     { icon: '🧩', name: 'Index & sets', where: 'Cards → Sets', how: 'Eight themed sets that give lasting bonuses when complete, and an Index of every card in the game.' },
     { icon: '✦', name: 'Charms & mastery', where: 'Cards → My Cards', how: 'Charm cards for town perks; cards you play earn ★ mastery (★★★: +1 health in battle).' },
     { icon: '🤝', name: 'Trading board', where: `The sign in ${PLACES.market}`, how: 'Three trades a day for spare cards.', lock: () => needs('market') },
+    { icon: '🌌', name: 'Special cards', where: 'Portals, puddle worlds, the deep cellar, the Daily Rift, bosses and milestones', how: 'Cards that are never in packs or on the ground. Every card now has full art, and these have their own backdrop for where they come from.' },
     { icon: '✨', name: 'Reborn cards', where: 'Any new card', how: 'Now and then a spirit that faded as an Echo comes back Reborn: the same card, shimmering. Your running total shows at the top of Cards → Sets and in your cottage trophy case.' },
     { icon: '🏅', name: 'Ladder & deck test', where: 'Social (ladder) · Cards → Deck → Your deck', how: `Lingering duels, deck challenges, the Cup, bosses and Draft Runs earn ladder points. Ranks (Pebble, Stone, Moss, Gem, Star) pay ${GAME.currency.many}, you never lose points, and the season resets monthly. Your deck gets an archetype label (6+ of a family; 8+ gives +1 Calm at the start), and Test your deck plays practice matches to show a win rate.` },
     { icon: '🧬', name: 'Family passives', where: 'Cards → Deck → Your deck', how: `Build a full deck with 6 or more cards of one family and it plays with a small once-per-match passive (Seedling: your first ${FAMILY_NAMES.grove} card restores 3 Calm. Footing: your first ${FAMILY_NAMES.stone} card costing 3+ gets +1 health. Ebb: your first ${FAMILY_NAMES.tide} card costing 3+ refunds 1 Energy. Breeze: your first cheap Flicker ${FAMILY_NAMES.wind} card gets +1 power). At 8 or more it becomes the full one. ${FAMILY_NAMES.grove} (Rooted): ${FAMILY_NAMES.grove} cards restore 2 Calm when they arrive. ${FAMILY_NAMES.stone} (Bedrock): your first ${FAMILY_NAMES.stone} card costing 4 or more enters with a Haze. ${FAMILY_NAMES.tide} (Undertow): your first ${FAMILY_NAMES.tide} card each turn draws a card if you hold 4 or fewer. ${FAMILY_NAMES.wind} (Tailwind): Flicker ${FAMILY_NAMES.wind} cards costing 2 or less get +1 power. This replaces the old +1 Calm.` },
@@ -147,7 +151,7 @@ const GUIDE = [
   ] },
 ];
 // Items added in the v1.81-1.89 releases wear a NEW tag until they have been opened once (state.progress.guideSeen).
-const GUIDE_NEW = ['Portal stones', 'Sketchbook worlds', 'Time-stop worlds', 'The Daily Rift', 'Rift Map', 'Portals', 'The Dream Gazette', 'Gossip', 'Weather moments', 'Town goal', 'Travelling visitors', 'Your glow and sparkles', `${CAST.guide.name} points the way`, 'Who goes first', 'Card families', 'New keywords', 'The world in battle', `${GAME.player.one}’s Gift`, 'Draft Run', 'Lingering duels', `${GAME.currency.many} and soft limits`];
+const GUIDE_NEW = ['Trading with neighbours', 'Special cards', 'Portal stones', 'Sketchbook worlds', 'Time-stop worlds', 'The Daily Rift', 'Rift Map', 'Portals', 'The Dream Gazette', 'Gossip', 'Weather moments', 'Town goal', 'Travelling visitors', 'Your glow and sparkles', `${CAST.guide.name} points the way`, 'Who goes first', 'Card families', 'New keywords', 'The world in battle', `${GAME.player.one}’s Gift`, 'Draft Run', 'Lingering duels', `${GAME.currency.many} and soft limits`];
 
 // ---- used by js/quests.js ----
 // The "wander" line: one quest at every 500-step rung up to 10,000, escalating rewards for the grind -
@@ -323,7 +327,7 @@ const ACHIEVEMENTS = [
   { id: 'ten-wins',    icon: '🔥', name: '10 wins',         test: () => state.progress.totals.battlesWon >= 10 },
   { id: 'first-pack',  icon: '🌾', name: 'First pack',      test: () => state.progress.packsOpened >= 1 },
   { id: 'tidy',        icon: '🫧', name: 'Tidy up',         test: () => state.progress.released >= 10 },
-  { id: 'alm-half',    icon: '📖', name: 'Half the Index', test: () => discoveredSet().size >= Math.ceil(CARD_POOL.length / 2) },
+  { id: 'alm-half',    icon: '📖', name: 'Half the Index', test: () => discoveredSet().size >= Math.ceil(INDEX_GOAL / 2) },
   { id: 'alm-full',    icon: '🏛️', name: 'Complete Index', test: () => CARD_POOL.every(c => discoveredSet().has(c.id)) },
   { id: 'first-craft', icon: '🔨', name: 'First craft',     test: () => state.progress.crafted >= 1 },
   { id: 'lucky-skill', icon: '🪄', name: 'Lucky skill',     test: () => state.progress.skillsCrafted >= 1 },
@@ -355,7 +359,7 @@ const ACHIEVEMENTS = [
   { id: 'deck-master', icon: '🧩', name: '10 deck edits',    test: () => state.progress.deckEdits >= 10 },
   { id: 'chest-1',     icon: '🗝️', name: 'First chest',      test: () => (state.progress.totals.chestsOpened || 0) >= 1 },
   { id: 'chest-5',     icon: '🏴', name: '5 chests opened',  test: () => (state.progress.totals.chestsOpened || 0) >= 5 },
-  { id: 'index-75',    icon: '📜', name: '75% of the Index', test: () => discoveredSet().size >= Math.ceil(CARD_POOL.length * 0.75) },
+  { id: 'index-75',    icon: '📜', name: '75% of the Index', test: () => discoveredSet().size >= Math.ceil(INDEX_GOAL * 0.75) },
   { id: 'collector-150', icon: '🗼', name: '150 cards',       test: () => state.ownedCards.length >= 150 },
   { id: 'mythic-x5',   icon: '🦄', name: '5 mythic cards',   test: () => state.ownedCards.filter(id => cardDef(id).rarity === 'mythic').length >= 5 },
   { id: 'mythic-x10',  icon: '🌠', name: '10 mythic cards',  test: () => state.ownedCards.filter(id => cardDef(id).rarity === 'mythic').length >= 10 },
@@ -387,7 +391,7 @@ const ACHIEVEMENTS = [
   { id: 'deck-master-25', icon: '🪡', name: '25 deck edits', test: () => state.progress.deckEdits >= 25 },
   { id: 'chest-10',    icon: '⛓️', name: '10 chests opened', test: () => (state.progress.totals.chestsOpened || 0) >= 10 },
   { id: 'chest-20',    icon: '💎', name: '20 chests opened', test: () => (state.progress.totals.chestsOpened || 0) >= 20 },
-  { id: 'index-90',    icon: '🗂️', name: '90% of the Index', test: () => discoveredSet().size >= Math.ceil(CARD_POOL.length * 0.9) },
+  { id: 'index-90',    icon: '🗂️', name: '90% of the Index', test: () => discoveredSet().size >= Math.ceil(INDEX_GOAL * 0.9) },
   { id: 'streak-30',   icon: '🌞', name: '30-day streak',    test: () => state.progress.giftStreak >= 30 },
   { id: 'first-weekly', icon: '📅', name: 'First weekly quest', test: () => (state.progress.questHistory || []).some(h => h.kind === 'weekly') },
   { id: 'weekly-10',   icon: '🗓️', name: '10 weekly quests', test: () => (state.progress.questHistory || []).filter(h => h.kind === 'weekly').length >= 10 },

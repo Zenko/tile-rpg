@@ -428,6 +428,30 @@ function seasonalPick(pool) {
   return pool[pool.length - 1];
 }
 
+/* ---------------- cards you can only get from outside the map (build 288) ----------------
+   Cards marked `exclusive` (portal, puddle, cellar, rift, milestone, boss: content/cards.js) never come out of packs or finds. The world
+   that owns one hands over the FIRST copy through worldCardId, so a keepsake is a one-time thing; after that the world pays as it always did. */
+function worldCardId(group, key) {
+  const id = WORLD_CARDS[group] && WORLD_CARDS[group][key];
+  return id && !state.ownedCards.includes(id) ? id : null;
+}
+let specialQueue = [];
+// Adds one copy at once (so it can never be lost) and shows its reveal as soon as nothing else is on screen (a battle result, a scene, another card).
+function giveSpecialCard(id, label) {
+  if (!cardDef(id)) return;
+  state.ownedCards.push(id); bumpStat('cardsFound', 1); bumpPill('pillCards'); saveState(); updateHud();
+  specialQueue.push({ id, label });
+  setTimeout(flushSpecialCards, 400);
+}
+function flushSpecialCards() {
+  if (!specialQueue.length) return;
+  if (inBattle || inScene || storyCur || !pickupOverlay.classList.contains('hidden') || (typeof pwBusy === 'function' && pwBusy())) { setTimeout(flushSpecialCards, 1500); return; }
+  const s = specialQueue.shift();
+  if (state.ownedCards.filter(x => x === s.id).length === 1) toast('📖 New entry in your Index');
+  showCardReveal(s.id, s.label, true, null);
+  if (specialQueue.length) setTimeout(flushSpecialCards, 1500);
+}
+
 // Ambient town finds (ground items, hidden finds): almost always common, rarely a rare - the exciting
 // pulls are meant to come from battles, not from strolling around. Weighted toward cards already owned
 // so the Almanac fills out with duplicates instead of racing to one-of-everything.
@@ -485,6 +509,31 @@ function buildDeckForOpponent(count, forBoss, tier, seed, district, wins, plan) 
   // A neighbour's plan (js/npc-brain.js) is a few cards they want in the deck: make sure the pool holds them, and keep them first.
   if (plan && plan.keep) plan.keep.forEach(id => { counts[id] = Math.max(counts[id] || 0, 2); });
   return foeEnhanceDeck(BattleEngine.suggestDeck(counts, plan && plan.keep), tier, seed);
+}
+/* ---------------- boss decks (build 288) ----------------
+   Every boss fields cards nobody else has. A district boss's deck is the usual boss build with its own five cards swapped in (BOSS_CARDS in
+   content/cards.js: the mythic once and each of the two supers twice); a Depth fight swaps in more of them the deeper it goes, and the cellar's
+   guardians carry their own prizes. Each card goes in for the card whose cost is nearest, so the curve stays as it was. Once a boss has been beaten
+   it trades the same cards (js/npc-trade.js). */
+function swapInCards(deck, ids) {
+  deck = deck.slice();
+  const used = new Set(), def = x => BattleEngine.defOf(x);
+  ids.forEach(id => {
+    const want = cardDef(id).cost;
+    const slots = deck.map((x, i) => i).filter(i => !used.has(i) && !def(deck[i]).spell);
+    if (!slots.length) return;
+    slots.sort((a, b) => Math.abs(def(deck[a]).cost - want) - Math.abs(def(deck[b]).cost - want) || def(deck[b]).cost - def(deck[a]).cost);
+    deck[slots[0]] = id; used.add(slots[0]);
+  });
+  return deck;
+}
+function bossSignatureIds(district, n) {
+  const c = BOSS_CARDS[district];
+  return c ? [c[2], c[0], c[1], c[0], c[1]].slice(0, n == null ? 5 : n) : [];
+}
+function buildBossDeck(district, seed) {
+  const base = buildDeckForOpponent(DECK_SIZE, true, null, seed || BOSSES[district], district);
+  return swapInCards(base, bossSignatureIds(district));
 }
 function foeEnhanceDeck(deck, tier, seed, extra) {
   deck = deck.slice();

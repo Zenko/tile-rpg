@@ -22,7 +22,7 @@ module.exports = async (page, assert) => {
     out.leak = leak;
     return out;
   });
-  assert.strictEqual(r.total, 117, 'the pool is exactly 117 cards');
+  assert.strictEqual(r.total, 162, 'the pool is exactly 162 cards');
   assert.deepStrictEqual(r.divine, ['duermevela', 'ensueno', 'marea-lenta', 'murmullo']);
   assert.deepStrictEqual(r.atlas, ['the-atlas']);
   assert.ok(r.allSummon, 'divine and atlas cards are all summon-only');

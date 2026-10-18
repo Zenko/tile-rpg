@@ -786,7 +786,7 @@ function ensureDistrictData(key) {
       deck: buildDeckForOpponent(DECK_SIZE, false), rewardCard: randomCardId(rollRewardRarity(false)), defeated: false, isBoss: false });
   }
   const bs = take({ isBoss: true });
-  const boss = { id: 'boss-' + key, name: DISTRICTS[key].boss, x: bs.x, y: bs.y, deck: buildDeckForOpponent(DECK_SIZE, true), rewardCard: randomCardId(rollRewardRarity(true)), defeated: false, isBoss: true };
+  const boss = { id: 'boss-' + key, name: DISTRICTS[key].boss, x: bs.x, y: bs.y, deck: buildBossDeck(key), rewardCard: randomCardId(rollRewardRarity(true)), defeated: false, isBoss: true };
   for (let i = 0; i < 3; i++) {
     const s = findItemSpot({ npcs, boss, items, decorations: [], buildings: {} }, null, key); taken.add(s.x + ',' + s.y);   // spread out (build 262)
     items.push({ id: 'item-' + key + '-' + i, x: s.x, y: s.y, cardId: townGroundCardId(items.length ? items[items.length - 1].cardId : null), collected: false, spawnedAt: Date.now(), collectedAt: null });

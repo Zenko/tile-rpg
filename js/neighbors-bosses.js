@@ -273,7 +273,7 @@ function returnFromGrave(data, f) {
   const spot = pool.length ? pool[Math.floor(Math.random() * pool.length)] : findFreeTile(data, f);
   f.x = spot.x; f.y = spot.y; f.homeX = spot.x; f.homeY = spot.y;
   if (!f.isBoss) f.name = randomNpcName(state.currentDistrict, namesInUse(data, f));
-  f.deck = buildDeckForOpponent(DECK_SIZE, !!f.isBoss);
+  f.deck = f.isBoss && BOSS_CARDS[state.currentDistrict] ? buildBossDeck(state.currentDistrict) : buildDeckForOpponent(DECK_SIZE, !!f.isBoss);
   f.rewardCard = randomCardId(rollRewardRarity(!!f.isBoss));
   f.defeated = false; f.defeatedAt = null; f.nextMoveAt = null; f.justArrived = true;
 }
