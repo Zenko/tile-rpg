@@ -6,7 +6,7 @@ module.exports = async (page, assert) => {
   const view = () => ev(() => document.getElementById('talkCard').dataset.view);
   const open = () => ev(() => { openTalk({ id: 'npc-square-fenn', name: 'Fenn', icon: '🧑', deck: [], level: 3 }); });
   const isOpen = () => ev(() => !document.getElementById('talkOverlay').classList.contains('hidden'));
-  await ev(() => { const h = document.getElementById('testHideOverlays'); if (h) h.remove(); switchTab('town'); state.progress.bread = 0; prefs.talkStyle = 'classic'; });   // the grid of cards; the dock and close-up are in talk-dock.test.js   // this test drives an overlay
+  await ev(() => { const h = document.getElementById('testHideOverlays'); if (h) h.remove(); switchTab('town'); state.progress.bread = 0; });   // this test drives an overlay
 
   // the grid: Chat and Play (no Gift with nothing to give), the lists are not on screen yet
   await open();
