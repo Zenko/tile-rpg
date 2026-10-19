@@ -161,10 +161,11 @@ const TALK_GOSSIP = [
   place => `Have you tried the bakery? Nothing beats warm bread while you walk through ${place}.`,
   place => `I saw a spirit drifting through ${place} earlier. Keep your eyes open.`
 ];
+// `say` is how the topic reads in the close-up style (a line you speak); `label` is the plain menu word
 const TALK_TOPICS = [
-  { id: 'weather', label: '🌤️ The weather' },
-  { id: 'town',    label: '🏘️ Around town' },
-  { id: 'cards',   label: '🎴 Favourite cards' }
+  { id: 'weather', label: '🌤️ The weather', say: '🌤️ “Lovely weather, isn’t it?”' },
+  { id: 'town',    label: '🏘️ Around town', say: '🏘️ “Heard anything around town?”' },
+  { id: 'cards',   label: '🎴 Favourite cards', say: '🎴 “What cards do you like?”' }
 ];
 function talkTopicReply(id, f) {
   if (id === 'weather') { const l = TALK_WEATHER[weatherNow()] || TALK_WEATHER.clear; return l[Math.floor(Math.random() * l.length)]; }
@@ -190,7 +191,7 @@ function renderTalkTopics(f) {
     }));
     return;
   }
-  box.innerHTML = TALK_TOPICS.map(t => `<button class="talk-topic${used[t.id] ? ' used' : ''}" data-topic="${t.id}">${t.label}</button>`).join('');
+  box.innerHTML = TALK_TOPICS.map(t => `<button class="talk-topic${used[t.id] ? ' used' : ''}" data-topic="${t.id}">${talkStyle() === 'combo' ? t.say : t.label}</button>`).join('');
   box.querySelectorAll('[data-topic]').forEach(b => b.addEventListener('click', () => {
     if (!talkTo) return;
     const id = b.dataset.topic; talkTo._topics = talkTo._topics || {}; talkTo._topics[id] = true;
@@ -201,7 +202,7 @@ function renderTalkTopics(f) {
     b.classList.add('used');
   }));
   if (typeof npcMemSummary === 'function' && npcMemOf(f, false)) {
-    const mb = document.createElement('button'); mb.className = 'talk-topic'; mb.textContent = '🗒️ What do you remember?';
+    const mb = document.createElement('button'); mb.className = 'talk-topic'; mb.textContent = talkStyle() === 'combo' ? '🗒️ “What do you remember about us?”' : '🗒️ What do you remember?';
     mb.addEventListener('click', () => { if (!talkTo) return; talkSay(npcMemSummary(talkTo)); talkReact('💭'); sfx('tap'); });
     box.appendChild(mb);
   }
@@ -219,7 +220,7 @@ function renderTalkBody() {
   if (!pt.firstChild || pt.dataset.for !== f.id) { pt.dataset.for = f.id; talkFigure(pt, f); talkSaid = ''; }
   const mood = (!f.isBoss && !f.isRival && friendHearts(f) >= 3) ? '😊' : '';
   pt.dataset.mood = mood;
-  renderTalkTopics(f);
+  renderTalkTopics(f); renderTalkMemo(f);
   const doing = document.getElementById('talkDoing');
   if (doing) doing.textContent = (!f.isBoss && !f.isRival && !f._thanks && typeof npcDoingLine === 'function' && npcDoingLine(f)) || '';   // what they are up to (js/neighbour-lives.js)
   e.fight.classList.remove('hidden'); e.main.classList.remove('hidden'); e.main.disabled = false; e.tag.textContent = '';
@@ -269,6 +270,28 @@ function renderTalkBody() {
    Every button inside keeps its id and its own show/hide logic; this only decides which are on screen. The way out is the
    "Head back out" footer (as on the building screens), the Android back gesture (one history entry while the screen is open) and Escape. */
 let talkView = 'home', talkPushed = false, talkPopIgnore = 0, talkCatsSig = '';
+/* How the neighbour screen looks (Settings -> Neighbours -> Talking to neighbours, prefs.talkStyle):
+     'combo'   (default) a close-up face with what they say as large subtitles, a line about what they remember, and the four jobs in a dock
+     'dock'    the whole neighbour in view with the same dock
+     'classic' the grid of cards the screen had before build 289
+   All three share the same panes and buttons (they only look different: css/latest.css, THE NEIGHBOUR SCREEN: DOCK AND CLOSE-UP). */
+const TALK_STYLES = ['combo', 'dock', 'classic'];
+function talkStyle() { return TALK_STYLES.includes(prefs.talkStyle) ? prefs.talkStyle : 'combo'; }
+function syncTalkStyleSeg() { document.querySelectorAll('#talkStyleSeg .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.talkstylePick === talkStyle())); }
+document.querySelectorAll('#talkStyleSeg .seg-btn').forEach(b => b.addEventListener('click', () => { prefs.talkStyle = b.dataset.talkstylePick; savePrefs(); syncTalkStyleSeg(); sfx('tap'); }));
+syncTalkStyleSeg();
+// One short line of what they remember about you, for the close-up (empty when they remember nothing yet).
+function talkMemoLine(f) {
+  if (f.isBoss || f.isRival || typeof npcMemOf !== 'function') return '';
+  const m = npcMemOf(f, false);
+  if (!m) return '';
+  if (m.helped) return `🗒 You have helped me ${npcMemWord(m.helped)}`;
+  if (m.won + m.lost) { const n = m.won + m.lost; return `🗒 ${n} ${n === 1 ? 'match' : 'matches'} together${m.won > m.lost ? ', you lead' : m.won < m.lost ? ', I lead' : ', all square'}`; }
+  if (m.gifts) return `🗒 You have given me ${m.gifts === 1 ? 'a gift' : m.gifts + ' gifts'}`;
+  if (m.chats) return `🗒 We have chatted on ${m.chats} ${m.chats === 1 ? 'day' : 'days'}`;
+  return '';
+}
+function renderTalkMemo(f) { const el = document.getElementById('talkMemo'); if (el) el.textContent = talkMemoLine(f); }
 function talkVisible(id) { return !document.getElementById(id).classList.contains('hidden'); }
 function talkFigure(pt, f) {
   const id = typeof NPC_DRAWN_SEEN !== 'undefined' ? NPC_DRAWN_SEEN[f.id] : null;
@@ -280,6 +303,7 @@ function talkFigure(pt, f) {
 function renderTalkView() {
   const f = talkTo; if (!f) return;
   const card = document.getElementById('talkCard');
+  card.dataset.style = talkStyle();
   const chatOn = talkVisible('talkTopics') || talkVisible('talkMain'), giftOn = ['talkGift', 'talkDish', 'talkCardGift'].some(talkVisible);
   const tradeOn = typeof npcTradeKind === 'function' && !!npcTradeKind(f);   // everyone but Rook, the Atlas and visitors (js/npc-trade.js)
   if (f._thanks || (talkView === 'chat' && !chatOn) || (talkView === 'gift' && !giftOn) || (talkView === 'trade' && !tradeOn)) talkView = 'home';   // a thank-you is spoken over the grid
@@ -290,8 +314,10 @@ function renderTalkView() {
   cats.push({ go: 'play', ico: '⚔️', lb: 'Play', sub: f.isRival ? 'A duel' : 'Matches' });
   if (giftOn) cats.push({ go: 'gift', ico: '🎁', lb: 'Gift', sub: f._tk ? `Loves ${f._tk.loves}` : 'Something small' });
   if (tradeOn && !f._thanks) cats.push({ go: 'trade', ico: '🤝', lb: 'Trade', sub: tradeCatSub(f) });
-  const html = cats.map((c, i) => `<button type="button" class="tk-cat${c.main ? ' main' : ''}" style="--n:${i}" data-go="${c.go}">${c.badge ? `<span class="badge">${c.badge}</span>` : ''}<span class="ico">${c.ico}</span><span><span class="lb">${c.lb}</span><small>${escapeHtml(c.sub)}</small></span></button>`).join('');
+  const html = cats.map((c, i) => `<button type="button" class="tk-cat${c.main ? ' main' : ''}${c.go === talkView ? ' on' : ''}" style="--n:${i}" data-go="${c.go}">${c.badge ? `<span class="badge">${c.badge}</span>` : ''}<span class="ico">${c.ico}</span><span><span class="lb">${c.lb}</span><small>${escapeHtml(c.sub)}</small></span></button>`).join('');
   if (html !== talkCatsSig) { talkCatsSig = html; document.getElementById('talkCats').innerHTML = html; }
+  const quick = document.getElementById('talkQuick'), fb = document.getElementById('talkFight');   // the dock styles keep the match one tap away
+  quick.classList.toggle('hidden', fb.classList.contains('hidden')); quick.textContent = fb.textContent;
   card.querySelectorAll('.tk-pane').forEach(p => {
     const on = p.dataset.pane === talkView; p.classList.toggle('on', on);
     p.querySelectorAll('.btn').forEach(b => b.classList.remove('tk-primary'));
@@ -301,11 +327,13 @@ function renderTalkView() {
   document.getElementById('talkSubTitle').textContent = { chat: 'Chat', play: 'Play', gift: 'Gift', trade: 'Trade' }[talkView] || '';
   if (talkView === 'trade') renderTradePane(f);
 }
-function talkGo(view) { if (!talkTo) return; talkView = view; sfx('nav'); if (view === 'trade') tradeOpened(talkTo); renderTalkView(); }
+function talkGo(view) { if (!talkTo) return; if (view === talkView && view !== 'home' && talkStyle() !== 'classic') view = 'home'; talkView = view; sfx('nav'); if (view === 'trade') tradeOpened(talkTo); renderTalkView(); }
 document.getElementById('talkCard').addEventListener('click', e => {
   const g = e.target.closest('[data-go]'); if (g) { talkGo(g.dataset.go); return; }
   if (e.target.closest('#talkBack')) talkGo('home');
+  else if (talkView !== 'home' && talkStyle() !== 'classic' && !e.target.closest('.tk-lower, .talk-close')) talkGo('home');   // the dock styles: tap the neighbour to put the list away
 });
+document.getElementById('talkQuick').addEventListener('click', () => document.getElementById('talkFight').click());
 // Android's back gesture: one history entry while the screen is open. Back inside a list goes to the grid first.
 function talkHistoryPush() { if (talkPushed || talkPopIgnore > 0) return; try { history.pushState({ talk: 1 }, ''); talkPushed = true; } catch (err) { /* no history here */ } }
 function talkHistoryPop() { if (!talkPushed) return; talkPushed = false; talkPopIgnore++; try { history.back(); } catch (err) { talkPopIgnore--; } }

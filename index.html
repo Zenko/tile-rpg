@@ -123,6 +123,14 @@
                   <button class="seg-btn" type="button" data-approach-pick="often">Often</button>
                 </div>
               </div>
+              <div class="st-block">
+                <div class="st-label">Talking to neighbours<small>Close-up: a big face, what they remember and a dock of things to do. Dock: the same dock with the whole neighbour in view. Classic: the grid of cards.</small></div>
+                <div class="seg" id="talkStyleSeg" role="group" aria-label="How the neighbour screen looks">
+                  <button class="seg-btn" type="button" data-talkstyle-pick="combo">Close-up</button>
+                  <button class="seg-btn" type="button" data-talkstyle-pick="dock">Dock</button>
+                  <button class="seg-btn" type="button" data-talkstyle-pick="classic">Classic</button>
+                </div>
+              </div>
             </div>
           </section>
           <section class="st-group">
@@ -627,6 +635,7 @@
   <div class="tk-bg" aria-hidden="true"></div>
   <div class="overlay-card" id="talkCard" data-view="home">
     <div class="tk-stage">
+      <div class="tk-memo" id="talkMemo"></div>
       <div class="tk-bust">
         <div class="talk-portrait" id="talkPortrait" aria-hidden="true"></div>
         <div class="talk-bubble" id="talkBubble">
@@ -641,26 +650,29 @@
         <div class="talk-hearts hidden" id="talkHearts"></div>
       </div>
     </div>
-    <div class="tk-cats" id="talkCats"></div>
-    <div class="tk-sub">
-      <div class="tk-subhead"><button type="button" class="tk-back" id="talkBack">‹ Back</button><h3 id="talkSubTitle"></h3></div>
-      <div class="tk-pane" data-pane="chat">
-        <div class="talk-topics hidden" id="talkTopics"></div>
-        <button class="btn" id="talkMain">Chat</button>
-      </div>
-      <div class="tk-pane" data-pane="play">
-        <button class="btn talk-fight" id="talkFight">⚔️ Friendly match</button>
-        <button class="btn talk-sig hidden" id="talkSig">🌟 Signature match</button>
-        <button class="btn talk-gift hidden" id="talkCompanion">🚶 Ask to walk with you</button>
-      </div>
-      <div class="tk-pane" data-pane="gift">
-        <button class="btn talk-gift hidden" id="talkGift">🍞 Share a loaf</button>
-        <button class="btn talk-gift hidden" id="talkDish">🎁 Give a dish</button>
-        <button class="btn talk-gift hidden" id="talkCardGift">🃏 Give a card</button>
-        <div class="talk-cards hidden" id="talkCards"></div>
-      </div>
-      <div class="tk-pane" data-pane="trade">
-        <div class="tr-box" id="talkTrade"></div>
+    <div class="tk-lower">
+      <div class="tk-dockwrap"><button type="button" class="tk-quick hidden" id="talkQuick"></button>
+        <div class="tk-cats" id="talkCats"></div></div>
+      <div class="tk-sub">
+        <div class="tk-subhead"><button type="button" class="tk-back" id="talkBack">‹ Back</button><h3 id="talkSubTitle"></h3></div>
+        <div class="tk-pane" data-pane="chat">
+          <div class="talk-topics hidden" id="talkTopics"></div>
+          <button class="btn" id="talkMain">Chat</button>
+        </div>
+        <div class="tk-pane" data-pane="play">
+          <button class="btn talk-fight" id="talkFight">⚔️ Friendly match</button>
+          <button class="btn talk-sig hidden" id="talkSig">🌟 Signature match</button>
+          <button class="btn talk-gift hidden" id="talkCompanion">🚶 Ask to walk with you</button>
+        </div>
+        <div class="tk-pane" data-pane="gift">
+          <button class="btn talk-gift hidden" id="talkGift">🍞 Share a loaf</button>
+          <button class="btn talk-gift hidden" id="talkDish">🎁 Give a dish</button>
+          <button class="btn talk-gift hidden" id="talkCardGift">🃏 Give a card</button>
+          <div class="talk-cards hidden" id="talkCards"></div>
+        </div>
+        <div class="tk-pane" data-pane="trade">
+          <div class="tr-box" id="talkTrade"></div>
+        </div>
       </div>
     </div>
     <button type="button" class="talk-close" id="talkClose">Head back out</button>
