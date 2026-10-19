@@ -2673,8 +2673,8 @@ body.pw-board #goalChip { display: none !important; }   /* the dice panel says w
 #talkCard[data-style="dock"] .tk-plate .talk-name, #talkCard[data-style="combo"] .tk-plate .talk-name { font-size: 1.3rem; }
 /* close-up */
 #talkCard[data-style="combo"] .tk-stage { position: relative; }
-#talkCard[data-style="combo"] .tk-bust:not(.emoji) { --fig-h: 132%; align-items: flex-start; overflow: hidden; }
-#talkCard[data-style="combo"] .tk-bust:not(.emoji) .talk-portrait { margin-top: -3%; animation: tk-breathe 5s ease-in-out infinite; transform-origin: 50% 0; }
+#talkCard[data-style="combo"] .tk-bust:not(.emoji) { --fig-h: 118%; align-items: flex-start; overflow: hidden; padding-top: 2%; }
+#talkCard[data-style="combo"] .tk-bust:not(.emoji) .talk-portrait { margin-top: 0; animation: tk-breathe 5s ease-in-out infinite; transform-origin: 50% 0; }
 #talkCard[data-style="combo"] .tk-bust:not(.emoji) .talk-portrait { -webkit-mask-image: linear-gradient(180deg, var(--c-grey-0) 52%, transparent 96%); mask-image: linear-gradient(180deg, var(--c-grey-0) 52%, transparent 96%); }   /* the picture fades out into the subtitle */
 @keyframes tk-breathe { 50% { transform: scale(1.025); } }
 #talkCard[data-style="combo"] .talk-bubble { bottom: 10px; z-index: 5; padding: 0 8px; border: 0; border-radius: 0; background: none; backdrop-filter: none; box-shadow: none; text-align: center; }
@@ -2686,3 +2686,7 @@ body.pw-board #goalChip { display: none !important; }   /* the dice panel says w
   color: var(--ink); font: 700 .72rem var(--f-ui);
 }
 @media (prefers-reduced-motion: reduce) { #talkCard[data-style="combo"] .tk-bust .talk-portrait, #talkCard[data-style] .tk-sub { animation: none; } }
+/* the close-up picture is only ever scaled, never stretched: its width follows the box and its height follows its own proportions */
+#talkCard[data-style="combo"] .talk-portrait .tk-img { width: 100%; height: auto; max-width: none; max-height: none; object-fit: contain; }
+/* a short phone: a little less crop and a smaller subtitle, so the words stay off the face */
+@media (max-height: 700px) { #talkCard[data-style="combo"] .tk-bust:not(.emoji) { --fig-h: 104%; } #talkCard[data-style="combo"] .talk-bubble .talk-text { font-size: 1.08rem !important; } }

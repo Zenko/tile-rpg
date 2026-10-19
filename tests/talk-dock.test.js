@@ -36,6 +36,26 @@ module.exports = async (page, assert) => {
     assert.strictEqual(fights, 1, 'the match button starts a match');
   }
 
+
+  // the close-up is never warped: for every drawn character, at phone sizes from small to large, the picture keeps its own proportions and
+  // shows the face (not cut off at the top or the sides of the screen more than a little)
+  const sizes = [[360, 640], [400, 860], [430, 932]];
+  for (const [w, h] of sizes) {
+    await page.setViewportSize({ width: w, height: h });
+    for (const ch of await ev(() => PLAYER_ART.order)) {
+      const r = await ev(async c => {
+        if (talkTo) closeTalk(); prefs.talkStyle = 'combo';
+        const f = { id: 'npc-square-' + c, name: 'Fenn', icon: '🧑', deck: [], level: 3 }; NPC_DRAWN_SEEN[f.id] = c; openTalk(f);
+        const im = document.querySelector('#talkPortrait .tk-img'); await im.decode().catch(() => {}); const b = im.getBoundingClientRect(), box = document.querySelector('.tk-bust').getBoundingClientRect();
+        // measure without the breathing scale, which is a uniform 2.5% either way
+        return { ratio: (b.width / b.height) / (im.naturalWidth / im.naturalHeight), w: b.width, boxW: box.width, left: b.left, right: b.right, top: b.top, vw: innerWidth, face: b.height > 0 };
+      }, ch);
+      assert.ok(Math.abs(r.ratio - 1) < 0.01, `${ch} at ${w}x${h} keeps its proportions: ` + JSON.stringify(r));
+      assert.ok(r.left > -r.w * 0.2 && r.right < r.vw + r.w * 0.2, `${ch} at ${w}x${h} is not pushed off the sides: ` + JSON.stringify(r));
+    }
+  }
+  await page.setViewportSize({ width: 400, height: 860 });
+
   // the close-up shows what they remember; the dock style does not
   const memo = await ev(() => { const f = { id: 'npc-square-fenn', name: 'Fenn', icon: '🧑', deck: [], level: 3 }; const m = npcMemOf(f, true); m.chats = 2; if (talkTo) closeTalk(); prefs.talkStyle = 'combo'; openTalk(f); const a = document.getElementById('talkMemo').textContent; closeTalk(); prefs.talkStyle = 'dock'; openTalk(f); const b = document.getElementById('talkMemo'); return { a, shown: b.offsetParent !== null }; });
   assert.ok(/chatted on 2 days/.test(memo.a) && !memo.shown, 'a line of what they remember, in the close-up only: ' + JSON.stringify(memo));
