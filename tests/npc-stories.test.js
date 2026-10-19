@@ -28,8 +28,10 @@ module.exports = async (page, assert) => {
     out.once = npcStoryTalked(b) === false;                              // delivered once only
     out.progress = /You told Target/.test(requestProgressText(req));
     // handing it in pays out like any favour
-    const peb = state.progress.pebbles; completeRequest(a);
-    out.paid = req.state === "done" && state.progress.pebbles === peb + STORY_PEBBLES;
+    // only what the favour itself paid counts: on a Double XP day the favour can also level you up, and a level pays Embers of its own
+    let paid = 0; const realAdd = addPebbles; addPebbles = (n, src) => { if (src === 'favours') paid += n; return realAdd(n, src); };
+    completeRequest(a); addPebbles = realAdd;
+    out.paid = req.state === "done" && paid === STORY_PEBBLES;
     // a target who has gone: the hint says so and it still resolves
     const req2 = npcStoryRequest({ id: a.id, giver: a.name, kind: 'message', state: 'active', made: Date.now() }, a, m); req2.target = 'npc-square-99'; req2.targetName = 'Ghosty';
     out.gone = /wandered off/.test(requestProgressText(req2));
