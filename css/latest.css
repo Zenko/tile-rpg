@@ -2621,3 +2621,68 @@ body.pw-board #goalChip { display: none !important; }   /* the dice panel says w
 #talkCard .tr-offer em { margin-left: auto; font-style: normal; font-size: .72rem; font-weight: 800; color: var(--ink-soft); }
 #talkCard .tr-offer:disabled { opacity: .55; cursor: default; }
 #talkCard .tr-offer:disabled::after { display: none; }
+
+/* ==========================================================================================================
+   THE NEIGHBOUR SCREEN: DOCK AND CLOSE-UP (build 289; prototype: labs/npc-interaction-lab.html, options 7 and 9)
+   prefs.talkStyle (js/requests-friendship-rival.js, talkStyle) sets #talkCard[data-style]:
+     classic  the grid of cards as before; the wrappers below vanish (display: contents) and the quick match button and memory line stay hidden
+     dock     the whole neighbour in view; the four jobs are a dock of icons at the thumb, with the match one tap above it; a job's list opens as
+              a card above the dock (tap the icon again, or the neighbour, to put it away)
+     combo    the dock plus a close-up: the face fills the top, what they say is a large italic subtitle over the foot of the picture, and a
+              line of what they remember sits in the corner
+   The same panes and buttons serve all three, so nothing about talking, gifting, trading or matches changes.
+   ========================================================================================================== */
+#talkCard .tk-lower, #talkCard .tk-dockwrap { display: contents; }
+#talkCard .tk-quick, #talkCard .tk-memo { display: none; }
+#talkCard[data-style="dock"] .tk-lower, #talkCard[data-style="combo"] .tk-lower { display: block; position: relative; flex: none; }
+#talkCard[data-style="dock"] .tk-dockwrap, #talkCard[data-style="combo"] .tk-dockwrap { display: block; }
+#talkCard[data-style="dock"] .tk-quick, #talkCard[data-style="combo"] .tk-quick {
+  display: flex; align-items: center; justify-content: center; width: 100%; min-height: 52px; margin: 0 0 10px; border: 0; border-radius: 18px;
+  background: var(--water); color: var(--on-water); font: 800 1rem var(--f-ui); cursor: pointer; box-shadow: 0 8px 20px color-mix(in srgb, var(--water) 35%, transparent);
+}
+#talkCard[data-style="dock"] .tk-quick:active, #talkCard[data-style="combo"] .tk-quick:active { transform: scale(.98); }
+#talkCard[data-style="dock"] .tk-quick.hidden, #talkCard[data-style="combo"] .tk-quick.hidden { display: none; }
+/* the dock */
+#talkCard[data-style="dock"][data-view] .tk-cats, #talkCard[data-style="combo"][data-view] .tk-cats {
+  display: flex; gap: 2px; margin: 0 0 12px; padding: 6px; border: 1px solid var(--stone-edge); border-radius: 26px;
+  background: color-mix(in srgb, var(--stone) 90%, transparent); box-shadow: 0 8px 24px var(--shadow);
+}
+#talkCard[data-style="dock"][data-view] .tk-cat, #talkCard[data-style="combo"][data-view] .tk-cat,
+#talkCard[data-style="dock"][data-view] .tk-cat.main, #talkCard[data-style="combo"][data-view] .tk-cat.main {
+  flex: 1 1 0; grid-column: auto; min-height: 0; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 8px 0 6px;
+  border: 0; border-radius: 20px; background: transparent; color: var(--ink-soft); text-align: center;
+}
+#talkCard[data-style="dock"][data-view] .tk-cat .ico, #talkCard[data-style="combo"][data-view] .tk-cat .ico { font-size: 1.45rem; }
+#talkCard[data-style="dock"][data-view] .tk-cat .lb, #talkCard[data-style="combo"][data-view] .tk-cat .lb { font-size: .72rem; font-weight: 800; }
+#talkCard[data-style="dock"] .tk-cat small, #talkCard[data-style="combo"] .tk-cat small { display: none; }
+#talkCard[data-style="dock"] .tk-cat .badge, #talkCard[data-style="combo"] .tk-cat .badge { right: 22%; top: 2px; }
+#talkCard[data-style="dock"][data-view] .tk-cat.on, #talkCard[data-style="combo"][data-view] .tk-cat.on { background: var(--accent); color: var(--on-accent); }
+/* a job's list: a card above the dock */
+#talkCard[data-style="dock"] .tk-sub, #talkCard[data-style="combo"] .tk-sub {
+  position: absolute; left: 0; right: 0; bottom: 100%; z-index: 6; margin: 0 0 8px; max-height: min(46vh, 380px); gap: 8px; padding: 12px;
+  border: 1px solid var(--stone-edge); border-radius: 22px; background: color-mix(in srgb, var(--stone) 95%, transparent); box-shadow: 0 12px 34px var(--shadow); animation: sc-rise .22s both;
+}
+#talkCard[data-style="dock"] .tk-back, #talkCard[data-style="combo"] .tk-back { display: none; }
+#talkCard[data-style="dock"] .tk-subhead h3, #talkCard[data-style="combo"] .tk-subhead h3 { margin: 0 4px; font-size: 1rem; color: var(--accent); }
+#talkCard[data-style="dock"] .tk-pane .btn, #talkCard[data-style="dock"] .tk-pane .talk-topic,
+#talkCard[data-style="combo"] .tk-pane .btn, #talkCard[data-style="combo"] .tk-pane .talk-topic { min-height: 52px; }
+/* the neighbour: bigger, with the name and hearts as a quiet line instead of the gold plate */
+#talkCard[data-style="dock"] .tk-bust, #talkCard[data-style="combo"] .tk-bust { --fig-h: 78%; }
+#talkCard[data-style="dock"] .tk-bust.emoji, #talkCard[data-style="combo"] .tk-bust.emoji { --fig-h: 46%; }
+#talkCard[data-style="dock"] .tk-plate, #talkCard[data-style="combo"] .tk-plate { flex-direction: column; gap: 2px; margin: -6px 0 8px; padding: 0; border-radius: 0; background: none; box-shadow: none; color: var(--ink); text-align: center; text-shadow: 0 2px 8px var(--tk-veil); }
+#talkCard[data-style="dock"] .tk-plate .talk-name, #talkCard[data-style="combo"] .tk-plate .talk-name { font-size: 1.3rem; }
+/* close-up */
+#talkCard[data-style="combo"] .tk-stage { position: relative; }
+#talkCard[data-style="combo"] .tk-bust:not(.emoji) { --fig-h: 132%; align-items: flex-start; overflow: hidden; }
+#talkCard[data-style="combo"] .tk-bust:not(.emoji) .talk-portrait { margin-top: -3%; animation: tk-breathe 5s ease-in-out infinite; transform-origin: 50% 0; }
+#talkCard[data-style="combo"] .tk-bust:not(.emoji) .talk-portrait { -webkit-mask-image: linear-gradient(180deg, var(--c-grey-0) 52%, transparent 96%); mask-image: linear-gradient(180deg, var(--c-grey-0) 52%, transparent 96%); }   /* the picture fades out into the subtitle */
+@keyframes tk-breathe { 50% { transform: scale(1.025); } }
+#talkCard[data-style="combo"] .talk-bubble { bottom: 10px; z-index: 5; padding: 0 8px; border: 0; border-radius: 0; background: none; backdrop-filter: none; box-shadow: none; text-align: center; }
+#talkCard[data-style="combo"] .talk-bubble::before { display: none; }
+#talkCard[data-style="combo"] .talk-bubble .talk-text { font: italic 400 1.28rem/1.3 var(--f-display) !important; text-shadow: 0 2px 12px var(--tk-veil), 0 0 4px var(--tk-veil); }
+#talkCard[data-style="combo"] .talk-sub, #talkCard[data-style="combo"] .talk-tag, #talkCard[data-style="combo"] .talk-doing { text-shadow: 0 1px 6px var(--tk-veil); }
+#talkCard[data-style="combo"] .tk-memo:not(:empty) {
+  display: block; position: absolute; right: 0; top: 0; z-index: 7; max-width: 100%; padding: 5px 11px; border-radius: 999px; background: color-mix(in srgb, var(--tk-veil) 62%, transparent);
+  color: var(--ink); font: 700 .72rem var(--f-ui);
+}
+@media (prefers-reduced-motion: reduce) { #talkCard[data-style="combo"] .tk-bust .talk-portrait, #talkCard[data-style] .tk-sub { animation: none; } }
