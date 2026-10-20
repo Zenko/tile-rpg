@@ -2788,17 +2788,33 @@ body.in-battle .tab-win, body.in-battle .win-dim, body.in-scene .tab-win, body.i
    then today's rows (event, weather moment, town goal with its bar, the Gazette headline, town mood). It replaces the old stack of
    equal-weight rows, so the sign reads at a glance and fits one screen with less scrolling.
    ========================================================================================================== */
-.wb-hero { display: flex; align-items: center; gap: 14px; margin: 0 0 8px; padding: 14px 14px 14px 16px; border-radius: 20px; border: 1px solid var(--stone-edge);
+.wb-hero { display: flex; align-items: flex-start; gap: 12px; margin: 0 0 6px; padding: 12px 14px; border-radius: 18px; border: 1px solid var(--stone-edge);
   background: linear-gradient(145deg, color-mix(in srgb, var(--water) 30%, var(--stone)), color-mix(in srgb, var(--accent) 10%, var(--stone))); }
-.wb-hero-ico { flex: none; font-size: 2.6rem; line-height: 1; filter: drop-shadow(0 3px 6px var(--shadow)); }
-.wb-hero-txt, .wb-next-txt { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.wb-hero-ico { flex: none; font-size: 2rem; line-height: 1; filter: drop-shadow(0 3px 6px var(--shadow)); }
+.wb-hero-txt, .wb-next-txt { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; }
 .wb-hero-txt small, .wb-next-txt small { font-size: .62rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
-.wb-hero-txt b { font-family: var(--f-display); font-weight: 500; font-size: 1.5rem; line-height: 1.1; color: var(--ink); }
+.wb-hero-txt b { font-family: var(--f-display); font-weight: 500; font-size: 1.3rem; line-height: 1.1; color: var(--ink); }
 .wb-hero .wb-tag { align-self: flex-start; }
-.wb-chips { display: flex; flex-wrap: wrap; gap: 5px; }
-.wb-chips span { padding: 3px 9px; border-radius: 999px; font-size: .72rem; font-weight: 700; line-height: 1.3; text-align: left; color: var(--ink); background: color-mix(in srgb, var(--ink) 9%, transparent); }
-.wb-next { display: flex; align-items: center; gap: 12px; margin: 0 0 12px; padding: 10px 14px; border-radius: 16px; border: 1px dashed var(--stone-edge); }
-.wb-next-ico { flex: none; font-size: 1.5rem; line-height: 1; opacity: .85; }
-.wb-next-txt b { font-family: var(--f-display); font-weight: 500; font-size: 1.02rem; line-height: 1.2; color: var(--ink); }
-.wb-hero + .wb-rows { margin-top: 12px; }
-.wb-rows .wb-bar { margin-top: 8px; }
+/* effects are plain lines, not pills: they wrapped into tall blobs on a phone */
+.wb-chips { display: flex; flex-direction: column; gap: 1px; margin-top: 2px; }
+.wb-chips span { font-size: .8rem; font-weight: 600; line-height: 1.35; text-align: left; color: var(--ink); }
+/* what is coming: one slim line, no effects (they show when it arrives) */
+.wb-next { display: flex; align-items: center; gap: 10px; margin: 0 0 8px; padding: 6px 14px; border-radius: 14px; border: 1px dashed var(--stone-edge); }
+.wb-next-ico { flex: none; font-size: 1.15rem; line-height: 1; opacity: .85; }
+.wb-next-txt { flex-direction: row; align-items: baseline; flex-wrap: wrap; gap: 2px 8px; }
+.wb-next-txt b { font-family: var(--f-display); font-weight: 500; font-size: .98rem; line-height: 1.2; color: var(--ink); }
+.wb-next .wb-chips { display: none; }
+.wb-rows { gap: 6px; }
+.wb-rows .wb-row { align-items: flex-start; gap: 10px; padding: 8px 12px; border-radius: 14px; }
+.wb-rows .wb-ico { width: 32px; height: 32px; font-size: 1.15rem; border-radius: 10px; }
+.wb-rows .wb-txt b { font-size: .98rem; }
+.wb-rows .wb-txt > span { font-size: .76rem; line-height: 1.3; }
+.wb-rows .wb-bar { margin-top: 5px; height: 6px; }
+.wb-rows .wb-tag { margin-top: 1px; }
+/* the sign is a fixed-height card: the title and the Continue button stay put and only the rows scroll, so the button is never off screen */
+#sceneryOverlay .overlay-card:has(#sceneryDesc.rich) { display: flex; flex-direction: column; width: min(380px, 94vw); max-width: none; max-height: min(92dvh, 780px); padding: 16px 16px 14px; overflow: hidden; }
+#sceneryOverlay .overlay-card:has(#sceneryDesc.rich) #sceneryIcon { display: none; }
+#sceneryOverlay .overlay-card:has(#sceneryDesc.rich) h2 { flex: none; margin: 0 0 4px; font-size: 1.25rem; }
+#sceneryOverlay .overlay-card:has(#sceneryDesc.rich) #sceneryDesc.rich { flex: 1 1 auto; min-height: 0; overflow-y: auto; margin: 0 -6px 12px; padding: 0 6px; }
+#sceneryOverlay .overlay-card:has(#sceneryDesc.rich) #sceneryContinue, #sceneryOverlay .overlay-card:has(#sceneryDesc.rich) .scenery-actions { flex: none; }
+#sceneryDesc.rich .wb-quote { margin: 0 0 8px; font-size: .84rem; line-height: 1.35; }
