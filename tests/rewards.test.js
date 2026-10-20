@@ -7,7 +7,7 @@ module.exports = async (page, assert) => {
   assert.ok(ready >= 3, 'expected at least 3 ready, saw ' + ready);
   const before = await page.evaluate(() => state.ownedCards.length);
   await page.click('#dailyClaim [data-claimall]'); await page.waitForTimeout(250);
-  assert.strictEqual(await page.evaluate(() => state.ownedCards.length), before + ready);
+  assert.ok(await page.evaluate(() => state.ownedCards.length) >= before + ready, 'claim all pays every quest that was ready');   // at least: a card can finish another daily quest while the rest are claimed, and which quests you get is random (it failed about one run in thirty on CI)
   // Claiming a card can itself finish another quest (e.g. "find a card"), so keep claiming until nothing is left.
   for (let i = 0; i < 4 && await page.locator('#dailyClaim [data-claimall]').count(); i++) { await page.click('#dailyClaim [data-claimall]'); await page.waitForTimeout(250); }
   assert.match(await page.locator('#dailyClaim .claim-hero').innerText(), /Nothing to claim/);
