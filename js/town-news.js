@@ -360,7 +360,8 @@ function townNewsBoardRows(row) {
   let h = '';
   const m = momentNow(); if (m) h += row(m.icon, 'Right now', momentName(m), `<span>${m.text}</span>`, `~${momentMinsLeft()} min`);
   const g = communityGoal(), t = communityTotals();
-  h += row(g.icon, 'Town goal', g.name, `<span>${t.total} of ${g.goal} ${g.unit}</span>`, `${Math.round(t.frac * 100)}%`);
+  const pct = Math.round(t.frac * 100);
+  h += row(g.icon, 'Town goal', g.name, `<span>${t.total} of ${g.goal} ${g.unit}</span>`, `${pct}%`, `<div class="wb-bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${Math.min(100, pct)}%"></i></div>`);
   h += row('📰', 'The Dream Gazette', gazetteToday().h, '', '');
   return h;
 }

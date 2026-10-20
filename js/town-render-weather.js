@@ -4,7 +4,7 @@
 const townView = document.getElementById('townGrid');
 const VIEW_COLS = 7; let STEP_MS = 170;   // `let`: a walk with your companion slows it down while it lasts (js/companion-activities.js)
 let viewRows = 7;
-const CAM_PAD_TOP = 70, CAM_PAD_BOTTOM = 96;   // px of the map hidden behind the floating top pill and bottom dock
+const CAM_PAD_TOP = 70, CAM_PAD_BOTTOM = 0, CAM_BAND_BOTTOM = 96;   // px: the map may scroll past its top edge to clear the pill, but runs to the bottom edge of the screen with the dock on top of it; the player is kept in the band above CAM_BAND_BOTTOM
 let townWorld = null, townBuiltFor = null, tilePx = 48, playerEl = null, walkToken = 0;
 // Rebuilt every renderEntities() call (elements don't survive a rebuild), so the wander ticks in
 // js/neighbors-bosses.js can look an npc/boss/spirit's element up by id instead of re-querying the DOM
@@ -162,13 +162,16 @@ function forecastText() {
 function weatherBoardHtml(quote) {
   const w = state.weather, nowK = weatherNow(), nx = WEATHER_KINDS[w.next] ? w.next : null, ev = eventNow();
   const mins = Math.max(1, Math.round(((w.changesAt || 0) - (w.elapsed || 0)) / 60000));
-  const fxLine = k => WEATHER_EFFECTS[k] ? WEATHER_EFFECTS[k].short.split(' · ').map(x => `<span>${x}</span>`).join('') : '';
-  const row = (ico, label, title, sub, tag) => `<div class="wb-row"><span class="wb-ico">${ico}</span><div class="wb-txt"><small>${label}</small><b>${title}</b>${sub}</div>${tag ? `<em class="wb-tag">${tag}</em>` : ''}</div>`;
+  const chips = k => WEATHER_EFFECTS[k] ? `<div class="wb-chips">${WEATHER_EFFECTS[k].short.split(' · ').map(x => `<span>${x}</span>`).join('')}</div>` : '';
+  const row = (ico, label, title, sub, tag, extra) => `<div class="wb-row"><span class="wb-ico">${ico}</span><div class="wb-txt"><small>${label}</small><b>${title}</b>${sub}${extra || ''}</div>${tag ? `<em class="wb-tag">${tag}</em>` : ''}</div>`;
   const data = ensureDistrictData(state.currentDistrict), lv = moodLevel(data), n = data.mood || 0, full = lv >= MOOD_STEPS.length;
   const pct = full ? 100 : Math.min(100, Math.round(n / MOOD_STEPS[lv] * 100));
-  let h = `<p class="wb-quote">${quote}</p><div class="wb-rows">`;
-  h += row(WEATHER_KINDS[nowK].icon || '☀️', 'Now', WEATHER_KINDS[nowK].name, fxLine(nowK), nx && nx !== nowK ? '' : `~${mins} min more`);
-  if (nx && nx !== nowK) h += row(WEATHER_KINDS[nx].icon || '☀️', `In ~${mins} min`, WEATHER_KINDS[nx].name, fxLine(nx), '');
+  const stays = !(nx && nx !== nowK);
+  // The sign, top to bottom: the weather right now (the big card), what is coming, then today's rows.
+  let h = `<p class="wb-quote">${quote}</p>`;
+  h += `<div class="wb-hero"><span class="wb-hero-ico">${WEATHER_KINDS[nowK].icon || '☀️'}</span><div class="wb-hero-txt"><small>Now</small><b>${WEATHER_KINDS[nowK].name}</b>${chips(nowK)}</div>${stays ? `<em class="wb-tag">~${mins} min more</em>` : ''}</div>`;
+  if (!stays) h += `<div class="wb-next"><span class="wb-next-ico">${WEATHER_KINDS[nx].icon || '☀️'}</span><div class="wb-next-txt"><small>In ~${mins} min</small><b>${WEATHER_KINDS[nx].name}</b>${chips(nx)}</div></div>`;
+  h += '<div class="wb-rows">';
   h += row(ev.icon, 'Today', ev.name, `<span>${ev.text}</span>`, '');
   if (typeof townNewsBoardRows === 'function') h += townNewsBoardRows(row);   // the weather moment, the town goal and the Gazette (js/town-news.js)
   h += `<div class="wb-row wb-mood"><span class="wb-ico">${full ? '🎆' : '🎈'}</span><div class="wb-txt"><small>Town mood</small><b>${MOOD_NAMES[lv]}${full ? ' (full!)' : ''}</b><div class="wb-bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div></div>${full ? '' : `<em class="wb-tag">${n}/${MOOD_STEPS[lv]}</em>`}</div>`;
@@ -546,7 +549,7 @@ function updateCamera(animate) {
   // The floating pill and dock cover the top and bottom of the map: centre on the visible band between them, and let
   // the map scroll a little past its edges so the first and last rows can be brought clear of them.
   const padT = CAM_PAD_TOP, padB = CAM_PAD_BOTTOM;
-  let cx = vw / 2 - (state.playerPos.x + 0.5) * tilePx, cy = (padT + vh - padB) / 2 - (state.playerPos.y + 0.5) * tilePx;
+  let cx = vw / 2 - (state.playerPos.x + 0.5) * tilePx, cy = (padT + vh - CAM_BAND_BOTTOM) / 2 - (state.playerPos.y + 0.5) * tilePx;
   cx = Math.min(0, Math.max(vw - m.w * tilePx, cx)); cy = Math.min(padT, Math.max(vh - m.h * tilePx - padB, cy));
   if (camFree && (camFree.district !== state.currentDistrict || inScene || inBattle)) camRelease();   // a dragged camera only lives in the district and view it was dragged in
   if (camFree) { const b = camBounds(); cx = Math.min(b.maxX, Math.max(b.minX, camFree.cx)); cy = Math.min(b.maxY, Math.max(b.minY, camFree.cy)); animate = false; }

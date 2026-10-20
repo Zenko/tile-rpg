@@ -2694,10 +2694,19 @@ body.pw-board #goalChip { display: none !important; }   /* the dice panel says w
    Journal, Cards, Rewards, Character and the Card Shop screen open as a window (#tabWin) over the dimmed town instead of filling
    the screen. The town stays drawn under the dim, so #townPanel.tab-away no longer fades it out. */
 #townPanel.tab-away { opacity: 1; pointer-events: none; }
-/* the top pill is only you now: avatar, name and XP; the sky, clock, cards and Embers moved to the info bar */
-.hud { right: auto; max-width: calc(100% - 20px); padding-right: 14px; }
-.hud-id-text { display: flex; }
+/* the top pill is only you: avatar, name and XP on the left, your cards and Embers on the right. The place, time and weather live in the info bar below. */
+.hud { right: 10px; max-width: none; padding-right: 14px; }
+.hud-id-text { display: flex; gap: 2px; }
 .hud-xp-bar { max-width: 90px; }
+.hud-xp-text { font-size: 11px; font-weight: 700; line-height: 1.2; color: var(--ink-soft); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.hud-spacer { display: block; flex: 1; min-width: 8px; }
+.hud-resources { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+.hud .hud-resources #pillCards { display: flex; }
+.hud-resources .hud-stat { font-size: .9rem; }
+.hud-resources .hs-icon, .hud-resources #pillPebbles .hs-icon { width: auto; height: auto; border: 0; background: none; box-shadow: none; font-size: 1.05rem; }
+.hud-resources .hs-bar, .hud-resources #pillPebbles .hs-bar { height: auto; min-width: 0; margin: 0; padding: 0 0 0 5px; background: none; box-shadow: none; border-radius: 0; }
+.hud-resources .hs-fill { display: none; }
+.hud-resources .hs-val { font-size: .9rem; font-weight: 800; }
 
 .dock { position: absolute; inset: 0; z-index: 14; pointer-events: none; --ex: 47px; --cy: calc(47px + env(safe-area-inset-bottom)); }
 .dock.r { --cx: calc(100% - var(--ex)); }
@@ -2705,30 +2714,23 @@ body.pw-board #goalChip { display: none !important; }   /* the dice panel says w
 .fan-scrim { position: absolute; inset: 0; background: var(--dock-dim); opacity: 0; transition: opacity .25s ease; }
 .dock.open .fan-scrim { opacity: 1; pointer-events: auto; }
 
-.dock-bar { position: absolute; z-index: 1; left: 14px; right: 14px; bottom: calc(14px + env(safe-area-inset-bottom)); height: 66px; padding: 0 82px 7px 20px; display: flex; flex-direction: column; justify-content: center; gap: 1px;
+.dock-bar { position: absolute; z-index: 1; left: 14px; right: 14px; bottom: calc(14px + env(safe-area-inset-bottom)); height: 66px; padding: 0 82px 0 20px; display: flex; flex-direction: column; justify-content: center; gap: 1px;
   border-radius: 33px; background: var(--glass); border: 1px solid color-mix(in srgb, var(--stone-edge) 80%, transparent); box-shadow: 0 10px 26px var(--shadow); pointer-events: auto; overflow: hidden; text-align: left; }
-.dock.l .dock-bar { padding: 0 20px 7px 82px; }
-.dock-l1 { display: flex; align-items: center; min-width: 0; min-height: 16px; }
+.dock.l .dock-bar { padding: 0 20px 0 82px; }
+.dock-l1 { display: flex; align-items: center; min-width: 0; }
 .dock-town { display: flex; min-width: 0; flex: 1; }
-.dock-ctx { flex: 1; min-width: 0; font-size: 11px; font-weight: 800; letter-spacing: .03em; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dock-ctx { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; white-space: nowrap; overflow: hidden; }
+.dc-title { font-size: 14px; font-weight: 800; color: var(--ink); overflow: hidden; text-overflow: ellipsis; }
+.dc-sub { font-size: 11px; font-weight: 700; color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; }
+.dc-sub:empty { display: none; }
 .dock:not([data-ctx="town"]) .dock-town, .dock[data-ctx="town"] .dock-ctx { display: none; }
-/* the sky pill, flattened to one line: place, then the time of day and the weather */
+/* the sky pill as two lines: the place, then the time of day and the weather */
 .dock-town .hud-ambient { flex: 1; max-width: none; min-width: 0; padding: 0; background: none; border: 0; box-shadow: none; justify-content: flex-start; }
-.dock-town .hud-ambient-text { flex-direction: row; align-items: baseline; gap: 6px; min-width: 0; overflow: hidden; }
-.dock-town .hud-district { font-family: var(--f-ui); font-size: 12px; font-weight: 800; color: var(--ink); flex: 0 1 auto; min-width: 0; }
-.dock-town .hud-ambient-sub { flex: none; font-size: 11px; }
-.dock-town .hud-ambient-sub .amb-time, .dock-town .hud-ambient-sub .amb-weather { font-size: 11px; max-width: 80px; }
+.dock-town .hud-ambient-text { flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; overflow: hidden; }
+.dock-town .hud-district { font-family: var(--f-ui); font-size: 14px; font-weight: 800; color: var(--ink); flex: 0 1 auto; min-width: 0; }
+.dock-town .hud-ambient-sub { flex: none; font-size: 11px; gap: 5px; }
+.dock-town .hud-ambient-sub .amb-time, .dock-town .hud-ambient-sub .amb-weather { font-size: 11px; max-width: 110px; }
 .dock-town .hud-ambient-sub .amb-weather:not(:empty)::before { content: '· '; }
-.dock-l2 { position: relative; z-index: 1; display: flex; align-items: center; gap: 14px; min-width: 0; }   /* above the sky line, so the counters keep their full 44px touch area (tests/mobile.test.js) */
-.dock-l2 #pillCards { display: flex; }
-.dock-l2 .hud-stat { font-size: .9rem; }
-.dock-l2 .hs-icon, .dock-l2 #pillPebbles .hs-icon { width: auto; height: auto; border: 0; background: none; box-shadow: none; font-size: 1rem; }
-.dock-l2 .hs-bar, .dock-l2 #pillPebbles .hs-bar { height: auto; min-width: 0; margin: 0; padding: 0 0 0 5px; background: none; box-shadow: none; border-radius: 0; }
-.dock-l2 .hs-fill { display: none; }
-.dock-l2 .hs-val { font-size: .9rem; font-weight: 800; }
-.dock-xp { position: absolute; left: 20px; right: 82px; bottom: 8px; height: 3px; border-radius: 2px; background: var(--track); overflow: hidden; }
-.dock.l .dock-xp { left: 82px; right: 20px; }
-.dock-xp i { display: block; width: 0; height: 100%; border-radius: 2px; background: var(--accent); transition: width .3s ease; }
 
 .fan-main { pointer-events: auto; position: absolute; z-index: 3; left: var(--cx); bottom: calc(var(--cy) - 28px); width: 56px; height: 56px; margin-left: -28px; padding: 0; border: 0; border-radius: 50%;
   display: grid; place-items: center; background: var(--water); color: var(--on-water); font-size: 1.55rem; box-shadow: 0 6px 16px var(--shadow); transition: transform .3s cubic-bezier(.3, 1.5, .5, 1), left .35s cubic-bezier(.3, 1.2, .45, 1); }
@@ -2779,3 +2781,24 @@ body.win-open .win-dim { opacity: 1; pointer-events: auto; }
 /* a battle or a building screen covers everything, so the window and the dim step aside (they come back with the tab when it ends) */
 body.in-battle .tab-win, body.in-battle .win-dim, body.in-scene .tab-win, body.in-scene .win-dim { display: none; }
 @media (prefers-reduced-motion: reduce) { .tab-win.win-in, .tab-win.win-out, .win-rise, .fan-main, .fm-ico, .fm-x, .fan-scrim, .win-dim { animation: none; transition: none; } }
+
+/* ==========================================================================================================
+   THE WELCOME SIGN, REDESIGNED (js/town-render-weather.js weatherBoardHtml + js/town-news.js townNewsBoardRows)
+   Top to bottom: the quote, one big card for the weather right now (its effects as small chips), a slim strip for what is coming,
+   then today's rows (event, weather moment, town goal with its bar, the Gazette headline, town mood). It replaces the old stack of
+   equal-weight rows, so the sign reads at a glance and fits one screen with less scrolling.
+   ========================================================================================================== */
+.wb-hero { display: flex; align-items: center; gap: 14px; margin: 0 0 8px; padding: 14px 14px 14px 16px; border-radius: 20px; border: 1px solid var(--stone-edge);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--water) 30%, var(--stone)), color-mix(in srgb, var(--accent) 10%, var(--stone))); }
+.wb-hero-ico { flex: none; font-size: 2.6rem; line-height: 1; filter: drop-shadow(0 3px 6px var(--shadow)); }
+.wb-hero-txt, .wb-next-txt { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.wb-hero-txt small, .wb-next-txt small { font-size: .62rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
+.wb-hero-txt b { font-family: var(--f-display); font-weight: 500; font-size: 1.5rem; line-height: 1.1; color: var(--ink); }
+.wb-hero .wb-tag { align-self: flex-start; }
+.wb-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.wb-chips span { padding: 3px 9px; border-radius: 999px; font-size: .72rem; font-weight: 700; line-height: 1.3; text-align: left; color: var(--ink); background: color-mix(in srgb, var(--ink) 9%, transparent); }
+.wb-next { display: flex; align-items: center; gap: 12px; margin: 0 0 12px; padding: 10px 14px; border-radius: 16px; border: 1px dashed var(--stone-edge); }
+.wb-next-ico { flex: none; font-size: 1.5rem; line-height: 1; opacity: .85; }
+.wb-next-txt b { font-family: var(--f-display); font-weight: 500; font-size: 1.02rem; line-height: 1.2; color: var(--ink); }
+.wb-hero + .wb-rows { margin-top: 12px; }
+.wb-rows .wb-bar { margin-top: 8px; }

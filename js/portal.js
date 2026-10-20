@@ -52,9 +52,9 @@ function portalInView(x, y) {
   if (!view || !view.clientWidth || !t) return Math.abs(x - state.playerPos.x) <= PORTAL_VIEW.x && Math.abs(y - state.playerPos.y) <= PORTAL_VIEW.y;
   const m = getMap(state.currentDistrict), vw = view.clientWidth, vh = view.clientHeight, padT = CAM_PAD_TOP, padB = CAM_PAD_BOTTOM;
   const cx = Math.min(0, Math.max(vw - m.w * t, vw / 2 - (state.playerPos.x + 0.5) * t));
-  const cy = Math.min(padT, Math.max(vh - m.h * t - padB, (padT + vh - padB) / 2 - (state.playerPos.y + 0.5) * t));
+  const cy = Math.min(padT, Math.max(vh - m.h * t - padB, (padT + vh - CAM_BAND_BOTTOM) / 2 - (state.playerPos.y + 0.5) * t));
   const px = (x + 0.5) * t + cx, py = (y + 0.5) * t + cy;
-  return px > t * 0.5 && px < vw - t * 0.5 && py > padT + t * 0.3 && py < vh - padB - t * 0.3;
+  return px > t * 0.5 && px < vw - t * 0.5 && py > padT + t * 0.3 && py < vh - CAM_BAND_BOTTOM - t * 0.3;
 }
 function portalPickSpot(near) {
   const d = state.currentDistrict, m = getMap(d), data = ensureDistrictData(d); if (!m || !data) return null;

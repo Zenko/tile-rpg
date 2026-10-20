@@ -8,9 +8,9 @@ module.exports = async (page, assert) => {
   await page.waitForTimeout(300);
 
   // resting: a bar and one button, the five places folded away under it
-  const rest = await ev(() => ({ open: fanNav.classList.contains('open'), ops: fanItems.map(b => +getComputedStyle(b).opacity), ctx: fanNav.dataset.ctx, sky: !!document.querySelector('#dockBar #pillSky'), stats: !!document.querySelector('#dockBar #pillPebbles') && !!document.querySelector('#dockBar #pillCards'),
-    hudSky: !!document.querySelector('.hud #pillSky'), win: document.getElementById('tabWin').classList.contains('on') }));
-  assert.ok(!rest.open && rest.ops.every(o => o === 0) && rest.ctx === 'town' && rest.sky && rest.stats && !rest.hudSky && !rest.win, 'resting state: ' + JSON.stringify(rest));
+  const rest = await ev(() => ({ open: fanNav.classList.contains('open'), ops: fanItems.map(b => +getComputedStyle(b).opacity), ctx: fanNav.dataset.ctx, sky: !!document.querySelector('#dockBar #pillSky'), stats: !!document.querySelector('.hud #pillPebbles') && !!document.querySelector('.hud #pillCards') && !!document.querySelector('.hud #hudXpText'),
+    hudSky: !!document.querySelector('.hud #pillSky'), barStats: !!document.querySelector('#dockBar #pillPebbles, #dockBar #pillCards'), win: document.getElementById('tabWin').classList.contains('on') }));
+  assert.ok(!rest.open && rest.ops.every(o => o === 0) && rest.ctx === 'town' && rest.sky && rest.stats && !rest.hudSky && !rest.barStats && !rest.win, 'resting state: ' + JSON.stringify(rest));
 
   // tap the round button: the fan unfolds, every place is a 44px+ target inside the screen, and the button shows a close mark
   await page.click('#fanMain'); await page.waitForTimeout(900);
@@ -48,7 +48,7 @@ module.exports = async (page, assert) => {
   await page.click('#fanMain'); await page.waitForTimeout(600); await page.click('#tabCollection'); await page.waitForTimeout(700);
   const c = await ev(() => ({ on: document.getElementById('tabWin').classList.contains('on'), out: document.getElementById('tabWin').classList.contains('win-out'), title: document.getElementById('winTitle').textContent,
     cards: !document.getElementById('collectionPanel').classList.contains('hidden'), journalHidden: document.getElementById('journalPanel').classList.contains('hidden'), ctx: document.getElementById('dockCtx').textContent }));
-  assert.ok(c.on && !c.out && c.title === 'Cards' && c.cards && c.journalHidden && /deck \d+\/\d+/.test(c.ctx), 'Cards replaces Journal in the same window: ' + JSON.stringify(c));
+  assert.ok(c.on && !c.out && c.title === 'Cards' && c.cards && c.journalHidden && /Deck \d+\/\d+/.test(c.ctx), 'Cards replaces Journal in the same window: ' + JSON.stringify(c));
   // the Deck, Sets and Workshop tabs work inside the window
   await page.click('#segDeck'); await page.waitForTimeout(300);
   assert.ok(await ev(() => !document.getElementById('deckPanel').classList.contains('hidden')), 'a tab inside the window still switches');
@@ -82,10 +82,11 @@ module.exports = async (page, assert) => {
   const d2 = await ev(() => ({ main: !document.getElementById('fanMainDot').classList.contains('hidden') }));
   assert.ok(!d2.main, 'and the dot goes when there is nothing waiting');
 
-  // the info bar: place and weather in town, cards and Embers always, XP line
-  const bar = await ev(() => ({ district: document.getElementById('hudDistrict').textContent, cards: document.getElementById('cardCount').textContent, embers: document.getElementById('pebbleCount').textContent, xp: document.getElementById('dockXpFill').style.width,
-    stat: document.getElementById('pillPebbles').getBoundingClientRect().height }));
-  assert.ok(bar.district && +bar.cards === await ev(() => state.ownedCards.length) && bar.embers !== '' && /%$/.test(bar.xp), 'the bar shows the place, cards, Embers and XP: ' + JSON.stringify(bar));
+  // the top pill is the player (XP, cards, Embers); the bar is the place (name, time and weather)
+  const bar = await ev(() => ({ district: document.getElementById('hudDistrict').textContent, time: document.getElementById('hudTimeText').textContent, cards: document.getElementById('cardCount').textContent, embers: document.getElementById('pebbleCount').textContent,
+    xp: document.getElementById('hudXpText').textContent, inBar: !!document.querySelector('#dockBar #hudDistrict'), inHud: !!document.querySelector('.hud #cardCount') && !!document.querySelector('.hud #pebbleCount'),
+    hudShown: getComputedStyle(document.getElementById('pillCards')).display !== 'none' }));
+  assert.ok(bar.district && bar.time && bar.inBar && bar.inHud && bar.hudShown && +bar.cards === await ev(() => state.ownedCards.length) && bar.embers !== '' && /\d+ \/ \d+ XP/.test(bar.xp), 'the top pill shows XP, cards and Embers, the bar the place and time: ' + JSON.stringify(bar));
 
   // the other hand: the button and the fan move to the left side, and the Settings switch does it
   await ev(() => { openPlayerMenu(); }); await page.waitForTimeout(300);

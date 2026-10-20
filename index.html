@@ -53,10 +53,21 @@
         <div class="hud-id-text">
           <span class="hud-name" id="avatarChipName">You</span>
           <div class="hud-xp-bar"><div class="hud-xp-fill" id="hudXpFill"></div></div>
+          <span class="hud-xp-text" id="hudXpText">0 / 0 XP</span>
         </div>
       </div>
 
       <div class="hud-spacer"></div>
+      <div class="hud-resources" id="hudResources">
+        <div class="hud-stat" id="pillCards" title="Cards owned - tap to open Cards" role="button" tabindex="0">
+          <span class="hs-icon">🃏</span>
+          <span class="hs-bar"><span class="hs-fill hs-fill-cards"></span><span class="hs-val" id="cardCount">0</span></span>
+        </div>
+        <div class="hud-stat" id="pillPebbles" title="Embers - the Card Shop on El Mercado de Susurros sells packs, sleeves and more" data-game-title="{GAME.currency.many} - the Card Shop on {PLACES.market} sells packs, sleeves and more" role="button" tabindex="0">
+          <span class="hs-icon">🫧</span>
+          <span class="hs-bar"><span class="hs-fill hs-fill-pebbles"></span><span class="hs-val" id="pebbleCount">0</span></span>
+        </div>
+      </div>
       <span class="hud-clock" id="hudClock" title="Game time">12:00 PM</span>
       <button type="button" class="hud-pill pw-pill hidden" id="pillWorld" title="Puddle world - tap to climb out early"><span class="hp-icon">🌀</span><span id="pwTime">0:00</span></button>
       <span class="hud-pill hidden" id="pillWins"><span id="winCount">0</span></span>
@@ -472,19 +483,8 @@
             </span>
           </div>
         </div>
-        <span class="dock-ctx" id="dockCtx"></span>
+        <span class="dock-ctx" id="dockCtx"><b class="dc-title"></b><span class="dc-sub"></span></span>
       </div>
-      <div class="dock-l2">
-        <div class="hud-stat" id="pillCards" title="Cards owned - tap to open Cards" role="button" tabindex="0">
-          <span class="hs-icon">🃏</span>
-          <span class="hs-bar"><span class="hs-fill hs-fill-cards"></span><span class="hs-val" id="cardCount">0</span></span>
-        </div>
-        <div class="hud-stat" id="pillPebbles" title="Embers - the Card Shop on El Mercado de Susurros sells packs, sleeves and more" data-game-title="{GAME.currency.many} - the Card Shop on {PLACES.market} sells packs, sleeves and more" role="button" tabindex="0">
-          <span class="hs-icon">🫧</span>
-          <span class="hs-bar"><span class="hs-fill hs-fill-pebbles"></span><span class="hs-val" id="pebbleCount">0</span></span>
-        </div>
-      </div>
-      <span class="dock-xp" aria-hidden="true"><i id="dockXpFill"></i></span>
     </div>
     <button type="button" class="fan-main" id="fanMain" aria-label="Open menu" aria-expanded="false" aria-controls="bottomNav"><span class="fm-ico" id="fanMainIcon">🏘️</span><span class="fm-x" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></span><i class="dot hidden" id="fanMainDot"></i></button>
     <button class="fan-item active" id="tabTown" type="button"><span class="t-icon">🏘️</span><span>Town</span></button>

@@ -13,9 +13,9 @@
      it slides the window up for a tab and down for Town. The panel being left is NOT hidden until the slide-down has finished
      (fanWinHold), or the window would empty itself before it left. Between two tabs the window stays and only the content rises
      in (fanStagger). The town stays drawn under a dim; nothing about the town's own pausing changed.
-   - The info bar: in Town it shows the place, time and weather (the old #pillSky, moved here) over cards and Embers (the old
-     #pillCards / #pillPebbles, moved here so their taps, bumps and flying rewards still work). In a window the first line says
-     what that screen is about (fanContext). A thin gold line is the XP to the next level.
+   - The info bar is about the place, not the player: in Town it shows the place over the time and weather (the old #pillSky); in a
+     window it shows what that screen is (fanContext: a title and one detail line). The player's own numbers (XP, cards, Embers)
+     live in the top pill (#hudResources), so their taps, bumps and flying rewards still work.
    - The side is a setting (prefs.menuHand: right or left, Settings -> Appearance).
    Everything here is prefixed fan / win so it never collides with another file's names.
    ============================================================ */
@@ -26,7 +26,7 @@ const WIN_OUT_MS = 280, WIN_RISE_MAX = 14;
 const WIN_TITLES = { journal: ['📓', 'Journal'], collection: ['🃏', 'Cards'], quests: ['🎁', 'Rewards'], character: ['🧑', 'Character'], shop: ['🛍️', 'Card Shop'] };
 
 const fanNav = document.getElementById('bottomNav'), fanMainBtn = document.getElementById('fanMain'), fanMainIcon = document.getElementById('fanMainIcon'), fanMainDot = document.getElementById('fanMainDot');
-const fanItems = FAN_IDS.map(id => document.getElementById(id)), fanCtxEl = document.getElementById('dockCtx'), fanXpEl = document.getElementById('dockXpFill');
+const fanItems = FAN_IDS.map(id => document.getElementById(id)), fanCtxEl = document.getElementById('dockCtx'), fanCtxTitle = fanCtxEl.querySelector('.dc-title'), fanCtxSub = fanCtxEl.querySelector('.dc-sub');
 const fanWinEl = document.getElementById('tabWin'), fanWinBody = document.getElementById('winBody'), fanWinIcon = document.getElementById('winIcon'), fanWinTitle = document.getElementById('winTitle');
 let fanIsOpen = false, fanU = fanItems.map(() => 0), fanWait = fanItems.map(() => 0), fanDir = 0, fanRaf = 0, fanLast = 0, fanPos = [];
 let winHeld = null, winOutTimer = 0, winRiseTimer = 0, fanIconSig = '', fanJournalAt = 0, fanJournalTxt = '';
@@ -72,22 +72,22 @@ function fanSetOpen(open) {
 }
 
 /* ---------- the info bar ---------- */
-function fanContext(key) {
+function fanContext(key) {   // [title, detail]: what this screen is, and one line about it
   const pr = state.progress;
   if (key === 'journal') {
     const now = Date.now();
     if (now - fanJournalAt > 1500) { fanJournalAt = now; try { fanJournalTxt = `${todayModel().daily.filter(d => !d.done).length} to do today`; } catch (e) { fanJournalTxt = ''; } }
-    return fanJournalTxt ? `Journal · ${fanJournalTxt}` : 'Journal';
+    return ['Journal', fanJournalTxt];
   }
-  if (key === 'collection') return `Cards · deck ${state.deck.length}/${DECK_SIZE}`;
+  if (key === 'collection') return ['Cards', `Deck ${state.deck.length}/${DECK_SIZE} · ${state.ownedCards.length} owned`];
   if (key === 'quests') {
     const ready = giftReady() ? 1 : 0, claim = (pr.quests || []).filter(q => !q.claimed && questProgress(q) >= questDef(q.id).goal).length
       + (pr.weeklyQuests || []).filter(q => !q.claimed && weeklyQuestProgress(q) >= weeklyQuestDef(q.id).goal).length;
-    return ready ? 'Rewards · gift ready' : claim ? `Rewards · ${claim} to claim` : 'Rewards · all caught up';
+    return ['Rewards', ready ? 'Gift ready' : claim ? `${claim} to claim` : 'All caught up'];
   }
-  if (key === 'character') return `Level ${ensureLevel().level} · ${state.character.name || 'You'}`;
-  if (key === 'shop') return 'Card Shop';
-  return '';
+  if (key === 'character') return ['Character', `Level ${ensureLevel().level} · ${state.character.name || 'You'}`];
+  if (key === 'shop') return ['Card Shop', ''];
+  return ['', ''];
 }
 let fanTipAsked = false;
 function fanDockUpdate() {
@@ -95,10 +95,9 @@ function fanDockUpdate() {
   const key = typeof currentTab === 'string' ? currentTab : 'town';
   if (fanIsOpen && fanNav.style.display === 'none') fanSetOpen(false);   // a battle or a building screen hid the menu while it was open
   if (fanNav.dataset.ctx !== key) fanNav.dataset.ctx = key;
-  const line = key === 'town' ? '' : fanContext(key);
-  if (fanCtxEl.textContent !== line) fanCtxEl.textContent = line;
-  const pr = ensureLevel(), pct = Math.max(0, Math.min(100, pr.xp / xpToNext(pr.level) * 100)).toFixed(1) + '%';
-  if (fanXpEl.style.width !== pct) fanXpEl.style.width = pct;
+  const [title, sub] = key === 'town' ? ['', ''] : fanContext(key);
+  if (fanCtxTitle.textContent !== title) fanCtxTitle.textContent = title;
+  if (fanCtxSub.textContent !== sub) fanCtxSub.textContent = sub;
   // the round button shows where you are
   const src = tabs[key] && tabs[key].btn.querySelector('.t-icon'), html = src ? src.innerHTML : (WIN_TITLES[key] ? WIN_TITLES[key][0] : '🏘️');
   if (fanIconSig !== html) { fanIconSig = html; fanMainIcon.innerHTML = html; }

@@ -144,6 +144,7 @@ function updateLevelHud() {
   const fill = document.getElementById('hudXpFill');
   if (badge) badge.textContent = pr.level;
   if (fill) fill.style.width = pct + '%';
+  const hudText = document.getElementById('hudXpText'); if (hudText) hudText.textContent = `${Math.floor(pr.xp)} / ${need} XP`;
   const ring = document.getElementById('hudRing'); if (ring) ring.style.setProperty('--p', pct.toFixed(1));
   const pmBadge = document.getElementById('pmLevelBadge'), pmText = document.getElementById('pmXpText'), pmFill = document.getElementById('pmXpFill');
   if (pmBadge) pmBadge.textContent = 'Lv ' + pr.level;
