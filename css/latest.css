@@ -2690,3 +2690,95 @@ body.pw-board #goalChip { display: none !important; }   /* the dice panel says w
 #talkCard[data-style="combo"] .talk-portrait .tk-img { width: 100%; height: auto; max-width: none; max-height: none; object-fit: contain; }
 /* a short phone: a little less crop and a smaller subtitle, so the words stay off the face */
 @media (max-height: 700px) { #talkCard[data-style="combo"] .tk-bust:not(.emoji) { --fig-h: 104%; } #talkCard[data-style="combo"] .talk-bubble .talk-text { font-size: 1.08rem !important; } }
+
+/* ---- THE FAN MENU, THE INFO BAR AND THE TAB WINDOW (build 290; script: js/fan-menu.js) ----
+   The bottom dock is gone. #bottomNav is now a full-size overlay (it ignores taps except on its own parts) holding the info bar and
+   one round button; tapping the button fans the five places out in an arc around the thumb. The five items keep the old tab ids.
+   Journal, Cards, Rewards, Character and the Card Shop screen open as a window (#tabWin) over the dimmed town instead of filling
+   the screen. The town stays drawn under the dim, so #townPanel.tab-away no longer fades it out. */
+#townPanel.tab-away { opacity: 1; pointer-events: none; }
+/* the top pill is only you now: avatar, name and XP; the sky, clock, cards and Embers moved to the info bar */
+.hud { right: auto; max-width: calc(100% - 20px); padding-right: 14px; }
+.hud-id-text { display: flex; }
+.hud-xp-bar { max-width: 90px; }
+
+.dock { position: absolute; inset: 0; z-index: 14; pointer-events: none; --ex: 47px; --cy: calc(47px + env(safe-area-inset-bottom)); }
+.dock.r { --cx: calc(100% - var(--ex)); }
+.dock.l { --cx: var(--ex); }
+.fan-scrim { position: absolute; inset: 0; background: var(--dock-dim); opacity: 0; transition: opacity .25s ease; }
+.dock.open .fan-scrim { opacity: 1; pointer-events: auto; }
+
+.dock-bar { position: absolute; z-index: 1; left: 14px; right: 14px; bottom: calc(14px + env(safe-area-inset-bottom)); height: 66px; padding: 0 82px 7px 20px; display: flex; flex-direction: column; justify-content: center; gap: 1px;
+  border-radius: 33px; background: var(--glass); border: 1px solid color-mix(in srgb, var(--stone-edge) 80%, transparent); box-shadow: 0 10px 26px var(--shadow); pointer-events: auto; overflow: hidden; text-align: left; }
+.dock.l .dock-bar { padding: 0 20px 7px 82px; }
+.dock-l1 { display: flex; align-items: center; min-width: 0; min-height: 16px; }
+.dock-town { display: flex; min-width: 0; flex: 1; }
+.dock-ctx { flex: 1; min-width: 0; font-size: 11px; font-weight: 800; letter-spacing: .03em; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dock:not([data-ctx="town"]) .dock-town, .dock[data-ctx="town"] .dock-ctx { display: none; }
+/* the sky pill, flattened to one line: place, then the time of day and the weather */
+.dock-town .hud-ambient { flex: 1; max-width: none; min-width: 0; padding: 0; background: none; border: 0; box-shadow: none; justify-content: flex-start; }
+.dock-town .hud-ambient-text { flex-direction: row; align-items: baseline; gap: 6px; min-width: 0; overflow: hidden; }
+.dock-town .hud-district { font-family: var(--f-ui); font-size: 12px; font-weight: 800; color: var(--ink); flex: 0 1 auto; min-width: 0; }
+.dock-town .hud-ambient-sub { flex: none; font-size: 11px; }
+.dock-town .hud-ambient-sub .amb-time, .dock-town .hud-ambient-sub .amb-weather { font-size: 11px; max-width: 80px; }
+.dock-town .hud-ambient-sub .amb-weather:not(:empty)::before { content: '· '; }
+.dock-l2 { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.dock-l2 #pillCards { display: flex; }
+.dock-l2 .hud-stat { font-size: .9rem; }
+.dock-l2 .hs-icon, .dock-l2 #pillPebbles .hs-icon { width: auto; height: auto; border: 0; background: none; box-shadow: none; font-size: 1rem; }
+.dock-l2 .hs-bar, .dock-l2 #pillPebbles .hs-bar { height: auto; min-width: 0; margin: 0; padding: 0 0 0 5px; background: none; box-shadow: none; border-radius: 0; }
+.dock-l2 .hs-fill { display: none; }
+.dock-l2 .hs-val { font-size: .9rem; font-weight: 800; }
+.dock-xp { position: absolute; left: 20px; right: 82px; bottom: 8px; height: 3px; border-radius: 2px; background: var(--track); overflow: hidden; }
+.dock.l .dock-xp { left: 82px; right: 20px; }
+.dock-xp i { display: block; width: 0; height: 100%; border-radius: 2px; background: var(--accent); transition: width .3s ease; }
+
+.fan-main { pointer-events: auto; position: absolute; z-index: 3; left: var(--cx); bottom: calc(var(--cy) - 28px); width: 56px; height: 56px; margin-left: -28px; padding: 0; border: 0; border-radius: 50%;
+  display: grid; place-items: center; background: var(--water); color: var(--on-water); font-size: 1.55rem; box-shadow: 0 6px 16px var(--shadow); transition: transform .3s cubic-bezier(.3, 1.5, .5, 1), left .35s cubic-bezier(.3, 1.2, .45, 1); }
+.dock.open .fan-main { transform: scale(.9); }
+.fm-ico, .fm-x { grid-area: 1 / 1; display: grid; place-items: center; transition: opacity .2s ease, transform .35s cubic-bezier(.3, 1.4, .5, 1); }
+.fm-x { opacity: 0; transform: rotate(-90deg) scale(.4); }
+.dock.open .fm-ico { opacity: 0; transform: rotate(90deg) scale(.4); }
+.dock.open .fm-x { opacity: 1; transform: none; }
+.fm-ico .t-icon, .fm-ico > span { line-height: 1; }
+.fm-ico:has(> .av-face) { width: 1.4em; height: 1.4em; }
+.fan-main .dot { position: absolute; top: 1px; right: 1px; width: 12px; height: 12px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg-top); animation: pulse-dot 1.8s ease-in-out infinite; transition: opacity .2s ease; }
+.dock.open .fan-main .dot { opacity: 0; }
+
+/* the five places. Each is a 64px glass circle with its icon and name inside (11px, like every UI label); the script gives it a
+   transform and an opacity every frame while the fan opens and closes, so the stylesheet only says where it rests (on the button). */
+.fan-item { pointer-events: none; position: absolute; z-index: 2; left: var(--cx); bottom: calc(var(--cy) - 32px); width: 64px; height: 64px; margin-left: -32px; padding: 0; border-radius: 50%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; background: var(--glass); color: var(--ink); font-family: inherit;
+  border: 1px solid color-mix(in srgb, var(--stone-edge) 80%, transparent); box-shadow: 0 6px 16px var(--shadow); opacity: 0; will-change: transform, opacity; }
+.dock.open .fan-item { pointer-events: auto; }
+.fan-item .t-icon { font-size: 1.35rem; line-height: 1.1; filter: drop-shadow(0 .035em .05em var(--art-sh)); }
+.fan-item .t-icon:has(> .av-face) { display: inline-flex; width: 1.4em; height: 1.4em; filter: none; }
+.fan-item > span:not(.t-icon) { font-size: 11px; font-weight: 800; line-height: 1.1; }
+.fan-item.active { background: var(--water); color: var(--on-water); border-color: transparent; }
+.fan-item .dot { position: absolute; top: 4px; right: 4px; width: 11px; height: 11px; border-radius: 50%; background: var(--accent); animation: pulse-dot 1.8s ease-in-out infinite; }
+.fan-item.active .dot { display: none; }
+
+/* the window */
+.win-dim { position: absolute; inset: 0; z-index: 11; background: var(--dock-dim); opacity: 0; pointer-events: none; transition: opacity .25s ease; }
+body.win-open .win-dim { opacity: 1; pointer-events: auto; }
+.tab-win { position: absolute; z-index: 12; left: 10px; right: 10px; top: calc(var(--hud-h) + 14px); bottom: calc(var(--dock-h) + 24px + env(safe-area-inset-bottom)); display: none; flex-direction: column;
+  background: var(--bg-top); border: 1px solid var(--stone-edge); border-radius: 24px; box-shadow: 0 22px 44px var(--shadow); overflow: hidden; text-align: left; }
+.tab-win.on { display: flex; }
+.win-head { display: flex; align-items: center; gap: 10px; flex: none; padding: 8px 8px 4px 16px; }
+.win-ico { font-size: 1.45rem; line-height: 1; display: inline-flex; }
+.win-ico:has(> .av-face) { width: 1.4em; height: 1.4em; }
+.win-title { margin: 0; flex: 1; min-width: 0; font: 500 1.4rem var(--f-display); color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.win-x { display: grid; place-items: center; flex: none; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; background: var(--track); color: var(--ink-soft); }
+.win-body { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 2px 8px 16px; }
+.win-body::-webkit-scrollbar { display: none; }
+.win-body > .panel { margin: 0; }
+.tab-win.win-in { animation: winSlideIn .4s cubic-bezier(.22, .9, .3, 1) backwards; }
+.tab-win.win-out { animation: winSlideOut .28s ease-in forwards; }
+@keyframes winSlideIn { from { transform: translateY(108%); } }
+@keyframes winSlideOut { to { transform: translateY(108%); } }
+/* the content: the rows and blocks of the screen rise in one after another (the script numbers them with --n) */
+.win-rise { animation: winRise .4s cubic-bezier(.22, .9, .3, 1) backwards; animation-delay: calc(var(--n, 0) * 45ms); }
+@keyframes winRise { from { opacity: 0; transform: translateY(14px); } }
+/* a battle or a building screen covers everything, so the window and the dim step aside (they come back with the tab when it ends) */
+body.in-battle .tab-win, body.in-battle .win-dim, body.in-scene .tab-win, body.in-scene .win-dim { display: none; }
+@media (prefers-reduced-motion: reduce) { .tab-win.win-in, .tab-win.win-out, .win-rise, .fan-main, .fm-ico, .fm-x, .fan-scrim, .win-dim { animation: none; transition: none; } }

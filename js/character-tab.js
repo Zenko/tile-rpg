@@ -37,7 +37,7 @@ function charSetView(v) {
   document.querySelectorAll('#chSeg .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.v === v));
   document.getElementById('chStage').classList.toggle('compact', charCompact());
   drawCharStage(); drawCharBody();
-  document.getElementById('screen').scrollTop = 0;
+  fanScroller().scrollTop = 0;
 }
 
 /* ---------- the stage ---------- */

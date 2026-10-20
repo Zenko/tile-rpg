@@ -56,30 +56,9 @@
         </div>
       </div>
 
-      <div class="hud-resources">
-        <div class="hud-stat" id="pillCards" title="Cards owned - tap to open Cards" role="button" tabindex="0">
-          <span class="hs-icon">🃏</span>
-          <span class="hs-bar"><span class="hs-fill hs-fill-cards"></span><span class="hs-val" id="cardCount">0</span></span>
-        </div>
-        <div class="hud-stat" id="pillPebbles" title="Embers - the Card Shop on El Mercado de Susurros sells packs, sleeves and more" data-game-title="{GAME.currency.many} - the Card Shop on {PLACES.market} sells packs, sleeves and more" role="button" tabindex="0">
-          <span class="hs-icon">🫧</span>
-          <span class="hs-bar"><span class="hs-fill hs-fill-pebbles"></span><span class="hs-val" id="pebbleCount">0</span></span>
-        </div>
-      </div>
-
       <div class="hud-spacer"></div>
       <span class="hud-clock" id="hudClock" title="Game time">12:00 PM</span>
       <button type="button" class="hud-pill pw-pill hidden" id="pillWorld" title="Puddle world - tap to climb out early"><span class="hp-icon">🌀</span><span id="pwTime">0:00</span></button>
-      <div class="hud-ambient" id="pillSky" title="Time and weather">
-        <span class="hud-ambient-text">
-          <span class="hud-district" id="hudDistrict" data-game="PLACES.square">El Umbral</span>
-          <span class="hud-ambient-sub">
-            <span class="hud-ambient-icon" id="hudSkyIcon">☀️</span>
-            <span class="amb-time" id="hudTimeText">Midday</span>
-            <span class="amb-weather" id="hudWeatherText"></span>
-          </span>
-        </span>
-      </div>
       <span class="hud-pill hidden" id="pillWins"><span id="winCount">0</span></span>
     </div>
 
@@ -148,6 +127,13 @@
                   <button class="seg-btn" type="button" data-theme-pick="dark">🌙 Dark</button>
                   <button class="seg-btn" type="button" data-theme-pick="light">☀️ Light</button>
                   <button class="seg-btn" type="button" data-theme-pick="auto">Auto</button>
+                </div>
+              </div>
+              <div class="st-block">
+                <div class="st-label">Menu hand<small>Which side of the screen the round menu button sits on, so your thumb reaches it.</small></div>
+                <div class="seg" id="handSeg" role="group" aria-label="Which side the menu button is on">
+                  <button class="seg-btn" type="button" data-hand-pick="right">Right</button>
+                  <button class="seg-btn" type="button" data-hand-pick="left">Left</button>
                 </div>
               </div>
             </div>
@@ -252,6 +238,77 @@
         </div>
       </div>
 
+      <div id="sceneView" class="hidden" data-theme="warm">
+        <div class="sc-head"><b id="scTitle"></b></div>
+        <div class="sc-stage" id="scStage"><div class="sc-rug"></div><div class="sc-who" id="scWho"></div></div>
+        <div class="sc-pips" id="scPips"></div>
+        <div class="sc-bubble" id="scText"></div>
+        <div class="sc-shop-host hidden" id="scShopHost"></div>
+        <div class="sc-actions" id="scActions"></div>
+      </div>
+
+      <div id="battleView" class="hidden">
+        <div class="bt-backdrop" id="btBackdrop"><div class="bt-bd-sky"></div><div class="bt-bd-scene"></div><div class="bt-bd-texture"></div><div class="bt-bd-you"></div><div class="bt-bd-scrim"></div></div>
+        <div class="side" id="btOppBar">
+          <div class="spirit" id="btOppSpirit"><span class="bt-portrait" id="btOppPortrait">🙂</span><div class="fill"></div><div class="num"></div></div>
+          <div class="nmv"><span class="who" id="btOppName">Neighbor</span><div class="sbar" id="btOppSbar"><div class="fill"></div><span class="sn"></span></div><span class="deckcount" id="btOppDeck"></span></div>
+          <div class="ohand" id="btOppHand" aria-label="Opponent's hand"></div>
+        </div>
+        <div class="divider"><span class="msg" id="btMsg">Your turn</span><span class="bt-weather" id="btWeather"></span><button class="atk-face hidden" id="btAtkFace" type="button">⚔ Attack Calm</button></div>
+        <div class="field">
+          <div class="table">
+            <div class="trow" id="btOppRow"><div class="board" id="btOppBoard"></div><div class="pile" id="btOppPile"></div></div>
+            <div class="seam"></div>
+            <div class="trow mat-glass" id="btYouRow"><div class="board" id="btYouBoard"></div><div class="pile" id="btYouPile"></div></div>
+          </div>
+        </div>
+        <div class="coach" id="btCoach"></div>
+        <div class="side" id="btYouBar">
+          <div class="spirit" id="btYouSpirit"><span class="bt-portrait" id="btYouPortrait">🙂</span><div class="fill"></div><div class="num"></div></div>
+          <div class="nmv"><span class="who" id="btYouName">You</span><div class="sbar" id="btYouSbar"><div class="fill"></div><span class="sn"></span></div><span class="deckcount" id="btYouDeck"></span></div>
+          <span class="snack-badge hidden" id="btYouSnackBadge"></span>
+          <button class="bt-mini bt-knack hidden" id="btKnack" aria-label="Your Gift"></button>
+          <button class="bt-mini bt-knack bt-fate hidden" id="btFate" aria-label="Your Fate"></button>
+          <button class="bt-mini bt-knack bt-cheer hidden" id="btCheer" aria-label="Your companion's cheer"></button>
+          <button class="bt-mini" id="btHelp" aria-label="How battles work">?</button>
+          <button class="bt-mini" id="btYield" aria-label="Step away from this battle">🏳️</button>
+        </div>
+        <div class="handwrap">
+          <div class="energy"><div class="gems" id="btGems"></div><button class="endbtn" id="btEnd">End turn</button></div>
+          <div class="hand" id="btHand"></div>
+        </div>
+        <div class="tip" id="btTip"></div>
+        <div class="overlay hidden" id="mulliganOverlay">
+          <div class="overlay-card mull-sheet">
+            <div class="mull-head"><h2>Keep this hand?</h2><p>You can trade it once for a fresh one.</p></div>
+            <div class="hand" id="mulliganHand"></div>
+            <div class="mull-lo">
+              <div class="snack-row lorow hidden" id="snackRow"></div>
+              <div class="knack-row lorow" id="knackRow"></div>
+              <div class="knack-row fate-row lorow hidden" id="fateRow"></div>
+              <div class="knack-row spread-row lorow hidden" id="spreadRow"></div>
+            </div>
+            <div class="controls">
+              <button id="mulliganSwapBtn" class="btn btn-ghost">Draw new hand</button>
+              <button id="mulliganKeepBtn" class="btn">Keep hand</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- The tab window (builds 290+): Journal, Cards, Rewards, Character (and the Card Shop screen) open as a window over the dimmed town.
+       The panels live here, not in #screen, so they scroll inside the window. js/fan-menu.js opens and closes it from switchTab(). -->
+  <div class="win-dim" id="winDim"></div>
+  <section class="tab-win" id="tabWin" role="dialog" aria-labelledby="winTitle">
+    <div class="win-head">
+      <span class="win-ico" id="winIcon" aria-hidden="true">📓</span>
+      <h2 class="win-title" id="winTitle">Journal</h2>
+      <button type="button" class="win-x" id="winClose" aria-label="Close"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
+    </div>
+    <div class="win-body" id="winBody">
       <div id="journalPanel" class="panel hidden">
         <div class="journal-bar">
           <div class="seg seg-scroll" id="journalSeg" role="tablist" aria-label="Journal sections">
@@ -394,74 +451,47 @@
       </div>
 
       <div id="characterPanel" class="panel hidden"></div>
-
-      <div id="sceneView" class="hidden" data-theme="warm">
-        <div class="sc-head"><b id="scTitle"></b></div>
-        <div class="sc-stage" id="scStage"><div class="sc-rug"></div><div class="sc-who" id="scWho"></div></div>
-        <div class="sc-pips" id="scPips"></div>
-        <div class="sc-bubble" id="scText"></div>
-        <div class="sc-shop-host hidden" id="scShopHost"></div>
-        <div class="sc-actions" id="scActions"></div>
-      </div>
-
-      <div id="battleView" class="hidden">
-        <div class="bt-backdrop" id="btBackdrop"><div class="bt-bd-sky"></div><div class="bt-bd-scene"></div><div class="bt-bd-texture"></div><div class="bt-bd-you"></div><div class="bt-bd-scrim"></div></div>
-        <div class="side" id="btOppBar">
-          <div class="spirit" id="btOppSpirit"><span class="bt-portrait" id="btOppPortrait">🙂</span><div class="fill"></div><div class="num"></div></div>
-          <div class="nmv"><span class="who" id="btOppName">Neighbor</span><div class="sbar" id="btOppSbar"><div class="fill"></div><span class="sn"></span></div><span class="deckcount" id="btOppDeck"></span></div>
-          <div class="ohand" id="btOppHand" aria-label="Opponent's hand"></div>
-        </div>
-        <div class="divider"><span class="msg" id="btMsg">Your turn</span><span class="bt-weather" id="btWeather"></span><button class="atk-face hidden" id="btAtkFace" type="button">⚔ Attack Calm</button></div>
-        <div class="field">
-          <div class="table">
-            <div class="trow" id="btOppRow"><div class="board" id="btOppBoard"></div><div class="pile" id="btOppPile"></div></div>
-            <div class="seam"></div>
-            <div class="trow mat-glass" id="btYouRow"><div class="board" id="btYouBoard"></div><div class="pile" id="btYouPile"></div></div>
-          </div>
-        </div>
-        <div class="coach" id="btCoach"></div>
-        <div class="side" id="btYouBar">
-          <div class="spirit" id="btYouSpirit"><span class="bt-portrait" id="btYouPortrait">🙂</span><div class="fill"></div><div class="num"></div></div>
-          <div class="nmv"><span class="who" id="btYouName">You</span><div class="sbar" id="btYouSbar"><div class="fill"></div><span class="sn"></span></div><span class="deckcount" id="btYouDeck"></span></div>
-          <span class="snack-badge hidden" id="btYouSnackBadge"></span>
-          <button class="bt-mini bt-knack hidden" id="btKnack" aria-label="Your Gift"></button>
-          <button class="bt-mini bt-knack bt-fate hidden" id="btFate" aria-label="Your Fate"></button>
-          <button class="bt-mini bt-knack bt-cheer hidden" id="btCheer" aria-label="Your companion's cheer"></button>
-          <button class="bt-mini" id="btHelp" aria-label="How battles work">?</button>
-          <button class="bt-mini" id="btYield" aria-label="Step away from this battle">🏳️</button>
-        </div>
-        <div class="handwrap">
-          <div class="energy"><div class="gems" id="btGems"></div><button class="endbtn" id="btEnd">End turn</button></div>
-          <div class="hand" id="btHand"></div>
-        </div>
-        <div class="tip" id="btTip"></div>
-        <div class="overlay hidden" id="mulliganOverlay">
-          <div class="overlay-card mull-sheet">
-            <div class="mull-head"><h2>Keep this hand?</h2><p>You can trade it once for a fresh one.</p></div>
-            <div class="hand" id="mulliganHand"></div>
-            <div class="mull-lo">
-              <div class="snack-row lorow hidden" id="snackRow"></div>
-              <div class="knack-row lorow" id="knackRow"></div>
-              <div class="knack-row fate-row lorow hidden" id="fateRow"></div>
-              <div class="knack-row spread-row lorow hidden" id="spreadRow"></div>
-            </div>
-            <div class="controls">
-              <button id="mulliganSwapBtn" class="btn btn-ghost">Draw new hand</button>
-              <button id="mulliganKeepBtn" class="btn">Keep hand</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
     </div>
-  </div>
+  </section>
 
-  <nav class="bottom-nav" id="bottomNav">
-    <button class="tab-btn active" id="tabTown"><span class="t-icon">🏘️</span><span>Town</span></button>
-    <button class="tab-btn" id="tabJournal"><span class="t-icon">📓</span><span>Journal</span></button>
-    <button class="tab-btn" id="tabCollection"><span class="t-icon">🃏</span><span>Cards</span></button>
-    <button class="tab-btn" id="tabQuests"><span class="t-icon">🎁</span><span>Rewards</span></button>
-    <button class="tab-btn" id="tabCharacter"><span class="t-icon" id="tabCharEmoji">🧑</span><span>Character</span></button>
+  <!-- The menu (builds 290+): an info bar and one round button that fans the five places out around your thumb (js/fan-menu.js).
+       The five buttons keep the old tab ids, so switchTab(), the dots and every test that clicks a tab still find them. -->
+  <nav class="dock" id="bottomNav" aria-label="Menu">
+    <div class="fan-scrim" id="fanScrim"></div>
+    <div class="dock-bar" id="dockBar">
+      <div class="dock-l1">
+        <div class="dock-town" id="dockTown">
+          <div class="hud-ambient" id="pillSky" title="Time and weather">
+            <span class="hud-ambient-text">
+              <span class="hud-district" id="hudDistrict" data-game="PLACES.square">El Umbral</span>
+              <span class="hud-ambient-sub">
+                <span class="hud-ambient-icon" id="hudSkyIcon">☀️</span>
+                <span class="amb-time" id="hudTimeText">Midday</span>
+                <span class="amb-weather" id="hudWeatherText"></span>
+              </span>
+            </span>
+          </div>
+        </div>
+        <span class="dock-ctx" id="dockCtx"></span>
+      </div>
+      <div class="dock-l2">
+        <div class="hud-stat" id="pillCards" title="Cards owned - tap to open Cards" role="button" tabindex="0">
+          <span class="hs-icon">🃏</span>
+          <span class="hs-bar"><span class="hs-fill hs-fill-cards"></span><span class="hs-val" id="cardCount">0</span></span>
+        </div>
+        <div class="hud-stat" id="pillPebbles" title="Embers - the Card Shop on El Mercado de Susurros sells packs, sleeves and more" data-game-title="{GAME.currency.many} - the Card Shop on {PLACES.market} sells packs, sleeves and more" role="button" tabindex="0">
+          <span class="hs-icon">🫧</span>
+          <span class="hs-bar"><span class="hs-fill hs-fill-pebbles"></span><span class="hs-val" id="pebbleCount">0</span></span>
+        </div>
+      </div>
+      <span class="dock-xp" aria-hidden="true"><i id="dockXpFill"></i></span>
+    </div>
+    <button type="button" class="fan-main" id="fanMain" aria-label="Open menu" aria-expanded="false" aria-controls="bottomNav"><span class="fm-ico" id="fanMainIcon">🏘️</span><span class="fm-x" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></span><i class="dot hidden" id="fanMainDot"></i></button>
+    <button class="fan-item active" id="tabTown" type="button"><span class="t-icon">🏘️</span><span>Town</span></button>
+    <button class="fan-item" id="tabJournal" type="button"><span class="t-icon">📓</span><span>Journal</span></button>
+    <button class="fan-item" id="tabCollection" type="button"><span class="t-icon">🃏</span><span>Cards</span></button>
+    <button class="fan-item" id="tabQuests" type="button"><span class="t-icon">🎁</span><span>Rewards</span></button>
+    <button class="fan-item" id="tabCharacter" type="button"><span class="t-icon" id="tabCharEmoji">🧑</span><span>Character</span></button>
   </nav>
 
 </div>
@@ -916,6 +946,7 @@ pixiReady.catch(function () {});
 <script src="js/cellar-crawl.js"></script>
 <script src="js/seg-slide.js"></script>
 <script src="js/ui-polish.js"></script>
+<script src="js/fan-menu.js"></script>
 <script src="js/town-life.js"></script>
 <script src="js/warp-fx.js"></script>
 <script src="js/puddle-worlds.js"></script>

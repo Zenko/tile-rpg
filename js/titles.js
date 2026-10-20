@@ -183,14 +183,15 @@ function updateHud() {
   updateQuestBadge();
   updateJournalBadge();
   updateLevelHud();
+  if (typeof fanDockUpdate === 'function') fanDockUpdate();   // js/fan-menu.js: the info bar and the round button
   checkSets();
   reconcileFoils();
   maybeFlushCardLog();
 }
 
-/* Switching tabs: the dock's pill slides (a transform), the new panel fades and slides in (opacity and transform), and
-   the heavy rendering waits two frames so the first frames of the animation are never blocked by it. Both animations
-   run on the compositor, so they stay smooth even while the page is busy building a long list. */
+/* Switching tabs (build 290, js/fan-menu.js): the tab opens as a window that slides up (Town slides it away), its content rises in
+   row by row, and the heavy rendering waits two frames so the first frames of the animation are never blocked by it. Both
+   animations run on the compositor, so they stay smooth even while the page is busy building a long list. */
 const TAB_ORDER = ['town', 'journal', 'collection', 'quests', 'character'];
 let currentTab = 'town';
 function renderTabContent(key) {
@@ -215,25 +216,21 @@ function switchTab(key) {
     t.btn.classList.toggle('active', active);
     // The town stays laid out while another tab is open (just invisible), so coming back is a fade, not a re-layout.
     if (t.panel === townPanel) { townPanel.classList.toggle('tab-away', !active); if (active) townPanel.classList.remove('hidden'); else if (inScene) townPanel.classList.add('hidden'); }
+    else if (!active && key === 'town' && typeof fanWinHold === 'function' && fanWinHold(t.panel)) { /* js/fan-menu.js hides it once the window has slid away */ }
     else t.panel.classList.toggle('hidden', !active);
   });
-  const nav = document.getElementById('bottomNav'), idx = TAB_ORDER.indexOf(key);
-  if (nav && idx >= 0) nav.style.setProperty('--i', idx);
-  document.getElementById('screen').scrollTop = 0;
+  fanScroller().scrollTop = 0;
   if (smooth) {
-    const panel = tabs[key].panel, dir = Math.sign(idx - TAB_ORDER.indexOf(prev));
-    const cls = key === 'town' || !dir || idx < 0 ? 'tab-in' : dir > 0 ? 'tab-in-r' : 'tab-in-l';
-    panel.classList.remove('tab-in', 'tab-in-r', 'tab-in-l'); void panel.offsetWidth; panel.classList.add(cls);
-    setTimeout(() => panel.classList.remove(cls), 360);
     const tick = viewTick;
     requestAnimationFrame(() => requestAnimationFrame(() => {
       if (currentTab !== key) return;
       // someone who called switchTab and then chose a Cards/Shop view themselves keeps their choice
       if ((key === 'collection' || key === 'shop') && viewTick !== tick) return;
-      renderTabContent(key); updateQuestBadge();
+      renderTabContent(key); updateQuestBadge(); fanStagger(key);
     }));
-  } else { renderTabContent(key); }
+  } else { renderTabContent(key); fanStagger(key); }
   updateQuestBadge();
+  fanWinSync(key); fanDockUpdate();
   if (key === 'town' && typeof refreshGoalChip === 'function') refreshGoalChip(true);   // coming back from Character: the pill may be out of date
 }
 

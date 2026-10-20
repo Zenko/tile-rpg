@@ -74,6 +74,9 @@ const PENDING_CHANGES = [
   { t: 'new', x: 'Weather moments: a change of weather can bring a few special minutes, like a koi run in the moonrain, a star shower in the snow or a rainbow when the rain clears, each with its own small bonus.' },
   { t: 'new', x: 'Town goal: one shared goal a week. You, your neighbours and the other dreamers all count toward it, with a reward at halfway and a card when it is done.' },
   { t: 'new', x: 'Travelling visitors: on most days Moth the Pedlar (three cards for sale) or Quill the Wanderer (a match with a prize) turns up in one district.' },
+  { t: 'new', x: 'A new menu. The bar of five tabs at the bottom is now one round button: tap it and Town, Journal, Cards, Rewards and Character fan out around your thumb, and the button turns into a cross to put them away again. Settings, Appearance, Menu hand moves it to the left side if that suits your thumb better.' },
+  { t: 'new', x: 'Screens open as a window. Journal, Cards, Rewards and Character slide up as a window over the dimmed town instead of replacing it, and what is inside rises in one row after another. Tap the cross, tap the dimmed town, or press Escape to close it. With motion reduced in your phone settings they simply appear.' },
+  { t: 'better', x: 'The place, the time and weather, and your cards and Embers moved to a bar at the bottom, beside the menu button. When a window is open the bar says what it is about (Cards: deck 12/12, Rewards: gift ready), and a thin gold line shows how close the next level is. The pill at the top is just you now.' }
 ];
 
 const RELEASES = [

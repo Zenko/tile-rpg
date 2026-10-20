@@ -367,6 +367,7 @@
   --ink: #e9edf1;
   --ink-soft: #a6b1bb;
   --shadow: rgba(0, 0, 0, 0.35);
+  --dock-dim: rgba(0, 0, 0, 0.5);   /* the dimming behind the tab window and the open fan menu */
   --overlay-bg: rgba(8, 11, 15, 0.6);
   --board-bg: rgba(233, 237, 241, 0.06);
   --hl: #ffffff;                 /* base for faint highlights on chrome (white on dark, ink on light) */
@@ -396,6 +397,7 @@
   --ink: #4b4a46;
   --ink-soft: #6b6a64;
   --shadow: rgba(75, 74, 70, 0.2);
+  --dock-dim: rgba(52, 50, 44, 0.4);
   --overlay-bg: rgba(58, 56, 50, 0.5);
   --board-bg: rgba(75, 74, 70, 0.05);
   --hl: #4b4a46;

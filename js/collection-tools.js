@@ -198,7 +198,7 @@ function cardTileHtml(id, count, opts) {
     <span class="ac-paper"><span class="ac-name">${def.name}</span><span class="ac-power">${cardStatsText(def)}</span></span>
     ${inDeck ? `<span class="ac-in">in deck ×${inDeck}</span>` : ''}</button>`;
 }
-const cardsKeepScroll = fn => { const sc = document.getElementById('screen'), before = sc.scrollTop; fn(); sc.scrollTop = before; };
+const cardsKeepScroll = fn => { const sc = fanScroller(), before = sc.scrollTop; fn(); sc.scrollTop = before; };   // the window body scrolls (js/fan-menu.js)
 const refreshCardsView = () => cardsKeepScroll(() => { if (cardsView === 'deck') renderDeckPanel(); else renderCollection(); });
 
 function deckAdd(id) {
