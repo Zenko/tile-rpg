@@ -258,19 +258,7 @@ body.in-battle .board-wrap { padding: 8px 10px 0; }
 .town-info .log:empty { display: none; }
 #decorationHint, #hideseekHint { position: absolute; top: calc(var(--hud-h) + 8px); left: 12px; right: 64px; z-index: 12; }
 #decorationHint.hidden, #hideseekHint.hidden { display: none; }
-/* the dock: five equal slots with a pill that slides under the current tab. The slide is a transform and the
-   icon lift is a transform too, so tab switches stay smooth even when the page is busy (v1.66.0) */
-.bottom-nav { --i: 0; position: absolute; left: 14px; right: 14px; bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 10; padding: 6px; gap: 0; border-radius: 30px; border: 1px solid color-mix(in srgb, var(--stone-edge) 80%, transparent);
-  background: var(--glass); box-shadow: 0 10px 26px var(--shadow); contain: layout; }
-.bottom-nav::before { content: ''; position: absolute; left: 6px; top: 6px; bottom: 6px; width: calc((100% - 12px) / 5); border-radius: 24px; background: var(--water);
-  box-shadow: 0 4px 14px color-mix(in srgb, var(--water) 45%, transparent); transform: translate3d(calc(var(--i) * 100%), 0, 0); transition: transform 0.42s cubic-bezier(0.3, 1.35, 0.45, 1); will-change: transform; }
-#bottomNav .tab-btn { position: relative; z-index: 1; flex: 1 1 0; min-width: 0; height: 52px; padding: 0; gap: 1px; justify-content: center; border-radius: 24px; background: none; font-size: 0.62rem; font-weight: 700; color: var(--ink-soft); transition: color 0.25s ease; -webkit-tap-highlight-color: transparent; }
-#bottomNav .tab-btn .t-icon { font-size: 1.3rem; line-height: 1.1; filter: none; transition: transform 0.35s cubic-bezier(0.3, 1.5, 0.5, 1), opacity 0.25s ease; opacity: 0.75; }
-#bottomNav .tab-btn.active { color: var(--on-water); background: none; font-weight: 800; }
-#bottomNav .tab-btn.active .t-icon { transform: translate3d(0, -1px, 0) scale(1.14); opacity: 1; }
-#bottomNav .tab-btn:active .t-icon { transform: scale(0.88); }
-#bottomNav .tab-btn .dot { top: 6px; right: auto; left: calc(50% + 9px); border-color: transparent; }
-#bottomNav .tab-btn.active .dot { background: var(--on-water); }
+/* the menu (a round button, an info bar and a window) is in the FAN MENU block at the end of latest.css (build 290) */
 #townPanel.tab-away { opacity: 0; pointer-events: none; }   /* not visibility: that is inherited, so flipping it restyles every tile */
 /* a panel arriving: fade and a short slide in the direction of travel, never touching layout */
 .tab-in, .tab-in-l, .tab-in-r { animation: tabIn 0.3s cubic-bezier(0.22, 0.8, 0.3, 1) 0.04s both; will-change: opacity, transform; }
@@ -278,7 +266,7 @@ body.in-battle .board-wrap { padding: 8px 10px 0; }
 @keyframes tabIn { from { opacity: 0; transform: translate3d(var(--tx, 0px), 6px, 0); } to { opacity: 1; transform: none; } }
 .toast { bottom: calc(env(safe-area-inset-bottom) + var(--dock-h) + 60px); }
 #sceneView { padding-top: calc(var(--hud-h) + 2px); }
-@media (prefers-reduced-motion: reduce) { .bottom-nav::before, #bottomNav .tab-btn, #bottomNav .tab-btn .t-icon { transition: none; } .tab-in, .tab-in-l, .tab-in-r { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .tab-in, .tab-in-l, .tab-in-r { animation: none; } }
 
 /* ===== Level ring (v1.67.0): XP as a ring around the avatar, the level hanging below it, nothing covering the face ===== */
 @property --p { syntax: '<number>'; inherits: false; initial-value: 0; }

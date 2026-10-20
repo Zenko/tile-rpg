@@ -1003,7 +1003,6 @@ html.cozy .cl-cell.rat { animation: none; }
    Deliberately NOT on anything that moves every frame (map characters, bobbing chests, fish, weather, scene characters) or that already has its own
    effect (the level-up glow, the cellar doors), because a filter on a moving element repaints every frame on a phone. */
 .card-emoji, .jtd-ic, .jr-ic, .bn-ico, .hs-icon, .dk-kws span, .ch-peb, .panel-icon, .ac-kw, .kws, .big-icon, .st-ico, .gd-icon, .gd-row-ico, .q-icon, .sf-icon, .le-icon, .wb-ico, .goal-ico, .story-icon, .life-ico, .sp-ico, .tr-ico, .pt-ico, .ps-icon, .hp-icon, .a-emoji, .wx-icon, .amb-icon, .hud-ambient-icon,
-#bottomNav .tab-btn .t-icon { filter: drop-shadow(0 .035em .05em var(--art-sh)); }
 
 /* Icon swap (build 128): a replaced icon is an <img> sized like the emoji it stands in for; taps go to whatever is underneath, as they did on the emoji. */
 .ico-swap { width: 1em; height: 1em; object-fit: contain; vertical-align: -.14em; margin-inline: .04em; display: inline-block; pointer-events: none; -webkit-user-drag: none; filter: drop-shadow(0 .035em .05em var(--art-sh)); }
@@ -1613,9 +1612,8 @@ body.in-altar .overlay, body.in-altar .toast { z-index: 70; }   /* the card reve
 .av-face { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; user-select: none; -webkit-user-drag: none; }
 .emoji-swatch.drawn-swatch { padding: 0; overflow: hidden; }
 .shop-swatch-row .emoji-swatch.drawn-swatch .av-face { width: 100%; height: 100%; border-radius: 0; }
-.hud-portrait .a-emoji, .tab-btn .t-icon:has(> .av-face), .bt-portrait:has(> .av-face), .toss-av:has(> .av-face), .ch-av > span { display: inline-flex; }
+.hud-portrait .a-emoji, .bt-portrait:has(> .av-face), .toss-av:has(> .av-face), .ch-av > span { display: inline-flex; }
 .hud-portrait .a-emoji:has(> .av-face) { width: 100%; height: 100%; }
-.tab-btn .t-icon:has(> .av-face) { width: 1.4em; height: 1.4em; filter: none; }
 .bt-portrait > .av-face, .toss-av > .av-face, .bt-intro-av > .av-face { width: 100%; height: 100%; }
 .ch-av > span:has(> .av-face) { width: 100%; height: 100%; }
 
@@ -2566,7 +2564,6 @@ body.pw-board #goalChip { display: none !important; }   /* the dice panel says w
 .profile-stat .ps-pin { width: 44px; height: 44px; display: flex; align-items: flex-start; justify-content: flex-end; padding: 7px 9px 0 0; }   /* same star, in a 44px button */
 
 /* ---- READABLE TEXT (build 280): UI labels are never under 11px (they were 9 to 10.9px); the Index's small card tiles keep scaling with their card but not below 9px ---- */
-.tab-btn > span:not(.t-icon) { font-size: 11px; }
 .lvl-badge { font-size: 11px; }
 .amb-time, .hud-ambient-sub .amb-time, .hud-ambient-sub .amb-weather { font-size: 11px; }
 .dk-slot-n, .ent-name, .ch-plate, .ch-pins > span, .col .lbl, .bn-group { font-size: 11px; }
@@ -2722,7 +2719,7 @@ body.pw-board #goalChip { display: none !important; }   /* the dice panel says w
 .dock-town .hud-ambient-sub { flex: none; font-size: 11px; }
 .dock-town .hud-ambient-sub .amb-time, .dock-town .hud-ambient-sub .amb-weather { font-size: 11px; max-width: 80px; }
 .dock-town .hud-ambient-sub .amb-weather:not(:empty)::before { content: '· '; }
-.dock-l2 { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.dock-l2 { position: relative; z-index: 1; display: flex; align-items: center; gap: 14px; min-width: 0; }   /* above the sky line, so the counters keep their full 44px touch area (tests/mobile.test.js) */
 .dock-l2 #pillCards { display: flex; }
 .dock-l2 .hud-stat { font-size: .9rem; }
 .dock-l2 .hs-icon, .dock-l2 #pillPebbles .hs-icon { width: auto; height: auto; border: 0; background: none; box-shadow: none; font-size: 1rem; }

@@ -89,7 +89,9 @@ function fanContext(key) {
   if (key === 'shop') return 'Card Shop';
   return '';
 }
+let fanTipAsked = false;
 function fanDockUpdate() {
+  if (!fanTipAsked && typeof showTipOnce === 'function') { fanTipAsked = true; setTimeout(() => showTipOnce('menu'), 2500); }   // first-time tip, queued behind Wren's first scene
   const key = typeof currentTab === 'string' ? currentTab : 'town';
   if (fanIsOpen && fanNav.style.display === 'none') fanSetOpen(false);   // a battle or a building screen hid the menu while it was open
   if (fanNav.dataset.ctx !== key) fanNav.dataset.ctx = key;
