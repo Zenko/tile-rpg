@@ -122,7 +122,7 @@ function activeCount() { return Object.values(reqState().list).filter(r => r.sta
 function openTalk(f) {
   if (f.isAtlas) { openAtlas(); return; }          // the Atlas has its own scene (js/atlas.js)
   if (f.isVisitor && typeof openVisitor === 'function') { openVisitor(f); return; }   // a travelling visitor (js/town-news.js)
-  talkTo = f; talkView = 'home'; const e = talkEls();
+  talkTo = f; talkView = 'home'; talkOfferDismissed = false; const e = talkEls();
   noteMet(f);
   bumpStat('talks', 1);
   e.name.textContent = f.name;
@@ -212,7 +212,40 @@ function renderTalkTopics(f) {
     box.appendChild(sb);
   }
 }
-function renderTalk() { renderTalkBody(); renderTalkView(); }
+function renderTalk() { renderTalkBody(); renderTalkView(); renderTalkOffer(talkTo); }
+/* A neighbour with something to say to you (a favour they are offering, or one you can now hand in) says it FIRST: the moment you
+   tap them it is a card over the screen with Accept and Not now (or Hand it in and Later), and only then the usual chat screen.
+   It only appears when you open that neighbour yourself, and once per opening: Not now puts it away until you next tap them. */
+let talkOfferDismissed = false, talkOfferSig = '';
+function talkOfferFor(f) {
+  if (!f || f.isRival || f.isBoss || f._thanks || talkOfferDismissed) return null;
+  const r = reqState().list[f.id];
+  if (!r) return null;
+  if (r.state === 'open') return { r, kind: 'ask' };
+  if (r.state === 'active' && requestDone(r)) return { r, kind: 'done' };
+  return null;
+}
+function renderTalkOffer(f) {
+  const box = document.getElementById('talkOffer'), card = document.getElementById('talkCard'), o = talkOfferFor(f);
+  card.classList.toggle('offering', !!o);
+  if (!o) { box.innerHTML = ''; talkOfferSig = ''; return; }
+  const r = o.r, full = o.kind === 'ask' && activeCount() >= REQ_MAX_ACTIVE;
+  const reward = r.reward ? `a ${REQ_WIN_RARITY} card or better` : `🫧 ${r.pebbles} ${GAME.currency.many}`;
+  const html = o.kind === 'done'
+    ? `<small>${escapeHtml(f.name)} has something for you</small><p class="to-text">${escapeHtml(r.replyText || 'You did it? Wonderful!')}</p><div class="to-reward">Reward: ${reward}</div>
+       <div class="to-actions"><button type="button" class="btn to-yes" data-offer="complete">🎁 Hand it in</button><button type="button" class="btn to-no" data-offer="later">Later</button></div>`
+    : `<small>${escapeHtml(f.name)} has a message for you</small><p class="to-text">${escapeHtml(r.text)}</p><div class="to-hint">${escapeHtml(r.hint || '')}</div><div class="to-reward">Reward: ${reward}</div>
+       <div class="to-actions">${full ? '<div class="to-full">You have two favours open already.</div>' : '<button type="button" class="btn to-yes" data-offer="accept">✅ Accept</button>'}<button type="button" class="btn to-no" data-offer="later">${full ? 'Close' : 'Not now'}</button></div>`;
+  if (html !== talkOfferSig) { talkOfferSig = html; box.innerHTML = html; }
+}
+document.getElementById('talkOffer').addEventListener('click', e => {
+  const b = e.target.closest('[data-offer]'); if (!b || !talkTo) return;
+  const act = b.dataset.offer;
+  talkOfferDismissed = true; sfx('tap'); buzz(HAP.tap);
+  if (act === 'accept') talkAct('accept');
+  else if (act === 'complete') completeRequest(talkTo);
+  else renderTalk();
+});
 function renderTalkBody() {
   if (!talkTo) return;
   const f = talkTo, e = talkEls(), rs = reqState(), r = rs.list[f.id];
@@ -371,7 +404,7 @@ function completeRequest(f) {
   toast(rewardCard ? '🎁 A card, as thanks' : `🫧 +${r.pebbles} ${GAME.currency.many}`);
   if (rewardCard) setTimeout(() => showCardReveal(rewardCard, `A gift from ${f.name}`, true), 300);
 }
-function closeTalk() { document.getElementById('talkCards').classList.add('hidden'); clearInterval(talkTypeTimer); talkSaid = ''; document.getElementById('talkPortrait').dataset.for = ''; if (talkTo) { delete talkTo._thanks; delete talkTo._topics; delete talkTo._reacted; delete talkTo._tk; } talkTo = null; talkView = 'home'; talkEls().ov.classList.add('hidden'); talkHistoryPop(); }
+function closeTalk() { document.getElementById('talkCards').classList.add('hidden'); clearInterval(talkTypeTimer); talkSaid = ''; document.getElementById('talkPortrait').dataset.for = ''; if (talkTo) { delete talkTo._thanks; delete talkTo._topics; delete talkTo._reacted; delete talkTo._tk; } talkTo = null; talkView = 'home'; talkOfferDismissed = false; talkOfferSig = ''; document.getElementById('talkCard').classList.remove('offering'); talkEls().ov.classList.add('hidden'); talkHistoryPop(); }
 document.getElementById('talkBubble').addEventListener('click', talkFinishTyping);
 document.getElementById('talkMain').addEventListener('click', e => { const a = e.currentTarget.dataset.act; if (a) talkAct(a); });
 document.getElementById('talkGift').addEventListener('click', () => { if (talkTo) shareBread(talkTo); });

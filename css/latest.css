@@ -2818,3 +2818,35 @@ body.in-battle .tab-win, body.in-battle .win-dim, body.in-scene .tab-win, body.i
 #sceneryOverlay .overlay-card:has(#sceneryDesc.rich) #sceneryDesc.rich { flex: 1 1 auto; min-height: 0; overflow-y: auto; margin: 0 -6px 12px; padding: 0 6px; }
 #sceneryOverlay .overlay-card:has(#sceneryDesc.rich) #sceneryContinue, #sceneryOverlay .overlay-card:has(#sceneryDesc.rich) .scenery-actions { flex: none; }
 #sceneryDesc.rich .wb-quote { margin: 0 0 8px; font-size: .84rem; line-height: 1.35; }
+
+/* ==========================================================================================================
+   THE NEIGHBOUR SCREEN, TEXT OFF THE FACE + THE MESSAGE CARD (build 293; js/requests-friendship-rival.js)
+   1. In the close-up the words used to be laid over the picture, so a long favour covered the face. The picture and the words now
+      share the box in two rows: the neighbour on top, the words in their own glass panel underneath. Nothing overlaps.
+   2. A neighbour with something to say (a favour to offer, or one to hand in) opens with a message card: Accept / Not now.
+   ========================================================================================================== */
+#talkCard[data-style="combo"] .tk-bust, #talkCard[data-style="combo"] .tk-bust:not(.emoji) { display: grid; grid-template-rows: minmax(0, 1fr) auto; justify-items: center; align-items: stretch; gap: 8px; overflow: hidden; padding-top: 0; --fig-h: 100%; }
+#talkCard[data-style="combo"] .tk-bust .talk-portrait { grid-row: 1; align-self: end; min-height: 0; max-height: 100%; margin: 0; }
+#talkCard[data-style="combo"] .tk-bust.emoji .talk-portrait { height: auto; align-self: center; font-size: min(30cqh, 62cqw); }
+#talkCard[data-style="combo"] .talk-bubble { grid-row: 2; position: relative; left: auto; right: auto; bottom: auto; z-index: 5; width: 100%; max-height: 44cqh; overflow-y: auto; scrollbar-width: none; margin: 0; padding: 10px 14px;
+  border: 1px solid var(--stone-edge); border-radius: 20px; background: color-mix(in srgb, var(--stone) 86%, transparent); box-shadow: 0 8px 24px var(--shadow); }
+#talkCard[data-style="combo"] .talk-bubble::-webkit-scrollbar { display: none; }
+#talkCard[data-style="combo"] .talk-bubble .talk-text { max-height: none; overflow: visible; font: italic 400 1.12rem/1.3 var(--f-display) !important; text-shadow: none; }
+#talkCard[data-style="combo"] .talk-sub, #talkCard[data-style="combo"] .talk-tag, #talkCard[data-style="combo"] .talk-doing { text-shadow: none; }
+@media (max-height: 700px) { #talkCard[data-style="combo"] .tk-bust:not(.emoji) { --fig-h: 100%; } #talkCard[data-style="combo"] .talk-bubble .talk-text { font-size: 1rem !important; } }
+
+.tk-offer { display: none; }
+#talkCard.offering .tk-offer { display: flex; flex-direction: column; gap: 8px; flex: none; margin: 0 0 12px; padding: 14px 16px; text-align: left; border: 1px solid var(--stone-edge); border-radius: 22px;
+  background: color-mix(in srgb, var(--stone) 94%, transparent); box-shadow: 0 12px 34px var(--shadow); animation: sc-rise .25s both; }
+#talkCard.offering .talk-bubble, #talkCard.offering .tk-lower { display: none; }
+.tk-offer small { font-size: .66rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
+.tk-offer .to-text { margin: 0; font: italic 400 1.2rem/1.3 var(--f-display); color: var(--ink); }
+.tk-offer .to-hint { font-size: .84rem; color: var(--ink-soft); }
+.tk-offer .to-reward { align-self: flex-start; padding: 3px 10px; border-radius: 999px; font-size: .76rem; font-weight: 800; color: var(--ink); background: color-mix(in srgb, var(--accent) 22%, transparent); }
+.tk-offer .to-actions { display: flex; gap: 8px; margin-top: 4px; }
+.tk-offer .to-actions .btn { margin: 0; min-height: 50px; }
+.tk-offer .to-yes { flex: 2; background: var(--water); color: var(--on-water); border-color: transparent; }
+.tk-offer .to-no { flex: 1; background: transparent; color: var(--ink); border: 1px solid var(--stone-edge); box-shadow: none; }
+.tk-offer .to-full { flex: 2; align-self: center; font-size: .84rem; color: var(--ink-soft); }
+@media (prefers-reduced-motion: reduce) { #talkCard.offering .tk-offer { animation: none; } }
+#talkCard[data-style="combo"] .tk-plate { margin: 2px 0 8px; }   /* the words are in their own panel now, so the name no longer tucks up under them */

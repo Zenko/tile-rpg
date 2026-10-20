@@ -18,6 +18,8 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'new', x: 'When a neighbour has something to say to you, they say it first. Tap them and a message card opens over the screen with Accept and Not now (or Hand it in and Later when you have finished their favour). It only shows when you tap that neighbour yourself.' },
+  { t: 'fixed', x: 'On the neighbour screen the words no longer sit on top of their face. The picture is above and what they say is in its own panel underneath.' },
   { t: 'new', x: 'The top bar is about you, the bottom bar is about where you are. Up top: your level, XP, cards and Embers. Below: the place, the time and the weather in town, and what each screen is (with one line about it) when a window is open.' },
   { t: 'new', x: 'The welcome sign has a new look. The weather right now gets its own card, what is coming next is one slim line, and today\'s event, the town goal (with a progress bar), the Gazette and the town mood follow underneath in tighter rows. The title and the Continue button stay in place while the rows scroll.' },
   { t: 'fixed', x: 'The town map now runs all the way to the bottom of the screen, with the menu bar floating on top of it, instead of stopping short and leaving an empty strip.' },
