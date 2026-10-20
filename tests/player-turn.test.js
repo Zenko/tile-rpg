@@ -64,6 +64,7 @@ module.exports = async (page, assert) => {
   // the Character tab: drag her round, and she settles back to the front
   await page.evaluate(() => { state.character.drawn = 'alyn'; switchTab('character'); renderCharacterTab(); });
   await page.waitForSelector('#chStage .ch-fig', { state: 'attached' });
+  await page.waitForFunction(() => !document.getElementById('tabWin').classList.contains('win-in'));   // the window slides up (build 290); measure her where she stops
   const box = await page.evaluate(() => { const r = document.getElementById('chMe').getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; });
   await page.mouse.move(box.x, box.y); await page.mouse.down(); await page.mouse.move(box.x + 30, box.y, { steps: 3 }); await page.mouse.move(box.x + 60, box.y, { steps: 3 });
   assert.strictEqual(await page.evaluate(() => document.querySelector('#chStage .ch-fig').dataset.ang), '45', 'dragging 60 px turns her 45 degrees');
