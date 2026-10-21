@@ -1114,3 +1114,20 @@
   --mu-bad: #e58a8a;
   --mu-shadow: rgba(8, 10, 24, .55);
 }
+
+/* The Card Shop front (build 312, js/shop-screen.js): a gilded boutique, the same in both themes. */
+.shop-screen {
+  --cs-wall: #3a2a4a;
+  --cs-wall2: #6a4a62;
+  --cs-card: #fbf3e6;
+  --cs-card2: #ecdcc4;
+  --cs-ink: #3a2740;
+  --cs-soft: #7b6283;
+  --cs-gold: #f0c968;
+  --cs-awn1: #7a4aa0;
+  --cs-awn2: #f4e3c4;
+  --cs-glass: #efe4f6;
+  --cs-glass2: #cdb8de;
+  --cs-edge: #261a30;
+  --cs-shadow: rgba(24, 12, 34, .5);
+}

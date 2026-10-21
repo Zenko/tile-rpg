@@ -351,6 +351,7 @@ function closeScene() {
   if (typeof tinkerScreenHide === 'function') tinkerScreenHide();
   if (typeof grainScreenHide === 'function') grainScreenHide();
   if (typeof museumScreenHide === 'function') museumScreenHide();
+  if (typeof shopScreenHide === 'function') shopScreenHide();
   hrLeave();                                          // js/home-room.js: put the cottage room away
   mountShopView(null);
   miniStop();
@@ -588,6 +589,7 @@ function sceneBtn(id, label, disabled, cls) {
 const SCENE_EXIT_ACTS = ['leave', 'back', 'mg-back', 'wings-back', 'exp-cancel', 'hr-close'];   // hr-close: your cottage's Close, which stays in the house (js/home-room.js)
 function renderScene() {
   renderSceneBody();
+  if (typeof shopScreenSync === 'function') shopScreenSync();   // js/shop-screen.js: the Card Shop front, full screen
   if (typeof museumScreenSync === 'function') museumScreenSync();   // js/museum-screen.js: the Hall of Spirits, full screen
   if (typeof grainScreenSync === 'function') grainScreenSync();   // js/grain-screen.js: the grain stall, full screen
   if (typeof tinkerScreenSync === 'function') tinkerScreenSync();   // js/tinker-screen.js: Tock's stall, full screen
