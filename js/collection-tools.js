@@ -192,11 +192,12 @@ function masteryLine(id) {
    card); everything you can do to one card - deck, craft, charm, release a spare - lives in that one sheet. */
 function cardTileHtml(id, count, opts) {
   const def = cardDef(id), inDeck = state.deck.filter(d => d === id).length, o = opts || {};
-  return `<button type="button" class="alm-card tile rarity-${def.rarity}${def.crafted ? ' crafted' : ''}${foilCount(id) ? ' foil' : ''}${o.dim ? ' dim' : ''}" data-tile="${id}" aria-label="${escapeHtml(def.name)}">
+  const stats = def.spell ? '✨ Spell' : `<span class="pw">⚔️ ${def.power}</span><span class="hp">♥ ${def.grit}</span>`;   // two spans: the icon and number stay together and the same size
+  return `<button type="button" class="alm-card tile rarity-${def.rarity}${def.crafted ? ' crafted' : ''}${foilCount(id) ? ' foil' : ''}${o.dim ? ' dim' : ''}${o.tray ? ' dk-tslot' : ''}" ${o.tray ? `data-tray="${id}"` : `data-tile="${id}"`} aria-label="${escapeHtml(o.tray ? (deckInfoMode ? 'Read ' : 'Remove ') + def.name : def.name)}">
     ${count > 1 ? `<span class="ac-count">×${count}</span>` : ''}<span class="ac-cost">${def.cost}</span>
     <span class="ac-icon">${cardArtHtml(def)}</span>${!def.spell && def.kw.length ? `<span class="ac-kw">${def.kw.map(k => `<i>${KW[k].icon}</i>`).join('')}</span>` : ''}
-    <span class="ac-paper"><span class="ac-name">${def.name}</span><span class="ac-power">${cardStatsText(def)}</span></span>
-    ${inDeck ? `<span class="ac-in">in deck ×${inDeck}</span>` : ''}</button>`;
+    <span class="ac-paper"><span class="ac-name">${def.name}</span><span class="ac-power">${stats}</span></span>
+    ${inDeck && !o.tray ? `<span class="ac-in">in deck ×${inDeck}</span>` : ''}</button>`;
 }
 const cardsKeepScroll = fn => { const sc = fanScroller(), before = sc.scrollTop; fn(); sc.scrollTop = before; };   // the window body scrolls (js/fan-menu.js)
 const refreshCardsView = () => cardsKeepScroll(() => { if (cardsView === 'deck') renderDeckPanel(); else renderCollection(); });
@@ -400,7 +401,7 @@ function renderDeckPanel() {
     const id = state.deck[i];
     if (!id) return '<div class="dk-tslot empty"></div>';
     const def = cardDef(id);
-    return `<button type="button" class="dk-tslot card-mini rarity-${def.rarity}${def.crafted ? ' crafted' : ''}" data-tray="${id}" aria-label="${deckInfoMode ? 'Read' : 'Remove'} ${escapeHtml(def.name)}"><span class="c-cost">${def.cost}</span><span class="c-icon">${cardArtHtml(def)}</span></button>`;
+    return cardTileHtml(id, 1, { tray: true });   // the whole card, as in My Cards (build 299)
   }).join('');
   tray.querySelectorAll('[data-tray]').forEach(b => b.addEventListener('click', () => {
     if (deckInfoMode) { openCardSheet(b.dataset.tray); return; }

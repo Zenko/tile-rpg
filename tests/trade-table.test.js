@@ -30,5 +30,22 @@ module.exports = async (page, assert) => {
   const end = await ev(() => ({ hidden: document.getElementById('tradeOverlay').classList.contains('hidden'), trades: state.progress.totals.tradesDone || 0, has: state.ownedCards.includes(window.__o.give), embers: state.progress.pebbles, xp: state.progress.xp + state.progress.level * 1000 }));
   assert.ok(end.hidden && end.trades === 1 && end.has, 'then they agree and the cards change hands: ' + JSON.stringify(end));
   assert.ok(end.embers > before.embers && end.xp > before.xp, 'and the trade paid Embers and XP: ' + JSON.stringify({ before, end }));
-  await ev(() => { document.getElementById('pickupOverlay').classList.add('hidden'); closeTalk(); });
+  await ev(() => { document.getElementById('pickupOverlay').classList.add('hidden'); });
+
+  // lucky swaps: the chance grows with the Merchant skill and a companion's bond, and a lucky swap pays double
+  const luck = await ev(() => {
+    state.progress.skills = {}; state.companion = null; const base = tradeLuck().total;
+    state.progress.skills.merchant = 3; const withSkill = tradeLuck().total; state.progress.skills = {};
+    state.companion = { kind: 'card', cardId: 'sprout', name: 'Sprout', icon: '🌱', perk: 'bounty', perk2: null, bond: 40 }; const withCompanion = tradeLuck().total; state.companion = null;
+    const f = window.__f, offers = npcTradeOffers(f), o = offers[1], need = o.need, pay = CARD_POOL.find(c => !c.exclusive && c.rarity === need && c.id !== o.give).id;
+    state.ownedCards = [pay, pay, pay, 'sprout', 'sprout', 'sprout']; state.deck = ['sprout'];
+    const kin = tradeKin(pay, o.give), expect = npcTradeReward(cardDef(o.give), false, kin);
+    npcTradeRng = () => 0;   // certain luck
+    const r = npcTradeDo(f, o.key, pay); npcTradeRng = Math.random;
+    document.getElementById('pickupOverlay').classList.add('hidden');
+    return { base, withSkill, withCompanion, lucky: r && r.lucky, xp: r && r.reward.xp, expectXp: expect.xp, embers: r && r.reward.embers, expectEmbers: expect.embers, loved: r && r.loved };
+  });
+  assert.ok(Math.abs(luck.base - 0.1) < 1e-9 && Math.abs(luck.withSkill - 0.19) < 1e-9 && luck.withCompanion > luck.base + 0.19, 'luck grows with Merchant ranks and a bonded companion: ' + JSON.stringify(luck));
+  assert.ok(luck.lucky && luck.xp >= luck.expectXp * 2 && luck.embers >= luck.expectEmbers * 2, 'a lucky swap pays double: ' + JSON.stringify(luck));
+  await ev(() => { closeTalk(); });
 };

@@ -2930,3 +2930,18 @@ body.in-battle .tab-win, body.in-battle .win-dim, body.in-scene .tab-win, body.i
 .tx-side .reveal-card-frame { margin: 2px 0; }
 .tx-side .reveal-card { width: 128px; }
 .tx-side .reveal-card.fa, .tx-side .reveal-card-frame.has-fa .reveal-card { width: 128px; }
+
+/* ---- build 299 ---- */
+/* the deck tray shows whole cards (the same tile as My Cards) */
+.dk-tray .alm-card.tile.dk-tslot { max-width: none; width: 100%; aspect-ratio: 3 / 4; height: auto; }
+#deckBuild .dk-tray { row-gap: 16px; }
+/* tile stats: icon and number together, same size; the "in deck" label hangs below the card instead of over the numbers */
+.alm-card.tile .ac-power .pw, .alm-card.tile .ac-power .hp { display: inline-flex; align-items: center; gap: .25em; }
+.alm-card.tile .ac-power .ico-swap, .alm-card.tile .ac-power img { width: 1.1em; height: 1.1em; vertical-align: middle; }
+.alm-card.tile .ac-in { bottom: -16px; }
+.alm-row.card-grid { row-gap: 28px; }
+/* the cost bubble on the detail sheet sticks out above the card; give it room so the sheet does not cut it off */
+.inspect-overlay .reveal-card-frame.ins-frame { margin: 26px 0 12px; }
+/* lucky swap line on the trade table */
+.tx-luck { margin: -4px 0 12px; font-size: .86rem; color: var(--ink); }
+.tx-luck small { display: block; font-size: .7rem; font-weight: 700; color: var(--ink-soft); }

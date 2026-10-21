@@ -13,6 +13,8 @@
    you take (NPC_TRADE_REWARD), a little more when it is their favourite keyword.
    Gamified (build 297): a Trader rank from your lifetime trades (TRADER_RANKS, +10% on every reward per rank), a Family match (the card you give and the
    card you take belong to the same family: +50%), and a daily goal of three swaps that pays a bonus on the third.
+   Lucky swap (build 299): every swap has a chance to DOUBLE its XP and Embers (tradeLuck: 10% to start, +3% a Merchant rank in the Path skills, and a
+   companion adds 4% a bond level and 8% more if its perk is Sting or Kin, the coin-minded ones).
    Saved in state.progress.npcTrades = { day, done: { <offer key>: true } }, reset each day. UI: #talkTrade in index.html, the TRADE block at the
    end of css/latest.css; talkGo / renderTalkView (js/requests-friendship-rival.js) call renderTradePane. tests/npc-trade.test.js.
    ============================================================ */
@@ -50,6 +52,13 @@ function traderInfo() {
   const next = TRADER_RANKS[i + 1] || null;
   return { n, i, rank: TRADER_RANKS[i], next, frac: next ? (n - TRADER_RANKS[i].n) / (next.n - TRADER_RANKS[i].n) : 1 };
 }
+const TRADE_LUCK_BASE = 0.1, TRADE_LUCK_MAX = 0.6;
+let npcTradeRng = Math.random;   // a test swaps this to make the luck certain or impossible
+function tradeLuck() {
+  const c = state.companion, skill = typeof cardBonus === 'function' ? cardBonus('tradeLuck') : 0;
+  const comp = c ? 0.04 * (typeof bondLevel === 'function' ? bondLevel(c) : 0) + (typeof hasPerk === 'function' && (hasPerk('bounty') || hasPerk('medals')) ? 0.08 : 0) : 0;
+  return { base: TRADE_LUCK_BASE, skill, comp, who: c ? c.name : '', total: Math.min(TRADE_LUCK_MAX, TRADE_LUCK_BASE + skill + comp) };
+}
 function tradeKin(payId, gotId) { const a = CARD_FAMILY[BattleEngine.baseIdOf(payId)], b = CARD_FAMILY[BattleEngine.baseIdOf(gotId)]; return !!a && a === b; }
 // What a swap pays: by the rarity of the card you take, a little more for their favourite keyword, +10% a Trader rank, +50% for a Family match.
 function npcTradeReward(got, loved, kin) {
@@ -82,6 +91,8 @@ function npcTradeDo(f, offerKey, payId) {
   state.progress.discovered = Array.from(new Set((state.progress.discovered || []).concat([BattleEngine.baseIdOf(payId)])));   // the Index remembers what went
   bumpStat('tradesDone', 1); bumpStat('cardsFound', 1); bumpPill('pillCards');
   const kin = tradeKin(payId, o.give), reward = npcTradeReward(got, loved, kin), rank0 = traderInfo().i;
+  const lucky = npcTradeRng() < tradeLuck().total;
+  if (lucky) { reward.xp *= 2; reward.embers *= 2; }   // a lucky swap doubles the swap's own reward (not the daily bonus)
   addXP(reward.xp); addPebbles(reward.embers, 'trades');   // addPebbles saves and refreshes the bar
   const st = npcTradeState(); st.count = (st.count || 0) + 1;
   const daily = st.count === TRADE_DAILY_GOAL;   // the third swap of the day pays a bonus
@@ -93,9 +104,10 @@ function npcTradeDo(f, offerKey, payId) {
   const ti = traderInfo(), rankUp = ti.i > rank0 ? ti.rank : null;
   if (rankUp) setTimeout(() => toast(`${rankUp.icon} You are a ${rankUp.name} trader now. Swaps pay ${Math.round(TRADE_RANK_BONUS * 100 * ti.i)}% more.`), 1800);
   const total = { xp: reward.xp + (daily ? TRADE_DAILY_BONUS.xp : 0), embers: reward.embers + (daily ? TRADE_DAILY_BONUS.embers : 0) };
-  const note = `🫧 +${total.embers} ${GAME.currency.many}` + (kin ? '<br>🤝 Family match: +50%' : '') + (daily ? `<br>⭐ Daily trader bonus: ${TRADE_DAILY_GOAL} swaps today` : '');
-  showCardReveal(o.give, `Traded with ${f.name}`, true, note, total.xp);
-  return { o, pay, got, loved, reward, kin, daily, rankUp };
+  const note = `🫧 +${total.embers} ${GAME.currency.many}` + (kin ? '<br>🤝 Family match: +50%' : '') + (lucky ? '<br>🍀 Lucky swap: rewards doubled!' : '') + (daily ? `<br>⭐ Daily trader bonus: ${TRADE_DAILY_GOAL} swaps today` : '');
+  if (lucky) { sfx('rare'); buzz(HAP.win); }
+  showCardReveal(o.give, lucky ? `Lucky swap with ${f.name}! 🍀` : `Traded with ${f.name}`, true, note, total.xp);
+  return { o, pay, got, loved, reward, kin, daily, rankUp, lucky };
 }
 
 /* ---------------- the Trade card on the Talk screen ---------------- */
@@ -172,6 +184,8 @@ function openTradeTable(f, o, payId, onDone) {
   txEl('txMeta').innerHTML = `<div class="tx-rank"><span>${ti.rank.icon} <b>${ti.rank.name}</b></span><span class="tx-bar" role="progressbar" aria-valuenow="${Math.round(ti.frac * 100)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${Math.round(ti.frac * 100)}%"></i></span><small>${ti.next ? `${ti.next.n - ti.n} more to ${ti.next.name}` : 'Top rank'}</small></div>`
     + `<div class="tx-daily"><span class="tx-pips">${pips}</span><small>${today >= TRADE_DAILY_GOAL ? 'Daily bonus claimed' : `${TRADE_DAILY_GOAL - today} more swap${TRADE_DAILY_GOAL - today === 1 ? '' : 's'} today for a bonus`}</small></div>`;
   txEl('txReward').innerHTML = `The swap pays <b>+${rw.xp} XP</b> and <b>🫧 +${rw.embers} ${GAME.currency.many}</b>` + (kin ? `<span class="tx-kin">🤝 Family match: +50%</span>` : '');
+  const lk = tradeLuck(), parts = [lk.skill ? `Merchant skills +${Math.round(lk.skill * 100)}%` : '', lk.comp ? `${lk.who || 'companion'} +${Math.round(lk.comp * 100)}%` : ''].filter(Boolean).join(' · ');
+  txEl('txLuck').innerHTML = `🍀 <b>${Math.round(lk.total * 100)}%</b> chance to double the reward${parts ? `<small>${escapeHtml(parts)}</small>` : '<small>A Merchant skill or a companion improves it</small>'}`;
   txEl('txYes').disabled = false; txEl('txNo').disabled = false;
   txEl('tradeOverlay').classList.remove('hidden'); sfx('nav');
   txEl('txNo').focus();

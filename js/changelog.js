@@ -18,6 +18,8 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'new', x: 'Lucky swaps. Every trade has a chance to double its XP and Embers (10% to start). The Merchant path skill adds 3% a rank, and a companion helps too: 4% for each bond level, and 8% more if it carries Sting or Kin.' },
+  { t: 'better', x: 'Your Deck page shows whole cards, with their name and stats, like My Cards. On card tiles the attack and health numbers keep their icons the same size, and the "in deck" label no longer covers them. The cost bubble on a card\'s detail sheet is no longer cut off at the top.' },
   { t: 'better', x: 'The trade table shows the whole card on both sides. Prop messages (a bench, a sign) and the new-card popup close with the round X instead of a button. On the neighbour screen the name and hearts sit above their head, bigger, and the words have more room. A keyword badge on a card is now the same size as the cost bubble above it.' },
   { t: 'fixed', x: 'Tapping a card to trade no longer throws you back to the neighbour screen. You stay on Trade and pick what to give.' },
   { t: 'new', x: 'Trading is a little game now. Climb Trader ranks (Newcomer, Swapper, Dealer, Merchant, Tycoon) for +10% on every swap per rank, swap two cards of the same family for a +50% Family match, and make three swaps in a day for a bonus.' },
