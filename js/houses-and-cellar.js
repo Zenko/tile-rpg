@@ -589,9 +589,16 @@ function renderScene() {
   // The storefront layout (v1.77.0) is for the ordinary "talk to the owner" screens; mini-games, the memory game and the
   // Card Shop counter keep the compact layout because they fill the stage with their own content.
   sceneView.classList.toggle('sc-std', !!scene && !['memory-mode', 'mini-mode', 'shop-mode'].some(c => sceneView.classList.contains(c)));
-  const acts = document.getElementById('scActions');
-  if (scene && acts && !SCENE_EXIT_ACTS.some(a => acts.querySelector(`[data-act="${a}"]`))) acts.insertAdjacentHTML('beforeend', sceneBtn('leave', 'Head back out'));
 }
+/* The round X at the top right is the way out of every building screen (build 294). It does what the screen's own exit button does (Back in a
+   sub-screen, Stop playing in a mini-game, Cancel on an expedition) and otherwise leaves the building. The plain "Head back out" row is gone;
+   rows that say something more than "out" ('Leave for now (the run waits)') stay. Your cottage hides the X: you leave it through its doorway. */
+document.getElementById('scX').addEventListener('click', () => {
+  if (!scene) return;
+  const acts = document.getElementById('scActions');
+  const exit = acts && [...acts.querySelectorAll('[data-act]')].filter(b => SCENE_EXIT_ACTS.includes(b.dataset.act) && !b.disabled).pop();
+  sceneAction(exit ? exit.dataset.act : 'leave');
+});
 function renderSceneBody() {
   if (!scene) return;
   const stage = document.getElementById('scStage'), pips = document.getElementById('scPips'), acts = document.getElementById('scActions');
@@ -609,12 +616,12 @@ function renderSceneBody() {
     pips.innerHTML = run && !resting ? `<span class="pip-label">🕳️ Floor ${st.floor + 1}${best ? ` · deepest ${best}` : ''}</span>`
       : best ? `<span class="pip-label">Deepest floor ${best}</span>` : '';
     if (resting) {
-      acts.innerHTML = sceneBtn('rest', `Quiet for now (${fmtClock(CELLAR.cooldownMs - (Date.now() - st.clearedAt))})`, true) + sceneBtn('leave', 'Climb back up');
+      acts.innerHTML = sceneBtn('rest', `Quiet for now (${fmtClock(CELLAR.cooldownMs - (Date.now() - st.clearedAt))})`, true);
     } else if (run) {
       sceneView.classList.toggle('cl-crawl', crawlOn() && !!document.getElementById('scActions'));
       acts.innerHTML = cellarMapHtml(st) + (st.floor > 0 ? sceneBtn('climb', `Climb out (ends the run at floor ${st.floor})`) : '') + sceneBtn('leave', 'Leave for now (the run waits)');
     } else {
-      acts.innerHTML = sceneBtn('descend', '🕯️ Go down the stairs') + sceneBtn('leave', 'Climb back up');
+      acts.innerHTML = sceneBtn('descend', '🕯️ Go down the stairs');
     }
   } else if (scene.id === 'cup') {
     const cs = cupState();
@@ -649,7 +656,7 @@ function renderSceneBody() {
     document.getElementById('scTitle').textContent = it.title;
     document.getElementById('scWho').textContent = typeof it.who === 'function' ? it.who() : it.who;
     pips.innerHTML = '';
-    acts.innerHTML = sceneBtn('leave', 'Head back out');
+    acts.innerHTML = '';
     renderMemoryGrid();
   } else {
     if (typeof memory !== 'undefined' && memory) { memory = null; memoryLeaveStage(); }
@@ -685,7 +692,7 @@ function renderSceneBody() {
     else if (scene.mode === 'redraw') acts.innerHTML = fortuneRedrawButtons() + sceneBtn('back', '← Back to the table');
     else if (scene.mode === 'nightdeco') acts.innerHTML = DECORATION_ITEMS.filter(d => d.night).map(d => sceneBtn('nightdeco:' + d.id, `${d.icon} ${d.name} · 🫧 ${d.cost}${decorationInventoryCount(d.id) ? ` (have ${decorationInventoryCount(d.id)})` : ''}`)).join('') + sceneBtn('back', '← Back');
     // an action may compute its own label (a timer, a sold-out deal) through view()
-    else acts.innerHTML = it.actions.map(a => { const v = a.view ? a.view(a) : null; return sceneBtn(a.id, v ? v.label : a.label, v && v.disabled); }).join('') + sceneBtn('leave', 'Head back out');
+    else acts.innerHTML = it.actions.map(a => { const v = a.view ? a.view(a) : null; return sceneBtn(a.id, v ? v.label : a.label, v && v.disabled); }).join('');
   }
 }
 // `src` names where the Embers came from (or went), for the economy ledger (econNote, js/progression.js).
@@ -836,7 +843,7 @@ function cupButtons() {
   const cs = cupState();
   const chal = sceneBtn('chal', `🎯 Deck challenges · ${challengeState().list.filter(c => c.won).length}/3 beaten today`);
   const dr = draftState(), draft = sceneBtn('draft', dr.active ? `🎴 Draft Run · in progress` : featureLocked('draft') ? `🎴 Draft Run · 🔒 level ${FEATURE_LEVELS.draft.level}` : `🎴 Draft Run · build a deck, win four`);
-  if (!cs.active) return sceneBtn('cup-enter', cs.trophy ? `🏆 Enter again (for ${GAME.currency.many})` : `🏆 Enter the ${cupName()}`) + draft + chal + sceneBtn('leave', 'Head back out');
+  if (!cs.active) return sceneBtn('cup-enter', cs.trophy ? `🏆 Enter again (for ${GAME.currency.many})` : `🏆 Enter the ${cupName()}`) + draft + chal;
   const r = CUP_ROUNDS[cs.round], foe = cs.foes[cs.round];
   return sceneBtn('cup-play', `${r.icon} ${r.title}: ${foe.icon} ${foe.name} · you have ♥${cs.spirit}`) +
     sceneBtn('cup-quit', 'Withdraw (ends this run)') + sceneBtn('leave', 'Step away for now');

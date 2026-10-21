@@ -2870,3 +2870,7 @@ body.in-battle .tab-win, body.in-battle .win-dim, body.in-scene .tab-win, body.i
 /* the welcome sign closes with the X; its Continue button is only for the small text-only prop messages */
 #sceneryOverlay .overlay-card:has(#sceneryDesc.rich) #sceneryContinue { display: none; }
 #sceneryOverlay .overlay-card:has(#sceneryDesc.rich) { padding-bottom: 16px; }
+/* building screens: the X sits at the top right, just under the player pill, and is not shown in your cottage (you leave it through its doorway) */
+#sceneView > .x-close { position: absolute; top: calc(var(--hud-h) + 6px); right: 12px; z-index: 6; }
+#sceneView.room-on > .x-close { display: none; }
+#sceneView.sc-std .sc-bubble { max-width: calc(100% - 124px); }   /* clear of the X on both sides, so the speech stays centred */

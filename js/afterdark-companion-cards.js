@@ -711,7 +711,7 @@ function doTrade(i) {
   return `${o.icon} ${o.name} shakes on it. A fair trade!`;
 }
 function tradeButtons() {
-  return tradesState().offers.map((o, i) => sceneBtn('trade:' + i, tradeLabel(o), !tradeReady(o))).join('') + sceneBtn('leave', 'Step away from the board');
+  return tradesState().offers.map((o, i) => sceneBtn('trade:' + i, tradeLabel(o), !tradeReady(o))).join('');
 }
 
 /* ---------------- deck challenges (at the fountain): win with a deck that follows today's rule ---------------- */

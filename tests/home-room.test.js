@@ -18,7 +18,7 @@ module.exports = async (page, assert) => {
   await until(() => !!document.querySelector('#scActions [data-act="mail"]'));
   assert.ok(await page.evaluate(() => !sceneView.classList.contains('hr-idle')), 'the stage makes room for the sheet');
   assert.ok(await page.evaluate(() => Math.abs(homeRoom.x - 6) + Math.abs(homeRoom.y - 7) === 1), 'stopped beside the mail table');
-  assert.ok(await page.evaluate(() => !!document.querySelector('#scActions [data-act="hr-close"]') && !document.querySelector('#scActions [data-act="leave"]')), 'the sheet ends in Close, not Head back out');
+  assert.ok(await page.evaluate(() => !!document.querySelector('#scActions [data-act="hr-close"]') && !document.querySelector('#scActions [data-act="leave"]')), 'the sheet ends in Close, and has no leave row');
   await page.click('#scActions [data-act="hr-close"]');
   assert.ok(await page.evaluate(() => inScene && sceneView.classList.contains('hr-idle') && !!document.querySelector('.hr-room')), 'Close puts the sheet away and stays in the house');
   await page.evaluate(() => hrGoTo(hrHome().items.find(i => i.id === 'mail')));
