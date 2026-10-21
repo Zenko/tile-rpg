@@ -56,9 +56,9 @@ module.exports = async (page, assert) => {
   }
   await page.setViewportSize({ width: 400, height: 860 });
 
-  // the close-up shows what they remember; the dock style does not
+  // the memory pill was taken off the screen in build 296 (the Chat topic "What do you remember about us?" still tells it)
   const memo = await ev(() => { const f = { id: 'npc-square-fenn', name: 'Fenn', icon: '🧑', deck: [], level: 3 }; const m = npcMemOf(f, true); m.chats = 2; if (talkTo) closeTalk(); prefs.talkStyle = 'combo'; openTalk(f); const a = document.getElementById('talkMemo').textContent; closeTalk(); prefs.talkStyle = 'dock'; openTalk(f); const b = document.getElementById('talkMemo'); return { a, shown: b.offsetParent !== null }; });
-  assert.ok(/chatted on 2 days/.test(memo.a) && !memo.shown, 'a line of what they remember, in the close-up only: ' + JSON.stringify(memo));
+  assert.ok(memo.a === '' && !memo.shown, 'no memory pill on the screen any more: ' + JSON.stringify(memo));
 
   // classic: the grid, no dock, nothing new on screen
   await open('classic');

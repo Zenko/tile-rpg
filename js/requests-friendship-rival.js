@@ -301,7 +301,7 @@ function renderTalkBody() {
    just above their head, and below it a grid of Chat / Play / Gift cards. A card opens its own list of choices with a Back.
    The live town shows through behind a soft scrim.
    Every button inside keeps its id and its own show/hide logic; this only decides which are on screen. The way out is the
-   round X at the top right, the Android back gesture (one history entry while the screen is open) and Escape. */
+   "Leave" button at the foot (the round X is for windows, not full-screen takeovers), the Android back gesture (one history entry while the screen is open) and Escape. */
 let talkView = 'home', talkPushed = false, talkPopIgnore = 0, talkCatsSig = '';
 /* How the neighbour screen looks (Settings -> Neighbours -> Talking to neighbours, prefs.talkStyle):
      'combo'   (default) a close-up face with what they say as large subtitles, a line about what they remember, and the four jobs in a dock
@@ -324,7 +324,7 @@ function talkMemoLine(f) {
   if (m.chats) return `🗒 We have chatted on ${m.chats} ${m.chats === 1 ? 'day' : 'days'}`;
   return '';
 }
-function renderTalkMemo(f) { const el = document.getElementById('talkMemo'); if (el) el.textContent = talkMemoLine(f); }
+function renderTalkMemo(f) { const el = document.getElementById('talkMemo'); if (el) el.textContent = ''; }   // the one-line memory pill is gone from the screen (build 296); "What do you remember about us?" in Chat still tells it
 function talkVisible(id) { return !document.getElementById(id).classList.contains('hidden'); }
 function talkFigure(pt, f) {
   const id = typeof NPC_DRAWN_SEEN !== 'undefined' ? NPC_DRAWN_SEEN[f.id] : null;
@@ -337,6 +337,11 @@ function renderTalkView() {
   const f = talkTo; if (!f) return;
   const card = document.getElementById('talkCard');
   card.dataset.style = talkStyle();
+  {   // the close-up puts the name and hearts between the picture and the words; the other styles keep them under the picture
+    const plate = card.querySelector('.tk-plate'), bust = card.querySelector('.tk-bust'), stage = card.querySelector('.tk-stage');
+    if (talkStyle() === 'combo') { if (plate.parentElement !== bust) bust.insertBefore(plate, document.getElementById('talkBubble')); }
+    else if (plate.parentElement !== stage) stage.appendChild(plate);
+  }
   const chatOn = talkVisible('talkTopics') || talkVisible('talkMain'), giftOn = ['talkGift', 'talkDish', 'talkCardGift'].some(talkVisible);
   const tradeOn = typeof npcTradeKind === 'function' && !!npcTradeKind(f);   // everyone but Rook, the Atlas and visitors (js/npc-trade.js)
   if (f._thanks || (talkView === 'chat' && !chatOn) || (talkView === 'gift' && !giftOn) || (talkView === 'trade' && !tradeOn)) talkView = 'home';   // a thank-you is spoken over the grid
@@ -404,7 +409,7 @@ function completeRequest(f) {
   toast(rewardCard ? '🎁 A card, as thanks' : `🫧 +${r.pebbles} ${GAME.currency.many}`);
   if (rewardCard) setTimeout(() => showCardReveal(rewardCard, `A gift from ${f.name}`, true), 300);
 }
-function closeTalk() { document.getElementById('talkCards').classList.add('hidden'); clearInterval(talkTypeTimer); talkSaid = ''; document.getElementById('talkPortrait').dataset.for = ''; if (talkTo) { delete talkTo._thanks; delete talkTo._topics; delete talkTo._reacted; delete talkTo._tk; } talkTo = null; talkView = 'home'; talkOfferDismissed = false; talkOfferSig = ''; document.getElementById('talkCard').classList.remove('offering'); talkEls().ov.classList.add('hidden'); talkHistoryPop(); }
+function closeTalk() { document.getElementById('talkCards').classList.add('hidden'); clearInterval(talkTypeTimer); talkSaid = ''; document.getElementById('talkPortrait').dataset.for = ''; if (talkTo) { delete talkTo._thanks; delete talkTo._topics; delete talkTo._reacted; delete talkTo._tk; } talkTo = null; talkView = 'home'; talkOfferDismissed = false; talkOfferSig = ''; document.getElementById('talkCard').classList.remove('offering'); document.getElementById('tradeOverlay').classList.add('hidden'); talkEls().ov.classList.add('hidden'); talkHistoryPop(); }
 document.getElementById('talkBubble').addEventListener('click', talkFinishTyping);
 document.getElementById('talkMain').addEventListener('click', e => { const a = e.currentTarget.dataset.act; if (a) talkAct(a); });
 document.getElementById('talkGift').addEventListener('click', () => { if (talkTo) shareBread(talkTo); });

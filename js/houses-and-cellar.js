@@ -589,16 +589,11 @@ function renderScene() {
   // The storefront layout (v1.77.0) is for the ordinary "talk to the owner" screens; mini-games, the memory game and the
   // Card Shop counter keep the compact layout because they fill the stage with their own content.
   sceneView.classList.toggle('sc-std', !!scene && !['memory-mode', 'mini-mode', 'shop-mode'].some(c => sceneView.classList.contains(c)));
-}
-/* The round X at the top right is the way out of every building screen (build 294). It does what the screen's own exit button does (Back in a
-   sub-screen, Stop playing in a mini-game, Cancel on an expedition) and otherwise leaves the building. The plain "Head back out" row is gone;
-   rows that say something more than "out" ('Leave for now (the run waits)') stay. Your cottage hides the X: you leave it through its doorway. */
-document.getElementById('scX').addEventListener('click', () => {
-  if (!scene) return;
+  // A building (or the fountain, a sign, the lantern market) takes over the whole screen, so its way out is a plain "Leave" button at the foot
+  // (build 296). The round X is for windows that sit over the town. Screens whose own exit says more ('Leave for now (the run waits)', '← Back') keep it.
   const acts = document.getElementById('scActions');
-  const exit = acts && [...acts.querySelectorAll('[data-act]')].filter(b => SCENE_EXIT_ACTS.includes(b.dataset.act) && !b.disabled).pop();
-  sceneAction(exit ? exit.dataset.act : 'leave');
-});
+  if (scene && acts && !SCENE_EXIT_ACTS.some(a => acts.querySelector(`[data-act="${a}"]`))) acts.insertAdjacentHTML('beforeend', sceneBtn('leave', 'Leave', false, 'btn-ghost sc-leave'));
+}
 function renderSceneBody() {
   if (!scene) return;
   const stage = document.getElementById('scStage'), pips = document.getElementById('scPips'), acts = document.getElementById('scActions');

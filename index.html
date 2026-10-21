@@ -250,7 +250,6 @@
       </div>
 
       <div id="sceneView" class="hidden" data-theme="warm">
-        <button type="button" class="x-close" id="scX" aria-label="Leave"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
         <div class="sc-head"><b id="scTitle"></b></div>
         <div class="sc-stage" id="scStage"><div class="sc-rug"></div><div class="sc-who" id="scWho"></div></div>
         <div class="sc-pips" id="scPips"></div>
@@ -665,7 +664,6 @@
 <div class="overlay sheet hidden" id="talkOverlay">
   <div class="tk-bg" aria-hidden="true"></div>
   <div class="overlay-card" id="talkCard" data-view="home">
-    <button type="button" class="x-close talk-close" id="talkClose" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
     <div class="tk-stage">
       <div class="tk-memo" id="talkMemo"></div>
       <div class="tk-bust">
@@ -689,8 +687,8 @@
       <div class="tk-sub">
         <div class="tk-subhead"><button type="button" class="tk-back" id="talkBack">‹ Back</button><h3 id="talkSubTitle"></h3></div>
         <div class="tk-pane" data-pane="chat">
-          <div class="talk-topics hidden" id="talkTopics"></div>
           <button class="btn" id="talkMain">Chat</button>
+          <div class="talk-topics hidden" id="talkTopics"></div>
         </div>
         <div class="tk-pane" data-pane="play">
           <button class="btn talk-fight" id="talkFight">⚔️ Friendly match</button>
@@ -708,6 +706,23 @@
         </div>
       </div>
     </div>
+    <button type="button" class="btn btn-ghost talk-close" id="talkClose">Leave</button>
+  </div>
+</div>
+
+<div class="overlay hidden" id="tradeOverlay" role="dialog" aria-modal="true" aria-labelledby="txTitle">
+  <div class="overlay-card tx-card">
+    <button type="button" class="x-close" id="txX" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
+    <h2 id="txTitle">Trade</h2>
+    <p class="tx-say" id="txSay"></p>
+    <div class="tx-deal">
+      <div class="tx-side" id="txYou"></div>
+      <div class="tx-swap" aria-hidden="true">⇄</div>
+      <div class="tx-side" id="txThem"></div>
+    </div>
+    <div class="tx-agree" aria-live="polite"><span class="tx-seal" id="txSealYou"></span><span class="tx-seal" id="txSealThem"></span></div>
+    <div class="tx-reward" id="txReward"></div>
+    <div class="tx-actions"><button type="button" class="btn tx-yes" id="txYes">🤝 Shake on it</button><button type="button" class="btn btn-ghost tx-no" id="txNo">Not now</button></div>
   </div>
 </div>
 <div class="overlay hidden" id="sceneOverlay" role="dialog" aria-modal="true" aria-label="Story" data-style="talk">

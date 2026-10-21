@@ -1,5 +1,5 @@
 // The neighbour screen: a grid of Chat / Play / Gift cards, each opening its own list with a Back, a thank-you spoken over the grid,
-// and three ways out: the round X, the Android back gesture (a history entry; Back inside a list goes to the grid first) and Escape.
+// and three ways out: the Leave button, the Android back gesture (a history entry; Back inside a list goes to the grid first) and Escape.
 module.exports = async (page, assert) => {
   const ev = (fn, arg) => page.evaluate(fn, arg);
   const shown = sel => ev(s => { const e = document.querySelector(s); return !!e && e.offsetParent !== null; }, sel);
@@ -34,9 +34,9 @@ module.exports = async (page, assert) => {
   assert.ok(/\+3/.test(await ev(() => document.getElementById('talkText').textContent + talkSaid)), 'and is spoken in the bubble');
 
   // the way out: the footer at the bottom (the last thing on the card, like the building screens)
-  assert.ok(await ev(() => { const c = document.getElementById('talkCard'); const x = document.getElementById('talkClose'), r = x.getBoundingClientRect(); return x.parentElement === c && x.classList.contains('x-close') && r.top < 80 && r.right > innerWidth - 80 && r.width >= 44; }), 'the way out is the round X at the top right');
+  assert.ok(await ev(() => { const c = document.getElementById('talkCard'); const x = document.getElementById('talkClose'), r = x.getBoundingClientRect(); return c.lastElementChild === x && /Leave/.test(x.textContent) && r.width > 200; }), 'the way out is a Leave button at the foot');
   await ev(() => document.getElementById('talkClose').click());
-  assert.ok(!(await isOpen()), 'the X closes the screen');
+  assert.ok(!(await isOpen()), 'Leave closes the screen');
   await page.waitForFunction(() => talkPopIgnore === 0, null, { timeout: 4000 });
 
   // the Android back gesture: one entry; Back inside a list goes to the grid first
