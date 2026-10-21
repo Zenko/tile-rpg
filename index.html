@@ -664,6 +664,7 @@
 <div class="overlay sheet hidden" id="talkOverlay">
   <div class="tk-bg" aria-hidden="true"></div>
   <div class="overlay-card" id="talkCard" data-view="home">
+    <button type="button" class="x-close talk-close" id="talkClose" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
     <div class="tk-stage">
       <div class="tk-memo" id="talkMemo"></div>
       <div class="tk-bust">
@@ -706,7 +707,6 @@
         </div>
       </div>
     </div>
-    <button type="button" class="talk-close" id="talkClose">Head back out</button>
   </div>
 </div>
 <div class="overlay hidden" id="sceneOverlay" role="dialog" aria-modal="true" aria-label="Story" data-style="talk">
@@ -724,6 +724,7 @@
 </div>
 <div class="overlay hidden" id="sceneryOverlay">
   <div class="overlay-card">
+    <button type="button" class="x-close" id="sceneryX" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
     <div style="font-size: 2.2rem; margin-bottom: 6px;" id="sceneryIcon">🌳</div>
     <h2 id="sceneryTitle">A quiet spot</h2>
     <p id="sceneryDesc"></p>
@@ -735,7 +736,7 @@
 <div class="overlay wm-screen hidden" id="worldMapOverlay" role="dialog" aria-modal="true" aria-labelledby="wmTitle">
   <div class="wm-head">
     <div><h2 id="wmTitle">World Map</h2><p class="wm-hint">Islands adrift in the dream. Tap one to see what's there.</p></div>
-    <button id="worldMapClose" class="wm-close" aria-label="Close the map">&times;</button>
+    <button id="worldMapClose" class="x-close wm-close" aria-label="Close the map"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
   </div>
   <div class="wm-stage" id="wmStage"></div>
   <div class="wm-sheet" id="wmSheet"></div>
@@ -759,9 +760,9 @@
 
 <div class="overlay hidden" id="weatherOverlay">
   <div class="overlay-card">
+    <button type="button" class="x-close" id="weatherOverlayClose" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
     <h2 id="wxTitle">Clear skies</h2>
     <div class="wx-rows" id="wxRows"></div>
-    <button id="weatherOverlayClose" class="btn">Close</button>
   </div>
 </div>
 

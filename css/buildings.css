@@ -282,7 +282,6 @@ body.in-fishing .toast.show { transform: translateX(-50%) translateY(0); }
 #talkCard .btn { display: block; width: 100%; margin: 8px 0 0; }
 #talkCard .btn:disabled { background: var(--stone-edge); color: var(--ink-soft); cursor: default; }
 #talkCard .talk-fight { background: var(--stone-edge); color: var(--ink); }
-#talkCard .talk-close { background: none; color: var(--ink-soft); box-shadow: none; }
 #talkCard .talk-gift { background: var(--c-orange-50); }
 .snack-row { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-items: center; margin: -4px 0 12px; }
 .snack-label { font-size: .72rem; color: var(--ink-soft); width: 100%; }

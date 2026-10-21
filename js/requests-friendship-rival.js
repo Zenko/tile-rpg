@@ -233,9 +233,9 @@ function renderTalkOffer(f) {
   const reward = r.reward ? `a ${REQ_WIN_RARITY} card or better` : `🫧 ${r.pebbles} ${GAME.currency.many}`;
   const html = o.kind === 'done'
     ? `<small>${escapeHtml(f.name)} has something for you</small><p class="to-text">${escapeHtml(r.replyText || 'You did it? Wonderful!')}</p><div class="to-reward">Reward: ${reward}</div>
-       <div class="to-actions"><button type="button" class="btn to-yes" data-offer="complete">🎁 Hand it in</button><button type="button" class="btn to-no" data-offer="later">Later</button></div>`
+       <div class="to-actions"><button type="button" class="btn to-yes" data-offer="complete">🎁 Hand it in</button><button type="button" class="btn btn-ghost to-no" data-offer="later">Later</button></div>`
     : `<small>${escapeHtml(f.name)} has a message for you</small><p class="to-text">${escapeHtml(r.text)}</p><div class="to-hint">${escapeHtml(r.hint || '')}</div><div class="to-reward">Reward: ${reward}</div>
-       <div class="to-actions">${full ? '<div class="to-full">You have two favours open already.</div>' : '<button type="button" class="btn to-yes" data-offer="accept">✅ Accept</button>'}<button type="button" class="btn to-no" data-offer="later">${full ? 'Close' : 'Not now'}</button></div>`;
+       <div class="to-actions">${full ? '<div class="to-full">You have two favours open already.</div>' : '<button type="button" class="btn to-yes" data-offer="accept">✅ Accept</button>'}<button type="button" class="btn btn-ghost to-no" data-offer="later">${full ? 'Close' : 'Not now'}</button></div>`;
   if (html !== talkOfferSig) { talkOfferSig = html; box.innerHTML = html; }
 }
 document.getElementById('talkOffer').addEventListener('click', e => {
@@ -301,7 +301,7 @@ function renderTalkBody() {
    just above their head, and below it a grid of Chat / Play / Gift cards. A card opens its own list of choices with a Back.
    The live town shows through behind a soft scrim.
    Every button inside keeps its id and its own show/hide logic; this only decides which are on screen. The way out is the
-   "Head back out" footer (as on the building screens), the Android back gesture (one history entry while the screen is open) and Escape. */
+   round X at the top right, the Android back gesture (one history entry while the screen is open) and Escape. */
 let talkView = 'home', talkPushed = false, talkPopIgnore = 0, talkCatsSig = '';
 /* How the neighbour screen looks (Settings -> Neighbours -> Talking to neighbours, prefs.talkStyle):
      'combo'   (default) a close-up face with what they say as large subtitles, a line about what they remember, and the four jobs in a dock
@@ -364,7 +364,7 @@ function talkGo(view) { if (!talkTo) return; if (view === talkView && view !== '
 document.getElementById('talkCard').addEventListener('click', e => {
   const g = e.target.closest('[data-go]'); if (g) { talkGo(g.dataset.go); return; }
   if (e.target.closest('#talkBack')) talkGo('home');
-  else if (talkView !== 'home' && talkStyle() !== 'classic' && !e.target.closest('.tk-lower, .talk-close')) talkGo('home');   // the dock styles: tap the neighbour to put the list away
+  else if (talkView !== 'home' && talkStyle() !== 'classic' && !e.target.closest('.tk-lower, .talk-close, .tk-offer')) talkGo('home');   // the dock styles: tap the neighbour to put the list away
 });
 document.getElementById('talkQuick').addEventListener('click', () => document.getElementById('talkFight').click());
 // Android's back gesture: one history entry while the screen is open. Back inside a list goes to the grid first.

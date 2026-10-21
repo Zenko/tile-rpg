@@ -19,7 +19,7 @@ Progress is saved in the browser (localStorage), so each tester keeps their own 
 | `js/` | The code, one file per system |
 | `labs/` | Sandboxes for trying art and effects outside the game (not part of the game) |
 | `style-guide.html` | A living reference of components, colours, icons and cards, read from the game's own files |
-| `scripts/` | Tools: `check.py` (run before every publish), art building, balance simulations, token export |
+| `scripts/` | Tools: `check.py` (run before every publish), art building, balance simulations |
 | `tests/` | Browser tests: `node tests/run.js` (needs Playwright) |
 | `HANDOFF.md` | The full guide to how everything works and the conventions to keep |
 
@@ -29,8 +29,7 @@ The game is set up so a full redesign touches data and art, not code. In order:
 
 1. **Names.** Edit the values in `js/game-config.js` (game title, money, player title, places, bosses, families, characters). Every sentence in the game reads them.
 2. **Words.** Rewrite `content/*.js`: cards, packs, buildings and what their keepers say, dialogue, the story, the Town Guide, tips, quests and titles.
-3. **Colours.** Edit `css/theme.css`. Section 1 is the palette, section 2 the theme tokens (dark is `:root`, light is `:root[data-theme="light"]`). `python3 scripts/export-tokens.py` writes `design-tokens.json` for Figma.
-4. **Art.** Card pictures in `assets/cards/` (or the drawings in `scripts/art/` + `node scripts/build-art.js`), sprites in `assets/sprites.js` (keep the symbol ids), icons in `assets/icons/`, the player in `assets/player/`. Try new art first in `labs/asset-lab.html`.
+3. **Colours.** Edit `css/theme.css`. Section 1 is the palette, section 2 the theme tokens (dark is `:root`, light is `:root[data-theme="light"]`).4. **Art.** Card pictures in `assets/cards/` (or the drawings in `scripts/art/` + `node scripts/build-art.js`), sprites in `assets/sprites.js` (keep the symbol ids), icons in `assets/icons/`, the player in `assets/player/`. Try new art first in `labs/asset-lab.html`.
 5. **App identity.** `manifest.json` (its name must match `GAME.title`), the icons `assets/icon-*.png`, and the browser-bar colour per theme (`THEME_META` in `js/audio.js`, plus the `<meta name="theme-color">` fallback in `index.html`).
 6. **Fonts.** `--f-display` and `--f-ui` at the top of `css/base.css`, plus the Google Fonts link in `index.html`.
 7. **Fresh start at launch.** Change `STORAGE_KEY` in `js/data-and-engine.js` so every player begins a new save. Until launch, ids and card order may change freely (all saves are reset then).

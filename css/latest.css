@@ -12,7 +12,6 @@
 .wm-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 18px 20px 0 24px; flex-shrink: 0; }
 .wm-head h2 { font-family: var(--f-display); font-weight: 500; font-size: 1.75rem; line-height: 1.1; margin: 0; color: var(--ink); }
 .wm-hint { margin: 4px 0 0; font-size: .8rem; color: var(--ink-soft); line-height: 1.35; }
-.wm-close { width: 44px; height: 44px; flex-shrink: 0; border-radius: 50%; border: 1px solid var(--stone-edge); background: var(--stone); color: var(--ink); font-size: 1.5rem; line-height: 1; cursor: pointer; }
 .wm-stage { position: relative; flex-shrink: 0; width: 100%; max-width: 480px; margin: 0 auto; aspect-ratio: 390 / 330; max-height: 42vh; }
 .wm-stage svg { width: 100%; height: 100%; display: block; overflow: visible; }
 .wm-stars circle { fill: var(--c-grey-100); } :root[data-theme="light"] .wm-stars { display: none; }
@@ -85,7 +84,7 @@
 #talkOverlay:not(.hidden) .talk-name { animation: sc-rise .26s .08s both; }
 /* Extra buttons on the little "look at it" card (editing a placed decoration). */
 .scenery-actions { display: flex; flex-direction: column; gap: 8px; margin: 4px 0 10px; }
-.scenery-act { min-height: 46px; width: 100%; }
+.scenery-act { width: 100%; }
 .scenery-act.danger { background: color-mix(in srgb, var(--boss-glow) 22%, transparent); color: var(--ink); }
 @media (prefers-reduced-motion: reduce) {
   #sceneView.scene-enter *, #talkOverlay .talk-bubble, #talkOverlay .talk-name { animation: none !important; }
@@ -1918,9 +1917,6 @@ svg.hr-th { display: block; position: relative; box-sizing: border-box; overflow
 #talkOverlay { align-items: stretch; justify-content: center; background: transparent; }
 #talkOverlay .tk-bg { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, color-mix(in srgb, var(--bg-top) 96%, transparent) 0, color-mix(in srgb, var(--bg-top) 92%, transparent) calc(env(safe-area-inset-top, 0px) + 92px), color-mix(in srgb, var(--bg-top) 30%, transparent) calc(env(safe-area-inset-top, 0px) + 200px), color-mix(in srgb, var(--bg-top) 40%, transparent) 45%, color-mix(in srgb, var(--bg-top) 82%, transparent) 70%, color-mix(in srgb, var(--bg-top) 95%, transparent)); }   /* the live town reads through the middle; the top bar, notices and dock behind stay out of the way */
 #talkCard { position: relative; display: flex; flex-direction: column; width: min(100vw, 560px); max-width: none; height: 100%; max-height: none; margin: 0 auto; padding: calc(env(safe-area-inset-top, 0px) + 18px) 14px 0; border-radius: 0; background: none; box-shadow: none; overflow: hidden; text-align: left; animation: sc-rise .3s both; }
-#talkCard .talk-close { flex: none; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 -14px; padding: 8px 16px calc(12px + env(safe-area-inset-bottom, 0px)); min-height: 60px; border: 0; border-top: 1px solid color-mix(in srgb, var(--stone-edge) 70%, transparent); border-radius: 0; background: color-mix(in srgb, var(--stone) 92%, transparent); color: var(--ink-soft); font: 700 .95rem var(--f-ui); cursor: pointer; }
-#talkCard .talk-close::before { content: '←'; }
-#talkCard .talk-close:active { background: color-mix(in srgb, var(--hl) 12%, var(--stone)); }
 #talkCard .tk-stage { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; margin-top: 8px; }
 #talkCard .tk-bust { position: relative; flex: 1 1 0; min-height: 0; display: flex; align-items: flex-end; justify-content: center; container-type: size; --fig-h: 70%; }
 #talkCard .tk-bust.emoji { --fig-h: 46%; }
@@ -2767,7 +2763,6 @@ body.win-open .win-dim { opacity: 1; pointer-events: auto; }
 .win-ico { font-size: 1.45rem; line-height: 1; display: inline-flex; }
 .win-ico:has(> .av-face) { width: 1.4em; height: 1.4em; }
 .win-title { margin: 0; flex: 1; min-width: 0; font: 500 1.4rem var(--f-display); color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.win-x { display: grid; place-items: center; flex: none; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; background: var(--track); color: var(--ink-soft); }
 .win-body { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 2px 8px 16px; }
 .win-body::-webkit-scrollbar { display: none; }
 .win-body > .panel { margin: 0; }
@@ -2844,9 +2839,34 @@ body.in-battle .tab-win, body.in-battle .win-dim, body.in-scene .tab-win, body.i
 .tk-offer .to-hint { font-size: .84rem; color: var(--ink-soft); }
 .tk-offer .to-reward { align-self: flex-start; padding: 3px 10px; border-radius: 999px; font-size: .76rem; font-weight: 800; color: var(--ink); background: color-mix(in srgb, var(--accent) 22%, transparent); }
 .tk-offer .to-actions { display: flex; gap: 8px; margin-top: 4px; }
-.tk-offer .to-actions .btn { margin: 0; min-height: 50px; }
-.tk-offer .to-yes { flex: 2; background: var(--water); color: var(--on-water); border-color: transparent; }
-.tk-offer .to-no { flex: 1; background: transparent; color: var(--ink); border: 1px solid var(--stone-edge); box-shadow: none; }
+.tk-offer .to-actions .btn { margin: 0; }
+.tk-offer .to-yes { flex: 2; }
+.tk-offer .to-no { flex: 1; }
 .tk-offer .to-full { flex: 2; align-self: center; font-size: .84rem; color: var(--ink-soft); }
 @media (prefers-reduced-motion: reduce) { #talkCard.offering .tk-offer { animation: none; } }
 #talkCard[data-style="combo"] .tk-plate { margin: 2px 0 8px; }   /* the words are in their own panel now, so the name no longer tucks up under them */
+
+/* ==========================================================================================================
+   ONE SET OF BUTTONS (build 294): three roles, the same everywhere a dialog, a neighbour or a menu asks you to act.
+   Primary   .btn           the filled pill (water colour): Accept, Continue, Hand it in, Friendly match
+   Secondary .btn.btn-ghost the same pill as an outline: Not now, Later, Cancel, Back
+   Close     .x-close       one round X, top right of every card, window, sheet and menu (.pm-close, .win-x and .wm-close are the same button)
+   Sizes are tokens so a change is made once.
+   ========================================================================================================== */
+:root { --btn-h: 50px; --x-size: 44px; }
+.btn, .btn-ghost { min-height: var(--btn-h); }
+.btn { padding: 12px 24px; font-size: .95rem; font-weight: 800; }
+.btn-ghost { color: var(--ink); background: transparent; box-shadow: none; }
+.btn.st-small { min-height: 0; padding: 6px 14px; font-size: .8rem; }   /* the little inline buttons in Settings rows stay little */
+#talkCard[data-style] .tk-pane .btn, #talkCard[data-style] .tk-pane .talk-topic { min-height: var(--btn-h); }
+#talkCard[data-style] .tk-pane .btn { border-radius: 999px; font-size: .95rem; font-weight: 800; }
+.x-close, .pm-close, .win-x, .wm-close { display: grid; place-items: center; flex: none; width: var(--x-size); height: var(--x-size); min-height: 0; padding: 0; border-radius: 50%; border: 1px solid var(--stone-edge);
+  background: color-mix(in srgb, var(--stone) 92%, transparent); color: var(--ink); box-shadow: 0 2px 8px var(--shadow); font-size: 0; line-height: 1; cursor: pointer; transition: transform .15s ease, background .15s ease; }
+.x-close svg, .pm-close svg, .win-x svg, .wm-close svg { width: 18px; height: 18px; pointer-events: none; }
+.x-close:active, .pm-close:active, .win-x:active, .wm-close:active { transform: scale(.9); background: color-mix(in srgb, var(--hl) 14%, var(--stone)); }
+.overlay-card > .x-close { position: absolute; top: 10px; right: 10px; z-index: 3; }
+#talkCard > .x-close { top: calc(10px + env(safe-area-inset-top, 0px)); }
+.overlay-card:has(> .x-close) > h2 { padding: 0 40px; }
+/* the welcome sign closes with the X; its Continue button is only for the small text-only prop messages */
+#sceneryOverlay .overlay-card:has(#sceneryDesc.rich) #sceneryContinue { display: none; }
+#sceneryOverlay .overlay-card:has(#sceneryDesc.rich) { padding-bottom: 16px; }

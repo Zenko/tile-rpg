@@ -260,6 +260,7 @@ document.getElementById('pickupContinue').addEventListener('click', () => {
   if (!collectionPanel.classList.contains('hidden') && cardsView === 'craft') renderCraft();
 });
 document.getElementById('sceneryContinue').addEventListener('click', () => sceneryOverlay.classList.add('hidden'));
+document.getElementById('sceneryX').addEventListener('click', () => { sfx('nav'); sceneryOverlay.classList.add('hidden'); });
 document.getElementById('battleRetryBtn').addEventListener('click', () => closeBattle(true));
 document.getElementById('battleContinueBtn').addEventListener('click', () => closeBattle(false));
 
