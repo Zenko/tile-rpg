@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'new', x: 'Saffron\'s Spice Stall is a full-screen market stall. Today\'s deal sits on the counter: drag your purse onto it to pay (or press Buy). Tap the hanging jars to open them and hear what Saffron says about each spice. Higher or Lower is played right at the stall: drag the open jar up for higher or down for lower, and tap the coin pile to take the pot. Prizes and medals are the same as before.' },
   { t: 'new', x: 'Maple\'s Bakery is a kitchen you work in now, full screen. Baking a loaf is hands-on: rub the dough to knead it, swipe three cuts across the loaf, then drag it up into the oven. The oven glows and the loaf rises in its window while it bakes (still in real time). When it is ready the door opens and you drag the fresh loaf into your basket. Cook, Cake Toppings and the daily warm roll are three spots around the kitchen. Every step also works with a plain tap.' },
   { t: 'better', x: 'The neighbour screen in the light theme: the name and hearts are light and easy to read over the town, and Leave is a proper solid button. The little smiley beside a close friend is gone, since the hearts already say it.' },
   { t: 'fixed', x: 'After you beat a neighbour, only their grave is left. Before, another neighbour could turn up in the same drawn look right next to it, so it seemed the beaten one was still standing there.' },

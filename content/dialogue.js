@@ -130,3 +130,13 @@ const SPIRIT_STORIES = [
   'Children in {town} leave small gifts out for {name}, just in case the stories are true.',
   '{name} rarely lingers long enough to be seen twice in the same place.',
 ];
+
+// ---- used by js/spice-screen.js: the jars hanging at the spice stall, and what the seller says when you open one ----
+const SPICE_JARS = [
+  { id: 'cinnamon', name: 'Cinnamon',    hue: 'cinnamon', line: 'Warm as a held hand. Good in bread, better in a cold room.' },
+  { id: 'saffron',  name: 'Moon saffron', hue: 'saffron',  line: 'Three threads is a feast. Four is a secret.' },
+  { id: 'pepper',   name: 'Pink pepper',  hue: 'pepper',   line: 'It tickles first and thinks about it after.' },
+  { id: 'clove',    name: 'Clove',        hue: 'clove',    line: 'Tiny, stubborn, and remembered for days.' },
+  { id: 'mint',     name: 'Frost mint',   hue: 'mint',     line: 'Breathe in slowly. There. Cleared the whole morning.' },
+  { id: 'vanilla',  name: 'Vanilla',      hue: 'vanilla',  line: 'People say it is plain. People are wrong.' },
+];

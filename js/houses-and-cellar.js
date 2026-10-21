@@ -346,6 +346,7 @@ function mountShopView(view) {
 }
 function closeScene() {
   if (typeof bakeryScreenHide === 'function') bakeryScreenHide();
+  if (typeof spiceScreenHide === 'function') spiceScreenHide();
   hrLeave();                                          // js/home-room.js: put the cottage room away
   mountShopView(null);
   miniStop();
@@ -583,6 +584,7 @@ function sceneBtn(id, label, disabled, cls) {
 const SCENE_EXIT_ACTS = ['leave', 'back', 'mg-back', 'wings-back', 'exp-cancel', 'hr-close'];   // hr-close: your cottage's Close, which stays in the house (js/home-room.js)
 function renderScene() {
   renderSceneBody();
+  if (typeof spiceScreenSync === 'function') spiceScreenSync();   // js/spice-screen.js: Saffron's stall, full screen
   if (typeof bakeryScreenSync === 'function') bakeryScreenSync();   // js/bakery-screen.js: Maple's kitchen, full screen, over the bakery's home view
   hrSync();                                           // js/home-room.js: your cottage is a walkable room (does nothing anywhere else)
   // The storefront layout (v1.77.0) is for the ordinary "talk to the owner" screens; mini-games, the memory game and the

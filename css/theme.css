@@ -996,3 +996,30 @@
   --bk-good: #7fb069;
   --bk-shadow: rgba(60, 35, 12, .35);
 }
+
+/* The spice stall screen (build 306, js/spice-screen.js): a market stall at dusk-gold, the same in both themes. */
+.spice-screen {
+  --sp-wall: #3b2a3f;
+  --sp-wall2: #5a3a45;
+  --sp-glow: #f3b85c;
+  --sp-awn1: #c8503c;
+  --sp-awn2: #f4e3c4;
+  --sp-wood: #8a5a35;
+  --sp-wood2: #5f3b20;
+  --sp-edge: #2e1c10;
+  --sp-card: #fbf1df;
+  --sp-card2: #efdcbc;
+  --sp-ink: #3d2614;
+  --sp-soft: #7a5733;
+  --sp-gold: #f6cf6a;
+  --sp-good: #8fcf7a;
+  --sp-bad: #e07a5f;
+  --sp-glass: #e9f0ea;
+  --sp-shadow: rgba(30, 14, 6, .45);
+}
+.sp-jar[data-hue="cinnamon"], .sp-puff[data-hue="cinnamon"] { --sp-spice: #b5632e; }
+.sp-jar[data-hue="saffron"], .sp-puff[data-hue="saffron"] { --sp-spice: #f0a21a; }
+.sp-jar[data-hue="pepper"], .sp-puff[data-hue="pepper"] { --sp-spice: #e0708c; }
+.sp-jar[data-hue="clove"], .sp-puff[data-hue="clove"] { --sp-spice: #6b3b26; }
+.sp-jar[data-hue="mint"], .sp-puff[data-hue="mint"] { --sp-spice: #66c4a0; }
+.sp-jar[data-hue="vanilla"], .sp-puff[data-hue="vanilla"] { --sp-spice: #f1dba0; }
