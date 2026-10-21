@@ -280,6 +280,7 @@ function miniRender() {
   stage.classList.add('mini-stage'); sceneView.classList.add('mini-mode');
   stage.innerHTML = `<div class="mg mg-${mini.id}${mini.done ? ' mg-over' : ''}">${mini.def.render(mini.st)}</div>`;
   if (typeof threadScreenSync === 'function') threadScreenSync();   // js/thread-screen.js follows the pattern game's timers
+  if (typeof grainScreenSync === 'function') grainScreenSync();   // and js/grain-screen.js the grain game's
 }
 function miniLeaveStage() {
   const stage = document.getElementById('scStage');

@@ -16,13 +16,14 @@ const spiceGame = () => (typeof mini !== 'undefined' && mini && mini.id === 'hag
 function spiceBuild() {
   const el = document.createElement('div'); el.id = 'spiceScreen'; el.className = 'spice-screen hidden'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', `${CAST.spiceSeller.name}'s spice stall`);
   el.innerHTML = `<div class="sp-motes" aria-hidden="true">${'<i></i>'.repeat(8)}</div>
-    <div class="sp-bar"><button type="button" class="sp-x" id="spX" aria-label="Leave the stall">✕</button><b class="sp-title">${CAST.spiceSeller.name}'s Spice Stall</b><span class="sp-chip" id="spChip"></span></div>
+    <div class="sp-bar"><span aria-hidden="true"></span><b class="sp-title">${CAST.spiceSeller.name}'s Spice Stall</b><span class="sp-chip" id="spChip"></span></div>
     <div class="sp-awning" aria-hidden="true"></div>
     <div class="sp-shelf" id="spShelf"></div>
     <div class="sp-maker"><span class="sp-seller" aria-hidden="true">${CAST.spiceSeller.icon}</span><p class="sp-say" id="spSay" aria-live="polite"></p></div>
     <div class="sp-stage" id="spStage"></div>
     <p class="sp-hint" id="spHint"></p>
-    <div class="sp-foot" id="spFoot"></div>`;
+    <div class="sp-foot" id="spFoot"></div>
+    <button type="button" class="btn btn-ghost sp-leave" id="spLeave">Leave</button>`;
   document.body.appendChild(el); spiceEl = el; spiceWire(el); return el;
 }
 
@@ -92,7 +93,7 @@ function spiceOpenJar(id, btn) {
 
 function spiceWire(el) {
   el.addEventListener('click', e => {
-    if (e.target.closest('#spX')) { sceneAction('leave'); return; }
+    if (e.target.closest('#spLeave')) { sceneAction('leave'); return; }
     if (e.target.closest('#spBuy')) { spiceBuyNow(); return; }
     const jar = e.target.closest('[data-jar]'); if (jar) { spiceOpenJar(jar.dataset.jar, jar); return; }
     const sp = e.target.closest('[data-sp]');

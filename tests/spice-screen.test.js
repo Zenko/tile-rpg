@@ -41,5 +41,5 @@ module.exports = async (page, assert) => {
   assert.strictEqual(await q("mini.st.phase"), 'bust', 'a wrong guess busts'); await page.waitForTimeout(1200);
   assert.ok(await q("mini.done"), 'and ends the round'); await q("Math.random = (() => { let s = 7; return () => (s = (s * 16807) % 2147483647) / 2147483647; })()");
   await page.click('[data-sp="mg-back"]'); await page.waitForTimeout(300); assert.strictEqual(await q("spiceEl.dataset.mode"), 'shop', 'Back returns to the stall');
-  await page.click('#spX'); await page.waitForTimeout(1100); assert.ok(await q("!spiceOpen() && !inScene"), 'the X leaves');
+  await page.click('#spLeave'); await page.waitForTimeout(1100); assert.ok(await q("!spiceOpen() && !inScene"), 'the X leaves');
 };

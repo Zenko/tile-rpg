@@ -35,5 +35,5 @@ module.exports = async (page, assert) => {
   assert.strictEqual(await q("mini.st.phase"), 'over', 'a wrong square ends the round'); await page.waitForTimeout(1300);
   assert.ok(await q("mini.done && threadEl.dataset.mode === 'over'"), 'and the stall offers play again or back');
   await page.click('[data-th="mg-back"]'); await page.waitForTimeout(300); assert.strictEqual(await q("threadEl.dataset.mode"), 'shop', 'Back returns to the stall');
-  await page.click('#thX'); await page.waitForTimeout(1100); assert.ok(await q("!threadOpen() && !inScene"), 'the X leaves');
+  await page.click('#thLeave'); await page.waitForTimeout(1100); assert.ok(await q("!threadOpen() && !inScene"), 'the X leaves');
 };

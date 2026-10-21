@@ -17,11 +17,12 @@ const tinkerSorted = () => buildingState('stall-tinker').sort === todayKey();
 
 function tinkerBuild() {
   const el = document.createElement('div'); el.id = 'tinkerScreen'; el.className = 'tinker-screen hidden'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', `${CAST.tinker.name}'s tinker stall`);
-  el.innerHTML = `<div class="tn-bar"><button type="button" class="tn-x" id="tnX" aria-label="Leave the stall">✕</button><b class="tn-title">${CAST.tinker.name}'s Tinker Stall</b><span class="tn-chip" id="tnChip"></span></div>
+  el.innerHTML = `<div class="tn-bar"><span aria-hidden="true"></span><b class="tn-title">${CAST.tinker.name}'s Tinker Stall</b><span class="tn-chip" id="tnChip"></span></div>
     <div class="tn-maker"><span class="tn-seller" aria-hidden="true">${CAST.tinker.icon}</span><p class="tn-say" id="tnSay" aria-live="polite"></p></div>
     <div class="tn-stage" id="tnStage"></div>
     <p class="tn-hint" id="tnHint"></p>
-    <div class="tn-foot" id="tnFoot"></div>`;
+    <div class="tn-foot" id="tnFoot"></div>
+    <button type="button" class="btn btn-ghost tn-leave" id="tnLeave">Leave</button>`;
   document.body.appendChild(el); tinkerEl = el; tinkerWire(el); return el;
 }
 
@@ -104,7 +105,7 @@ function tinkerPlace(i, bin) {
 
 function tinkerWire(el) {
   el.addEventListener('click', e => {
-    if (e.target.closest('#tnX')) { sceneAction('leave'); return; }
+    if (e.target.closest('#tnLeave')) { sceneAction('leave'); return; }
     const bait = e.target.closest('[data-bait]'); if (bait) { tinkerBuyBait(bait.dataset.bait, bait); return; }
     const tn = e.target.closest('[data-tn]'); if (tn) { sfx('tap'); sceneAction(tn.dataset.tn); return; }
     const gear = e.target.closest('[data-gear]'); if (gear && e.detail === 0) { tinkerSlide(+gear.dataset.gear); return; }   // keyboard; a pointer already moved it on press
@@ -128,7 +129,8 @@ function tinkerWire(el) {
   const end = e => {
     if (!g || e.pointerId !== g.id) return;
     const a = g; g = null; a.el.classList.remove('dragging');
-    const under = (a.el.style.transform = '', document.elementFromPoint(e.clientX, e.clientY)), bin = under && under.closest('[data-bin]');
+    a.el.style.transform = ''; a.el.style.pointerEvents = 'none';   // it is still gliding home: look through it
+    const under = document.elementFromPoint(e.clientX, e.clientY), bin = under && under.closest('[data-bin]'); a.el.style.pointerEvents = '';
     if (a.moved >= 8 && bin) tinkerPlace(a.i, bin.dataset.bin);   // a plain tap is the click handler's: it selects the part
   };
   el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);

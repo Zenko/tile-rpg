@@ -25,14 +25,15 @@ function bakeryBakeFrac() { const ov = ovenState(); return ov.startedAt ? Math.m
 function bakeryBuild() {
   const el = document.createElement('div'); el.id = 'bakeryScreen'; el.className = 'bakery-screen hidden'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', `${CAST.baker.name}'s bakery`);
   el.innerHTML = `<div class="bk-steam" aria-hidden="true">${'<i></i>'.repeat(8)}</div>
-    <div class="bk-bar"><button type="button" class="bk-x" id="bkX" aria-label="Leave the bakery">✕</button><b class="bk-title">${CAST.baker.name}'s Bakery</b><span class="bk-basket-chip" id="bkChip"></span></div>
+    <div class="bk-bar"><span aria-hidden="true"></span><b class="bk-title">${CAST.baker.name}'s Bakery</b><span class="bk-basket-chip" id="bkChip"></span></div>
     <div class="bk-maple"><span class="bk-chef" aria-hidden="true">${CAST.baker.icon}</span><p class="bk-say" id="bkSay" aria-live="polite"></p></div>
     <div class="bk-stage" id="bkStage">
       <div class="bk-oven" id="bkOven"><div class="bk-arch"><div class="bk-window"><span class="bk-inloaf" id="bkInLoaf" aria-hidden="true"></span><span class="bk-glow"></span></div><div class="bk-door"></div></div><div class="bk-clock" id="bkClock"></div></div>
       <div class="bk-counter" id="bkCounter"></div>
     </div>
     <p class="bk-hint" id="bkHint"></p>
-    <div class="bk-spots" id="bkSpots"></div>`;
+    <div class="bk-spots" id="bkSpots"></div>
+    <button type="button" class="btn btn-ghost bk-leave" id="bkLeave">Leave</button>`;
   document.body.appendChild(el); bakeryEl = el; bakeryWire(el); return el;
 }
 
@@ -139,7 +140,7 @@ function bakeryCollect() {
 
 function bakeryWire(el) {
   el.addEventListener('click', e => {
-    if (e.target.closest('#bkX')) { sceneAction('leave'); return; }
+    if (e.target.closest('#bkLeave')) { sceneAction('leave'); return; }
     const spot = e.target.closest('[data-bk]');
     if (spot) { sfx('tap'); buzz(HAP.tap); sceneAction(spot.dataset.bk); return; }
   });

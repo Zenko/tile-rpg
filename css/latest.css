@@ -3178,3 +3178,56 @@ body.in-tinker .overlay, body.in-tinker .toast { z-index: 70; }
 .tn-play span { font-size: 1.5rem; } .tn-play small { flex-basis: 100%; text-align: center; color: var(--tn-soft); font: 500 .72rem var(--f-ui); margin-top: -2px; }
 .tn-play.ghost { background: var(--tn-card); }
 @media (prefers-reduced-motion: reduce) { .tn-crate, .tn-bin, .tn-part, .tn-gear, .tn-cog, .tinker-screen.solved .tn-gear { animation: none !important; transition: none !important; } }
+
+/* ---- build 309: the grain stall, full screen (js/grain-screen.js) ---- */
+.grain-screen { position: fixed; inset: 0; z-index: 58; max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; overflow: hidden; padding: env(safe-area-inset-top, 0px) 14px calc(10px + env(safe-area-inset-bottom, 0px)); gap: 8px; color: var(--gr-card); background: linear-gradient(180deg, var(--gr-wall) 0%, var(--gr-wall2) 100%); }
+.grain-screen.hidden { display: none; }
+body.in-grain .overlay, body.in-grain .toast { z-index: 70; }
+.gr-bar { display: flex; align-items: center; gap: 10px; padding-top: 8px; }
+.gr-title { flex: 1; text-align: center; font: 700 1.2rem var(--f-display); color: var(--gr-gold); }
+.gr-x { width: 40px; height: 40px; border-radius: 50%; border: 0; background: var(--gr-card); color: var(--gr-ink); font-size: 1rem; font-weight: 800; box-shadow: 0 2px 6px var(--gr-shadow); }
+.gr-chip { min-width: 40px; padding: 8px 12px; border-radius: 999px; background: var(--gr-card); color: var(--gr-ink); font: 800 .85rem var(--f-ui); box-shadow: 0 2px 6px var(--gr-shadow); white-space: nowrap; }
+.gr-maker { display: flex; align-items: center; gap: 10px; }
+.gr-seller { flex: none; width: 54px; height: 54px; display: grid; place-items: center; font-size: 2.1rem; border-radius: 50%; background: var(--gr-card); box-shadow: 0 2px 8px var(--gr-shadow); }
+.gr-say { flex: 1; margin: 0; padding: 10px 14px; border-radius: 16px; background: var(--gr-card); color: var(--gr-ink); font: 500 .88rem/1.35 var(--f-ui); min-height: 2.6em; box-shadow: 0 2px 8px var(--gr-shadow); }
+.gr-stage { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+.gr-counter { position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-around; padding: 14px; border-radius: 20px; background: linear-gradient(180deg, var(--gr-wood), var(--gr-wood2)); border: 3px solid var(--gr-edge); box-shadow: inset 0 3px 0 var(--gr-card2), 0 4px 10px var(--gr-shadow); }
+.gr-sack { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; width: 70%; min-height: 130px; padding: 10px; border-radius: 30px 30px 18px 18px; background: linear-gradient(180deg, var(--gr-sack), var(--gr-sack2)); color: var(--gr-ink); box-shadow: 0 5px 12px var(--gr-shadow), inset 0 0 0 3px var(--gr-sack2); }
+.gr-grain { font-size: 3rem; line-height: 1; letter-spacing: -.1em; } .gr-sack b { font: 800 .85rem var(--f-ui); }
+.gr-counter.empty .gr-sack { opacity: .7; min-height: 90px; }
+.gr-scoop { position: relative; width: 70px; height: 70px; display: grid; place-items: center; border: 0; border-radius: 50%; background: var(--gr-card); font-size: 2.2rem; box-shadow: 0 4px 10px var(--gr-shadow); touch-action: none; cursor: grab; transition: transform .2s ease, box-shadow .2s; }
+.gr-scoop span { display: block; transform: rotate(-30deg); }
+.gr-load { position: absolute; left: 50%; top: 10px; width: 22px; height: 12px; margin-left: -11px; border-radius: 50%; background: var(--gr-straw); opacity: 0; transition: opacity .2s; }
+.gr-scoop.full .gr-load { opacity: 1; } .gr-scoop.held { box-shadow: 0 0 0 4px var(--gr-gold), 0 4px 10px var(--gr-shadow); transform: translateY(-4px); }
+.gr-scoop.dragging { transition: none; cursor: grabbing; z-index: 4; }
+.gr-hand { display: flex; flex-direction: column; align-items: center; width: 52%; padding: 8px; border-radius: 18px; background: var(--gr-card2); color: var(--gr-ink); font: 800 .8rem var(--f-ui); box-shadow: inset 0 0 0 3px var(--gr-sack2); }
+.gr-hand span { font-size: 2.4rem; line-height: 1.1; } .gr-hand.catch { animation: gr-hop .4s ease; }
+@keyframes gr-hop { 40% { transform: scale(1.12); } }
+.gr-top { display: flex; align-items: center; gap: 10px; }
+.gr-score { min-width: 64px; font: 800 1.1rem var(--f-ui); color: var(--gr-card); }
+.gr-time { flex: 1; height: 12px; border-radius: 8px; background: var(--gr-edge); overflow: hidden; } .gr-time i { display: block; height: 100%; border-radius: inherit; background: var(--gr-gold); transition: width .1s linear; }
+.gr-board { position: relative; flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 6px; border-radius: 20px; background: linear-gradient(180deg, var(--gr-sky), var(--gr-sky2)); border: 3px solid var(--gr-edge); box-shadow: inset 0 3px 0 var(--gr-card), 0 4px 10px var(--gr-shadow); touch-action: none; overflow: hidden; }
+.gr-lane { border-radius: 14px; background: var(--gr-card2); opacity: .55; }
+.gr-board.good { animation: gr-flash-good .25s ease; } .gr-board.bad { animation: gr-flash-bad .3s ease; }
+@keyframes gr-flash-good { 50% { box-shadow: inset 0 0 0 5px var(--gr-good); } } @keyframes gr-flash-bad { 50% { box-shadow: inset 0 0 0 6px var(--gr-bad); } }
+.gr-fall, .gr-basket { position: absolute; left: calc(6px + var(--l) * ((100% - 12px) / 3)); width: calc((100% - 24px) / 3); text-align: center; line-height: 1; pointer-events: none; }
+.gr-fall { top: calc(6px + var(--y) * ((100% - 12px) / 6.2)); font-size: 2.1rem; transition: top .2s linear, opacity .2s, transform .2s; }
+.gr-fall.gone { opacity: 0; transform: scale(.4); }
+.gr-basket { bottom: 8px; font-size: 3rem; transition: left .12s ease-out; }
+.gr-hint { margin: 0; text-align: center; font: 600 .8rem var(--f-ui); color: var(--gr-card2); min-height: 1.2em; }
+.gr-foot { display: flex; gap: 8px; }
+.gr-play { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 2px 8px; width: 100%; min-height: 48px; padding: 8px 14px; border: 0; border-radius: 16px; background: var(--gr-gold); color: var(--gr-ink); font: 800 .95rem var(--f-ui); box-shadow: 0 3px 8px var(--gr-shadow); }
+.gr-play span { font-size: 1.5rem; } .gr-play small { flex-basis: 100%; text-align: center; color: var(--gr-soft); font: 500 .72rem var(--f-ui); margin-top: -2px; }
+.gr-play.ghost { background: var(--gr-card); }
+@media (prefers-reduced-motion: reduce) { .gr-hand.catch, .gr-board.good, .gr-board.bad, .gr-fall, .gr-basket, .gr-scoop { animation: none !important; transition: none !important; } }
+
+/* ---- build 310: every building screen leaves from a Leave button at the foot (like the other screens), not an X at the top ---- */
+.bk-bar, .sp-bar, .th-bar, .tn-bar, .gr-bar { display: grid; grid-template-columns: 1fr auto 1fr; }
+.bk-title, .sp-title, .th-title, .tn-title, .gr-title { flex: none; padding: 0 8px; }
+.bk-basket-chip, .sp-chip, .th-chip, .tn-chip, .gr-chip { justify-self: end; }
+.bk-leave, .sp-leave, .th-leave, .tn-leave, .gr-leave { flex: none; width: 100%; min-height: 48px; border: 0; border-radius: 16px; font: 700 .95rem var(--f-ui); }
+.bk-leave { background: var(--bk-card); color: var(--bk-ink); box-shadow: 0 3px 8px var(--bk-shadow); }
+.sp-leave { background: var(--sp-card); color: var(--sp-ink); box-shadow: 0 3px 8px var(--sp-shadow); }
+.th-leave { background: var(--th-card); color: var(--th-ink); box-shadow: 0 3px 8px var(--th-shadow); }
+.tn-leave { background: var(--tn-card); color: var(--tn-ink); box-shadow: 0 3px 8px var(--tn-shadow); }
+.gr-leave { background: var(--gr-card); color: var(--gr-ink); box-shadow: 0 3px 8px var(--gr-shadow); }

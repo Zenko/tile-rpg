@@ -48,5 +48,5 @@ module.exports = async (page, assert) => {
   await page.click('[data-bk="cook"]'); assert.ok(await q("!bakeryOpen() && scene.mode === 'cook'"), 'Cook leaves the kitchen for the recipe sheet');
   await q("sceneAction('back')"); assert.ok(await q("bakeryOpen()"), 'Back returns to the kitchen');
   await page.click('[data-bk="mg-frost"]'); assert.ok(await q("!bakeryOpen() && !!mini"), 'Cake Toppings starts over the scene'); await q("sceneAction('mg-back')"); assert.ok(await q("bakeryOpen()"), 'and its Back returns to the kitchen');
-  await page.click('#bkX'); await page.waitForTimeout(1100); assert.ok(await q("!bakeryOpen() && !inScene"), 'the X leaves the bakery');
+  await page.click('#bkLeave'); await page.waitForTimeout(1100); assert.ok(await q("!bakeryOpen() && !inScene"), 'the X leaves the bakery');
 };

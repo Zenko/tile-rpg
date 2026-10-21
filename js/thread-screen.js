@@ -19,12 +19,13 @@ const threadFound = () => !!buildingState('stall-thread').basket;
 
 function threadBuild() {
   const el = document.createElement('div'); el.id = 'threadScreen'; el.className = 'thread-screen hidden'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', `${CAST.threadSeller.name}'s thread stall`);
-  el.innerHTML = `<div class="th-bar"><button type="button" class="th-x" id="thX" aria-label="Leave the stall">✕</button><b class="th-title">${CAST.threadSeller.name}'s Thread Stall</b><span class="th-chip" id="thChip"></span></div>
+  el.innerHTML = `<div class="th-bar"><span aria-hidden="true"></span><b class="th-title">${CAST.threadSeller.name}'s Thread Stall</b><span class="th-chip" id="thChip"></span></div>
     <div class="th-line" id="thLine"></div>
     <div class="th-maker"><span class="th-seller" aria-hidden="true">${CAST.threadSeller.icon}</span><p class="th-say" id="thSay" aria-live="polite"></p></div>
     <div class="th-stage" id="thStage"></div>
     <p class="th-hint" id="thHint"></p>
-    <div class="th-foot" id="thFoot"></div>`;
+    <div class="th-foot" id="thFoot"></div>
+    <button type="button" class="btn btn-ghost th-leave" id="thLeave">Leave</button>`;
   document.body.appendChild(el); threadEl = el; threadWire(el); return el;
 }
 
@@ -86,7 +87,7 @@ function threadFlutter(id, btn) {
 
 function threadWire(el) {
   el.addEventListener('click', e => {
-    if (e.target.closest('#thX')) { sceneAction('leave'); return; }
+    if (e.target.closest('#thLeave')) { sceneAction('leave'); return; }
     const rib = e.target.closest('[data-rib]'); if (rib) { threadFlutter(rib.dataset.rib, rib); return; }
     const t = e.target.closest('[data-th]'); if (t && !t.disabled) { sfx('tap'); sceneAction(t.dataset.th); return; }
     const patch = e.target.closest('[data-patch]'); if (patch && e.detail === 0) { threadStitch(+patch.dataset.patch); return; }   // keyboard; a pointer already stitched on press

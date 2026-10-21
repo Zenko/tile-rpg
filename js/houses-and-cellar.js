@@ -349,6 +349,7 @@ function closeScene() {
   if (typeof spiceScreenHide === 'function') spiceScreenHide();
   if (typeof threadScreenHide === 'function') threadScreenHide();
   if (typeof tinkerScreenHide === 'function') tinkerScreenHide();
+  if (typeof grainScreenHide === 'function') grainScreenHide();
   hrLeave();                                          // js/home-room.js: put the cottage room away
   mountShopView(null);
   miniStop();
@@ -586,6 +587,7 @@ function sceneBtn(id, label, disabled, cls) {
 const SCENE_EXIT_ACTS = ['leave', 'back', 'mg-back', 'wings-back', 'exp-cancel', 'hr-close'];   // hr-close: your cottage's Close, which stays in the house (js/home-room.js)
 function renderScene() {
   renderSceneBody();
+  if (typeof grainScreenSync === 'function') grainScreenSync();   // js/grain-screen.js: the grain stall, full screen
   if (typeof tinkerScreenSync === 'function') tinkerScreenSync();   // js/tinker-screen.js: Tock's stall, full screen
   if (typeof threadScreenSync === 'function') threadScreenSync();   // js/thread-screen.js: Clover's stall, full screen
   if (typeof spiceScreenSync === 'function') spiceScreenSync();   // js/spice-screen.js: Saffron's stall, full screen

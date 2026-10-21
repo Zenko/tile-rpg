@@ -1073,3 +1073,25 @@
   --tn-bad: #e58a7c;
   --tn-shadow: rgba(8, 20, 24, .5);
 }
+
+/* The grain stall screen (build 309, js/grain-screen.js): a sunlit granary, the same in both themes. */
+.grain-screen {
+  --gr-wall: #6b4f2a;
+  --gr-wall2: #a47c3e;
+  --gr-card: #fbf3df;
+  --gr-card2: #ecdcb6;
+  --gr-ink: #46321a;
+  --gr-soft: #82653a;
+  --gr-gold: #f0c04e;
+  --gr-straw: #e7c46a;
+  --gr-sack: #c9a46a;
+  --gr-sack2: #a67f47;
+  --gr-wood: #8a5f33;
+  --gr-wood2: #5c3d1e;
+  --gr-edge: #3a2610;
+  --gr-sky: #f6e6b8;
+  --gr-sky2: #e4c887;
+  --gr-good: #8fcf72;
+  --gr-bad: #d9806a;
+  --gr-shadow: rgba(40, 24, 8, .45);
+}

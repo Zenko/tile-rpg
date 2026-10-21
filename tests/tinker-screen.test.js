@@ -32,5 +32,5 @@ module.exports = async (page, assert) => {
   await page.click('.tn-gear[data-gear="8"]'); await page.waitForTimeout(800);
   assert.ok(await q("mini.done && tinkerEl.dataset.mode === 'over'"), 'solving the gears ends the game'); assert.ok(await q("miniState('gears').plays >= 1"), 'and counts as a play');
   await page.click('[data-tn="mg-back"]'); await page.waitForTimeout(300); assert.strictEqual(await q("tinkerEl.dataset.mode"), 'shop', 'Back returns to the stall');
-  await page.click('#tnX'); await page.waitForTimeout(1100); assert.ok(await q("!tinkerOpen() && !inScene"), 'the X leaves');
+  await page.click('#tnLeave'); await page.waitForTimeout(1100); assert.ok(await q("!tinkerOpen() && !inScene"), 'the X leaves');
 };
