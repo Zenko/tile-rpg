@@ -1095,3 +1095,22 @@
   --gr-bad: #d9806a;
   --gr-shadow: rgba(40, 24, 8, .45);
 }
+
+/* The Hall of Spirits screen (build 311, js/museum-screen.js): a hushed gallery, the same in both themes. */
+.museum-screen {
+  --mu-wall: #232a3f;
+  --mu-wall2: #3c4766;
+  --mu-card: #f4efe6;
+  --mu-card2: #dcd5c6;
+  --mu-ink: #262c42;
+  --mu-soft: #666d8a;
+  --mu-gold: #e8c776;
+  --mu-gold2: #b8923c;
+  --mu-stone: #8d95ad;
+  --mu-stone2: #5d6580;
+  --mu-edge: #181c2c;
+  --mu-glow: #fff0b8;
+  --mu-good: #8fd1a4;
+  --mu-bad: #e58a8a;
+  --mu-shadow: rgba(8, 10, 24, .55);
+}

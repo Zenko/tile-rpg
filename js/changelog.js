@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'new', x: 'The Hall of Spirits is a full-screen gallery. Five wing doors show how far along each wing is, with a glowing number for spares you can donate. Inside a wing, every card has its own plinth: drag a spare from the tray onto its plinth to place it (or tap the card, then the plinth), or press Donate all. A card on the wrong plinth hops back, and a finished wing glows gold. Prizes are the same as before.' },
   { t: 'better', x: 'The new full-screen bakery and market stalls all leave the same way as the other screens: a Leave button at the bottom, instead of an X at the top.' },
   { t: 'new', x: 'The Grain Stall is full screen. Take your free sample by scooping from the sack and pouring it into your hand (drag the scoop, or tap scoop, sack, hand). Catch the Grain is played right at the stall: drag your finger across the board and the basket follows it, and the grain falls smoothly. Prizes and medals are unchanged.' },
   { t: 'new', x: 'Tock\'s Tinker Stall is a full-screen workshop. The bait crates sit on a shelf with their prices: tap one to buy it and it drops into your tackle box. Sort the day\'s spare parts by dragging each into its bin (cogs, screws, springs), or tap a part and then its bin. Fix the Clockwork is played right there too: the gears slide and turn into place.' },
