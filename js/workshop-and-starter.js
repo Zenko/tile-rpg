@@ -581,6 +581,7 @@ function renderItems() {
     sfx('nav'); buzz(HAP.tap); itemsCat = btn.dataset.cat; renderItems();
   }));
 
+  if (typeof shopScreenRefresh === 'function') shopScreenRefresh();   // js/shop-screen.js shows the same list full screen
   const note = document.createElement('div');
   note.className = 'shop-note';
   note.textContent = 'Buying a decoration adds it to Your Decorations above. Place it whenever you like - it goes in whichever district you are standing in.';

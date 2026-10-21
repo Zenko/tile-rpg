@@ -1,14 +1,43 @@
-// The Card Shop front as a full screen (js/shop-screen.js): four displays, each opening the Shop view its button used to, and a Leave button.
+// The Card Shop front as a full screen (js/shop-screen.js): four displays. Packs and the mirror open the Shop screens; the sleeve wall and
+// the decoration shelf are full-screen views inside this screen (swipe through sleeves, buy and wear; buy, place, store and remove
+// decorations). Leave at the foot.
 module.exports = async (page, assert) => {
   const q = s => page.evaluate(s2 => eval(s2), s);
-  await page.evaluate(() => { document.getElementById('testHideOverlays').textContent = '.overlay:not(#pickupOverlay){display:none!important}'; openScene('card-shop'); });
+  await page.evaluate(() => { document.getElementById('testHideOverlays').textContent = '.overlay:not(#pickupOverlay){display:none!important}'; state.progress.pebbles = 500; state.character.unlockedSleeves = ['']; state.character.sleeve = ''; state.decorationInventory = {}; openScene('card-shop'); });
   await page.waitForTimeout(400);
   assert.ok(await q("shopOpen() && document.body.classList.contains('in-shopfront')"), 'the shop front opens as a full screen');
   assert.strictEqual(await page.locator('.cs-case').count(), 4, 'four displays');
-  for (const [id, mode] of [['packs', 'packs'], ['customize', 'customize'], ['items', 'items'], ['sleeves', 'sleeves']]) {
+  for (const [id, mode] of [['packs', 'packs'], ['customize', 'customize']]) {
     await page.click(`[data-shop="${id}"]`); await page.waitForTimeout(400);
-    assert.ok(await q(`!shopOpen() && scene.mode === '${mode}'`), `the ${id} display opens its view and puts the front away`);
+    assert.ok(await q(`!shopOpen() && scene.mode === '${mode}'`), `the ${id} display opens its Shop view and puts the front away`);
     await q("sceneAction('back')"); await page.waitForTimeout(300); assert.ok(await q("shopOpen()"), `Back returns to the front from ${id}`);
   }
+  // the sleeve wall: swipe the card, buy and wear
+  await page.click('[data-shop="sleeves"]'); await page.waitForTimeout(400);
+  assert.ok(await q("shopOpen() && shopEl.dataset.view === 'sleeves'"), 'the sleeve wall is a view of this screen');
+  assert.strictEqual(await q("shopUi.sleeve"), 0, 'it starts on the sleeve you wear');
+  const cb = await page.locator('#csBigCard').boundingBox();
+  await page.mouse.move(cb.x + cb.width * .8, cb.y + 60); await page.mouse.down(); await page.mouse.move(cb.x + cb.width * .1, cb.y + 60, { steps: 8 }); await page.mouse.up(); await page.waitForTimeout(400);
+  assert.strictEqual(await q("shopUi.sleeve"), 1, 'swiping the card left shows the next sleeve');
+  await page.click('[data-step="1"]'); await page.waitForTimeout(300); assert.strictEqual(await q("shopUi.sleeve"), 2, 'the arrow does the same');
+  await page.click('[data-step="-1"]'); await page.waitForTimeout(300);
+  const cost = await q("SLEEVES[1].cost"), id = await q("SLEEVES[1].id");
+  await page.click('#csMain'); await page.waitForTimeout(300);
+  assert.strictEqual(await q("ensureSleeves().sleeve"), id, 'the button buys and wears it'); assert.strictEqual(await q("state.progress.pebbles"), 500 - cost, 'and charges for it');
+  assert.ok(await q("document.getElementById('csMain').disabled"), 'a worn sleeve shows as worn');
+  await page.click('#csBack'); await page.waitForTimeout(300); assert.ok(await q("shopEl.dataset.view === 'hub'"), 'Front returns to the four displays');
+  // decorations: pick, buy, see it in Yours, remove it
+  await page.click('[data-shop="items"]'); await page.waitForTimeout(400);
+  assert.ok(await q("shopEl.dataset.view === 'items'"), 'the decoration shelf is a view of this screen');
+  const item = await q("DECORATION_ITEMS.find(d => !d.museum && !d.atlas && !d.rift && !d.night && !d.level).id");
+  await q("itemsCat = 'all'; shopRender()"); await page.click(`[data-item="${item}"]`); await page.waitForTimeout(150);
+  assert.ok(await page.locator('.cs-detail').count() === 1, 'tapping a tile shows it with its price');
+  await page.click(`[data-buy="${item}"]`); await page.waitForTimeout(250);
+  assert.strictEqual(await q(`decorationInventoryCount('${item}')`), 1, 'Buy adds it to your decorations'); assert.ok(await page.locator(`[data-place="${item}"]`).count() === 1, 'and a Place button appears');
+  await page.click('[data-tab="yours"]'); await page.waitForTimeout(200); assert.ok(await page.locator('.cs-row').count() === 1, 'Yours lists what is in storage');
+  await page.click('[data-tab="shop"]'); await page.waitForTimeout(150);
+  await page.click(`[data-place="${item}"]`); await page.waitForTimeout(600); assert.ok(await q("!shopOpen() && !inScene && !!placingDecoration"), 'Place steps out to the map to put it down');
+  await q("cancelPlacingDecoration(true)");
+  await q("openScene('card-shop'); sceneAction('items')"); await page.waitForTimeout(300);
   await page.click('#csLeave'); await page.waitForTimeout(1100); assert.ok(await q("!shopOpen() && !inScene"), 'Leave goes back to the street');
 };
