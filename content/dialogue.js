@@ -149,3 +149,11 @@ const THREAD_RIBBONS = [
   { id: 'gold',   name: 'Gold thread',   hue: 'gold',   line: 'Do not pull it. It is the only thing holding that coat together.' },
   { id: 'violet', name: 'Violet ribbon', hue: 'violet', line: 'I am told it glows at night. I have never checked.' },
 ];
+
+// ---- used by js/tinker-screen.js: the spare parts on the tinker stall's bench, and the bins they go in ----
+const TINKER_BINS = [
+  { id: 'cog',    icon: '⚙️', name: 'Cogs' },
+  { id: 'screw',  icon: '🔩', name: 'Screws' },
+  { id: 'spring', icon: '🌀', name: 'Springs' },
+];
+const TINKER_PARTS = ['cog', 'screw', 'spring'];   // a sort job is six of these, picked at random

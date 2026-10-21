@@ -1053,3 +1053,23 @@
 .th-rib[data-hue="moss"] { --th-r: #7fb577; }
 .th-rib[data-hue="gold"] { --th-r: #e8c25a; }
 .th-rib[data-hue="violet"] { --th-r: #a98be0; }
+
+/* The tinker stall screen (build 308, js/tinker-screen.js): a workshop of teal and brass, the same in both themes. */
+.tinker-screen {
+  --tn-wall: #1f3a40;
+  --tn-wall2: #356069;
+  --tn-card: #f6f1e4;
+  --tn-card2: #e1d9c2;
+  --tn-ink: #25363a;
+  --tn-soft: #5f7378;
+  --tn-brass: #e3b64f;
+  --tn-brass2: #b98a26;
+  --tn-steel: #8f9ea3;
+  --tn-steel2: #5d6c72;
+  --tn-wood: #7d5f3c;
+  --tn-wood2: #523b22;
+  --tn-edge: #1a2a2e;
+  --tn-good: #8fd0a0;
+  --tn-bad: #e58a7c;
+  --tn-shadow: rgba(8, 20, 24, .5);
+}
