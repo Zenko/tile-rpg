@@ -259,6 +259,7 @@ function drawCardSheet() {
   }));
 }
 document.getElementById('cardScrim').addEventListener('click', closeCardSheet);
+document.getElementById('cardSheetX').addEventListener('click', () => { sfx('nav'); closeCardSheet(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && cardSheetId) closeCardSheet(); });
 document.getElementById('collViewToggle').addEventListener('click', () => {
   collView = collView === 'grid' ? 'list' : 'grid'; sfx('nav'); buzz(HAP.tap); renderCollection();

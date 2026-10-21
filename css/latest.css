@@ -2954,3 +2954,4 @@ body.in-battle .tab-win, body.in-battle .win-dim, body.in-scene .tab-win, body.i
 @media (prefers-reduced-motion: reduce) { .pw-beacon .pwb-ico { animation: none; } }
 /* the card detail sheet: the cost bubble hangs above the card's top-left corner, so the frame needs room above it or the sheet's own scroll box cuts it off */
 #cardSheet .reveal-card-frame.cs-card { margin: 34px 0 14px; }
+.jsheet > .x-close { position: absolute; top: 10px; right: 10px; z-index: 3; }
