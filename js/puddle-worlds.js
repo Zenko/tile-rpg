@@ -333,26 +333,27 @@ function pwEnterWorld(w, x, y, via) {
 // The way out: the timer ran down, or the player chose to leave. `quiet` = no transition (used at start-up).
 function pwLeave(why, quiet, after) {   // why: 'faded' (the timer), 'left' (climbed out), 'done' (finished the world's goal); after: runs once she is back
   const w = pwActive(); if (!w) return;
+  const cellar = w.kind === 'cellar';   // the cellar (js/cellar-world.js) is a world with no timer: no cooldown, no Rift Atlas entry, its own words
   const origin = w.origin && Object.prototype.hasOwnProperty.call(DISTRICTS, w.origin.district) && w.origin.district !== PW_KEY ? w.origin : { district: 'square', x: null, y: null };
   const back = () => {
     const found = Math.max(0, state.ownedCards.length - (w.cards0 || 0)), k = pwKind(w);
     const dd = state.districtData[PW_KEY], cleared = w.kind === 'explore' && !w.daily && !!(dd && dd.items && dd.items.length && dd.items.every(i => i.collected));   // every hidden card found
-    if (typeof riftNoteLeave === 'function') riftNoteLeave(w, why, found);   // js/rift-atlas.js
-    if (typeof dailyRiftLeave === 'function') dailyRiftLeave(w);             // js/daily-rift.js: today's result and the board
+    if (!cellar && typeof riftNoteLeave === 'function') riftNoteLeave(w, why, found);   // js/rift-atlas.js
+    if (!cellar && typeof dailyRiftLeave === 'function') dailyRiftLeave(w);             // js/daily-rift.js: today's result and the board
     if (k.leave) { try { k.leave(w); } catch (e) { /* cleanup only */ } }
     pwLayerClear();
     delete state.districtData[PW_KEY]; delete LIFE.puddles[PW_KEY]; delete LIFE.birds[PW_KEY];
-    state.progress.puddleWorld = null; state.progress.pwEndedAt = Date.now();
+    state.progress.puddleWorld = null; if (!cellar) state.progress.pwEndedAt = Date.now();
     pwApply(null);
     const m = getMap(origin.district), ok = origin.x != null && m.rows[origin.y] && !m.solid[origin.y][origin.x];
     state.currentDistrict = origin.district; state.playerPos = ok ? { x: origin.x, y: origin.y } : Object.assign({}, m.spawn);
     townBuiltFor = null; cancelWalk(); saveState();
     if (!quiet) {
       renderTown(); if (typeof renderDistricts === 'function') renderDistricts();
-      const gone = why === 'left' ? `You climbed back out of the ${w.name}.` : why === 'done' ? `You made it out of the ${w.name} and are back in ${DISTRICTS[origin.district].name}.` : `The ${w.name} faded like a ripple, and you are back in ${DISTRICTS[origin.district].name}.`;
+      const gone = cellar ? (why === 'pushed' ? 'The dark pushes you back out of the cellar.' : 'You climb the stairs back out of the cellar.') : why === 'left' ? `You climbed back out of the ${w.name}.` : why === 'done' ? `You made it out of the ${w.name} and are back in ${DISTRICTS[origin.district].name}.` : `The ${w.name} faded like a ripple, and you are back in ${DISTRICTS[origin.district].name}.`;
       townLog.textContent = gone;
-      toast(`🌀 ${gone}${found ? ` You came back with ${found} new card${found === 1 ? '' : 's'}.` : ''}`);
-      logEvent('🌀', `The ${w.name} ${why === 'left' ? 'was left behind' : why === 'done' ? 'was completed' : 'faded away'}${found ? ` (${found} new card${found === 1 ? '' : 's'} found)` : ''}.`);
+      toast(`${cellar ? '🕯️' : '🌀'} ${gone}${found && !cellar ? ` You came back with ${found} new card${found === 1 ? '' : 's'}.` : ''}`);
+      if (!cellar) logEvent('🌀', `The ${w.name} ${why === 'left' ? 'was left behind' : why === 'done' ? 'was completed' : 'faded away'}${found ? ` (${found} new card${found === 1 ? '' : 's'} found)` : ''}.`);
       sfx('soft');
     }
     if (typeof teleInc === 'function') teleInc('puddleWorld.' + why);
@@ -362,10 +363,12 @@ function pwLeave(why, quiet, after) {   // why: 'faded' (the timer), 'left' (cli
     if (after && !quiet) setTimeout(after, 700);
   };
   // Warped time on the way out too (js/warp-fx.js), running forward this time: the clock catches up and the twist unwinds the other way.
-  if (quiet) back(); else (typeof warpTransition === 'function' ? warpTransition : withTravelTransition)(origin.district, back, { name: DISTRICTS[origin.district].name, sub: 'Back where you started…', icon: '🌀', forward: true });
+  if (quiet) back(); else if (cellar) { if (doorFading) back(); else withDoorFade(back); }   // stairs, not a ripple: the plain door fade
+  else (typeof warpTransition === 'function' ? warpTransition : withTravelTransition)(origin.district, back, { name: DISTRICTS[origin.district].name, sub: 'Back where you started…', icon: '🌀', forward: true });
 }
 function pwBlocksTravel() {
   if (!pwActive()) return false;
+  const k = pwKind(); if (k.blockMsg) { toast(k.blockMsg(pwActive())); return true; }
   toast('🌀 A ripple holds you here. Tap the timer at the top to climb out early.');
   return true;
 }
@@ -382,7 +385,7 @@ function pwReachedExit(exit) { if (!exit || !exit.pw) return false; const w = pw
 function pwGoal() {   // the goal pill at the top: what this world is about
   if (!pwInside()) return null;
   const w = pwActive(), g = pwKind(w).goal ? pwKind(w).goal(w) : null; if (!g) return null;
-  return { icon: g.icon, text: g.text, run: () => toast('🌀 ' + (g.hint || g.text)) };
+  return { icon: g.icon, text: g.text, run: () => toast((w.kind === 'cellar' ? '🕯️ ' : '🌀 ') + (g.hint || g.text)) };
 }
 
 /* ---------------- start-up, the timer and the pill ---------------- */
@@ -400,6 +403,12 @@ function pwUpdatePill() {
   const el = document.getElementById('pillWorld'); if (!el) return;
   const w = pwActive(); el.classList.toggle('hidden', !w);
   if (!w) { el.classList.remove('warn'); return; }
+  const k = pwKind(w);
+  if (w.noTimer && k.pill) {   // a world with no timer (the cellar) says something else in the pill: where you are and your hearts
+    const p = k.pill(w); el.querySelector('.hp-icon').textContent = p.icon; document.getElementById('pwTime').textContent = p.text;
+    el.classList.remove('warn'); el.title = p.title || ''; return;
+  }
+  el.querySelector('.hp-icon').textContent = '🌀';
   const left = pwLeft(w);
   document.getElementById('pwTime').textContent = pwFmt(left);
   el.classList.toggle('warn', left <= 30000);
@@ -407,7 +416,7 @@ function pwUpdatePill() {
 }
 function pwTick() {
   if (document.hidden) return;
-  const w = pwActive();
+  const w = pwActive(); if (w && w.noTimer) return;
   if (!w) { const el = document.getElementById('pillWorld'); if (el && !el.classList.contains('hidden')) pwUpdatePill(); return; }   // no world: nothing to do, and no DOM work every second
   const left = pwLeft(w);
   if (left > 0) {
@@ -422,5 +431,6 @@ setInterval(pwTick, 1000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) pwTick(); });
 document.getElementById('pillWorld').addEventListener('click', () => {
   const w = pwActive(); if (!w) return;
+  if (w.noTimer && pwKind(w).menu) { sfx('nav'); pwKind(w).menu(w); return; }   // the cellar's run menu (js/cellar-world.js)
   sfx('nav'); askConfirm({ title: 'Climb out?', text: `The ${w.name} will be gone for good, and you will be back where you fell in. ${pwFmt(pwLeft(w))} left.`, ok: 'Climb out' }, () => { if (pwActive() && !pwBusy()) pwLeave('left'); });
 });

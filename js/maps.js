@@ -173,6 +173,7 @@ function findPath(m, data, from, isGoal) {
   if (isGoal(from.x, from.y)) return [];
   const blocked = new Set();
   data.npcs.forEach(n => { if (!n.defeated) blocked.add(n.x + ',' + n.y); else if (n.grave) blocked.add(n.grave.x + ',' + n.grave.y); });
+  (data.blockers || []).forEach(b => blocked.add(b.x + ',' + b.y));   // things a world puts in the way (the cellar's creatures, js/cellar-world.js)
   if (data.boss) { if (!data.boss.defeated && bossVisible()) blocked.add(data.boss.x + ',' + data.boss.y); else if (data.boss.defeated && data.boss.grave) blocked.add(data.boss.grave.x + ',' + data.boss.grave.y); }
   const prev = new Map(), start = from.x + ',' + from.y, q = [from];
   prev.set(start, null);

@@ -9,7 +9,7 @@ SKIP = {'js/changelog.js', 'js/changelog-archive.js', 'js/build.js'}            
 AREAS = {
     'js/data-and-engine.js': 'Cards, keywords and districts', 'js/progression.js': 'Quests, tips and progress', 'js/quests.js': 'Quests and rewards',
     'js/titles.js': 'Titles, tabs and top bar', 'js/town-render-weather.js': 'Town map and weather', 'js/town-life.js': 'Town life and mood',
-    'js/houses-and-cellar.js': 'Buildings, shops and mail', 'js/cellar-run.js': 'The cellar', 'js/cellar-crawl.js': 'The cellar', 'js/fishing.js': 'Fishing',
+    'js/houses-and-cellar.js': 'Buildings, shops and mail', 'js/cellar-run.js': 'The cellar', 'js/cellar-world.js': 'The cellar', 'js/fishing.js': 'Fishing',
     'js/gardening.js': 'Gardening', 'js/puzzle-memory-minigames.js': 'Mini-games and puzzles', 'js/afterdark-companion-cards.js': 'Companion, sets and night market',
     'js/battle-ui.js': 'Battle', 'js/battle-toss.js': 'Battle', 'js/draft-run.js': 'Draft run', 'js/shop-economy.js': 'Shop', 'js/workshop-and-starter.js': 'Cards tab and workshop',
     'js/collection-tools.js': 'Cards tab and workshop', 'js/journal-history.js': 'Journal', 'js/journal-pages.js': 'Journal', 'js/character-tab.js': 'Character tab',

@@ -1,4 +1,4 @@
-// The weather board is rows (not one paragraph), the mailbox is grouped, and the cellar hud keeps hearts and lantern chips on one row.
+// The weather board is rows (not one paragraph), the mailbox is grouped, and the cellar's bar and pill carry its floor, hearts and lantern.
 module.exports = async (page, assert) => {
   await page.evaluate(() => { showProp('🪧', 'Sign', { html: weatherBoardHtml('"Hello."') }); });
   const rows = await page.evaluate(() => document.querySelectorAll('#sceneryDesc.rich .wb-row').length);
@@ -12,6 +12,7 @@ module.exports = async (page, assert) => {
   assert.strictEqual(mail.items, 2); assert.ok(mail.gift, 'gift letter shows a Gift chip'); assert.strictEqual(mail.secs.length, 2, 'two groups: ' + mail.secs.join('|'));
   await page.evaluate(() => { closeScene(); const st = cellarState(); st.floor = 3; st.run = null; cellarNewRun(st); openScene('cellar'); });
   await page.waitForTimeout(500);
-  const hud = await page.evaluate(() => !!document.querySelector('.cl-top .cl-hearts') && !!document.querySelector('.cl-top #clChips'));
-  assert.ok(hud, 'hearts and lantern chips share the .cl-top row');
+  const hud = await page.evaluate(() => ({ bar: document.getElementById('hudCellar').textContent, pill: document.getElementById('pwTime').textContent }));
+  assert.ok(/Floor 4 · ♥♥♥/.test(hud.bar) && /Lantern/.test(hud.bar) && /^F4/.test(hud.pill), 'the cellar bar and pill carry the floor, hearts and lantern: ' + JSON.stringify(hud));
+  await page.evaluate(() => { pwLeave('left', true); const st = cellarState(); st.floor = 0; st.run = null; });
 };

@@ -1263,7 +1263,7 @@ function btShowResult(won, yielded) {
     battleEndTitle.textContent = lost.ended ? 'The dark pushes you back.' : 'You lose a heart.';
     battleEndStats.innerHTML = lost.ended
       ? `${npc.name} held floor ${npc.dungeon.floor + 1}. You cleared <b>${npc.dungeon.floor}</b> floors this run · deepest <b>${cellarBest()}</b>.<br>${npc.dungeon.floor >= CELLAR.floors.length ? 'The cellar rests for a while before the next climb.' : 'You can go straight back down.'}`
-      : `${npc.name} held floor ${npc.dungeon.floor + 1}. <b>${'♥'.repeat(lost.hearts)}</b> left.<br>Pick a door again, or try a different one.`;
+      : `${npc.name} held floor ${npc.dungeon.floor + 1}. <b>${'♥'.repeat(lost.hearts)}</b> left.<br>Step back into the dark whenever you are ready.`;
     btGet('battleRetryBtn').classList.add('hidden');
     sfx('soft');
   } else if (!won) {
@@ -1324,7 +1324,7 @@ function closeBattle(retry) {
     townLog.textContent = 'The town settles back into quiet.';
     renderTown();
     updateHud();
-    if (fromDungeon) openScene('cellar');
+    if (fromDungeon && typeof cellarAfterBattle === 'function') cellarAfterBattle();   // back in the cellar's world (js/cellar-world.js), or out of it if the run ended
     else if (fromPuzzle) openScene('nook');
     else if (fromCup) openScene('cup');
     else if (fromDraft) { openScene('cup'); scene.mode = 'draft'; scene.text = draftIntro(); renderScene(); }

@@ -238,6 +238,7 @@ function lifeRenderEntities(data, add) {
   townView.dataset.wx = wx;
   const l = lifeState(), lv = moodLevel(data);
   if (typeof pwRenderEntities === 'function') pwRenderEntities(data, add);   // js/puddle-worlds.js: what a puddle world draws (exit, board, actors)
+  if (typeof pwInside === 'function' && pwInside() && pwKind().noLife) return;   // the cellar (js/cellar-world.js) has no birds, puddles, lamps or rain of its own
   if (typeof portalRender === 'function') portalRender(data, add);           // js/portal.js: an open portal
   if (typeof dailyRiftRender === 'function') dailyRiftRender(data, add);     // js/daily-rift.js: today's gold portal
   if (!night && Object.keys(l.lit).length) l.lit = {};

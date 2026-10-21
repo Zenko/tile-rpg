@@ -38,7 +38,7 @@ const GAME = {
 function currencyName(n) { return n === 1 ? GAME.currency.one : GAME.currency.many; }
 
 // The four districts (towns) and the boss who rules each.
-const PLACES = { square: 'El Umbral', market: 'El Mercado de Susurros', harbor: 'La Orilla del Arrullo', garden: 'El Jardín Lúcido' };
+const PLACES = { square: 'El Umbral', market: 'El Mercado de Susurros', harbor: 'La Orilla del Arrullo', garden: 'El Jardín Lúcido', cellar: 'El Sótano Olvidado' };
 const BOSSES = { square: 'Duermevela', market: 'Murmullo', harbor: 'Marea Lenta', garden: 'Ensueño' };
 
 // The four card families (FAMILIES in js/data-and-engine.js adds their icon and home district).

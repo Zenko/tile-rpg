@@ -47,6 +47,10 @@ PALETTES = {
     'pw-dusk':   dict(ground='#3a3128', ground2='#362d24', ground3='#3f362c', tuft='#7a6038', path='#55442f', **{'path-edge': '#453626', 'path-dot': '#6c573c'},
                       leaf1='#8a6a2a', leaf2='#b08a3a', leaf3='#e0b85a', pine1='#5a4420', pine2='#7a5c2a', water='#3a4a6e', water2='#7e8fb8', shore='#6e5a3a',
                       stone='#82796c', stone2='#665e53', stone3='#9a9184', flower1='#ff9a5a', flower2='#ffd27a', flower3='#fff0cc', lamp='#ffb860'),
+    # the cellar (js/cellar-world.js): cool dark stone, a little warm where the path is worn
+    'pw-cellar': dict(ground='#27222a', ground2='#231e26', ground3='#2c262f', tuft='#463b44', path='#403740', **{'path-edge': '#322b33', 'path-dot': '#554a54'},
+                      leaf1='#3b4a3a', leaf2='#4d6049', leaf3='#6d8a63', pine1='#2a3a30', pine2='#38503f', water='#27384f', water2='#4d6a8c', shore='#4a4048',
+                      stone='#5d5664', stone2='#47404e', stone3='#756e7d', flower1='#c9a24a', flower2='#e0c070', flower3='#f0e2b0', lamp='#ffb860'),
 }
 # how much lighter the light theme is, by variable group (the existing light palettes sit about +0.3 above their dark ones)
 LIGHT_L = {'ground': .30, 'ground2': .30, 'ground3': .30, 'tuft': .26, 'path': .30, 'path-edge': .28, 'path-dot': .30, 'shore': .30,
