@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'better', x: 'The trade table shows the whole card on both sides. Prop messages (a bench, a sign) and the new-card popup close with the round X instead of a button. On the neighbour screen the name and hearts sit above their head, bigger, and the words have more room. A keyword badge on a card is now the same size as the cost bubble above it.' },
   { t: 'fixed', x: 'Tapping a card to trade no longer throws you back to the neighbour screen. You stay on Trade and pick what to give.' },
   { t: 'new', x: 'Trading is a little game now. Climb Trader ranks (Newcomer, Swapper, Dealer, Merchant, Tycoon) for +10% on every swap per rank, swap two cards of the same family for a +50% Family match, and make three swaps in a day for a bonus.' },
   { t: 'new', x: 'A proper trade table. Pick a card to take and a spare to give and a window shows both cards side by side with their families, what the swap pays, and a two-step handshake: you shake on it, then they do, and only then do the cards change hands. Every trade now pays XP and Embers (more for rarer cards, and a little extra when it is their favourite).' },

@@ -155,7 +155,7 @@ let txBusy = false, txTimers = [], txDone = null;
 function txFamily(def) { const fam = def.spell ? null : FAMILIES[CARD_FAMILY[BattleEngine.baseIdOf(def.id)]]; return fam ? `${fam.icon} ${fam.name} family` : '✨ Spell'; }
 function txSide(label, id) {
   const d = cardDef(id);
-  return `<small>${escapeHtml(label)}</small><span class="tx-art rarity-${d.rarity}">${cardArtHtml(d)}</span><b>${escapeHtml(d.name)}</b><span class="rarity-tag rt-${d.rarity}">${RARITY_LABEL[d.rarity]}</span><span class="tx-fam">${txFamily(d)}</span>`;
+  return `<small>${escapeHtml(label)}</small><div class="reveal-card-frame"><div class="reveal-card rarity-${d.rarity}${d.spell ? ' spell' : ''}">${cardFaceHtml(d)}</div></div><span class="rarity-tag rt-${d.rarity}">${RARITY_LABEL[d.rarity]}</span><span class="tx-fam">${txFamily(d)}</span>`;
 }
 function txClose() { txTimers.forEach(clearTimeout); txTimers = []; txBusy = false; txDone = null; txEl('tradeOverlay').classList.add('hidden'); }
 function openTradeTable(f, o, payId, onDone) {
@@ -166,6 +166,7 @@ function openTradeTable(f, o, payId, onDone) {
   txEl('txSay').textContent = loved ? `“${pay.name}! ${KW[theme].icon} ${KW[theme].name} is my favourite. Do we have a deal?”` : f.isBoss ? '“Fair is fair. Do we have a deal?”' : '“A swap, then? Do we have a deal?”';
   txEl('txYou').innerHTML = txSide('You give', payId);
   txEl('txThem').innerHTML = txSide(`${f.name} gives`, o.give);
+  if (typeof fullArtApply === 'function') [['txYou', pay], ['txThem', give]].forEach(([id, d]) => { const face = txEl(id).querySelector('.reveal-card'); if (face) face.parentElement.classList.toggle('has-fa', fullArtApply(face, d)); });
   [['txSealYou', 'You'], ['txSealThem', f.name]].forEach(([id, who]) => { const el = txEl(id); el.className = 'tx-seal'; el.textContent = `${who}: not yet`; });
   const ti = traderInfo(), today = npcTradeState().count || 0, pips = Array.from({ length: TRADE_DAILY_GOAL }, (_, i) => `<i class="${i < today ? 'on' : ''}"></i>`).join('');
   txEl('txMeta').innerHTML = `<div class="tx-rank"><span>${ti.rank.icon} <b>${ti.rank.name}</b></span><span class="tx-bar" role="progressbar" aria-valuenow="${Math.round(ti.frac * 100)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${Math.round(ti.frac * 100)}%"></i></span><small>${ti.next ? `${ti.next.n - ti.n} more to ${ti.next.name}` : 'Top rank'}</small></div>`

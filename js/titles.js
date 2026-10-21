@@ -259,6 +259,7 @@ document.getElementById('pickupContinue').addEventListener('click', () => {
   if ((!shopPanel.classList.contains('hidden') && shopSubView === 'packs') || shopModeActive('packs')) renderPacks();
   if (!collectionPanel.classList.contains('hidden') && cardsView === 'craft') renderCraft();
 });
+document.getElementById('pickupX').addEventListener('click', () => document.getElementById('pickupContinue').click());   // the X is how a card reveal is closed; the old Nice button is hidden but still does the work
 document.getElementById('sceneryContinue').addEventListener('click', () => sceneryOverlay.classList.add('hidden'));
 document.getElementById('sceneryX').addEventListener('click', () => { sfx('nav'); sceneryOverlay.classList.add('hidden'); });
 document.getElementById('battleRetryBtn').addEventListener('click', () => closeBattle(true));

@@ -2820,8 +2820,8 @@ body.in-battle .tab-win, body.in-battle .win-dim, body.in-scene .tab-win, body.i
       share the box in two rows: the neighbour on top, the words in their own glass panel underneath. Nothing overlaps.
    2. A neighbour with something to say (a favour to offer, or one to hand in) opens with a message card: Accept / Not now.
    ========================================================================================================== */
-#talkCard[data-style="combo"] .tk-bust, #talkCard[data-style="combo"] .tk-bust:not(.emoji) { display: grid; grid-template-rows: minmax(0, 1fr) auto auto; justify-items: center; align-items: stretch; gap: 8px; overflow: hidden; padding-top: 0; --fig-h: 100%; }
-#talkCard[data-style="combo"] .tk-bust .talk-portrait { grid-row: 1; align-self: end; min-height: 0; max-height: 80%; margin: 0; }
+#talkCard[data-style="combo"] .tk-bust, #talkCard[data-style="combo"] .tk-bust:not(.emoji) { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; justify-items: center; align-items: stretch; gap: 8px; overflow: hidden; padding-top: 0; --fig-h: 100%; }
+#talkCard[data-style="combo"] .tk-bust .talk-portrait { grid-row: 2; align-self: end; min-height: 0; max-height: 80%; margin: 0; }
 #talkCard[data-style="combo"] .tk-bust.emoji .talk-portrait { height: auto; align-self: center; font-size: min(30cqh, 62cqw); }
 #talkCard[data-style="combo"] .talk-bubble { grid-row: 3; position: relative; left: auto; right: auto; bottom: auto; z-index: 5; width: 100%; max-height: 44cqh; overflow-y: auto; scrollbar-width: none; margin: 0; padding: 10px 14px;
   border: 1px solid var(--stone-edge); border-radius: 20px; background: color-mix(in srgb, var(--stone) 86%, transparent); box-shadow: 0 8px 24px var(--shadow); }
@@ -2866,12 +2866,12 @@ body.in-battle .tab-win, body.in-battle .win-dim, body.in-scene .tab-win, body.i
 .overlay-card > .x-close { position: absolute; top: 10px; right: 10px; z-index: 3; }
 .overlay-card:has(> .x-close) > h2 { padding: 0 40px; }
 /* the welcome sign closes with the X; its Continue button is only for the small text-only prop messages */
-#sceneryOverlay .overlay-card:has(#sceneryDesc.rich) #sceneryContinue { display: none; }
+#sceneryContinue { display: none; }   /* the X closes every prop message (build 297); the button stays in the page for the code that points at it */
 #sceneryOverlay .overlay-card:has(#sceneryDesc.rich) { padding-bottom: 16px; }
 
 /* ---- build 296: the neighbour screen and the Leave buttons ---- */
 /* the name and hearts sit between the picture and the words (the script moves them there in the close-up) */
-#talkCard[data-style="combo"] .tk-bust > .tk-plate { grid-row: 2; margin: 0; padding: 0; }
+#talkCard[data-style="combo"] .tk-bust > .tk-plate { grid-row: 1; margin: 0; padding: 14px 0 0; }
 #talkCard[data-style="combo"] .tk-memo { display: none; }
 /* a full-screen takeover (a neighbour, a building, the fountain) leaves with a plain button at the foot; the round X is for windows */
 #talkCard > .talk-close { flex: none; width: 100%; margin: 0 0 calc(8px + env(safe-area-inset-bottom, 0px)); }
@@ -2911,3 +2911,22 @@ body.in-battle .tab-win, body.in-battle .win-dim, body.in-scene .tab-win, body.i
 .tx-pips i { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--stone-edge); }
 .tx-pips i.on { background: var(--accent); border-color: var(--accent); }
 .tx-kin { display: block; margin-top: 4px; font-weight: 800; color: var(--ink); }
+
+/* ---- build 297 ---- */
+/* the neighbour's name and hearts sit above their head, bigger; the words get room to breathe and a gap above the match button */
+#talkCard[data-style="combo"] .tk-plate .talk-name { font-size: 1.9rem; line-height: 1.1; }
+#talkCard[data-style="combo"] .tk-plate .talk-hearts { font-size: 1.1rem; letter-spacing: 3px; }
+#talkCard[data-style="combo"] .talk-bubble { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; }
+#talkCard[data-style="combo"] .talk-bubble > * { margin: 0; }
+#talkCard .tk-stage { margin-bottom: 14px; }
+/* a keyword badge is exactly as big as the cost bubble above it (it was squeezed to an oval inside the column) */
+#battleView .card .kws span, .reveal-card .kws span, .alm-card.tile .ac-kw i { flex: none; width: 1.75em; height: 1.75em; }
+/* the card reveal closes with the X; the Nice button is hidden (and while a card is still face down the X waits too) */
+#pickupContinue { display: none; }
+#pickupCard:has(#pickupContinue.hidden) > #pickupX { visibility: hidden; }
+/* the trade table shows the whole card */
+.tx-card { max-height: 94dvh; overflow-y: auto; }
+.tx-side { padding: 10px 6px 12px; gap: 6px; }
+.tx-side .reveal-card-frame { margin: 2px 0; }
+.tx-side .reveal-card { width: 128px; }
+.tx-side .reveal-card.fa, .tx-side .reveal-card-frame.has-fa .reveal-card { width: 128px; }
