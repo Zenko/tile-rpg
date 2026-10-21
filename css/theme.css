@@ -971,3 +971,28 @@
   --fa-ripple: #d8f4ff;     /* rings behind puddle cards */
   --fa-portal: #c9a6ff;     /* the swirl behind portal cards */
 }
+
+/* The bakery screen (build 305, js/bakery-screen.js): a warm kitchen on purpose, the same in both themes. */
+.bakery-screen {
+  --bk-wall: #e7c99a;
+  --bk-wall2: #d3a972;
+  --bk-tile: #c99a62;
+  --bk-counter: #a87343;
+  --bk-counter2: #8a5a30;
+  --bk-edge: #5e3b1c;
+  --bk-ink: #4a2f17;
+  --bk-soft: #7b5632;
+  --bk-card: #fbf1df;
+  --bk-card2: #f1dfc2;
+  --bk-oven: #6e6a66;
+  --bk-oven2: #4d4a47;
+  --bk-fire: #ff9a3c;
+  --bk-fire2: #ffd27a;
+  --bk-dough: #f4e2bd;
+  --bk-dough2: #e2c690;
+  --bk-crust: #d99543;
+  --bk-crust2: #a8641f;
+  --bk-flour: #fffaf0;
+  --bk-good: #7fb069;
+  --bk-shadow: rgba(60, 35, 12, .35);
+}
