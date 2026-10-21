@@ -10,9 +10,12 @@
      - Decorations: a shelf of tiles by category; tap one to see it, then Buy (buyDecoration) or, if you own one, Place it
        (startPlacingDecoration, which steps out to the map as before). A "Yours" tab lists what is in storage (Place) and what is placed
        (Move, Store, Remove), the old Your Decorations lists.
-   Packs and the mirror still open the Shop screens. Back (inside the stage) returns to the front; Leave at the foot still leaves.
+   Build 316: the mirror is a dressing room too (scene.mode 'customize'). A live preview of your character (look, accessory, colour, border,
+   backdrop, table mat) sits above six category tabs and a strip of choices. Tapping a choice TRIES IT ON in the mirror without changing anything;
+   the one button then wears it (free or already yours) or buys it first (buyCosmetic, unchanged). Only Packs still opens a Shop screen.
+   Back (inside the stage) returns to the front; Leave at the foot still leaves.
    ============================================================ */
-let shopEl = null, shopUi = { sig: '', sleeve: 0, tab: 'shop', pick: null };
+let shopEl = null, shopUi = { sig: '', sleeve: 0, tab: 'shop', pick: null, cat: 'look', tryOn: null };
 const shopOpen = () => !!shopEl && !shopEl.classList.contains('hidden');
 
 function shopBuild() {
@@ -26,7 +29,7 @@ function shopBuild() {
   document.body.appendChild(el); shopEl = el; shopWire(el); return el;
 }
 
-function shopView() { return scene && scene.mode === 'sleeves' ? 'sleeves' : scene && scene.mode === 'items' ? 'items' : 'hub'; }
+function shopView() { return scene && ['sleeves', 'items', 'customize'].includes(scene.mode) ? scene.mode : 'hub'; }
 
 function shopRender() {
   if (!shopOpen()) return;
@@ -35,7 +38,7 @@ function shopRender() {
   $('csTitle').textContent = v === 'sleeves' ? 'The Sleeve Wall' : v === 'items' ? 'Decorations' : 'The Card Shop';
   $('csChip').textContent = `🫧 ${state.progress.pebbles}`;
   $('csSay').textContent = (scene && scene.text) || '';
-  if (v === 'sleeves') shopRenderSleeves($); else if (v === 'items') shopRenderItems($); else shopRenderHub($);
+  if (v === 'sleeves') shopRenderSleeves($); else if (v === 'items') shopRenderItems($); else if (v === 'customize') shopRenderMirror($); else shopRenderHub($);
 }
 
 function shopRenderHub($) {
@@ -48,6 +51,68 @@ function shopRenderHub($) {
     ['items', 'Decorations', 'for town and home', `<span class="cs-packs" aria-hidden="true">${decos.map(d => `<i>${d.icon}</i>`).join('')}</span>`],
   ].map(([id, name, sub, art]) => `<button type="button" class="cs-case" data-shop="${id}" aria-label="${name}: ${sub}"><span class="cs-glass">${art}</span><b>${name}</b><small>${sub}</small></button>`).join('');
   $('csHint').textContent = 'Tap a display to look inside.';
+}
+
+
+/* ---- the mirror ---- */
+const SHOP_CATS = [
+  { id: 'look',      label: 'Look',      icon: '🙂' },
+  { id: 'accessory', label: 'Extras',    icon: '🎀' },
+  { id: 'color',     label: 'Colour',    icon: '🎨' },
+  { id: 'border',    label: 'Border',    icon: '⭕' },
+  { id: 'stage',     label: 'Backdrop',  icon: '🌅' },
+  { id: 'mat',       label: 'Table mat', icon: '🃏' },
+];
+// every choice in a category as { kind, value, label, cost, owned, on, ... }, mirroring the old Customize rows
+function shopChoices(cat) {
+  ensureCosmeticUnlocks(); const ch = state.character;
+  if (cat === 'look') return (typeof drawnAvatarSwatches === 'function' && playerSpriteReady() ? PLAYER_ART.order.filter(id => PLAYER_ART.chars[id]).map(id => ({ kind: 'drawn', value: id, label: PLAYER_ART.chars[id].name, cost: 0, owned: true, on: playerCharId() === id, face: PLAYER_ART.chars[id].face })) : [])
+    .concat(EMOJI_OPTIONS.map(o => ({ kind: 'emoji', value: o.emoji, label: o.emoji, cost: o.cost, owned: ch.unlockedEmojis.includes(o.emoji), on: !playerDrawn() && ch.emoji === o.emoji, glyph: o.emoji })));
+  if (cat === 'accessory') return ACCESSORY_OPTIONS.map(o => ({ kind: 'accessory', value: o.icon, label: o.label, cost: o.cost, owned: ch.unlockedAccessories.includes(o.icon), on: ch.accessory === o.icon, glyph: o.icon || '🚫' }));
+  if (cat === 'color') return COLOR_OPTIONS.map(o => ({ kind: 'color', value: o.color, label: 'Colour', cost: o.cost, owned: ch.unlockedColors.includes(o.color), on: ch.color === o.color, swatch: o.color }));
+  if (cat === 'border') return BORDER_OPTIONS.map(o => ({ kind: 'border', value: o.id, label: o.name + (o.fixed ? ' (own colours)' : ''), cost: o.cost, owned: ch.unlockedAvBorders.includes(o.id), on: ch.avBorder === o.id }));
+  if (cat === 'stage') return STAGE_OPTIONS.map(o => ({ kind: 'stage', value: o.id, label: o.name, cost: o.cost, owned: ch.unlockedStages.includes(o.id), on: ch.stage === o.id }));
+  return MAT_OPTIONS.map(o => ({ kind: 'mat', value: o.id, label: o.name, cost: o.cost, owned: ch.unlockedMats.includes(o.id), on: ch.mat === o.id }));
+}
+const shopField = kind => ({ emoji: 'emoji', accessory: 'accessory', mat: 'mat', stage: 'stage', border: 'avBorder', color: 'color' })[kind];
+function shopPreviewChar(t) {
+  const c = Object.assign({}, state.character);
+  if (t) { if (t.kind === 'drawn') c.drawn = t.value; else if (t.kind === 'emoji') { c.emoji = t.value; c.drawn = false; } else c[shopField(t.kind)] = t.value; }
+  return c;
+}
+function shopRenderMirror($) {
+  const cat = shopUi.cat, list = shopChoices(cat), t = shopUi.tryOn && shopUi.tryOn.cat === cat ? shopUi.tryOn : null, pc = shopPreviewChar(t);
+  const pick = t ? list.find(x => x.kind === t.kind && x.value === t.value) : null;
+  const dId = pc.drawn === false ? null : (typeof pc.drawn === 'string' && playerSpriteReady() && PLAYER_ART.chars[pc.drawn] ? pc.drawn : playerCharId());
+  const face = dId ? `<img class="av-face" src="${PLAYER_ART.chars[dId].face}" alt="" draggable="false">` : escapeHtml(pc.emoji || '🙂');
+  const choice = x => {
+    const inner = x.face ? `<img class="av-face" src="${x.face}" alt="" draggable="false">` : x.swatch ? '' : x.kind === 'border' ? '<span class="cs-bd"></span>' : x.kind === 'stage' ? '<span class="cs-stg"></span>' : x.kind === 'mat' ? `<span class="cs-mat mat-swatch mat-${x.value}"><span>${x.label}</span></span>` : x.glyph || '';
+    return `<button type="button" class="cs-ch${x.on ? ' on' : ''}${pick === x ? ' try' : ''}${x.owned ? '' : ' locked'}" data-try="${x.kind}|${x.value}" data-kind="${x.kind}" aria-label="${x.label}${x.owned ? '' : ', ' + x.cost + ' ' + GAME.currency.many}" ${x.swatch ? `style="--sw:${x.swatch}"` : ''}>${inner}${x.owned ? '' : `<em class="cs-cost">🫧${x.cost}</em>`}</button>`;
+  };
+  const owned = !pick || pick.owned, can = pick && !pick.owned && state.progress.pebbles >= pick.cost, same = pick && pick.on;
+  $('csStage').innerHTML = `<div class="cs-sub"><div class="cs-subhead"><button type="button" class="cs-back" id="csBack">‹ Front</button><b>The mirror</b><span>${pick ? pick.label : 'Try things on'}</span></div>
+    <div class="cs-glassbox" id="csGlass"><div class="cs-room" id="csRoom"><span class="cs-sky"></span><span class="cs-ground"></span><span class="avatar-preview cs-me" id="csMe">${face}</span></div><div class="cs-matstrip"><span class="mat-swatch mat-${pc.mat}"><span>Your table mat</span></span></div></div>
+    <div class="cs-cats" role="tablist">${SHOP_CATS.map(c => `<button type="button" class="cs-cat${c.id === cat ? ' on' : ''}" data-cat2="${c.id}" aria-label="${c.label}"><span aria-hidden="true">${c.icon}</span><small>${c.label}</small></button>`).join('')}</div>
+    <div class="cs-chs">${list.map(choice).join('')}</div>
+    <button type="button" class="cs-main" id="csWear" ${!pick || same || (!owned && !can) ? 'disabled' : ''}>${!pick ? 'Tap something to try it on' : same ? 'Wearing it' : owned ? 'Wear it' : can ? `Buy and wear · 🫧 ${pick.cost}` : `Needs 🫧 ${pick.cost - state.progress.pebbles} more`}</button></div>`;
+  const me = document.getElementById('csMe'); applyAvatarStyle(me, pc);
+  const room = document.getElementById('csRoom'); room.style.setProperty('--sky', stageGradient(stageDef(pc.stage)));
+  document.querySelectorAll('.cs-ch[data-kind="border"]').forEach(b => { const v = b.dataset.try.split('|')[1], sp = b.querySelector('.cs-bd'); if (sp) applyAvatarStyle(sp, { color: state.character.color, avBorder: v, avBorderColor: state.character.avBorderColor }); });
+  document.querySelectorAll('.cs-ch[data-kind="stage"]').forEach(b => { const sp = b.querySelector('.cs-stg'); if (sp) sp.style.background = stageGradient(stageDef(b.dataset.try.split('|')[1])); });
+  $('csHint').textContent = pick ? '' : 'Tap a choice to see it on you. Nothing changes until you press the button.';
+}
+function shopWear() {
+  const t = shopUi.tryOn; if (!t) return;
+  const x = shopChoices(t.cat).find(c => c.kind === t.kind && c.value === t.value); if (!x || x.on) return;
+  ensureAudio();
+  if (x.owned) {
+    sfx('nav'); buzz(HAP.tap);
+    if (x.kind === 'drawn') state.character.drawn = x.value;
+    else { state.character[shopField(x.kind)] = x.value; if (x.kind === 'emoji') state.character.drawn = false; }
+    saveState(); updateHud(); renderTown(); if (typeof renderCharacterTab === 'function') renderCharacterTab();
+  } else if (!buyCosmetic(x.kind, x.value, x.cost)) return;
+  shopUi.tryOn = null; shopUi.sig = ''; shopRender();
+  const m = document.getElementById('csMe'); if (m) { m.classList.add('pop'); setTimeout(() => m.classList.remove('pop'), 500); }
 }
 
 /* ---- the sleeve wall ---- */
@@ -109,6 +174,9 @@ function shopWire(el) {
     const st = e.target.closest('[data-step]'); if (st) { shopSleeveStep(+st.dataset.step); return; }
     const dot = e.target.closest('[data-dot]'); if (dot) { shopUi.sleeve = +dot.dataset.dot; sfx('tap'); shopRender(); return; }
     if (e.target.closest('#csMain')) { shopSleeveWear(); return; }
+    if (e.target.closest('#csWear')) { shopWear(); return; }
+    const c2 = e.target.closest('[data-cat2]'); if (c2) { shopUi.cat = c2.dataset.cat2; shopUi.tryOn = null; sfx('nav'); buzz(HAP.tap); shopRender(); return; }
+    const tr = e.target.closest('[data-try]'); if (tr) { const [kind, ...v] = tr.dataset.try.split('|'); shopUi.tryOn = { cat: shopUi.cat, kind, value: v.join('|') }; sfx('tap'); buzz(HAP.tap); shopRender(); return; }
     const tab = e.target.closest('[data-tab]'); if (tab) { shopUi.tab = tab.dataset.tab; sfx('nav'); shopRender(); return; }
     const cat = e.target.closest('[data-cat]'); if (cat) { itemsCat = cat.dataset.cat; sfx('nav'); buzz(HAP.tap); shopRender(); return; }
     const tile = e.target.closest('[data-item]'); if (tile) { shopUi.pick = tile.dataset.item; sfx('tap'); shopRender(); return; }
@@ -139,10 +207,10 @@ function shopScreenHide() {
 }
 // called at the end of renderScene(): over the Card Shop's front and its Sleeves and Items views; Packs and Customize show the Shop screens instead
 function shopScreenSync() {
-  if (!scene || scene.id !== 'card-shop' || (scene.mode && scene.mode !== 'sleeves' && scene.mode !== 'items')) { shopScreenHide(); return; }
+  if (!scene || scene.id !== 'card-shop' || (scene.mode && !['sleeves', 'items', 'customize'].includes(scene.mode))) { shopScreenHide(); return; }
   const el = shopEl || shopBuild(), was = shopOpen();
   el.classList.remove('hidden'); document.body.classList.add('in-shopfront');
-  if (!was) { shopUi.sleeveFor = null; shopUi.tab = 'shop'; shopUi.pick = null; }
-  const sig = [shopView(), scene.text, state.progress.pebbles, currentSleeve().id, ensureSleeves().unlockedSleeves.length, state.character.emoji].join('|');
+  if (!was) { shopUi.sleeveFor = null; shopUi.tab = 'shop'; shopUi.pick = null; shopUi.tryOn = null; shopUi.cat = 'look'; }
+  const sig = [shopView(), scene.text, state.progress.pebbles, currentSleeve().id, ensureSleeves().unlockedSleeves.length, state.character.emoji, state.character.drawn, state.character.color].join('|');
   if (!was || sig !== shopUi.sig) { shopUi.sig = sig; shopRender(); }
 }

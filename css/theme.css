@@ -1132,6 +1132,9 @@
   --cs-shadow: rgba(24, 12, 34, .5);
   --cs-bad: #c0564e;
   --cs-good: #8fd1a4;
+  --cs-frame: #c9a24a;
+  --cs-frame2: #8a6a22;
+  --cs-ground: #86b873;
 }
 
 /* Tearing a pack open (build 313, js/pack-tear.js): a velvet table and a foil pack, the same in both themes. */

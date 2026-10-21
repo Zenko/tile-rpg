@@ -1,5 +1,5 @@
-// The Card Shop front as a full screen (js/shop-screen.js): four displays. Packs and the mirror open the Shop screens; the sleeve wall and
-// the decoration shelf are full-screen views inside this screen (swipe through sleeves, buy and wear; buy, place, store and remove
+// The Card Shop front as a full screen (js/shop-screen.js): four displays. Packs opens the Shop screen; the sleeve wall, the decoration shelf
+// and the mirror (try things on, then wear or buy) are full-screen views inside this screen (swipe through sleeves, buy and wear; buy, place, store and remove
 // decorations). Leave at the foot.
 module.exports = async (page, assert) => {
   const q = s => page.evaluate(s2 => eval(s2), s);
@@ -7,11 +7,29 @@ module.exports = async (page, assert) => {
   await page.waitForTimeout(400);
   assert.ok(await q("shopOpen() && document.body.classList.contains('in-shopfront')"), 'the shop front opens as a full screen');
   assert.strictEqual(await page.locator('.cs-case').count(), 4, 'four displays');
-  for (const [id, mode] of [['packs', 'packs'], ['customize', 'customize']]) {
+  for (const [id, mode] of [['packs', 'packs']]) {
     await page.click(`[data-shop="${id}"]`); await page.waitForTimeout(400);
     assert.ok(await q(`!shopOpen() && scene.mode === '${mode}'`), `the ${id} display opens its Shop view and puts the front away`);
     await q("sceneAction('back')"); await page.waitForTimeout(300); assert.ok(await q("shopOpen()"), `Back returns to the front from ${id}`);
   }
+  // the mirror: trying something on changes only the preview; the button wears or buys it
+  await page.click('[data-shop="customize"]'); await page.waitForTimeout(400);
+  assert.ok(await q("shopOpen() && shopEl.dataset.view === 'customize'"), 'the mirror is a view of this screen');
+  const emoji = await q("EMOJI_OPTIONS.find(o => o.cost > 0 && !state.character.unlockedEmojis.includes(o.emoji))"), was = await q("state.character.emoji");
+  await q("state.character.drawn = false; shopRender()");
+  await page.click(`[data-try="emoji|${emoji.emoji}"]`); await page.waitForTimeout(200);
+  assert.ok((await q("document.getElementById('csMe').innerHTML")).includes(emoji.emoji), 'trying a look on shows it in the mirror'); assert.strictEqual(await q("state.character.emoji"), was, 'but changes nothing yet');
+  const peb = await q("state.progress.pebbles"); await page.click('#csWear'); await page.waitForTimeout(300);
+  assert.strictEqual(await q("state.character.emoji"), emoji.emoji, 'the button buys and wears it'); assert.strictEqual(await q("state.progress.pebbles"), peb - emoji.cost, 'and charges for it');
+  assert.ok(await q("document.getElementById('csWear').disabled"), 'a worn look shows as worn');
+  await page.click('[data-cat2="color"]'); await page.waitForTimeout(150);
+  const col = await q("COLOR_OPTIONS.find(o => o.cost > 0 && !state.character.unlockedColors.includes(o.color))"), was2 = await q("state.character.color");
+  await q("state.progress.pebbles = 0"); await page.click(`[data-try="color|${col.color}"]`); await page.waitForTimeout(150);
+  assert.ok(/Needs/.test(await page.textContent('#csWear')) && await q("document.getElementById('csWear').disabled"), 'too poor: the button says what is missing'); assert.strictEqual(await q("state.character.color"), was2, 'and nothing changes');
+  await q("state.progress.pebbles = 500"); await page.click('[data-cat2="stage"]'); await page.waitForTimeout(150); await page.click('[data-try="stage|live"]'); await page.waitForTimeout(100);
+  await page.click('[data-cat2="mat"]'); await page.click('[data-cat2="border"]'); assert.ok(await page.locator('.cs-ch').count() >= 2, 'every category lists its choices');
+  await page.click('#csBack'); await page.waitForTimeout(300); assert.ok(await q("shopEl.dataset.view === 'hub'"), 'Front returns to the four displays');
+  await q("state.progress.pebbles = 500");
   // the sleeve wall: swipe the card, buy and wear
   await page.click('[data-shop="sleeves"]'); await page.waitForTimeout(400);
   assert.ok(await q("shopOpen() && shopEl.dataset.view === 'sleeves'"), 'the sleeve wall is a view of this screen');

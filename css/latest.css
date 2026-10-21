@@ -3363,3 +3363,27 @@ body.in-shopfront .overlay, body.in-shopfront .toast { z-index: 70; }
 .cs-row-act { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
 .cs-empty { margin: auto; padding: 20px; text-align: center; color: var(--cs-soft); font: 600 .85rem/1.4 var(--f-ui); }
 @media (prefers-reduced-motion: reduce) { .cs-bigcard, .cs-detail-ico { animation: none !important; transition: none !important; } }
+
+/* ---- build 316: the mirror, a dressing room inside the Card Shop screen (js/shop-screen.js) ---- */
+.cs-glassbox { flex: none; display: flex; flex-direction: column; gap: 6px; padding: 8px; border-radius: 24px 24px 14px 14px; background: linear-gradient(180deg, var(--cs-frame), var(--cs-frame2)); box-shadow: 0 4px 10px var(--cs-shadow); }
+.cs-room { position: relative; height: 190px; border-radius: 18px 18px 8px 8px; overflow: hidden; background: var(--sky, var(--cs-glass)); display: grid; place-items: end center; box-shadow: inset 0 0 0 3px var(--cs-edge); }
+.cs-ground { position: absolute; left: 0; right: 0; bottom: 0; height: 26%; background: var(--cs-ground); opacity: .85; }
+.cs-sky { position: absolute; inset: 0; }
+.avatar-preview.cs-me { position: relative; width: 118px; height: 118px; margin: 0 0 18px; font-size: 3.6rem; transition: transform .25s; }
+.avatar-preview.cs-me .av-face { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
+.cs-me.pop { animation: cs-pop .45s ease; }
+.cs-matstrip .mat-swatch { height: 34px; border-radius: 8px; cursor: default; }
+.cs-cats { display: flex; gap: 6px; }
+.cs-cat { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0; padding: 6px 2px; border: 0; border-radius: 12px; background: var(--cs-glass2); color: var(--cs-ink); } .cs-cat span { font-size: 1.2rem; line-height: 1.1; } .cs-cat small { font: 800 .58rem var(--f-ui); }
+.cs-cat.on { background: var(--cs-wall); color: var(--cs-card); }
+.cs-chs { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(5, 1fr); grid-auto-rows: 58px; gap: 8px; overflow-y: auto; align-content: start; padding: 2px; }
+.cs-ch { position: relative; height: 58px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 14px; background: var(--cs-glass); font-size: 1.7rem; overflow: hidden; box-shadow: inset 0 0 0 2px var(--cs-glass2); }
+.cs-ch[style*="--sw"] { background: var(--sw); box-shadow: inset 0 0 0 2px var(--cs-edge); }
+.cs-ch.on { box-shadow: inset 0 0 0 3px var(--cs-good); } .cs-ch.try { box-shadow: inset 0 0 0 4px var(--cs-gold), 0 0 10px var(--cs-gold); transform: scale(1.06); }
+.cs-ch.locked > *:not(.cs-cost) { opacity: .7; }
+.cs-ch .av-face { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
+.cs-cost { position: absolute; left: 0; right: 0; bottom: 0; padding: 1px 0; background: var(--cs-wall); color: var(--cs-card); font: 800 .62rem var(--f-ui); text-align: center; font-style: normal; }
+.cs-bd { display: block; width: 70%; aspect-ratio: 1; border-radius: 50%; box-sizing: border-box; border: var(--av-border-w, 4px) var(--av-border-style, solid) var(--av-border-color, var(--cs-ink)); }
+.cs-stg { display: block; width: 100%; height: 100%; }
+.cs-ch .cs-mat { display: flex; width: 100%; height: 100%; border-radius: 0; border: 0; }
+@media (prefers-reduced-motion: reduce) { .cs-me.pop { animation: none !important; } }
