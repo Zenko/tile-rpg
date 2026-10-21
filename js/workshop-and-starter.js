@@ -401,6 +401,7 @@ function renderPacks() {
       <button class="btn" ${can ? '' : 'disabled'}>${price < pack.cost ? `<s>${pack.cost}</s> ` : ''}🫧 ${price}</button>`;
     el.querySelector('.btn').addEventListener('click', () => {
       ensureAudio();
+      if (typeof packTearStart === 'function' && packTearStart(pack)) return;   // js/pack-tear.js: tear it open first; it buys the pack when it rips
       if (buyPack(pack.id)) { /* reveal overlay handles feedback */ }
       else { toast(`Not enough ${GAME.currency.many} yet`); sfx('tie'); }
     });

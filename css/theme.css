@@ -1131,3 +1131,16 @@
   --cs-edge: #261a30;
   --cs-shadow: rgba(24, 12, 34, .5);
 }
+
+/* Tearing a pack open (build 313, js/pack-tear.js): a velvet table and a foil pack, the same in both themes. */
+.pack-tear {
+  --pt-bg: #1f1830;
+  --pt-bg2: #3c2d58;
+  --pt-foil: #e9c868;
+  --pt-foil2: #b9892f;
+  --pt-foil3: #f7e7a8;
+  --pt-ink: #3b2a10;
+  --pt-card: #fbf3e6;
+  --pt-spark: #fff2b8;
+  --pt-shadow: rgba(10, 6, 20, .6);
+}

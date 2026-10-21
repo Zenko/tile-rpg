@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'new', x: 'Opening a card pack is something you do now. Buy one in the Card Shop and the foil pack is held up on its own: swipe across the top to tear the strip off (or tap it three times). Nothing is charged until it rips, and Put it back leaves you with your money. Then the card appears face down, as before.' },
   { t: 'new', x: 'The Card Shop is a shop front now, full screen. Four display cases show what is inside: the pack rack with the cheapest price, the sleeve wall with the sleeve you are wearing, the mirror with your character, and the decoration shelf. Tap one to look inside, and Back returns you to the front.' },
   { t: 'new', x: 'The Hall of Spirits is a full-screen gallery. Five wing doors show how far along each wing is, with a glowing number for spares you can donate. Inside a wing, every card has its own plinth: drag a spare from the tray onto its plinth to place it (or tap the card, then the plinth), or press Donate all. A card on the wrong plinth hops back, and a finished wing glows gold. Prizes are the same as before.' },
   { t: 'better', x: 'The new full-screen bakery and market stalls all leave the same way as the other screens: a Leave button at the bottom, instead of an X at the top.' },
