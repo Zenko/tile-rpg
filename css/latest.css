@@ -2923,3 +2923,10 @@ body.in-cellar .hud-ambient-sub { display: none; }
 body.in-cellar .hud-cellar { display: block; }
 .cl-menu { margin: 0 0 10px; text-align: center; line-height: 1.7; color: var(--ink-soft); }
 @media (prefers-reduced-motion: reduce) { .ent.cl-foe > span, .ent.cl-obj > span { animation: none; } }
+
+/* ---- build 304: neighbour screen in the light theme ---- */
+:root[data-theme="light"] #talkCard .tk-plate { color: var(--tk-name); text-shadow: 0 1px 2px var(--tk-name-shadow), 0 2px 12px var(--tk-name-shadow); }
+:root[data-theme="light"] #talkCard > .talk-close { background: color-mix(in srgb, var(--bg-top) 92%, transparent); color: var(--ink); border-color: var(--stone-edge); font-weight: 700; }
+:root[data-theme="light"] #talkCard > .talk-close:active { background: var(--hl); }
+/* the little smiley by the portrait said nothing the hearts do not already say */
+#talkCard .talk-portrait[data-mood]::after { display: none; }

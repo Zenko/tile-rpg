@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'better', x: 'The neighbour screen in the light theme: the name and hearts are light and easy to read over the town, and Leave is a proper solid button. The little smiley beside a close friend is gone, since the hearts already say it.' },
   { t: 'fixed', x: 'After you beat a neighbour, only their grave is left. Before, another neighbour could turn up in the same drawn look right next to it, so it seemed the beaten one was still standing there.' },
   { t: 'new', x: 'The cellar is a world now. Tap its door and you walk down into a dark place of your own: every floor is a map of rooms and corridors, you carry a lantern and only see a little way, and the floor remembers what you have found. Look for the stairs down. Creatures stand in the rooms (walk up and tap one for a match), a guardian stands on the stairs every few floors, and barrels, keys, chests, campfires, shrines and a peddler are tucked away. Tap the candle at the top for your run, or walk onto the stairs up to leave; your run waits.' },
   { t: 'fixed', x: 'A card\'s detail sheet has the round X in its top right, and its cost bubble is no longer cut off at the top. The way out of a maze world now glows above the dark, and when it is off screen an arrow on the edge points to it. The locked companion button says "make it your companion" instead of "walk with it".' },

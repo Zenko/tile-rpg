@@ -868,6 +868,9 @@
    slightly deeper sand there; dark theme keeps --bg-top. */
 #talkOverlay { --tk-veil: var(--bg-top); }
 :root[data-theme="light"] #talkOverlay { --tk-veil: color-mix(in srgb, var(--bg-top) 60%, #5c6855); }
+/* Light theme: the name and hearts sit on that darker veil, so they are light with a soft dark shadow (the dark ink was unreadable there),
+   and Leave is a solid cream button instead of a see-through one over the veil. Dark theme is unchanged. */
+:root[data-theme="light"] #talkOverlay { --tk-name: #fffaf0; --tk-name-shadow: rgba(40, 48, 36, .65); }
 /* Light-theme battle: a sand surface a step deeper than --stone for every pill, button and card paper that sat on the green mat,
    dark ink on it, and names on their own plates. The dark theme is untouched. */
 :root[data-theme="light"] #battleView {
