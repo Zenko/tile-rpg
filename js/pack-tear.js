@@ -13,14 +13,14 @@ function packTearStart(pack) {
   if (typeof btMotionOk === 'function' && !btMotionOk()) return false;
   packTearUi = { pack, tear: 0, torn: false, x0: null, id: null };
   const el = document.createElement('div'); el.id = 'packTear'; el.className = 'pack-tear'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', `Open the ${pack.name}`);
-  el.innerHTML = `<div class="pt-sparks" aria-hidden="true">${'<i></i>'.repeat(10)}</div>
-    <b class="pt-title">${pack.name}</b>
-    <div class="pt-pack" id="ptPack" role="button" tabindex="0" aria-label="${pack.name}: swipe across the top to tear it open, or tap it three times">
-      <div class="pt-flap" id="ptFlap"><span class="pt-crimp" aria-hidden="true"></span></div>
-      <div class="pt-body"><span class="pt-icon" aria-hidden="true">${pack.icon}</span><b>${pack.name}</b><small>${pack.floorLabel}</small></div>
-      <div class="pt-line" aria-hidden="true"><i id="ptFill"></i></div>
+  el.innerHTML = `<div class="ptr-sparks" aria-hidden="true">${'<i></i>'.repeat(10)}</div>
+    <b class="ptr-title">${pack.name}</b>
+    <div class="ptr-pack" id="ptPack" role="button" tabindex="0" aria-label="${pack.name}: swipe across the top to tear it open, or tap it three times">
+      <div class="ptr-flap" id="ptFlap"><span class="ptr-crimp" aria-hidden="true"></span></div>
+      <div class="ptr-body"><span class="ptr-icon" aria-hidden="true">${pack.icon}</span><b>${pack.name}</b><small>${pack.floorLabel}</small></div>
+      <div class="ptr-line" aria-hidden="true"><i id="ptFill"></i></div>
     </div>
-    <p class="pt-hint" id="ptHint">Swipe across the top to tear it open. (Or tap it three times.)</p>
+    <p class="ptr-hint" id="ptHint">Swipe across the top to tear it open. (Or tap it three times.)</p>
     <button type="button" class="btn btn-ghost pt-leave" id="ptLeave">Put it back</button>`;
   document.body.appendChild(el); packTearEl = el; packTearWire(el); sfx('nav');
   requestAnimationFrame(() => el.classList.add('in'));

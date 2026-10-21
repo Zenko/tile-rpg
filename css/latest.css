@@ -3307,23 +3307,23 @@ body.in-shopfront .overlay, body.in-shopfront .toast { z-index: 70; }
 /* ---- build 313: tearing a pack open (js/pack-tear.js) ---- */
 .pack-tear { position: fixed; inset: 0; z-index: 21; max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: env(safe-area-inset-top, 0px) 20px calc(14px + env(safe-area-inset-bottom, 0px)); background: radial-gradient(120% 70% at 50% 30%, var(--pt-bg2), var(--pt-bg)); color: var(--pt-card); opacity: 0; transition: opacity .25s; --tear: 0; touch-action: none; }
 .pack-tear.in { opacity: 1; }
-.pt-title { font: 700 1.3rem var(--f-display); color: var(--pt-foil); }
-.pt-sparks { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
-.pt-sparks i { position: absolute; bottom: -8px; width: 4px; height: 4px; border-radius: 50%; background: var(--pt-spark); opacity: 0; animation: pt-rise 8s linear infinite; }
-.pt-sparks i:nth-child(1) { left: 8%; } .pt-sparks i:nth-child(2) { left: 20%; animation-delay: 2s; } .pt-sparks i:nth-child(3) { left: 33%; animation-delay: 4s; } .pt-sparks i:nth-child(4) { left: 45%; animation-delay: 1s; } .pt-sparks i:nth-child(5) { left: 58%; animation-delay: 5s; }
-.pt-sparks i:nth-child(6) { left: 70%; animation-delay: 3s; } .pt-sparks i:nth-child(7) { left: 82%; animation-delay: 6s; } .pt-sparks i:nth-child(8) { left: 92%; animation-delay: 2.5s; } .pt-sparks i:nth-child(9) { left: 26%; animation-delay: 7s; } .pt-sparks i:nth-child(10) { left: 64%; animation-delay: 6.5s; }
+.ptr-title { font: 700 1.3rem var(--f-display); color: var(--pt-foil); }
+.ptr-sparks { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.ptr-sparks i { position: absolute; bottom: -8px; width: 4px; height: 4px; border-radius: 50%; background: var(--pt-spark); opacity: 0; animation: pt-rise 8s linear infinite; }
+.ptr-sparks i:nth-child(1) { left: 8%; } .ptr-sparks i:nth-child(2) { left: 20%; animation-delay: 2s; } .ptr-sparks i:nth-child(3) { left: 33%; animation-delay: 4s; } .ptr-sparks i:nth-child(4) { left: 45%; animation-delay: 1s; } .ptr-sparks i:nth-child(5) { left: 58%; animation-delay: 5s; }
+.ptr-sparks i:nth-child(6) { left: 70%; animation-delay: 3s; } .ptr-sparks i:nth-child(7) { left: 82%; animation-delay: 6s; } .ptr-sparks i:nth-child(8) { left: 92%; animation-delay: 2.5s; } .ptr-sparks i:nth-child(9) { left: 26%; animation-delay: 7s; } .ptr-sparks i:nth-child(10) { left: 64%; animation-delay: 6.5s; }
 @keyframes pt-rise { 0% { transform: translateY(0); opacity: 0; } 15% { opacity: .8; } 100% { transform: translateY(-90vh); opacity: 0; } }
-.pt-pack { position: relative; width: min(64vw, 250px); aspect-ratio: .62; touch-action: none; cursor: grab; filter: none; animation: pt-bob 3s ease-in-out infinite; }
+.ptr-pack { position: relative; width: min(64vw, 250px); aspect-ratio: .62; touch-action: none; cursor: grab; filter: none; animation: pt-bob 3s ease-in-out infinite; }
 @keyframes pt-bob { 50% { transform: translateY(-6px) rotate(.6deg); } }
-.pt-body { position: absolute; left: 0; right: 0; top: 12%; bottom: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; border-radius: 0 0 14px 14px; background: linear-gradient(160deg, var(--pt-foil3), var(--pt-foil) 40%, var(--pt-foil2)); color: var(--pt-ink); box-shadow: 0 10px 24px var(--pt-shadow), inset 0 0 0 3px var(--pt-foil2); }
-.pt-icon { font-size: 4.2rem; line-height: 1; } .pt-body b { font: 800 1.05rem var(--f-ui); } .pt-body small { font: 600 .75rem var(--f-ui); opacity: .8; }
-.pt-flap { position: absolute; left: 0; right: 0; top: 0; height: 14%; border-radius: 14px 14px 0 0; background: linear-gradient(180deg, var(--pt-foil2), var(--pt-foil)); box-shadow: inset 0 0 0 3px var(--pt-foil2); transform-origin: 100% 100%; transform: translate(calc(var(--tear) * 30%), calc(var(--tear) * -12%)) rotate(calc(var(--tear) * 18deg)); transition: transform .08s linear; }
-.pt-crimp { position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent 0 6px, var(--pt-foil2) 6px 8px); opacity: .6; }
-.pt-line { position: absolute; left: 4%; right: 4%; top: 12%; height: 4px; border-radius: 2px; background: repeating-linear-gradient(90deg, var(--pt-ink) 0 6px, transparent 6px 12px); opacity: .5; }
-.pt-line i { display: block; height: 100%; width: calc(var(--tear) * 100%); background: var(--pt-spark); }
-.pack-tear.torn .pt-pack { animation: pt-burst .5s ease-out forwards; }
-.pack-tear.torn .pt-flap { transform: translate(70%, -90%) rotate(34deg); opacity: 0; transition: transform .5s ease, opacity .5s; }
+.ptr-body { position: absolute; left: 0; right: 0; top: 12%; bottom: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; border-radius: 0 0 14px 14px; background: linear-gradient(160deg, var(--pt-foil3), var(--pt-foil) 40%, var(--pt-foil2)); color: var(--pt-ink); box-shadow: 0 10px 24px var(--pt-shadow), inset 0 0 0 3px var(--pt-foil2); }
+.ptr-icon { font-size: 4.2rem; line-height: 1; } .ptr-body b { font: 800 1.05rem var(--f-ui); } .ptr-body small { font: 600 .75rem var(--f-ui); opacity: .8; }
+.ptr-flap { position: absolute; left: 0; right: 0; top: 0; height: 14%; border-radius: 14px 14px 0 0; background: linear-gradient(180deg, var(--pt-foil2), var(--pt-foil)); box-shadow: inset 0 0 0 3px var(--pt-foil2); transform-origin: 100% 100%; transform: translate(calc(var(--tear) * 30%), calc(var(--tear) * -12%)) rotate(calc(var(--tear) * 18deg)); transition: transform .08s linear; }
+.ptr-crimp { position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent 0 6px, var(--pt-foil2) 6px 8px); opacity: .6; }
+.ptr-line { position: absolute; left: 4%; right: 4%; top: 12%; height: 4px; border-radius: 2px; background: repeating-linear-gradient(90deg, var(--pt-ink) 0 6px, transparent 6px 12px); opacity: .5; }
+.ptr-line i { display: block; height: 100%; width: calc(var(--tear) * 100%); background: var(--pt-spark); }
+.pack-tear.torn .ptr-pack { animation: pt-burst .5s ease-out forwards; }
+.pack-tear.torn .ptr-flap { transform: translate(70%, -90%) rotate(34deg); opacity: 0; transition: transform .5s ease, opacity .5s; }
 @keyframes pt-burst { 40% { transform: scale(1.12); filter: brightness(1.5); } 100% { transform: scale(1.3); opacity: 0; filter: brightness(2); } }
-.pt-hint { margin: 0; text-align: center; font: 600 .85rem var(--f-ui); color: var(--pt-card); min-height: 1.3em; }
-.pt-leave { width: min(100%, 360px); min-height: 48px; border: 0; border-radius: 16px; background: var(--pt-card); color: var(--pt-ink); font: 700 .95rem var(--f-ui); }
-@media (prefers-reduced-motion: reduce) { .pt-pack, .pt-sparks i { animation: none !important; } }
+.ptr-hint { margin: 0; text-align: center; font: 600 .85rem var(--f-ui); color: var(--pt-card); min-height: 1.3em; }
+.ptr-leave { width: min(100%, 360px); min-height: 48px; border: 0; border-radius: 16px; background: var(--pt-card); color: var(--pt-ink); font: 700 .95rem var(--f-ui); }
+@media (prefers-reduced-motion: reduce) { .ptr-pack, .ptr-sparks i { animation: none !important; } }
