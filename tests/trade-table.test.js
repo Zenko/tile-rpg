@@ -7,10 +7,12 @@ module.exports = async (page, assert) => {
     const f = { id: 'npc-square-fenn', name: 'Fenn', icon: '🧑', deck: [], level: 3 }; window.__f = f; openTalk(f);
     const o = npcTradeOffers(f)[0], pay = CARD_POOL.find(c => !c.exclusive && c.rarity === o.need && c.id !== o.give).id;
     window.__o = o; window.__pay = pay; state.ownedCards = [pay, pay, pay, 'sprout', 'sprout', 'sprout']; state.deck = ['sprout']; saveState();
-    talkGo('trade'); document.querySelector(`#talkTrade [data-offer="${o.key}"]`).click(); document.querySelector(`#talkTrade [data-pay="${pay}"]`).click();
+    talkGo('trade'); document.querySelector(`#talkTrade [data-offer="${o.key}"]`).click();
   });
+  assert.ok(await ev(() => document.getElementById('talkCard').dataset.view === 'trade' && !!document.querySelector('#talkTrade [data-pay]')), 'tapping an offer keeps you on the Trade screen and lists your cards to pay with');
+  await ev(() => document.querySelector(`#talkTrade [data-pay="${window.__pay}"]`).click());
   const t = await ev(() => { const el = document.getElementById('tradeOverlay'); return { shown: !el.classList.contains('hidden') && getComputedStyle(el).display !== 'none', you: document.getElementById('txYou').textContent, them: document.getElementById('txThem').textContent, reward: document.getElementById('txReward').textContent, owned: state.ownedCards.length, trades: state.progress.totals.tradesDone || 0 }; });
-  assert.ok(t.shown && /You give/.test(t.you) && /family|Spell/.test(t.you) && /Fenn gives/.test(t.them) && /family|Spell/.test(t.them) && /\+\d+ XP/.test(t.reward) && /Embers/.test(t.reward), 'the table shows both cards, their families and the reward: ' + JSON.stringify(t));
+  assert.ok(t.shown && /You give/.test(t.you) && /family|Spell/.test(t.you) && /Fenn gives/.test(t.them) && /family|Spell/.test(t.them) && /\+\d+ XP/.test(t.reward) && /Embers/.test(t.reward) && /Daily|swap/.test(await ev(() => document.getElementById('txMeta').textContent)), 'the table shows both cards, their families and the reward: ' + JSON.stringify(t));
   assert.strictEqual(t.trades, 0, 'nothing has changed hands yet');
 
   // Not now: nothing happens

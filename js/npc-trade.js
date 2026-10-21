@@ -11,13 +11,15 @@
    A swap is made at the trade table (build 296, openTradeTable below): a window showing the two cards side by side with each one's family, what the
    swap pays, and a two-step agreement (you shake on it, then they do) before anything changes hands. A trade pays XP and Embers by the rarity of the card
    you take (NPC_TRADE_REWARD), a little more when it is their favourite keyword.
+   Gamified (build 297): a Trader rank from your lifetime trades (TRADER_RANKS, +10% on every reward per rank), a Family match (the card you give and the
+   card you take belong to the same family: +50%), and a daily goal of three swaps that pays a bonus on the third.
    Saved in state.progress.npcTrades = { day, done: { <offer key>: true } }, reset each day. UI: #talkTrade in index.html, the TRADE block at the
    end of css/latest.css; talkGo / renderTalkView (js/requests-friendship-rival.js) call renderTradePane. tests/npc-trade.test.js.
    ============================================================ */
 const NPC_TRADE_TIERS = [['common', 'rare', 'rare'], ['common', 'rare', 'ultra'], ['rare', 'ultra', 'super']];   // by friendship: new, friendly (2+ hearts), close (3+)
 function npcTradeState() {
   const p = state.progress;
-  if (!p.npcTrades || p.npcTrades.day !== todayKey()) p.npcTrades = { day: todayKey(), done: {} };
+  if (!p.npcTrades || p.npcTrades.day !== todayKey()) p.npcTrades = { day: todayKey(), done: {}, count: 0 };
   return p.npcTrades;
 }
 function npcTradeKind(f) { return !f || f.isRival || f.isAtlas || f.isVisitor ? null : f.isBoss ? 'boss' : 'neighbour'; }
@@ -40,7 +42,20 @@ function npcTradeOffers(f) {
   return out;
 }
 const NPC_TRADE_REWARD = { common: [8, 2], rare: [12, 3], ultra: [18, 5], super: [26, 8], mythic: [40, 12] };   // [XP, Embers] by the rarity of the card you take
-function npcTradeReward(got, loved) { const r = NPC_TRADE_REWARD[got.rarity] || NPC_TRADE_REWARD.common; return { xp: r[0] + (loved ? 4 : 0), embers: r[1] + (loved ? 2 : 0) }; }
+const TRADER_RANKS = [{ n: 0, name: 'Newcomer', icon: '🌱' }, { n: 3, name: 'Swapper', icon: '🔄' }, { n: 8, name: 'Dealer', icon: '🤝' }, { n: 15, name: 'Merchant', icon: '🎒' }, { n: 30, name: 'Tycoon', icon: '👑' }];
+const TRADE_DAILY_GOAL = 3, TRADE_DAILY_BONUS = { xp: 30, embers: 10 }, TRADE_KIN_BONUS = 0.5, TRADE_RANK_BONUS = 0.1;
+function traderInfo() {
+  const n = (state.progress.totals.tradesDone || 0); let i = 0;
+  TRADER_RANKS.forEach((r, k) => { if (n >= r.n) i = k; });
+  const next = TRADER_RANKS[i + 1] || null;
+  return { n, i, rank: TRADER_RANKS[i], next, frac: next ? (n - TRADER_RANKS[i].n) / (next.n - TRADER_RANKS[i].n) : 1 };
+}
+function tradeKin(payId, gotId) { const a = CARD_FAMILY[BattleEngine.baseIdOf(payId)], b = CARD_FAMILY[BattleEngine.baseIdOf(gotId)]; return !!a && a === b; }
+// What a swap pays: by the rarity of the card you take, a little more for their favourite keyword, +10% a Trader rank, +50% for a Family match.
+function npcTradeReward(got, loved, kin) {
+  const r = NPC_TRADE_REWARD[got.rarity] || NPC_TRADE_REWARD.common, mul = (1 + TRADE_RANK_BONUS * traderInfo().i) * (kin ? 1 + TRADE_KIN_BONUS : 1);
+  return { xp: Math.round((r[0] + (loved ? 4 : 0)) * mul), embers: Math.round((r[1] + (loved ? 2 : 0)) * mul) };
+}
 function npcTradeDone(f, o) {
   const done = npcTradeState().done;
   return !!done[o.key] || (f.isBoss && !!done['boss:' + npcBossDistrict(f)]);   // a boss trades once a day, whichever card
@@ -66,14 +81,21 @@ function npcTradeDo(f, offerKey, payId) {
   const done = npcTradeState().done; done[o.key] = true; if (kind === 'boss') done['boss:' + npcBossDistrict(f)] = true;
   state.progress.discovered = Array.from(new Set((state.progress.discovered || []).concat([BattleEngine.baseIdOf(payId)])));   // the Index remembers what went
   bumpStat('tradesDone', 1); bumpStat('cardsFound', 1); bumpPill('pillCards');
-  const reward = npcTradeReward(got, loved);
+  const kin = tradeKin(payId, o.give), reward = npcTradeReward(got, loved, kin), rank0 = traderInfo().i;
   addXP(reward.xp); addPebbles(reward.embers, 'trades');   // addPebbles saves and refreshes the bar
+  const st = npcTradeState(); st.count = (st.count || 0) + 1;
+  const daily = st.count === TRADE_DAILY_GOAL;   // the third swap of the day pays a bonus
+  if (daily) { addXP(TRADE_DAILY_BONUS.xp); addPebbles(TRADE_DAILY_BONUS.embers, 'trades'); }
   if (kind === 'neighbour') addFriendship(f, loved ? 3 : 1, 'trade');
   logEvent('🤝', `Traded ${pay.name} to ${f.name} for ${got.name}.`);
   saveState(); updateHud(); if (typeof checkSets === 'function') checkSets(); checkAchievements();
   if (isNew) toast('📖 New entry in your Index');
-  showCardReveal(o.give, `Traded with ${f.name}`, true, `🫧 +${reward.embers} ${GAME.currency.many}`, reward.xp);
-  return { o, pay, got, loved, reward };
+  const ti = traderInfo(), rankUp = ti.i > rank0 ? ti.rank : null;
+  if (rankUp) setTimeout(() => toast(`${rankUp.icon} You are a ${rankUp.name} trader now. Swaps pay ${Math.round(TRADE_RANK_BONUS * 100 * ti.i)}% more.`), 1800);
+  const total = { xp: reward.xp + (daily ? TRADE_DAILY_BONUS.xp : 0), embers: reward.embers + (daily ? TRADE_DAILY_BONUS.embers : 0) };
+  const note = `🫧 +${total.embers} ${GAME.currency.many}` + (kin ? '<br>🤝 Family match: +50%' : '') + (daily ? `<br>⭐ Daily trader bonus: ${TRADE_DAILY_GOAL} swaps today` : '');
+  showCardReveal(o.give, `Traded with ${f.name}`, true, note, total.xp);
+  return { o, pay, got, loved, reward, kin, daily, rankUp };
 }
 
 /* ---------------- the Trade card on the Talk screen ---------------- */
@@ -138,14 +160,17 @@ function txSide(label, id) {
 function txClose() { txTimers.forEach(clearTimeout); txTimers = []; txBusy = false; txDone = null; txEl('tradeOverlay').classList.add('hidden'); }
 function openTradeTable(f, o, payId, onDone) {
   const give = cardDef(o.give), pay = cardDef(payId), theme = f.isBoss ? null : signatureTheme(f);
-  const loved = !!theme && (pay.kw.includes(theme) || give.kw.includes(theme)), rw = npcTradeReward(give, loved);
+  const loved = !!theme && (pay.kw.includes(theme) || give.kw.includes(theme)), kin = tradeKin(payId, o.give), rw = npcTradeReward(give, loved, kin);
   txBusy = false; txDone = onDone;
   txEl('txTitle').textContent = `Trade with ${f.name}`;
   txEl('txSay').textContent = loved ? `“${pay.name}! ${KW[theme].icon} ${KW[theme].name} is my favourite. Do we have a deal?”` : f.isBoss ? '“Fair is fair. Do we have a deal?”' : '“A swap, then? Do we have a deal?”';
   txEl('txYou').innerHTML = txSide('You give', payId);
   txEl('txThem').innerHTML = txSide(`${f.name} gives`, o.give);
   [['txSealYou', 'You'], ['txSealThem', f.name]].forEach(([id, who]) => { const el = txEl(id); el.className = 'tx-seal'; el.textContent = `${who}: not yet`; });
-  txEl('txReward').innerHTML = `The swap pays <b>+${rw.xp} XP</b> and <b>🫧 +${rw.embers} ${GAME.currency.many}</b>`;
+  const ti = traderInfo(), today = npcTradeState().count || 0, pips = Array.from({ length: TRADE_DAILY_GOAL }, (_, i) => `<i class="${i < today ? 'on' : ''}"></i>`).join('');
+  txEl('txMeta').innerHTML = `<div class="tx-rank"><span>${ti.rank.icon} <b>${ti.rank.name}</b></span><span class="tx-bar" role="progressbar" aria-valuenow="${Math.round(ti.frac * 100)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${Math.round(ti.frac * 100)}%"></i></span><small>${ti.next ? `${ti.next.n - ti.n} more to ${ti.next.name}` : 'Top rank'}</small></div>`
+    + `<div class="tx-daily"><span class="tx-pips">${pips}</span><small>${today >= TRADE_DAILY_GOAL ? 'Daily bonus claimed' : `${TRADE_DAILY_GOAL - today} more swap${TRADE_DAILY_GOAL - today === 1 ? '' : 's'} today for a bonus`}</small></div>`;
+  txEl('txReward').innerHTML = `The swap pays <b>+${rw.xp} XP</b> and <b>🫧 +${rw.embers} ${GAME.currency.many}</b>` + (kin ? `<span class="tx-kin">🤝 Family match: +50%</span>` : '');
   txEl('txYes').disabled = false; txEl('txNo').disabled = false;
   txEl('tradeOverlay').classList.remove('hidden'); sfx('nav');
   txEl('txNo').focus();

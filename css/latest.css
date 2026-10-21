@@ -2900,3 +2900,14 @@ body.in-battle .tab-win, body.in-battle .win-dim, body.in-scene .tab-win, body.i
 .tx-actions .btn { margin: 0; }
 .tx-yes { flex: 2; } .tx-no { flex: 1; }
 .tx-side .rarity-tag { margin: 0; font-size: .66rem; }
+
+/* trade table, gamified (build 297): trader rank, the daily three, the family-match badge */
+.tx-meta { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; text-align: left; }
+.tx-rank, .tx-daily { display: flex; align-items: center; gap: 8px; font-size: .8rem; color: var(--ink); }
+.tx-rank small, .tx-daily small { margin-left: auto; font-size: .7rem; font-weight: 700; color: var(--ink-soft); }
+.tx-bar { flex: 1; max-width: 90px; height: 6px; border-radius: 999px; background: var(--track); overflow: hidden; }
+.tx-bar i { display: block; height: 100%; border-radius: inherit; background: var(--accent); }
+.tx-pips { display: inline-flex; gap: 5px; }
+.tx-pips i { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--stone-edge); }
+.tx-pips i.on { background: var(--accent); border-color: var(--accent); }
+.tx-kin { display: block; margin-top: 4px; font-weight: 800; color: var(--ink); }

@@ -369,7 +369,7 @@ function talkGo(view) { if (!talkTo) return; if (view === talkView && view !== '
 document.getElementById('talkCard').addEventListener('click', e => {
   const g = e.target.closest('[data-go]'); if (g) { talkGo(g.dataset.go); return; }
   if (e.target.closest('#talkBack')) talkGo('home');
-  else if (talkView !== 'home' && talkStyle() !== 'classic' && !e.target.closest('.tk-lower, .talk-close, .tk-offer')) talkGo('home');   // the dock styles: tap the neighbour to put the list away
+  else if (talkView !== 'home' && talkStyle() !== 'classic' && !e.composedPath().some(n => n.matches && n.matches('.tk-lower, .talk-close, .tk-offer'))) talkGo('home');   // composedPath, not target.closest: a button that redraws its own list (a trade offer) is no longer in the page by the time this runs, and the screen used to drop back to the grid   // the dock styles: tap the neighbour to put the list away
 });
 document.getElementById('talkQuick').addEventListener('click', () => document.getElementById('talkFight').click());
 // Android's back gesture: one history entry while the screen is open. Back inside a list goes to the grid first.

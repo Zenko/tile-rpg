@@ -18,6 +18,8 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'fixed', x: 'Tapping a card to trade no longer throws you back to the neighbour screen. You stay on Trade and pick what to give.' },
+  { t: 'new', x: 'Trading is a little game now. Climb Trader ranks (Newcomer, Swapper, Dealer, Merchant, Tycoon) for +10% on every swap per rank, swap two cards of the same family for a +50% Family match, and make three swaps in a day for a bonus.' },
   { t: 'new', x: 'A proper trade table. Pick a card to take and a spare to give and a window shows both cards side by side with their families, what the swap pays, and a two-step handshake: you shake on it, then they do, and only then do the cards change hands. Every trade now pays XP and Embers (more for rarer cards, and a little extra when it is their favourite).' },
   { t: 'better', x: 'The neighbour screen is tidier: the picture is a little smaller, their name and hearts sit just above what they say, the memory pill at the top is gone, and a favour\'s Happy to help is the first thing in Chat.' },
   { t: 'better', x: 'One look for buttons everywhere. Every card, window and menu closes with the same round X in the top right (the welcome sign, the weather card and the world map now match the main menu). Screens that take over the whole display (a neighbour, a building, the fountain) leave with a plain Leave button at the foot instead, and the action buttons are one size, with a filled pill for the main choice and an outline pill for Not now, Later and Cancel.' },
