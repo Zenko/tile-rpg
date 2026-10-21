@@ -176,8 +176,8 @@ const NPC_DRAWN_TEST = { square: 'don' };
 function npcDrawnId(f, data) {
   const id = NPC_DRAWN_TEST[state.currentDistrict];
   if (!id || !playerSpriteReady() || !PLAYER_ART.chars[id]) return null;
-  const first = fighters(data).find(n => !n.isBoss && !n.isRival && !n.isAtlas && !n.isVisitor && !n.defeated);
-  return first === f ? id : null;
+  const first = fighters(data).find(n => !n.isBoss && !n.isRival && !n.isAtlas && !n.isVisitor);   // buried ones still count, so the drawn sprite never hops to the next neighbour beside a grave
+  return first === f && !f.defeated ? id : null;
 }
 // The neighbour screen (js/requests-friendship-rival.js) shows a drawn neighbour as a big bust: the upper-body picture, cropped at the
 // hem (meta.legTop, where the legs begin). The town notes which fighters it drew so the screen can find them again.
