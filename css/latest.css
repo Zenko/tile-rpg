@@ -2945,3 +2945,12 @@ body.in-battle .tab-win, body.in-battle .win-dim, body.in-scene .tab-win, body.i
 /* lucky swap line on the trade table */
 .tx-luck { margin: -4px 0 12px; font-size: .86rem; color: var(--ink); }
 .tx-luck small { display: block; font-size: .7rem; font-weight: 700; color: var(--ink-soft); }
+
+/* the maze's way out, above the fog (js/puddle-modes.js pwBeaconSync) */
+.pw-beacon { position: absolute; z-index: 7; width: 44px; height: 44px; margin: -22px 0 0 -22px; display: grid; place-items: center; pointer-events: none; }
+.pw-beacon .pwb-ico { font-size: 1.7rem; line-height: 1; animation: pw-spin 6s linear infinite; filter: drop-shadow(0 0 10px var(--c-indigo-77)); }
+.pw-beacon .pwb-arrow { display: none; position: absolute; left: 50%; top: 50%; width: 0; height: 0; margin: -7px 0 0 -5px; border-left: 12px solid var(--accent); border-top: 7px solid transparent; border-bottom: 7px solid transparent; filter: drop-shadow(0 1px 3px var(--shadow)); }
+.pw-beacon.edge .pwb-arrow { display: block; }
+@media (prefers-reduced-motion: reduce) { .pw-beacon .pwb-ico { animation: none; } }
+/* the card detail sheet: the cost bubble hangs above the card's top-left corner, so the frame needs room above it or the sheet's own scroll box cuts it off */
+#cardSheet .reveal-card-frame.cs-card { margin: 34px 0 14px; }

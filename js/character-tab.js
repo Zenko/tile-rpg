@@ -262,7 +262,7 @@ function drawCompanionPicker() {
   const cur = state.companion ? companionKey(state.companion) : '';
   document.getElementById('cpList').innerHTML = rows.length ? rows.map(({ e, why }) => {
     const lowLv = ensureLevel().level < e.level, lowHearts = e.kind === 'npc' && e.hearts < e.needHearts;
-    const st = e.key === cur ? '✓ With you' : why ? '🔒 ' + (lowLv || lowHearts ? [lowLv ? `Lv ${e.level}` : '', lowHearts ? `❤️ ${e.hearts}/${e.needHearts}` : ''].filter(Boolean).join(' · ') : why.replace(/^You need to own this card to walk with it$/, 'Not owned')) : '';
+    const st = e.key === cur ? '✓ With you' : why ? '🔒 ' + (lowLv || lowHearts ? [lowLv ? `Lv ${e.level}` : '', lowHearts ? `❤️ ${e.hearts}/${e.needHearts}` : ''].filter(Boolean).join(' · ') : why.replace(/^You need to own this card to make it your companion$/, 'Not owned')) : '';
     const bs = bondsStore()[e.key], lv = bs ? bondLevel(bs) : 0;
     return `<button class="cp-row${e.key === cur ? ' cur' : ''}${why && e.key !== cur ? ' lock' : ''}" data-cpkey="${escapeHtml(e.key)}"><span class="cp-ico">${entryIconHtml(e)}</span><span class="cp-t"><b>${escapeHtml(e.name)}</b><small>${[e.perk, e.perk2].filter(Boolean).map(k => COMPANION_PERKS[k].icon + ' ' + COMPANION_PERKS[k].text).join(' · ')}${lv > 1 ? ` · bond ${lv}` : ''}</small><small>${escapeHtml(e.sub)}</small></span><span class="cp-st">${escapeHtml(st)}</span></button>`;
   }).join('') : `<div class="panel-desc cp-empty">${q ? 'Nobody matches that.' : empty}</div>`;

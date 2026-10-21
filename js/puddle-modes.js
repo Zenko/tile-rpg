@@ -95,10 +95,26 @@ function pwFogLoop() {
     f.style.setProperty('--fx', (a.left + a.width / 2 - v.left) + 'px'); f.style.setProperty('--fy', (a.top + a.height / 2 - v.top) + 'px');
     f.style.setProperty('--fr', (tilePx * PW_MAZE_RADIUS) + 'px');
   }
+  pwBeaconSync();
   pwFogRaf = requestAnimationFrame(pwFogLoop);
 }
+/* The way out glows above the fog (build 300). It used to sit in the dark and under the top pill, so it was hard to find: now a spinning beacon marks
+   the exit when it is on screen, and when it is not, it sits on the edge of the screen with an arrow that points the way. */
+function pwBeaconSync() {
+  const m = getMap(PW_KEY), ex = m.exits && Object.keys(m.exits)[0];
+  let b = townView.querySelector(':scope > .pw-beacon');
+  if (!ex || typeof lastCam === 'undefined' || !lastCam) { if (b) b.remove(); return; }
+  if (!b) { b = document.createElement('div'); b.className = 'pw-beacon'; b.innerHTML = '<span class="pwb-ico">🌀</span><i class="pwb-arrow"></i>'; townView.appendChild(b); }
+  const [x, y] = ex.split(',').map(Number), vw = townView.clientWidth, vh = townView.clientHeight;
+  const tx = (x + 0.5) * tilePx + lastCam.cx, ty = (y + 0.5) * tilePx + lastCam.cy;
+  const px = Math.max(30, Math.min(vw - 30, tx)), py = Math.max(150, Math.min(vh - 120, ty));
+  b.style.left = px + 'px'; b.style.top = py + 'px';
+  const edge = Math.abs(px - tx) > 4 || Math.abs(py - ty) > 4;
+  b.classList.toggle('edge', edge);
+  if (edge) b.querySelector('.pwb-arrow').style.transform = `rotate(${Math.atan2(ty - py, tx - px)}rad) translateX(30px)`;
+}
 function pwFogOn() { if (!pwFogRaf) pwFogRaf = requestAnimationFrame(pwFogLoop); }
-function pwFogOff() { if (pwFogRaf) cancelAnimationFrame(pwFogRaf); pwFogRaf = 0; const f = townView && pwFogEl(); if (f) f.remove(); }
+function pwFogOff() { if (pwFogRaf) cancelAnimationFrame(pwFogRaf); pwFogRaf = 0; const f = townView && pwFogEl(); if (f) f.remove(); const b = townView && townView.querySelector(':scope > .pw-beacon'); if (b) b.remove(); }
 
 PW_KINDS.maze = {
   weight: 2,

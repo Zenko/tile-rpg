@@ -214,7 +214,7 @@ function companionRoster() {
 function companionBlock(e) {
   if (!e) return 'Not available';
   if (state.companion && companionKey(state.companion) === e.key) return '';
-  if (e.kind === 'card') { if (e.rarity === 'atlas') return `The ${CAST.atlas.name} cannot walk with anyone`; if (!e.owned) return 'You need to own this card to walk with it'; }
+  if (e.kind === 'card') { if (e.rarity === 'atlas') return `The ${CAST.atlas.name} cannot walk with anyone`; if (!e.owned) return 'You need to own this card to make it your companion'; }
   const lv = ensureLevel().level, needLv = lv < e.level, needHearts = e.kind === 'npc' && e.hearts < e.needHearts;
   if (needLv && needHearts) return `Needs Lv ${e.level} and ${e.needHearts} hearts (you are Lv ${lv} with ${e.hearts})`;
   if (needHearts) return `Needs ${e.needHearts} hearts (you have ${e.hearts})`;
