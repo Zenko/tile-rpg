@@ -1023,3 +1023,33 @@
 .sp-jar[data-hue="clove"], .sp-puff[data-hue="clove"] { --sp-spice: #6b3b26; }
 .sp-jar[data-hue="mint"], .sp-puff[data-hue="mint"] { --sp-spice: #66c4a0; }
 .sp-jar[data-hue="vanilla"], .sp-puff[data-hue="vanilla"] { --sp-spice: #f1dba0; }
+
+/* The thread stall screen (build 307, js/thread-screen.js): an evening haberdashery, the same in both themes. */
+.thread-screen {
+  --th-wall: #2d3350;
+  --th-wall2: #475075;
+  --th-cloth: #e9e3f2;
+  --th-cloth2: #cfc6e0;
+  --th-card: #fbf6ee;
+  --th-ink: #2f2745;
+  --th-soft: #6d6490;
+  --th-gold: #f2c96b;
+  --th-wood: #8a6a49;
+  --th-wood2: #5e4529;
+  --th-edge: #26203a;
+  --th-good: #8fcf9a;
+  --th-bad: #e07a8a;
+  --th-lit: #f6a6c1;
+  --th-shadow: rgba(18, 12, 36, .5);
+  --th-c1: #e87fa0;
+  --th-c2: #7fb6e8;
+  --th-c3: #7fb577;
+  --th-c4: #e8c25a;
+  --th-c5: #a98be0;
+  --th-c6: #f6a6c1;
+}
+.th-rib[data-hue="rose"] { --th-r: #e87fa0; }
+.th-rib[data-hue="sky"] { --th-r: #7fb6e8; }
+.th-rib[data-hue="moss"] { --th-r: #7fb577; }
+.th-rib[data-hue="gold"] { --th-r: #e8c25a; }
+.th-rib[data-hue="violet"] { --th-r: #a98be0; }

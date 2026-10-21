@@ -140,3 +140,12 @@ const SPICE_JARS = [
   { id: 'mint',     name: 'Frost mint',   hue: 'mint',     line: 'Breathe in slowly. There. Cleared the whole morning.' },
   { id: 'vanilla',  name: 'Vanilla',      hue: 'vanilla',  line: 'People say it is plain. People are wrong.' },
 ];
+
+// ---- used by js/thread-screen.js: the ribbons on the thread stall's line, and what the seller whispers about each ----
+const THREAD_RIBBONS = [
+  { id: 'rose',   name: 'Rose ribbon',   hue: 'rose',   line: 'For gifts. Tie it loose, so it can be undone with a smile.' },
+  { id: 'sky',    name: 'Sky ribbon',    hue: 'sky',    line: 'Cut from a very long afternoon. There is still a lot of it.' },
+  { id: 'moss',   name: 'Moss ribbon',   hue: 'moss',   line: 'Quiet green. It holds a hem and keeps a secret.' },
+  { id: 'gold',   name: 'Gold thread',   hue: 'gold',   line: 'Do not pull it. It is the only thing holding that coat together.' },
+  { id: 'violet', name: 'Violet ribbon', hue: 'violet', line: 'I am told it glows at night. I have never checked.' },
+];
