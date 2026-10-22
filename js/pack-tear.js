@@ -38,7 +38,12 @@ function packTearDone() {
   document.getElementById('ptHint').textContent = '';
   setTimeout(() => { const p = u.pack; packTearClose(); ensureAudio(); if (!buyPack(p.id)) { toast(`Not enough ${GAME.currency.many} yet`); sfx('tie'); } }, 520);
 }
-function packTearClose() { if (!packTearEl) return; packTearEl.remove(); packTearEl = null; packTearUi = null; }
+function packTearClose() {
+  if (!packTearEl) return;
+  const el = packTearEl; packTearEl = null; packTearUi = null;   // gone for logic at once; the picture fades out
+  el.removeAttribute('id'); el.querySelectorAll('[id]').forEach(n => n.removeAttribute('id'));   // so a fading copy is never mistaken for the live one
+  el.classList.add('bye'); setTimeout(() => el.remove(), 220);
+}
 
 function packTearWire(el) {
   el.addEventListener('click', e => {

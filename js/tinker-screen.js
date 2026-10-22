@@ -23,7 +23,7 @@ function tinkerBuild() {
     <p class="tn-hint" id="tnHint"></p>
     <div class="tn-foot" id="tnFoot"></div>
     <button type="button" class="btn btn-ghost tn-leave" id="tnLeave">Leave</button>`;
-  document.body.appendChild(el); tinkerEl = el; tinkerWire(el); return el;
+  document.body.appendChild(el); tinkerEl = el; screenFxInit(el); tinkerWire(el); return el;
 }
 
 function tinkerRender() {
@@ -144,7 +144,7 @@ function tinkerScreenHide() {
 function tinkerScreenSync() {
   if (!scene || scene.id !== 'stall-tinker' || scene.mode || (typeof mini !== 'undefined' && mini && mini.id !== 'gears')) { tinkerScreenHide(); return; }
   const el = tinkerEl || tinkerBuild(), was = tinkerOpen(), g = tinkerGame();
-  el.classList.remove('hidden'); document.body.classList.add('in-tinker');
+  screenFxShow(el); document.body.classList.add('in-tinker');
   const sig = [scene.text, state.progress.pebbles, tinkerSorted(), g ? ['g', g.done].join(',') : '-', miniState('gears').rewarded, ingredientCount('flowers'), ingredientCount('fish')].join('|');
   const want = g ? (g.done ? 'over' : 'game') : 'shop';
   if (!was || sig !== tinkerUi.sig || el.dataset.mode !== want) { tinkerUi.sig = sig; if (!g) el.classList.remove('solved'); tinkerRender(); }

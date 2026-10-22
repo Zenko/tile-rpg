@@ -34,7 +34,7 @@ function bakeryBuild() {
     <p class="bk-hint" id="bkHint"></p>
     <div class="bk-spots" id="bkSpots"></div>
     <button type="button" class="btn btn-ghost bk-leave" id="bkLeave">Leave</button>`;
-  document.body.appendChild(el); bakeryEl = el; bakeryWire(el); return el;
+  document.body.appendChild(el); bakeryEl = el; screenFxInit(el); bakeryWire(el); return el;
 }
 
 function bakerySay() { const t = document.getElementById('bkSay'); if (t && scene) t.textContent = scene.text || ''; }
@@ -203,7 +203,7 @@ function bakeryScreenSync() {
   const home = !!scene && scene.id === 'bakery' && !scene.mode && !(typeof mini !== 'undefined' && mini);
   if (!home) { bakeryScreenHide(); return; }
   const el = bakeryEl || bakeryBuild(), was = bakeryOpen();
-  el.classList.remove('hidden'); document.body.classList.add('in-bakery');
+  screenFxShow(el); document.body.classList.add('in-bakery');
   if (!was) { bakeryUi.step = 'knead'; bakeryUi.knead = 0; bakeryUi.cuts = []; }   // a fresh visit starts at the dough
   const sig = [bakeryPhase(), bakeryUi.step, scene.text, breadCount(), buildingState('bakery').roll, miniState('frost').rewarded].join('|');
   if (!was || sig !== bakeryUi.sig) { bakeryUi.sig = sig; bakeryRender(); } else bakeryTick();

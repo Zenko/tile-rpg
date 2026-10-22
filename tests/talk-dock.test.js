@@ -1,11 +1,16 @@
 // The neighbour screen's dock and close-up styles (build 289, prefs.talkStyle): the same panes and buttons as the classic grid, a dock of the four jobs,
-// a match button one tap away, a list that opens above the dock and closes again, and a Settings switch.
+// a match button one tap away, and a list that opens above the dock and closes again. Close-up is the only look players get (talkStyleLock);
+// this test lifts the lock to keep covering the other layouts.
 module.exports = async (page, assert) => {
   const ev = (fn, arg) => page.evaluate(fn, arg);
   const shown = sel => ev(s => { const e = document.querySelector(s); return !!e && e.offsetParent !== null; }, sel);
   const view = () => ev(() => document.getElementById('talkCard').dataset.view);
   const open = s => ev(st => { if (talkTo) closeTalk(); prefs.talkStyle = st; openTalk({ id: 'npc-square-fenn', name: 'Fenn', icon: '🧑', deck: [], level: 3 }); }, s);
   await ev(() => { const h = document.getElementById('testHideOverlays'); if (h) h.remove(); switchTab('town'); });
+  // the lock: whatever the pref says, players get the close-up
+  assert.strictEqual(await ev(() => { prefs.talkStyle = 'dock'; return talkStyle(); }), 'combo', 'the close-up is the only look players get');
+  assert.ok(await ev(() => !document.getElementById('talkStyleSeg')), 'and Settings no longer offers a choice');
+  await ev(() => { talkStyleLock = null; });
 
   // the default is the close-up, and an unknown value falls back to it
   assert.strictEqual(await ev(() => { delete prefs.talkStyle; return talkStyle(); }), 'combo', 'close-up is the default');
@@ -66,8 +71,5 @@ module.exports = async (page, assert) => {
   await ev(() => document.querySelector('#talkCats [data-go="play"]').click());
   assert.ok(!(await shown('#talkCats')), 'classic hides the grid while a list is open');
 
-  // the Settings switch sets the pref and shows the choice
-  const seg = await ev(() => { document.querySelector('#talkStyleSeg [data-talkstyle-pick="dock"]').click(); const a = prefs.talkStyle; syncTalkStyleSeg(); return { a, on: document.querySelector('#talkStyleSeg .seg-btn.active').dataset.talkstylePick }; });
-  assert.deepStrictEqual(seg, { a: 'dock', on: 'dock' }, 'the Settings switch works');
   await ev(() => { closeTalk(); delete prefs.talkStyle; savePrefs(); });
 };

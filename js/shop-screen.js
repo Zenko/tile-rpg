@@ -26,7 +26,7 @@ function shopBuild() {
     <div class="cs-stage" id="csStage"></div>
     <p class="cs-hint" id="csHint"></p>
     <button type="button" class="btn btn-ghost cs-leave" id="csLeave">Leave</button>`;
-  document.body.appendChild(el); shopEl = el; shopWire(el); return el;
+  document.body.appendChild(el); shopEl = el; screenFxInit(el); shopWire(el); return el;
 }
 
 function shopView() { return scene && ['sleeves', 'items', 'customize'].includes(scene.mode) ? scene.mode : 'hub'; }
@@ -209,7 +209,7 @@ function shopScreenHide() {
 function shopScreenSync() {
   if (!scene || scene.id !== 'card-shop' || (scene.mode && !['sleeves', 'items', 'customize'].includes(scene.mode))) { shopScreenHide(); return; }
   const el = shopEl || shopBuild(), was = shopOpen();
-  el.classList.remove('hidden'); document.body.classList.add('in-shopfront');
+  screenFxShow(el); document.body.classList.add('in-shopfront');
   if (!was) { shopUi.sleeveFor = null; shopUi.tab = 'shop'; shopUi.pick = null; shopUi.tryOn = null; shopUi.cat = 'look'; }
   const sig = [shopView(), scene.text, state.progress.pebbles, currentSleeve().id, ensureSleeves().unlockedSleeves.length, state.character.emoji, state.character.drawn, state.character.color].join('|');
   if (!was || sig !== shopUi.sig) { shopUi.sig = sig; shopRender(); }

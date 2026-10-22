@@ -26,7 +26,7 @@ function threadBuild() {
     <p class="th-hint" id="thHint"></p>
     <div class="th-foot" id="thFoot"></div>
     <button type="button" class="btn btn-ghost th-leave" id="thLeave">Leave</button>`;
-  document.body.appendChild(el); threadEl = el; threadWire(el); return el;
+  document.body.appendChild(el); threadEl = el; screenFxInit(el); threadWire(el); return el;
 }
 
 function threadRender() {
@@ -134,7 +134,7 @@ function threadScreenHide() {
 function threadScreenSync() {
   if (!scene || scene.id !== 'stall-thread' || scene.mode || (typeof mini !== 'undefined' && mini && mini.id !== 'pattern')) { threadScreenHide(); return; }
   const el = threadEl || threadBuild(), was = threadOpen(), g = threadGame();
-  el.classList.remove('hidden'); document.body.classList.add('in-thread');
+  screenFxShow(el); document.body.classList.add('in-thread');
   if (g) { threadRender2(g, was); return; }
   const sig = [scene.text, state.progress.pebbles, threadFound(), miniState('pattern').rewarded].join('|');
   if (!was || sig !== threadUi.sig || el.dataset.mode !== 'shop') { threadUi.sig = sig; threadRender(); }

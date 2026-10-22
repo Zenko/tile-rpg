@@ -19,7 +19,7 @@ function museumBuild() {
     <div class="mu-tray-wrap" id="muTray"></div>
     <p class="mu-hint" id="muHint"></p>
     <button type="button" class="btn btn-ghost mu-leave" id="muLeave">Leave</button>`;
-  document.body.appendChild(el); museumEl = el; museumWire(el); return el;
+  document.body.appendChild(el); museumEl = el; screenFxInit(el); museumWire(el); return el;
 }
 
 function museumRender() {
@@ -106,7 +106,7 @@ function museumScreenHide() {
 function museumScreenSync() {
   if (!scene || scene.id !== 'museum' || scene.mode) { museumScreenHide(); return; }
   const el = museumEl || museumBuild(), was = museumOpen();
-  el.classList.remove('hidden'); document.body.classList.add('in-museum');
+  screenFxShow(el); document.body.classList.add('in-museum');
   if (!was) { museumUi.wing = null; museumUi.sel = null; }   // a fresh visit starts in the hall
   const sig = [museumUi.wing, scene.text, MUSEUM_WINGS.map(wingProgress).join(','), totalSpares()].join('|');
   if (!was || sig !== museumUi.sig) { museumUi.sig = sig; museumRender(); }

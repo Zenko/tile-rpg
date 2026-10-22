@@ -689,6 +689,7 @@ function sceneAction(actId) {
   if (actId === 'leave') {
     if (doorFading || scene.leaving) return;
     sfx('nav'); buzz(HAP.tap);
+    if (typeof screenFxLeave === 'function') screenFxLeave();   // js/screen-fx.js: a building screen fades down while the door fade runs
     // The sheet drops away and the speech fades first, then the usual fade to the street (v1.77.0)
     if (btMotionOk() && sceneView.classList.contains('sc-std')) {
       scene.leaving = true; sceneView.classList.remove('scene-enter'); sceneView.classList.add('scene-leaving');

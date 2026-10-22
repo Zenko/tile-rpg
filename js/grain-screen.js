@@ -21,7 +21,7 @@ function grainBuild() {
     <p class="gr-hint" id="grHint"></p>
     <div class="gr-foot" id="grFoot"></div>
     <button type="button" class="btn btn-ghost gr-leave" id="grLeave">Leave</button>`;
-  document.body.appendChild(el); grainEl = el; grainWire(el); return el;
+  document.body.appendChild(el); grainEl = el; screenFxInit(el); grainWire(el); return el;
 }
 
 function grainRender() {
@@ -134,7 +134,7 @@ function grainScreenHide() {
 function grainScreenSync() {
   if (!scene || scene.id !== 'stall-grain' || scene.mode || (typeof mini !== 'undefined' && mini && mini.id !== 'grain')) { grainScreenHide(); return; }
   const el = grainEl || grainBuild(), was = grainOpen(), g = grainGame();
-  el.classList.remove('hidden'); document.body.classList.add('in-grain');
+  screenFxShow(el); document.body.classList.add('in-grain');
   const want = g ? (g.done ? 'over' : 'game') : 'shop', sig = [want, scene.text, state.progress.pebbles, grainSampled(), miniState('grain').rewarded].join('|');
   if (!was || sig !== grainUi.sig || el.dataset.mode !== want) { grainUi.sig = sig; grainRender(); } else if (g) grainPaint(g);
 }

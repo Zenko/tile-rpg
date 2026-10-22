@@ -18,6 +18,8 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'better', x: 'The full-screen bakery, stalls, museum, card shop and altar now come in and go out smoothly: the screen fades up with its parts following one after another, fades down when you press Leave, and slides between its own views (a wing, a game, the mirror). Opening a card pack fades out too. With reduced motion on, they just appear.' },
+  { t: 'better', x: 'Settings no longer has the Talking to neighbours choice. Neighbours always show the close-up screen now.' },
   { t: 'new', x: 'The Card Shop mirror is a dressing room. Your character stands in a mirror with your backdrop and table mat, and tapping any look, accessory, colour, border, backdrop or mat tries it on without changing anything. One button then wears it, or buys it first. If you cannot afford it, the button says how much more you need.' },
   { t: 'new', x: 'The Card Shop\'s sleeves and decorations are full-screen now. On the sleeve wall, swipe the big card sideways (or use the arrows) to look through your sleeves; it tilts under your finger, and one button wears it or buys it first. On the decoration shelf, tap a tile to see it, then Buy it or Place one you own. A Yours tab lists what is in storage and what you have placed, with Place, Move, Store and Remove.' },
   { t: 'new', x: 'Opening a card pack is something you do now. Buy one in the Card Shop and the foil pack is held up on its own: swipe across the top to tear the strip off (or tap it three times). Nothing is charged until it rips, and Put it back leaves you with your money. Then the card appears face down, as before.' },

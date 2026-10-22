@@ -37,17 +37,17 @@ function altarBuildScreen() {
     <div class="as-stage" id="asStage">${Object.keys(CANDLE_POS).map(f => `<div class="as-c pos-${CANDLE_POS[f]}" data-fam="${f}"></div>`).join('')}<button type="button" class="as-bowl" id="asBowl" aria-label="Hold to call the spirit"><svg viewBox="0 0 132 132" aria-hidden="true"><circle class="as-ring" id="asRing" cx="66" cy="66" r="64"/></svg><span class="as-core"><i>🔥</i><span id="asBowlTxt"></span></span></button></div>
     <div class="as-burns" id="asBurns"></div><p class="as-hint" id="asHint"></p><div class="as-tabs" id="asTabs"></div><div class="as-tray" id="asTray"></div>
     <div class="as-cta"><button type="button" class="as-call" id="asCall"></button></div><div class="as-sheet hidden" id="asSheet"></div>`;
-  document.body.appendChild(el); altarEl = el; altarWire(el); return el;
+  document.body.appendChild(el); altarEl = el; screenFxInit(el); altarWire(el); return el;
 }
 function openAltarScreen() {
   altarDraft = null; altarDraftNow();
   altarUi = { sel: ALTAR_FAMS.find(f => altarSpares(f).length) || 'stone', armed: null, msg: '', msgT: 0, hold: null, book: false };
-  const el = altarEl || altarBuildScreen(); el.classList.remove('hidden'); document.body.classList.add('in-altar');
+  const el = altarEl || altarBuildScreen(); screenFxShow(el); document.body.classList.add('in-altar');
   showTipOnce('candles'); sfx('nav'); altarRender();
 }
 function closeAltarScreen() {
   if (!altarEl || altarEl.classList.contains('hidden')) return;
-  clearTimeout(altarUi && altarUi.msgT); altarEl.classList.add('hidden'); document.body.classList.remove('in-altar'); altarUi = null; altarDraft = null; sfx('nav');
+  clearTimeout(altarUi && altarUi.msgT); screenFxHide(altarEl); document.body.classList.remove('in-altar'); altarUi = null; altarDraft = null; sfx('nav');
   if (typeof inScene !== 'undefined' && inScene && scene) renderScene();   // the altar menu behind it shows the new god rows and pillar state
 }
 const altarOpen = () => !!altarUi && !!altarEl && !altarEl.classList.contains('hidden');

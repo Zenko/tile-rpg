@@ -303,16 +303,15 @@ function renderTalkBody() {
    Every button inside keeps its id and its own show/hide logic; this only decides which are on screen. The way out is the
    "Leave" button at the foot (the round X is for windows, not full-screen takeovers), the Android back gesture (one history entry while the screen is open) and Escape. */
 let talkView = 'home', talkPushed = false, talkPopIgnore = 0, talkCatsSig = '';
-/* How the neighbour screen looks (Settings -> Neighbours -> Talking to neighbours, prefs.talkStyle):
-     'combo'   (default) a close-up face with what they say as large subtitles, a line about what they remember, and the four jobs in a dock
+/* How the neighbour screen looks. The close-up ('combo') is the one look now: the Settings choice between Close-up, Dock and Classic was
+   removed (build 317). The other two layouts are still in the code and the CSS (css/latest.css, THE NEIGHBOUR SCREEN: DOCK AND CLOSE-UP), reached
+   only by clearing talkStyleLock, which tests/talk-dock.test.js does so it can keep covering them; prefs.talkStyle is read only then.
+     'combo'   a close-up face with what they say as large subtitles, a line about what they remember, and the four jobs in a dock
      'dock'    the whole neighbour in view with the same dock
-     'classic' the grid of cards the screen had before build 289
-   All three share the same panes and buttons (they only look different: css/latest.css, THE NEIGHBOUR SCREEN: DOCK AND CLOSE-UP). */
+     'classic' the grid of cards the screen had before build 289 */
 const TALK_STYLES = ['combo', 'dock', 'classic'];
-function talkStyle() { return TALK_STYLES.includes(prefs.talkStyle) ? prefs.talkStyle : 'combo'; }
-function syncTalkStyleSeg() { document.querySelectorAll('#talkStyleSeg .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.talkstylePick === talkStyle())); }
-document.querySelectorAll('#talkStyleSeg .seg-btn').forEach(b => b.addEventListener('click', () => { prefs.talkStyle = b.dataset.talkstylePick; savePrefs(); syncTalkStyleSeg(); sfx('tap'); }));
-syncTalkStyleSeg();
+let talkStyleLock = 'combo';
+function talkStyle() { return talkStyleLock || (TALK_STYLES.includes(prefs.talkStyle) ? prefs.talkStyle : 'combo'); }
 // One short line of what they remember about you, for the close-up (empty when they remember nothing yet).
 function talkMemoLine(f) {
   if (f.isBoss || f.isRival || typeof npcMemOf !== 'function') return '';

@@ -24,7 +24,7 @@ function spiceBuild() {
     <p class="sp-hint" id="spHint"></p>
     <div class="sp-foot" id="spFoot"></div>
     <button type="button" class="btn btn-ghost sp-leave" id="spLeave">Leave</button>`;
-  document.body.appendChild(el); spiceEl = el; spiceWire(el); return el;
+  document.body.appendChild(el); spiceEl = el; screenFxInit(el); spiceWire(el); return el;
 }
 
 function spiceRender() {
@@ -140,7 +140,7 @@ function spiceScreenHide() {
 function spiceScreenSync() {
   if (!scene || scene.id !== 'stall-spice' || scene.mode || (typeof mini !== 'undefined' && mini && mini.id !== 'haggle')) { spiceScreenHide(); return; }
   const el = spiceEl || spiceBuild(), was = spiceOpen(), g = spiceGame();
-  el.classList.remove('hidden'); document.body.classList.add('in-spice');
+  screenFxShow(el); document.body.classList.add('in-spice');
   const sig = [scene.text, state.progress.pebbles, spiceSold(), g ? [g.st.cur, g.st.streak, g.st.phase, g.done].join(',') : '-', miniState('haggle').rewarded].join('|');
   if (!was || sig !== spiceUi.sig) { spiceUi.sig = sig; spiceRender(); }
 }
