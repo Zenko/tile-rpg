@@ -9,6 +9,16 @@ module.exports = async (page, assert) => {
   assert.deepStrictEqual(titles, ['Gameplay', 'Appearance', 'Sound & feel', 'Notifications', 'Privacy', 'Backup', 'Help & data', 'Danger zone'], 'the groups: ' + titles.join(' | '));
   assert.ok(await q("!document.getElementById('talkStyleSeg') && !document.getElementById('bigTextToggle')"), 'the removed controls are gone');
   assert.ok(await q("document.querySelectorAll('#stg-privacy .st-row').length === 3 && /Sends your name, level, district/.test(document.getElementById('stg-privacy').textContent) && /Only the game's maker/.test(document.getElementById('stg-privacy').textContent)"), 'each privacy switch says what is sent and who sees it');
+  // the window slides down from the top and back up, like the tab window (a closed menu must not already be on screen)
+  await q("closePlayerMenu()"); await page.waitForTimeout(500);
+  assert.ok(await q("document.getElementById('playerMenu').classList.contains('hidden')"), 'it closes');
+  await q("openPlayerMenu()"); await page.waitForTimeout(40);
+  assert.ok(await q("document.getElementById('playerMenu').classList.contains('pm-in') && document.getElementById('playerMenu').getBoundingClientRect().top < -50"), 'opening starts above the screen and slides down');
+  await page.waitForTimeout(800); assert.ok(await q("Math.round(document.getElementById('playerMenu').getBoundingClientRect().top) === 0 && !document.getElementById('playerMenu').classList.contains('pm-in')"), 'and settles at the top');
+  await q("closePlayerMenu()"); await page.waitForTimeout(120);
+  assert.ok(await q("document.getElementById('playerMenu').classList.contains('pm-out') && !document.getElementById('playerMenu').classList.contains('hidden')"), 'closing slides it back up first');
+  await page.waitForTimeout(500); assert.ok(await q("document.getElementById('playerMenu').classList.contains('hidden')"), 'then hides it');
+  await q("openPlayerMenu()"); await page.waitForTimeout(800);
   // text size
   await page.click('[data-text-pick="largest"]'); assert.ok(await q("document.documentElement.classList.contains('bigger-text') && prefs.textSize === 'largest'"), 'Largest text');
   await page.click('[data-text-pick="large"]'); assert.ok(await q("document.documentElement.classList.contains('big-text') && !document.documentElement.classList.contains('bigger-text')"), 'Large text');

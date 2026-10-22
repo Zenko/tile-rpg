@@ -113,17 +113,33 @@ Object.entries(PM_SEGMENTS).forEach(([key, s]) => {
 });
 
 // The avatar opens the app-level sheet: Settings and Social. Everything about the character itself lives in the Character tab.
+/* The Settings window slides down from the top and slides back up when it closes, the same way and at the same speed as the main menu's tab
+   window (js/fan-menu.js, css/latest.css winSlideIn / winSlideOut), with the rows rising in one after another. (Its old closed look set
+   display: flex, which the global .hidden { display: none !important } always beat, so it never animated.) Reduced motion skips it. */
+let pmTimer = 0;
+const pmEls = () => [document.getElementById('playerMenu'), document.getElementById('playerMenuBackdrop')];
 function openPlayerMenu() {
   fetchWhosPlaying();
   syncToggles();
   switchPmSegment(pmView);
   document.getElementById('pmVersion').textContent = `${GAME.title} ` + gameVersionLabel() + ' · build ' + BUILD;
-  document.getElementById('playerMenuBackdrop').classList.remove('hidden');
-  document.getElementById('playerMenu').classList.remove('hidden');
+  clearTimeout(pmTimer);
+  const [menu, back] = pmEls(), motion = typeof btMotionOk !== 'function' || btMotionOk();
+  menu.classList.remove('pm-out'); back.classList.remove('pm-out');
+  back.classList.remove('hidden'); menu.classList.remove('hidden');
+  if (!motion) return;
+  menu.classList.add('pm-in'); back.classList.add('pm-in');
+  // the first rows of whichever view is showing rise in one after another, like the tab windows
+  let n = 0; document.querySelectorAll('#pmSeg, #pmSettingsView:not(.hidden) > *, #pmSocialView:not(.hidden) > *').forEach(el => { if (n < 9) { el.classList.remove('win-rise'); void el.offsetWidth; el.style.setProperty('--n', n++); el.classList.add('win-rise'); } });
+  pmTimer = setTimeout(() => { menu.classList.remove('pm-in'); back.classList.remove('pm-in'); document.querySelectorAll('#playerMenu .win-rise').forEach(el => el.classList.remove('win-rise')); }, 720);
 }
 function closePlayerMenu() {
-  document.getElementById('playerMenuBackdrop').classList.add('hidden');
-  document.getElementById('playerMenu').classList.add('hidden');
+  const [menu, back] = pmEls(); if (menu.classList.contains('hidden') || menu.classList.contains('pm-out')) return;
+  clearTimeout(pmTimer);
+  const done = () => { menu.classList.add('hidden'); back.classList.add('hidden'); menu.classList.remove('pm-out', 'pm-in'); back.classList.remove('pm-out', 'pm-in'); };
+  if (typeof btMotionOk === 'function' && !btMotionOk()) { done(); return; }
+  menu.classList.remove('pm-in'); back.classList.remove('pm-in'); menu.classList.add('pm-out'); back.classList.add('pm-out');
+  pmTimer = setTimeout(done, 290);
 }
 document.getElementById('avatarChip').addEventListener('click', () => { if (inBattle) return; ensureAudio(); sfx('nav'); buzz(HAP.tap); openPlayerMenu(); });
 document.getElementById('playerMenuClose').addEventListener('click', closePlayerMenu);
