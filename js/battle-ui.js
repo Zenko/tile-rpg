@@ -512,7 +512,7 @@ function btRenderOppHand() {
     box.appendChild(b);
   }
 }
-const btMotionOk = () => !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+const btMotionOk = () => prefs.motion !== 'reduced' && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);   // Settings -> Display -> Screen animations can also turn it off
 // Fly a card back from one element to another over ms milliseconds; resolves when it lands.
 function btFlyBack(fromEl, toEl, ms, mine) {
   return new Promise(res => {

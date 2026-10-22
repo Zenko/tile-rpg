@@ -351,7 +351,7 @@ function syncToggles() {
   document.querySelectorAll('#themeSeg .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.themePick === prefs.theme));
   document.getElementById('ambientToggle').classList.toggle('on', prefs.ambient);
   document.getElementById('charFxToggle').classList.toggle('on', prefs.charFx !== false);
-  document.getElementById('bigTextToggle').classList.toggle('on', !!prefs.bigText);
+  if (typeof syncSettingsExtra === 'function') syncSettingsExtra();   // js/settings-extra.js: text size, animations, haptic strength, quiet hours
   document.getElementById('notifsToggle').classList.toggle('on', notifsEnabled());
   document.getElementById('weatherAlertsToggle').classList.toggle('on', notifsEnabled('weatherAlerts'));
   document.getElementById('presenceToggle').classList.toggle('on', !!prefs.sharePresence);

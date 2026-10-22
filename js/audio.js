@@ -8,6 +8,13 @@ if (!prefs.presenceChosen) prefs.sharePresence = true;
 // Repair anything a corrupted/edited save could hand us
 ['musicVol', 'sfxVol'].forEach(k => { const v = Number(prefs[k]); prefs[k] = (isFinite(v) ? Math.min(1, Math.max(0, v)) : 0.5); });
 prefs.sound = prefs.sound !== false; prefs.music = prefs.music !== false; prefs.haptics = prefs.haptics !== false; prefs.ambient = prefs.ambient !== false; if (!['dark', 'light', 'auto'].includes(prefs.theme)) prefs.theme = 'dark';   // ambient (town sounds) is on unless the player turned it off
+// Build 318 settings: text size (the old on/off "Larger text" becomes Large), screen animations, haptic strength and quiet hours
+if (!['normal', 'large', 'largest'].includes(prefs.textSize)) prefs.textSize = prefs.bigText ? 'large' : 'normal';
+delete prefs.bigText;
+if (!['full', 'reduced'].includes(prefs.motion)) prefs.motion = 'full';
+if (!['gentle', 'normal', 'strong'].includes(prefs.hapticStrength)) prefs.hapticStrength = 'normal';
+if (!prefs.quiet || typeof prefs.quiet !== 'object') prefs.quiet = { on: false, from: 22, to: 7 };
+prefs.quiet = { on: !!prefs.quiet.on, from: Math.min(23, Math.max(0, Math.floor(Number(prefs.quiet.from)) || 0)), to: Math.min(23, Math.max(0, Math.floor(Number(prefs.quiet.to)) || 0)) };
 ['fast', 'fishEasy', 'cozy', 'cellarFog', 'tossStyle'].forEach(k => { delete prefs[k]; });   // switches removed from Settings: a saved value must not stay stuck on with no way to turn it off
 /* Colour theme: prefs.theme is 'dark' (the default), 'light' or 'auto' (follows the device). The CSS keys off
    <html data-theme> - see the token block at the top of css/style.css. Applied here, before the first paint of
@@ -55,9 +62,19 @@ function localNotify(title, body, tag, pref = 'notifs') {
 const notifTimers = {};
 // Re-callable any time (on the triggering action, and once at start-up for anything already pending) -
 // clears any previous timer under the same key first, so re-scheduling the same wait never double-fires.
+// Quiet hours (Settings -> Notifications): a notification due inside the window waits until it ends. The window may cross midnight (22 -> 7).
+function quietShift(atMs) {
+  const q = prefs.quiet; if (!q || !q.on || q.from === q.to) return atMs;
+  const d = new Date(atMs), h = d.getHours() + d.getMinutes() / 60, inside = q.from < q.to ? (h >= q.from && h < q.to) : (h >= q.from || h < q.to);
+  if (!inside) return atMs;
+  const end = new Date(atMs); end.setHours(q.to, 0, 0, 0);
+  if (end.getTime() <= atMs) end.setDate(end.getDate() + 1);
+  return end.getTime();
+}
 function scheduleLocalNotify(key, atMs, title, body) {
   clearTimeout(notifTimers[key]);
   if (!notifsEnabled()) return;
+  atMs = quietShift(atMs);
   const delay = atMs - Date.now();
   if (delay <= 0) return;
   notifTimers[key] = setTimeout(() => localNotify(title, body, key), delay);
@@ -735,9 +752,14 @@ function sfx(name) { if (prefs.sound && SFX[name]) { try { SFX[name](); } catch 
     syncMusic();          // browsers only allow audio after a gesture, so the first touch starts the music
   }, { once: true, passive: true, capture: true }));
 
+const HAP_SCALE = { gentle: 0.6, normal: 1, strong: 1.7 };   // Settings -> Sound & feel -> Haptic strength: the buzzes get shorter or longer, the gaps stay
+function hapScale(pattern) {
+  const k = HAP_SCALE[prefs.hapticStrength] || 1; if (k === 1) return pattern;
+  return Array.isArray(pattern) ? pattern.map((n, i) => (i % 2 === 0 ? Math.max(4, Math.round(n * k)) : n)) : Math.max(4, Math.round(pattern * k));
+}
 function buzz(pattern) {
   if (!prefs.haptics || !userHasTouched) return;
-  try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (e) { /* ignore */ }
+  try { if (navigator.vibrate) navigator.vibrate(hapScale(pattern)); } catch (e) { /* ignore */ }
 }
 const HAP = { tap: 8, step: 10, play: 14, round: [12, 40, 12], win: [20, 60, 20, 60, 40], soft: 18, found: [10, 30, 10], big: [20, 50, 30, 50, 60] };
 

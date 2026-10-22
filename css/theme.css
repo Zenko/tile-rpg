@@ -1149,3 +1149,11 @@
   --pt-spark: #fff2b8;
   --pt-shadow: rgba(10, 6, 20, .6);
 }
+
+/* Settings extras (build 318, js/settings-extra.js): the little swatches on the Colour theme buttons show each theme in its own colours,
+   whichever theme the screen is in. */
+:root {
+  --sw-dark: #12161b;
+  --sw-light: #f3ece0;
+  --sw-edge: #8a949c;
+}

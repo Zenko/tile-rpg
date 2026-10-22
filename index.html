@@ -102,48 +102,40 @@
         </div>
 
         <div id="pmSettingsView">
-          <section class="st-group">
-            <h3 class="st-title">Neighbours</h3>
+          <div class="st-find">
+            <input type="search" id="stSearch" class="st-search" placeholder="Search settings" aria-label="Search settings" autocomplete="off">
+            <div class="st-jump" id="stJump" role="group" aria-label="Jump to a group"></div>
+            <p class="st-none hidden" id="stNone">No settings match that.</p>
+          </div>
+          <section class="st-group" id="stg-gameplay" data-kw="neighbours battles difficulty adjust">
+            <h3 class="st-title">Gameplay</h3>
             <div class="st-card">
-              <div class="st-block">
-                <div class="st-label">Neighbours come to you<small>Now and then one walks over to chat, ask a favour or offer a friendly game. They only come while you stand still.</small></div>
-                <div class="seg" id="approachSeg" role="group" aria-label="How often neighbours come to you">
-                  <button class="seg-btn" type="button" data-approach-pick="off">Never</button>
-                  <button class="seg-btn" type="button" data-approach-pick="sometimes">Sometimes</button>
-                  <button class="seg-btn" type="button" data-approach-pick="often">Often</button>
-                </div>
+              <div class="st-block"><div class="st-label"><span class="st-ico">🏘️</span>Neighbours come to you<small>Now and then one walks over to chat, ask a favour or offer a friendly game. They only come while you stand still.</small></div>
+                <div class="seg" id="approachSeg" role="group" aria-label="How often neighbours come to you"><button class="seg-btn" type="button" data-approach-pick="off">Never</button><button class="seg-btn" type="button" data-approach-pick="sometimes">Sometimes</button><button class="seg-btn" type="button" data-approach-pick="often">Often</button></div>
               </div>
-            </div>
-          </section>
-          <section class="st-group">
-            <h3 class="st-title">Battles</h3>
-            <div class="st-card">
               <div class="st-row"><span class="st-ico">⚖️</span><span class="st-label">Adjust to my results<small>After a rough patch opponents ease off a little, after a hot streak they push back. Never by much, and they tell you.</small></span><button class="toggle" id="adaptiveToggle" aria-label="Toggle difficulty that adjusts to your results"></button></div>
             </div>
           </section>
-          <section class="st-group">
+          <section class="st-group" id="stg-look" data-kw="theme dark light colour hand text size larger animation motion">
             <h3 class="st-title">Appearance</h3>
             <div class="st-card">
-              <div class="st-block">
-                <div class="st-label">Colour theme<small>The map, battles and interiors stay dark either way.</small></div>
-                <div class="seg" id="themeSeg" role="group" aria-label="Colour theme">
-                  <button class="seg-btn" type="button" data-theme-pick="dark">🌙 Dark</button>
-                  <button class="seg-btn" type="button" data-theme-pick="light">☀️ Light</button>
-                  <button class="seg-btn" type="button" data-theme-pick="auto">Auto</button>
-                </div>
+              <div class="st-block"><div class="st-label"><span class="st-ico">🎨</span>Colour theme<small>The map, battles and interiors stay dark either way.</small></div>
+                <div class="seg" id="themeSeg" role="group" aria-label="Colour theme"><button class="seg-btn" type="button" data-theme-pick="dark"><i class="st-sw sw-dark"></i>Dark</button><button class="seg-btn" type="button" data-theme-pick="light"><i class="st-sw sw-light"></i>Light</button><button class="seg-btn" type="button" data-theme-pick="auto"><i class="st-sw sw-auto"></i>Auto</button></div>
               </div>
-              <div class="st-block">
-                <div class="st-label">Menu hand<small>Which side of the screen the round menu button sits on, so your thumb reaches it.</small></div>
-                <div class="seg" id="handSeg" role="group" aria-label="Which side the menu button is on">
-                  <button class="seg-btn" type="button" data-hand-pick="right">Right</button>
-                  <button class="seg-btn" type="button" data-hand-pick="left">Left</button>
-                </div>
+              <div class="st-block"><div class="st-label"><span class="st-ico">✋</span>Menu hand<small>Which side of the screen the round menu button sits on, so your thumb reaches it.</small></div>
+                <div class="seg" id="handSeg" role="group" aria-label="Which side the menu button is on"><button class="seg-btn" type="button" data-hand-pick="right">Right</button><button class="seg-btn" type="button" data-hand-pick="left">Left</button></div>
+              </div>
+              <div class="st-block"><div class="st-label"><span class="st-ico">🔠</span>Text size<small>Bigger text across the game. Try it: the line below changes as you pick.</small></div>
+                <div class="seg" id="textSeg" role="group" aria-label="Text size"><button class="seg-btn" type="button" data-text-pick="normal">Normal</button><button class="seg-btn" type="button" data-text-pick="large">Large</button><button class="seg-btn" type="button" data-text-pick="largest">Largest</button></div>
+                <p class="st-sample" id="textSample">The oven is warm and the dough is rising.</p>
+              </div>
+              <div class="st-block"><div class="st-label"><span class="st-ico">🎞️</span>Screen animations<small>Full: screens fade and slide in and out. Reduced: they just appear. Also follows your phone's reduce-motion setting.</small></div>
+                <div class="seg" id="motionSeg" role="group" aria-label="Screen animations"><button class="seg-btn" type="button" data-motion-pick="full">Full</button><button class="seg-btn" type="button" data-motion-pick="reduced">Reduced</button></div>
               </div>
             </div>
           </section>
-
-          <section class="st-group">
-            <h3 class="st-title">Sound</h3>
+          <section class="st-group" id="stg-sound" data-kw="sound music volume haptics vibration ambience effects">
+            <h3 class="st-title">Sound &amp; feel</h3>
             <div class="st-card">
               <div class="st-row"><span class="st-ico">🔊</span><span class="st-label">Sound<small>Turns every sound on or off</small></span><button class="toggle" id="soundToggle" aria-label="Toggle all sound"></button></div>
               <div class="st-row"><span class="st-ico">🎵</span><span class="st-label">Music</span><button class="toggle" id="musicToggle" aria-label="Toggle music"></button></div>
@@ -160,29 +152,31 @@
               <div class="st-row"><span class="st-ico">🌿</span><span class="st-label">Town ambience<small>Birds, wind and water</small></span><button class="toggle" id="ambientToggle" aria-label="Toggle town ambient sounds"></button></div>
               <div class="st-row"><span class="st-ico">✨</span><span class="st-label">Character effects<small>Shadow, light, weather, footsteps and glow on your character, plus fireflies, leaves and sparkles in town</small></span><button class="toggle" id="charFxToggle" aria-label="Toggle character effects"></button></div>
               <div class="st-row"><span class="st-ico">📳</span><span class="st-label">Haptics<small>Small vibrations when you tap</small></span><button class="toggle" id="hapticToggle" aria-label="Toggle haptics"></button></div>
+              <div class="st-block"><div class="st-label"><span class="st-ico">📳</span>Haptic strength<small>How hard the vibration feels. You feel a sample when you pick.</small></div>
+                <div class="seg" id="hapticSeg" role="group" aria-label="Haptic strength"><button class="seg-btn" type="button" data-haptic-pick="gentle">Gentle</button><button class="seg-btn" type="button" data-haptic-pick="normal">Normal</button><button class="seg-btn" type="button" data-haptic-pick="strong">Strong</button></div>
+              </div>
             </div>
           </section>
-
-          <section class="st-group">
-            <h3 class="st-title">Display</h3>
-            <div class="st-card">
-              <div class="st-row"><span class="st-ico">🔠</span><span class="st-label">Larger text<small>Bigger text across the game</small></span><button class="toggle" id="bigTextToggle" aria-label="Toggle larger text"></button></div>
-            </div>
-          </section>
-
-          <section class="st-group">
-            <h3 class="st-title">Notifications &amp; privacy</h3>
+          <section class="st-group" id="stg-notify" data-kw="notifications alerts bread weather quiet hours">
+            <h3 class="st-title">Notifications</h3>
             <div class="st-card">
               <div class="st-row"><span class="st-ico">🔔</span><span class="st-label">Notify me<small>When bread is ready or the boss appears</small></span><button class="toggle" id="notifsToggle" aria-label="Toggle notifications for bread baking and the district boss"></button></div>
               <div class="st-row"><span class="st-ico">🌦️</span><span class="st-label">Weather alerts<small>A notification when the weather turns while the game is in the background. The weather keeps moving while you are away</small></span><button class="toggle" id="weatherAlertsToggle" aria-label="Toggle weather change notifications"></button></div>
-              <div class="st-row"><span class="st-ico">👋</span><span class="st-label">Share that I'm playing<small>Your name and activity, shown to other testers</small></span><button class="toggle" id="presenceToggle" aria-label="Toggle sharing your name and activity with other testers"></button></div>
-              <div class="st-row"><span class="st-ico">📈</span><span class="st-label">Share anonymous play stats<small>Counts only, no name. Helps tune the game.</small></span><button class="toggle" id="statsToggle" aria-label="Toggle sharing anonymous play statistics"></button></div>
-              <div class="st-row"><span class="st-ico">👻</span><span class="st-label">Let testers duel my deck<small>They play a ghost copy of your deck</small></span><button class="toggle" id="shareDeckToggle" aria-label="Toggle letting other testers play a lingering duel against your deck"></button></div>
+              <div class="st-row"><span class="st-ico">🌙</span><span class="st-label">Quiet hours<small>No notifications between the two times. Anything due in that window waits until it ends.</small></span><button class="toggle" id="quietToggle" aria-label="Toggle quiet hours"></button></div>
+              <div class="st-block st-quiet" id="quietRow"><label class="st-sel">From<select id="quietFrom" aria-label="Quiet hours start"><option value="0">12 am</option><option value="1">1 am</option><option value="2">2 am</option><option value="3">3 am</option><option value="4">4 am</option><option value="5">5 am</option><option value="6">6 am</option><option value="7">7 am</option><option value="8">8 am</option><option value="9">9 am</option><option value="10">10 am</option><option value="11">11 am</option><option value="12">12 pm</option><option value="13">1 pm</option><option value="14">2 pm</option><option value="15">3 pm</option><option value="16">4 pm</option><option value="17">5 pm</option><option value="18">6 pm</option><option value="19">7 pm</option><option value="20">8 pm</option><option value="21">9 pm</option><option value="22">10 pm</option><option value="23">11 pm</option></select></label><label class="st-sel">Until<select id="quietTo" aria-label="Quiet hours end"><option value="0">12 am</option><option value="1">1 am</option><option value="2">2 am</option><option value="3">3 am</option><option value="4">4 am</option><option value="5">5 am</option><option value="6">6 am</option><option value="7">7 am</option><option value="8">8 am</option><option value="9">9 am</option><option value="10">10 am</option><option value="11">11 am</option><option value="12">12 pm</option><option value="13">1 pm</option><option value="14">2 pm</option><option value="15">3 pm</option><option value="16">4 pm</option><option value="17">5 pm</option><option value="18">6 pm</option><option value="19">7 pm</option><option value="20">8 pm</option><option value="21">9 pm</option><option value="22">10 pm</option><option value="23">11 pm</option></select></label></div>
             </div>
           </section>
-
-          <section class="st-group">
-            <h3 class="st-title">Your save</h3>
+          <section class="st-group" id="stg-privacy" data-kw="privacy share presence stats deck duel name">
+            <h3 class="st-title">Privacy</h3>
+            <div class="st-card">
+              <div class="st-row"><span class="st-ico">👋</span><span class="st-label">Share that I'm playing<small>Sends your name, level, district and when you were last here. Other testers see it under Social. Off stops it.</small></span><button class="toggle" id="presenceToggle" aria-label="Toggle sharing your name and activity with other testers"></button></div>
+              <div class="st-row"><span class="st-ico">📈</span><span class="st-label">Share anonymous play stats<small>Sends counts only (battles, skills, deck mix, how you spend <span data-game="GAME.currency.many">Embers</span>) and your share of the town goal. No name. Only the game's maker sees it.</small></span><button class="toggle" id="statsToggle" aria-label="Toggle sharing anonymous play statistics"></button></div>
+              <div class="st-row"><span class="st-ico">👻</span><span class="st-label">Let testers duel my deck<small>Lets other testers play a copy of your 12 cards, under your name. They never see the rest of your collection.</small></span><button class="toggle" id="shareDeckToggle" aria-label="Toggle letting other testers play a lingering duel against your deck"></button></div>
+              <div class="st-note">Each switch works on its own and you can change it any time. Your save is private to your account.</div>
+            </div>
+          </section>
+          <section class="st-group" id="stg-backup" data-kw="save backup cloud restore file export import">
+            <h3 class="st-title">Backup</h3>
             <div class="st-card">
               <div class="st-row"><span class="st-ico">☁️</span><span class="st-label">Cloud save<small id="cloudStatus">—</small></span></div>
               <div class="st-block st-pair">
@@ -195,18 +189,26 @@
                 <button id="saveFileImportBtn" class="btn btn-ghost">⬆️ Load from file</button>
                 <input type="file" id="saveFileInput" accept=".json,application/json" class="hidden" aria-label="Choose a save file">
               </div>
-              <div class="st-row"><span class="st-ico">📊</span><span class="st-label"><span data-game="GAME.currency.one">Ember</span> ledger<small>Where your <span data-game="GAME.currency.many">Embers</span> came from</small></span><button class="btn btn-ghost st-small" id="econToggle" type="button">Show</button></div>
-              <div class="panel-desc hidden st-econ" id="econPanel"></div>
             </div>
           </section>
         </div>
 
-        <section class="st-group st-help">
-          <h3 class="st-title">Help</h3>
-          <div class="controls st-card st-help-card" id="townControls">
-            <button id="feedbackBtn" class="btn btn-ghost">💬 Feedback &amp; bugs</button>
-            <button id="forceUpdateBtn" class="btn btn-ghost" type="button">🔄 Update game</button>
-            <button id="resetTown" class="btn btn-ghost st-danger">Start over</button>
+        <section class="st-group st-help" id="stg-help" data-kw="help feedback bug update ledger reset start over">
+          <h3 class="st-title">Help &amp; data</h3>
+          <div class="st-card" id="townControls">
+            <div class="st-block st-pair">
+              <button id="feedbackBtn" class="btn btn-ghost">💬 Feedback &amp; bugs</button>
+              <button id="forceUpdateBtn" class="btn btn-ghost" type="button">🔄 Update game</button>
+            </div>
+              <div class="st-row"><span class="st-ico">📊</span><span class="st-label"><span data-game="GAME.currency.one">Ember</span> ledger<small>Where your <span data-game="GAME.currency.many">Embers</span> came from</small></span><button class="btn btn-ghost st-small" id="econToggle" type="button">Show</button></div>
+              <div class="panel-desc hidden st-econ" id="econPanel"></div>
+            <div class="st-row"><span class="st-ico">↩️</span><span class="st-label">Reset settings<small>Puts every switch on this screen back to how it started. Your game and save are not touched.</small></span><button class="btn btn-ghost st-small" id="resetSettingsBtn" type="button">Reset</button></div>
+          </div>
+        </section>
+        <section class="st-group st-danger-zone" id="stg-danger" data-kw="start over danger delete">
+          <h3 class="st-title">Danger zone</h3>
+          <div class="st-card">
+            <div class="st-row"><span class="st-ico">🧹</span><span class="st-label">Start over<small>Clears your collection, character and progress on this device.</small></span><button id="resetTown" class="btn btn-ghost st-danger st-small">Start over</button></div>
           </div>
         </section>
         <div class="pm-version" id="pmVersion"></div>
@@ -986,6 +988,7 @@ pixiReady.catch(function () {});
 <script src="js/town-news.js"></script>
 <script src="js/scenes.js"></script>
 <script src="js/events-story-foils-guide.js"></script>
+<script src="js/settings-extra.js"></script>
 <!-- Cloud save (optional): deliberately loaded last, after the whole game above has already loaded and
      rendered from the local save, so a slow or unreachable connection to Google's CDN can never delay
      actually playing. js/cloud-save.js checks for a missing `firebase` global and no-ops if these fail to

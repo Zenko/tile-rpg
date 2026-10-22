@@ -175,14 +175,10 @@ function renderGuide() {
    DISPLAY SETTINGS: larger text (the old Fast battles, Easy reeling, Cozy mode, dark cellar and Smooth map switches were removed)
    ============================================================ */
 function applyComfortPrefs() {
-  document.documentElement.classList.toggle('big-text', !!prefs.bigText);
+  const r = document.documentElement.classList;
+  r.toggle('big-text', prefs.textSize === 'large'); r.toggle('bigger-text', prefs.textSize === 'largest');   // js/settings-extra.js owns the Text size choice
+  r.toggle('reduce-motion', prefs.motion === 'reduced');
 }
-[['bigTextToggle', 'bigText']].forEach(([id, key]) => {
-  document.getElementById(id).addEventListener('click', () => {
-    prefs[key] = !prefs[key]; savePrefs(); applyComfortPrefs(); syncToggles(); sfx('tap');
-    if (key === 'bigText' && !inBattle) renderTown();
-  });
-});
 // Separate from the loop above: turning this on needs an async permission prompt first, and turning it on
 // or off should immediately (re)schedule or cancel whatever's currently pending (a loaf in the oven, the
 // boss's next appearance) rather than waiting for the next natural trigger.
