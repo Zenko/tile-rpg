@@ -27,8 +27,9 @@ module.exports = async (page, assert) => {
   assert.ok(o.compass, 'a compass at the edge of the view points to it');
   assert.match(o.log, /to the (north|south|east|west)/, 'and the words say which way: ' + o.log);
   // walking into view hides the compass
-  await page.evaluate(() => { const p = state.progress.portal; state.playerPos = { x: p.x, y: p.y + 2 }; renderTown(); });
-  await page.waitForTimeout(400);   // the camera follows her
+  await page.evaluate(() => { const p = state.progress.portal, m = getMap('square'); state.playerPos = { x: p.x, y: p.y + 2 < m.h && !m.solid[p.y + 2][p.x] ? p.y + 2 : p.y - 2 }; renderTown(); });   // the portal is random: stand on whichever side has walkable room
+  await until(() => { const p = state.progress.portal; return portalInView(p.x, p.y); }, null, 3000);   // the camera follows her: wait for it, not a fixed time
+  await page.waitForTimeout(150);
   const near = await page.evaluate(() => { portalCompass(); return !!document.getElementById('portalCompass'); });
   assert.strictEqual(near, false, 'the compass goes once the portal is in view');
   await page.evaluate(() => { state.playerPos = Object.assign({}, getMap('square').spawn); renderTown(); });
