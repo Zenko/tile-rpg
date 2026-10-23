@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'better', x: 'The spirit perch, the Reborn mantel and the collector\'s cabinet open full screen like the rest of your home: pick a spirit to rest on the perch, put Reborn spirits up on the mantel, and see every card set\'s progress in the cabinet. A visiting spirit greets you on a screen of its own too.' },
   { t: 'better', x: 'Tidy Up has a full screen of its own in your home: drag each thing from the messy floor to the wardrobe, bookshelf or kitchen (or tap one). Things fly into place, wrong ones shake back, and right answers in a row build a combo. Same 20 seconds, medals and prizes as before.' },
   { t: 'new', x: 'Your home starts small: a bare little nook with a mailbox and an armchair. It grows as you level it up, and new pieces arrive as it does (a bonsai, shelves and frames, then a sand garden, trophy case and toy basket, then the altar, sooner once you beat a district god).' },
   { t: 'new', x: 'Walk up to anything in your home and it opens straight away, full screen. No more menu with one button in it.' },

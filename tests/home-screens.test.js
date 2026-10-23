@@ -139,6 +139,22 @@ module.exports = async (page, assert) => {
   await ev(() => closeAltarScreen());
   await ev(() => homeScreenClose());
 
+  // the spirit pieces and a visiting spirit open full screen too
+  await ev(() => { const h = hrHome(); h.level = 5; h.items.push({ uid: 'p1', id: 'perch', x: 2, y: 4 }, { uid: 'm1', id: 'mantel', x: 3, y: 1 }, { uid: 'c1', id: 'cabinet', x: 4, y: 1 }); hrIndex(); homeScreenOpen('perch', 'p1'); });
+  await page.click('#hoFoot [data-ho^="hs:perch:p1:"]');
+  assert.ok(await ev(() => !!hrHome().items.find(i => i.uid === 'p1').card && !!document.querySelector('.ho-perch.on')), 'a spirit rests on the perch');
+  await shot('18-perch');
+  await ev(() => homeScreenOpen('mantel', 'm1')); await shot('19-mantel');
+  await ev(() => homeScreenOpen('cabinet', 'c1'));
+  assert.strictEqual(await ev(() => document.querySelectorAll('.ho-medal-row').length), await ev(() => CARD_SETS.length), 'one row per card set');
+  await shot('20-cabinet');
+  await ev(() => { homeScreenClose(); hsMaybeVisit(true); });
+  await ev(() => homeScreenOpen('visitor')); await shot('21-visitor');
+  const n0 = await ev(() => state.ownedCards.length);
+  await page.click('[data-ho="welcome"]');
+  assert.strictEqual(await ev(() => state.ownedCards.length), n0 + 1, 'welcoming the visitor gives its card');
+  await ev(() => document.querySelectorAll('.overlay').forEach(o => o.classList.add('hidden')));
+
   // leaving the house puts everything away
   await ev(() => closeScene());
   assert.ok(await ev(() => document.getElementById('homeScreen').classList.contains('hidden') && !document.body.classList.contains('in-home-screen')), 'closed with the house');

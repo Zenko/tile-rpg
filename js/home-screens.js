@@ -23,8 +23,8 @@
    Colours are the --ho-* tokens in css/theme.css (a warm room, the same in both themes), CSS in the YOUR HOME'S SCREENS block of
    css/latest.css. tests/home-screens.test.js.
    ============================================================ */
-const HO_VIEWS = { 'mg-tidy': 'tidy', mail: 'mail', 'calm-bonsai': 'bonsai', 'calm-sand': 'sand', nap: 'nap', decorate: 'shelves', favs: 'frames', trophies: 'trophies', altar: 'altar', manage: 'manage' };
-const HO_TITLES = { tidy: 'Tidy Up', mail: 'Mailbox', bonsai: 'Your bonsai', sand: 'Sand garden', nap: 'The armchair', shelves: 'The shelves', frames: 'Framed cards', trophies: 'Trophy case', altar: 'The altar', manage: 'Your home' };
+const HO_VIEWS = { perch: 'perch', mantel: 'mantel', cabinet: 'cabinet', visitor: 'visitor', 'mg-tidy': 'tidy', mail: 'mail', 'calm-bonsai': 'bonsai', 'calm-sand': 'sand', nap: 'nap', decorate: 'shelves', favs: 'frames', trophies: 'trophies', altar: 'altar', manage: 'manage' };
+const HO_TITLES = { perch: 'Spirit perch', mantel: 'Reborn mantel', cabinet: 'Collector\'s cabinet', visitor: 'A visiting spirit', tidy: 'Tidy Up', mail: 'Mailbox', bonsai: 'Your bonsai', sand: 'Sand garden', nap: 'The armchair', shelves: 'The shelves', frames: 'Framed cards', trophies: 'Trophy case', altar: 'The altar', manage: 'Your home' };
 const HO_SHOOTS = 3, HO_SHOOT_SPOTS = [[20, 34], [80, 30], [28, 66], [74, 62], [50, 12], [12, 52], [88, 50]];
 const HO_LEAVES = 3, HO_DREAM_MS = 9000, HO_MOTES = ['✨', '🌙', '⭐', '🫧'];
 let homeEl = null, hoUi = null, hoCleanups = [];
@@ -52,10 +52,10 @@ function homeBuild() {
   return el;
 }
 // Open the view for one of the cottage's actions (or 'manage'). False when that action has no view of its own.
-function homeScreenOpen(act) {
+function homeScreenOpen(act, uid) {   // uid: which piece, for the spirit pieces (there can be several perches)
   const view = HO_VIEWS[act]; if (!view || !scene || scene.id !== 'home') return false;
   const el = homeEl || homeBuild();
-  hoUi = { view, say: '', tab: 'home', cat: 'all', rar: 'all', letter: null, frame: null, god: null, pick: null, tool: 'rake' };
+  hoUi = { view, uid: uid || null, say: '', tab: 'home', cat: 'all', rar: 'all', letter: null, frame: null, god: null, pick: null, tool: 'rake' };
   if (homeRoom.player) { homeRoom.walk++; homeRoom.player.classList.remove('walking'); }
   homeRoom.sel = null;
   screenFxShow(el); document.body.classList.add('in-home-screen'); sfx('nav'); buzz(HAP.tap);
@@ -74,7 +74,7 @@ function homeScreenHide() { if (!homeEl) return; hoReset(); homeEl.classList.add
 function homeScreenSync() {
   if (!hoOpen()) return;
   if (!scene || scene.id !== 'home') { homeScreenHide(); return; }
-  if (['mail', 'altar', 'manage', 'frames', 'shelves', 'trophies'].includes(hoUi.view) && !hoUi.rendering) hoRender();
+  if (['mail', 'altar', 'manage', 'frames', 'shelves', 'trophies', 'perch', 'mantel', 'cabinet', 'visitor'].includes(hoUi.view) && !hoUi.rendering) hoRender();
   else if (hoUi.view === 'tidy' && !hoUi.rendering && hoTidyPhase() !== hoUi.phase) hoRender();   // the game started or ended
 }
 function hoRender() {
@@ -84,14 +84,19 @@ function hoRender() {
   homeEl.dataset.view = v;
   $ho('hoTitle').textContent = HO_TITLES[v];
   $ho('hoChip').textContent = '';
-  const fn = { tidy: hoTidy, mail: hoMail, bonsai: hoBonsai, sand: hoSand, nap: hoNap, shelves: hoShelves, frames: hoFrames, trophies: hoTrophies, altar: hoAltar, manage: hoManage }[v];
+  const fn = { perch: hoPerch, mantel: hoMantel, cabinet: hoCabinet, visitor: hoVisitor, tidy: hoTidy, mail: hoMail, bonsai: hoBonsai, sand: hoSand, nap: hoNap, shelves: hoShelves, frames: hoFrames, trophies: hoTrophies, altar: hoAltar, manage: hoManage }[v];
   fn($ho('hoStage'), $ho('hoFoot'));
+  if (!hoUi) return;   // the view closed itself (its piece or its visitor is gone)
   hoSay(hoUi.say);
   hoUi.rendering = false;
 }
 function hoAct(a) {
   const [what, ...rest] = a.split(':'), arg = rest.join(':'), u = hoUi;
   const run = {
+    // spirit pieces: the rules are home-spirits.js's hsAction, which redraws through renderScene() -> homeScreenSync()
+    hs: () => { hsAction('hs:' + arg); return true; },
+    set: () => { const st = CARD_SETS.find(x => x.id === arg); if (st) { u.say = `${st.icon} ${st.name}: ${setComplete(st) ? st.text : `${setProgress(st)} of ${st.cards.length} cards. ${st.text}`}`; sfx('tap'); } },
+    welcome: () => { homeScreenClose(); hsWelcome(); return true; },
     // tidy
     tstart: () => { u.combo = 0; u.bestCombo = 0; miniStart('tidy'); return true; },
     // mail
@@ -122,6 +127,47 @@ function hoAct(a) {
   if (!run) return;
   if (run() === true) return;   // the step re-draws (or leaves) on its own
   hoRender();
+}
+
+/* ---------------- the spirit pieces and a visiting spirit (js/home-spirits.js) ---------------- */
+const hoPiece = () => hrHome().items.find(i => i.uid === hoUi.uid) || null;
+const hoSpiritCard = (id, act, on) => { const d = cardDef(id); return `<button type="button" class="ho-card rarity-${d.rarity}${on ? ' on' : ''}" data-ho="${act}">${cardArtHtml(d)}<small>${escapeHtml(d.name)}</small></button>`; };
+function hoPerch(stage, foot) {
+  const it = hoPiece(), u = hoUi; if (!it) { homeScreenClose(); return; }
+  const cur = hsCardOf(it), d = cur && cardDef(cur), fam = cur && hsFam(cur), glow = cur ? (hsResonant(it) ? HS_FAMILY_GLOW[fam] : HS_GLOW[d.rarity]) : '';
+  $ho('hoChip').textContent = cur ? RARITY_LABEL[d.rarity] : 'Empty';
+  stage.innerHTML = `<div class="ho-perch${cur ? ' on' : ''}${hsResonant(it) ? ' resonant' : ''}" style="--g:${glow || 'transparent'}"><span class="ho-perch-fig">${cur ? cardArtHtml(d) : '🕊️'}</span><i class="ho-perch-stand"></i>
+    ${cur ? `<div class="ho-perch-name"><b>${escapeHtml(d.name)}</b><small>${RARITY_LABEL[d.rarity]}${fam ? ' · ' + FAMILIES[fam].name : ''}${hsResonant(it) ? ' · resonating with its corner' : ''}</small></div>` : ''}</div>`;
+  const others = hrHome().items.filter(i => i.id === 'perch' && i.uid !== it.uid).map(hsCardOf).filter(Boolean), list = hsOwnedBases().filter(id => !others.includes(id)).slice(0, 40);
+  foot.innerHTML = `<div class="ho-sec">${cur ? 'Choose another spirit' : 'Choose a spirit'}</div>${list.length ? `<div class="ho-cards">${list.map(id => hoSpiritCard(id, `hs:perch:${it.uid}:${id}`, id === cur)).join('')}</div>` : '<p class="ho-note">Cards you collect can rest here.</p>'}
+    ${cur ? `<button type="button" class="ho-btn ghost" data-ho="hs:clear:${it.uid}">Send it back to your cards</button>` : ''}`;
+  if (!u.say) u.say = hsSay('perch') + ' A spirit beside a corner of its own family resonates, and draws visitors.';
+}
+function hoMantel(stage, foot) {
+  const it = hoPiece(), u = hoUi; if (!it) { homeScreenClose(); return; }
+  const have = (it.cards || []).filter(c => hsOwns(c) && hasFoil(c)), reborn = [...new Set(Object.keys(foils()).filter(k => foils()[k] > 0).map(k => BattleEngine.baseIdOf(k)))].filter(c => cardDef(c) && !have.includes(c));
+  $ho('hoChip').textContent = `✨ ${have.length}/3`;
+  stage.innerHTML = `<div class="ho-mantel">${[0, 1, 2].map(i => { const c = have[i], d = c && cardDef(c);
+    return d ? `<button type="button" class="ho-mslot on rarity-${d.rarity}" data-ho="hs:mdel:${it.uid}:${c}" aria-label="Take ${escapeHtml(d.name)} down"><span>${cardArtHtml(d)}</span><small>${escapeHtml(d.name)}</small></button>` : '<span class="ho-mslot" aria-hidden="true"></span>'; }).join('')}<i class="ho-mantel-shelf"></i></div>`;
+  foot.innerHTML = have.length >= 3 ? '<p class="ho-note">The mantel is full. Tap a spirit on it to take it down.</p>'
+    : `<div class="ho-sec">Reborn spirits</div>${reborn.length ? `<div class="ho-cards">${reborn.map(c => hoSpiritCard(c, `hs:madd:${it.uid}:${c}`)).join('')}</div>` : '<p class="ho-note">A spirit that faded as an Echo can come back Reborn. They shimmer here.</p>'}`;
+  if (!u.say) u.say = hsSay('mantel') + ' Tap one on the mantel to take it down.';
+}
+function hoCabinet(stage, foot) {
+  const done = CARD_SETS.filter(setComplete).length;
+  $ho('hoChip').textContent = `🏅 ${done}/${CARD_SETS.length}`;
+  stage.innerHTML = `<div class="ho-cabinet">${CARD_SETS.map(st => { const n = setProgress(st), ok = setComplete(st);
+    return `<button type="button" class="ho-medal-row${ok ? ' on' : ''}" data-ho="set:${st.id}"><span>${st.icon}</span><b>${escapeHtml(st.name)}</b><div class="ho-bar2"><i style="width:${Math.round(n / st.cards.length * 100)}%"></i></div><small>${ok ? 'Lit ✓' : `${n}/${st.cards.length}`}</small></button>`; }).join('')}</div>`;
+  foot.innerHTML = '';
+  if (!hoUi.say) hoUi.say = hsSay('cabinet') + ' Tap a set to see what it needs.';
+}
+function hoVisitor(stage, foot) {
+  const v = hrHome().level >= HS_VISIT_LEVEL ? hsVisit().cur : null; if (!v) { homeScreenClose(); return; }
+  const d = cardDef(v.card), fam = FAMILIES[v.fam];
+  $ho('hoChip').textContent = RARITY_LABEL[d.rarity];
+  stage.innerHTML = `<div class="ho-visit" style="--g:${HS_GLOW[v.rar] || 'transparent'}"><span class="ho-visit-fig">${cardArtHtml(d)}</span><b>${escapeHtml(d.name)}</b><small>${RARITY_LABEL[d.rarity]} · ${fam ? fam.name : 'a spirit'}</small></div>`;
+  foot.innerHTML = '<button type="button" class="ho-btn pri" data-ho="welcome">🤝 Welcome it</button>';
+  if (!hoUi.say) hoUi.say = 'A spirit has come to visit. It has brought you something.';
 }
 
 /* ---------------- Tidy Up ----------------

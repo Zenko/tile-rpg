@@ -23,10 +23,11 @@ module.exports = async (page, assert) => {
 
   // a perch shows a card you own, and only one perch per card
   await ev(() => hrGoTo(hrHome().items.find(i => i.uid === 'pc1')));
-  await until(() => /Choose a spirit/.test(document.getElementById('scActions').textContent));
-  assert.ok(await ev(() => !!document.querySelector('#scActions [data-act="hs:perch:pc1:sprout"]')), 'the sheet lists the cards you own');
-  assert.ok(await ev(() => !!document.querySelector('#scActions [data-act="hr-close"]')), 'and ends in Close');
-  await ev(() => sceneAction('hs:perch:pc1:sprout'));
+  await until(() => typeof hoOpen === 'function' && hoOpen() && homeEl.dataset.view === 'perch');   // build 320: its own full screen
+  assert.ok(await ev(() => !!document.querySelector('#hoFoot [data-ho="hs:perch:pc1:sprout"]')), 'the perch screen lists the cards you own');
+  await page.click('#hoFoot [data-ho="hs:perch:pc1:sprout"]');
+  assert.ok(await ev(() => /Choose another spirit/.test(document.getElementById('hoFoot').textContent) && !!document.querySelector('.ho-perch.on')), 'the screen shows it resting');
+  await page.click('#hoLeave');
   assert.strictEqual(await ev(() => hrHome().items.find(i => i.uid === 'pc1').card), 'sprout', 'the perch holds it');
   assert.ok(await ev(() => !!document.querySelector('.hr-prop .hr-fig')), 'and the spirit is drawn over it');
   assert.ok(await ev(() => !hsSheetHtml(hrHome().items.find(i => i.uid === 'pc2')).includes('hs:perch:pc2:sprout')), 'another perch cannot show the same card');
@@ -71,8 +72,8 @@ module.exports = async (page, assert) => {
   await until(() => !!document.querySelector('.hr-visitor .hr-vfig'));
   const owned = await ev(() => state.ownedCards.length);
   await ev(() => { const t = hs.vis; hsTapVisitor(t.x, t.y); });
-  await until(() => !!document.querySelector('#scActions [data-act="hs:welcome"]'));
-  await page.click('#scActions [data-act="hs:welcome"]');
+  await until(() => hoOpen() && homeEl.dataset.view === 'visitor');
+  await page.click('[data-ho="welcome"]');
   assert.strictEqual(await ev(() => state.ownedCards.length), owned + 1, 'welcoming it gives you its card');
   assert.ok(await ev(() => !hsVisit().cur && hsVisit().n === 1 && state.progress.totals.homeVisitors === 1 && !document.querySelector('.hr-visitor')), 'and it goes on its way');
   assert.strictEqual(await ev(() => hsMaybeVisit(true)), false, 'one visitor a day at level 3');

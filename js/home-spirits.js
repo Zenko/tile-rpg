@@ -187,6 +187,7 @@ function hsEntitiesHtml() {   // the companion and a waiting visitor, drawn just
 function hsTapVisitor(tx, ty) {   // true when the tap was for the visiting spirit (it opens its sheet) or the companion (it says something)
   const v = hrHome().level >= HS_VISIT_LEVEL ? hsVisit().cur : null;
   if (v && hs.vis && tx === hs.vis.x && (ty === hs.vis.y || ty === hs.vis.y - 1)) {
+    if (typeof homeScreenOpen === 'function' && homeScreenOpen('visitor')) { sfx('tap'); return true; }   // js/home-screens.js, full screen
     const h = homeRoom; h.sel = 'hs-visitor'; const d = cardDef(v.card); scene.text = `A spirit has come to visit: ${d.name}, ${RARITY_LABEL[d.rarity]}. It has brought you something.`; sfx('tap'); renderScene(); return true;
   }
   if (state.companion && hs.comp && tx === hs.comp.x && ty === hs.comp.y) { toast(companionLine()); sfx('tap'); return true; }
