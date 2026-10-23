@@ -3669,6 +3669,35 @@ body.in-home-screen .overlay, body.in-home-screen .toast { z-index: 70; }
 .ho-preview .f { position: absolute; inset: 38% 0 0 0; background: repeating-linear-gradient(0deg, var(--pf) 0 16px, var(--pf2) 16px 18px); }
 .ho-preview .r { position: absolute; left: 30%; right: 30%; top: 54%; bottom: 10%; border-radius: 8px; background: var(--pr); box-shadow: inset 0 0 0 4px var(--pr2); }
 
+/* Tidy Up */
+.ho-tidy { position: relative; flex: 1; min-height: 300px; display: flex; flex-direction: column; gap: 10px; }
+.ho-floor { position: relative; flex: 1; min-height: 170px; border-radius: 22px; overflow: hidden; background: repeating-linear-gradient(0deg, var(--ho-wood) 0 28px, var(--ho-wood2) 28px 30px); box-shadow: inset 0 0 0 6px var(--ho-wood2); }
+.ho-mess { position: absolute; transform: translate(-50%, -50%) rotate(var(--r)); font-size: 1.9rem; filter: drop-shadow(0 4px 3px rgba(0,0,0,.3)); }
+.ho-thing { position: absolute; left: 50%; top: 50%; width: 104px; height: 104px; margin: -52px 0 0 -52px; display: grid; place-items: center; font-size: 3.6rem; border-radius: 26px; background: var(--ho-paper); box-shadow: 0 10px 20px var(--ho-shadow); cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; transition: transform .15s; }
+.ho-thing.held { cursor: grabbing; transition: none; z-index: 2; box-shadow: 0 18px 30px var(--ho-shadow); }
+.ho-thing.in { animation: ho-pop .28s cubic-bezier(.2, 1.6, .4, 1) both; }
+.ho-thing.nope { animation: ho-nope .35s ease; }
+@keyframes ho-nope { 20%, 60% { translate: -10px 0; } 40%, 80% { translate: 10px 0; } }
+.ho-bins { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; flex: none; }
+.ho-bin { position: relative; display: grid; justify-items: center; gap: 2px; padding: 14px 4px; border-radius: 18px; border: 2px solid var(--ho-edge); background: var(--ho-card); color: var(--ho-ink); cursor: pointer; touch-action: none; }
+.ho-bin span { font-size: 2.1rem; line-height: 1.1; }
+.ho-bin b { font: 800 .8rem var(--f-ui); }
+.ho-bin-n { position: absolute; top: 6px; right: 8px; min-width: 20px; padding: 1px 6px; border-radius: 999px; background: var(--ho-card2); font: 800 .7rem var(--f-ui); font-style: normal; }
+.ho-tidy.idle .ho-bin-n { display: none; }
+.ho-bin.good { animation: ho-bump .3s ease; border-color: var(--ho-good); }
+.ho-bin.bad { animation: ho-nope .35s ease; border-color: var(--ho-seal); }
+@keyframes ho-bump { 50% { transform: scale(1.08); } }
+.ho-tbar { height: 10px; border-radius: 999px; background: var(--ho-card2); overflow: hidden; flex: none; }
+.ho-tbar i { display: block; height: 100%; background: linear-gradient(90deg, var(--ho-seal), var(--ho-gold), var(--ho-accent)); }
+.ho-tscore { display: flex; align-items: baseline; justify-content: center; gap: 10px; flex: none; }
+.ho-tscore b { font: 800 2rem var(--f-ui); }
+.ho-tscore span { color: var(--ho-seal); font: 800 .95rem var(--f-ui); }
+.ho-fly { position: fixed; z-index: 80; width: 60px; text-align: center; font-size: 2.4rem; pointer-events: none; }
+.ho-tidy.done { align-items: center; justify-content: center; gap: 6px; border-radius: 22px; background: var(--ho-card); border: 1px solid var(--ho-edge); }
+.ho-medal { font-size: 5rem; animation: ho-pop .5s cubic-bezier(.2, 1.6, .4, 1) both; }
+.ho-big { font: 800 2.6rem var(--f-ui); }
+.ho-tidy.done small { color: var(--ho-soft); font: 600 .85rem var(--f-ui); }
+
 /* in the room: a piece that has just arrived sparkles until it is first used */
 .hr-prop.fresh::after { content: '✨'; position: absolute; right: -2px; top: -10px; font-size: calc(var(--t) * .34); animation: ho-glow 1.6s ease-in-out infinite; border-radius: 50%; pointer-events: none; }
 html.reduce-motion .home-screen *, html.reduce-motion .hr-prop.fresh::after { animation: none !important; }

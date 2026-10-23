@@ -23,8 +23,8 @@
    Colours are the --ho-* tokens in css/theme.css (a warm room, the same in both themes), CSS in the YOUR HOME'S SCREENS block of
    css/latest.css. tests/home-screens.test.js.
    ============================================================ */
-const HO_VIEWS = { mail: 'mail', 'calm-bonsai': 'bonsai', 'calm-sand': 'sand', nap: 'nap', decorate: 'shelves', favs: 'frames', trophies: 'trophies', altar: 'altar', manage: 'manage' };
-const HO_TITLES = { mail: 'Mailbox', bonsai: 'Your bonsai', sand: 'Sand garden', nap: 'The armchair', shelves: 'The shelves', frames: 'Framed cards', trophies: 'Trophy case', altar: 'The altar', manage: 'Your home' };
+const HO_VIEWS = { 'mg-tidy': 'tidy', mail: 'mail', 'calm-bonsai': 'bonsai', 'calm-sand': 'sand', nap: 'nap', decorate: 'shelves', favs: 'frames', trophies: 'trophies', altar: 'altar', manage: 'manage' };
+const HO_TITLES = { tidy: 'Tidy Up', mail: 'Mailbox', bonsai: 'Your bonsai', sand: 'Sand garden', nap: 'The armchair', shelves: 'The shelves', frames: 'Framed cards', trophies: 'Trophy case', altar: 'The altar', manage: 'Your home' };
 const HO_SHOOTS = 3, HO_SHOOT_SPOTS = [[20, 34], [80, 30], [28, 66], [74, 62], [50, 12], [12, 52], [88, 50]];
 const HO_LEAVES = 3, HO_DREAM_MS = 9000, HO_MOTES = ['✨', '🌙', '⭐', '🫧'];
 let homeEl = null, hoUi = null, hoCleanups = [];
@@ -65,6 +65,7 @@ function homeScreenOpen(act) {
 }
 function homeScreenClose() {
   if (!hoOpen()) return;
+  if (hoUi.view === 'tidy' && typeof mini !== 'undefined' && mini && mini.house === 'home') miniStop();   // leaving mid-game ends it (no medal), and the room comes back
   hoReset(); screenFxHide(homeEl); document.body.classList.remove('in-home-screen'); hoUi = null; sfx('nav');
   if (scene && scene.id === 'home') renderScene();
 }
@@ -74,6 +75,7 @@ function homeScreenSync() {
   if (!hoOpen()) return;
   if (!scene || scene.id !== 'home') { homeScreenHide(); return; }
   if (['mail', 'altar', 'manage', 'frames', 'shelves', 'trophies'].includes(hoUi.view) && !hoUi.rendering) hoRender();
+  else if (hoUi.view === 'tidy' && !hoUi.rendering && hoTidyPhase() !== hoUi.phase) hoRender();   // the game started or ended
 }
 function hoRender() {
   if (!hoOpen()) return;
@@ -82,7 +84,7 @@ function hoRender() {
   homeEl.dataset.view = v;
   $ho('hoTitle').textContent = HO_TITLES[v];
   $ho('hoChip').textContent = '';
-  const fn = { mail: hoMail, bonsai: hoBonsai, sand: hoSand, nap: hoNap, shelves: hoShelves, frames: hoFrames, trophies: hoTrophies, altar: hoAltar, manage: hoManage }[v];
+  const fn = { tidy: hoTidy, mail: hoMail, bonsai: hoBonsai, sand: hoSand, nap: hoNap, shelves: hoShelves, frames: hoFrames, trophies: hoTrophies, altar: hoAltar, manage: hoManage }[v];
   fn($ho('hoStage'), $ho('hoFoot'));
   hoSay(hoUi.say);
   hoUi.rendering = false;
@@ -90,6 +92,8 @@ function hoRender() {
 function hoAct(a) {
   const [what, ...rest] = a.split(':'), arg = rest.join(':'), u = hoUi;
   const run = {
+    // tidy
+    tstart: () => { u.combo = 0; u.bestCombo = 0; miniStart('tidy'); return true; },
     // mail
     open: () => hoOpenLetter(arg), letters: () => { u.letter = null; u.say = ''; sfx('nav'); }, claim: () => { u.popped = arg; claimLetter(arg); if (hoUi) hoRender(); return true; },
     claimall: () => { mailState().list.filter(l => l.gift && !l.claimed).forEach(l => claimLetter(l.id)); }, del: () => { deleteLetter(arg); return true; },
@@ -118,6 +122,82 @@ function hoAct(a) {
   if (!run) return;
   if (run() === true) return;   // the step re-draws (or leaves) on its own
   hoRender();
+}
+
+/* ---------------- Tidy Up ----------------
+   The game is still MINIGAMES.tidy (js/puzzle-memory-minigames.js: the 20 seconds, the medal lines, the prizes and the daily limit); this
+   is its screen. A thing to put away sits in the middle of a messy floor: drag it onto the wardrobe, bookshelf or kitchen (or tap one).
+   It flies into the right one, or shakes back from the wrong one, and right answers in a row build a combo (just for show: the score is
+   the game's own). The game's 100 ms timer calls miniRender(), which calls hoTidyPaint() to update this screen in place. */
+function hoTidyPhase() { return typeof mini !== 'undefined' && mini && mini.house === 'home' && mini.id === 'tidy' ? (mini.done ? 'done' : 'play') : 'idle'; }
+const hoTidyBins = () => Object.keys(TIDY_BINS).map(k => `<button type="button" class="ho-bin" data-ho-bin="${k}"><span>${TIDY_BINS[k].icon}</span><b>${TIDY_BINS[k].name}</b><i class="ho-bin-n">0</i></button>`).join('');
+function hoTidy(stage, foot) {
+  const u = hoUi, ph = hoTidyPhase(), def = MINIGAMES.tidy, ms = miniState('tidy'), left = Math.max(0, MINI_DAILY_REWARDED - ms.rewarded);
+  u.phase = ph;
+  $ho('hoChip').textContent = left ? `🎁 ${left} left` : '🎁 done';
+  if (ph === 'play') {
+    u.shown = null; u.binN = { wardrobe: 0, shelf: 0, kitchen: 0 };
+    stage.innerHTML = `<div class="ho-tidy play"><div class="ho-tbar"><i id="hoTidyTime"></i></div><div class="ho-tscore"><b id="hoTidyScore">0</b><span id="hoTidyCombo"></span></div>
+      <div class="ho-floor" id="hoFloor"><span class="ho-thing" id="hoThing" role="button" aria-label="Drag this to where it belongs"></span></div><div class="ho-bins">${hoTidyBins()}</div></div>`;
+    foot.innerHTML = '<p class="ho-note">Drag each thing to where it belongs, or tap the right place.</p>';
+    u.say = 'Go! Wardrobe, bookshelf or kitchen?';
+    hoTidyWire(); hoTidyPaint();
+    return;
+  }
+  const things = Object.values(TIDY_BINS).flatMap(b => b.things);
+  const mess = Array.from({ length: 9 }, (_, i) => `<span class="ho-mess" style="left:${8 + (i * 37) % 80}%;top:${14 + (i * 53) % 62}%;--r:${(i * 47) % 70 - 35}deg">${things[(i * 5) % things.length]}</span>`).join('');
+  if (ph === 'done') {
+    const score = mini.st.score, tier = miniTier(def, score), medal = { gold: '🥇', silver: '🥈', bronze: '🥉' }[tier] || '🧺';
+    stage.innerHTML = `<div class="ho-tidy done${tier ? ' ' + tier : ''}"><div class="ho-medal">${medal}</div><b class="ho-big">${score}</b><small>${def.scoreText(score)}${u.bestCombo >= 3 ? ` · best combo ×${u.bestCombo}` : ''}</small></div>`;
+    u.say = scene.text;
+  } else {
+    stage.innerHTML = `<div class="ho-tidy idle"><div class="ho-floor">${mess}</div><div class="ho-bins">${hoTidyBins()}</div></div>`;
+    if (!u.say) u.say = HR_CATALOG.tidy.say() + ' ' + def.how;
+  }
+  const t = def.tiers;
+  foot.innerHTML = `<div class="ho-steps"><span>🥉 ${t.bronze}</span><span>🥈 ${t.silver}</span><span>🥇 ${t.gold}</span>${ms.best !== null ? `<span class="on">Best ${ms.best}</span>` : ''}</div>
+    <button type="button" class="ho-btn pri" data-ho="tstart">🧺 ${ph === 'done' ? 'Tidy again' : 'Start tidying'}${left ? '' : ' · just for fun'}</button>`;
+}
+function hoTidyPaint(hit) {
+  if (!hoOpen() || hoUi.view !== 'tidy' || hoTidyPhase() !== 'play') return;
+  const st = mini.st, u = hoUi, thing = $ho('hoThing'); if (!thing) return;
+  const bar = $ho('hoTidyTime'); if (bar) bar.style.width = Math.max(0, st.left / 20000 * 100) + '%';
+  $ho('hoTidyScore').textContent = st.score;
+  $ho('hoTidyCombo').textContent = u.combo >= 3 ? `×${u.combo} combo!` : '';
+  if (u.shown !== st.item) { u.shown = st.item; thing.textContent = st.item.icon; thing.style.transform = ''; thing.classList.remove('in'); void thing.offsetWidth; thing.classList.add('in'); }
+  if (hit) {
+    const bin = homeEl.querySelector(`[data-ho-bin="${hit.bin}"]`); if (!bin) return;
+    bin.classList.remove('good', 'bad'); void bin.offsetWidth; bin.classList.add(hit.ok ? 'good' : 'bad');
+    if (hit.ok) { u.binN[hit.bin]++; bin.querySelector('.ho-bin-n').textContent = u.binN[hit.bin]; }
+    if (hit.ok && btMotionOk() && hit.from) {   // the thing just put away flies into its place
+      const f = document.createElement('span'), b = bin.getBoundingClientRect();
+      f.className = 'ho-fly'; f.textContent = hit.icon; f.style.left = hit.from.left + 'px'; f.style.top = hit.from.top + 'px'; document.body.appendChild(f);
+      f.animate([{ transform: 'translate(0,0) scale(1)', opacity: 1 }, { transform: `translate(${b.left + b.width / 2 - hit.from.left - 30}px,${b.top + 10 - hit.from.top}px) scale(.35)`, opacity: .2 }], { duration: 320, easing: 'ease-in' }).onfinish = () => f.remove();
+    }
+  }
+}
+function hoTidyPut(binKey) {   // put the current thing in a place; returns nothing, paints the result
+  if (hoTidyPhase() !== 'play') return;
+  const st = mini.st, before = st.score, icon = st.item.icon, thing = $ho('hoThing'), from = thing && thing.getBoundingClientRect(), right = st.item.bin === binKey;
+  mini.def.tap(st, binKey);
+  const ok = right && st.score >= before; hoUi.combo = ok ? hoUi.combo + 1 : 0; hoUi.bestCombo = Math.max(hoUi.bestCombo, hoUi.combo);
+  buzz(ok ? HAP.tap : HAP.tap);
+  if (!ok && thing) { thing.classList.remove('nope'); void thing.offsetWidth; thing.classList.add('nope'); }
+  hoTidyPaint({ bin: binKey, ok, icon, from: from && { left: from.left, top: from.top } });
+}
+function hoTidyWire() {
+  const thing = $ho('hoThing'); let drag = null;
+  homeEl.querySelectorAll('[data-ho-bin]').forEach(b => hoOn(b, 'pointerdown', e => { if (drag) return; e.preventDefault(); hoTidyPut(b.dataset.hoBin); }));
+  hoOn(thing, 'pointerdown', e => { drag = { x: e.clientX, y: e.clientY }; try { thing.setPointerCapture(e.pointerId); } catch (err) { /* synthetic */ } thing.classList.add('held'); });
+  hoOn(thing, 'pointermove', e => { if (drag) thing.style.transform = `translate(${e.clientX - drag.x}px,${e.clientY - drag.y}px) scale(1.08)`; });
+  const end = e => {
+    if (!drag) return; drag = null; thing.classList.remove('held');
+    thing.style.pointerEvents = 'none'; const under = document.elementFromPoint(e.clientX, e.clientY); thing.style.pointerEvents = '';   // look under the finger, not at the thing
+    const bin = under && under.closest && under.closest('[data-ho-bin]');
+    thing.style.transform = '';
+    if (bin) hoTidyPut(bin.dataset.hoBin);
+  };
+  hoOn(thing, 'pointerup', end); hoOn(thing, 'pointercancel', () => { drag = null; thing.classList.remove('held'); thing.style.transform = ''; });
 }
 
 /* ---------------- the mailbox ---------------- */

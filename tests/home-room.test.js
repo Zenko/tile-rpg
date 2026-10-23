@@ -26,15 +26,16 @@ module.exports = async (page, assert) => {
   await page.evaluate(() => { const h = homeRoom, r = h.host.getBoundingClientRect(); hrTap({ clientX: r.left + h.cx + 3.5 * h.t, clientY: r.top + h.cy + 5.5 * h.t }); });
   await until(() => homeRoom.x === 3 && homeRoom.y === 5 && !homeRoom.player.classList.contains('walking'));
 
-  // Tidy: the mini-game owns the stage, then the room comes back
-  await page.evaluate(() => hrGoTo(hrHome().items.find(i => i.id === 'tidy')));   // walking up starts the game, no sheet in between
-  await until(() => !!document.querySelector('#scStage .mg'));
-  assert.ok(await page.evaluate(() => !document.querySelector('.hr-room') && !sceneView.classList.contains('room-on')), 'the game takes over the stage');
+  // Tidy: walking up opens its screen; a game started there owns the stage, and leaving the screen ends it and gives the room back
+  await page.evaluate(() => hrGoTo(hrHome().items.find(i => i.id === 'tidy')));
+  await until(() => typeof hoOpen === 'function' && hoOpen() && homeEl.dataset.view === 'tidy');
   const spot = await page.evaluate(() => [homeRoom.x, homeRoom.y].join());
-  await page.evaluate(() => sceneAction('mg-back'));
-  await until(() => !!document.querySelector('.hr-room .hr-world'));
+  await page.click('[data-ho="tstart"]');
+  await until(() => !!mini && !document.querySelector('.hr-room'));
+  await page.click('#hoLeave');
+  await until(() => !mini && !!document.querySelector('.hr-room .hr-world'));
   assert.strictEqual(await page.evaluate(() => [homeRoom.x, homeRoom.y].join()), spot, 'you are where you were');
-  assert.ok(await page.evaluate(() => sceneView.classList.contains('hr-idle')), 'and the room is free again');
+  await until(() => sceneView.classList.contains('hr-idle'));
 
   // the door: walk out and the scene closes
   await page.evaluate(() => { const h = homeRoom; hrWalk(hrBfs(h.x, h.y, (x, y) => x === 4 && y === h.rows - 1), null); });

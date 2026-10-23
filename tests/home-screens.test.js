@@ -103,6 +103,28 @@ module.exports = async (page, assert) => {
   assert.deepStrictEqual(await ev(() => homeState().favs), ['blossom'], 'a selected frame swaps its card');
   await shot('12-frames');
 
+  // Tidy Up: drag a thing onto its place, or tap one; the game's own timer, score and medal
+  await ev(() => { hrHome().level = 3; hrArrivals(true); homeScreenOpen('mg-tidy'); });
+  assert.ok(await ev(() => homeEl.dataset.view === 'tidy' && !!document.querySelector('[data-ho="tstart"]')), 'the basket opens Tidy Up');
+  await shot('15-tidy');
+  await page.click('[data-ho="tstart"]');
+  await until(() => hoTidyPhase() === 'play' && !!document.getElementById('hoThing').innerHTML);
+  const right = await ev(() => mini.st.item.bin);
+  const t = await (await page.$('#hoThing')).boundingBox(), bn = await (await page.$(`[data-ho-bin="${right}"]`)).boundingBox();
+  await page.mouse.move(t.x + t.width / 2, t.y + t.height / 2); await page.mouse.down();
+  await page.mouse.move(bn.x + bn.width / 2, bn.y + bn.height / 2, { steps: 6 }); await page.mouse.up();
+  assert.strictEqual(await ev(() => mini.st.score), 1, 'dragging a thing to its place scores');
+  const right2 = await ev(() => mini.st.item.bin);
+  await page.dispatchEvent(`[data-ho-bin="${right2}"]`, 'pointerdown');
+  assert.strictEqual(await ev(() => mini.st.score), 2, 'tapping the right place scores too');
+  await shot('16-tidy-play');
+  await ev(() => { mini.st.start = Date.now() - 21000; });
+  await until(() => hoTidyPhase() === 'done' && !!document.querySelector('.ho-tidy.done'));
+  assert.ok(await ev(() => /2 things tidied/.test(document.getElementById('hoStage').textContent)), 'the result shows the score');
+  await shot('17-tidy-done');
+  await ev(() => homeScreenClose());
+  await until(() => !mini);
+
   // the trophy case and the altar
   await ev(() => homeScreenOpen('trophies'));
   assert.ok(await ev(() => document.querySelectorAll('.ho-tro').length >= 5), 'empty places show what there is to win');

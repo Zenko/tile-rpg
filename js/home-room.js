@@ -375,7 +375,6 @@ function hrUse(it) {
   const h = homeRoom, d = hrDef(it); if (!scene || scene.id !== 'home') return;
   playerFaceFromMove({ x: h.x, y: h.y }, { x: it.x, y: it.y }); hrPlace(false);
   const home = hrHome(); if (home.fresh && home.fresh[it.id]) { delete home.fresh[it.id]; saveState(); h.world.querySelectorAll(`[data-uid="${it.uid}"]`).forEach(e => e.classList.remove('fresh')); }
-  if (d.act === 'mg-tidy') { sfx('tap'); sceneAction('mg-tidy'); return; }
   if (d.act && typeof homeScreenOpen === 'function' && homeScreenOpen(d.act)) return;
   hrSelect(it);
 }
