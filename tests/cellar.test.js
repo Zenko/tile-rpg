@@ -66,7 +66,8 @@ module.exports = async (page, assert) => {
   assert.ok(f1.near && f1.n0 > 6 && f1.n0 < f1.total / 3, 'only the tiles around the lantern are known at first: ' + JSON.stringify(f1));
   const f2 = await ev(() => { const fl = cellarFl(), m = getMap('pw'), data = state.districtData.pw; const far = Object.keys(fl.seen).length;
     // walk (by steps) to the tile furthest from you that is walkable and seen, then see how much more is known
-    const path = findPath(m, data, state.playerPos, (x, y) => Math.hypot(x - fl.map.cellarDown.x, y - fl.map.cellarDown.y) < 1.5); fl.foes.length = 0; fl.objs = {};
+    fl.foes.length = 0; fl.objs = {}; cellarSyncBlockers();   // clear the floor first: a creature standing in a corridor used to leave no path (findPath null), now and then
+    const path = findPath(m, data, state.playerPos, (x, y) => Math.hypot(x - fl.map.cellarDown.x, y - fl.map.cellarDown.y) < 1.5);
     path.slice(0, 12).forEach(p => { state.playerPos = { x: p.x, y: p.y }; cellarStep(pwActive(), p.x, p.y); });
     return { before: far, after: Object.keys(fl.seen).length, pos: fl.pos }; });
   assert.ok(f2.after > f2.before + 10, 'walking lights up and remembers more of the floor: ' + JSON.stringify(f2));
@@ -85,7 +86,8 @@ module.exports = async (page, assert) => {
     put(3, 'rat'); step(3); const dim = fl.dim;
     fl.dim = 0; put(4, 'cap'); step(4); const bright = fl.bright;
     const radii = [cellarRadius({ dim: 0, bright: 0 }), cellarRadius({ dim: 5, bright: 0 }), cellarRadius({ dim: 0, bright: 5 })];
-    run.hearts = 1; put(5, 'camp'); step(5); const healed = run.hearts === 2 && fl.objs[spots[5].x + ',' + spots[5].y].used;
+    // no boons for the campfire: the chest above may have given Warm Hands (+1 heart from a campfire), 1 time in 6
+    run.hearts = 1; run.boons = []; put(5, 'camp'); step(5); const healed = run.hearts === 2 && fl.objs[spots[5].x + ',' + spots[5].y].used;
     step(5); const once = run.hearts === 2;
     put(6, 'shrine'); const b1 = run.boons.length; step(6); const shrine = run.boons.length > b1 || run.boons.length === CELLAR_BOONS.length;
     return { barrel, lockKept, hasKey, opened, dim, bright, radii, healed, once, shrine };
