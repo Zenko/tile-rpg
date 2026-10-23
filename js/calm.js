@@ -134,24 +134,27 @@ function calmBreathe(body) {
 }
 
 /* ---------- sand garden ---------- */
+// A stroke is a list of points (the three-tine rake) or, from the home's sand screen (build 320), { n: tines, p: points }.
+const sandPts = s => Array.isArray(s) ? s : (s && s.p) || [];
+const sandTines = n => n === 5 ? [-16, -8, 0, 8, 16] : n === 1 ? [0] : [-9, 0, 9];
 function calmSand(body) {
   body.innerHTML = `<div class="calm-sand" id="cSand"><canvas id="cSandCv" aria-label="Sand garden: drag to rake"></canvas></div><div class="calm-say sm">Drag to rake. Use Place stones, then tap the sand.</div><div class="calm-actions two"><button type="button" class="calm-btn wide" id="cStone" aria-pressed="false">🪨 Place stones</button><button type="button" class="calm-btn wide" id="cSmooth">Smooth the sand</button></div>`;
   const box = document.getElementById('cSand'), cv = document.getElementById('cSandCv'), cx = cv.getContext('2d'), st = calmState().sand, stoneBtn = document.getElementById('cStone');
   let placing = false, drawing = false, last = null, cur = null, W = 0, H = 0;
-  const POINT_CAP = 1600, count = () => st.strokes.reduce((n, s) => n + s.length, 0);
-  function rakeSeg(a, b) {
+  const POINT_CAP = 1600, count = () => st.strokes.reduce((n, s) => n + sandPts(s).length, 0);
+  function rakeSeg(a, b, tines) {
     const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy) || 1, nx = -dy / len, ny = dx / len;
-    [-9, 0, 9].forEach(o => {
+    sandTines(tines).forEach(o => {
       cx.lineCap = 'round'; cx.lineWidth = 4; cx.strokeStyle = 'rgba(120,104,70,.55)'; cx.beginPath(); cx.moveTo(a.x + nx * o, a.y + ny * o); cx.lineTo(b.x + nx * o, b.y + ny * o); cx.stroke();
       cx.lineWidth = 2; cx.strokeStyle = 'rgba(255,248,225,.5)'; cx.beginPath(); cx.moveTo(a.x + nx * o + 2, a.y + ny * o + 2); cx.lineTo(b.x + nx * o + 2, b.y + ny * o + 2); cx.stroke();
     });
   }
-  function stoneEl(x, y) { const r = document.createElement('span'); r.className = 'calm-rock'; r.textContent = '🪨'; r.style.left = (x * 100) + '%'; r.style.top = (y * 100) + '%'; box.appendChild(r); }
+  function stoneEl(x, y, ico) { const r = document.createElement('span'); r.className = 'calm-rock'; r.textContent = ico || '🪨'; r.style.left = (x * 100) + '%'; r.style.top = (y * 100) + '%'; box.appendChild(r); }
   function redraw() {
     const b = box.getBoundingClientRect(), d = window.devicePixelRatio || 1; W = b.width; H = b.height;
     cv.width = Math.round(W * d); cv.height = Math.round(H * d); cx.setTransform(d, 0, 0, d, 0, 0); cx.clearRect(0, 0, W, H);
-    st.strokes.forEach(s => { for (let i = 1; i < s.length; i++) rakeSeg({ x: s[i - 1][0] * W, y: s[i - 1][1] * H }, { x: s[i][0] * W, y: s[i][1] * H }); });
-    box.querySelectorAll('.calm-rock').forEach(r => r.remove()); st.stones.forEach(s => stoneEl(s[0], s[1]));
+    st.strokes.forEach(s => { const p = sandPts(s); for (let i = 1; i < p.length; i++) rakeSeg({ x: p[i - 1][0] * W, y: p[i - 1][1] * H }, { x: p[i][0] * W, y: p[i][1] * H }, s.n); });
+    box.querySelectorAll('.calm-rock').forEach(r => r.remove()); st.stones.forEach(s => stoneEl(s[0], s[1], s[2]));
   }
   redraw(); calmOn(window, 'resize', redraw);
   const pos = e => { const b = cv.getBoundingClientRect(); return { x: (e.clientX - b.left), y: (e.clientY - b.top) }; };
@@ -243,19 +246,36 @@ function calmTea(body) {
 /* ---------- bonsai ---------- */
 function bonsaiGrowthDays() { const b = calmState().bonsai; if (!b) return 0; return Math.max(0, (Date.now() - b.since) / 86400000) + (b.trims || 0) * 0.5; }
 function bonsaiStage() { const g = bonsaiGrowthDays(); let s = 0; BONSAI_STAGES.forEach((x, i) => { if (g >= x.at) s = i; }); return s; }
+// Shared with the home's bonsai screen (js/home-screens.js). A new stage pays 10 Embers a stage, once.
+function bonsaiPayStage() {
+  const c = calmState(); if (!c.bonsai) return;
+  const s = bonsaiStage(), st = BONSAI_STAGES[s];
+  if (s > (c.bonsai.paid || 0)) { const peb = 10 * s; addPebbles(peb, 'bonsai'); c.bonsai.paid = s; saveState(); toast(`${st.icon} Your bonsai is now a ${st.name.toLowerCase()}. +${peb} 🫧`); sfx('found'); }
+}
+// One tending a day (build 320 counts the days in a row: 3, 7, 14 and 30 pay a little). Missing a day only restarts the count.
+const BONSAI_STREAK_PAY = { 3: 3, 7: 6, 14: 10, 30: 15 };
+function bonsaiDayKey(ms) { const d = new Date(ms); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function bonsaiTendDone() {
+  const b = calmState().bonsai; if (!b || b.trimDay === todayKey()) return;
+  b.streak = b.trimDay === bonsaiDayKey(Date.now() - 86400000) ? (b.streak || 0) + 1 : 1;
+  b.trims = (b.trims || 0) + 1; b.trimDay = todayKey(); b.best = Math.max(b.best || 0, b.streak);
+  const pay = BONSAI_STREAK_PAY[b.streak];
+  if (pay) { addPebbles(pay, 'bonsai'); toast(`🌳 ${b.streak} days in a row. +${pay} 🫧`); }
+  bumpStat('bonsaiTends', 1); saveState(); bonsaiPayStage();
+}
 function calmBonsai(body) {
   const c = calmState();
   const draw = () => {
     if (!c.bonsai) { body.innerHTML = `<div class="calm-tree"><div class="calm-tree-ico">🫘</div></div><div class="calm-say">Nothing planted yet</div><div class="calm-say sm">It grows with real days. Tending it helps a little. Missing days costs nothing.</div><div class="calm-actions"><button type="button" class="calm-btn pri wide" id="cPlant">Plant a seedling</button></div>`; document.getElementById('cPlant').addEventListener('click', () => { c.bonsai = { since: Date.now(), trims: 0, trimDay: '', paid: 0 }; saveState(); sfx('claim'); draw(); }); return; }
     const s = bonsaiStage(), st = BONSAI_STAGES[s], nx = BONSAI_STAGES[s + 1], g = bonsaiGrowthDays(), tended = c.bonsai.trimDay === todayKey();
-    if (s > (c.bonsai.paid || 0)) { const peb = 10 * s; addPebbles(peb, 'bonsai'); c.bonsai.paid = s; saveState(); toast(`${st.icon} Your bonsai is now a ${st.name.toLowerCase()}. +${peb} 🫧`); sfx('found'); }
+    bonsaiPayStage();
     const pct = nx ? Math.min(100, Math.round((g - st.at) / (nx.at - st.at) * 100)) : 100;
     body.innerHTML = `<div class="calm-tree"><div class="calm-tree-ico s${s}">${st.icon}</div><div class="calm-grow"><i style="width:${pct}%"></i></div></div>
       <div class="calm-say">${st.name}</div><div class="calm-say sm">${nx ? `${Math.max(0, nx.at - g).toFixed(1)} days to ${nx.name.toLowerCase()}` : 'As grown as it gets. Still lovely.'}</div>
       <div class="calm-steps five" id="cStages">${BONSAI_STAGES.map((x, i) => `<span class="${i === s ? 'on' : i < s ? 'done' : ''}" title="${x.name}">${x.icon}</span>`).join('')}</div>
       <div class="calm-actions"><button type="button" class="calm-btn pri wide" id="cTend" ${tended ? 'disabled' : ''}>${tended ? 'Tended today ✓' : '✂️ Trim and water'}</button></div>
       <div class="calm-say sm">Tending once a day speeds it up a little. Nothing is lost if you miss a day.</div>`;
-    const b = document.getElementById('cTend'); if (b) b.addEventListener('click', () => { c.bonsai.trims = (c.bonsai.trims || 0) + 1; c.bonsai.trimDay = todayKey(); saveState(); sfx('soft'); calmNote(587, 0.03, 1.8); draw(); });
+    const b = document.getElementById('cTend'); if (b) b.addEventListener('click', () => { bonsaiTendDone(); sfx('soft'); calmNote(587, 0.03, 1.8); draw(); });
   };
   draw();
 }

@@ -18,6 +18,14 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'new', x: 'Your home starts small: a bare little nook with a mailbox and an armchair. It grows as you level it up, and new pieces arrive as it does (a bonsai, shelves and frames, then a sand garden, trophy case and toy basket, then the altar, sooner once you beat a district god).' },
+  { t: 'new', x: 'Walk up to anything in your home and it opens straight away, full screen. No more menu with one button in it.' },
+  { t: 'new', x: 'The mailbox: break the seal on each letter, unwrap gifts, write back to friends (a friendship point) and collect a stamp from every sender.' },
+  { t: 'new', x: 'The bonsai: hold to water it into the green band and snip the three stray shoots that grow each day. Tend it on days in a row for a little extra, and once it is a young tree it flowers every day.' },
+  { t: 'new', x: 'The sand garden: three rakes, stones and shells, and three leaves blow onto the sand each day. Rake them away for a little something.' },
+  { t: 'new', x: 'The armchair: close your eyes and catch the dreams that drift up. A good catch pays a little more for the nap.' },
+  { t: 'new', x: 'Manage your home (bottom right in your home): level, cosiness, stats, what is still on the way, upgrades, colours and the furniture shop, all in one place. Decorate the room from there.' },
+  { t: 'better', x: 'The shelves, framed cards, trophy case and altar are full screens of their own. Two decorations of a kind on a shelf make a pair, framed cards draw spirits of their family, and the trophy case shows what is still to win.' },
   { t: 'fixed', x: 'The Settings window now slides down from the top when you open it and slides back up when you close it, at the same speed and feel as the main menu windows, with its rows rising in one after another. Before, it just appeared and vanished.' },
   { t: 'new', x: 'Settings is reorganised and has new things in it. A search box and jump chips find any setting fast. Neighbours and Battles are now one Gameplay group, Privacy is separate from Notifications, and Start over lives in its own Danger zone. Every privacy switch now says exactly what is sent and who sees it.' },
   { t: 'new', x: 'New settings: Text size (Normal, Large, Largest, with a sample line), Screen animations (Full or Reduced), Haptic strength (Gentle, Normal, Strong, and you feel a sample when you pick), Quiet hours for notifications (anything due in that window waits until it ends), and Reset settings, which puts every switch back to how it started without touching your game. The colour theme buttons show each theme in its own colours.' },

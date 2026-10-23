@@ -157,3 +157,17 @@ const TINKER_BINS = [
   { id: 'spring', icon: '🌀', name: 'Springs' },
 ];
 const TINKER_PARTS = ['cog', 'screw', 'spring'];   // a sort job is six of these, picked at random
+
+// ---- used by js/home-screens.js ----
+// What you dreamt in the armchair: the line picks by how many dream motes you caught (0-2, 3-5, 6+).
+const HOME_DREAMS = [
+  ['You dreamt of nothing at all, which was lovely.', 'A grey cat walked across the dream and did not stop.', 'You dreamt the kettle was singing. It was not.'],
+  ['You dreamt of a long staircase made of cards, each one warm underfoot.', 'In the dream the town was upside down and nobody minded.', 'You dreamt you could hear the bonsai growing.'],
+  ['You dreamt the whole sky was a deck, and you drew the moon.', 'A spirit sat on the end of your chair and told you a secret you have already forgotten.', 'You dreamt you were a lantern, drifting over the harbour.']
+];
+// Ways to write back to a friend's letter (the mailbox).
+const HOME_REPLIES = [
+  { id: 'thanks', icon: '💌', label: 'A thank-you note' },
+  { id: 'doodle', icon: '✏️', label: 'A little doodle' },
+  { id: 'flower', icon: '🌸', label: 'A pressed flower' }
+];

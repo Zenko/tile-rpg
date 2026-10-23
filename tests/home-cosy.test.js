@@ -1,5 +1,6 @@
 // The Cosy score (js/home-room.js hrCosy): what raises it, its tiers and cap, and what it pays.
 module.exports = async (page, assert) => {
+  await page.evaluate(require('./home-fixture').furnish);   // the furnished 6 by 6 home these checks were written for
   const ev = (fn, arg) => page.evaluate(fn, arg);
   await ev(() => { switchTab('town'); openScene('home'); });
   await page.waitForFunction(() => !!document.querySelector('.hr-room .hr-world'), null, { timeout: 8000 });
@@ -40,7 +41,7 @@ module.exports = async (page, assert) => {
   const paid = (await ev(() => state.progress.pebbles)) - p0;
   assert.strictEqual(paid, await ev(() => 3 + (weatherFx().dailyBonus || 0) + hrCosyBonus()), 'the nap pays its 3 plus weather plus cosiness');
 
-  // the Room tab shows it
-  await ev(() => { hrRefresh(); hrToggleEdit(); sceneAction('hr:tab:room'); });
-  assert.ok(await ev(() => /Cosiness/.test(document.getElementById('scActions').textContent) && /Enchanting/.test(document.getElementById('scActions').textContent)), 'the Room tab shows the score and tier');
+  // Manage's Home tab shows it
+  await ev(() => { hrRefresh(); homeScreenOpen('manage'); });
+  assert.ok(await ev(() => /Cosiness/.test(document.getElementById('hoStage').textContent) && /Enchanting/.test(document.getElementById('hoStage').textContent)), 'Manage shows the score and tier');
 };

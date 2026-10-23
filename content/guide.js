@@ -25,9 +25,11 @@ const TIPS = {
   garden:     { icon: '🌱', title: 'Thought Tending', text: `Buy seeds here, then tap a glowing patch of ${PLACES.square} to plant. Crops grow in real time (faster in the rain). Card seeds grow a card.` },
   puzzle:     { icon: '🧩', title: 'The daily puzzle', text: 'A fixed board: win it this turn. Ending your turn gives up and resets the board, so take your time. The first solve each day pays a card.' },
   cup:        { icon: '🏆', title: `The ${GAME.player.many}’ Cup`, text: 'Three matches in a row. Your Calm carries over between rounds - there is no healing - and a loss ends the run. Sweep all three for the week\'s trophy.' },
-  homeDecor:  { icon: '🎨', title: 'Decorate your home', text: `Tap a piece to pick it up, then tap where it should go. Everything can move or be put away, even the mailbox and the bonsai. Drag to look around. Buy new furniture in Items, and put the decorations you bought for town in your home too. Change the floor, walls and rug in Colours, and spend ${GAME.currency.many} in Room to level your home up: each level makes it bigger and reveals more colours and furniture.` },
+  homeDecor:  { icon: '🎨', title: 'Decorate your home', text: 'Tap a piece to pick it up, then tap where it should go. Everything can move or be put away, even the mailbox. Drag to look around. Manage (in the panel) has the shop, the colours and the upgrades.' },
+  homeManage: { icon: '🏠', title: 'Manage your home', text: `Your home in one place: its level, how cosy it is, your stats and the pieces still on their way. Grow it with ${GAME.currency.many} to make room and bring new pieces, pick the colours, buy furniture, then Decorate the room to put things where you like.` },
+  homeScreens: { icon: '🛋️', title: 'Using your things', text: 'Walk up to a piece and it opens. Each one has something to do every day: letters to open and answer, a bonsai to water and snip, leaves to rake off the sand, a nap with dreams to catch. Back to the room is at the bottom.' },
   homeSpirits: { icon: '🕊️', title: 'Spirits at home', text: 'Your spirits live in your home. Put a Spirit perch down to show one of your cards, light medals in the Collector\'s cabinet by finishing card sets, and put Reborn cards on the mantel. Family corners (a Grove nook, Memory cairn, Tide basin or Wind chimes) draw spirits of that family. From home level 3, now and then a spirit comes to visit: tap it and it leaves you a rare card.' },
-  home:       { icon: '🏠', title: 'Your cottage', text: 'Your own place, and you can walk around it. Tap the floor to move and tap furniture to use it: read letters at the mailbox, put decorations on the shelves, frame favourite cards, look over your trophies, tend the bonsai or take a nap. Close puts a menu away and keeps you here. The door on the bottom wall is the way out, and Decorate (top right) is for making it yours.' },
+  home:       { icon: '🏠', title: 'Your home', text: 'It starts as a bare little nook: a mailbox and an armchair. Tap the floor to walk and walk up to a piece to use it. The home grows as you level it up (Manage, bottom right), and new pieces arrive as it does: a bonsai, shelves, frames, a sand garden, a trophy case and an altar. The door on the bottom wall is the way out.' },
   lantern:    { icon: '🏮', title: 'The Lantern Market', text: `${CAST.nightVendor.name} only trades after dark: Lantern Packs full of moonlit cards, glowing decorations, and ${GAME.currency.many} for the critters in your jar.` },
   bugs:       { icon: '✨', title: 'Night critters', text: 'Glowing critters come out at night. Tap one to catch it - it goes in your jar for the Lantern Market and in the critter log under Cards → Fish.' },
   companion:  { icon: '👻', title: 'A companion', text: `A wandering spirit can walk with you if you own its card and are high enough level. Character → Companion lists everyone who could: cards, neighbours (at full hearts), bosses and ${CAST.rival.name}. Tap your companion to do things together.` },
@@ -118,7 +120,7 @@ const GUIDE = [
   { section: 'Houses & shops', items: [
     { icon: '🫧', name: `${GAME.currency.many} and soft limits`, where: `Settings → ${GAME.currency.one} ledger`, how: `Thought Fishing, crops, the ${GAME.player.many}’ Cup and Draft Runs pay full ${GAME.currency.many} up to a daily amount, then less, then less again - it resets every morning. The ${GAME.currency.one} ledger in Settings shows where yours came from. Bigger purchases (premium rings, backdrops and decorations) open up as you level.` },
     { icon: '🕊️', name: 'Spirits at home', where: 'Your cottage → Decorate', how: 'Your companion wanders your home. Spirit perches show a card you own, the Collector\'s cabinet lights a medal for every finished set, the Reborn mantel holds three Reborn cards, and family corners draw spirits of that family. From home level 3 a spirit sometimes visits and leaves a rare card when you welcome it: tap it. A higher level brings rarer visitors, and corners and glowing perches steer who calls.' },
-    { icon: '🏠', name: 'Your cottage', where: `${PLACES.square}, beside the Reading Nook`, how: `A room you can walk around and decorate: move anything, buy furniture, pick colours and level it up with ${GAME.currency.many} for a bigger room and more to unlock. Mailbox, shelves, framed cards, trophies, a sand garden, a bonsai, the altar and the Tidy Up game live here.` },
+    { icon: '🏠', name: 'Your cottage', where: `${PLACES.square}, beside the Reading Nook`, how: `It starts as a bare nook with a mailbox and an armchair. Walk up to a piece and it opens full screen: open and answer letters (each sender leaves a stamp), nap and catch dreams, water and snip the bonsai, rake leaves off the sand. Manage (bottom right) shows your level, cosiness and stats, and is where you grow the home with ${GAME.currency.many}: each level is a bigger room and brings new pieces (a bonsai, shelves and frames at 2, a sand garden, trophy case and Tidy basket at 3, the altar at 4 or once you beat a god).` },
     { icon: '🗺️', name: `The ${CAST.atlas.name}`, where: 'Wherever you are, once summoned', how: 'It walks with you from district to district. Ask it questions, take on four matches that each bend a rule, play harder versions of the house games, and buy decorations only it sells. It never explains itself.', lock: () => atlasHome() ? '' : 'Summon it at the altar first.' },
     { icon: '🕯️', name: 'The altar', where: 'Your cottage', how: `Summon the four district gods as cards: beat the god, then offer three spare cards of their family. Then light the four candles: feed them spare cards and the tallest flames call a spirit, a card of that family. Burn one for an hour or overnight for more. Put all four gods on the candles, one each, and the ${CAST.atlas.name} answers. Divine and ${CAST.atlas.name} cards are never in packs.` },
     { icon: '🍞', name: `${CAST.baker.name}'s Bakery`, where: `${PLACES.square}, bottom left`, how: 'Bake bread, cook dishes from your pantry, and play Cake Toppings.' },
@@ -165,6 +167,9 @@ for (let s = 500; s <= 10000; s += 500) {
   STEP_QUEST_TIERS.push({ id: 'step' + s, icon, name: `Wander ${s.toLocaleString()} steps`, goal: s, stat: 'steps', reward });
 }
 const QUEST_POOL = [
+  { id: 'nap1',     icon: '😴', name: 'Take a nap in your armchair',   goal: 1,  stat: 'naps',            reward: 'common' },
+  { id: 'tend1',    icon: '🌳', name: 'Water and snip your bonsai',     goal: 1,  stat: 'bonsaiTends',     reward: 'common' },
+  { id: 'leaves3',  icon: '🍂', name: 'Rake 3 leaves off the sand',     goal: 3,  stat: 'leavesSwept',     reward: 'common' },
   { id: 'draft2',   icon: '🎴', name: 'Win 2 matches in a Draft Run', goal: 2, stat: 'draftWins', reward: 'rare' },
   { id: 'knack1',   icon: '✨', name: `Use your ${GAME.player.one}’s Gift in a match`, goal: 1, stat: 'knacksUsed', reward: 'common' },
   { id: 'find2',    icon: '🍂', name: 'Find 2 cards on the ground',   goal: 2,  stat: 'cardsFound',      reward: 'common' },
@@ -232,6 +237,8 @@ const QUEST_POOL = [
 ];
 // Same shape as QUEST_POOL, but with week-sized goals and better rewards to match the longer commitment.
 const WEEKLY_QUEST_POOL = [
+  { id: 'w_tend5',    icon: '🌳', name: 'Tend your bonsai on 5 days',  goal: 5,   stat: 'bonsaiTends',     reward: 'super' },
+  { id: 'w_reply3',   icon: '💌', name: 'Write back to 3 letters',     goal: 3,   stat: 'lettersSent',     reward: 'rare' },
   { id: 'w_craft8',   icon: '⚒️', name: 'Craft 8 cards in the Workshop', goal: 8, stat: 'crafts',          reward: 'super' },
   { id: 'w_daily3',   icon: '⭐', name: 'Try 3 Daily Rifts',           goal: 3,   stat: 'dailyRifts',      reward: 'super' },
   { id: 'w_portal2',  icon: '🌀', name: 'Step through 2 portals',      goal: 2,   stat: 'portalsEntered',  reward: 'super' },
@@ -310,6 +317,10 @@ const ACHIEVEMENTS = [
   { id: 'home-lv3',    icon: '🏠', name: 'A home of level 3', test: () => typeof hrHome === 'function' && hrHome().level >= 3 },
   { id: 'cosy-45',     icon: '🛋️', name: 'A snug home', test: () => typeof hrCosy === 'function' && hrCosy().score >= 45 },
   { id: 'visitors-5',  icon: '🕊️', name: 'Five spirits welcomed home', test: () => (state.progress.totals.homeVisitors || 0) >= 5 },
+  { id: 'bonsai-week', icon: '🌳', name: 'Tended the bonsai 7 days in a row', test: () => !!(state.progress.calm && state.progress.calm.bonsai && (state.progress.calm.bonsai.best || 0) >= 7) },
+  { id: 'stamps-10',   icon: '📮', name: '10 stamps in the album', test: () => !!(state.progress.mail && state.progress.mail.stamps && Object.keys(state.progress.mail.stamps).length >= 10) },
+  { id: 'dreams-30',   icon: '🌙', name: '30 dreams caught in naps', test: () => (state.progress.totals.dreamMotes || 0) >= 30 },
+  { id: 'home-grand',  icon: '🏡', name: 'A grand home', test: () => typeof hrHome === 'function' && hrHome().level >= 5 },
   { id: 'mood-1',      icon: '🎈', name: 'A cheerful district', test: () => lifeTopMood() >= 1 },
   { id: 'mood-3',      icon: '🎆', name: 'A festive district', test: () => lifeTopMood() >= 3 },
   { id: 'first-card',  icon: '🌱', name: 'First find',      test: () => state.progress.totals.cardsFound >= 1 },

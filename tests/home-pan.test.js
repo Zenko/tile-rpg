@@ -1,10 +1,11 @@
 // While decorating you cannot walk, so a drag pans the camera and a plain tap still picks a piece up (real mouse events).
 module.exports = async (page, assert) => {
+  await page.evaluate(require('./home-fixture').furnish);   // the furnished 6 by 6 home these checks were written for
   const until = (fn, arg) => page.waitForFunction(fn, arg, { timeout: 8000 });
   const ev = (fn, arg) => page.evaluate(fn, arg);
   await ev(() => { switchTab('town'); openScene('home'); });
   await until(() => !!document.querySelector('.hr-room .hr-world'));
-  await page.click('.hr-edit-btn');
+  await require('./home-fixture').decorate(page);
   const cam = () => ev(() => [Math.round(homeRoom.cx), Math.round(homeRoom.cy)]);
   const box = await ev(() => { const r = homeRoom.host.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; });
   // a plain click on the mailbox picks it up

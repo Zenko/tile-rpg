@@ -1,9 +1,10 @@
 // Decorating extras: undo (refunds a purchase), selling, flip, the categorised buy list with thumbnails, and dragging a piece (real mouse events).
 module.exports = async (page, assert) => {
+  await page.evaluate(require('./home-fixture').furnish);   // the furnished 6 by 6 home these checks were written for
   const ev = (fn, arg) => page.evaluate(fn, arg);
   await ev(() => { switchTab('town'); state.progress.pebbles = 500; openScene('home'); });
   await page.waitForFunction(() => !!document.querySelector('.hr-room .hr-world'), null, { timeout: 8000 });
-  await page.click('.hr-edit-btn');
+  await require('./home-fixture').decorate(page);
   const embers = () => ev(() => state.progress.pebbles);
   const has = id => ev(id => hrHome().items.some(i => i.id === id), id);
 

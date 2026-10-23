@@ -73,18 +73,19 @@ const SLEEVES = [
 ];
 
 // ---- used by js/home-room.js ----
-/* Everything that can stand in the room. `act` marks a menu piece (an id from INTERIORS.home: owned from the start, never put away).
+/* Everything that can stand in the room. `act` marks a menu piece (an id from INTERIORS.home: never sold or lost). A menu piece arrives by
+   itself at home level `lvl` (no `lvl` = from the start), or sooner when its `early()` is true (`why` says how, for the Manage screen).
    The rest is bought with Embers (`cost`) once the home reaches `lvl`. wall = hangs on the back wall, flat = lies on the floor under
    everything (w x h tiles), tall = drawn one and a half tiles high, glow = light it gives off (dx, dy in tiles from its tile). */
 const HR_CATALOG = {
   nap: { name: 'Armchair', icon: '🛋️', spr: 'r-armchair', act: 'nap', say: () => 'A sunny chair by the window. The cushion is still warm.' },
-  decorate: { name: 'The shelves', icon: '📚', spr: 'r-shelves', tall: 1, wall: 1, act: 'decorate', say: () => 'Room for a few more things.' },
-  favs: { name: 'Framed cards', icon: '⭐', spr: 'r-frames', tall: 1, wall: 1, act: 'favs', say: () => 'Your favourite cards, framed on the wall.' },
-  trophies: { name: 'Trophy case', icon: '🏆', spr: 'r-trophy', tall: 1, wall: 1, act: 'trophies', say: () => 'Everything you have won so far.' },
-  altar: { name: 'The altar', icon: '🕯️', spr: 'r-altar', act: 'altar', glow: { dx: .5, dy: .2, r: 3.2 }, say: () => 'A small flame, always lit.' },
-  sand: { name: 'Sand garden', icon: '🪨', spr: 'r-sand', act: 'calm-sand', say: () => 'The sand is smooth, waiting for a rake.' },
-  bonsai: { name: 'Your bonsai', icon: '🪴', spr: 'r-bonsai', act: 'calm-bonsai', say: () => 'It looks a little taller than yesterday.' },
-  tidy: { name: 'Basket', icon: '🧺', spr: 'r-basket', act: 'mg-tidy', say: () => 'Toys everywhere. Someone has been busy.' },
+  decorate: { name: 'The shelves', icon: '📚', spr: 'r-shelves', tall: 1, wall: 1, act: 'decorate', lvl: 2, say: () => 'Room for a few more things.' },
+  favs: { name: 'Framed cards', icon: '⭐', spr: 'r-frames', tall: 1, wall: 1, act: 'favs', lvl: 2, say: () => 'Your favourite cards, framed on the wall.' },
+  trophies: { name: 'Trophy case', icon: '🏆', spr: 'r-trophy', tall: 1, wall: 1, act: 'trophies', lvl: 3, early: () => trophyItems().length > 0, why: 'or your first trophy', say: () => 'Everything you have won so far.' },
+  altar: { name: 'The altar', icon: '🕯️', spr: 'r-altar', act: 'altar', lvl: 4, early: () => Object.keys(summonState().beaten).length > 0, why: 'or beat a district god', glow: { dx: .5, dy: .2, r: 3.2 }, say: () => 'A small flame, always lit.' },
+  sand: { name: 'Sand garden', icon: '🪨', spr: 'r-sand', act: 'calm-sand', lvl: 3, say: () => 'The sand is smooth, waiting for a rake.' },
+  bonsai: { name: 'Your bonsai', icon: '🪴', spr: 'r-bonsai', act: 'calm-bonsai', lvl: 2, say: () => 'It looks a little taller than yesterday.' },
+  tidy: { name: 'Basket', icon: '🧺', spr: 'r-basket', act: 'mg-tidy', lvl: 3, say: () => 'Toys everywhere. Someone has been busy.' },
   mail: { name: 'Mailbox', icon: '📬', spr: 'r-mail', act: 'mail', say: () => unreadMail() ? `📬 ${unreadMail()} unread letter${unreadMail() === 1 ? '' : 's'} in the mailbox.` : 'The mailbox is empty for now.' },
   window: { name: 'Window', icon: '🪟', spr: 'r-window', tall: 1, wall: 1, cost: 30, lvl: 1, glow: { dx: .5, dy: .9, r: 2.6, day: 1 } },
   sconce: { name: 'Wall lamp', icon: '💡', spr: 'r-sconce', tall: 1, wall: 1, cost: 20, lvl: 1, glow: { dx: .5, dy: .6, r: 3 } },

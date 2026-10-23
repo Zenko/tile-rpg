@@ -5,16 +5,19 @@ module.exports = async (page, assert) => {
   await ev(() => { switchTab('town'); openScene('home'); state.progress.pebbles = 500; });
   await until(() => !!document.querySelector('.hr-room .hr-world'));
 
-  // an old or brand new cottage is the original layout, level 1
-  assert.deepStrictEqual(await ev(() => { const h = hrHome(); return [h.level, h.items.length, h.style.floor, h.style.wall, h.style.rug]; }), [1, 9, 'oak', 'plaster', 'teal'], 'a new home is plain: only the nine pieces that do something');
+  // a brand new home is a bare nook, level 1 (build 320)
+  assert.deepStrictEqual(await ev(() => { const h = hrHome(); return [h.level, h.items.length, h.style.floor, h.style.wall, h.style.rug]; }), [1, 2, 'oak', 'plaster', 'teal'], 'a new home is plain: a mailbox and an armchair');
   assert.ok(await ev(() => !hrHome().items.some(i => ['window', 'sconce', 'clock', 'toys', 'rug3'].includes(i.id))), 'no windows, rug, lamp, clock or toys to start with');
-  assert.strictEqual(await ev(() => homeRoom.cols + 'x' + homeRoom.rows), '8x9', 'a 6 by 6 floor inside its walls');
-  await ev(() => { delete state.progress.home.items; delete state.progress.home.style; delete state.progress.home.level; });
-  assert.strictEqual(await ev(() => hrHome().items.length), 9, 'a save with none of the new fields gets the plain layout');
+  assert.strictEqual(await ev(() => homeRoom.cols + 'x' + homeRoom.rows), '7x7', 'a 5 by 4 floor inside its walls');
+  await ev(() => { delete state.progress.home.items; delete state.progress.home.style; delete state.progress.home.level; delete state.progress.home.got; });
+  assert.strictEqual(await ev(() => hrHome().items.length), 2, 'a save with none of the new fields gets the plain layout');
+  // the rest was written for the furnished 6 by 6 room
+  await ev(require('./home-fixture').furnish); await ev(() => { closeScene(); openScene('home'); });
+  await until(() => !!document.querySelector('.hr-room .hr-world'));
 
   // Decorate opens the panel; nothing is for using while you do
-  await page.click('.hr-edit-btn');
-  assert.ok(await ev(() => !!homeRoom.edit && !!document.querySelector('#scActions .hr-tabs') && !sceneView.classList.contains('hr-idle')), 'the Decorate panel opens as the sheet');
+  await require('./home-fixture').decorate(page);
+  assert.ok(await ev(() => !!homeRoom.edit && !!document.querySelector('#scActions [data-act="hr:manage"]') && !sceneView.classList.contains('hr-idle')), 'the Decorate panel opens as the sheet');
   assert.ok(await ev(() => !document.querySelector('#scActions [data-act="leave"]')), 'and it has no way out of the house');
 
   // even the bonsai can be moved: tap it, then a free tile
@@ -58,7 +61,7 @@ module.exports = async (page, assert) => {
   await ev(() => { checkMail(true); });
   await ev(() => sceneAction('hr-close'));   // out of decorating, to see the button as it is the rest of the time
   assert.ok(await ev(() => unreadMail() === 0 || /·/.test(document.querySelector('.hr-edit-btn').textContent)), 'the button says so when letters are waiting and the mailbox is put away');
-  await page.click('.hr-edit-btn');
+  await require('./home-fixture').decorate(page);
   await ev(() => sceneAction('hr:place:mail')); await ev(() => hrEditTap(5, 6));
   assert.ok(await ev(() => hrHome().items.some(i => i.id === 'mail' && i.x === 5 && i.y === 6) && !hrHome().storage.mail), 'and it can be put back anywhere');
   await ev(() => { hrHome().items = hrHome().items.filter(i => i.id !== 'mail'); delete hrHome().storage.mail; });
@@ -74,12 +77,12 @@ module.exports = async (page, assert) => {
   // level up: the room grows, the colours unlock, nothing moves
   const before = await ev(() => hrHome().items.map(i => i.uid + i.x + i.y).join());
   await ev(() => sceneAction('hr:up'));
-  assert.strictEqual(await ev(() => hrHome().level), 2); assert.strictEqual(await pebbles(), 410, 'level 2 costs 60 Embers');
-  assert.strictEqual(await ev(() => document.querySelectorAll('.hr-room .town-tile').length), 9 * 11, 'level 2 is a 7 by 8 floor');
+  assert.strictEqual(await ev(() => hrHome().level), 2); assert.strictEqual(await pebbles(), 420, 'level 2 costs 50 Embers');
+  assert.strictEqual(await ev(() => document.querySelectorAll('.hr-room .town-tile').length), 8 * 9, 'level 2 is a 6 by 6 floor, which this furnished room already was');
   assert.strictEqual(await ev(() => hrHome().items.map(i => i.uid + i.x + i.y).join()), before, 'every piece stays where it was');
   await ev(() => sceneAction('hr:floor:birch'));
   assert.strictEqual(await ev(() => hrHome().style.floor), 'birch', 'the new colour is unlocked');
-  assert.strictEqual(await ev(() => hrMatY()), 9);
+  assert.strictEqual(await ev(() => hrMatY()), 7);
 
   // Done leaves decorating, not the house
   await ev(() => sceneAction('hr-close'));

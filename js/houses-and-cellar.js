@@ -352,6 +352,7 @@ function closeScene() {
   if (typeof grainScreenHide === 'function') grainScreenHide();
   if (typeof museumScreenHide === 'function') museumScreenHide();
   if (typeof shopScreenHide === 'function') shopScreenHide();
+  if (typeof homeScreenHide === 'function') homeScreenHide();   // js/home-screens.js
   hrLeave();                                          // js/home-room.js: put the cottage room away
   mountShopView(null);
   miniStop();
@@ -597,6 +598,7 @@ function renderScene() {
   if (typeof spiceScreenSync === 'function') spiceScreenSync();   // js/spice-screen.js: Saffron's stall, full screen
   if (typeof bakeryScreenSync === 'function') bakeryScreenSync();   // js/bakery-screen.js: Maple's kitchen, full screen, over the bakery's home view
   hrSync();                                           // js/home-room.js: your cottage is a walkable room (does nothing anywhere else)
+  if (typeof homeScreenSync === 'function') homeScreenSync();   // js/home-screens.js: a piece of your home, full screen
   // The storefront layout (v1.77.0) is for the ordinary "talk to the owner" screens; mini-games, the memory game and the
   // Card Shop counter keep the compact layout because they fill the stage with their own content.
   sceneView.classList.toggle('sc-std', !!scene && !['memory-mode', 'mini-mode', 'shop-mode'].some(c => sceneView.classList.contains(c)));

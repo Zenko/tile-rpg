@@ -1,10 +1,11 @@
 // Town decorations (bought in Shop -> Items) can be placed in the cottage too, from the same inventory the town uses.
 module.exports = async (page, assert) => {
+  await page.evaluate(require('./home-fixture').furnish);   // the furnished 6 by 6 home these checks were written for
   const until = (fn, arg) => page.waitForFunction(fn, arg, { timeout: 8000 });
   const ev = (fn, arg) => page.evaluate(fn, arg);
   await ev(() => { switchTab('town'); openScene('home'); state.decorationInventory = { planter: 2, flag: 1 }; });
   await until(() => !!document.querySelector('.hr-room .hr-world'));
-  await page.click('.hr-edit-btn');
+  await require('./home-fixture').decorate(page);
   assert.ok(await ev(() => /Your decorations/.test(document.getElementById('scActions').textContent) && !!document.querySelector('#scActions [data-act="hr:place:deco:planter"]')), 'the panel lists the decorations you own');
   assert.ok(await ev(() => !document.querySelector('#scActions [data-act="hr:place:deco:wind-chime"]')), 'and only those');
 

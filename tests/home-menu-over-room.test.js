@@ -3,7 +3,7 @@ module.exports = async (page, assert) => {
   const ev = (fn, arg) => page.evaluate(fn, arg);
   await ev(() => { switchTab('town'); openScene('home'); });
   await page.waitForFunction(() => !!document.querySelector('.hr-room .hr-world'), null, { timeout: 8000 });
-  await page.click('.hr-edit-btn');   // edit mode: the button reads "Done"
+  await require('./home-fixture').decorate(page);   // edit mode: the button reads "Done"
   await ev(() => openPlayerMenu());
   const top = await ev(() => {
     const b = document.querySelector('.hr-edit-btn').getBoundingClientRect();

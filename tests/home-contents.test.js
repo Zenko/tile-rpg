@@ -1,5 +1,6 @@
 // The frames, shelves and trophy case in the room show what you actually chose and won (js/home-room.js hrExtras), and redraw when it changes.
 module.exports = async (page, assert) => {
+  await page.evaluate(require('./home-fixture').furnish);   // the furnished 6 by 6 home these checks were written for
   const ev = (fn, arg) => page.evaluate(fn, arg);
   await ev(() => {
     switchTab('town');

@@ -38,9 +38,11 @@
    Hooks into houses-and-cellar.js: renderScene() calls hrSync() after drawing, closeScene() calls hrLeave(), sceneAction() calls
    hrAction(), and SCENE_EXIT_ACTS lists 'hr-close'. The room is built lazily into #scStage (a mini-game rebuilds that element, so
    hrMount() rebuilds the room when it finds it gone). */
+// Build 320: a home starts as a bare nook (5 by 4, a mailbox and an armchair) and grows from there. The other pieces that do something
+// arrive as it does (HR_CATALOG `lvl`, or sooner through `early`: see hrArrivals).
 const HR_LEVELS = [null,
-  { name: 'Cosy', fw: 6, fh: 6, cost: 0 }, { name: 'Comfy', fw: 7, fh: 8, cost: 60 }, { name: 'Homely', fw: 9, fh: 9, cost: 120 },
-  { name: 'Spacious', fw: 10, fh: 11, cost: 200 }, { name: 'Grand', fw: 12, fh: 12, cost: 320 }];
+  { name: 'Nook', fw: 5, fh: 4, cost: 0 }, { name: 'Cosy', fw: 6, fh: 6, cost: 50 }, { name: 'Homely', fw: 7, fh: 8, cost: 110 },
+  { name: 'Spacious', fw: 9, fh: 9, cost: 190 }, { name: 'Grand', fw: 11, fh: 11, cost: 300 }];
 const HR_DOOR_X = 4;
 // Palettes. `lvl` is the home level that reveals it; `c` is the tones the room uses (floor: three boards; wall: upper wall, wainscot,
 // side and front walls; rug: the rug and its edge).
@@ -58,12 +60,10 @@ const HR_RUGS = [
   { id: 'fern', name: 'Fern', lvl: 4, c: ['#4a7a4e', '#385f3c'] }, { id: 'cream', name: 'Cream', lvl: 5, c: ['#cdbf9c', '#a99b78'] }];   // names-ok: a rug colour
 // HR_CATALOG: in content/items.js (the game's words and data, kept apart from the code)
 const hrUses = d => !!(d.act || d.uses);   // a piece you walk up to and use
-// A new home: a plain 6 by 6 room with only the pieces that do something, and nothing to look at (no windows, rug, lamp or toys), so there
-// is something to want. Every piece here can be moved or put away. Homes saved before this keep the layout they were given.
-const HR_DEFAULTS = [
-  { uid: 'nap', id: 'nap', x: 1, y: 2 }, { uid: 'decorate', id: 'decorate', x: 2, y: 1 }, { uid: 'favs', id: 'favs', x: 3, y: 1 }, { uid: 'trophies', id: 'trophies', x: 5, y: 1 },
-  { uid: 'altar', id: 'altar', x: 6, y: 2 }, { uid: 'bonsai', id: 'bonsai', x: 6, y: 4 }, { uid: 'sand', id: 'sand', x: 1, y: 5 }, { uid: 'tidy', id: 'tidy', x: 1, y: 7 },
-  { uid: 'mail', id: 'mail', x: 6, y: 7 }];
+// A new home: a bare 5 by 4 nook with a mailbox and an armchair, and nothing to look at, so there is something to want. Everything else
+// that does something arrives as the home grows (hrArrivals). Every piece here can be moved or put away. Homes saved before this keep
+// the layout they were given.
+const HR_DEFAULTS = [{ uid: 'nap', id: 'nap', x: 1, y: 2 }, { uid: 'mail', id: 'mail', x: 5, y: 4 }];
 const homeRoom = { focus: null, drag: null, scene: null, host: null, world: null, player: null, ring: null, badge: null, ro: null, edit: null,
   t: 58, vw: 400, vh: 600, cx: 0, cy: 0, x: 4, y: 9, sel: null, walk: 0, hadModal: false,
   cols: 9, rows: 11, solid: new Map() };
@@ -89,7 +89,8 @@ function hrHome() {   // your cottage's saved state, filled in (and tidied) the 
   Object.keys(h.storage).forEach(k => { if (!HR_CATALOG[k] || !(h.storage[k] > 0)) delete h.storage[k]; });
   if (!Array.isArray(h.items)) h.items = HR_DEFAULTS.map(d => Object.assign({}, d));
   h.items = h.items.filter(i => i && hrDefOf(i.id) && Number.isFinite(i.x) && Number.isFinite(i.y) && typeof i.uid === 'string');
-  Object.keys(HR_CATALOG).forEach(id => { if (HR_CATALOG[id].act && !h.storage[id] && !h.items.some(i => i.id === id)) h.storage[id] = 1; });   // a piece that does something is never lost: if it is not in the room it is in storage
+  if (!h.got || typeof h.got !== 'object') { h.got = {}; h.items.concat(Object.keys(h.storage).map(id => ({ id }))).forEach(i => { if (HR_CATALOG[i.id] && HR_CATALOG[i.id].act) h.got[i.id] = 1; }); }   // the pieces that do something this home has been given
+  Object.keys(h.got).forEach(id => { if (HR_CATALOG[id] && !h.storage[id] && !h.items.some(i => i.id === id)) h.storage[id] = 1; });   // a piece that does something is never lost: if it is not in the room it is in storage
   if (!(h.nextUid > 0)) h.nextUid = 1;
   return h;
 }
@@ -156,7 +157,34 @@ function hrPlaceError(id, x, y, uid) {
   const next = h.items.filter(i => i.uid !== uid).concat([{ uid: uid || 'new', id, x, y }]);
   return hrReachOk(next) ? null : 'That would block the way.';
 }
-function hrCommit() { saveState(); hrIndex(); hrRefresh(); }   // the layout changed: save it and redraw the room
+function hrCommit() { saveState(); hrIndex(); hrRefresh(); }
+/* ---------------- pieces that arrive ----------------
+   Only the mailbox and the armchair come with a new home. The other pieces that do something have a home level in HR_CATALOG (`lvl`) and
+   some an `early` test that brings them sooner (the altar once a district god is beaten, the trophy case with a first trophy). When one
+   is due it is set down on the first free spot (hrPlaceError decides) or, in a full room, into storage, marked `fresh` so it sparkles
+   until it is first used, and named in a toast. Checked when you come home and after an upgrade. */
+function hrPieceDue(id) { const d = HR_CATALOG[id]; return !!(d && d.act) && ((d.lvl || 1) <= hrHome().level || (typeof d.early === 'function' && d.early())); }
+function hrFreeSpot(id) {
+  const r = homeRoom, d = HR_CATALOG[id];
+  const ok = (x, y) => !hrPlaceError(id, x, y, null) && hrReachOk(hrHome().items.concat([{ uid: 'new', id, x, y }]));   // a wall piece must not hang above furniture you could not reach it past
+  for (let y = d.wall ? 1 : 2; y < r.rows - 1; y++) { for (let x = 1; x < r.cols - 1; x++) if (ok(x, y)) return [x, y]; if (d.wall) break; }
+  return null;
+}
+function hrArrivals(quiet) {
+  const h = hrHome(), got = [];
+  h.fresh = h.fresh || {};
+  Object.keys(HR_CATALOG).forEach(id => {
+    if (h.got[id] || !hrPieceDue(id)) return;
+    const at = hrFreeSpot(id);   // before marking it got: hrHome() would otherwise put the missing piece in storage while we look
+    h.got[id] = 1; h.fresh[id] = 1; got.push(HR_CATALOG[id]);
+    if (at) { h.items.push({ uid: 'u' + h.nextUid++, id, x: at[0], y: at[1] }); hrIndex(); } else h.storage[id] = (h.storage[id] || 0) + 1;
+  });
+  if (!got.length) return got;
+  saveState();
+  if (!quiet) { toast(`🏠 New in your home: ${got.map(d => `${d.icon} ${d.name.replace(/^(the|your) /i, '').toLowerCase()}`).join(', ')}`); sfx('found'); logEvent('🏠', `${got.map(d => d.name).join(', ')} arrived at your home.`); }
+  return got;
+}
+function hrUnlockWhen(id) { const d = HR_CATALOG[id]; return `Home level ${d.lvl || 1}${d.why ? ` ${d.why}` : ''}`; }   // the layout changed: save it and redraw the room
 
 /* ---------------- building the room ---------------- */
 function hrPalette(list, id) { return list.find(p => p.id === id) || list[0]; }
@@ -191,7 +219,7 @@ function hrWorldHtml() {
   h.items.forEach(i => {
     const d = hrDef(i);
     if (d.rug) s += `<div class="hr-rug" data-uid="${i.uid}" style="left:calc(var(--t)*${i.x});top:calc(var(--t)*${i.y});width:calc(var(--t)*${d.w});height:calc(var(--t)*${d.h})"></div>`;
-    else s += `<div class="hr-prop${d.flat ? ' flat' : ''}${d.tall ? ' tall' : ''}${d.emoji ? ' emoji' : ''}${typeof hsClass === 'function' ? hsClass(i) : ''}${i.flip ? ' flip' : ''}" data-uid="${i.uid}" style="--x:${i.x};--y:${i.y}">${d.emoji ? `<span>${d.icon}</span>` : svgUse(d.spr)}${hrExtras(i)}${typeof hsExtras === 'function' ? hsExtras(i) : ''}</div>`;
+    else s += `<div class="hr-prop${d.flat ? ' flat' : ''}${d.tall ? ' tall' : ''}${d.emoji ? ' emoji' : ''}${typeof hsClass === 'function' ? hsClass(i) : ''}${i.flip ? ' flip' : ''}${(h.fresh || {})[i.id] ? ' fresh' : ''}" data-uid="${i.uid}" style="--x:${i.x};--y:${i.y}">${d.emoji ? `<span>${d.icon}</span>` : svgUse(d.spr)}${hrExtras(i)}${typeof hsExtras === 'function' ? hsExtras(i) : ''}</div>`;
     if (d.glow) glows.push({ x: i.x + d.glow.dx, y: i.y + d.glow.dy, r: d.glow.r, day: d.glow.day });
   });
   s += `<div class="hr-prop deco door" style="--x:${HR_DOOR_X};--y:${r.rows - 1}">${svgUse('r-door')}</div><div class="hr-prop deco mat" style="--x:${HR_DOOR_X};--y:${hrMatY()}">${svgUse('r-mat')}</div>`;
@@ -200,7 +228,7 @@ function hrWorldHtml() {
 }
 function hrFill() {   // (re)draw everything inside the host
   const h = homeRoom;
-  h.host.innerHTML = hrWorldHtml() + '<div class="hr-vignette"></div><button class="hr-edit-btn" type="button"></button>';
+  h.host.innerHTML = hrWorldHtml() + '<div class="hr-vignette"></div><button class="hr-edit-btn" type="button"></button>';   // the button reads Manage, or Done while decorating
   hrApplyStyle(); h.sig = hrSig();
   h.world = h.host.querySelector('.hr-world'); h.player = h.host.querySelector('.hr-player'); h.ring = h.host.querySelector('.hr-ring'); h.badge = h.host.querySelector('.hr-badge');
 }
@@ -214,7 +242,7 @@ function hrMount() {
   hrFill();
   h.host.addEventListener('pointerdown', hrTap);
   h.host.addEventListener('pointermove', hrDragMove); h.host.addEventListener('pointerup', hrDragEnd); h.host.addEventListener('pointercancel', () => { homeRoom.drag = null; hrDragClean(); });
-  h.host.addEventListener('click', e => { if (e.target.closest('.hr-edit-btn')) hrToggleEdit(); });
+  h.host.addEventListener('click', e => { if (e.target.closest('.hr-edit-btn')) { if (homeRoom.edit || typeof homeScreenOpen !== 'function') hrToggleEdit(); else homeScreenOpen('manage'); } });
   h.ro = new ResizeObserver(() => hrLayout()); h.ro.observe(h.host);
   hrLayout();
 }
@@ -222,6 +250,7 @@ function hrRefresh() { if (homeRoom.host) { hrFill(); hrLayout(); hrSync(); } }
 function hrEnter() {   // a fresh visit starts on the doormat, facing the room
   const h = homeRoom; hrIndex(); h.scene = scene; h.x = HR_DOOR_X; h.y = hrMatY(); h.sel = null; h.edit = null; h.hadModal = false; h.walk++;
   playerFaceFromMove({ x: HR_DOOR_X, y: h.y + 1 }, { x: HR_DOOR_X, y: h.y });
+  hrArrivals();   // a piece may be due since the last visit (a level, a beaten god, a first trophy)
   if (typeof hsEnter === 'function') hsEnter();   // js/home-spirits.js: a spirit may have come to visit
 }
 /* ---------------- the cottage from outside ----------------
@@ -338,7 +367,17 @@ function hrWalk(path, then) {
 function hrArrive(item) {
   const h = homeRoom;
   if (h.y === h.rows - 1) { sceneAction('leave'); return; }   // the doorway: the usual fade back to the street
-  if (item) hrSelect(item);
+  if (item) hrUse(item);
+}
+// Walking up to a piece uses it straight away (build 320): its own full-screen view (js/home-screens.js), the Tidy game, or for the
+// spirit pieces, which have several choices, the sheet as before.
+function hrUse(it) {
+  const h = homeRoom, d = hrDef(it); if (!scene || scene.id !== 'home') return;
+  playerFaceFromMove({ x: h.x, y: h.y }, { x: it.x, y: it.y }); hrPlace(false);
+  const home = hrHome(); if (home.fresh && home.fresh[it.id]) { delete home.fresh[it.id]; saveState(); h.world.querySelectorAll(`[data-uid="${it.uid}"]`).forEach(e => e.classList.remove('fresh')); }
+  if (d.act === 'mg-tidy') { sfx('tap'); sceneAction('mg-tidy'); return; }
+  if (d.act && typeof homeScreenOpen === 'function' && homeScreenOpen(d.act)) return;
+  hrSelect(it);
 }
 function hrSelect(it) {
   const h = homeRoom; if (!scene || scene.id !== 'home') return;
@@ -417,7 +456,7 @@ function hrSnap() {
   const h = hrHome();
   return { items: JSON.parse(JSON.stringify(h.items)), storage: Object.assign({}, h.storage), style: Object.assign({}, h.style), inv: Object.assign({}, state.decorationInventory || {}) };
 }
-function hrDo(dp, fn) { const e = homeRoom.edit, snap = hrSnap(); fn(); snap.dp = dp || 0; e.undo.push(snap); if (e.undo.length > 30) e.undo.shift(); }
+function hrDo(dp, fn) { const e = homeRoom.edit; if (!e) { fn(); return; } const snap = hrSnap(); fn(); snap.dp = dp || 0; e.undo.push(snap); if (e.undo.length > 30) e.undo.shift(); }   // outside decorating (the Manage screen) there is no undo
 function hrUndo() {
   const e = homeRoom.edit, home = hrHome(), snap = e && e.undo.pop(); if (!snap) return;
   home.items = snap.items; home.storage = snap.storage; home.style = snap.style; state.decorationInventory = snap.inv;
@@ -529,7 +568,9 @@ function hrCosyHtml() {
 }
 function hrEditHtml() {
   const e = homeRoom.edit, home = hrHome(), it = hrSelected(), tabs = [['items', 'Items'], ['colors', 'Colours'], ['room', 'Room']];
-  let s = '<div class="hr-tabs">' + tabs.map(([k, n]) => `<button class="btn sc-btn${e.tab === k ? ' on' : ''}" data-act="hr:tab:${k}">${n}</button>`).join('') + '</div>';
+  // Build 320: colours, levels and stats moved to the Manage screen (js/home-screens.js); decorating is for placing things
+  if (e.tab !== 'items') e.tab = 'items';
+  let s = typeof homeScreenOpen === 'function' ? sceneBtn('hr:manage', '🏠 Manage your home · level, colours, shop') : '<div class="hr-tabs">' + tabs.map(([k, n]) => `<button class="btn sc-btn${e.tab === k ? ' on' : ''}" data-act="hr:tab:${k}">${n}</button>`).join('') + '</div>';
   if (e.undo.length) s += `<button class="btn sc-btn hr-undo" data-act="hr:undo">↩ Undo · ${e.undo.length}</button>`;
   if (e.tab === 'items') {
     if (it) {
@@ -566,6 +607,23 @@ function hrAction(act) {
   const e = h.edit;
   if (what === 'close') { if (e) { h.edit = null; h.drag = null; } else { scene.mode = null; } h.sel = null; sfx('nav'); renderScene(); hrCamera(true); return; }
   if (what === 'noop') return;
+  if (what === 'manage') { if (typeof homeScreenOpen === 'function') homeScreenOpen('manage'); return; }
+  // colours and the level work from the Manage screen too, with or without decorating
+  if (what === 'floor' || what === 'wall' || what === 'rug') {
+    const list = { floor: HR_FLOORS, wall: HR_WALLS, rug: HR_RUGS }[what], p = list.find(q => q.id === which);
+    if (p && !hrLocked(p.lvl) && home.style[what] !== p.id) { hrDo(0, () => { home.style[what] = p.id; }); saveState(); if (h.host) hrApplyStyle(); sfx('tap'); }
+    if (e) renderScene(); return;
+  }
+  if (what === 'up') {
+    const N = HR_LEVELS[home.level + 1];
+    if (!N) return;
+    if (state.progress.pebbles < N.cost) { toast(`Not enough ${GAME.currency.many} yet`); sfx('tie'); return; }
+    spendPebbles(N.cost, 'home'); home.level++; saveState(); updateHud(); bumpPill('pillPebbles'); sfx('claim'); buzz(HAP.found);
+    toast(`🏠 Your home is now level ${home.level}: ${N.name}`); logEvent('🏠', `Your home grew to level ${home.level}, ${N.name}.`);
+    if (e) e.undo = [];   // a bigger home is not taken back
+    hrIndex(); setTimeout(() => { if (scene && scene.id === 'home') { hrArrivals(); hrIndex(); hrRefresh(); } }, 1200);   // the new pieces are named after the level-up toast
+    hrRefresh(); return;   // hrRefresh redraws the bigger room and runs the sheet
+  }
   if (!e) return;
   if (what === 'tab') { e.tab = which; e.sel = null; e.pick = null; sfx('nav'); }
   else if (what === 'desel') { e.sel = null; e.pick = null; sfx('nav'); }
@@ -597,17 +655,6 @@ function hrAction(act) {
     hrDo(-d.cost, () => { spendPebbles(d.cost, 'home'); home.storage[which] = (home.storage[which] || 0) + 1; });
     e.pick = which; e.sel = null;
     saveState(); updateHud(); bumpPill('pillPebbles'); sfx('claim'); buzz(HAP.found); toast(`${d.icon} Bought. Tap a spot to put it down.`);
-  } else if (what === 'floor' || what === 'wall' || what === 'rug') {
-    const list = { floor: HR_FLOORS, wall: HR_WALLS, rug: HR_RUGS }[what], p = list.find(q => q.id === which);
-    if (p && !hrLocked(p.lvl) && home.style[what] !== p.id) { hrDo(0, () => { home.style[what] = p.id; }); saveState(); hrApplyStyle(); sfx('tap'); }
-  } else if (what === 'up') {
-    const N = HR_LEVELS[home.level + 1];
-    if (!N) return;
-    if (state.progress.pebbles < N.cost) { toast(`Not enough ${GAME.currency.many} yet`); sfx('tie'); return; }
-    spendPebbles(N.cost, 'home'); home.level++; saveState(); updateHud(); bumpPill('pillPebbles'); sfx('claim'); buzz(HAP.found);
-    toast(`🏠 Your home is now level ${home.level}: ${N.name}`); logEvent('🏠', `Your home grew to level ${home.level}, ${N.name}.`);
-    e.undo = [];   // a bigger home is not taken back
-    hrIndex(); hrRefresh(); return;   // hrRefresh redraws the bigger room and runs the sheet
   }
   renderScene();
 }
@@ -646,6 +693,6 @@ function hrSync() {
   const btn = h.host.querySelector('.hr-edit-btn');
   btn.classList.toggle('hidden', modal);
   const lost = unreadMail() && !hrHome().items.some(i => i.id === 'mail');   // letters are waiting but the mailbox is put away: say so on the button
-  btn.textContent = h.edit ? '✓ Done' : '🎨 Decorate' + (lost ? ' · 📬' : '');
+  btn.textContent = h.edit ? '✓ Done' : '🏠 Manage' + (lost ? ' · 📬' : '');
   hrBadge(); hrMarks();
 }

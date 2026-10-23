@@ -1137,6 +1137,44 @@
   --cs-ground: #86b873;
 }
 
+/* Your home's screens (build 320, js/home-screens.js): a warm cottage room, the same in both themes. */
+.home-screen {
+  --ho-bg: #f6efe2;
+  --ho-bg2: #e9dcc4;
+  --ho-card: #fffaf1;
+  --ho-card2: #f1e6d2;
+  --ho-ink: #3d2f22;
+  --ho-soft: #7a6652;
+  --ho-edge: #dccbb0;
+  --ho-wood: #9a6a3e;
+  --ho-wood2: #6f4a28;
+  --ho-accent: #8fc4b6;
+  --ho-accent2: #4f8f80;
+  --ho-on-accent: #17352e;
+  --ho-gold: #e3b552;
+  --ho-good: #6fae7e;
+  --ho-night: #262a44;
+  --ho-night2: #4b4672;
+  --ho-sun: #ffe6a6;
+  --ho-leaf: #3d6b45;
+  --ho-leaf2: #22362a;
+  --ho-sand: #d8c59c;
+  --ho-sand2: #c7b183;
+  --ho-paper: #fffdf6;
+  --ho-seal: #b5463e;
+  --ho-water: #6fb3d6;
+  --ho-shadow: rgba(70, 45, 20, .22);
+}
+
+/* the armchair sprite (r-armchair) reads town colour names; on the home screen they are the cottage's own */
+.home-screen .ho-chair {
+  --tshadow: rgba(70, 45, 20, .25);
+  --roof: #b5574a;
+  --roof2: #8e3f36;
+  --bread: #e8c58a;
+  --trunk: #6f4a28;
+}
+
 /* Tearing a pack open (build 313, js/pack-tear.js): a velvet table and a foil pack, the same in both themes. */
 .pack-tear {
   --pt-bg: #1f1830;

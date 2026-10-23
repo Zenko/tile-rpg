@@ -140,7 +140,8 @@ function hsFamilyWeights() {   // each family starts at 1; its corners count 2 a
   const w = {};
   Object.keys(FAMILIES).forEach(f => {
     const perches = hrHome().items.filter(i => i.id === 'perch' && hsCardOf(i) && hsFam(hsCardOf(i)) === f).length;
-    w[f] = 1 + Math.min(6, hsCorners(f) * 2) + Math.min(3, perches);
+    const framed = hrHome().favs.filter(id => cardDef(id) && hsFam(id) === f).length;   // build 320: a framed card draws its family too
+    w[f] = 1 + Math.min(6, hsCorners(f) * 2) + Math.min(3, perches) + framed;
   });
   return w;
 }
