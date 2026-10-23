@@ -27,11 +27,18 @@ module.exports = async (page, assert) => {
   assert.ok(o.compass, 'a compass at the edge of the view points to it');
   assert.match(o.log, /to the (north|south|east|west)/, 'and the words say which way: ' + o.log);
   // walking into view hides the compass
-  await page.evaluate(() => { const p = state.progress.portal, m = getMap('square'); state.playerPos = { x: p.x, y: p.y + 2 < m.h && !m.solid[p.y + 2][p.x] ? p.y + 2 : p.y - 2 }; renderTown(); });   // the portal is random: stand on whichever side has walkable room
-  await until(() => { const p = state.progress.portal; return portalInView(p.x, p.y); }, null, 3000);   // the camera follows her: wait for it, not a fixed time
-  await page.waitForTimeout(150);
-  const near = await page.evaluate(() => { portalCompass(); return !!document.getElementById('portalCompass'); });
-  assert.strictEqual(near, false, 'the compass goes once the portal is in view');
+  // portalInView is worked out from where she stands, not from the drawn camera, so check it in the same step as the move: a walk still
+  // under way (cancelWalk stops it) used to carry her off again between a wait and the check, which made this flaky on CI
+  const near = await page.evaluate(() => {
+    cancelWalk(); if (typeof pendingWalk !== 'undefined') pendingWalk = null;
+    // the portal is random, and near the top of the map a tile a step or two away can still be under the top bar: stand on a walkable
+    // tile near it from which it really is on screen
+    const p = state.progress.portal, m = getMap('square'), near = [[0, 2], [0, -2], [2, 0], [-2, 0], [0, 1], [0, -1], [1, 0], [-1, 0], [1, 2], [-1, 2], [0, 3]];
+    for (const [dx, dy] of near) { const x = p.x + dx, y = p.y + dy; if (x < 0 || y < 0 || x >= m.w || y >= m.h || m.solid[y][x]) continue; state.playerPos = { x, y }; if (portalInView(p.x, p.y)) break; }
+    renderTown(); portalCompass(); return { inView: portalInView(p.x, p.y), compass: !!document.getElementById('portalCompass') };
+  });
+  assert.ok(near.inView, 'two steps from the portal it is in view');
+  assert.strictEqual(near.compass, false, 'the compass goes once the portal is in view');
   await page.evaluate(() => { state.playerPos = Object.assign({}, getMap('square').spawn); renderTown(); });
   assert.ok(o.ground && o.path, 'on walkable ground she can reach');
   assert.ok(o.drawn, 'drawn on its tile');
