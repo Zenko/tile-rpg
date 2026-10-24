@@ -38,12 +38,15 @@
    Hooks into houses-and-cellar.js: renderScene() calls hrSync() after drawing, closeScene() calls hrLeave(), sceneAction() calls
    hrAction(), and SCENE_EXIT_ACTS lists 'hr-close'. The room is built lazily into #scStage (a mini-game rebuilds that element, so
    hrMount() rebuilds the room when it finds it gone). */
-// Build 320: a home starts as a bare nook (5 by 4, a mailbox and an armchair) and grows from there. The other pieces that do something
+// Build 320: a home starts as a bare nook (3 by 3 since build 323, a mailbox and an armchair) and grows from there. The other pieces that do something
 // arrive as it does (HR_CATALOG `lvl`, or sooner through `early`: see hrArrivals).
 const HR_LEVELS = [null,
-  { name: 'Nook', fw: 5, fh: 4, cost: 0 }, { name: 'Cosy', fw: 6, fh: 6, cost: 50 }, { name: 'Homely', fw: 7, fh: 8, cost: 110 },
+  { name: 'Nook', fw: 3, fh: 3, cost: 0 }, { name: 'Cosy', fw: 6, fh: 6, cost: 50 }, { name: 'Homely', fw: 7, fh: 8, cost: 110 },
   { name: 'Spacious', fw: 9, fh: 9, cost: 190 }, { name: 'Grand', fw: 11, fh: 11, cost: 300 }];
 const HR_DOOR_X = 4;
+// The door stays in column 4 once the room is wide enough for it, so saved positions never move; the narrow starting nook has it in
+// the middle. Growing a level always adds rows, so the doormat lands on a new, empty row either way.
+function hrDoorX() { const c = homeRoom.cols; return c - 2 < HR_DOOR_X ? Math.floor(c / 2) : HR_DOOR_X; }
 // Palettes. `lvl` is the home level that reveals it; `c` is the tones the room uses (floor: three boards; wall: upper wall, wainscot,
 // side and front walls; rug: the rug and its edge).
 const HR_FLOORS = [
@@ -60,10 +63,10 @@ const HR_RUGS = [
   { id: 'fern', name: 'Fern', lvl: 4, c: ['#4a7a4e', '#385f3c'] }, { id: 'cream', name: 'Cream', lvl: 5, c: ['#cdbf9c', '#a99b78'] }];   // names-ok: a rug colour
 // HR_CATALOG: in content/items.js (the game's words and data, kept apart from the code)
 const hrUses = d => !!(d.act || d.uses);   // a piece you walk up to and use
-// A new home: a bare 5 by 4 nook with a mailbox and an armchair, and nothing to look at, so there is something to want. Everything else
+// A new home: a bare 3 by 3 nook with a mailbox and an armchair, and nothing to look at, so there is something to want. Everything else
 // that does something arrives as the home grows (hrArrivals). Every piece here can be moved or put away. Homes saved before this keep
 // the layout they were given.
-const HR_DEFAULTS = [{ uid: 'nap', id: 'nap', x: 1, y: 2 }, { uid: 'mail', id: 'mail', x: 5, y: 4 }];
+const HR_DEFAULTS = [{ uid: 'nap', id: 'nap', x: 1, y: 2 }, { uid: 'mail', id: 'mail', x: 3, y: 2 }];
 const homeRoom = { focus: null, drag: null, scene: null, host: null, world: null, player: null, ring: null, badge: null, ro: null, edit: null,
   t: 58, vw: 400, vh: 600, cx: 0, cy: 0, x: 4, y: 9, sel: null, walk: 0, hadModal: false,
   cols: 9, rows: 11, solid: new Map() };
@@ -102,7 +105,7 @@ function hrIndex() {   // room size, and which tiles are blocked, from the saved
   h.items.forEach(i => { if (!hrDefOf(i.id).flat) r.solid.set(i.x + ',' + i.y, i); });
 }
 function hrMatY() { return homeRoom.rows - 2; }
-function hrKind(x, y) { const r = homeRoom; return y === 0 ? 'wt' : y === 1 ? 'wb' : y === r.rows - 1 ? (x === HR_DOOR_X ? 'door' : 'ws') : (x === 0 || x === r.cols - 1) ? 'ws' : 'floor'; }
+function hrKind(x, y) { const r = homeRoom; return y === 0 ? 'wt' : y === 1 ? 'wb' : y === r.rows - 1 ? (x === hrDoorX() ? 'door' : 'ws') : (x === 0 || x === r.cols - 1) ? 'ws' : 'floor'; }
 function hrDef(it) { return hrDefOf(it.id); }
 function hrItemAt(x, y) { return homeRoom.solid.get(x + ',' + y) || null; }
 function hrFlatAt(x, y) { return hrHome().items.find(i => { const d = hrDef(i); return d.flat && x >= i.x && x < i.x + (d.w || 1) && y >= i.y && y < i.y + (d.h || 1); }) || null; }
@@ -135,7 +138,7 @@ function hrReachOk(items) {
     if (seen.has(nx + ',' + ny) || !hrWalkable(nx, ny, solid)) continue;
     seen.add(nx + ',' + ny); q.push([nx, ny]);
   }
-  if (!seen.has(HR_DOOR_X + ',' + (r.rows - 1))) return false;
+  if (!seen.has(hrDoorX() + ',' + (r.rows - 1))) return false;
   return items.filter(i => hrUses(hrDef(i))).every(i => [[0, 1], [0, -1], [1, 0], [-1, 0]].some(([dx, dy]) => seen.has((i.x + dx) + ',' + (i.y + dy))));
 }
 // Why a piece cannot go on that tile (a short sentence), or null when it can. `uid` is the piece being moved (null for a new one).
@@ -152,7 +155,7 @@ function hrPlaceError(id, x, y, uid) {
   }
   if (hrKind(x, y) !== 'floor' || y < 2) return 'That stands on the floor.';
   const o = hrItemAt(x, y); if (o && o.uid !== uid) return 'That spot is taken.';
-  if (x === HR_DOOR_X && y === hrMatY()) return 'Keep the doormat clear.';
+  if (x === hrDoorX() && y === hrMatY()) return 'Keep the doormat clear.';
   if (x === r.x && y === r.y) return 'You are standing there. Step aside first.';
   const next = h.items.filter(i => i.uid !== uid).concat([{ uid: uid || 'new', id, x, y }]);
   return hrReachOk(next) ? null : 'That would block the way.';
@@ -215,14 +218,14 @@ function hrWorldHtml() {
     if (k === 'floor' || k === 'door') s += `<div class="town-tile hr-f${1 + ((x * 7 + y * 13 + x * y) % 3)}" style="--x:${x};--y:${y}">${svgUse(((x + y * 2) & 1) ? 'r-plank-a' : 'r-plank-b')}</div>`;
     else s += `<div class="town-tile hr-${k}" style="--x:${x};--y:${y}"></div>`;
   }
-  const glows = [{ x: HR_DOOR_X + .5, y: r.rows - 1.6, r: 3.4, day: 1 }];
+  const glows = [{ x: hrDoorX() + .5, y: r.rows - 1.6, r: 3.4, day: 1 }];
   h.items.forEach(i => {
     const d = hrDef(i);
     if (d.rug) s += `<div class="hr-rug" data-uid="${i.uid}" style="left:calc(var(--t)*${i.x});top:calc(var(--t)*${i.y});width:calc(var(--t)*${d.w});height:calc(var(--t)*${d.h})"></div>`;
     else s += `<div class="hr-prop${d.flat ? ' flat' : ''}${d.tall ? ' tall' : ''}${d.emoji ? ' emoji' : ''}${typeof hsClass === 'function' ? hsClass(i) : ''}${i.flip ? ' flip' : ''}${(h.fresh || {})[i.id] ? ' fresh' : ''}" data-uid="${i.uid}" style="--x:${i.x};--y:${i.y}">${d.emoji ? `<span>${d.icon}</span>` : svgUse(d.spr)}${hrExtras(i)}${typeof hsExtras === 'function' ? hsExtras(i) : ''}</div>`;
     if (d.glow) glows.push({ x: i.x + d.glow.dx, y: i.y + d.glow.dy, r: d.glow.r, day: d.glow.day });
   });
-  s += `<div class="hr-prop deco door" style="--x:${HR_DOOR_X};--y:${r.rows - 1}">${svgUse('r-door')}</div><div class="hr-prop deco mat" style="--x:${HR_DOOR_X};--y:${hrMatY()}">${svgUse('r-mat')}</div>`;
+  s += `<div class="hr-prop deco door" style="--x:${hrDoorX()};--y:${r.rows - 1}">${svgUse('r-door')}</div><div class="hr-prop deco mat" style="--x:${hrDoorX()};--y:${hrMatY()}">${svgUse('r-mat')}</div>`;
   glows.forEach(g => { s += `<div class="hr-glow${g.day ? ' day' : ''}" style="left:calc(var(--t)*${g.x - g.r / 2});top:calc(var(--t)*${g.y - g.r / 2});width:calc(var(--t)*${g.r});height:calc(var(--t)*${g.r})"></div>`; });
   return s + (typeof hsEntitiesHtml === 'function' ? hsEntitiesHtml() : '') + '<div class="hr-ring hidden"></div><div class="hr-badge hidden"></div><div class="ent player hr-player">' + playerSpriteHTML() + '</div></div>';
 }
@@ -248,8 +251,8 @@ function hrMount() {
 }
 function hrRefresh() { if (homeRoom.host) { hrFill(); hrLayout(); hrSync(); } }
 function hrEnter() {   // a fresh visit starts on the doormat, facing the room
-  const h = homeRoom; hrIndex(); h.scene = scene; h.x = HR_DOOR_X; h.y = hrMatY(); h.sel = null; h.edit = null; h.hadModal = false; h.walk++;
-  playerFaceFromMove({ x: HR_DOOR_X, y: h.y + 1 }, { x: HR_DOOR_X, y: h.y });
+  const h = homeRoom; hrIndex(); h.scene = scene; h.x = hrDoorX(); h.y = hrMatY(); h.sel = null; h.edit = null; h.hadModal = false; h.walk++;
+  playerFaceFromMove({ x: hrDoorX(), y: h.y + 1 }, { x: hrDoorX(), y: h.y });
   hrArrivals();   // a piece may be due since the last visit (a level, a beaten god, a first trophy)
   if (typeof hsEnter === 'function') hsEnter();   // js/home-spirits.js: a spirit may have come to visit
 }

@@ -36,7 +36,7 @@ async function hmgWarm() {
 }
 // The same list hrWorldHtml() makes: the doorway plus every piece that has a glow.
 function hmgGlowList() {
-  const r = homeRoom, out = [{ x: HR_DOOR_X + 0.5, y: r.rows - 1.6, r: 3.4, day: 1, id: 'door' }];
+  const r = homeRoom, out = [{ x: hrDoorX() + 0.5, y: r.rows - 1.6, r: 3.4, day: 1, id: 'door' }];
   hrHome().items.forEach(i => { const d = hrDef(i); if (d && d.glow) out.push({ x: i.x + d.glow.dx, y: i.y + d.glow.dy, r: d.glow.r, day: d.glow.day, id: i.id }); });
   return out;
 }

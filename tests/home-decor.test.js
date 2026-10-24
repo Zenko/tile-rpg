@@ -8,7 +8,7 @@ module.exports = async (page, assert) => {
   // a brand new home is a bare nook, level 1 (build 320)
   assert.deepStrictEqual(await ev(() => { const h = hrHome(); return [h.level, h.items.length, h.style.floor, h.style.wall, h.style.rug]; }), [1, 2, 'oak', 'plaster', 'teal'], 'a new home is plain: a mailbox and an armchair');
   assert.ok(await ev(() => !hrHome().items.some(i => ['window', 'sconce', 'clock', 'toys', 'rug3'].includes(i.id))), 'no windows, rug, lamp, clock or toys to start with');
-  assert.strictEqual(await ev(() => homeRoom.cols + 'x' + homeRoom.rows), '7x7', 'a 5 by 4 floor inside its walls');
+  assert.strictEqual(await ev(() => homeRoom.cols + 'x' + homeRoom.rows), '5x6', 'a 3 by 3 floor inside its walls');
   await ev(() => { delete state.progress.home.items; delete state.progress.home.style; delete state.progress.home.level; delete state.progress.home.got; });
   assert.strictEqual(await ev(() => hrHome().items.length), 2, 'a save with none of the new fields gets the plain layout');
   // the rest was written for the furnished 6 by 6 room

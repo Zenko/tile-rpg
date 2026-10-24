@@ -1,5 +1,5 @@
 // Shared by the home tests written before build 320: a home furnished the way every new home used to start (a 6 by 6 room with all nine
-// pieces that do something), so their positions still hold. A new home is now a bare 5 by 4 nook (tests/home-screens.test.js covers it).
+// pieces that do something), so their positions still hold. A new home is now a bare 3 by 3 nook (tests/home-screens.test.js covers it).
 // Use: await page.evaluate(require('./home-fixture').furnish)  before openScene('home');  and  await require('./home-fixture').decorate(page)
 // instead of clicking the old Decorate button (it opens Manage now, whose Decorate the room button starts decorating).
 module.exports = {

@@ -12,7 +12,7 @@ module.exports = async (page, assert) => {
 
   // a new home is a bare nook: a mailbox and an armchair
   assert.deepStrictEqual(await ev(() => hrHome().items.map(i => i.id).sort()), ['mail', 'nap'], 'only a mailbox and an armchair to start');
-  assert.strictEqual(await ev(() => homeRoom.cols + 'x' + homeRoom.rows), '7x7', 'a 5 by 4 floor inside its walls');
+  assert.strictEqual(await ev(() => homeRoom.cols + 'x' + homeRoom.rows), '5x6', 'a 3 by 3 floor inside its walls');
 
   // walking up to the mailbox opens it full screen, no sheet in between
   await ev(() => { checkMail(true); hrGoTo(hrHome().items.find(i => i.id === 'mail')); });

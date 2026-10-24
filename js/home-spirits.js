@@ -108,7 +108,7 @@ function hsAction(act) {
 function hsFreeTiles(avoid) {
   const r = homeRoom, out = [];
   for (let y = 2; y <= r.rows - 2; y++) for (let x = 1; x <= r.cols - 2; x++)
-    if (hrWalkable(x, y) && !(x === r.x && y === r.y) && !(x === HR_DOOR_X && y === hrMatY()) && !avoid.some(a => a && a.x === x && a.y === y)) out.push({ x, y });
+    if (hrWalkable(x, y) && !(x === r.x && y === r.y) && !(x === hrDoorX() && y === hrMatY()) && !avoid.some(a => a && a.x === x && a.y === y)) out.push({ x, y });
   return out;
 }
 function hsPick(list) { return list.length ? list[Math.floor(Math.random() * list.length)] : null; }
@@ -123,7 +123,7 @@ function hsTick() {   // every few seconds: the companion shuffles a step, and n
   const c = hs.comp, el = h.world.querySelector('.hr-comp');
   if (c && el && !h.edit && !h.sel && Math.random() < .7) {
     const nbs = [[0, -1], [0, 1], [-1, 0], [1, 0]].map(([dx, dy]) => ({ x: c.x + dx, y: c.y + dy }))
-      .filter(t => hrWalkable(t.x, t.y) && t.y >= 2 && t.y <= h.rows - 2 && !(t.x === h.x && t.y === h.y) && !(t.x === HR_DOOR_X && t.y === hrMatY()) && !(hs.vis && hs.vis.x === t.x && hs.vis.y === t.y));
+      .filter(t => hrWalkable(t.x, t.y) && t.y >= 2 && t.y <= h.rows - 2 && !(t.x === h.x && t.y === h.y) && !(t.x === hrDoorX() && t.y === hrMatY()) && !(hs.vis && hs.vis.x === t.x && hs.vis.y === t.y));
     const n = hsPick(nbs);
     if (n) { c.x = n.x; c.y = n.y; el.style.setProperty('--x', n.x); el.style.setProperty('--y', n.y); el.style.zIndex = n.y * 10 + 4; }
   }
