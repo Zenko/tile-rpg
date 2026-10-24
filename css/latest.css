@@ -3727,3 +3727,7 @@ body.in-home-screen .overlay, body.in-home-screen .toast { z-index: 70; }
 .hr-prop.fresh::after { content: '✨'; position: absolute; right: -2px; top: -10px; font-size: calc(var(--t) * .34); animation: ho-glow 1.6s ease-in-out infinite; border-radius: 50%; pointer-events: none; }
 html.reduce-motion .home-screen *, html.reduce-motion .hr-prop.fresh::after { animation: none !important; }
 @media (prefers-reduced-motion: reduce) { .home-screen *, .hr-prop.fresh::after { animation: none !important; } }
+
+/* Build 327: the companion sheets (things to do together, its games, choose a companion) close with the round X like every other window */
+.chb-head .x-close { margin-left: auto; align-self: flex-start; }
+#companionGame .coll-sheet h2, #companionPicker .coll-sheet h2 { align-items: center; }

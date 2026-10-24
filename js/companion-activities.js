@@ -97,7 +97,7 @@ function drawCompanionHub(line) {
     <div class="chb-head"><div class="chb-portrait">${companionIconHtml(c)}</div>
       <div class="chb-who"><b>${escapeHtml(c.name)}</b><small>${escapeHtml(companionTypeText(c))}</small>
         <div class="cp-bond"><span class="cp-bond-bar">${[1, 2, 3].map(i => `<i class="${lv >= i ? 'on' : ''}"></i>`).join('')}</span><span class="cp-bond-name">${bondName}</span></div></div>
-      <button class="coll-clear" id="chbClose">Close</button></div>
+      <button type="button" class="x-close" id="chbClose" aria-label="Close"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button></div>
     <div class="chb-perks">${perks}</div>
     <div class="chb-say" id="chbSay">${line ? escapeHtml(line) : `“${escapeHtml(companionTrait(c))}”`}</div>
     <div class="chb-quick"><button data-chb="chat">💬 Chat</button><button data-chb="pet">🤚 Pet</button><button data-chb="look">👀 Look around</button></div>
