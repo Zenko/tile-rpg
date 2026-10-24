@@ -408,6 +408,29 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) { wea
 setInterval(() => { if (!document.hidden) tickSkyAndWeather(); }, 5000);   // a hidden tab has nothing to draw or hear, and advanceClock ignores hidden time anyway
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { state.sky.lastTickAt = Date.now(); tickSkyAndWeather(); } });   // catch up the moment the tab is back
 
+/* ---------------- the fish you can see ----------------
+   A swimming fish marks the only water tiles that can be fished right now (m.fishTiles, js/maps.js), and which ones those are
+   reshuffles every FISH_ROTATE_MS. The fish used to be drawn once, with the rest of the static world, so after a reshuffle they
+   stayed where they had been while the real fishing spots moved: tapping a fish then skipped a stone instead of opening the
+   fishing screen. They are now their own small layer, redrawn whenever the set changes (renderTown calls this every time). */
+function fishHintsSync(key) {
+  if (!townWorld) return;
+  const m = getMap(key), sig = key + ':' + m.fishBucket + ':' + Object.keys(m.fishTiles).join('|');
+  if (townWorld.dataset.fish === sig) return;
+  townWorld.dataset.fish = sig;
+  townWorld.querySelectorAll('.fish-hint').forEach(e => e.remove());
+  townWorld.querySelectorAll('.town-tile.ov.fishspot').forEach(e => { tileOv.delete(e.dataset.x + ',' + e.dataset.y); e.remove(); });
+  const rnd = seeded('fishhint-' + sig);
+  Object.keys(m.fishTiles).forEach(k => {
+    const [x, y] = k.split(',').map(Number), span = `<span class="fish-hint" style="--fdur:${(3.2 + rnd() * 2.2).toFixed(2)}s;--fdelay:${(rnd() * 2.6).toFixed(2)}s">🐟</span>`;
+    const tile = townWorld.querySelector(`.town-tile:not(.ov)[data-x="${x}"][data-y="${y}"]`);
+    if (tile) { tile.insertAdjacentHTML('beforeend', span); return; }   // the classic town: inside the water tile itself
+    const ov = document.createElement('div');   // the WebGL town has no tile elements: a see-through overlay tile carries it
+    ov.className = 'town-tile ov fishspot'; ov.dataset.x = x; ov.dataset.y = y; ov.style.setProperty('--x', x); ov.style.setProperty('--y', y);
+    ov.innerHTML = span; townWorld.appendChild(ov); tileOv.set(k, ov);
+  });
+}
+
 /* ---------------- static world (ground, trees, water, buildings) ---------------- */
 let tileOv = new Map();   // 'x,y' -> transparent overlay <div class="town-tile ov"> (fish hints, and the glow in placement / Hide and Seek) while js/town-gl.js draws the ground
 function buildWorld(key) {
@@ -441,13 +464,7 @@ function buildWorld(key) {
       else if (c === '~' || c === 'b') {
         if (c === 'b') decor = { id: at(x + 1, y) === 'b' ? 's-bridge-l' : at(x - 1, y) === 'b' ? 's-bridge-r' : 's-bridge' };
         else {
-          if (r2 < 0.55) decor = { id: 's-ripple' };
-          if (m.fishTiles[x + ',' + y]) {
-            const dur = (3.2 + rnd() * 2.2).toFixed(2), delay = (rnd() * 2.6).toFixed(2), ov = document.createElement('div');
-            ov.className = 'town-tile ov fishspot'; ov.dataset.x = x; ov.dataset.y = y; ov.style.setProperty('--x', x); ov.style.setProperty('--y', y);
-            ov.innerHTML = `<span class="fish-hint" style="--fdur:${dur}s;--fdelay:${delay}s">🐟</span>`;
-            frag.appendChild(ov); tileOv.set(x + ',' + y, ov);
-          }
+          if (r2 < 0.55) decor = { id: 's-ripple' };   // the fish are drawn by fishHintsSync, which follows the reshuffle
         }
       } else {
         const tree = c === 'o' ? (r2 < 0.5 ? 's-oak' : 's-oak2') : c === 'i' ? 's-pine' : c === 'h' ? 's-hedge' : c === 'r' ? 's-rock' : null;
@@ -466,12 +483,7 @@ function buildWorld(key) {
       el.classList.add('t-water');   // no sand band: the water fills the whole tile (the WebGL town does the same)
       if (c === 'b') html = svgUse(at(x + 1, y) === 'b' ? 's-bridge-l' : at(x - 1, y) === 'b' ? 's-bridge-r' : 's-bridge');
       else {
-        if (r2 < 0.55) html = svgUse('s-ripple');
-        // A swimming fish marks the only water tiles that can actually be fished right now.
-        if (m.fishTiles[x + ',' + y]) {
-          const dur = (3.2 + rnd() * 2.2).toFixed(2), delay = (rnd() * 2.6).toFixed(2);
-          html += `<span class="fish-hint" style="--fdur:${dur}s;--fdelay:${delay}s">🐟</span>`;
-        }
+        if (r2 < 0.55) html = svgUse('s-ripple');   // the swimming fish are drawn by fishHintsSync (below)
       }
     } else {
       el.classList.add(tone < 0.34 ? 'g1' : tone < 0.67 ? 'g2' : 'g3');
@@ -716,6 +728,7 @@ function renderTown(justMoved) {
   if (!layoutTown()) return;
   if (townBuiltFor !== key || !townWorld || !townWorld.isConnected) buildWorld(key);
   else { applyWeather(); applySky(); }
+  fishHintsSync(key);
   renderEntities(data);
   // Skip re-syncing position/camera while a walk is in progress: startWalk()'s own step() already calls
   // positionPlayer(true)/updateCamera(true) every STEP_MS with the transition it wants. Any *other* trigger

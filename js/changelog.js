@@ -18,6 +18,9 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'better', x: 'Messages at the bottom of the screen stay a little longer (3 seconds, more for long ones), so there is time to read them.' },
+  { t: 'fixed', x: 'Tapping a fish you can see in the water opens fishing again. The fish moved every ten minutes but the drawings stayed put, so a tap often landed on plain water.' },
+  { t: 'fixed', x: 'Skipping stones on the water no longer gives XP on every tap: it counts at most once every few seconds.' },
   { t: 'better', x: 'A new home is even smaller: a snug 3 by 3 nook with the door in the middle, just room for the armchair and the mailbox. Level 2 opens it up to 6 by 6.' },
   { t: 'better', x: 'The spirit perch, the Reborn mantel and the collector\'s cabinet open full screen like the rest of your home: pick a spirit to rest on the perch, put Reborn spirits up on the mantel, and see every card set\'s progress in the cabinet. A visiting spirit greets you on a screen of its own too.' },
   { t: 'better', x: 'Tidy Up has a full screen of its own in your home: drag each thing from the messy floor to the wardrobe, bookshelf or kitchen (or tap one). Things fly into place, wrong ones shake back, and right answers in a row build a combo. Same 20 seconds, medals and prizes as before.' },

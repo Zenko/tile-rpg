@@ -206,9 +206,9 @@ function lifeSkip(tx, ty) {
   const hops = 1 + Math.floor(Math.random() * 5);
   lifeFx('life-ripple', tx, ty, '', 700); sfx('plop'); buzz(HAP.tap);
   townLog.textContent = hops >= 4 ? `Plink-plink-plink-plink! ${hops} skips - what a throw.` : `Your stone skips ${hops} time${hops > 1 ? 's' : ''}.`;
+  // a skip counts (the stat, its XP, the quest, the mood) at most once every 8 s: tapping the water over and over was free XP
   const l = lifeState(), now = Date.now();
-  if (!l.lastSkipAt || now - l.lastSkipAt > 8000) { l.lastSkipAt = now; lifeMood(1); }
-  bumpStat('stonesSkipped', 1);
+  if (!l.lastSkipAt || now - l.lastSkipAt > 8000) { l.lastSkipAt = now; lifeMood(1); bumpStat('stonesSkipped', 1); }
 }
 
 /* ---------------- walking hook: birds scatter, puddles splash ---------------- */

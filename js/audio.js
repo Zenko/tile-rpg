@@ -773,6 +773,8 @@ function toast(msg, now) {
   toastQueue.push(msg);
   if (!toastBusy) nextToast();
 }
+// How long a toast stays: 3 s, and a little longer for a long one so it can be read (owner, build 324: 2 s was too quick), at most 5 s.
+const toastMs = msg => Math.min(5000, 3000 + Math.max(0, String(msg).length - 40) * 35);
 function nextToast() {
   const el = document.getElementById('toast');
   const msg = toastQueue.shift();
@@ -783,7 +785,7 @@ function nextToast() {
   toastTimer = setTimeout(() => {
     el.classList.remove('show');
     toastTimer = setTimeout(nextToast, 350);
-  }, 2000);
+  }, toastMs(msg));
 }
 
 function bumpPill(id) {
