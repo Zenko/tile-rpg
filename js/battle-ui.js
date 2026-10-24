@@ -1239,6 +1239,7 @@ function btShowResult(won, yielded) {
     if (battle.weather === 'snow') npc.rewardCard = snowUpgrade(npc.rewardCard, !!npc.isBoss);
     const isNew = !discoveredSet().has(BattleEngine.baseIdOf(npc.rewardCard));
     state.ownedCards.push(npc.rewardCard);
+    if (npc.isBoss) markFoil(npc.rewardCard);   // a boss's prize is always Reborn (build 325)
     noteCardsFound(1);
     saveState();
     const rewardDef = cardDef(npc.rewardCard), tier = RARITY_ORDER.indexOf(rewardDef.rarity);

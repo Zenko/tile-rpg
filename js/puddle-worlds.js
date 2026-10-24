@@ -250,7 +250,7 @@ function pwScatterItems(data, m, n, treasure, taken) {
 // A card given outright (a reward, a gift): the same pickup sheet as a hidden card.
 function pwGiveCard(cardId, label) {
   const isNew = !state.ownedCards.includes(cardId);
-  state.ownedCards.push(cardId); saveState(); updateHud(); bumpPill('pillCards'); bumpStat('cardsFound', 1);
+  state.ownedCards.push(cardId); markFoil(cardId); saveState(); updateHud(); bumpPill('pillCards'); bumpStat('cardsFound', 1);   // world cards are always Reborn (build 325)
   if (isNew) toast('📖 New entry in your Index');
   sfx('claim'); buzz(HAP.tap); showCardReveal(cardId, label, false, null, XP_PER_STAT.cardsFound);
 }
@@ -359,7 +359,7 @@ function pwLeave(why, quiet, after) {   // why: 'faded' (the timer), 'left' (cli
     if (typeof teleInc === 'function') teleInc('puddleWorld.' + why);
     pwUpdatePill();
     const keep = cleared && !quiet ? worldCardId('puddle', 'explore') : null;
-    if (keep) setTimeout(() => giveSpecialCard(keep, 'A keepsake: every hidden card found'), 1500);
+    if (keep) setTimeout(() => giveSpecialCard(keep, 'A keepsake: every hidden card found', true), 1500);
     if (after && !quiet) setTimeout(after, 700);
   };
   // Warped time on the way out too (js/warp-fx.js), running forward this time: the clock catches up and the twist unwinds the other way.

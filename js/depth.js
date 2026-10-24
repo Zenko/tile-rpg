@@ -50,7 +50,7 @@ function depthWin() {
     depthState().cleared[d] = n;
     const floor = RARITY_ORDER.indexOf(pay.card), rolled = rollRewardRarity(true), rar = RARITY_ORDER.indexOf(rolled) > floor ? rolled : pay.card;
     const cid = randomCardId(rar), def = cardDef(cid);
-    state.ownedCards.push(cid); noteCardsFound(1); bumpPill('pillCards');
+    state.ownedCards.push(cid); markFoil(cid); noteCardsFound(1); bumpPill('pillCards');   // a boss's prize is always Reborn (build 325)
     addPebbles(pay.embers, 'depth'); state.progress.starlight = starlight() + pay.starlight;
     endCard.classList.add('glow-' + def.rarity);
     battleEndStats.innerHTML = `<span class="end-prize-k">First clear</span><br><b>${cardArtHtml(def)} ${def.name}</b> <span class="rarity-tag rt-${def.rarity}" style="margin:4px 0 0">${RARITY_LABEL[def.rarity]}</span><br><b>+${pay.embers} 🫧</b> · <b>+${pay.starlight} ${GAME.starlight.icon}</b>${n < DEPTH_MAX ? `<br>${GAME.depth.name} ${n + 1} is open.` : `<br>${PLACES[d]} is as deep as it goes.`}`;

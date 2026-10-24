@@ -438,9 +438,9 @@ function worldCardId(group, key) {
 }
 let specialQueue = [];
 // Adds one copy at once (so it can never be lost) and shows its reveal as soon as nothing else is on screen (a battle result, a scene, another card).
-function giveSpecialCard(id, label) {
+function giveSpecialCard(id, label, foil) {   // foil: a portal or puddle world's keepsake, always Reborn (build 325)
   if (!cardDef(id)) return;
-  state.ownedCards.push(id); bumpStat('cardsFound', 1); bumpPill('pillCards'); saveState(); updateHud();
+  state.ownedCards.push(id); if (foil) markFoil(id); bumpStat('cardsFound', 1); bumpPill('pillCards'); saveState(); updateHud();
   specialQueue.push({ id, label });
   setTimeout(flushSpecialCards, 400);
 }

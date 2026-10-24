@@ -93,6 +93,18 @@ const FOIL_ODDS = 0.02;
 function foils() { const p = state.progress; if (!p.foils || typeof p.foils !== 'object') p.foils = {}; return p.foils; }
 function foilCount(id) { return foils()[id] || 0; }
 function hasFoil(id) { const b = BattleEngine.baseIdOf(id); return Object.keys(foils()).some(k => BattleEngine.baseIdOf(k) === b && foils()[k] > 0); }
+/* Build 325 (owner): every card from a portal, a puddle world or a boss's reward is Reborn, always, instead of the 2% roll. Called
+   right after the card joins the collection; the snapshot is brought up to the new count so reconcileFoils does not roll it again. */
+function markFoil(id) {
+  const p = state.progress, f = foils(), d = cardDef(id); if (!d) return;
+  f[id] = Math.min((f[id] || 0) + 1, ownedCardCounts()[id] || 1);
+  if (p.foilSnap) p.foilSnap[id] = ownedCardCounts()[id] || 0;
+  logEvent('✨', `A Reborn ${d.name}!`); bumpStat('foilsFound', 1); showTipOnce('foils');
+  setTimeout(() => toast(`✨ Reborn! Your ${d.icon} ${d.name} shimmers`), 1400);
+  saveState();
+}
+// Is this card coming from a portal or puddle world (not the cellar, which is a world too but is not a puddle)?
+function foilWorldNow() { const w = typeof pwActive === 'function' && pwActive(); return !!w && state.currentDistrict === PW_KEY && w.kind !== 'cellar'; }
 function reconcileFoils() {
   const p = state.progress, counts = ownedCardCounts(), f = foils();
   if (!p.foilSnap) { p.foilSnap = counts; return; }

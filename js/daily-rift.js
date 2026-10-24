@@ -88,7 +88,7 @@ function dailyRiftLeave(w) {
   if (cards && cards === items.length) {   // every card found: the Rift Walker, and after ten such days the Rift Cartographer
     bumpStat('dailyRiftsFull', 1);
     const k = worldCardId('rift', 'walker') || ((state.progress.totals.dailyRiftsFull || 0) >= 10 ? worldCardId('rift', 'cartographer') : null);
-    if (k) setTimeout(() => giveSpecialCard(k, 'A keepsake from the Daily Rift'), 2500);
+    if (k) setTimeout(() => giveSpecialCard(k, 'A keepsake from the Daily Rift', true), 2500);
   }
   logEvent('⭐', `Today's rift: ${cards} of ${items.length} cards${cards === items.length && cards ? ` in ${pwFmt(st.ms)}` : ''}.`);
   saveState(); dailyRiftPush();
