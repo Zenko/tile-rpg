@@ -250,7 +250,7 @@ function pwScatterItems(data, m, n, treasure, taken) {
 // A card given outright (a reward, a gift): the same pickup sheet as a hidden card.
 function pwGiveCard(cardId, label) {
   const isNew = !state.ownedCards.includes(cardId);
-  state.ownedCards.push(cardId); markFoil(cardId); saveState(); updateHud(); bumpPill('pillCards'); bumpStat('cardsFound', 1);   // world cards are always Reborn (build 325)
+  state.ownedCards.push(cardId); markFoil(cardId); saveState(); updateHud(); bumpPill('pillCards'); bumpStat('cardsFound', 1);   // world cards have a better chance to be Reborn (markFoil)
   if (isNew) toast('📖 New entry in your Index');
   sfx('claim'); buzz(HAP.tap); showCardReveal(cardId, label, false, null, XP_PER_STAT.cardsFound);
 }

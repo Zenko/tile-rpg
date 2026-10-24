@@ -107,7 +107,8 @@ module.exports = async (page, assert) => {
     return { blocked, c };
   });
   assert.ok(f.blocked, 'a creature stands in the way (you cannot walk through it)');
-  await page.waitForTimeout(1500);
+  // wait for the walk to arrive rather than a fixed time: on a busy machine 1.5 s was sometimes too short
+  await page.waitForFunction(() => { const fl = cellarFl(), pp = state.playerPos, c = fl.foes[0]; return c && Math.abs(pp.x - c.x) + Math.abs(pp.y - c.y) === 1; }, null, { timeout: 8000 }).catch(() => {});
   const f3 = await ev(() => { const fl = cellarFl(), pp = state.playerPos, c = fl.foes[0]; return { adjacent: Math.abs(pp.x - c.x) + Math.abs(pp.y - c.y) === 1 }; });
   assert.ok(f3.adjacent, 'you walked up next to it');
   const f4 = await ev(() => {

@@ -89,16 +89,18 @@ function checkStory() {
    they shimmer everywhere the card is shown. Found by comparing the collection with the last snapshot, so every
    way of getting a card counts without each one having to remember to roll.
    ============================================================ */
-const FOIL_ODDS = 0.02;
+const FOIL_ODDS = 0.005, FOIL_SOURCE_ODDS = 0.1;   // build 326 (owner): Reborn made rarer, 0.5% for any new card (was 2%), 10% from a portal, a puddle world or a boss's prize
 function foils() { const p = state.progress; if (!p.foils || typeof p.foils !== 'object') p.foils = {}; return p.foils; }
 function foilCount(id) { return foils()[id] || 0; }
 function hasFoil(id) { const b = BattleEngine.baseIdOf(id); return Object.keys(foils()).some(k => BattleEngine.baseIdOf(k) === b && foils()[k] > 0); }
-/* Build 325 (owner): every card from a portal, a puddle world or a boss's reward is Reborn, always, instead of the 2% roll. Called
-   right after the card joins the collection; the snapshot is brought up to the new count so reconcileFoils does not roll it again. */
+/* A card from a portal, a puddle world or a boss's prize rolls its own, better chance (FOIL_SOURCE_ODDS) instead of the ordinary one.
+   Called right after the card joins the collection; either way the snapshot is brought up to the new count, so reconcileFoils does not
+   roll that copy a second time. (Build 325 made these always Reborn; build 326 made it a chance, as Reborn should stay rare.) */
 function markFoil(id) {
   const p = state.progress, f = foils(), d = cardDef(id); if (!d) return;
-  f[id] = Math.min((f[id] || 0) + 1, ownedCardCounts()[id] || 1);
   if (p.foilSnap) p.foilSnap[id] = ownedCardCounts()[id] || 0;
+  if (Math.random() >= FOIL_SOURCE_ODDS * (eventIs('starfall') ? 3 : 1)) { saveState(); return; }
+  f[id] = Math.min((f[id] || 0) + 1, ownedCardCounts()[id] || 1);
   logEvent('✨', `A Reborn ${d.name}!`); bumpStat('foilsFound', 1); showTipOnce('foils');
   setTimeout(() => toast(`✨ Reborn! Your ${d.icon} ${d.name} shimmers`), 1400);
   saveState();

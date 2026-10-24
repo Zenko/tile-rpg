@@ -178,7 +178,7 @@ function collectItem(item) {
   item.despawnedUncollected = false;
   const isNewCard = !state.ownedCards.includes(item.cardId);
   state.ownedCards.push(item.cardId);
-  if (typeof foilWorldNow === 'function' && foilWorldNow()) markFoil(item.cardId);   // a card found in a portal or puddle world is Reborn (build 325)
+  if (typeof foilWorldNow === 'function' && foilWorldNow()) markFoil(item.cardId);   // a card found in a portal or puddle world has a better chance to be Reborn (markFoil)
   saveState();
   renderTown();
   updateHud();
