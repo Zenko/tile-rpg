@@ -5,7 +5,7 @@
 module.exports = {
   furnish: () => {
     const items = [['nap', 1, 2], ['decorate', 2, 1], ['favs', 3, 1], ['trophies', 5, 1], ['altar', 6, 2], ['bonsai', 6, 4], ['sand', 1, 5], ['tidy', 1, 7], ['mail', 6, 7]];
-    const h = homeState(); h.items = items.map(([id, x, y]) => ({ uid: id, id, x, y })); h.got = {}; items.forEach(([id]) => { h.got[id] = 1; }); h.level = 1;
+    const h = homeState(); h.items = items.map(([id, x, y]) => ({ uid: id, id, x, y })); h.got = {}; items.forEach(([id]) => { h.got[id] = 1; }); h.level = 1; h.fit = 2;   // already fitted: keep this furnished room as it is
   },
   decorate: async page => {
     await page.click('.hr-edit-btn');

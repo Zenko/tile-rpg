@@ -88,7 +88,11 @@ module.exports = async (page, assert) => {
   await ev(() => sceneAction('hr-close'));
   assert.ok(await ev(() => !homeRoom.edit && inScene && sceneView.classList.contains('hr-idle')), 'Done closes the panel and stays inside');
 
-  // a home saved at an older, bigger size keeps every piece inside its walls
-  await ev(() => { state.progress.home = { level: 1, items: [{ uid: 'mail', id: 'mail', x: 7, y: 9 }, { uid: 'win', id: 'window', x: 1, y: 1 }] }; hrIndex(); });
-  assert.strictEqual(await ev(() => homeRoom.cols + 'x' + homeRoom.rows), '9x11', 'a level 1 home with furniture out at the old edge is not shrunk');
+  // a home saved before the small starting rooms is fitted to its level once (build 328): bought pieces to storage, the room its level's size
+  await ev(() => { state.progress.home = { level: 1, items: [{ uid: 'mail', id: 'mail', x: 7, y: 9 }, { uid: 'win', id: 'window', x: 1, y: 1 }, { uid: 'alt', id: 'altar', x: 6, y: 2 }] }; hrIndex(); });
+  assert.strictEqual(await ev(() => homeRoom.cols + 'x' + homeRoom.rows), '5x6', 'an old level 1 home shrinks to the 3 by 3 nook');
+  assert.deepStrictEqual(await ev(() => [hrHome().items.map(i => i.id).sort().join(), hrHome().storage.window, hrHome().fit]), ['mail,nap', 1, 2], 'the window goes to storage, the nook gets its mailbox and armchair, once');
+  assert.ok(await ev(() => !hrHome().storage.altar || hrPieceDue('altar')), 'a piece that does something comes back only when it is due');
+  await ev(() => { hrHome().items.push({ uid: 'w2', id: 'window', x: 2, y: 1 }); hrIndex(); });
+  assert.ok(await ev(() => hrHome().items.some(i => i.uid === 'w2')), 'fitting happens once: later layouts are left alone');
 };

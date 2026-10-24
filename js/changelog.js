@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'fixed', x: 'A home saved before the new small rooms now shrinks to its level\'s size, once: furniture you bought waits in storage (Manage → Furniture), decorations go back to your decorations, and the other pieces arrive again as your home grows.' },
   { t: 'fixed', x: 'Your companion\'s windows (things to do together, its games and choosing a companion) close with the round ✕ at the top right, like every other window.' },
   { t: 'better', x: 'Reborn cards are rarer: any new card has a small chance (lower than before), and a card from a portal, a puddle world or a boss you beat has a much better one.' },
   { t: 'better', x: 'Messages at the bottom of the screen stay a little longer (3 seconds, more for long ones), so there is time to read them.' },

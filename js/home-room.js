@@ -93,9 +93,31 @@ function hrHome() {   // your cottage's saved state, filled in (and tidied) the 
   if (!Array.isArray(h.items)) h.items = HR_DEFAULTS.map(d => Object.assign({}, d));
   h.items = h.items.filter(i => i && hrDefOf(i.id) && Number.isFinite(i.x) && Number.isFinite(i.y) && typeof i.uid === 'string');
   if (!h.got || typeof h.got !== 'object') { h.got = {}; h.items.concat(Object.keys(h.storage).map(id => ({ id }))).forEach(i => { if (HR_CATALOG[i.id] && HR_CATALOG[i.id].act) h.got[i.id] = 1; }); }   // the pieces that do something this home has been given
+  if (h.fit !== 2) hrFitToLevel(h);   // build 328: a home saved before the small starting rooms is fitted to its level once
   Object.keys(h.got).forEach(id => { if (HR_CATALOG[id] && !h.storage[id] && !h.items.some(i => i.id === id)) h.storage[id] = 1; });   // a piece that does something is never lost: if it is not in the room it is in storage
   if (!(h.nextUid > 0)) h.nextUid = 1;
   return h;
+}
+/* A home saved before builds 320-323 (when a new home was a furnished 6 by 6 room) can hold more than its level's floor, and hrIndex
+   keeps the room big enough for whatever is placed, so it never shrank. Once, such a home is fitted to its level: bought furniture
+   goes to storage, town decorations back to the decorations, and the pieces that do something stay only if they are due at this level
+   (the rest arrive again as it grows, hrArrivals). The room then starts from the level's own layout. Nothing bought is lost. */
+function hrLevelFits(h) {
+  const L = HR_LEVELS[h.level] || HR_LEVELS[1];
+  return h.items.every(i => { const d = hrDefOf(i.id); return d && i.x >= 1 && i.x + (d.w || 1) - 1 <= L.fw && (d.wall ? i.y === 1 : i.y >= 2 && i.y + (d.h || 1) - 1 <= L.fh + 1); });
+}
+function hrFitToLevel(h) {
+  h.fit = 2;
+  if (hrLevelFits(h)) return;
+  h.items.forEach(i => {
+    const d = hrDefOf(i.id); if (!d) return;
+    if (d.deco) hrDecoGive(d.deco, 1);
+    else if (!d.act) h.storage[i.id] = (h.storage[i.id] || 0) + 1;
+  });
+  h.items = HR_DEFAULTS.map(d => Object.assign({}, d));
+  h.got = {}; h.items.forEach(i => { h.got[i.id] = 1; });
+  Object.keys(h.storage).forEach(k => { if (HR_CATALOG[k] && HR_CATALOG[k].act) delete h.storage[k]; });   // a piece that does something comes back by level
+  if (typeof saveState === 'function') setTimeout(saveState, 0);
 }
 function hrIndex() {   // room size, and which tiles are blocked, from the saved layout
   const h = hrHome(), L = HR_LEVELS[h.level], r = homeRoom;
