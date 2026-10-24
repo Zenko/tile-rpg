@@ -15,7 +15,8 @@ module.exports = async (page, assert) => {
   assert.strictEqual(await page.evaluate(() => playerEl.querySelectorAll('.pl-shd').length), 0, 'there is no cast shadow, only the round one under her feet');
   assert.ok(await page.evaluate(() => /ellipse|circle|radial/.test(getComputedStyle(playerEl, '::before').background) || getComputedStyle(playerEl, '::before').borderRadius === '50%'), 'the round shadow under her feet is still there');
 
-  // weather layers
+  // weather layers (their 2.2 s fade is switched off here: when it ran, the opacity read straight after the change was still the old one)
+  await page.evaluate(() => playerEl.querySelectorAll('.pl-wet, .pl-frost').forEach(e => { e.style.transition = 'none'; }));
   const op = sel => page.evaluate(sel => getComputedStyle(playerEl.querySelector('.pl-view[data-v="down"] ' + sel)).opacity, sel);
   await page.evaluate(() => { townView.dataset.wx = 'clear'; }); assert.strictEqual(await op('.pl-wet'), '0'); assert.strictEqual(await op('.pl-frost'), '0');
   await page.evaluate(() => { townView.dataset.wx = 'rain'; }); assert.ok(+await op('.pl-wet') > 0.5, 'wet shine in the rain'); assert.strictEqual(await op('.pl-frost'), '0');
