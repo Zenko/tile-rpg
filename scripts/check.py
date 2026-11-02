@@ -175,7 +175,7 @@ else:
 #     them with words('key'). Many lines are still typed into js/, so this counts them (a string holding a sentence: a capital
 #     letter and at least four words) and fails if the count grows. When you move lines out, lower TEXT_IN_JS to the new count.
 #     A line that has to stay (a debug label, a test hook) ends with a `text-ok` comment.
-TEXT_IN_JS = 1246
+TEXT_IN_JS = 1238
 sentence_re = re.compile(r"[A-Z][a-z’']*(?:[ ,]+[A-Za-z’'-]+){3,}")
 text_counts = collections.Counter()
 for f, src in allsrc.items():

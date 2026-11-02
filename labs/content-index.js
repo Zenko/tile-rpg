@@ -20,6 +20,9 @@ const CONTENT_INDEX = {
   "CARD_STORY_TEMPLATES",
   "COMPANION_TRAITS"
  ],
+ "content/chapters.js": [
+  "CHAPTERS"
+ ],
  "content/dialogue.js": [
   "COMPANION_MEMORIES",
   "COMPANION_GIFT_LINES",
@@ -65,6 +68,7 @@ const CONTENT_INDEX = {
  ],
  "content/story.js": [
   "STORY",
+  "STORY_HOME",
   "STORY_INTRO",
   "WREN_NOT_SURE",
   "STORY_BEATS",

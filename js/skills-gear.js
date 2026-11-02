@@ -206,9 +206,10 @@ function nextGoal() {
   if (skillPointsLeft() > 0) return { icon: '🧭', text: `${skillPointsLeft()} skill point${skillPointsLeft() === 1 ? '' : 's'} to spend`, run: () => { switchTab('character'); charSetView('path'); } };
   const m = todayModel();
   if (m.away.length) { const a = m.away[0]; return { icon: a.icon, text: a.title, run: () => journalGo(a.go), go: a.go }; }
+  const cg = typeof chapterGoal === 'function' ? chapterGoal(true) : null; if (cg) return cg;   // this district's story, or a story step ready to claim (js/chapters.js)
   const open = m.daily.find(i => !i.done && i.go && i.title !== 'Daily gift') || m.daily.find(i => !i.done);
   if (open) return { icon: open.icon, text: `${open.title}: ${open.sub}`, run: () => journalGo(open.go), go: open.go };
-  return sg;
+  return sg || (typeof chapterGoal === 'function' ? chapterGoal(false) : null);
 }
 function refreshGoalChip(force) {
   const chip = document.getElementById('goalChip'); if (!chip) return;

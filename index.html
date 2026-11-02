@@ -435,6 +435,7 @@
           <button class="seg-btn" id="segWeekly">Weekly</button>
           <button class="seg-btn" id="segMilestones">Milestones</button>
           <button class="seg-btn" id="segFavours">Favours</button>
+          <button class="seg-btn" id="segStories">Stories</button>
         </div>
         <div id="dailiesView">
           <div id="storySlot"></div>
@@ -446,6 +447,9 @@
         </div>
         <div id="milestonesView" class="hidden">
           <div class="ach-grid" id="achGrid"></div>
+        </div>
+        <div id="storiesView" class="hidden">
+          <div id="storiesList"></div>
         </div>
         <div id="favoursView" class="hidden">
           <div class="panel-desc" id="favoursSub"></div>
@@ -877,6 +881,7 @@
 <script src="content/story.js"></script>
 <script src="content/guide.js"></script>
 <script src="content/text.js"></script>
+<script src="content/chapters.js"></script>
 <script>applySkinContent();</script>
 <script src="js/data-and-engine.js"></script>
 <script src="js/icon-swap.js"></script>
@@ -992,6 +997,7 @@ pixiReady.catch(function () {});
 <script src="js/town-news.js"></script>
 <script src="js/scenes.js"></script>
 <script src="js/events-story-foils-guide.js"></script>
+<script src="js/chapters.js"></script>
 <script src="js/settings-extra.js"></script>
 <!-- Cloud save (optional): deliberately loaded last, after the whole game above has already loaded and
      rendered from the local save, so a slow or unreachable connection to Google's CDN can never delay

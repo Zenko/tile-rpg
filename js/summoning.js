@@ -32,6 +32,7 @@ function noteGodBeaten(district) {
   if (!DISTRICTS[district]) return;
   const s = summonState();
   if (!s.beaten[district]) { s.beaten[district] = true; saveState(); }
+  if (typeof chapterNoteBoss === 'function') chapterNoteBoss(district);   // a district story's last step (js/chapters.js)
 }
 function summonOwned(s) { return state.ownedCards.includes(s.card); }
 

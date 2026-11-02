@@ -18,6 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'new', x: 'Stories: once Getting started is done, each district has a short story of its own that ends with its god (why the fountain hums, a whisper tangled in thread, a tide that comes in late, a garden growing in its sleep). Some neighbours have one too: Maple, Fern, Olwen and Tam. Each step plays as a little scene, counts what you do after it starts, and is claimed in the new Rewards → Stories tab. The last step pays a card or a gift.' },
   { t: 'fixed', x: 'A home saved before the new small rooms now shrinks to its level\'s size, once: furniture you bought waits in storage (Manage → Furniture), decorations go back to your decorations, and the other pieces arrive again as your home grows.' },
   { t: 'fixed', x: 'Your companion\'s windows (things to do together, its games and choosing a companion) close with the round ✕ at the top right, like every other window.' },
   { t: 'better', x: 'Reborn cards are rarer: any new card has a small chance (lower than before), and a card from a portal, a puddle world or a boss you beat has a much better one.' },

@@ -3738,3 +3738,15 @@ html.reduce-motion .home-screen *, html.reduce-motion .hr-prop.fresh::after { an
 .cast-portrait { display: inline-block; width: 1.15em; height: 1.15em; object-fit: contain; vertical-align: middle; }
 /* The skin pill (js/game-config.js, SKINS) reuses the icon preview pill, one row higher so both fit when both are on. */
 .ico-pill.skin-pill { bottom: calc(env(safe-area-inset-bottom, 0px) + 196px); }
+
+/* ---------- STORIES (build 331, js/chapters.js) ----------
+   Rewards → Stories reuses the Getting started card (.story-card in css/buildings.css); these only add the locked / finished
+   looks and the small "Hear it again" link under each card. */
+.chapter-card.locked { opacity: .62; }
+.chapter-card.locked .story-text b { letter-spacing: .04em; }
+.chapter-card.done { border-style: dashed; }
+.chapter-card .q-count { color: var(--accent); font-weight: 800; }
+.chapter-links { display: flex; justify-content: flex-end; margin-top: 6px; }
+.chapter-link { font: inherit; font-size: .74rem; font-weight: 700; padding: 2px 4px; border: 0; background: none; color: var(--ink-soft); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+.chapter-link:hover, .chapter-link:focus-visible { color: var(--accent); }
+#storiesView .section-title:first-child { margin-top: 0; }

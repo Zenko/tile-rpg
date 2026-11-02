@@ -22,6 +22,16 @@ const STORY = [
   { icon: '⭐', text: 'Settle in properly.',                          goal: 'Reach level 5',                              done: p => (p.level || 1) >= 5,                card: 'super' },
 ];
 
+// "Making yourself at home": the steps after Getting started (js/events-story-foils-guide.js appends them to STORY).
+const STORY_HOME = [
+  { icon: '👑', text: 'Face down a district boss.',                   goal: 'Defeat any district boss',                   done: p => (p.totals.bossesWon || 0) >= 1,     pebbles: 12 },
+  { icon: '🗺️', text: 'See the whole town.',                          goal: 'Visit every district',                       done: () => Object.keys(DISTRICTS).every(k => state.visitedDistricts.includes(k)), pebbles: 12 },
+  { icon: '🦦', text: "Meet the harbor and the garden's newest neighbors.", goal: 'Visit the Net Loft and the Glasshouse', done: p => !!(p.visited && p.visited['harbor-hut'] && p.visited['garden-glass']), pebbles: 10 },
+  { icon: '🎭', text: 'Take on your rival.',                          goal: `Beat ${CAST.rival.name} in a match`,                       done: p => (p.totals.rivalWins || 0) >= 1,     pebbles: 15 },
+  { icon: '🧩', text: 'Finish what you started.',                     goal: 'Complete any themed card set',               done: () => CARD_SETS.some(setComplete),        pebbles: 15 },
+  { icon: '⭐', text: 'Truly settle in.',                             goal: 'Reach level 10',                             done: p => (p.level || 1) >= 10,                card: 'mythic' }
+];
+
 // ---- used by js/scenes.js ----
 /* ---------- A. the opening ---------- */
 const STORY_INTRO = { id: 'intro', style: 'dream', cards: [

@@ -7,6 +7,7 @@
 
 // ---- used by js/progression.js ----
 const TIPS = {
+  stories:    { icon: '📖', title: 'Stories', text: 'Every district has a story of its own, and some neighbours do too. A step plays as a little scene when it starts; do what it asks, then claim it in Rewards → Stories. Tap the pill under the top bar to be taken there.' },
   menu:       { icon: '🧭', title: 'The menu', text: `The round button at the bottom opens your menu: Town, Journal, Cards, Rewards and Character fan out around your thumb. Each opens as a window over the town; tap the cross, or the dimmed town, to close it. The bar beside the button shows where you are and your cards and ${GAME.currency.many}. Left-handed? Settings, Appearance, Menu hand.` },
   story:      { icon: '🧓', title: `${CAST.guide.name} points the way`, text: `${CAST.guide.name} tells you what to try next. The pill under the top bar says what ${pron('guide').they} asked: tap it to hear ${pron('guide').them} again or to go there. A small gold diamond bobs over the building to visit. Turn it all off with Cozy mode in Settings.` },
   atlas:      { icon: '🗺️', title: `The ${CAST.atlas.name}`, text: 'It travels with you from district to district. Ask it questions, play its harder games, challenge it to a match, or see what it keeps for sale. It never explains itself.' },
@@ -96,6 +97,7 @@ const GUIDE = [
     { icon: '🎒', name: 'Inventory', where: 'Character → Pantry', how: 'Pantry ingredients, cooked dishes, seeds and spare decorations, all in one list - tap Plant or Place to use one right from there.' },
   ] },
   { section: 'Neighbors', items: [
+    { icon: '📖', name: 'Stories', where: 'Rewards → Stories · the pill under the top bar', how: `After Getting started, each district has a short story that ends with its god, and some neighbours (${CAST.baker.name}, ${CAST.gardener.name}, ${CAST.scholar.name}, ${CAST.netMender.name}) have one of their own once you have visited them. One step at a time: it plays as a scene when it starts, counts only what you do after that, and pays when you claim it. The last step pays a card or a gift. Hear any step again from the list.` },
     { icon: '💬', name: 'Favours', where: 'Tap any neighbor', how: `Small daily requests for ${GAME.currency.many} or cards. Track them in Rewards → Favours.` },
     { icon: '💞', name: 'Friendship', where: 'Tap any neighbor', how: 'Favours, gifts (bread, dishes, cards they love) and wins earn hearts. 3 hearts: signature match. 5: a keepsake.' },
     { icon: '🎭', name: `${CAST.rival.name}, your rival`, where: 'A different district each time', how: 'Appears after your first win. Eight chapters, each harder, with a unique final prize.', lock: () => (state.progress.totals.battlesWon || 0) >= 1 ? '' : 'Appears after your first win' },

@@ -63,6 +63,23 @@ const TEXT = {
   'advice.noFinisher': 'A tidy, cheap deck, but nothing to finish with. One big card at cost 4 or 5 gives you something to build toward.',
   'advice.good': 'That is a well-shaped deck: {cheap} cheap cards, average cost {avg}, and {defenders} defenders. I would not change much.',
 
+  // ---- Rewards → Stories (js/chapters.js; the stories themselves are in content/chapters.js) ----
+  'stories.districtTitle': 'District stories',
+  'stories.districtSub': 'Each district has a story of its own, and it ends with its god.',
+  'stories.neighbourTitle': 'Neighbours’ stories',
+  'stories.neighbourSub': 'Some neighbours have something on their mind. Get to know them and they will tell you.',
+  'stories.lockedFirstHour': 'Opens after Getting started',
+  'stories.lockedDistrict': 'Opens with {place}',
+  'stories.lockedNeighbour': 'Meet {name} first',
+  'stories.hearAgain': 'Hear it again',
+  'stories.hearEnding': 'Hear the ending again',
+  'stories.stepDone': '📖 {title}: step done - claim it in Rewards → Stories',
+  'stories.claimed': '📖 Step done! +{n} {money}',
+  'stories.pillClaim': '{title}: claim it in Rewards',
+  'stories.finishedLog': 'Finished the story “{title}”.',
+  'stories.decoGift': '{icon} {name} goes into your decorations',
+  'stories.cardNote': '{name}: "This is yours now."',
+
   // ---- letters in the mailbox (js/houses-and-cellar.js) ----
   'mail.claimFirst': 'Claim the gift first',
   'mail.welcomeHome.subject': 'Your cottage',

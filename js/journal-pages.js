@@ -33,7 +33,7 @@ function journalGo(t) {
   switchTab('town');
 }
 const GUIDE_GO = {
-  'Districts': { map: 1 }, 'Themes': { menu: 'settings' }, 'Inventory': { tab: 'character' }, 'Character tab': { tab: 'character' },
+  'Districts': { map: 1 }, 'Stories': { tab: 'quests' }, 'Themes': { menu: 'settings' }, 'Inventory': { tab: 'character' }, 'Character tab': { tab: 'character' },
   'Draft Run': JPLACES.cup, [`${GAME.player.many}’ Cup`]: JPLACES.cup, 'Deck challenges': JPLACES.cup, 'Daily puzzle': JPLACES.nook,
   'The cellar': JPLACES.cellar, 'Letters': JPLACES.home, 'Your cottage': JPLACES.home,
   'Packs & decorations': JPLACES.shop, 'Lantern Market': JPLACES.lantern, 'The Net Loft': JPLACES.net, 'The Glasshouse': JPLACES.glass,

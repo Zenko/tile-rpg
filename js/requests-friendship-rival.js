@@ -501,6 +501,7 @@ function notePlayerPlay(ev) {
 /* stepping inside a building completes a visit request for that building */
 function noteVisit(buildingId) {
   const pv = state.progress; if (!pv.visited || typeof pv.visited !== 'object') pv.visited = {}; pv.visited[buildingId] = true;
+  if (typeof chapterNoteVisit === 'function') chapterNoteVisit(buildingId);   // a story step that asks you to go in (js/chapters.js)
   const rs = reqState(); let any = false;
   Object.values(rs.list).forEach(r => { if (r.kind === 'visit' && r.state === 'active' && !r.visited && r.building === buildingId) { r.visited = true; any = true; } });
   if (any) { saveState(); toast('👋 You passed on the hello.'); }

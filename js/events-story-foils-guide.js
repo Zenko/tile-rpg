@@ -41,14 +41,7 @@ function packPrice(pack) { return Math.round(pack.cost * (eventIs('market-day') 
 // The path above ends onboarding; everyone who keeps playing gets these too, at their own pace, still one
 // step at a time in the same Rewards → Dailies slot. STORY_ARC_LEN marks where "getting started" ends.
 const STORY_ARC_LEN = STORY.length;
-STORY.push(
-  { icon: '👑', text: 'Face down a district boss.',                   goal: 'Defeat any district boss',                   done: p => (p.totals.bossesWon || 0) >= 1,     pebbles: 12 },
-  { icon: '🗺️', text: 'See the whole town.',                          goal: 'Visit every district',                       done: () => Object.keys(DISTRICTS).every(k => state.visitedDistricts.includes(k)), pebbles: 12 },
-  { icon: '🦦', text: "Meet the harbor and the garden's newest neighbors.", goal: 'Visit the Net Loft and the Glasshouse', done: p => !!(p.visited && p.visited['harbor-hut'] && p.visited['garden-glass']), pebbles: 10 },
-  { icon: '🎭', text: 'Take on your rival.',                          goal: `Beat ${CAST.rival.name} in a match`,                       done: p => (p.totals.rivalWins || 0) >= 1,     pebbles: 15 },
-  { icon: '🧩', text: 'Finish what you started.',                     goal: 'Complete any themed card set',               done: () => CARD_SETS.some(setComplete),        pebbles: 15 },
-  { icon: '⭐', text: 'Truly settle in.',                             goal: 'Reach level 10',                             done: p => (p.level || 1) >= 10,                card: 'mythic' },
-);
+STORY.push(...STORY_HOME);   // STORY_HOME: in content/story.js
 function storyState() { const p = state.progress; if (!p.story || typeof p.story !== 'object') p.story = { step: 0, notified: -1, beat: -1 }; return p.story; }   // beat: the last step whose scene has played (js/scenes.js)
 function storyStep() { const s = storyState(); return s.step < STORY.length ? STORY[s.step] : null; }
 function storyReady() { const st = storyStep(); return !!(st && st.done(state.progress)); }
@@ -81,6 +74,7 @@ function checkStory() {
   const s = storyState();
   if (storyReady() && s.notified !== s.step) { s.notified = s.step; saveState(); toast('📜 Next step ready - claim it in Rewards'); }
   storyBeatCheck();
+  if (typeof chapterBeatCheck === 'function') chapterBeatCheck();   // the district and neighbour stories (js/chapters.js)
 }
 
 /* ============================================================

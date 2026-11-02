@@ -282,6 +282,7 @@ function renderQuests() {
   const pr = state.progress;
 
   renderStory();
+  if (typeof renderChapters === 'function') renderChapters();   // Rewards → Stories (js/chapters.js)
   const slot = document.getElementById('giftSlot');
   const ready = giftReady();
   slot.innerHTML = `
@@ -366,6 +367,7 @@ const REWARDS_SEGMENTS = {
   weekly: { btn: 'segWeekly', view: 'weeklyView' },
   milestones: { btn: 'segMilestones', view: 'milestonesView' },
   favours: { btn: 'segFavours', view: 'favoursView' },
+  stories: { btn: 'segStories', view: 'storiesView' },   // js/chapters.js
 };
 function switchRewardsSegment(key) {
   sfx('nav'); buzz(HAP.tap);
@@ -378,5 +380,6 @@ document.getElementById('segDailies').addEventListener('click', () => switchRewa
 document.getElementById('segWeekly').addEventListener('click', () => switchRewardsSegment('weekly'));
 document.getElementById('segMilestones').addEventListener('click', () => switchRewardsSegment('milestones'));
 document.getElementById('segFavours').addEventListener('click', () => switchRewardsSegment('favours'));
+document.getElementById('segStories').addEventListener('click', () => switchRewardsSegment('stories'));
 
 
