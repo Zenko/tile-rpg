@@ -143,15 +143,7 @@ function openGazette() {
 
 /* ---------------- 4. THE TOWN GOAL ----------------
    Your share is the goal's stat now minus where it stood when you first saw this week's goal (comm.base). */
-const COMMUNITY_GOALS = [
-  { id: 'fish',    stat: 'fishCaught',     icon: '🎣', name: 'Fill the harbour nets',        unit: 'fish',       goal: 60 },
-  { id: 'crops',   stat: 'cropsHarvested', icon: '🌻', name: 'A bumper harvest',             unit: 'crops',      goal: 120 },
-  { id: 'wins',    stat: 'battlesWon',     icon: '⚔️', name: 'A week of friendly matches',   unit: 'wins',       goal: 40 },
-  { id: 'bread',   stat: 'breadBaked',     icon: '🍞', name: 'Bread for every table',        unit: 'loaves',     goal: 30 },
-  { id: 'spirits', stat: 'spiritsMet',     icon: '👻', name: 'Welcome the wandering spirits', unit: 'spirits',   goal: 50 },
-  { id: 'acts',    stat: 'townActs',       icon: '🎈', name: 'Liven up the town',            unit: 'good deeds', goal: 150 },
-  { id: 'finds',   stat: 'cardsFound',     icon: '🍂', name: 'Sweep up the lost cards',      unit: 'cards',      goal: 80 },
-];
+// COMMUNITY_GOALS: in content/story.js (the game's words and data, kept apart from the code)
 const COMMUNITY = { npcShare: 0.5, half: 30, full: 80, fullRarity: 'super', pushMs: 2 * 60 * 1000, fetchMs: 10 * 60 * 1000, coll: 'community' };
 function communityGoal(wk) { return tnPick(seeded('community-' + (wk || weekKey())), COMMUNITY_GOALS); }
 function communityState() {

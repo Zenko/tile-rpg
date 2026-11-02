@@ -148,6 +148,15 @@ else:
         for ln, text in js_strings(src):
             for m in name_re.finditer(text):
                 if 'names-ok' not in lines[ln - 1]: fail(f'{f}:{ln} types the name "{m.group(1)}" - use js/game-config.js instead')
+    # Pronouns come from CAST[role].pronouns through pron(role) (js/game-config.js), so changing who someone is stays one word.
+    # A he / she / her / his typed into a string fails; a line that really means the plain word ends with a `pronouns-ok` comment.
+    pron_re = re.compile(r'(?<![A-Za-z])(she|he|her|hers|herself|him|his|himself)(?![A-Za-z])', re.I)
+    for f, src in allsrc.items():
+        if f in ('js/game-config.js', 'js/changelog.js', 'js/changelog-archive.js') or not f.startswith(('js/', 'content/')): continue
+        lines = src.split('\n')
+        for ln, text in js_strings(src):
+            for m in pron_re.finditer(text):
+                if 'pronouns-ok' not in lines[ln - 1]: fail(f'{f}:{ln} types the pronoun "{m.group(1)}" - use pron(role) from js/game-config.js')
     # index.html: names only inside a data-game element whose fallback text matches the config, and the manifest says the title
     def cfg_value(p):
         v = cfg
@@ -161,6 +170,38 @@ else:
         for m in name_re.finditer(t): fail(f'index.html types the name "{m.group(1)}" - wrap it in <span data-game="...">')
     man = json.load(open('manifest.json', encoding='utf-8'))
     if man.get('name') != cfg['GAME']['title']: fail(f'manifest.json "name" is "{man.get("name")}" but GAME.title is "{cfg["GAME"]["title"]}"')
+
+# 7b. The game's words belong in content/ (HANDOFF §5 "Reskinning"); one-off lines go in content/text.js and the code asks for
+#     them with words('key'). Many lines are still typed into js/, so this counts them (a string holding a sentence: a capital
+#     letter and at least four words) and fails if the count grows. When you move lines out, lower TEXT_IN_JS to the new count.
+#     A line that has to stay (a debug label, a test hook) ends with a `text-ok` comment.
+TEXT_IN_JS = 1246
+sentence_re = re.compile(r"[A-Z][a-z’']*(?:[ ,]+[A-Za-z’'-]+){3,}")
+text_counts = collections.Counter()
+for f, src in allsrc.items():
+    if not f.startswith('js/') or f in ('js/game-config.js', 'js/changelog.js', 'js/changelog-archive.js'): continue
+    lines = src.split('\n')
+    for ln, text in js_strings(src):
+        if sentence_re.search(text) and 'text-ok' not in lines[ln - 1]: text_counts[f] += 1
+text_total = sum(text_counts.values())
+if text_total > TEXT_IN_JS:
+    fail(f'{text_total} sentences are typed straight into js/ (the limit is {TEXT_IN_JS}): put new lines in content/text.js and use words(key). '
+         'Most in: ' + ', '.join(f'{f} {n}' for f, n in text_counts.most_common(5)))
+elif text_total < TEXT_IN_JS:
+    print(f'NOTE  only {text_total} sentences are left in js/ - lower TEXT_IN_JS in scripts/check.py from {TEXT_IN_JS} to {text_total}')
+
+# 7c. Every words('key') the code asks for exists in content/text.js (a missing key would show the key itself on screen).
+r = subprocess.run(['node', '-e', open('js/game-config.js', encoding='utf-8').read() + ';' + open('content/text.js', encoding='utf-8').read() +
+                    ';console.log(JSON.stringify(Object.keys(TEXT)))'], capture_output=True, text=True)
+if r.returncode: fail('could not evaluate content/text.js: ' + (r.stderr.strip().splitlines() or ['?'])[-1])
+else:
+    text_keys = set(json.loads(r.stdout.strip().splitlines()[-1]))
+    for f, src in allsrc.items():
+        for m in re.finditer(r"\bwords\(\s*'([\w.-]+)'\s*([,)+])", src):
+            key, after = m.group(1), m.group(2)
+            if after == '+': ok_key = any(k.startswith(key) for k in text_keys)   # words('shop.mode.' + mode): some key with that start
+            else: ok_key = key in text_keys
+            if not ok_key: fail(f'{f}:{src.count(chr(10), 0, m.start()) + 1} asks for words("{key}"), which content/text.js does not have')
 
 # 8. Every colour in the stylesheets lives in css/theme.css (HANDOFF §5 "Reskinning"): no hex colour, and no colour variable
 #    declared, in any other css/ file. A new colour goes into theme.css's palette (or a token there) and the rule reads var().

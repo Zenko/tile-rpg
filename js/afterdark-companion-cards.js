@@ -9,14 +9,7 @@ const NIGHT_CARDS = ['sunbeam', 'temple-bell', 'folding-screen', 'hollow-log',
                      'stone-lantern', 'lantern-fish', 'moon-jelly', 'ember-fox', 'heron',
                      'moonstone', 'mist-wraith', 'silver-fox', 'moonlit-tide',
                      'moon-dragon', 'sky-whale', 'starfall'];   // the Lantern Pack: night and lantern cards only, rare to mythic
-const BUGS = [
-  { id: 'firefly',     name: 'Firefly',     icon: '✨', weight: 50, pebbles: 2, hint: 'Any night' },
-  { id: 'cricket',     name: 'Cricket',     icon: '🦗', weight: 26, pebbles: 2, hint: 'Any night' },
-  { id: 'glow-beetle', name: 'Glow Beetle', icon: '🪲', weight: 14, pebbles: 3, hint: 'Any night, now and then' },
-  { id: 'luna-moth',   name: 'Luna Moth',   icon: '🦋', weight: 9,  pebbles: 4, hint: 'Any night, but shy' },   // names-ok: a critter, not the pedlar
-  { id: 'rain-snail',  name: 'Rain Snail',  icon: '🐌', weight: 18, pebbles: 3, weather: ['rain', 'storm'], hint: 'Only on rainy nights' },
-  { id: 'starwing',    name: 'Starwing',    icon: '💫', weight: 1.5, pebbles: 15, legendary: true, hint: 'A legend of the night sky' },
-];
+// BUGS: in content/world.js (the game's words and data, kept apart from the code)
 const BUG_MAX = 3, BUG_CATCH_ODDS = 0.8;
 function isNightNow() { return skyPhase().isNight; }
 function lanternOpen() { return isNightNow() && state.currentDistrict === LANTERN_TILE.district; }
@@ -539,12 +532,7 @@ function museumCardButtons(wid) {
    The cards leave your collection while they travel and come home with the loot. Keywords matter: Flicker shortens the
    trip, Watch / Haze / Briar make a mishap less likely, Startle improves the odds of a card, Bloom and Sip bring
    extra supplies, Chorus adds Embers, Rest brings back more experience. Strength (power + health) scales the Embers. */
-const EXPEDITIONS = [
-  { id: 'meadow', name: 'Meadow Walk',     icon: '🌾', mins: 20,  need: 8,  desc: `Seeds, daisies and ${GAME.currency.many}. A common card now and then.` },
-  { id: 'shore',  name: 'Along the Shore', icon: '🐚', mins: 45,  need: 14, desc: `Fish, ${GAME.currency.many}, and a fair chance of a rare card.` },
-  { id: 'ruins',  name: 'Old Ruins',       icon: '🏚️', mins: 90,  need: 20, desc: `Plenty of ${GAME.currency.many} and a good chance of a rare card or better.` },
-  { id: 'peaks',  name: 'Misty Peaks',     icon: '⛰️', mins: 180, need: 28, desc: 'A long climb. The best odds of an ultra rare card or better, and Moonbeans.' },
-];
+// EXPEDITIONS: in content/world.js (the game's words and data, kept apart from the code)
 const EXPED_TEAMS = 2, EXPED_PARTY = 3;
 function expedState() { const p = state.progress; if (!p.expeditions || typeof p.expeditions !== 'object') p.expeditions = { active: [], picking: null }; return p.expeditions; }
 function expedDef(id) { return EXPEDITIONS.find(e => e.id === id); }
@@ -715,22 +703,7 @@ function tradeButtons() {
 }
 
 /* ---------------- deck challenges (at the fountain): win with a deck that follows today's rule ---------------- */
-const CHALLENGE_RULES = [
-  { id: 'commons',  icon: '🌱', text: 'Only common cards',               test: ds => ds.every(d => d.rarity === 'common') },
-  { id: 'noguard',  icon: '🚫', text: 'No Watch cards at all',            test: ds => ds.every(d => !d.kw.includes('guard')) },
-  { id: 'spells',   icon: '✨', text: 'At least 3 spells',                test: ds => ds.filter(d => d.spell).length >= 3 },
-  { id: 'cheap',    icon: '🪶', text: 'Nothing costing more than 2',      test: ds => ds.every(d => d.cost <= 2) },
-  { id: 'single',   icon: '🎴', text: 'No two cards the same',            test: ds => new Set(ds.map(d => BattleEngine.baseIdOf(d.id))).size === ds.length },
-  { id: 'big',      icon: '⛰️', text: 'At least 4 cards costing 4 or more', test: ds => ds.filter(d => d.cost >= 4).length >= 4 },
-  { id: 'keywords', icon: '🧩', text: 'Every card has a keyword or is a spell', test: ds => ds.every(d => d.spell || d.kw.length) },
-  { id: 'rareplus', icon: '💎', text: 'Only rare cards or better',         test: ds => ds.every(d => d.rarity !== 'common') },
-  // Family formats (build 100): spells have no family, so they are allowed in every one.
-  { id: 'fam-grove', icon: '🌿', text: `Only ${FAMILY_NAMES.grove} cards (and spells)`,    test: ds => ds.every(d => d.spell || CARD_FAMILY[BattleEngine.baseIdOf(d.id)] === 'grove') },
-  { id: 'fam-stone', icon: '🪨', text: `Only ${FAMILY_NAMES.stone} cards (and spells)`,    test: ds => ds.every(d => d.spell || CARD_FAMILY[BattleEngine.baseIdOf(d.id)] === 'stone') },
-  { id: 'fam-tide',  icon: '🌊', text: `Only ${FAMILY_NAMES.tide} cards (and spells)`,     test: ds => ds.every(d => d.spell || CARD_FAMILY[BattleEngine.baseIdOf(d.id)] === 'tide') },
-  { id: 'fam-wind',  icon: '🪶', text: `Only ${FAMILY_NAMES.wind} cards (and spells)`,     test: ds => ds.every(d => d.spell || CARD_FAMILY[BattleEngine.baseIdOf(d.id)] === 'wind') },
-  { id: 'two-fam',   icon: '🎭', text: 'Cards from at most two families',  test: ds => new Set(ds.filter(d => !d.spell).map(d => CARD_FAMILY[BattleEngine.baseIdOf(d.id)] || 'none')).size <= 2 },
-];
+// CHALLENGE_RULES: in content/guide.js (the game's words and data, kept apart from the code)
 function challengeState() {
   const p = state.progress;
   if (!p.challenges || p.challenges.day !== todayKey()) {

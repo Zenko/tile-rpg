@@ -92,24 +92,11 @@ function renderAtlasHints() {
   if (!h.length) return;
   box.innerHTML = `<div class="jgroup-h">Heard from the ${CAST.atlas.name}</div>` + h.slice(-6).reverse().map(x => `<div class="atlas-hint">“${escapeHtml(x)}”</div>`).join('') + (h.length > 6 ? `<div class="atlas-hint more">…and ${h.length - 6} more</div>` : '');
 }
-const ATLAS_HELLO = [
-  'You are here. Good. So am I.',
-  'Hello again. The roads are where you left them.',
-  'I was just reading a page about you. It had not been written yet.',
-  'Sit. Or do not. Both are fine.'
-];
+// ATLAS_HELLO: in content/dialogue.js (the game's words and data, kept apart from the code)
 function atlasGreeting() { return atlasPick(ATLAS_HELLO, 'hello'); }
 
 /* ---------- Battles ---------- */
-// Difficulty is set by the deck's rarity floor (the foe deck is built from every card at or above it) and by its Calm. Simulated (200
-// smart-vs-smart games each, a mid-game midrange deck): about 68%, 43%, 28% and 15% for the four, so they climb. A slow wall deck does
-// much worse (about 12%, 2%, 1%, 1%): the AI's decks are quick. Re-run before changing a row or any card's numbers.
-const ATLAS_BATTLES = [
-  { id: 'bloom', title: 'The Counting',   twist: 'bloom', calm: 22, rarity: 'rare',  pay: 30, line: 'Small things, everywhere, growing.' },
-  { id: 'wall', title: 'The Long Wall',   twist: 'wall',  calm: 44, rarity: 'rare',  pay: 45, line: 'Everything it plays is a little sturdier than it should be.' },
-  { id: 'hand', title: 'The Quiet Hand',  twist: 'roots', calm: 40, rarity: 'rare',  pay: 60, line: 'It mends itself as if nothing had happened.' },
-  { id: 'tide', title: 'The Slow Tide',   twist: 'tide',  calm: 48, rarity: 'ultra', pay: 80, line: 'Your best card keeps being taken back.' }
-];
+// ATLAS_BATTLES: in content/world.js (the game's words and data, kept apart from the code)
 function atlasBattleOpen(i) { return i === 0 || !!atlasState().battles[ATLAS_BATTLES[i - 1].id]; }
 function atlasDeck(t) {
   const floor = RARITY_ORDER.indexOf(t.rarity), counts = {};

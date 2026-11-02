@@ -11,8 +11,11 @@
      (and, once real players have saves, their saves and deck codes); players never see them.
    - Titles that sit in front of a name are written in the sentences, not here: "the Atlas", "Madame Brume",
      "Curator Paz", "Maple's Bakery". Pick names that read well after "the" / before "'s".
-   - The text still uses she / they for some people (Wren and Maple are "her"); check those lines if you change who
-     someone is, not just what they are called.
+   - Everyone in CAST has `pronouns` ('she', 'he', 'they' or 'it', see PRONOUNS below). Sentences never type a he / she / her /
+     his: they read `${pron('baker').their} rolls`, `${pron('rival').They} brought spells.` (capitalised = start of a sentence),
+     and a verb that changes with "they" adds `${pron('baker').s}` ("she bake-s", "they bake") or uses .is / .has / .was. So changing
+     who someone is (not just what they are called) is one word here too. check.py fails on a he / she / her / his typed in a
+     string; a line that really means the plain word ends with a `pronouns-ok` comment.
    - `scripts/check.py` fails if one of these names is typed straight into a string anywhere in js/, so a new line of
      dialogue cannot quietly bring an old name back. The changelog files are history and are left alone.
 
@@ -22,9 +25,11 @@
    - content/items.js     decorations, cottage furniture, sleeves, avatar borders, backdrops
    - content/dialogue.js  companion and neighbour talk, favours, hints, letters
    - content/story.js     the opening, the story steps and the guide's words, events, the Gazette, gossip
-   - content/guide.js     tips, the Town Guide, quests, milestones, titles
-   Not yet in content/: spirits at the altar (js/summoning.js), mini-game rules (js/puzzle-memory-minigames.js) and
-   the save key, STORAGE_KEY (js/data-and-engine.js) - changing that starts every player on a fresh save.
+   - content/guide.js     tips, the Town Guide, quests, milestones, titles, deck challenges
+   - content/text.js      every other line the code says on its own, by key: words('bread.basketFull', { n: 4 })
+   Not yet in content/: mini-game rules (js/puzzle-memory-minigames.js), many one-off lines still typed in js/ (check.py
+   counts them and only lets the number go down) and the save key, STORAGE_KEY (js/data-and-engine.js) - changing that
+   starts every player on a fresh save.
    ============================================================ */
 const GAME = {
   title: 'Tile RPG',                                  // tab title, version line, feedback mail, signs in town
@@ -44,27 +49,50 @@ const BOSSES = { square: 'Duermevela', market: 'Murmullo', harbor: 'Marea Lenta'
 // The four card families (FAMILIES in js/data-and-engine.js adds their icon and home district).
 const FAMILY_NAMES = { grove: 'Brote', stone: 'Recuerdo', tide: 'Deriva', wind: 'Susurro' };
 
-// Everyone with a name and a job. The key is their role; `icon` is their face until portraits arrive.
-const CAST = {
-  guide:         { name: 'Wren',    icon: '🧓' },        // welcomes you, guides the first hour, lives in the cottage
-  rival:         { name: 'Rook',    icon: '🎭' },        // the wandering rival
-  atlas:         { name: 'Atlas',   icon: '🗺️' },        // "the Atlas": the one-of-a-kind top card and its building
-  scholar:       { name: 'Olwen',   icon: '🧙' },        // the Reading Nook: puzzles, memory game, deck advice
-  baker:         { name: 'Maple',   icon: '🧑‍🍳' },       // the bakery and cooking
-  gardener:      { name: 'Fern',    icon: '👩‍🌾' },       // sells seeds
-  grainSeller:   { name: 'Pip',     icon: '🐭' },        // grain stall
-  threadSeller:  { name: 'Clover',  icon: '🐰' },        // thread stall
-  spiceSeller:   { name: 'Saffron', icon: '🦔' },        // spice stall and the daily deal
-  tinker:        { name: 'Tock',    icon: '🦝' },        // tinker stall and fishing bait
-  cardSeller:    { name: 'Zeph',    icon: '🦎' },        // the Card Shop
-  nightVendor:   { name: 'Lumen',   icon: '🦉' },        // the Lantern Market (after dark)
-  fortuneTeller: { name: 'Brume',   icon: '🐈‍⬛' },       // "Madame Brume": daily Fate readings
-  netMender:     { name: 'Tam',     icon: '🦦' },        // the Net Loft (harbor)
-  glassKeeper:   { name: 'Iris',    icon: '🐌' },        // the Glasshouse (garden)
-  curator:       { name: 'Paz',     icon: '🦚' },        // "Curator Paz": the Hall of Spirits (Market Row)
-  pedlar:        { name: 'Moth',    icon: '🧳' },        // "Moth the Pedlar": a travelling visitor who sells cards
-  wanderer:      { name: 'Quill',   icon: '🎒' }         // "Quill the Wanderer": a travelling visitor who duels
+// The words for each kind of pronoun. pron(role) returns one of these for CAST[role], with capitalised copies (They, Them, Their, ...).
+// `s` is the verb ending ("she bakes" / "they bake"); is / was / has are the verbs that change with it.
+const PRONOUNS = {
+  she:  { they: 'she',  them: 'her',  their: 'her',   theirs: 'hers',   self: 'herself',  s: 's', is: 'is',  was: 'was',  has: 'has' },
+  he:   { they: 'he',   them: 'him',  their: 'his',   theirs: 'his',    self: 'himself',  s: 's', is: 'is',  was: 'was',  has: 'has' },
+  they: { they: 'they', them: 'them', their: 'their', theirs: 'theirs', self: 'themself', s: '',  is: 'are', was: 'were', has: 'have' },
+  it:   { they: 'it',   them: 'it',   their: 'its',   theirs: 'its',    self: 'itself',   s: 's', is: 'is',  was: 'was',  has: 'has' }
 };
+function pron(role) {
+  const p = PRONOUNS[(CAST[role] && CAST[role].pronouns) || 'they'] || PRONOUNS.they, out = {};
+  Object.keys(p).forEach(k => { out[k] = p[k]; out[k.charAt(0).toUpperCase() + k.slice(1)] = p[k].charAt(0).toUpperCase() + p[k].slice(1); });
+  return out;
+}
+
+// Everyone with a name and a job. The key is their role; `icon` is their face until portraits arrive; `pronouns` picks a PRONOUNS row.
+const CAST = {
+  guide:         { name: 'Wren',    icon: '🧓', pronouns: 'she' },        // welcomes you, guides the first hour, lives in the cottage
+  rival:         { name: 'Rook',    icon: '🎭', pronouns: 'he' },        // the wandering rival
+  atlas:         { name: 'Atlas',   icon: '🗺️', pronouns: 'they' },        // "the Atlas": the one-of-a-kind top card and its building
+  scholar:       { name: 'Olwen',   icon: '🧙', pronouns: 'they' },        // the Reading Nook: puzzles, memory game, deck advice
+  baker:         { name: 'Maple',   icon: '🧑‍🍳', pronouns: 'she' },       // the bakery and cooking
+  gardener:      { name: 'Fern',    icon: '👩‍🌾', pronouns: 'she' },       // sells seeds
+  grainSeller:   { name: 'Pip',     icon: '🐭', pronouns: 'they' },        // grain stall
+  threadSeller:  { name: 'Clover',  icon: '🐰', pronouns: 'they' },        // thread stall
+  spiceSeller:   { name: 'Saffron', icon: '🦔', pronouns: 'they' },        // spice stall and the daily deal
+  tinker:        { name: 'Tock',    icon: '🦝', pronouns: 'they' },        // tinker stall and fishing bait
+  cardSeller:    { name: 'Zeph',    icon: '🦎', pronouns: 'they' },        // the Card Shop
+  nightVendor:   { name: 'Lumen',   icon: '🦉', pronouns: 'they' },        // the Lantern Market (after dark)
+  fortuneTeller: { name: 'Brume',   icon: '🐈‍⬛', pronouns: 'she' },       // "Madame Brume": daily Fate readings
+  netMender:     { name: 'Tam',     icon: '🦦', pronouns: 'they' },        // the Net Loft (harbor)
+  glassKeeper:   { name: 'Iris',    icon: '🐌', pronouns: 'they' },        // the Glasshouse (garden)
+  curator:       { name: 'Paz',     icon: '🦚', pronouns: 'they' },        // "Curator Paz": the Hall of Spirits (Market Row)
+  pedlar:        { name: 'Moth',    icon: '🧳', pronouns: 'they' },        // "Moth the Pedlar": a travelling visitor who sells cards
+  wanderer:      { name: 'Quill',   icon: '🎒', pronouns: 'they' }         // "Quill the Wanderer": a travelling visitor who duels
+};
+
+// One line of the game's words from TEXT (content/text.js) by its key, with its {slots} filled from vars:
+// words('bread.basketFull', { n: 4 }). A missing key shows the key itself, so it is easy to spot (and check.py fails on it).
+// A slot with no value is left as {slot} for the same reason.
+function words(key, vars) {
+  const t = typeof TEXT !== 'undefined' ? TEXT[key] : undefined;
+  if (typeof t !== 'string') return key;
+  return vars ? t.replace(/\{(\w+)\}/g, (m, k) => (vars[k] != null ? String(vars[k]) : m)) : t;
+}
 
 // Static text in index.html. The markup keeps today's words as a fallback and marks them:
 //   <span data-game="PLACES.square">El Umbral</span>     the element's text becomes that value

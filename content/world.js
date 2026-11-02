@@ -211,3 +211,81 @@ const DEPTH_FIRST_CLEAR = [null,
   { embers: 160, starlight: 40, card: 'super' },
   { embers: 240, starlight: 60, card: 'mythic' },
 ];
+
+// ---- used by js/atlas.js ----
+// Difficulty is set by the deck's rarity floor (the foe deck is built from every card at or above it) and by its Calm. Simulated (200
+// smart-vs-smart games each, a mid-game midrange deck): about 68%, 43%, 28% and 15% for the four, so they climb. A slow wall deck does
+// much worse (about 12%, 2%, 1%, 1%): the AI's decks are quick. Re-run before changing a row or any card's numbers.
+const ATLAS_BATTLES = [
+  { id: 'bloom', title: 'The Counting',   twist: 'bloom', calm: 22, rarity: 'rare',  pay: 30, line: 'Small things, everywhere, growing.' },
+  { id: 'wall', title: 'The Long Wall',   twist: 'wall',  calm: 44, rarity: 'rare',  pay: 45, line: 'Everything it plays is a little sturdier than it should be.' },
+  { id: 'hand', title: 'The Quiet Hand',  twist: 'roots', calm: 40, rarity: 'rare',  pay: 60, line: 'It mends itself as if nothing had happened.' },
+  { id: 'tide', title: 'The Slow Tide',   twist: 'tide',  calm: 48, rarity: 'ultra', pay: 80, line: 'Your best card keeps being taken back.' }
+];
+
+// ---- used by js/summoning.js ----
+const ALTAR_PRE = { grove: 'Mossy', stone: 'Hollow', tide: 'Drifting', wind: 'Hushed' }, ALTAR_NOUN = { grove: 'Fawn', stone: 'Warden', tide: 'Heron', wind: 'Moth' };   // names-ok: spirit name words, not the pedlar
+const ALTAR_BURNS = [
+  { id: 'now', label: 'Now', sub: 'no wait' },
+  { id: 'hour', label: '1 hour', sub: `+2 ${GAME.currency.many} a card`, ms: 3600000 },
+  { id: 'night', label: 'Overnight', sub: '4+ cards: a rarity higher', ms: 8 * 3600000 }
+];
+
+// ---- used by js/altar-screen.js ----
+const CANDLE_CLUES = { wind: 'Where whispers rise', grove: 'Where thoughts take root', tide: 'Where the water settles', stone: 'Where the door stays shut' };
+
+// ---- used by js/afterdark-companion-cards.js ----
+const BUGS = [
+  { id: 'firefly',     name: 'Firefly',     icon: '✨', weight: 50, pebbles: 2, hint: 'Any night' },
+  { id: 'cricket',     name: 'Cricket',     icon: '🦗', weight: 26, pebbles: 2, hint: 'Any night' },
+  { id: 'glow-beetle', name: 'Glow Beetle', icon: '🪲', weight: 14, pebbles: 3, hint: 'Any night, now and then' },
+  { id: 'luna-moth',   name: 'Luna Moth',   icon: '🦋', weight: 9,  pebbles: 4, hint: 'Any night, but shy' },   // names-ok: a critter, not the pedlar
+  { id: 'rain-snail',  name: 'Rain Snail',  icon: '🐌', weight: 18, pebbles: 3, weather: ['rain', 'storm'], hint: 'Only on rainy nights' },
+  { id: 'starwing',    name: 'Starwing',    icon: '💫', weight: 1.5, pebbles: 15, legendary: true, hint: 'A legend of the night sky' },
+];
+const EXPEDITIONS = [
+  { id: 'meadow', name: 'Meadow Walk',     icon: '🌾', mins: 20,  need: 8,  desc: `Seeds, daisies and ${GAME.currency.many}. A common card now and then.` },
+  { id: 'shore',  name: 'Along the Shore', icon: '🐚', mins: 45,  need: 14, desc: `Fish, ${GAME.currency.many}, and a fair chance of a rare card.` },
+  { id: 'ruins',  name: 'Old Ruins',       icon: '🏚️', mins: 90,  need: 20, desc: `Plenty of ${GAME.currency.many} and a good chance of a rare card or better.` },
+  { id: 'peaks',  name: 'Misty Peaks',     icon: '⛰️', mins: 180, need: 28, desc: 'A long climb. The best odds of an ultra rare card or better, and Moonbeans.' },
+];
+
+// ---- used by js/calm.js ----
+const CALM_ACTIVITIES = [
+  { id: 'breathe',  icon: '🌬️', name: 'Breathing pond',  text: 'One slow breath at a time.' },
+  { id: 'sand',     icon: '🪨', name: 'Sand garden',     text: 'Rake lines, set a stone or two.' },
+  { id: 'lanterns', icon: '🏮', name: 'Lantern night',   text: 'Send a light up into the dark.', night: true },
+  { id: 'chimes',   icon: '🎐', name: 'Wind chimes',     text: 'Drag a finger across the chimes.' },
+  { id: 'stars',    icon: '✨', name: 'Star gazing',     text: 'Join the dots in the night sky.', night: true },
+  { id: 'tea',      icon: '🍵', name: 'Tea ritual',      text: 'Pour, steep, sip.' },
+  { id: 'bonsai',   icon: '🪴', name: 'Bonsai',          text: 'A tree that grows while you are away.' },
+  { id: 'tarot',    icon: '🔮', name: 'Fates',           text: 'A daily reading, and the Fates.' },
+];
+const BONSAI_STAGES = [{ icon: '🌱', name: 'Seedling', at: 0 }, { icon: '🌿', name: 'Sapling', at: 3 }, { icon: '🪴', name: 'Young tree', at: 7 }, { icon: '🌳', name: 'Bonsai', at: 14 }, { icon: '🎋', name: 'Old bonsai', at: 30 }];
+const CALM_CONSTELLATIONS = [
+  { name: 'The Kettle', note: 'A warm pot, always on the boil somewhere.', pts: [[18, 64], [28, 48], [44, 44], [58, 52], [62, 68]] },
+  { name: 'The Fox', note: 'It sleeps with one eye open, curled around the north.', pts: [[72, 22], [80, 32], [88, 26], [84, 44], [74, 50], [66, 40]] },
+  { name: 'The Lantern', note: 'Hung by someone patient, just out of reach.', pts: [[30, 14], [38, 22], [32, 32], [24, 26]] },
+  { name: 'The Heron', note: 'Stands very still, so the night can pass.', pts: [[52, 66], [54, 54], [50, 42], [56, 30], [62, 24]] },
+];
+
+// ---- used by js/houses-and-cellar.js ----
+const CELLAR = {
+  cooldownMs: 5 * 60 * 1000,
+  floors: [
+    { name: 'Cellar Rats', icon: '🐀', theme: 'swarm', pebbles: 2, profile: { level: 'gentle', spirit: 15 }, blurb: 'Something small and quick scurries between the barrels.' },
+    { name: 'The Stone Wall', icon: '🧱', theme: 'wall', pebbles: 4, profile: { level: 'normal', spirit: 16 }, blurb: 'A slow, stubborn guardian fills the whole passage.' },
+    { name: 'The Root Keeper', icon: '🌳', theme: 'grove', pebbles: 7, final: true, profile: { level: 'normal', spirit: 18 }, blurb: 'Roots as thick as your arm coil around an old chest.' },
+  ],
+};
+const DEEP_FOES = [
+  { name: 'Cave Bats',       icon: '🦇', kw: 'swift',  blurb: 'Leathery wings flutter somewhere in the dark.' },
+  { name: 'The Web Weaver',  icon: '🕷️', kw: 'guard',  blurb: 'Silver threads stretch from wall to wall.' },
+  { name: 'Tunnel Snake',    icon: '🐍', kw: 'echo',   blurb: 'A long hiss echoes down the tunnel.' },
+  { name: 'Glowworm Swarm',  icon: '🪱', kw: 'bloom',  blurb: 'Tiny lights pulse on the ceiling, growing brighter.' },
+  { name: 'Old Bones',       icon: '💀', kw: 'shield', blurb: 'Something rattles in a heap of dust.' },
+];
+const DEEP_GUARDIANS = [
+  { name: 'The Watcher Below', icon: '👁️', kw: 'guard', cards: ['watcher-eye', 'candle-wraith', 'watcher-eye', 'candle-wraith'], blurb: 'One great eye opens in the rock and follows you.' },
+  { name: 'The Forgotten Wyrm',     icon: '🐉', kw: 'bloom', cards: ['hollow-king', 'deep-wyrm', 'deep-wyrm'], blurb: 'The floor trembles. Something very large is breathing.' },
+];

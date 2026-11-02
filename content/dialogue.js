@@ -74,8 +74,8 @@ const TALK_WEATHER = {
 const REQ_VISITS = [
   { building: 'nook',    who: CAST.scholar.name, place: 'the Reading Nook', line: `Could you pop into the Reading Nook and tell ${CAST.scholar.name} I said hello?` },
   { building: 'cottage', who: CAST.guide.name,  place: `${CAST.guide.name}'s Cottage`,   line: `Would you look in on ${CAST.guide.name} at the cottage? Just say I sent you.` },
-  { building: 'bakery',  who: CAST.baker.name, place: `${CAST.baker.name}'s Bakery`,   line: `Pop into the bakery and tell ${CAST.baker.name} her rolls are the talk of the square.` },
-  { building: 'house2',  who: CAST.gardener.name,  place: `${CAST.gardener.name}'s Cottage`,   line: `${CAST.gardener.name} lent me a watering can ages ago. Could you let her know I have not forgotten?` },
+  { building: 'bakery',  who: CAST.baker.name, place: `${CAST.baker.name}'s Bakery`,   line: `Pop into the bakery and tell ${CAST.baker.name} ${pron('baker').their} rolls are the talk of the square.` },
+  { building: 'house2',  who: CAST.gardener.name,  place: `${CAST.gardener.name}'s Cottage`,   line: `${CAST.gardener.name} lent me a watering can ages ago. Could you let ${pron('gardener').them} know I have not forgotten?` },
   { building: 'stall-spice',  who: CAST.spiceSeller.name, place: `${CAST.spiceSeller.name}'s Spice Stall`, line: `Could you ask ${CAST.spiceSeller.name} what today's deal is? I'm too shy to haggle.` },
   { building: 'stall-tinker', who: CAST.tinker.name,    place: `${CAST.tinker.name}'s Tinker Stall`,   line: `Tell ${CAST.tinker.name} the little bell on the door is squeaking again, would you?` },
 ];
@@ -170,4 +170,39 @@ const HOME_REPLIES = [
   { id: 'thanks', icon: '💌', label: 'A thank-you note' },
   { id: 'doodle', icon: '✏️', label: 'A little doodle' },
   { id: 'flower', icon: '🌸', label: 'A pressed flower' }
+];
+
+// ---- used by js/atlas.js ----
+const ATLAS_HELLO = [
+  'You are here. Good. So am I.',
+  'Hello again. The roads are where you left them.',
+  'I was just reading a page about you. It had not been written yet.',
+  'Sit. Or do not. Both are fine.'
+];
+
+// ---- used by js/calm.js ----
+const CALM_SIT_LINES = ['A leaf turns over in the breeze.', 'Someone laughs, far away and friendly.', 'The light moves a little along the wall.', 'A bird makes a small decision.', 'The town hums to itself.', 'Nothing is asked of you here.'];
+
+// ---- used by js/npc-stories.js ----
+const STORY_NOTES = [
+  'that the morning here smells wonderful',
+  'that I am saving them a seat at the fountain',
+  'thank you for the kind word last week',
+  'that I admired their deck the other day',
+  'that I would love to swap stories sometime',
+  'that the town is better with them in it'
+];
+const STORY_REPLIES = [
+  'Ha! Please tell them I was just thinking the same thing.',
+  'Oh, that is lovely. Tell them I will find them soon.',
+  'You carry messages kindly. Tell them thank you from me.',
+  'That made my day. Pass my warmest hello back.'
+];
+
+// ---- used by js/houses-and-cellar.js ----
+const FRIEND_NOTES = [
+  'Thank you for being such a good neighbor. I found this and thought of you.',
+  'The town feels friendlier with you in it. A little something, just because.',
+  `I tried to bake like ${CAST.baker.name}. It did not go well. Here is something better instead.`,
+  'Saw you playing cards by the fountain the other day. You make it look easy!',
 ];

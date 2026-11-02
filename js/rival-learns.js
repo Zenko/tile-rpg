@@ -36,10 +36,10 @@ function rookNoteDuel(deck) {
 function rookThemes(s) {
   const out = [];
   if (!s || !s.duels) return out;
-  if (s.guards >= ROOK_LEARN.guards) out.push({ id: 'spells', why: 'You lean on Watch cards, so he brought spells.', say: 'I noticed you lean on Watch cards, so I brought spells.' });
-  if (s.swifts >= ROOK_LEARN.swifts || s.avgCost <= ROOK_LEARN.cheap) out.push({ id: 'blockers', why: 'You like to rush, so he brought Watch cards.', say: 'I noticed you like to rush, so I brought Watch cards.' });
-  if (s.avgCost >= ROOK_LEARN.heavy) out.push({ id: 'rush', why: 'You build slowly, so he brought fast, hard-hitting cards.', say: 'I noticed you build slowly, so I brought fast, hard-hitting cards.' });
-  if (s.spells >= ROOK_LEARN.spells) out.push({ id: 'shields', why: 'You carry plenty of spells, so he brought shields.', say: 'I noticed you carry plenty of spells, so I brought shields.' });
+  if (s.guards >= ROOK_LEARN.guards) out.push({ id: 'spells', why: `You lean on Watch cards, so ${pron('rival').they} brought spells.`, say: 'I noticed you lean on Watch cards, so I brought spells.' });
+  if (s.swifts >= ROOK_LEARN.swifts || s.avgCost <= ROOK_LEARN.cheap) out.push({ id: 'blockers', why: `You like to rush, so ${pron('rival').they} brought Watch cards.`, say: 'I noticed you like to rush, so I brought Watch cards.' });
+  if (s.avgCost >= ROOK_LEARN.heavy) out.push({ id: 'rush', why: `You build slowly, so ${pron('rival').they} brought fast, hard-hitting cards.`, say: 'I noticed you build slowly, so I brought fast, hard-hitting cards.' });
+  if (s.spells >= ROOK_LEARN.spells) out.push({ id: 'shields', why: `You carry plenty of spells, so ${pron('rival').they} brought shields.`, say: 'I noticed you carry plenty of spells, so I brought shields.' });
   return out;
 }
 function rookPool(theme, maxRarityIdx) {

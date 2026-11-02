@@ -17,26 +17,12 @@
    every bench. Cozy mode (Settings -> Comfort) hides the nudges that ask for your attention. Everything honours reduced motion.
    Saved in state.progress.calm (created lazily), nothing in it can run out or expire.
    ============================================================ */
-const CALM_ACTIVITIES = [
-  { id: 'breathe',  icon: '🌬️', name: 'Breathing pond',  text: 'One slow breath at a time.' },
-  { id: 'sand',     icon: '🪨', name: 'Sand garden',     text: 'Rake lines, set a stone or two.' },
-  { id: 'lanterns', icon: '🏮', name: 'Lantern night',   text: 'Send a light up into the dark.', night: true },
-  { id: 'chimes',   icon: '🎐', name: 'Wind chimes',     text: 'Drag a finger across the chimes.' },
-  { id: 'stars',    icon: '✨', name: 'Star gazing',     text: 'Join the dots in the night sky.', night: true },
-  { id: 'tea',      icon: '🍵', name: 'Tea ritual',      text: 'Pour, steep, sip.' },
-  { id: 'bonsai',   icon: '🪴', name: 'Bonsai',          text: 'A tree that grows while you are away.' },
-  { id: 'tarot',    icon: '🔮', name: 'Fates',           text: 'A daily reading, and the Fates.' },
-];
+// CALM_ACTIVITIES: in content/world.js (the game's words and data, kept apart from the code)
 const CALM_SCALE = [392, 440, 523, 587, 659, 784, 880];     // a pentatonic scale: any two notes sound fine together
 // CALM_TEA_LINES: in content/dialogue.js (the game's words and data, kept apart from the code)
-const CALM_SIT_LINES = ['A leaf turns over in the breeze.', 'Someone laughs, far away and friendly.', 'The light moves a little along the wall.', 'A bird makes a small decision.', 'The town hums to itself.', 'Nothing is asked of you here.'];
-const BONSAI_STAGES = [{ icon: '🌱', name: 'Seedling', at: 0 }, { icon: '🌿', name: 'Sapling', at: 3 }, { icon: '🪴', name: 'Young tree', at: 7 }, { icon: '🌳', name: 'Bonsai', at: 14 }, { icon: '🎋', name: 'Old bonsai', at: 30 }];
-const CALM_CONSTELLATIONS = [
-  { name: 'The Kettle', note: 'A warm pot, always on the boil somewhere.', pts: [[18, 64], [28, 48], [44, 44], [58, 52], [62, 68]] },
-  { name: 'The Fox', note: 'It sleeps with one eye open, curled around the north.', pts: [[72, 22], [80, 32], [88, 26], [84, 44], [74, 50], [66, 40]] },
-  { name: 'The Lantern', note: 'Hung by someone patient, just out of reach.', pts: [[30, 14], [38, 22], [32, 32], [24, 26]] },
-  { name: 'The Heron', note: 'Stands very still, so the night can pass.', pts: [[52, 66], [54, 54], [50, 42], [56, 30], [62, 24]] },
-];
+// CALM_SIT_LINES: in content/dialogue.js (the game's words and data, kept apart from the code)
+// BONSAI_STAGES: in content/world.js (the game's words and data, kept apart from the code)
+// CALM_CONSTELLATIONS: in content/world.js (the game's words and data, kept apart from the code)
 
 function calmState() {
   const p = state.progress; if (!p.calm || typeof p.calm !== 'object') p.calm = {};

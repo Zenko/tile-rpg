@@ -12,7 +12,7 @@
    Layering: the card reveal (#pickupOverlay) is a plain overlay at z-index 20, so while this screen is open body.in-altar lifts
    every overlay above it (see css/latest.css).
    ============================================================ */
-const CANDLE_CLUES = { wind: 'Where whispers rise', grove: 'Where thoughts take root', tide: 'Where the water settles', stone: 'Where the door stays shut' };
+// CANDLE_CLUES: in content/world.js (the game's words and data, kept apart from the code)
 const CANDLE_POS = { wind: 'n', grove: 'e', tide: 's', stone: 'w' };
 const HOLD_MS = 900;
 let altarUi = null, altarEl = null;

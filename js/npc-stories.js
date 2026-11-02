@@ -6,20 +6,8 @@
    It plugs into the existing favour system in js/requests-friendship-rival.js: makeRequest() may pick kind 'message' (npcStoryKinds), requestDone() and
    requestProgressText() ask this file about it, and openTalk's interactWith calls npcStoryTalked(). Rewards are Embers like the other small favours.
    ============================================================ */
-const STORY_NOTES = [
-  'that the morning here smells wonderful',
-  'that I am saving them a seat at the fountain',
-  'thank you for the kind word last week',
-  'that I admired their deck the other day',
-  'that I would love to swap stories sometime',
-  'that the town is better with them in it'
-];
-const STORY_REPLIES = [
-  'Ha! Please tell them I was just thinking the same thing.',
-  'Oh, that is lovely. Tell them I will find them soon.',
-  'You carry messages kindly. Tell them thank you from me.',
-  'That made my day. Pass my warmest hello back.'
-];
+// STORY_NOTES: in content/dialogue.js (the game's words and data, kept apart from the code)
+// STORY_REPLIES: in content/dialogue.js (the game's words and data, kept apart from the code)
 const STORY_PEBBLES = 5;
 function npcStoryTargets(f, data) { return (data.npcs || []).filter(n => n !== f && !n.defeated && !n.isBoss && !n.isRival && !n.isAtlas && /^npc-/.test(n.id || '')); }
 // Extra favour kinds that can be offered right now (makeRequest appends these to its list).

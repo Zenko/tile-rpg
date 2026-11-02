@@ -55,7 +55,7 @@ const STORY_BEATS = [
       { text: 'I will put the kettle on. I always do, and it is always just ready.' } ] },
   { ask: `bake a loaf at ${CAST.baker.name}'s bakery`, mark: 'bakery', go: () => JPLACES.bakery, cards: [
       { text: `${CAST.baker.name} bakes bread that tastes like a memory you cannot place.` },
-      { text: 'Bake a loaf at her bakery, bottom left. Tell me what it reminds you of. Nobody ever agrees.' } ] },
+      { text: `Bake a loaf at ${pron('baker').their} bakery, bottom left. Tell me what it reminds you of. Nobody ever agrees.` } ] },
   { ask: 'catch a fish: tap the water', go: () => ({ fish: true }), cards: [
       { text: 'Cast a thought into any water. The fish bite on whatever you are thinking about.' },
       { text: 'The quiet ones bite best. Tap the water where a shadow is swimming.' } ] },
@@ -186,4 +186,15 @@ const ATLAS_TOPICS = [
     'Waking is a lovely idea. Many here have it. It keeps them warm.',
     'That depends which dream you mean.'] },
   { id: 'next', label: '🧭 What should I do next?', guidance: true }
+];
+
+// ---- used by js/town-news.js ----
+const COMMUNITY_GOALS = [
+  { id: 'fish',    stat: 'fishCaught',     icon: '🎣', name: 'Fill the harbour nets',        unit: 'fish',       goal: 60 },
+  { id: 'crops',   stat: 'cropsHarvested', icon: '🌻', name: 'A bumper harvest',             unit: 'crops',      goal: 120 },
+  { id: 'wins',    stat: 'battlesWon',     icon: '⚔️', name: 'A week of friendly matches',   unit: 'wins',       goal: 40 },
+  { id: 'bread',   stat: 'breadBaked',     icon: '🍞', name: 'Bread for every table',        unit: 'loaves',     goal: 30 },
+  { id: 'spirits', stat: 'spiritsMet',     icon: '👻', name: 'Welcome the wandering spirits', unit: 'spirits',   goal: 50 },
+  { id: 'acts',    stat: 'townActs',       icon: '🎈', name: 'Liven up the town',            unit: 'good deeds', goal: 150 },
+  { id: 'finds',   stat: 'cardsFound',     icon: '🍂', name: 'Sweep up the lost cards',      unit: 'cards',      goal: 80 },
 ];

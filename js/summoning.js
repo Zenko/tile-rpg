@@ -108,12 +108,8 @@ function summonDo(s) {
 const ALTAR_FAMS = ['grove', 'stone', 'tide', 'wind'];
 const ALTAR_PER_CANDLE = 3, ALTAR_TOTAL = 6, ALTAR_PILLARS = 2, ALTAR_TIER_CAP = 3;   // index into RARITY_ORDER: super
 const ALTAR_PTS = { common: 1, rare: 2, ultra: 3, super: 4, mythic: 5 };
-const ALTAR_PRE = { grove: 'Mossy', stone: 'Hollow', tide: 'Drifting', wind: 'Hushed' }, ALTAR_NOUN = { grove: 'Fawn', stone: 'Warden', tide: 'Heron', wind: 'Moth' };   // names-ok: spirit name words, not the pedlar
-const ALTAR_BURNS = [
-  { id: 'now', label: 'Now', sub: 'no wait' },
-  { id: 'hour', label: '1 hour', sub: `+2 ${GAME.currency.many} a card`, ms: 3600000 },
-  { id: 'night', label: 'Overnight', sub: '4+ cards: a rarity higher', ms: 8 * 3600000 }
-];
+// ALTAR_PRE, ALTAR_NOUN: in content/world.js (the game's words and data, kept apart from the code)
+// ALTAR_BURNS: in content/world.js (the game's words and data, kept apart from the code)
 const ALTAR_GODS = SUMMONS.filter(x => !x.atlas).map(x => x.card);
 let altarDraft = null;
 function altarDraftNow() { if (!altarDraft) altarDraft = { feed: { grove: [], stone: [], tide: [], wind: [] }, sel: 'grove', burn: 'now' }; return altarDraft; }
