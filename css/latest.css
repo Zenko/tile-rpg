@@ -3731,3 +3731,10 @@ html.reduce-motion .home-screen *, html.reduce-motion .hr-prop.fresh::after { an
 /* Build 327: the companion sheets (things to do together, its games, choose a companion) close with the round X like every other window */
 .chb-head .x-close { margin-left: auto; align-self: flex-start; }
 #companionGame .coll-sheet h2, #companionPicker .coll-sheet h2 { align-items: center; }
+
+/* ---------- CAST PORTRAITS (build 330) ----------
+   faceHtml() (js/game-config.js) swaps a speaker's emoji for their drawn portrait when CAST gives one. The picture takes the
+   emoji's place at the emoji's size, so every keeper / scene layout sized for the emoji fits it unchanged. */
+.cast-portrait { display: inline-block; width: 1.15em; height: 1.15em; object-fit: contain; vertical-align: middle; }
+/* The skin pill (js/game-config.js, SKINS) reuses the icon preview pill, one row higher so both fit when both are on. */
+.ico-pill.skin-pill { bottom: calc(env(safe-area-inset-bottom, 0px) + 196px); }

@@ -22,7 +22,7 @@ function shopBuild() {
   const el = document.createElement('div'); el.id = 'shopScreen'; el.className = 'shop-screen hidden'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'The Card Shop');
   el.innerHTML = `<div class="cs-bar"><span aria-hidden="true"></span><b class="cs-title" id="csTitle">The Card Shop</b><span class="cs-chip" id="csChip"></span></div>
     <div class="cs-awning" aria-hidden="true"></div>
-    <div class="cs-maker"><span class="cs-seller" aria-hidden="true">${CAST.cardSeller.icon}</span><p class="cs-say" id="csSay" aria-live="polite"></p></div>
+    <div class="cs-maker"><span class="cs-seller" aria-hidden="true">${faceHtml(CAST.cardSeller.icon)}</span><p class="cs-say" id="csSay" aria-live="polite"></p></div>
     <div class="cs-stage" id="csStage"></div>
     <p class="cs-hint" id="csHint"></p>
     <button type="button" class="btn btn-ghost cs-leave" id="csLeave">Leave</button>`;

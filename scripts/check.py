@@ -203,6 +203,14 @@ else:
             else: ok_key = key in text_keys
             if not ok_key: fail(f'{f}:{src.count(chr(10), 0, m.start()) + 1} asks for words("{key}"), which content/text.js does not have')
 
+# 7d. labs/content-index.js lists every top-level table in content/ by file, for labs/content-viewer.html (a page cannot list a
+#     script's own const names). Rewritten here whenever content/ changes, like asset-hashes.json, so it never goes stale.
+_ci = {f: re.findall(r'^const\s+([A-Za-z_$][\w$]*)\s*=', allsrc[f], re.M) for f in sorted(allsrc) if f.startswith('content/')}
+_ci_src = ('// Written by scripts/check.py (section 7d) - do not edit. Every top-level table in content/, by file, for labs/content-viewer.html.\n'
+           'const CONTENT_INDEX = ' + json.dumps(_ci, indent=1) + ';\n')
+if not os.path.exists('labs/content-index.js') or open('labs/content-index.js', encoding='utf-8').read() != _ci_src:
+    open('labs/content-index.js', 'w', encoding='utf-8').write(_ci_src); print('wrote labs/content-index.js')
+
 # 8. Every colour in the stylesheets lives in css/theme.css (HANDOFF §5 "Reskinning"): no hex colour, and no colour variable
 #    declared, in any other css/ file. A new colour goes into theme.css's palette (or a token there) and the rule reads var().
 css_hex = re.compile(r'/\*.*?\*/|url\((?:[^()"\']|"[^"]*"|\'[^\']*\')*\)|#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3,4})\b', re.S)

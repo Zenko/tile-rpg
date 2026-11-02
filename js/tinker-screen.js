@@ -18,7 +18,7 @@ const tinkerSorted = () => buildingState('stall-tinker').sort === todayKey();
 function tinkerBuild() {
   const el = document.createElement('div'); el.id = 'tinkerScreen'; el.className = 'tinker-screen hidden'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', `${CAST.tinker.name}'s tinker stall`);
   el.innerHTML = `<div class="tn-bar"><span aria-hidden="true"></span><b class="tn-title">${CAST.tinker.name}'s Tinker Stall</b><span class="tn-chip" id="tnChip"></span></div>
-    <div class="tn-maker"><span class="tn-seller" aria-hidden="true">${CAST.tinker.icon}</span><p class="tn-say" id="tnSay" aria-live="polite"></p></div>
+    <div class="tn-maker"><span class="tn-seller" aria-hidden="true">${faceHtml(CAST.tinker.icon)}</span><p class="tn-say" id="tnSay" aria-live="polite"></p></div>
     <div class="tn-stage" id="tnStage"></div>
     <p class="tn-hint" id="tnHint"></p>
     <div class="tn-foot" id="tnFoot"></div>

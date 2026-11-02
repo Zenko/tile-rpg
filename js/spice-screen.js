@@ -19,7 +19,7 @@ function spiceBuild() {
     <div class="sp-bar"><span aria-hidden="true"></span><b class="sp-title">${CAST.spiceSeller.name}'s Spice Stall</b><span class="sp-chip" id="spChip"></span></div>
     <div class="sp-awning" aria-hidden="true"></div>
     <div class="sp-shelf" id="spShelf"></div>
-    <div class="sp-maker"><span class="sp-seller" aria-hidden="true">${CAST.spiceSeller.icon}</span><p class="sp-say" id="spSay" aria-live="polite"></p></div>
+    <div class="sp-maker"><span class="sp-seller" aria-hidden="true">${faceHtml(CAST.spiceSeller.icon)}</span><p class="sp-say" id="spSay" aria-live="polite"></p></div>
     <div class="sp-stage" id="spStage"></div>
     <p class="sp-hint" id="spHint"></p>
     <div class="sp-foot" id="spFoot"></div>

@@ -21,7 +21,7 @@ function threadBuild() {
   const el = document.createElement('div'); el.id = 'threadScreen'; el.className = 'thread-screen hidden'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', `${CAST.threadSeller.name}'s thread stall`);
   el.innerHTML = `<div class="th-bar"><span aria-hidden="true"></span><b class="th-title">${CAST.threadSeller.name}'s Thread Stall</b><span class="th-chip" id="thChip"></span></div>
     <div class="th-line" id="thLine"></div>
-    <div class="th-maker"><span class="th-seller" aria-hidden="true">${CAST.threadSeller.icon}</span><p class="th-say" id="thSay" aria-live="polite"></p></div>
+    <div class="th-maker"><span class="th-seller" aria-hidden="true">${faceHtml(CAST.threadSeller.icon)}</span><p class="th-say" id="thSay" aria-live="polite"></p></div>
     <div class="th-stage" id="thStage"></div>
     <p class="th-hint" id="thHint"></p>
     <div class="th-foot" id="thFoot"></div>

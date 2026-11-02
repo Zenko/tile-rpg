@@ -17,7 +17,7 @@
       steps, goals and rewards are still the ones in STORY.
    Saved: state.progress.scenes = { seen: { id: true } } and state.progress.story.beat (the last step whose beat has played).
    ============================================================ */
-const STORY_GUIDE_ICON = CAST.guide.icon;   // the guide's face (js/game-config.js), until portraits arrive
+const STORY_GUIDE_ICON = CAST.guide.icon;   // the guide's face (js/game-config.js); a CAST portrait replaces it through faceHtml
 
 function storyScenes() { const p = state.progress; if (!p.scenes || typeof p.scenes !== 'object') p.scenes = { seen: {} }; if (!p.scenes.seen) p.scenes.seen = {}; return p.scenes; }
 function storySeen(id) { return !!storyScenes().seen[id]; }
@@ -53,7 +53,7 @@ function storyShow() {
   [...e.pips.children].forEach((p, k) => p.classList.toggle('on', k <= c.i));
   e.breath.classList.toggle('hidden', !card.breath);
   e.who.classList.toggle('hidden', dream || !card.who);
-  if (card.who) { e.name.textContent = card.who; e.portrait.textContent = card.icon || STORY_GUIDE_ICON; }
+  if (card.who) { e.name.textContent = card.who; e.portrait.innerHTML = faceHtml(card.icon || STORY_GUIDE_ICON); }
   e.sub.textContent = card.sub || '';
   e.opts.innerHTML = ''; e.hint.classList.add('hidden');
   e.stage.classList.remove('scn-in'); void e.stage.offsetWidth; e.stage.classList.add('scn-in');

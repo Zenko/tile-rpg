@@ -622,7 +622,7 @@ function renderSceneBody() {
     const it = INTERIORS[scene.id];
     sceneView.dataset.theme = it.theme;
     document.getElementById('scTitle').textContent = it.title;
-    document.getElementById('scWho').textContent = typeof it.who === 'function' ? it.who() : it.who;
+    document.getElementById('scWho').innerHTML = faceHtml(typeof it.who === 'function' ? it.who() : it.who);
     pips.innerHTML = '';
     acts.innerHTML = '';
     renderMemoryGrid();
@@ -631,7 +631,7 @@ function renderSceneBody() {
     const it = INTERIORS[scene.id];
     sceneView.dataset.theme = it.theme;
     document.getElementById('scTitle').textContent = it.title;
-    document.getElementById('scWho').textContent = typeof it.who === 'function' ? it.who() : it.who;
+    document.getElementById('scWho').innerHTML = faceHtml(typeof it.who === 'function' ? it.who() : it.who);
     pips.innerHTML = '';
     renderHomeShelf();
     mountShopView(shopModeActive() ? scene.mode : null);

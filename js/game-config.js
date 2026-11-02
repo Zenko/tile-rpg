@@ -63,7 +63,9 @@ function pron(role) {
   return out;
 }
 
-// Everyone with a name and a job. The key is their role; `icon` is their face until portraits arrive; `pronouns` picks a PRONOUNS row.
+// Everyone with a name and a job. The key is their role; `icon` is their emoji face (used in text: letters, toasts, lists);
+// `pronouns` picks a PRONOUNS row. Add `portrait: 'assets/cast/baker.png'` to show a drawn face instead wherever a face is shown
+// large (their shop or building, the story scenes): see faceHtml() below. Without one, the emoji is used as today.
 const CAST = {
   guide:         { name: 'Wren',    icon: '🧓', pronouns: 'she' },        // welcomes you, guides the first hour, lives in the cottage
   rival:         { name: 'Rook',    icon: '🎭', pronouns: 'he' },        // the wandering rival
@@ -84,6 +86,14 @@ const CAST = {
   pedlar:        { name: 'Moth',    icon: '🧳', pronouns: 'they' },        // "Moth the Pedlar": a travelling visitor who sells cards
   wanderer:      { name: 'Quill',   icon: '🎒', pronouns: 'they' }         // "Quill the Wanderer": a travelling visitor who duels
 };
+
+// A face for a speaker: the drawn portrait when the CAST member with this emoji has one, else the emoji itself (escaped).
+// Places that show a face large (shop keepers, building keepers, the story scenes) use this, so a portrait lands everywhere at once.
+function castByIcon(icon) { return Object.values(CAST).find(c => c.icon === icon) || null; }
+function faceHtml(icon, cls) {
+  const c = castByIcon(icon), safe = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+  return c && c.portrait ? `<img class="cast-portrait${cls ? ' ' + cls : ''}" src="${safe(c.portrait)}" alt="${safe(c.name)}">` : safe(icon == null ? '' : icon);
+}
 
 // One line of the game's words from TEXT (content/text.js) by its key, with its {slots} filled from vars:
 // words('bread.basketFull', { n: 4 }). A missing key shows the key itself, so it is easy to spot (and check.py fails on it).
@@ -107,4 +117,59 @@ function applyGameConfigText() {
   document.title = `${GAME.title}: ${GAME.tagline}`;
   document.querySelectorAll('[data-game]').forEach(el => { const v = gameConfigValue(el.dataset.game); if (v != null) el.textContent = v; });
   document.querySelectorAll('[data-game-title]').forEach(el => { el.title = el.dataset.gameTitle.replace(/\{([\w.]+)\}/g, (m, p) => gameConfigValue(p) ?? m); });
+}
+
+/* ---------- SKINS: try a whole new set of names and words without touching the real ones (build 330) ----------
+   A skin is one file in content/skins/ that calls skin({...}) with only what it changes (see content/skins/example.js):
+     names    GAME / PLACES / BOSSES / FAMILY_NAMES / CAST, merged into the tables above before content/ loads, so every
+              sentence built from them (all of content/ and the code) picks the new names up, pronouns included
+     text     lines for TEXT (content/text.js), by key
+     content  a function run after content/ has loaded, for anything else: STORY_INTRO.cards[0].text = '...', a new
+              entry in NPC_POOLS.square.names, a different STORY step
+   Open the game with ?skin=example to switch one on (it is remembered on this device), ?skin= to go back to the real game.
+   A skin only changes words, never saves or rules, so it is safe to switch back and forth; while one is on, a small
+   "Skin" pill with an Exit button sits at the bottom left. List each skin file in SKINS so a typo in the address is ignored. */
+const SKINS = ['example'];
+let SKIN_ON = null, SKIN_DEF = null;
+function skinMerge(into, from) {
+  Object.keys(from || {}).forEach(k => {
+    const v = from[k];
+    if (v && typeof v === 'object' && !Array.isArray(v) && into[k] && typeof into[k] === 'object') skinMerge(into[k], v);
+    else into[k] = v;
+  });
+}
+// Called by a skin file as it loads (straight after this file, before content/).
+function skin(def) {
+  SKIN_DEF = def || {};
+  const roots = { GAME, PLACES, BOSSES, FAMILY_NAMES, CAST };
+  Object.keys(roots).forEach(k => { if (SKIN_DEF[k]) skinMerge(roots[k], SKIN_DEF[k]); });
+}
+// Called by index.html straight after content/ has loaded: the skin's TEXT lines and its content() hook, then the pill.
+function applySkinContent() {
+  if (!SKIN_DEF) return;
+  if (SKIN_DEF.text && typeof TEXT !== 'undefined') Object.assign(TEXT, SKIN_DEF.text);
+  if (typeof SKIN_DEF.content === 'function') { try { SKIN_DEF.content(); } catch (e) { console.warn('skin content() failed:', e); } }
+  const pill = () => {
+    const p = document.createElement('div'); p.className = 'ico-pill skin-pill'; p.setAttribute('data-no-icon-swap', '');
+    p.innerHTML = `<span>Skin: ${String(SKIN_DEF.title || SKIN_ON).replace(/[&<>"]/g, '')}</span><button type="button">Exit</button>`;
+    p.querySelector('button').onclick = () => { try { localStorage.removeItem('tr-skin'); } catch (e) {} location.href = location.pathname; };
+    document.body.appendChild(p);
+  };
+  if (typeof document !== 'undefined') { if (document.body) pill(); else document.addEventListener('DOMContentLoaded', pill); }
+}
+// Which skin this page uses: ?skin=name (remembered), ?skin= (forget it), else the one remembered on this device.
+function skinChosen() {
+  if (typeof location === 'undefined' || typeof localStorage === 'undefined') return null;
+  let name = null;
+  try {
+    const q = new URLSearchParams(location.search);
+    if (q.has('skin')) { name = q.get('skin') || null; if (name && SKINS.includes(name)) localStorage.setItem('tr-skin', name); else localStorage.removeItem('tr-skin'); }
+    else name = localStorage.getItem('tr-skin');
+  } catch (e) { return null; }
+  return name && SKINS.includes(name) ? name : null;
+}
+// index.html calls this straight after loading this file; document.write keeps the skin ahead of content/ (and works from file://).
+function loadSkin() {
+  SKIN_ON = skinChosen();
+  if (SKIN_ON && typeof document !== 'undefined' && document.readyState === 'loading') document.write(`<script src="content/skins/${SKIN_ON}.js"><\/script>`);
 }

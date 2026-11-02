@@ -16,7 +16,7 @@ const grainSampled = () => buildingState('stall-grain').sample === todayKey();
 function grainBuild() {
   const el = document.createElement('div'); el.id = 'grainScreen'; el.className = 'grain-screen hidden'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', `${CAST.grainSeller.name}'s grain stall`);
   el.innerHTML = `<div class="gr-bar"><span aria-hidden="true"></span><b class="gr-title">${CAST.grainSeller.name}'s Grain Stall</b><span class="gr-chip" id="grChip"></span></div>
-    <div class="gr-maker"><span class="gr-seller" aria-hidden="true">${CAST.grainSeller.icon}</span><p class="gr-say" id="grSay" aria-live="polite"></p></div>
+    <div class="gr-maker"><span class="gr-seller" aria-hidden="true">${faceHtml(CAST.grainSeller.icon)}</span><p class="gr-say" id="grSay" aria-live="polite"></p></div>
     <div class="gr-stage" id="grStage"></div>
     <p class="gr-hint" id="grHint"></p>
     <div class="gr-foot" id="grFoot"></div>

@@ -14,7 +14,7 @@ const museumOpen = () => !!museumEl && !museumEl.classList.contains('hidden');
 function museumBuild() {
   const el = document.createElement('div'); el.id = 'museumScreen'; el.className = 'museum-screen hidden'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'The Hall of Spirits');
   el.innerHTML = `<div class="mu-bar"><span aria-hidden="true"></span><b class="mu-title">The Hall of Spirits</b><span class="mu-chip" id="muChip"></span></div>
-    <div class="mu-maker"><span class="mu-curator" aria-hidden="true">${CAST.curator.icon}</span><p class="mu-say" id="muSay" aria-live="polite"></p></div>
+    <div class="mu-maker"><span class="mu-curator" aria-hidden="true">${faceHtml(CAST.curator.icon)}</span><p class="mu-say" id="muSay" aria-live="polite"></p></div>
     <div class="mu-stage" id="muStage"></div>
     <div class="mu-tray-wrap" id="muTray"></div>
     <p class="mu-hint" id="muHint"></p>

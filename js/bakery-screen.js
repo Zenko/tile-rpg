@@ -26,7 +26,7 @@ function bakeryBuild() {
   const el = document.createElement('div'); el.id = 'bakeryScreen'; el.className = 'bakery-screen hidden'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', `${CAST.baker.name}'s bakery`);
   el.innerHTML = `<div class="bk-steam" aria-hidden="true">${'<i></i>'.repeat(8)}</div>
     <div class="bk-bar"><span aria-hidden="true"></span><b class="bk-title">${CAST.baker.name}'s Bakery</b><span class="bk-basket-chip" id="bkChip"></span></div>
-    <div class="bk-maple"><span class="bk-chef" aria-hidden="true">${CAST.baker.icon}</span><p class="bk-say" id="bkSay" aria-live="polite"></p></div>
+    <div class="bk-maple"><span class="bk-chef" aria-hidden="true">${faceHtml(CAST.baker.icon)}</span><p class="bk-say" id="bkSay" aria-live="polite"></p></div>
     <div class="bk-stage" id="bkStage">
       <div class="bk-oven" id="bkOven"><div class="bk-arch"><div class="bk-window"><span class="bk-inloaf" id="bkInLoaf" aria-hidden="true"></span><span class="bk-glow"></span></div><div class="bk-door"></div></div><div class="bk-clock" id="bkClock"></div></div>
       <div class="bk-counter" id="bkCounter"></div>
