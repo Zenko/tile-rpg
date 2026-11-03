@@ -57,7 +57,8 @@ module.exports = async (page, assert) => {
     assert.ok(inCache.css === true, 'the new cache holds the new stylesheet'); assert.ok(inCache.art && inCache.ui, 'and the unchanged files, copied from the old cache');
     assert.ok(Math.abs(inCache.n - first.n) <= 2, `with as many entries as the first install: ${inCache.n} vs ${first.n}`);
     assert.ok(firstRequests > 100 && asked.length <= 5, `a first install is ${firstRequests} requests, an update ${asked.length}`);
-    let names = inCache.names; for (let i = 0; i < 25 && names.includes('tile-rpg-v' + build); i++) { await page.waitForTimeout(200); names = await page.evaluate(() => caches.keys()); }
+    // up to 10 s: the old worker hands over in its own time, and a busy CI runner once took longer than the old 5 s
+    let names = inCache.names; for (let i = 0; i < 50 && names.includes('tile-rpg-v' + build); i++) { await page.waitForTimeout(200); names = await page.evaluate(() => caches.keys()); }
     assert.ok(!names.includes('tile-rpg-v' + build), 'the old cache is cleaned up once the new worker takes over: ' + names);
 
     // ----- 5. no asset-hashes.json: the old full install still works -----
