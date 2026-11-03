@@ -397,3 +397,17 @@ const COMPANION_TRAITS = {
   boss: ['Walks slowly, and the grass leans aside.', 'Looks down at everything, kindly.', 'Has promised to behave. Mostly.', 'Takes up a lot of the path and knows it.', 'Rumbles when something is hidden nearby.', 'Still sizes up every stranger for a match.'],
   rival: ['Claims to be here to keep an eye on you.', 'Practises card shuffles at every bench.', 'Pretends not to be impressed.', 'Keeps score of your wins out loud.'],
 };
+
+// ---- used by js/data-and-engine.js (defOf) and js/evolution.js ----
+/* Evolved cards (build 332). A creature you have played to ★★★ mastery can evolve, once: one copy becomes '<id>~e', the same
+   card a little stronger (EVOLVE_BONUS) under a new name. EVOLVE_NAMES gives a card its own evolved name; any other card
+   is called EVOLVE_PREFIX[its family] + its name. Change the words freely; the ids are what saves keep. */
+const EVOLVE_BONUS = { power: 1, grit: 1 };
+const EVOLVE_PREFIX = { grove: 'Elder', stone: 'Ancient', tide: 'Deepwater', wind: 'High', none: 'Awakened' };
+const EVOLVE_NAMES = {
+  'sprout': 'Sapling', 'acorn': 'Young Oak', 'bubble': 'Lucid Bubble', 'pebble': 'Weathered Stone', 'droplet': 'Raincloud',
+  'feather': 'Wing', 'firefly': 'Lantern Swarm', 'hedgehog': 'Wide-Awake Hedgehog', 'origami-crane': 'Thousand Cranes',
+  'hermit-crab': 'Housewarming Crab', 'slow-snail': 'Snail Who Arrived', 'stone-hen': 'Stone Hen and Chicks',
+  'paper-boat': 'Paper Ship', 'dove': 'Homing Dove', 'puffer': 'Calm Puffer', 'honeybee': 'Queen of the Hive',
+};
+

@@ -60,6 +60,11 @@ module.exports = async (page, assert) => {
     visible: !document.getElementById('storiesView').classList.contains('hidden') }));
   assert.strictEqual(ui.cards, 8); assert.strictEqual(ui.done, 1); assert.ok(ui.visible); assert.ok(ui.go.includes('baker'), 'the baker\'s story has a Go button');
 
+  // 3b. one tap on Claim claims (a helper once wired it so the first tap only armed the button)
+  const tapped = await page.evaluate(() => { const b = chapterDef('baker'), c = chapterRec(b); chapterStep(b); bumpStat('breadBaked', 2);
+    renderChapters(); const btn = document.querySelector('#storiesList [data-ch-claim="baker"]'); if (!btn) return 'no button'; btn.click(); return chapterRec(b).step; });
+  assert.strictEqual(tapped, 1);
+
   // 4. a step's scene plays once, by itself (the HUD refresh runs chapterBeatCheck), when the screen is quiet; a neighbour's can
   //    play anywhere. After it, the next one waits (CHAPTER_SCENE_GAP_MS) so two scenes never run back to back.
   // (the finished chapter's XP may have opened a level-up sheet, which rightly holds every scene back: close it)

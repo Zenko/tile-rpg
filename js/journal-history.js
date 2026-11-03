@@ -46,6 +46,7 @@ function noteCardsFound(n) {
   if (!n) return;
   ensureCardLog().pending += n;
   maybeFlushCardLog();
+  if (typeof starredNoteNew === 'function') starredNoteNew();   // a starred card that just arrived un-stars itself (js/pack-luck.js)
 }
 function maybeFlushCardLog() {
   const log = ensureCardLog();
@@ -143,16 +144,18 @@ function renderLog() {
 
 /* ---------------- battle history: the last matches you played, and your overall record ---------------- */
 const BATTLE_LOG_MAX = 40;
-const BATTLE_KIND_LABEL = { neighbor: 'Friendly', boss: 'Boss', cellar: 'Cellar', deep: 'Deep cellar', rival: 'Rival', signature: 'Signature', cup: 'Cup', challenge: 'Challenge', draft: 'Draft', ghost: 'Lingering', atlas: CAST.atlas.name };
+const BATTLE_KIND_LABEL = { neighbor: 'Friendly', boss: 'Boss', cellar: 'Cellar', deep: 'Deep cellar', rival: 'Rival', signature: 'Signature', cup: 'Cup', challenge: 'Challenge', draft: 'Draft', sealed: 'Sealed', ghost: 'Lingering', atlas: CAST.atlas.name };
 function battleLog() { const p = state.progress; if (!Array.isArray(p.battleLog)) p.battleLog = []; return p.battleLog; }
 function recordBattle(won, yielded, prizes) {
   const npc = battle.npc, G = battle.G, p = state.progress;
-  const kind = npc.atlas ? 'atlas' : npc.ghost ? 'ghost' : npc.draft ? 'draft' : npc.challenge ? 'challenge' : npc.cup ? 'cup' : npc.dungeon ? (npc.dungeon.deep ? 'deep' : 'cellar') : npc.isRival ? 'rival' : npc.signature ? 'signature' : npc.isBoss ? 'boss' : 'neighbor';
+  const st = typeof finishReplayStats === 'function' && !yielded ? finishReplayStats(won) : {};   // card and family stats (js/replays.js)
+  const kind = npc.atlas ? 'atlas' : npc.ghost ? 'ghost' : npc.sealed ? 'sealed' : npc.draft ? 'draft' : npc.challenge ? 'challenge' : npc.cup ? 'cup' : npc.dungeon ? (npc.dungeon.deep ? 'deep' : 'cellar') : npc.isRival ? 'rival' : npc.signature ? 'signature' : npc.isBoss ? 'boss' : 'neighbor';
   battleLog().unshift({ at: Date.now(), name: npc.name, icon: opponentPortrait(npc), kind, won, yielded,
     turns: Math.ceil(G.turn / 2) + 1, spirit: Math.max(0, G.p[0].spirit), opp: Math.max(0, G.p[1].spirit),
     district: (npc.dungeon && npc.dungeon.district) || state.currentDistrict, weather: battle.weather,
     floor: npc.dungeon ? npc.dungeon.floor + 1 : null, deckName: npc.playerDeck ? 'Draft deck' : ensureDeckSlots()[state.activeDeckSlot].name,
-    prizes: prizes.map(id => { const d = cardDef(id); return d ? `${d.icon} ${d.name}` : ''; }).filter(Boolean) });
+    prizes: prizes.map(id => { const d = cardDef(id); return d ? `${d.icon} ${d.name}` : ''; }).filter(Boolean), oppFam: st.oppFam || null });
+  if (typeof replaySave === 'function') battleLog()[0].rid = replaySave({ name: npc.name, icon: opponentPortrait(npc), won, yielded, kind });   // the replay lives in its own key (js/replays.js)
   if (battleLog().length > BATTLE_LOG_MAX) battleLog().length = BATTLE_LOG_MAX;
   // win/loss record is kept separately so it covers every match ever played, not just the ones in the list
   if (!p.record) p.record = { won: 0, lost: 0, streak: 0, best: 0 };
@@ -172,6 +175,7 @@ function battleSparkline(log) {
 }
 function renderBattleLog() {
   if (typeof drawDepthCard === 'function') drawDepthCard();   // the second lap (js/depth.js)
+  if (typeof renderBattleInsights === 'function') renderBattleInsights();   // your cards in battle (js/replays.js)
   const p = state.progress, r = p.record || { won: 0, lost: 0, streak: 0, best: 0 }, total = r.won + r.lost, log = battleLog();
   document.getElementById('battleStats').innerHTML = `
     <div class="bl-stat"><b>${r.won}–${r.lost}</b><span>won–lost</span></div>
@@ -197,9 +201,11 @@ function renderBattleLog() {
       ${open ? `<div class="bl-detail"><div class="jsoft">${fmtLogTime(b.at)} · ${where}${wx}${b.deckName ? ' · ' + escapeHtml(b.deckName) : ''}</div>
         <div class="jsoft">Recent record against ${escapeHtml(b.name)}: <b>${w}–${mine.length - w}</b></div>
         ${b.prizes && b.prizes.length ? `<div class="bl-prize">🎁 ${b.prizes.map(escapeHtml).join(', ')}</div>` : ''}
+        ${b.rid && typeof replayGet === 'function' && replayGet(b.rid) ? `<div><button class="jgo" type="button" data-replay="${b.rid}">${words('replay.watch')}</button></div>` : ''}
         ${npc ? `<div><button class="jgo" type="button" data-rematch="${b.i}">⚔️ Rematch</button></div>` : (b.kind === 'neighbor' || b.kind === 'boss') && DISTRICTS[b.district] ? `<div class="jsoft">📍 Find them in ${DISTRICTS[b.district].name}</div>` : ''}</div>` : ''}</div>`;
   }).join('');
   list.querySelectorAll('.bl-head').forEach(h => h.addEventListener('click', () => { sfx('flip'); btOpen = btOpen === +h.dataset.i ? -1 : +h.dataset.i; renderBattleLog(); }));
+  list.querySelectorAll('[data-replay]').forEach(btn => btn.addEventListener('click', () => openReplay(btn.dataset.replay)));
   list.querySelectorAll('[data-rematch]').forEach(btn => btn.addEventListener('click', () => {
     const npc = rematchNpc(log[+btn.dataset.rematch]); if (!npc) return;
     sfx('tap'); buzz(HAP.tap); switchTab('town'); setTimeout(() => startBattle(npc), 120);

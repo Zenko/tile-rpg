@@ -18,6 +18,13 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'new', x: 'Replays: your last 10 matches can be watched again, move by move, from Journal → Battles. Above the list, "Your cards in battle" shows the cards you play and win with most, and how you do with and against each family.' },
+  { t: 'new', x: 'The Sealed League at the fountain: every week everyone opens the same six packs, builds a deck from them, and plays five league matches. Four wins pay a super rare card, and your record shows in Who\'s Playing.' },
+  { t: 'new', x: 'Challenges: when you duel a tester\'s ghost, they get a letter with the result and the replay, and can answer by playing your deck back.' },
+  { t: 'new', x: 'A lucky meter in the Card Shop: money spent on packs fill it, and when it fills, that pack is super rare or better. You can also star three cards you are missing in Cards → Sets so they turn up more often.' },
+  { t: 'new', x: 'Cards can evolve: a creature played to ★★★ mastery can become a stronger version with a new name, once.' },
+  { t: 'new', x: 'Every card now has its own line of lore on its page, and the neighbour who tells it.' },
+  { t: 'fixed', x: 'The Claim and Go buttons in Rewards → Stories work on the first tap.' },
   { t: 'new', x: 'Stories: once Getting started is done, each district has a short story of its own that ends with its god (why the fountain hums, a whisper tangled in thread, a tide that comes in late, a garden growing in its sleep). Some neighbours have one too: Maple, Fern, Olwen and Tam. Each step plays as a little scene, counts what you do after it starts, and is claimed in the new Rewards → Stories tab. The last step pays a card or a gift.' },
   { t: 'fixed', x: 'A home saved before the new small rooms now shrinks to its level\'s size, once: furniture you bought waits in storage (Manage → Furniture), decorations go back to your decorations, and the other pieces arrive again as your home grows.' },
   { t: 'fixed', x: 'Your companion\'s windows (things to do together, its games and choosing a companion) close with the round ✕ at the top right, like every other window.' },

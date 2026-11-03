@@ -3750,3 +3750,66 @@ html.reduce-motion .home-screen *, html.reduce-motion .hr-prop.fresh::after { an
 .chapter-link { font: inherit; font-size: .74rem; font-weight: 700; padding: 2px 4px; border: 0; background: none; color: var(--ink-soft); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
 .chapter-link:hover, .chapter-link:focus-visible { color: var(--accent); }
 #storiesView .section-title:first-child { margin-top: 0; }
+
+/* ---------- MATCH REPLAYS AND BATTLE STATS (build 332, js/replays.js) ---------- */
+#replayOverlay { z-index: 56; }
+.rp-sheet { position: relative; max-width: 380px; width: calc(100vw - 32px); padding: 18px 16px 14px; text-align: left; }
+.rp-sheet h2 { margin: 0 40px 2px 0; font-size: 1.1rem; text-align: left; }
+.rp-x { position: absolute; top: 12px; right: 12px; }
+.rp-subline { margin: 0 0 10px; color: var(--ink-soft); font-size: .8rem; }
+.rp-table { display: grid; gap: 6px; padding: 10px; border-radius: 14px; background: var(--track); }
+.rp-side { display: flex; align-items: center; gap: 10px; font-size: .8rem; font-weight: 700; }
+.rp-side .rp-who { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rp-calm { color: var(--c-pink-71); }
+.rp-hand { color: var(--ink-soft); }
+.rp-board { display: flex; flex-wrap: wrap; gap: 5px; min-height: 52px; align-items: center; }
+.rp-board.mine { border-top: 1px dashed var(--stone-edge); padding-top: 6px; }
+.rp-card { display: grid; justify-items: center; width: 62px; padding: 4px 3px; border-radius: 9px; background: var(--stone); border: 1px solid var(--stone-edge); font-size: .62rem; line-height: 1.15; }
+.rp-card.shield { box-shadow: 0 0 0 2px var(--water-glow); }
+.rp-ico { font-size: 1.15rem; }
+.rp-name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rp-stats { font-weight: 800; }
+.rp-empty { color: var(--ink-soft); font-size: .72rem; font-style: italic; }
+.rp-handrow { display: flex; gap: 4px; flex-wrap: wrap; font-size: 1rem; min-height: 1.3em; }
+.rp-hcard { display: grid; place-items: center; width: 26px; height: 32px; border-radius: 6px; background: var(--stone); border: 1px solid var(--stone-edge); }
+.rp-lines { min-height: 3.2em; margin: 10px 0 6px; font-size: .84rem; line-height: 1.35; }
+.rp-slider { width: 100%; accent-color: var(--accent); }
+.rp-controls { display: flex; gap: 8px; justify-content: center; margin-top: 6px; }
+.rp-controls .btn { min-width: 52px; padding-inline: 10px; }
+.rp-step { margin-top: 6px; text-align: center; color: var(--ink-soft); font-size: .74rem; }
+.bl-insights .bi-sub { margin: 10px 0 4px; font-size: .74rem; font-weight: 800; color: var(--ink-soft); }
+.bi-cards { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
+.bi-card { display: grid; justify-items: center; flex: none; width: 84px; padding: 6px 4px; border-radius: 10px; background: var(--track); text-align: center; font-size: .7rem; line-height: 1.2; }
+.bi-card span { font-size: 1.3rem; }
+.bi-card small { color: var(--ink-soft); }
+.bi-fams { display: flex; flex-wrap: wrap; gap: 6px; }
+.bi-fam { padding: 4px 9px; border-radius: 999px; background: var(--track); font-size: .74rem; }
+.bi-tip { margin-top: 10px; }
+
+/* ---------- THE LUCKY METER AND STARRED CARDS (build 332, js/pack-luck.js) ---------- */
+.luck-wallet .luck-body { flex: 1; min-width: 0; display: grid; gap: 6px; }
+.luck-stars { display: flex; flex-wrap: wrap; gap: 6px; }
+.luck-star { padding: 3px 9px; border-radius: 999px; background: var(--track); font-size: .74rem; font-weight: 700; }
+.luck-none { color: var(--ink-soft); font-size: .74rem; }
+.alm-card.unknown { position: relative; }
+.ac-star { position: absolute; top: 2px; right: 2px; width: 26px; height: 26px; min-height: 0; padding: 0; border: 0; border-radius: 50%; background: var(--track); color: var(--accent); font-size: .9rem; line-height: 1; cursor: pointer; }
+.alm-card.starred { box-shadow: 0 0 0 2px var(--accent); }
+
+/* ---------- CARD LORE (build 332, js/evolution.js) ---------- */
+.cs-lore-h { display: block; margin-bottom: 2px; font-size: .68rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); font-style: normal; }
+.cs-lore-who { display: block; margin-top: 4px; font-size: .74rem; color: var(--ink-soft); }
+
+/* ---------- THE WEEKLY SEALED LEAGUE (build 332, js/sealed.js) ---------- */
+#sealedOverlay { z-index: 28; }
+.sl-sheet { max-width: 420px; width: calc(100vw - 32px); max-height: calc(100vh - 40px); display: flex; flex-direction: column; padding: 18px 14px 14px; }
+.sl-sheet h2 { margin: 0 0 2px; font-size: 1.1rem; }
+.sl-sub { margin: 0 0 8px; color: var(--ink-soft); font-size: .8rem; }
+.sl-count { font-weight: 800; font-size: .84rem; margin-bottom: 8px; }
+.sl-pool { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 6px; overflow-y: auto; min-height: 0; flex: 1; padding: 2px; }
+.sl-card { position: relative; display: grid; justify-items: center; gap: 1px; padding: 6px 3px 5px; border-radius: 10px; border: 1px solid var(--stone-edge); background: var(--track); color: var(--ink); font: inherit; font-size: .62rem; line-height: 1.15; cursor: pointer; opacity: .78; }
+.sl-card.on { opacity: 1; background: var(--stone); box-shadow: 0 0 0 2px var(--accent); }
+.sl-card .ac-icon { font-size: 1.3rem; }
+.sl-card .ac-name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sl-card .ac-cost { position: absolute; top: 3px; left: 5px; font-weight: 800; }
+.sl-sheet .controls { flex-wrap: wrap; margin-top: 10px; }
+.pip.lost { background: var(--c-pink-71); }

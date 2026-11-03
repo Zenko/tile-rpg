@@ -233,11 +233,12 @@ function drawCardSheet() {
       <span class="cs-sub">Owned ×${n}${foilCount(id) ? ` · ✨ ${foilCount(id)} foil` : ''} · ${inDeck} in deck · ${spare} spare${isDonated(id) ? ' · 🏛️' : ''}</span>
       <span class="cs-sub">${masteryLine(id)}</span></div>
     ${hasAbility(def) ? `<div class="cs-abil">${cardAbilityHtml(def)}</div>` : ''}
-    <p class="cs-story">${cardStory(def)}</p>
+    ${typeof loreHtml === 'function' ? loreHtml(def) : `<p class="cs-story">${cardStory(def)}</p>`}
     <div class="cs-actions">
       ${inDeck ? `<button class="btn" data-cs="rem">Remove from deck</button>` : ''}
       <button class="btn${inDeck ? '' : ' cs-primary'}" data-cs="add" ${inDeck >= cap || state.deck.length >= DECK_SIZE ? 'disabled' : ''}>${state.deck.length >= DECK_SIZE && inDeck < cap ? 'Deck is full' : inDeck ? 'Add another' : 'Add to deck'}</button>
       <button class="btn" data-cs="craft" ${refinable ? '' : 'disabled'}>🔨 ${refinable ? 'Refine in Workshop' : def.spell || def.crafted ? 'Cannot be refined' : 'Refine needs 2 copies'}</button>
+      ${typeof evolveBlock === 'function' && !def.spell && !def.crafted ? `<button class="btn${canEvolve(id) ? ' cs-primary' : ''}" data-cs="evolve" ${canEvolve(id) ? '' : 'disabled'} title="${escapeHtml(evolveBlock(id))}">🌟 ${canEvolve(id) ? words('evolve.button', { name: cardDef(id + '~e').name }) : escapeHtml(evolveBlock(id))}</button>` : ''}
       <button class="btn${charmOn ? ' cs-on' : ''}" data-cs="charm">✦ ${charmOn ? 'Remove charm' : 'Use as charm'}</button>
       <button class="btn" data-cs="release" ${canRelease(id) ? '' : 'disabled'}>${canRelease(id) || n >= RELEASE_MIN_COPIES ? `Release a spare · +🫧 ${RELEASE_VALUE[def.rarity]}` : 'Release needs 3 copies'}</button>
     </div>`;
@@ -248,6 +249,7 @@ function drawCardSheet() {
     if (act === 'add') deckAdd(id);
     else if (act === 'rem') deckRemove(id);
     else if (act === 'craft') { closeCardSheet(); refineOpenId = id; setCardsView('craft'); return; }
+    else if (act === 'evolve') { closeCardSheet(); evolveCard(id); refreshCardsView(); return; }
     else if (act === 'charm') {
       const i = charms().indexOf(id);
       if (i >= 0) clearCharm(i); else if (!charmInfo(id)) { toast('That card has no charm effect'); return; } else setCharm(id);

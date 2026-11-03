@@ -614,6 +614,7 @@ const BattleEngine = (function () {
     const base = DEFS.get(id.slice(0, i)); if (!base || base.spell) return undefined;   // spells have no crafted versions
     const rest = id.slice(i + 1), dot = rest.indexOf('.');
     const st = dot < 0 ? rest : rest.slice(0, dot), sk = dot < 0 ? '' : rest.slice(dot + 1);
+    if (st === 'e') return evolvedDef(base, id, sk);   // an evolved card (build 332): its own name, EVOLVE_BONUS
     if (st !== '' && st !== 'p' && st !== 'g') return undefined;
     if (sk !== '' && !KEYWORDS[sk]) return undefined;
     if (st === '' && sk === '') return undefined;
@@ -621,6 +622,15 @@ const BattleEngine = (function () {
     if (variantId(base.id, st, sk) !== id) return undefined;          // one canonical spelling per card, so a card never exists under two ids
     d = Object.assign({}, base, { id: id, name: base.name + '+', power: base.power + (st === 'p' ? 1 : 0), grit: base.grit + (st === 'g' ? 1 : 0),
                                   kw: base.kw.concat(sk ? [sk] : []), crafted: true, base: base.id, stat: st, skill: sk });
+    DEFS.set(id, d);
+    return d;
+  }
+  // '<id>~e': the card evolved once (js/evolution.js). Names and the bonus are in content/cards.js (EVOLVE_*).
+  function evolvedDef(base, id, sk) {
+    if (sk || id !== base.id + '~e' || typeof EVOLVE_BONUS === 'undefined') return undefined;
+    const fam = CARD_FAMILY[base.id] || 'none', name = (EVOLVE_NAMES && EVOLVE_NAMES[base.id]) || `${EVOLVE_PREFIX[fam] || EVOLVE_PREFIX.none} ${base.name}`;
+    const d = Object.assign({}, base, { id, name, power: base.power + (EVOLVE_BONUS.power || 0), grit: base.grit + (EVOLVE_BONUS.grit || 0),
+                                        kw: base.kw.slice(), crafted: true, evolved: true, base: base.id, stat: 'e', skill: '' });
     DEFS.set(id, d);
     return d;
   }

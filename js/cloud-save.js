@@ -37,7 +37,7 @@ function cloudInit() {
     cloudDb.enablePersistence({ synchronizeTabs: true }).catch(() => { /* already enabled in another tab, or unsupported - fine either way */ });
     firebase.auth().onAuthStateChanged(user => {
       if (user) {
-        cloudUser = user; cloudReady = true;
+        cloudUser = user; cloudReady = true; setTimeout(() => { if (typeof challengeFetch === 'function') challengeFetch(true); }, 4000);
         cloudSetStatus(user.isAnonymous ? 'Backed up automatically' : `Backed up to ${user.email}`);
         cloudPullThenReconcile(false);
       } else {
@@ -118,6 +118,7 @@ function pushPresence() {
     district: (DISTRICTS[state.currentDistrict] && DISTRICTS[state.currentDistrict].name) || '',
     lastSeen: Date.now(),
     deck: ghostDeckCode(),
+    sealed: typeof sealedPresence === 'function' ? sealedPresence() : null,   // this week's sealed league record (js/sealed.js)
   }).catch(() => { /* offline - this is just a nice-to-have glance, not core save data */ });
 }
 // Removes you from the list right away when you opt out, rather than lingering until PRESENCE_STALE_MS.
@@ -182,6 +183,7 @@ function ghostWin() {
   const gs = ghostState(), id = battle.npc.ghost.uid;
   battle.rewarded = true;
   bumpStat('ghostWins', 1);
+  if (typeof challengeSend === 'function') challengeSend(true);   // the deck's owner hears how it went (js/challenges.js)
   let extra = 'A fine duel.';
   if (!gs.beaten[id] && gs.paid < 5) { gs.beaten[id] = true; gs.paid++; addPebbles(8, 'ghost'); extra = '<b>+8 🫧</b> for beating this ghost today.'; }
   saveState();
@@ -193,6 +195,7 @@ function ghostWin() {
   sfx('win'); buzz(HAP.win);
 }
 function ghostLoss() {
+  if (typeof challengeSend === 'function') challengeSend(false);   // the deck's owner hears how it went (js/challenges.js)
   const icon = btGet('battleEndIcon'); icon.textContent = '👻'; icon.className = 'big-icon';
   btGet('battleSparkles').innerHTML = '';
   battleEndTitle.textContent = `${battle.npc.ghost.name}'s ghost wins this one.`;
@@ -227,6 +230,7 @@ async function fetchWhosPlaying() {
   if (!box) return;
   renderSocialYou();
   if (typeof renderLadderCard === 'function') renderLadderCard();
+  if (typeof challengeFetch === 'function') challengeFetch(true);   // any challenges waiting for you (js/challenges.js)
   const note = (icon, title, text) => `<div class="so-empty"><span>${icon}</span><b>${title}</b><small>${text}</small></div>`;
   if (!cloudAvailable() || !cloudReady) { box.innerHTML = note('📡', 'Not connected right now', 'Testers show up here when you are online.'); return; }
   box.innerHTML = note('⏳', 'Loading…', '');
@@ -239,7 +243,7 @@ async function fetchWhosPlaying() {
       const me = p.id === (cloudUser && cloudUser.uid), g = !me ? ghostDeckOf(p) : null, live = now - (p.lastSeen || 0) < 10 * 60 * 1000;
       return `<div class="so-card${me ? ' me' : ''}"><span class="so-av">${escapeHtml(String(p.emoji || '🙂').slice(0, 8))}${live ? '<i class="so-live" title="Playing now"></i>' : ''}</span>
         <span class="so-text"><b>${escapeHtml(String(p.name || 'A player').slice(0, 16))}${me ? ' <em>you</em>' : ''}<span class="so-lv">Lv ${Math.max(1, Math.floor(Number(p.level)) || 1)}</span></b>
-        <small>${escapeHtml(p.district || '')}${p.district ? ' · ' : ''}${live ? 'Playing now' : fmtLogTime(p.lastSeen)}</small></span>
+        <small>${escapeHtml(p.district || '')}${p.district ? ' · ' : ''}${live ? 'Playing now' : fmtLogTime(p.lastSeen)}${p.sealed && p.sealed.wk === weekKey() ? ` · 📦 ${Math.max(0, +p.sealed.w || 0)}–${Math.max(0, +p.sealed.l || 0)}` : ''}</small></span>
         ${g ? (featureLocked('ghost') ? `<span class="ghost-lock" title="${featureLockText('ghost')}">🔒 Lv ${FEATURE_LEVELS.ghost.level}</span>` : `<button class="btn ghost-btn so-duel" type="button" data-ghost="${i}" title="Duel a ghost of their deck">👻 ${g.fam ? g.fam.icon + ' ' : ''}Duel</button>`) : ''}</div>`;
     }).join('')
       : note('🌱', 'Nobody sharing yet', 'Turn it on in Settings and be the first.');

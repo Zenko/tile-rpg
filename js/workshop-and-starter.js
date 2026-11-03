@@ -98,7 +98,7 @@ function buyPack(packId, price) {
   const cost = typeof price === 'number' ? price : packPrice(pack);
   if (state.progress.pebbles < cost) return false;   // guard: can't go negative
   spendPebbles(cost, 'packs');
-  const id = randomCardId(rollPackRarity(pack), pack.only);
+  const id = randomCardId(typeof packLuckRoll === 'function' ? packLuckRoll(rollPackRarity(pack), cost) : rollPackRarity(pack), pack.only);   // the lucky meter (js/pack-luck.js)
   const isNew = !state.ownedCards.includes(id);
   const stars = isNew ? 0 : awardStarlight(id);   // a duplicate also pays Starlight toward a wish (js/wishes.js)
   state.ownedCards.push(id);
@@ -386,6 +386,7 @@ function renderPacks() {
     </div>`;
 
   box.insertAdjacentHTML('beforeend', wishPanelHtml());
+  if (typeof luckPanelHtml === 'function') box.insertAdjacentHTML('beforeend', luckPanelHtml());   // the lucky meter and starred cards (js/pack-luck.js)
   if (eventIs('market-day')) box.insertAdjacentHTML('beforeend', '<div class="event-banner">🛍️ Market Day: every pack is 20% off today!</div>');
   PACKS.forEach(pack => {
     const price = packPrice(pack), can = peb >= price;
@@ -643,7 +644,7 @@ function renderAlmanac() {
       <span class="set-title"><b>${st.icon} ${st.name}</b><span>${done ? '✅ Bonus active: ' : 'Bonus: '}${st.text}</span></span><span class="set-chev">${open ? '▲' : '▼'}</span></button>
       ${open ? `<div class="alm-row set-open">${st.cards.map(id => { const d = cardDef(id);
         return own.has(id) ? `<div class="alm-card rarity-${d.rarity}" data-inspect="${id}"><span class="ac-cost">${d.cost}</span><span class="ac-icon">${cardArtHtml(d)}</span><span class="ac-power">${cardStatsText(d)}</span><span class="ac-name">${d.name}</span></div>`
-          : `<div class="alm-card unknown"><span class="ac-icon">${cardArtHtml(d)}</span><span class="ac-name">${disc.has(id) ? d.name : '???'}</span><span class="ac-hint">${RARITY_LABEL[d.rarity]}</span></div>`; }).join('')}</div>${n < st.cards.length ? '<div class="set-note">Missing cards show as silhouettes. Find them in packs, on the ground or as prizes.</div>' : ''}` : ''}</div>`; }).join('')}</div>`;
+          : `<div class="alm-card unknown${isStarred(id) ? ' starred' : ''}"><span class="ac-icon">${cardArtHtml(d)}</span><span class="ac-name">${disc.has(id) ? d.name : '???'}</span><span class="ac-hint">${RARITY_LABEL[d.rarity]}</span>${canStar(id) ? `<button type="button" class="ac-star" data-star="${id}" aria-pressed="${isStarred(id)}" aria-label="${isStarred(id) ? words('star.unstarLabel') : words('star.starLabel')}">${isStarred(id) ? '⭐' : '☆'}</button>` : ''}</div>`; }).join('')}</div>${n < st.cards.length ? '<div class="set-note">Missing cards show as silhouettes. Find them in packs, on the ground or as prizes.</div>' : ''}` : ''}</div>`; }).join('')}</div>`;
   const foilTotal = Object.values(foils()).reduce((a, b) => a + b, 0);
   const hasNew = almanacHasNew();
   if (hasNew) almGridOpen = true;      // never hide the "New" tags behind a closed toggle
@@ -653,6 +654,7 @@ function renderAlmanac() {
     ${foilTotal ? `<div class="alm-season">✨ ${foilTotal} Reborn in your collection - look for the shimmer on any card.</div>` : ''}
     <div class="alm-season">${sd.icon} It's ${sd.name}: cards marked ${sd.icon} turn up more often for ${seasonDaysLeft()} more day${seasonDaysLeft() === 1 ? '' : 's'}.</div>
     <button type="button" class="claim-more" id="almGridToggle">${almGridOpen ? 'Hide' : 'Show'} every card · ${found}/${total}</button>`;
+  onAll(document, '#almProgress [data-star]', b => { if (toggleStar(b.dataset.star)) renderAlmanac(); });   // star a card you hope for (js/pack-luck.js)
   onAll(document, '#almProgress [data-set]', b => { setOpenId = setOpenId === b.dataset.set ? null : b.dataset.set; sfx('tap'); renderAlmanac(); });
   document.getElementById('almGridToggle').addEventListener('click', () => { almGridOpen = !almGridOpen; sfx('nav'); renderAlmanac(); });
 

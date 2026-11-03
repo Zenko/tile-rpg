@@ -597,7 +597,13 @@ function renderSceneBody() {
     document.getElementById('scTitle').textContent = `🏆 The ${cupName()}`;
     document.getElementById('scWho').textContent = cs.active ? cs.foes[cs.round].icon : '🏆';
     pips.innerHTML = CUP_ROUNDS.map((r, i) => `<span class="pip ${cs.active && i < cs.round ? 'done' : (cs.active && i === cs.round ? 'now' : '')}"></span>`).join('') + (cs.trophy ? '<span class="pip-label">🏆 won this week</span>' : '');
-    acts.innerHTML = scene.mode === 'chal' ? challengeButtons() : scene.mode === 'draft' ? draftButtons() : cupButtons();
+    acts.innerHTML = scene.mode === 'chal' ? challengeButtons() : scene.mode === 'draft' ? draftButtons() : scene.mode === 'sealed' ? sealedButtons() : cupButtons();
+    if (scene.mode === 'sealed') {   // the weekly sealed league (js/sealed.js)
+      const sl = sealedState();
+      document.getElementById('scTitle').textContent = words('sealed.title');
+      document.getElementById('scWho').textContent = '📦';
+      pips.innerHTML = Array.from({ length: SEALED_MATCHES }, (_, i) => `<span class="pip ${i < sl.results.length ? (sl.results[i] ? 'done' : 'lost') : i === sl.results.length ? 'now' : ''}"></span>`).join('') + `<span class="pip-label">${words('sealed.pips', { record: sealedRecordText() })}</span>`;
+    }
     if (scene.mode === 'draft') {
       const dr = draftState();
       document.getElementById('scTitle').textContent = '🎴 The Draft Run';
@@ -792,7 +798,8 @@ function cupButtons() {
   const cs = cupState();
   const chal = sceneBtn('chal', `🎯 Deck challenges · ${challengeState().list.filter(c => c.won).length}/3 beaten today`);
   const dr = draftState(), draft = sceneBtn('draft', dr.active ? `🎴 Draft Run · in progress` : featureLocked('draft') ? `🎴 Draft Run · 🔒 level ${FEATURE_LEVELS.draft.level}` : `🎴 Draft Run · build a deck, win four`);
-  if (!cs.active) return sceneBtn('cup-enter', cs.trophy ? `🏆 Enter again (for ${GAME.currency.many})` : `🏆 Enter the ${cupName()}`) + draft + chal;
+  const sealed = sceneBtn('sealed', words('sealed.button', { record: sealedState().results.length ? sealedRecordText() : words('sealed.new') }));   // js/sealed.js
+  if (!cs.active) return sceneBtn('cup-enter', cs.trophy ? `🏆 Enter again (for ${GAME.currency.many})` : `🏆 Enter the ${cupName()}`) + draft + sealed + chal;
   const r = CUP_ROUNDS[cs.round], foe = cs.foes[cs.round];
   return sceneBtn('cup-play', `${r.icon} ${r.title}: ${foe.icon} ${foe.name} · you have ♥${cs.spirit}`) +
     sceneBtn('cup-quit', words('cup.withdraw')) + sceneBtn('leave', words('cup.stepAway'));
@@ -805,6 +812,7 @@ function cupIntro() {
 function cupAction(act) {
   const cs = cupState();
   if (act === 'draft' || act.startsWith('draft-')) { draftAction(act); return; }
+  if (act === 'sealed' || act.startsWith('sealed-')) { sealedAction(act); return; }
   if (act === 'chal') { scene.mode = 'chal'; scene.text = "Today's deck challenges: win using a deck that follows the rule. Tip: keep a deck for them in one of your deck slots (Cards → Deck)."; sfx('tap'); showTipOnce('challenges'); renderScene(); return; }
   if (act === 'chal-back') { scene.mode = null; scene.text = cupIntro(); renderScene(); return; }
   if (act.startsWith('chal-play:')) { startChallenge(+act.slice(10)); return; }

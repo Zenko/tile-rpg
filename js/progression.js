@@ -90,7 +90,8 @@ function econTaper(src, n, softCap) {
 const FEATURE_LEVELS = {
   draft: { level: 5, icon: '🎴', name: 'Draft Run' },
   ghost: { level: 8, icon: '👻', name: 'Lingering duels' },
-  spread: { level: 6, icon: '🃏', name: 'Fate Spread' }
+  spread: { level: 6, icon: '🃏', name: 'Fate Spread' },
+  sealed: { level: 6, icon: '📦', name: 'Sealed League' }   // js/sealed.js
 };
 function featureLocked(id) { return ensureLevel().level < FEATURE_LEVELS[id].level; }
 function featureLockText(id) { const f = FEATURE_LEVELS[id]; return `${f.icon} ${f.name} unlocks at level ${f.level}`; }
@@ -218,6 +219,8 @@ function cardDef(id) { return BattleEngine.defOf(id); }
 
 // CARD_STORY_TEMPLATES: in content/cards.js (the game's words and data, kept apart from the code)
 function cardStory(def) {
+  const lore = typeof CARD_LORE !== 'undefined' && CARD_LORE[BattleEngine.baseIdOf(def.id)];   // a card's own line (content/lore.js)
+  if (lore) return lore;
   const pool = CARD_STORY_TEMPLATES[def.rarity] || CARD_STORY_TEMPLATES.common;
   let h = 0; for (let i = 0; i < def.id.length; i++) h = (h * 31 + def.id.charCodeAt(i)) >>> 0;
   return pool[h % pool.length].replace(/\{name\}/g, def.name);
@@ -421,9 +424,9 @@ function randomCardId(rarity, only) {
   const usePool = pool.length ? pool : cardPool('common');
   return seasonalPick(usePool).id;
 }
-// In-season cards are three times as likely as the rest of their rarity.
+// In-season cards are three times as likely as the rest of their rarity; a starred card twice (js/pack-luck.js).
 function seasonalPick(pool) {
-  const w = pool.map(c => (inSeason(c.id) ? 3 : 1)), total = w.reduce((a, b) => a + b, 0);
+  const w = pool.map(c => (inSeason(c.id) ? 3 : 1) * (typeof starWeight === 'function' ? starWeight(c.id) : 1)), total = w.reduce((a, b) => a + b, 0);
   let r = Math.random() * total;
   for (let i = 0; i < pool.length; i++) { r -= w[i]; if (r <= 0) return pool[i]; }
   return pool[pool.length - 1];

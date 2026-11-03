@@ -149,10 +149,10 @@ function renderChapters() {
   const group = (kind, title, sub) => `<div class="section-title">${title}</div><div class="panel-desc">${sub}</div>` + CHAPTERS.filter(ch => ch.kind === kind).map(chapterCardHtml).join('');
   box.innerHTML = group('district', words('stories.districtTitle'), words('stories.districtSub')) +
                   group('neighbour', words('stories.neighbourTitle'), words('stories.neighbourSub'));
-  onAll(box, '[data-ch-claim]', b => b.addEventListener('click', () => claimChapter(b.dataset.chClaim)));
-  onAll(box, '[data-ch-go]', b => b.addEventListener('click', () => { sfx('nav'); chapterGo(chapterDef(b.dataset.chGo)); }));
-  onAll(box, '[data-ch-hear]', b => b.addEventListener('click', () => { const ch = chapterDef(b.dataset.chHear); sfx('tap'); switchTab('town'); setTimeout(() => chapterPlayStep(ch, chapterRec(ch).step, true), 300); }));
-  onAll(box, '[data-ch-end]', b => b.addEventListener('click', () => { const ch = chapterDef(b.dataset.chEnd); sfx('tap'); switchTab('town'); setTimeout(() => playStoryScene(chapterScript(ch, ch.end), { replay: true }), 300); }));
+  onAll(box, '[data-ch-claim]', b => claimChapter(b.dataset.chClaim));
+  onAll(box, '[data-ch-go]', b => { sfx('nav'); chapterGo(chapterDef(b.dataset.chGo)); });
+  onAll(box, '[data-ch-hear]', b => { const ch = chapterDef(b.dataset.chHear); sfx('tap'); switchTab('town'); setTimeout(() => chapterPlayStep(ch, chapterRec(ch).step, true), 300); });
+  onAll(box, '[data-ch-end]', b => { const ch = chapterDef(b.dataset.chEnd); sfx('tap'); switchTab('town'); setTimeout(() => playStoryScene(chapterScript(ch, ch.end), { replay: true }), 300); });
 }
 // For the goal pill (nextGoal, js/skills-gear.js): a ready step first, then this district's chapter, then any open one.
 function chapterGoal(hereOnly) {

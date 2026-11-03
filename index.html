@@ -344,6 +344,7 @@
           <div id="depthCard"></div>
           <div class="bl-stats" id="battleStats"></div>
           <div class="card-box bl-trend" id="battleTrend"></div>
+          <div class="card-box bl-insights hidden" id="battleInsights"></div>
           <div class="jchips" id="battleChips" role="group" aria-label="Filter matches"></div>
           <div class="panel-list" id="battleLogList"></div>
         </div>
@@ -535,6 +536,44 @@
 <div class="calm hidden" id="calmOverlay" role="dialog" aria-label="Quiet Nook">
   <div class="calm-top"><button type="button" class="calm-back hidden" id="calmBack" aria-label="Back to the quiet nook">‹</button><span class="calm-title" id="calmTitle">Quiet Nook</span><button type="button" class="calm-x" id="calmClose" aria-label="Close">✕</button></div>
   <div class="calm-body" id="calmBody"></div>
+</div>
+
+<div class="overlay hidden" id="replayOverlay" role="dialog" aria-labelledby="rpTitle">
+  <div class="overlay-card rp-sheet">
+    <button type="button" class="x-close rp-x" id="rpClose" aria-label="Close"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+    <h2 id="rpTitle">Replay</h2>
+    <p class="rp-subline" id="rpSub"></p>
+    <div class="rp-table">
+      <div class="rp-side" id="rpOpp"></div>
+      <div class="rp-board" id="rpOppBoard"></div>
+      <div class="rp-board mine" id="rpYouBoard"></div>
+      <div class="rp-side" id="rpYou"></div>
+      <div class="rp-handrow" id="rpHand"></div>
+    </div>
+    <div class="rp-lines" id="rpLines" aria-live="polite"></div>
+    <input type="range" class="rp-slider" id="rpSlider" min="0" max="1" value="0" aria-label="Move">
+    <div class="rp-controls">
+      <button class="btn btn-ghost" id="rpPrev" type="button" aria-label="Previous move">◀</button>
+      <button class="btn" id="rpPlay" type="button" aria-label="Play">▶</button>
+      <button class="btn btn-ghost" id="rpNext" type="button" aria-label="Next move">▶▶</button>
+      <button class="btn btn-ghost" id="rpSpeed" type="button" aria-label="Speed">1×</button>
+    </div>
+    <div class="rp-step" id="rpStep"></div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="sealedOverlay" role="dialog" aria-labelledby="sealedTitle">
+  <div class="overlay-card sl-sheet">
+    <h2 id="sealedTitle">This week's sealed pool</h2>
+    <p class="sl-sub">Build a 12-card deck from these cards only. Everyone opens the same packs this week.</p>
+    <div class="sl-count" id="sealedCount"></div>
+    <div class="sl-pool" id="sealedPool"></div>
+    <div class="controls">
+      <button class="btn btn-ghost" id="sealedClose" type="button">Close</button>
+      <button class="btn btn-ghost" id="sealedAuto" type="button">Build one for me</button>
+      <button class="btn" id="sealedDone" type="button" disabled>Use this deck</button>
+    </div>
+  </div>
 </div>
 
 <div class="overlay hidden" id="draftOverlay" role="dialog" aria-labelledby="draftTitle">
@@ -882,6 +921,7 @@
 <script src="content/guide.js"></script>
 <script src="content/text.js"></script>
 <script src="content/chapters.js"></script>
+<script src="content/lore.js"></script>
 <script>applySkinContent();</script>
 <script src="js/data-and-engine.js"></script>
 <script src="js/icon-swap.js"></script>
@@ -941,15 +981,19 @@ pixiReady.catch(function () {});
 <script src="js/battle-ui.js"></script>
 <script src="js/battle-toss.js"></script>
 <script src="js/draft-run.js"></script>
+<script src="js/sealed.js"></script>
 <script src="js/shop-economy.js"></script>
 <script src="js/workshop-and-starter.js"></script>
 <script src="js/wishes.js"></script>
+<script src="js/pack-luck.js"></script>
+<script src="js/evolution.js"></script>
 <script src="js/depth.js"></script>
 <script src="js/craft-forge.js"></script>
 <script src="js/portal-craft.js"></script>
 <script src="js/collection-tools.js"></script>
 <script src="js/save-file.js"></script>
 <script src="js/journal-history.js"></script>
+<script src="js/replays.js"></script>
 <script src="js/build.js"></script>
 <link rel="prefetch" href="js/changelog-archive.js" as="script">
 <script src="js/changelog.js"></script>
@@ -1007,6 +1051,7 @@ pixiReady.catch(function () {});
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script src="js/cloud-save.js"></script>
+<script src="js/challenges.js"></script>
 <script>
 // Makes the game installable and playable offline. Service workers need a secure context (https or
 // localhost), so this is a silent no-op when the file is opened directly (file://) - normal local

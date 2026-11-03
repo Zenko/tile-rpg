@@ -18,7 +18,10 @@ const CONTENT_INDEX = {
   "MUSEUM_WINGS",
   "ARCANA",
   "CARD_STORY_TEMPLATES",
-  "COMPANION_TRAITS"
+  "COMPANION_TRAITS",
+  "EVOLVE_BONUS",
+  "EVOLVE_PREFIX",
+  "EVOLVE_NAMES"
  ],
  "content/chapters.js": [
   "CHAPTERS"
@@ -65,6 +68,10 @@ const CONTENT_INDEX = {
   "HR_CATALOG",
   "BORDER_OPTIONS",
   "STAGE_OPTIONS"
+ ],
+ "content/lore.js": [
+  "LORE_VOICE",
+  "CARD_LORE"
  ],
  "content/story.js": [
   "STORY",

@@ -150,6 +150,7 @@ function startBattleNow(opponent, first) {
   const tw = twistKind ? BattleEngine.TWISTS[twistKind] : null;
   btSetChips(opponent.puzzle ? ['🧩 Ending your turn resets the board'] : [tw ? `${tw.icon} ${tw.text}` : '', opponent.trial ? '🔮 Brings a Fate and a Spread' : '', (G.p[0].passive ? (d => `${d.icon} ${d.name}: ${d.text}`)(passiveDef(G.p[0].passive, G.p[0].passiveTier)) : ''), chip, plainFoe ? '✦ Seasoned deck' : ''].filter(Boolean));
   battle.puzzle = !!opponent.puzzle;
+  if (!battle.puzzle && typeof replayBegin === 'function') replayBegin();   // the first replay frame: the table as dealt (js/replays.js)
 
   townPanel.classList.add('hidden');
   sceneView.classList.add('hidden'); document.body.classList.remove('in-scene'); inScene = false;
@@ -960,7 +961,7 @@ function btSpellFx(def, e) {
 }
 
 /* ---------------- animation ---------------- */
-function btFlush(G) { return G.events.splice(0); }
+function btFlush(G) { const evs = G.events.splice(0); if (typeof replayNote === 'function') replayNote(G, evs); return evs; }   // every batch is also a replay frame (js/replays.js)
 
 async function btAnimate(evs, token) {
   for (const e of evs) {
@@ -1211,6 +1212,8 @@ function btShowResult(won, yielded) {
   } else if (!won && npc.ghost && !battle.rewarded) {
     battle.rewarded = true;
     ghostLoss();
+  } else if (npc.sealed && !battle.rewarded) {
+    sealedResult(won);   // the weekly sealed league: every match counts, won or lost (js/sealed.js)
   } else if (won && !battle.rewarded && npc.draft) {
     draftWin();
   } else if (!won && npc.draft && !battle.rewarded) {
@@ -1305,7 +1308,7 @@ function btRenderEndStats(G, won, yielded, turns, npc) {
 
 function closeBattle(retry) {
   if (battle && battle.closing) return;                 // a second tap on Continue while the fade is running
-  const fromDungeon = !!(battle && battle.npc && battle.npc.dungeon), fromPuzzle = !!(battle && battle.npc && battle.npc.puzzle), fromCup = !!(battle && battle.npc && battle.npc.cup), fromDraft = !!(battle && battle.npc && battle.npc.draft),
+  const fromDungeon = !!(battle && battle.npc && battle.npc.dungeon), fromPuzzle = !!(battle && battle.npc && battle.npc.puzzle), fromCup = !!(battle && battle.npc && battle.npc.cup), fromDraft = !!(battle && battle.npc && battle.npc.draft), fromSealed = !!(battle && battle.npc && battle.npc.sealed),
         fromChallenge = !!(battle && battle.npc && battle.npc.challenge), fromTrial = !!(battle && battle.npc && battle.npc.trial);
   if (battle) { battle.ended = true; battleToken++; }
   if (retry && battle) { battleEndOverlay.classList.add('hidden'); btGet('mulliganOverlay').classList.add('hidden'); startBattle(battle.npc); return; }
@@ -1329,6 +1332,7 @@ function closeBattle(retry) {
     else if (fromPuzzle) openScene('nook');
     else if (fromCup) openScene('cup');
     else if (fromDraft) { openScene('cup'); scene.mode = 'draft'; scene.text = draftIntro(); renderScene(); }
+    else if (fromSealed) { openScene('cup'); scene.mode = 'sealed'; scene.text = sealedIntro(); renderScene(); }
     else if (fromTrial) { tarotView = 'trials'; openCalm('tarot'); }
     else if (fromChallenge) { openScene('cup'); scene.mode = 'chal'; scene.text = 'The challenge board, again.'; renderScene(); }
   };

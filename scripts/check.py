@@ -190,6 +190,10 @@ if text_total > TEXT_IN_JS:
 elif text_total < TEXT_IN_JS:
     print(f'NOTE  only {text_total} sentences are left in js/ - lower TEXT_IN_JS in scripts/check.py from {TEXT_IN_JS} to {text_total}')
 
+# 7c'. A key typed twice in TEXT would silently keep only the second line (a JS object literal allows it), so it fails here.
+for k, n in collections.Counter(re.findall(r"^\s*'([\w.-]+)'\s*:", allsrc.get('content/text.js', ''), re.M)).items():
+    if n > 1: fail(f'content/text.js has the key "{k}" {n} times - only the last one would be used')
+
 # 7c. Every words('key') the code asks for exists in content/text.js (a missing key would show the key itself on screen).
 r = subprocess.run(['node', '-e', open('js/game-config.js', encoding='utf-8').read() + ';' + open('content/text.js', encoding='utf-8').read() +
                     ';console.log(JSON.stringify(Object.keys(TEXT)))'], capture_output=True, text=True)
