@@ -65,7 +65,7 @@ Tile RPG is a calm, mobile-first card-collecting town game. You walk around a ti
     ```
     Add this alongside the existing `saves`/`players` rules. Until it's added, `pushFeedback()` fails silently and `sendFeedback()` falls back to the old `mailto:` link, so a message is never actually lost - just worth adding this rule promptly so testers' reports land where they're meant to. Same "sandbox network blocked" caveat as above: the graceful-failure/mailto-fallback path is what's actually been exercised, not a live Firestore write.
 
-  - **Challenges between testers need a fifth Firestore rule the owner still has to paste in (build 332)** - `challengeSend()` in `js/challenges.js` writes a duel's result and replay frames to a `challenges` collection, addressed to the deck's owner (`to`), and the owner's game reads and deletes the ones addressed to it (`challengeFetch`). Until the rule is added both fail silently: ghost duels work exactly as before, nobody gets a letter.
+  - **Challenges between testers need a sixth Firestore rule the owner still has to paste in (build 332)** - `challengeSend()` in `js/challenges.js` writes a duel's result and replay frames to a `challenges` collection, addressed to the deck's owner (`to`), and the owner's game reads and deletes the ones addressed to it (`challengeFetch`). Until the rule is added both fail silently: ghost duels work exactly as before, nobody gets a letter.
     ```
     match /challenges/{doc} {
       allow create: if request.auth != null && request.resource.data.from == request.auth.uid;
