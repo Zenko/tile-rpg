@@ -35,10 +35,11 @@ module.exports = async (page, assert) => {
   assert.strictEqual(r.again, false, 'one challenge per tester per day');
   assert.strictEqual(r.got, 1); assert.ok(r.letter); assert.strictEqual(r.subject, 'They beat your ghost'); assert.strictEqual(r.left, 0, 'delivered challenges are deleted');
   assert.ok(r.replay); assert.strictEqual(r.pov, 'Tester A');
+  await page.waitForFunction(() => !inBattle && !(battle && battle.closing && !battle.ended), null, { timeout: 15000 });   // the first duel has fully closed (its fade is slower on CI)
   // the letter's buttons: watch opens the replay (labelled with their name), answer starts a duel with their deck
   const ui = await page.evaluate(() => { const l = mailState().list.find(x => /^chal-/.test(x.id)); challengeWatch(l.id);
     const t = document.getElementById('rpTitle').textContent, you = document.querySelector('#rpYou .rp-who').textContent; closeReplay();
     challengeAnswer(l.id); return { t, you }; });
   assert.strictEqual(ui.t, 'Tester A against your deck'); assert.strictEqual(ui.you, 'Tester A');
-  await page.waitForFunction(() => battle && battle.npc && battle.npc.ghost && battle.npc.ghost.uid === 'me' && !battle.ended, null, { timeout: 8000 });   // answering duels their deck
+  await page.waitForFunction(() => battle && battle.npc && battle.npc.ghost && battle.npc.ghost.uid === 'me' && !battle.ended, null, { timeout: 15000 });   // answering duels their deck (15 s: a CI runner once took longer than 8)
 };
