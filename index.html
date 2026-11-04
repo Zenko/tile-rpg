@@ -172,6 +172,7 @@
               <div class="st-row"><span class="st-ico">👋</span><span class="st-label">Share that I'm playing<small>Sends your name, level, district and when you were last here. Other testers see it under Social. Off stops it.</small></span><button class="toggle" id="presenceToggle" aria-label="Toggle sharing your name and activity with other testers"></button></div>
               <div class="st-row"><span class="st-ico">📈</span><span class="st-label">Share anonymous play stats<small>Sends counts only (battles, skills, deck mix, how you spend <span data-game="GAME.currency.many">Embers</span>) and your share of the town goal. No name. Only the game's maker sees it.</small></span><button class="toggle" id="statsToggle" aria-label="Toggle sharing anonymous play statistics"></button></div>
               <div class="st-row"><span class="st-ico">👻</span><span class="st-label">Let testers duel my deck<small>Lets other testers play a copy of your 12 cards, under your name. They never see the rest of your collection.</small></span><button class="toggle" id="shareDeckToggle" aria-label="Toggle letting other testers play a lingering duel against your deck"></button></div>
+              <div class="st-row"><span class="st-ico">🔁</span><span class="st-label">Let testers trade with me<small>Shows your spare cards to other testers so they can offer a swap. Your deck and your last copy of a card are never offered.</small></span><button class="toggle" id="shareTradesToggle" aria-label="Toggle letting other testers offer trades for your spare cards"></button></div>
               <div class="st-note">Each switch works on its own and you can change it any time. Your save is private to your account.</div>
             </div>
           </section>
@@ -275,6 +276,7 @@
           <button class="bt-mini bt-knack hidden" id="btKnack" aria-label="Your Gift"></button>
           <button class="bt-mini bt-knack bt-fate hidden" id="btFate" aria-label="Your Fate"></button>
           <button class="bt-mini bt-knack bt-cheer hidden" id="btCheer" aria-label="Your companion's cheer"></button>
+          <button class="bt-mini bt-emote-btn" id="btEmoteBtn" aria-label="Send a reaction">😊</button>
           <button class="bt-mini" id="btHelp" aria-label="How battles work">?</button>
           <button class="bt-mini" id="btYield" aria-label="Step away from this battle">🏳️</button>
         </div>
@@ -283,6 +285,9 @@
           <div class="hand" id="btHand"></div>
         </div>
         <div class="tip" id="btTip"></div>
+        <div class="bt-emotes hidden" id="btEmotes" aria-label="Reactions"></div>
+        <div class="bt-choice hidden" id="btChoice" role="dialog" aria-label="Choose"></div>
+        <div class="bt-deck-sheet hidden" id="btDeckSheet" role="dialog" aria-label="Deck"></div>
         <div class="overlay hidden" id="mulliganOverlay">
           <div class="overlay-card mull-sheet">
             <div class="mull-head"><h2>Keep this hand?</h2><p>You can trade it once for a fresh one.</p></div>
@@ -897,6 +902,9 @@
   </div>
 </div>
 
+<div class="overlay sheet hidden" id="ttOverlay" role="dialog" aria-label="Trade cards with a tester">
+  <div class="overlay-card tt-card" id="ttCard"></div>
+</div>
 <div class="overlay sheet hidden" id="cloudOverlay">
   <div class="overlay-card">
     <h2 id="cloudModalTitle">Back up your save</h2>
@@ -980,6 +988,7 @@ pixiReady.catch(function () {});
 <script src="js/gardening.js"></script>
 <script src="js/battle-ui.js"></script>
 <script src="js/battle-toss.js"></script>
+<script src="js/battle-interact.js"></script>
 <script src="js/draft-run.js"></script>
 <script src="js/sealed.js"></script>
 <script src="js/shop-economy.js"></script>
@@ -1052,6 +1061,7 @@ pixiReady.catch(function () {});
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script src="js/cloud-save.js"></script>
 <script src="js/challenges.js"></script>
+<script src="js/tester-trade.js"></script>
 <script>
 // Makes the game installable and playable offline. Service workers need a secure context (https or
 // localhost), so this is a silent no-op when the file is opened directly (file://) - normal local

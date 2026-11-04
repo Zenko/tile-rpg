@@ -442,6 +442,7 @@ function giftText(g) {
   if (g.kind === 'ingredient') return `${INGREDIENTS[g.id].icon} ${g.n} × ${INGREDIENTS[g.id].name}`;
   if (g.kind === 'bread') return '🍞 a loaf of bread';
   if (g.kind === 'card') return `a ${RARITY_LABEL[g.rarity]} card`;
+  if (g.kind === 'cards') return (g.ids || []).filter(id => cardDef(id)).map(id => `${cardDef(id).icon} ${cardDef(id).name}`).join(', ');
   return '';
 }
 let mailCheckedAt = 0;
@@ -462,6 +463,9 @@ function checkMail(force) {
     sendLetter('rook-' + c, { from: CAST.rival.name, icon: CAST.rival.icon, subject: c === RIVAL.chapters ? words('mail.rival.lastSubject') : words('mail.rival.subject', { n: c, of: RIVAL.chapters }), body: ROOK_LETTERS[c - 1], gift: c < RIVAL.chapters ? { kind: 'pebbles', n: 5 } : null });
   if ((t.battlesWon || 0) >= 1) sendLetter('cup-' + cupWeek(), { from: words('mail.cup.from'), icon: '🎪', subject: words('mail.cup.subject', { cup: cupName() }),
     body: words('mail.cup.body', { cup: cupName() }) });
+  // build 336: three of the new interactive cards to try, once you have won a match
+  if ((t.battlesWon || 0) >= 1) sendLetter('table-tricks', { from: CAST.cardSeller.name, icon: CAST.cardSeller.icon, subject: words('mail.tableTricks.subject'),
+    gift: { kind: 'cards', ids: ['hush-snare', 'crossroads', 'nest-keeper'] }, body: words('mail.tableTricks.body') });
   if ((state.progress.level || 1) >= 2) sendLetter('lumen-night', { from: CAST.nightVendor.name, icon: CAST.nightVendor.icon, subject: words('mail.nightVendor.subject'), gift: null,
     body: words('mail.nightVendor.body') });
   // a friend's note, at most one a day
@@ -533,8 +537,9 @@ function claimLetter(id) {
   else if (g.kind === 'ingredient') addIngredient(g.id, g.n);
   else if (g.kind === 'bread') state.progress.bread = Math.min(BREAD_MAX, breadCount() + 1);
   else if (g.kind === 'card') { const cid = randomCardId(g.rarity); state.ownedCards.push(cid); bumpStat('cardsFound', 1); showCardReveal(cid, `A gift from ${l.from}`, true); }
+  else if (g.kind === 'cards') (g.ids || []).forEach(id => giveSpecialCard(id, words('mail.tableTricks.label', { name: l.from })));   // named cards, each shown in turn
   saveState(); sfx('claim'); buzz(HAP.found);
-  if (g.kind !== 'card') toast(`🎁 ${giftText(g)} - thanks, ${l.from}!`);
+  if (g.kind !== 'card' && g.kind !== 'cards') toast(`🎁 ${giftText(g)} - thanks, ${l.from}!`);
   renderScene();
 }
 // Keeps a gift from being thrown away unclaimed by mistake - claim it first, then delete is offered instead.

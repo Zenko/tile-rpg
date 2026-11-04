@@ -214,6 +214,26 @@ const CARD_POOL = [
   { id: 'festival-marshal', name: 'Festival Marshal', icon: '🎗️', rarity: 'super', cost: 4, power: 6, grit: 6, kw: ['rally', 'drain'], exclusive: 'milestone' },
   { id: 'set-spirit', name: 'Spirit of the Sets', icon: '🧩', rarity: 'super', cost: 4, power: 5, grit: 6, kw: ['shield', 'mend'], exclusive: 'milestone' },
   { id: 'prism-fox', name: 'Prism Fox', icon: '🦊', rarity: 'super', cost: 4, power: 7, grit: 5, kw: ['swift', 'bloom'], exclusive: 'milestone' },
+  /* Build 336 - cards that ask for a decision: where a card goes in your row (Nestle, Flank), the order you play in (Follow-up),
+     which card you keep (Glimpse), a face-down Snare that springs on the enemy's turn, and choose-one spells. Ordinary pack cards. */
+  { id: 'nest-keeper', name: 'Nest Keeper', icon: '🪺', rarity: 'common', cost: 2, power: 1, grit: 3, kw: ['nestle'] },
+  { id: 'patchwork-bear', name: 'Patchwork Bear', icon: '🧸', rarity: 'rare', cost: 3, power: 3, grit: 4, kw: ['nestle'] },
+  { id: 'harbor-buoy', name: 'Harbor Buoy', icon: '🛟', rarity: 'ultra', cost: 3, power: 2, grit: 5, kw: ['nestle', 'guard'] },
+  { id: 'pinwheel', name: 'Pinwheel', icon: '🎡', rarity: 'common', cost: 1, power: 1, grit: 2, kw: ['flank'] },
+  { id: 'field-cricket', name: 'Field Cricket', icon: '🦗', rarity: 'rare', cost: 3, power: 3, grit: 5, kw: ['flank'] },
+  { id: 'leaping-dolphin', name: 'Leaping Dolphin', icon: '🐬', rarity: 'ultra', cost: 4, power: 4, grit: 4, kw: ['flank', 'swift'] },
+  { id: 'domino-mouse', name: 'Domino Mouse', icon: '🐭', rarity: 'common', cost: 1, power: 1, grit: 2, kw: ['combo'] },
+  { id: 'relay-finch', name: 'Relay Finch', icon: '🐤', rarity: 'rare', cost: 2, power: 1, grit: 2, kw: ['combo', 'swift'] },
+  { id: 'coral-dancer', name: 'Coral Dancer', icon: '🫙', rarity: 'ultra', cost: 3, power: 4, grit: 4, kw: ['combo', 'drain'] },
+  { id: 'leaf-reader', name: 'Leaf Reader', icon: '🧿', rarity: 'rare', cost: 2, power: 2, grit: 4, kw: ['glimpse'] },
+  { id: 'shell-seer', name: 'Shell Seer', icon: '🦪', rarity: 'ultra', cost: 3, power: 4, grit: 5, kw: ['glimpse'] },
+  { id: 'peacock-oracle', name: 'Peacock Oracle', icon: '🦚', rarity: 'super', cost: 4, power: 4, grit: 5, kw: ['glimpse', 'swift'] },
+  { id: 'bramble-snare', name: 'Bramble Snare', icon: '🪤', rarity: 'rare', cost: 2, power: 0, grit: 0, kw: [], spell: 'bramble-snare' },
+  { id: 'hush-snare', name: 'Hush Snare', icon: '🕸️', rarity: 'common', cost: 1, power: 0, grit: 0, kw: [], spell: 'hush-snare' },
+  { id: 'pitfall', name: 'Pitfall', icon: '🪝', rarity: 'ultra', cost: 2, power: 0, grit: 0, kw: [], spell: 'pitfall' },
+  { id: 'keepsake', name: 'Keepsake', icon: '🎀', rarity: 'common', cost: 1, power: 0, grit: 0, kw: [], spell: 'keepsake' },
+  { id: 'crossroads', name: 'Crossroads', icon: '🪧', rarity: 'rare', cost: 1, power: 0, grit: 0, kw: [], spell: 'crossroads' },
+  { id: 'twin-moons', name: 'Twin Moons', icon: '🌗', rarity: 'ultra', cost: 2, power: 0, grit: 0, kw: [], spell: 'twin-moons' },
 ];
 /* Foe cards: unique cards that only opponents carry (neighbors, bosses, cellar floors). They are deliberately NOT in
    CARD_POOL - so they never show up in packs, the Index, deck codes or rewards - but defOf() knows them, so the battle
@@ -246,10 +266,10 @@ const FAMILIES = {
 };
 const CARD_FAMILY = (() => {
   const lists = {
-    grove: 'sprout blossom toadstool cherry-blossom-storm acorn firefly hollow-log foxglove hedgehog storm-lily aurora-stag bramble cactus-keeper bramble-king glowworm seedpod moss-hare dandelion oak-warden world-tree ensueno evergreen-sentry ladybug daydream-bloom gentle-briar waking-orchard portal-verdant hollow-king candle-wraith evergreen-sun myth-weaver crown-of-dreams',
-    stone: 'pebble flintstone geode crystal-spire moonstone mountain-heart rice-cake torii-gate stone-lantern old-kettle copper-kettle-spirit jade-turtle thundering-ram echo-cavern deep-wyrm stone-hen cliff-goat badger quarry-bear mossy-titan duermevela clay-jar door-cat sleepers-lantern last-door portal-hollow thread-spinner frozen-moment watcher-eye unbroken-champion anvil-spirit lampbearer archivist-owl hoard-keeper hearthkeeper gilded-marble festival-marshal',
-    tide: 'droplet bubble tide koi-ascending deep-current whirlpool lantern-fish glass-float river-otter void-koi sunken-leviathan wishing-well heron paper-boat hermit-crab puffer harbor-seal moon-jelly tide-caller kraken marea-lenta drift-ice warm-tea lotus-pool slow-snail slack-warden lullaby-pearl undertow-choir portal-tidemirror puddle-sprite drowned-bell anglers-dream starcaught-koi set-spirit',
-    wind: 'feather dove gale origami-crane paper-fan folding-screen temple-bell sky-whale moon-dragon lion-dancer morning-bugle dusk-bat village-banner silver-fox ember-fox rooks-ace mist-wraith honeybee market-sparrow kite-runner murmullo chime-wind dusk-moth parade-balloon drifting-cloud first-light whisper-courier rumour-wing hushed-chorus portal-galegate dicebound-serpent living-sketch rift-walker rift-cartographer endless-walker cartographers-compass tireless-courier prism-fox'
+    grove: 'sprout blossom toadstool cherry-blossom-storm acorn firefly hollow-log foxglove hedgehog storm-lily aurora-stag bramble cactus-keeper bramble-king glowworm seedpod moss-hare dandelion oak-warden world-tree ensueno evergreen-sentry ladybug daydream-bloom gentle-briar waking-orchard portal-verdant hollow-king candle-wraith evergreen-sun myth-weaver crown-of-dreams nest-keeper field-cricket leaf-reader',
+    stone: 'pebble flintstone geode crystal-spire moonstone mountain-heart rice-cake torii-gate stone-lantern old-kettle copper-kettle-spirit jade-turtle thundering-ram echo-cavern deep-wyrm stone-hen cliff-goat badger quarry-bear mossy-titan duermevela clay-jar door-cat sleepers-lantern last-door portal-hollow thread-spinner frozen-moment watcher-eye unbroken-champion anvil-spirit lampbearer archivist-owl hoard-keeper hearthkeeper gilded-marble festival-marshal patchwork-bear domino-mouse',
+    tide: 'droplet bubble tide koi-ascending deep-current whirlpool lantern-fish glass-float river-otter void-koi sunken-leviathan wishing-well heron paper-boat hermit-crab puffer harbor-seal moon-jelly tide-caller kraken marea-lenta drift-ice warm-tea lotus-pool slow-snail slack-warden lullaby-pearl undertow-choir portal-tidemirror puddle-sprite drowned-bell anglers-dream starcaught-koi set-spirit harbor-buoy leaping-dolphin coral-dancer shell-seer',
+    wind: 'feather dove gale origami-crane paper-fan folding-screen temple-bell sky-whale moon-dragon lion-dancer morning-bugle dusk-bat village-banner silver-fox ember-fox rooks-ace mist-wraith honeybee market-sparrow kite-runner murmullo chime-wind dusk-moth parade-balloon drifting-cloud first-light whisper-courier rumour-wing hushed-chorus portal-galegate dicebound-serpent living-sketch rift-walker rift-cartographer endless-walker cartographers-compass tireless-courier prism-fox pinwheel relay-finch peacock-oracle'
   };
   const m = {};
   Object.keys(lists).forEach(f => lists[f].split(' ').forEach(id => { m[id] = f; }));

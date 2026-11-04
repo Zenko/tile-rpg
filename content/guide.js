@@ -61,6 +61,12 @@ const TIPS = {
   townlife:   { icon: '🪑', title: 'Things to do around town', text: 'Props do things now: sit on benches, make a wish at wells, light lamps after dark, haggle, haul nets, water plants or busk for tips. Shake trees, skip stones, splash through puddles in the rain. Everything nudges the district\'s town mood - fill it up and the district dresses itself up for good.' },
   character:  { icon: '🧑', title: 'Your character', text: 'You and your companion stand on a backdrop you choose. Check your stats here, change how you look in Look, and see your bag, milestones and companion. Tap the 🎨 to jump to the backdrops, and tap a milestone with a 🏷️ title to wear it. Settings are behind your avatar at the top.' },
   fishing:    { icon: '🎣', title: 'Thought Fishing', text: 'Pick a bait that suits the fish you want, then cast and watch the shadow: its size hints at the catch. When it bites, tap to hook it, then hold the button to reel. Keep the marker in the green and ease off when the fish runs. Nothing is lost if it gets away. Prefer simpler? Turn on Easy reeling in Settings.' },
+  snares:     { icon: '🪤', title: 'Snares', text: `A Snare is a spell you set face down instead of casting. It waits on the corner of your deck (at most two) and springs by itself on your opponent's turn, when its moment comes. Theirs show as 🪤 on their deck: you can't see which one it is, so think about what you attack with first.` },
+  glimpse:    { icon: '🔭', title: 'Glimpse', text: 'A Glimpse card lets you look at the top three cards of your deck as it arrives. Tap the one you want in your hand; the other two go to the bottom of your deck.' },
+  chooseOne:  { icon: '🪧', title: 'Choose one', text: 'Some spells can do one of two things. Pick the half that fits the table right now; a half that needs a target then asks you to aim it.' },
+  placement:  { icon: '🪺', title: 'Where it lands', text: 'Where you drop a card in your row matters for some of them. 🪺 Nestle cards grow the cards on either side, so drop them between two friends; 🏹 Flank cards like the ends of the row. The marked slots show where the bonus is.' },
+  deckTracker: { icon: '🃏', title: 'Your deck', text: 'Tap your deck on the table at any time to see what is still in it. Tap theirs to see how many cards they have left, and how many Snares they have set.' },
+  testerTrade: { icon: '🔁', title: 'Trading with testers', text: `Offer one of your spare cards to another tester for one of theirs. Your card is set aside while they decide; if they say no, or you cancel, it comes back. Only spares can be traded, so your deck is never touched.` },
   inventory:  { icon: '🎒', title: 'Your inventory', text: 'Everything you\'re carrying, in one place: pantry ingredients, cooked dishes, seeds and spare decorations. Tap Plant or Place to use one straight from the list.' },
 };
 
@@ -114,6 +120,9 @@ const GUIDE = [
     { icon: '✨', name: `${GAME.player.one}’s Gift`, where: 'Keep-this-hand screen · Character → Me', how: 'A free, once-per-match power you pick before the match: Forage (draw 2), Soothe (heal), Sow (Seedlings), Spark Storm, Bulwark (Shields) and Tidal Hush. New ones unlock as you level up. Tap the glowing round button by your bar, then Use it.' },
     { icon: '🌦️', name: 'The world in battle', where: 'The line under the battle bar', how: 'Matches feel the world around them, for both sides: ☀️ clear skies give Bloom +1 power, ☁️ cloud gives Haze +1 health, 🌧️ rain makes Rest heal +1, ⛈️ storms give Flicker +1 power, 🌙 night makes Startle hit +1, and every district is home turf for its family (+1 health). Bring the right family to the right town.' },
     { icon: '🌿', name: 'Card families', where: 'Card info · each district favours one', how: `Cards belong to a family: 🪨 ${FAMILY_NAMES.stone} (${PLACES.square}), 🪶 ${FAMILY_NAMES.wind} (${PLACES.market}), 🌊 ${FAMILY_NAMES.tide} (${PLACES.harbor}) or 🌿 ${FAMILY_NAMES.grove} (${PLACES.garden}). Neighbors and bosses lean on their district's family, and 🤝 Kin cards grow when more of their family are on your board.` },
+    { icon: '🪤', name: 'Snares', where: 'Card info · the corner of each deck on the table', how: `A Snare is set face down instead of cast (at most two at a time) and springs by itself on your opponent's turn: 🪤 Bramble Snare hurts an attacker before it strikes, 🕸️ Hush Snare stops an attack on your Calm, 🪝 Pitfall catches a big card as it is played, 🎀 Keepsake answers when one of your cards falls. You can see that they have Snares set, never which ones.` },
+    { icon: '🪺', name: 'Placement, Follow-up and Glimpse', where: 'Card info', how: '🪺 Nestle grows the cards on either side of where you drop it. 🏹 Flank gains power at either end of your row. 🔗 Follow-up grows if you already played a card this turn, so play it second (it glows when ready). 🔭 Glimpse shows you the top three cards of your deck to keep one. 🪧 Choose-one spells ask which half you want.' },
+    { icon: '🃏', name: 'Reading the table', where: 'Tap a deck on the table · the 😊 button', how: 'Tap your deck to see what is left in it, theirs to see how many cards and Snares they have. Watch their hand: the card they are about to play lifts for a moment first. The 😊 button sends a little reaction; they sometimes answer.' },
     { icon: '🌰', name: 'New keywords', where: 'Card info', how: '🌰 Echo leaves an Afterthought when it falls. 😴 Lull stops the enemy\'s strongest card attacking next turn. 🤝 Kin grows with its family. 🐝 Sting hits the weakest enemy card as it arrives.' },
     { icon: '🪙', name: 'Who goes first', where: 'Before every match · Settings → Accessibility & battles', how: 'Call the coin (Sun or Moon) or roll a die against your opponent. The winner plays first; whoever goes second draws an extra card and gets +1 energy on their first two turns. Pick Coin, Dice, Mix or Skip in Settings.' },
     { icon: '⚔️', name: 'Friendly matches', where: 'Tap a neighbor → Friendly match', how: 'Drag a card from your hand onto the table to play it (or tap it to read it, tap again to play). To attack, drag a ready card onto an enemy card or up past their cards, or tap it and use the Attack Calm button. Win a card every time. Tap "How battles work" in Cards → Deck for the rules.' },
@@ -164,7 +173,7 @@ const GUIDE = [
   ] },
 ];
 // Items added in the v1.81-1.89 releases wear a NEW tag until they have been opened once (state.progress.guideSeen).
-const GUIDE_NEW = ['Trading with neighbours', 'Special cards', 'Portal stones', 'Sketchbook worlds', 'Time-stop worlds', 'The Daily Rift', 'Rift Map', 'Portals', 'The Dream Gazette', 'Gossip', 'Weather moments', 'Town goal', 'Travelling visitors', 'Your glow and sparkles', `${CAST.guide.name} points the way`, 'Who goes first', 'Card families', 'New keywords', 'The world in battle', `${GAME.player.one}’s Gift`, 'Draft Run', 'Lingering duels', `${GAME.currency.many} and soft limits`];
+const GUIDE_NEW = ['Snares', 'Placement, Follow-up and Glimpse', 'Reading the table', 'Trading with testers', 'Trading with neighbours', 'Special cards', 'Portal stones', 'Sketchbook worlds', 'Time-stop worlds', 'The Daily Rift', 'Rift Map', 'Portals', 'The Dream Gazette', 'Gossip', 'Weather moments', 'Town goal', 'Travelling visitors', 'Your glow and sparkles', `${CAST.guide.name} points the way`, 'Who goes first', 'Card families', 'New keywords', 'The world in battle', `${GAME.player.one}’s Gift`, 'Draft Run', 'Lingering duels', `${GAME.currency.many} and soft limits`];
 
 // ---- used by js/quests.js ----
 // The "wander" line: one quest at every 500-step rung up to 10,000, escalating rewards for the grind -
@@ -219,6 +228,7 @@ const QUEST_POOL = [
   { id: 'bake1',    icon: '🍞', name: 'Bake a loaf at the bakery',    goal: 1,  stat: 'breadBaked',      reward: 'rare' },
   { id: 'share1',   icon: '🥖', name: 'Share a loaf with a neighbor', goal: 1,  stat: 'breadShared',     reward: 'rare' },
   { id: 'spell3',   icon: '✨', name: 'Cast 3 spells in battle',      goal: 3,  stat: 'spellsCast',      reward: 'rare' },
+  { id: 'followup2', icon: '🔗', name: 'Play 2 cards as a Follow-up',   goal: 2,  stat: 'followUps',       reward: 'rare' },
   { id: 'plant2',   icon: '🌱', name: `Plant 2 seeds in ${PLACES.square}`, goal: 2,  stat: 'seedsPlanted',    reward: 'common' },
   { id: 'harvest1', icon: '🌻', name: 'Harvest something you grew',   goal: 1,  stat: 'cropsHarvested',  reward: 'rare' },
   { id: 'rival1',   icon: '🎭', name: `Beat your rival, ${CAST.rival.name}`,        goal: 1,  stat: 'rivalWins',       reward: 'ultra' },
@@ -274,6 +284,8 @@ const WEEKLY_QUEST_POOL = [
   { id: 'w_decor3',   icon: '🏺', name: 'Place 3 decorations', goal: 3, stat: 'decorationsPlaced', reward: 'super' },
   { id: 'w_share5',   icon: '🥖', name: 'Share 5 loaves with neighbors', goal: 5, stat: 'breadShared',  reward: 'super' },
   { id: 'w_spell20',  icon: '📜', name: 'Cast 20 spells in battle',  goal: 20, stat: 'spellsCast',      reward: 'super' },
+  { id: 'w_snare5',   icon: '🪤', name: 'Catch 5 cards with your Snares', goal: 5, stat: 'snaresSprung',  reward: 'super' },
+  { id: 'w_glimpse6', icon: '🔭', name: 'Glimpse 6 times in battle',  goal: 6,  stat: 'glimpses',        reward: 'super' },
   { id: 'w_harvest8', icon: '🧺', name: 'Harvest 8 crops',           goal: 8,  stat: 'cropsHarvested',  reward: 'super' },
   { id: 'w_rival3',   icon: '🎭', name: `Beat ${CAST.rival.name} 3 times`,         goal: 3,  stat: 'rivalWins',       reward: 'mythic' },
   { id: 'w_cup',      icon: '🏆', name: `Win this week's ${GAME.player.many}’ Cup`, goal: 1, stat: 'cupTrophies',     reward: 'mythic' },
@@ -423,6 +435,10 @@ const ACHIEVEMENTS = [
   { id: 'bread-10',    icon: '🥖', name: '10 loaves shared', test: () => (state.progress.totals.breadShared || 0) >= 10 },
   { id: 'first-spell', icon: '✨', name: 'First spell',      test: () => (state.progress.totals.spellsCast || 0) >= 1 },
   { id: 'spells-50',   icon: '📜', name: '50 spells cast',   test: () => (state.progress.totals.spellsCast || 0) >= 50 },
+  { id: 'snare-1',     icon: '🪤', name: 'First Snare sprung', test: () => (state.progress.totals.snaresSprung || 0) >= 1 },
+  { id: 'snare-25',    icon: '🕸️', name: '25 Snares sprung', test: () => (state.progress.totals.snaresSprung || 0) >= 25 },
+  { id: 'glimpse-20',  icon: '🔭', name: 'Glimpsed 20 times', test: () => (state.progress.totals.glimpses || 0) >= 20 },
+  { id: 'trade-tester-1', icon: '🔁', name: 'Traded a card with another tester', test: () => (state.progress.totals.testerTrades || 0) >= 1 },
   { id: 'sleeved',     icon: '🎴', name: 'Sharp sleeves',    test: () => ((state.character.unlockedSleeves || []).length > 1) },
   { id: 'cellar-5',    icon: '🕳️', name: 'Cellar floor 5',   test: () => (state.progress.cellarBest || 0) >= 5 },
   { id: 'cellar-10',   icon: '🦇', name: 'Cellar floor 10',  test: () => (state.progress.cellarBest || 0) >= 10 },

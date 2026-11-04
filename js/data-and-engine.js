@@ -246,10 +246,13 @@ function cardFaceHtml(def) {
    - Cards you play stay on the board and can attack from the following turn (Flicker: the same turn), once per turn.
    - An attack targets an enemy card, or the enemy Calm (at most 4 damage to Calm per attack).
    - Watch: while an enemy has a Watch card, attacks must be aimed at a Watch.
-   - No retaliation: a card that survives a hit does not hit back.                                                       */
+   - No retaliation: a card that survives a hit does not hit back.
+   - Snares (build 336): a Snare spell is set face down (at most RULES.snares) and springs on the enemy's turn when its moment comes.
+   - Where a card lands in your row matters for Nestle (its neighbours) and Flank (the ends); the slot is part of the play action.
+   - Glimpse leaves a choice open (G.pending) that the 'pick' action settles; choose-one spells carry their `mode` in the play action. */
 const BattleEngine = (function () {
   'use strict';
-  const RULES = { spirit: 20, board: 4, hand: 3, ecap: 5, secondBonus: 1, secondBonusTurns: 2, faceCap: 4, mend: 2, drain: 2, rally: 2, bloom: 1, thorns: 1, echo: 2, handMax: 7, turnCap: 60, deck: 12, copies: 2 };
+  const RULES = { spirit: 20, board: 4, hand: 3, ecap: 5, secondBonus: 1, secondBonusTurns: 2, faceCap: 4, mend: 2, drain: 2, rally: 2, bloom: 1, thorns: 1, echo: 2, handMax: 7, turnCap: 60, deck: 12, copies: 2, snares: 2, glimpse: 3, nestle: 1, flank: 2, combo: 1 };
 
   const KEYWORDS = {
     guard:  { icon: '🛡️', name: 'Watch',  text: 'Enemies must attack Watch cards first.' },
@@ -264,7 +267,12 @@ const BattleEngine = (function () {
     seed:   { icon: '🌰', name: 'Echo',   text: 'When it falls, a 1/2 Afterthought grows in its place.' },
     lull:   { icon: '😴', name: 'Lull',   text: "When played, the enemy's strongest card can't attack on its next turn." },
     kin:    { icon: '🤝', name: 'Kin',    text: 'When played, gains +1/+1 for each other card of its family on your board.' },
-    sting:  { icon: '🐝', name: 'Sting',  text: 'When played, deals 1 damage to the enemy card with the least health.' }
+    sting:  { icon: '🐝', name: 'Sting',  text: 'When played, deals 1 damage to the enemy card with the least health.' },
+    // Build 336: cards that ask for a decision - where it goes in your row, what order you play in, which card you keep.
+    nestle:  { icon: '🪺', name: 'Nestle',    text: words('kw.nestle') },
+    flank:   { icon: '🏹', name: 'Flank',     text: words('kw.flank') },
+    combo:   { icon: '🔗', name: 'Follow-up', text: words('kw.combo') },
+    glimpse: { icon: '🔭', name: 'Glimpse',   text: words('kw.glimpse') }
   };
 
   /* ---------- Boss twists ----------
@@ -594,7 +602,19 @@ const BattleEngine = (function () {
     'hold-fast':       { family: 'stone', value: 7, text: 'Each Stone card on your board gains +3 health and +1 power.' },
     'tidepool':        { value: 7, text: 'Draw a card, and restore 1 Calm for each Tide card on your board.' },
     'gathering-storm': { family: 'wind', value: 9, text: 'Deal 1 damage to every enemy card for each Wind card on your board (at most 2).' },
-    'last-light':      { target: 'enemy', value: 8, text: 'Deal 4 damage to an enemy card. If it falls, draw a card.' }
+    'last-light':      { target: 'enemy', value: 8, text: 'Deal 4 damage to an enemy card. If it falls, draw a card.' },
+    /* Snares (build 336): cast face down, they wait (at most RULES.snares at a time) and spring once, on the enemy's turn:
+         attack  an enemy card attacks          face  an enemy card attacks your Calm
+         play    the enemy plays a card costing 3 or more        fall  one of your cards falls          */
+    'bramble-snare': { snare: 'attack', value: 6, text: words('spell.bramble-snare') },
+    'hush-snare':    { snare: 'face',   value: 5, text: words('spell.hush-snare') },
+    'pitfall':       { snare: 'play',   value: 6, text: words('spell.pitfall') },
+    'keepsake':      { snare: 'fall',   value: 5, text: words('spell.keepsake') },
+    // Choose one (build 336): `modes` replaces target/needs; the play action names the mode (AI: the best by spellPlan).
+    'crossroads':    { value: 7, text: words('spell.crossroads'),
+                       modes: [{ target: 'enemy', icon: '⚡', text: words('spell.crossroads.0') }, { icon: '🍵', text: words('spell.crossroads.1') }] },
+    'twin-moons':    { value: 8, text: words('spell.twin-moons'),
+                       modes: [{ needs: 'own', icon: '🌔', text: words('spell.twin-moons.0') }, { icon: '🌘', text: words('spell.twin-moons.1') }] }
   };
 
   /* ---------- Card definitions, including crafted variants ----------
@@ -678,7 +698,7 @@ const BattleEngine = (function () {
     const G = { rng, aiRng: seeded ? makeRng(String(opts.seed) + ':ai') : null, turn: 0, first, active: first, over: false, winner: null, why: null, events: [], aiMemo: null, mods, twist: opts.twist || null, p: [] };
     const mk = (deck, i) => shuffled(deck, rng).map(id => makeCard(id, uid++, modsFor(G, i)));
     const sp = opts.spirit || [RULES.spirit, RULES.spirit];
-    G.p = [0, 1].map(i => ({ idx: i, spirit: sp[i], maxSpirit: sp[i], deck: mk(i === 0 ? deckA : deckB, i), hand: [], board: [], turns: 0, energy: 0, maxEnergy: 0 }));
+    G.p = [0, 1].map(i => ({ idx: i, spirit: sp[i], maxSpirit: sp[i], deck: mk(i === 0 ? deckA : deckB, i), hand: [], board: [], snares: [], played: 0, turns: 0, energy: 0, maxEnergy: 0 }));
     G.uid = uid;                                   // later cards (Afterthoughts) keep numbering from here
     (opts.knack || []).forEach((id, i) => { if (id && KNACKS[id]) G.p[i].knack = id; });
     (opts.fate || []).forEach((id, i) => { if (id && FATES[id]) G.p[i].fate = id; });
@@ -703,7 +723,7 @@ const BattleEngine = (function () {
 
   function startTurn(G) {
     const me = G.p[G.active];
-    me.turns++; me.tideDrew = false;
+    me.turns++; me.tideDrew = false; me.played = 0;
     const bonus = (G.active !== (G.first || 0) && me.turns <= RULES.secondBonusTurns) ? RULES.secondBonus : 0;
     me.maxEnergy = Math.min(me.turns + bonus, RULES.ecap);
     me.energy = me.maxEnergy;
@@ -733,9 +753,12 @@ const BattleEngine = (function () {
     if (G.over || G.active !== who) return { ok: false, why: 'Not your turn' };
     const me = G.p[who], c = me.hand.find(x => x.uid === uid);
     if (!c) return { ok: false, why: 'Not in hand' };
+    if (G.pending) return { ok: false, why: words('table.chooseFirst') };
     if (c.cost > me.energy) return { ok: false, why: 'Needs ' + c.cost + ' energy' };
     if (c.spell) {
       const fx = SPELLS[c.spell];
+      if (fx.snare) return snaresOf(me).length >= RULES.snares ? { ok: false, why: `You already have ${RULES.snares} Snares set` } : { ok: true };
+      if (fx.modes) return fx.modes.some((m, i) => modeOk(G, who, fx, i)) ? { ok: true } : { ok: false, why: words('table.noAim') };
       if (fx.target === 'enemy' && !G.p[1 - who].board.length) return { ok: false, why: 'No enemy card to aim at' };
       if (fx.needs === 'own' && !me.board.length) return { ok: false, why: 'You need a card on the board first' };
       if (fx.needs === 'room' && me.board.length >= RULES.board) return { ok: false, why: 'Your board is full' };
@@ -747,16 +770,41 @@ const BattleEngine = (function () {
     return { ok: true };
   }
   function spellNeedsTarget(c) { return !!(c && c.spell && SPELLS[c.spell].target === 'enemy'); }
+  // Choose-one spells: is mode i castable right now, and does it need an enemy card to aim at?
+  function modeOk(G, who, fx, i) {
+    const m = fx.modes && fx.modes[i]; if (!m) return false;
+    if (m.target === 'enemy' && !G.p[1 - who].board.length) return false;
+    if (m.needs === 'own' && !G.p[who].board.length) return false;
+    return true;
+  }
+  function modeNeedsTarget(c, mode) { const fx = c && c.spell && SPELLS[c.spell]; return !!(fx && fx.modes && fx.modes[mode] && fx.modes[mode].target === 'enemy'); }
+  function snaresOf(pl) { return pl.snares || (pl.snares = []); }   // a puzzle snapshot from before build 336 has none
+  /* Where a creature would land and what its spot gives it: o.slot is the board index it is dropped on (clamped; none = the end).
+     Used by playCard, the AI and the battle screen's drop highlights, so all three agree. */
+  function slotIndex(G, who, slot) { const n = G.p[who].board.length; return typeof slot === 'number' && slot >= 0 ? Math.min(slot, n) : n; }
+  function slotBonus(G, who, c, slot) {
+    const me = G.p[who], i = slotIndex(G, who, slot), n = me.board.length + 1, out = { nestle: 0, flank: false };
+    if (c.kw.includes('nestle')) out.nestle = (i > 0 ? 1 : 0) + (i < n - 1 ? 1 : 0);
+    if (c.kw.includes('flank')) out.flank = n >= 2 && (i === 0 || i === n - 1);
+    return out;
+  }
 
-  function playCard(G, who, uid, target) {
+  // o = { slot, mode }: where a creature lands in your row, which half of a choose-one spell is cast.
+  function playCard(G, who, uid, target, o) {
+    o = o || {};
     const chk = canPlay(G, who, uid); if (!chk.ok) return chk;
     const me = G.p[who], op = G.p[1 - who];
     const c = me.hand.find(x => x.uid === uid);
-    if (c.spell) return castSpell(G, who, c, target);
+    const followUp = (me.played || 0) > 0;
+    if (c.spell) { const r = castSpell(G, who, c, target, o.mode); if (r.ok) me.played = (me.played || 0) + 1; return r; }
+    const at = slotIndex(G, who, o.slot), spot = slotBonus(G, who, c, o.slot);
     me.hand.splice(me.hand.indexOf(c), 1);
-    me.energy -= c.cost; me.board.push(c);
-    emit(G, 'play', { who, card: c });
+    me.energy -= c.cost; me.board.splice(at, 0, c); me.played = (me.played || 0) + 1;
+    emit(G, 'play', { who, card: c, slot: at });
     passiveOnPlay(G, who, c);
+    if (spot.nestle) [me.board[at - 1], me.board[at + 1]].forEach(x => { if (x) { x.power += RULES.nestle; x.grit += RULES.nestle; x.hp += RULES.nestle; emit(G, 'buff', { who, uid: x.uid, amt: RULES.nestle, nestle: true }); } });
+    if (spot.flank) { c.power += RULES.flank; emit(G, 'buff', { who, uid: c.uid, amt: RULES.flank, flank: true }); }
+    if (followUp && c.kw.includes('combo')) { c.power += RULES.combo; c.grit += RULES.combo; c.hp += RULES.combo; emit(G, 'buff', { who, uid: c.uid, amt: RULES.combo, combo: true }); }
     if (c.kw.includes('echo')) { const dmg = RULES.echo + ((G.mods && G.mods.echoBonus) || 0); op.spirit -= dmg; emit(G, 'spirit', { who: 1 - who, delta: -dmg, source: c, echo: true }); }
     if (c.kw.includes('rally')) me.board.forEach(x => { if (x !== c) { x.power += RULES.rally + rallyBonus(G); emit(G, 'buff', { who, uid: x.uid, amt: RULES.rally + rallyBonus(G), rally: true }); } });
     if (c.kw.includes('kin')) {
@@ -768,8 +816,49 @@ const BattleEngine = (function () {
       zap(G, 1 - who, t, 1, false, 'sting');
     }
     if (c.kw.includes('lull') && op.board.length) lullCard(G, 1 - who, op.board.slice().sort((a, b) => b.power - a.power || b.hp - a.hp)[0]);
+    if (c.kw.includes('glimpse')) openGlimpse(G, who);
+    if (c.cost >= 3 && me.board.includes(c)) { const s = spring(G, 1 - who, 'play'); if (s) zap(G, who, c, 3, false, 'snare'); }
     checkEnd(G);
     return { ok: true };
+  }
+
+  /* ---------- Snares (build 336) ----------
+     spring(G, side, kind) is called at each moment a Snare can catch: `side` owns the Snares, and only the enemy's turn counts
+     (a Snare never catches its owner's own play). The oldest matching Snare goes, is revealed (event 'snare'), and the caller applies its effect. */
+  function spring(G, side, kind) {
+    if (G.over || G.active === side) return null;
+    const list = snaresOf(G.p[side]), i = list.findIndex(s => SPELLS[s.spell].snare === kind);
+    if (i < 0) return null;
+    const s = list.splice(i, 1)[0];
+    emit(G, 'snare', { who: side, card: s, kind });
+    return s;
+  }
+  /* ---------- Glimpse (build 336) ----------
+     The top cards of the deck wait in G.pending until the 'pick' action takes one; the rest go under the deck in the order shown.
+     Nothing else can happen while it is open (canPlay / attack refuse, endTurn settles it with the AI's choice). */
+  function openGlimpse(G, who) {
+    const pl = G.p[who], n = Math.min(RULES.glimpse, pl.deck.length);
+    if (!n) return;
+    const options = pl.deck.splice(pl.deck.length - n, n).reverse();   // the top card first
+    if (n === 1) { pl.deck.push(options[0]); draw(G, pl); return; }
+    G.pending = { who, kind: 'glimpse', options };
+    emit(G, 'glimpse', { who, n });
+  }
+  function pickCard(G, who, index) {
+    const P = G.pending;
+    if (!P || P.who !== who) return { ok: false, why: 'Nothing to choose' };
+    const i = Math.max(0, Math.min(P.options.length - 1, index | 0)), pl = G.p[who], take = P.options[i];
+    G.pending = null;
+    P.options.forEach(c => { if (c !== take) pl.deck.unshift(c); });
+    pl.deck.push(take); draw(G, pl);
+    emit(G, 'picked', { who, card: take, n: P.options.length });
+    return { ok: true };
+  }
+  function aiPickIndex(G, who) {
+    const P = G.pending, me = G.p[who], room = me.maxEnergy + 1;
+    const score = c => (c.spell ? SPELLS[c.spell].value * 0.8 : valueOf(c)) - Math.max(0, c.cost - room) * 2.5 + (me.hand.some(h => !h.spell) ? 0 : c.spell ? -3 : 1);
+    let best = 0; P.options.forEach((c, i) => { if (score(c) > score(P.options[best])) best = i; });
+    return best;
   }
 
   /* ---------- casting ---------- */
@@ -789,6 +878,7 @@ const BattleEngine = (function () {
     if (pl.board.includes(t)) pl.board.splice(pl.board.indexOf(t), 1);
     emit(G, 'faint', { who: side, card: t });
     if (t.kw.includes('seed')) summon(G, side, 'seedling');
+    if (spring(G, side, 'fall')) { summon(G, side, 'seedling'); draw(G, pl); }
   }
   function summon(G, side, id) {
     const pl = G.p[side];
@@ -805,18 +895,36 @@ const BattleEngine = (function () {
   function lullCard(G, side, t) { if (!t) return; t.lull = 1; emit(G, 'lull', { who: side, uid: t.uid }); }
   function spellDamageSpirit(G, side, n, card) { G.p[side].spirit -= n; emit(G, 'spirit', { who: side, delta: -n, source: card, spell: true }); }
 
-  function castSpell(G, who, c, target) {
+  function castSpell(G, who, c, target, mode) {
     const me = G.p[who], op = G.p[1 - who], fx = SPELLS[c.spell];
+    if (fx.snare) {                                   // set face down: the enemy sees only that a Snare is waiting
+      me.hand.splice(me.hand.indexOf(c), 1); me.energy -= c.cost;
+      snaresOf(me).push(c);
+      emit(G, 'snareset', { who, uid: c.uid, card: c });          // the screen never shows `card` for the enemy's side
+      return { ok: true };
+    }
     let t = null;
-    if (fx.target === 'enemy') {
+    if (fx.modes) {                                   // a choose-one spell: an unusable or missing mode falls back to the best one
+      if (!(mode === 0 || mode === 1) || !modeOk(G, who, fx, mode)) mode = spellPlan(G, who, c).mode;
+      if (!modeOk(G, who, fx, mode)) return { ok: false, why: words('table.noAim') };
+    }
+    if (fx.target === 'enemy' || modeNeedsTarget(c, mode)) {
       t = target && target.kind === 'card' ? op.board.find(x => x.uid === target.uid) : null;
       if (!t) t = bestSpellTarget(G, who, c);          // no (or a stale) target: aim for the caster, as the AI would
       if (!t) return { ok: false, why: 'No enemy card to aim at' };
     }
     me.hand.splice(me.hand.indexOf(c), 1);
     me.energy -= c.cost;
-    emit(G, 'spell', { who, card: c, target: t ? { kind: 'card', uid: t.uid } : null });
+    emit(G, 'spell', { who, card: c, target: t ? { kind: 'card', uid: t.uid } : null, mode: fx.modes ? mode : undefined });
     switch (c.spell) {
+      case 'crossroads':
+        if (mode === 0) zap(G, 1 - who, t, 3);
+        else { draw(G, me); const heal = Math.min(3, me.maxSpirit - me.spirit); if (heal > 0) { me.spirit += heal; emit(G, 'spirit', { who, delta: heal, source: c }); } }
+        break;
+      case 'twin-moons':
+        if (mode === 0) me.board.forEach(x => { x.power++; x.grit++; x.hp++; emit(G, 'buff', { who, uid: x.uid, amt: 1, moons: true }); });
+        else { op.board.slice().forEach(x => zap(G, 1 - who, x, 1)); draw(G, me); }
+        break;
       case 'spark': zap(G, 1 - who, t, 2); break;
       case 'rain-shower': {
         const heal = Math.min(4, me.maxSpirit - me.spirit);
@@ -872,6 +980,23 @@ const BattleEngine = (function () {
     const me = G.p[who], op = G.p[1 - who];
     const killable = dmg => op.board.filter(x => !x.shield && x.hp <= dmg);
     const bestBy = list => list.slice().sort((a, b) => valueOf(b) - valueOf(a))[0] || null;
+    const fx = SPELLS[c.spell];
+    if (fx && fx.snare) {                            // a Snare is worth setting when a slot is free and the enemy is likely to walk into it
+      if (snaresOf(me).length >= RULES.snares) return { score: 0 };
+      const threat = op.board.reduce((s, x) => s + x.power, 0), dup = snaresOf(me).some(s => s.spell === c.spell) ? 0.6 : 0;
+      const sc = { attack: 1.8 + op.board.length * 0.5, face: 1.4 + Math.min(3, threat) * 0.4, play: 1.6 + (op.hand.length >= 2 ? 0.6 : 0), fall: me.board.length ? 1.6 + me.board.length * 0.3 : 0.9 }[fx.snare];
+      return { score: sc - dup };
+    }
+    if (fx && fx.modes) {                            // choose-one: plan each castable half and keep the better
+      const plans = fx.modes.map((m, i) => {
+        if (!modeOk(G, who, fx, i)) return { score: 0, mode: i };
+        if (c.spell === 'crossroads' && i === 0) { const k = bestBy(killable(3)); if (k) return { score: 2.4 + valueOf(k) / 3, target: k, mode: 0 }; const t = bestBy(op.board.filter(x => !x.shield)); return { score: t ? 1.3 : 0.2, target: t || op.board[0], mode: 0 }; }
+        if (c.spell === 'crossroads') { const heal = Math.min(3, me.maxSpirit - me.spirit); return { score: (me.deck.length ? 1.4 : 0) + heal * 0.5, mode: 1 }; }
+        if (i === 0) return { score: me.board.length * 1.5, mode: 0 };
+        return { score: (killable(1).length * 2.6 + op.board.length * 0.4) / 1.4 + (me.deck.length ? 1 : 0), mode: 1 };
+      });
+      return plans.slice().sort((a, b) => b.score - a.score)[0];
+    }
     switch (c.spell) {
       case 'spark': {
         const k = bestBy(killable(2)); if (k) return { score: 2 + valueOf(k) / 3, target: k };
@@ -920,6 +1045,7 @@ const BattleEngine = (function () {
 
   function attack(G, who, attackerUid, target) {
     if (G.over || G.active !== who) return { ok: false, why: 'Not your turn' };
+    if (G.pending) return { ok: false, why: words('table.chooseFirst') };
     const me = G.p[who], op = G.p[1 - who];
     const a = me.board.find(c => c.uid === attackerUid);
     if (!a) return { ok: false, why: 'No such card' };
@@ -930,8 +1056,11 @@ const BattleEngine = (function () {
     if (!legal.some(t => t.kind === target.kind && (t.kind === 'spirit' || t.uid === target.uid)))
       return { ok: false, why: guards(op).length ? 'A Watch must be attacked first' : 'Invalid target' };
 
-    if (a.kw.includes('bloom')) { a.power += RULES.bloom; emit(G, 'grow', { card: a }); }
     a.attacks++;
+    // Snares on the defending side spring before the blow lands: Hush stops an attack on the Calm, Bramble hurts the attacker first.
+    if (target.kind === 'spirit' && spring(G, 1 - who, 'face')) { lullCard(G, who, a); emit(G, 'stopped', { who, uid: a.uid }); checkEnd(G); return { ok: true }; }
+    if (spring(G, 1 - who, 'attack')) { zap(G, who, a, 3, false, 'snare'); if (!me.board.includes(a)) { checkEnd(G); return { ok: true }; } }
+    if (a.kw.includes('bloom')) { a.power += RULES.bloom; emit(G, 'grow', { card: a }); }
     if (target.kind === 'spirit') {
       const dmg = Math.min(a.power, RULES.faceCap);
       op.spirit -= dmg;
@@ -954,6 +1083,7 @@ const BattleEngine = (function () {
 
   function endTurn(G, who) {
     if (G.over || G.active !== who) return { ok: false };
+    if (G.pending && G.pending.who === who) pickCard(G, who, aiPickIndex(G, who));   // a Glimpse left open is settled, never lost
     const me = G.p[who];
     me.board.forEach(c => { if (c.kw.includes('mend') && me.spirit < me.maxSpirit) { const heal = RULES.mend + ((G.mods && G.mods.mendBonus) || 0); me.spirit = Math.min(me.maxSpirit, me.spirit + heal); emit(G, 'spirit', { who, delta: heal, source: c }); } });
     if (G.twist && G.twist.kind === 'roots' && G.twist.side === who && me.spirit < me.maxSpirit) {
@@ -1019,6 +1149,7 @@ const BattleEngine = (function () {
     const style = (G.aiStyles && AI_STYLES[G.aiStyles[who]]) ? G.aiStyles[who] : null;
     if (!G.aiMemo || G.aiMemo.turn !== G.turn) G.aiMemo = { turn: G.turn, stopPlaying: false };
     const memo = G.aiMemo;
+    if (G.pending && G.pending.who === who) return { type: 'pick', index: aiPickIndex(G, who) };   // a Glimpse waits on its choice before anything else
 
     if (!memo.stopPlaying) {
       // Spells are only considered when they would actually do something right now.
@@ -1037,6 +1168,9 @@ const BattleEngine = (function () {
           if (threat > mine + 2 && (c.kw.includes('guard') || c.kw.includes('shield'))) s += 1.5;
           if (op.spirit <= 8 && (c.kw.includes('swift') || c.kw.includes('echo'))) s += 2;
           if (me.spirit <= 8 && c.kw.includes('mend')) s += 1.5;
+          if (c.kw.includes('combo')) s += me.played ? 1 : -1.5;                 // a Follow-up card waits for something to follow
+          if (c.kw.includes('nestle')) s += Math.min(2, me.board.length) * 0.6;   // better with neighbours to tuck in
+          if (c.kw.includes('glimpse') && me.deck.length >= 2) s += 0.6;
           if (style === 'aggressive') s += c.power * 0.2 + (c.kw.includes('swift') || c.kw.includes('echo') || c.kw.includes('bloom') ? 1 : 0) - (c.kw.includes('guard') ? 0.8 : 0);
           else if (style === 'defensive') s += (c.kw.includes('guard') || c.kw.includes('shield') || c.kw.includes('mend') || c.kw.includes('thorns') ? 1.5 : 0) - c.power * 0.15;
           else if (style === 'greedy') s += c.cost * 0.45;
@@ -1046,12 +1180,17 @@ const BattleEngine = (function () {
         if (rng() < r * 0.4) memo.stopPlaying = true;          // a gentle opponent sometimes just holds its cards
         else {
           const plan = pick.spell ? plans.get(pick.uid) : null;
-          return { type: 'play', uid: pick.uid, target: plan && plan.target ? { kind: 'card', uid: plan.target.uid } : undefined };
+          const act = { type: 'play', uid: pick.uid, target: plan && plan.target ? { kind: 'card', uid: plan.target.uid } : undefined };
+          if (plan && plan.mode != null) act.mode = plan.mode;
+          if (!pick.spell && (pick.kw.includes('nestle') || pick.kw.includes('flank'))) act.slot = aiSlot(G, who, pick);
+          return act;
         }
       }
     }
 
-    for (const a of me.board) {
+    // With a Snare waiting on the other side, a careful player sends the cheapest attacker in first to spring it.
+    const order = snaresOf(op).length && level === 'smart' ? me.board.slice().sort((x, y) => valueOf(x) - valueOf(y)) : me.board;
+    for (const a of order) {
       const targets = legalTargets(G, who, a.uid);
       if (!targets.length) continue;
       let choice;
@@ -1074,7 +1213,20 @@ const BattleEngine = (function () {
     return { type: 'end' };
   }
 
-  function applyAction(G, who, a) { return a.type === 'play' ? playCard(G, who, a.uid, a.target) : a.type === 'attack' ? attack(G, who, a.uid, a.target) : { ok: true }; }
+  // Where the AI puts a Nestle or Flank card: the spot that gives the most (Nestle: beside the strongest neighbours).
+  function aiSlot(G, who, c) {
+    const me = G.p[who]; let best = me.board.length, bestV = -1;
+    for (let i = 0; i <= me.board.length; i++) {
+      const b = slotBonus(G, who, c, i);
+      const v = (b.flank ? 3 : 0) + (b.nestle ? [me.board[i - 1], me.board[i]].reduce((s, x) => s + (x ? 1 + valueOf(x) * 0.05 : 0), 0) : 0);
+      if (v > bestV) { bestV = v; best = i; }
+    }
+    return best;
+  }
+  function applyAction(G, who, a) {
+    if (a.type === 'pick') return pickCard(G, who, a.index);
+    return a.type === 'play' ? playCard(G, who, a.uid, a.target, { slot: a.slot, mode: a.mode }) : a.type === 'attack' ? attack(G, who, a.uid, a.target) : { ok: true };
+  }
 
   /* Whole AI turn at once: used by tests and simulations. The UI uses aiNextAction() step by step. */
   function aiTurn(G, who, level) {
@@ -1131,8 +1283,8 @@ const BattleEngine = (function () {
   /* ---------- Seeds, match records and replay (no DOM, no Math.random: runs unchanged in Node) ----------
      makeRng(seed) is a small seeded generator (mulberry32; a string seed is hashed first), so the same seed always gives the same
      shuffles. A match is fully described by a record { seed, decks: [A, B], opts, actions }, where an action is one of
-       { type: 'start' } (once, first) | { type: 'mulligan', who } | { type: 'play', who, uid, target } |
-       { type: 'attack', who, uid, target } | { type: 'knack', who } | { type: 'fate', who } | { type: 'cheer', who } | { type: 'end', who }.
+       { type: 'start' } (once, first) | { type: 'mulligan', who } | { type: 'play', who, uid, target, slot?, mode? } |
+       { type: 'attack', who, uid, target } | { type: 'pick', who, index } (a Glimpse choice) | { type: 'knack', who } | { type: 'fate', who } | { type: 'cheer', who } | { type: 'end', who }.
      replay(record) rebuilds the game from the seed and re-applies the actions, so a server can referee a match by checking the
      moves it receives against the same rules the client runs, and a finished match can be replayed move by move.
      simulate() plays a whole AI-vs-AI match and returns its record. Keep every random draw in the rules on G.rng and every AI
@@ -1151,7 +1303,7 @@ const BattleEngine = (function () {
     switch (a.type) {
       case 'start': startTurn(G); return { ok: true };
       case 'mulligan': mulligan(G, a.who); return { ok: true };
-      case 'play': case 'attack': return applyAction(G, a.who, a);
+      case 'play': case 'attack': case 'pick': return applyAction(G, a.who, a);
       case 'knack': return useKnack(G, a.who);
       case 'fate': return useFate(G, a.who);
       case 'cheer': return useCheer(G, a.who);
@@ -1182,7 +1334,7 @@ const BattleEngine = (function () {
     return { G, record: rec };
   }
 
-  return { makeRng, step, replay, simulate, AI_STYLES, RULES, KEYWORDS, SPELLS, TWISTS, KNACKS, knackReady, setKnack, useKnack, FATES, fateReady, setFate, useFate, CHEERS, cheerReady, cheerWorthIt, useCheer, spreadBonus, layoutSpread, SPREAD_RULES, PASSIVES, MINORS, PASSIVE_RULES, MINOR_RULES, MAX_KEYWORDS, defOf, baseIdOf, variantId, suggestDeck, makeCard, familyOf, newGame, startTurn, canPlay, playCard, spellNeedsTarget, legalTargets, attack, endTurn, forfeit, boost, mulligan, aiNextAction, applyAction, aiTurn, guards, valueOf };
+  return { makeRng, step, replay, simulate, AI_STYLES, RULES, KEYWORDS, SPELLS, TWISTS, KNACKS, knackReady, setKnack, useKnack, FATES, fateReady, setFate, useFate, CHEERS, cheerReady, cheerWorthIt, useCheer, spreadBonus, layoutSpread, SPREAD_RULES, PASSIVES, MINORS, PASSIVE_RULES, MINOR_RULES, MAX_KEYWORDS, defOf, baseIdOf, variantId, suggestDeck, makeCard, familyOf, newGame, startTurn, canPlay, playCard, spellNeedsTarget, modeOk, modeNeedsTarget, slotIndex, slotBonus, snaresOf, pickCard, aiPickIndex, legalTargets, attack, endTurn, forfeit, boost, mulligan, aiNextAction, applyAction, aiTurn, guards, valueOf };
 })();
 /* END BATTLE ENGINE */
 

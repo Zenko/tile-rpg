@@ -168,7 +168,7 @@ function startBattleNow(opponent, first) {
   battleView.style.setProperty('--side-accent', state.character.color || 'var(--water-glow)');
   btSetMsg(first === 1 ? `${opponent.name} goes first` : isBoss ? `${opponent.name} rises to meet you` : 'Your turn');
   ensureCosmeticUnlocks(); btGet('btYouRow').className = 'trow mat-' + (state.character.mat || 'glass');   // the player's table mat
-  btHideTip();
+  btHideTip(); btResetInteract();
   btRender();
   if (isBoss) { sfx('rare'); buzz(HAP.win); }
   if (battle.puzzle) { btSetMsg('🧩 Win this turn!'); btRender(); return; }   // no mulligan, no snack: the board is the puzzle
@@ -503,6 +503,7 @@ function btRenderPiles() {
     for (let l = 0; l < layers; l++) { const b = btBackEl(i === 0); b.style.transform = `translate(${-l * 1.3}px, ${-l * 1.7}px)`; pile.appendChild(b); }
     if (n) { const c = document.createElement('span'); c.className = 'pile-n'; c.textContent = n; pile.appendChild(c); }
   });
+  btRenderSnares();                                      // face-down Snares sit on the pile's corner (js/battle-interact.js)
 }
 function btRenderOppHand() {
   const box = btGet('btOppHand'), n = battle.G.p[1].hand.length;
@@ -631,6 +632,7 @@ function btRenderHand(drawnUid, dealAll) {
       el.addEventListener('pointerdown', e => btStartDrag(e, el._c));
       w.appendChild(el);
     }
+    w.firstChild.classList.toggle('combo-ready', ok && c.kw.includes('combo') && (me.played || 0) > 0);   // a Follow-up card is ready to follow
     if (box.children[i] !== w) box.insertBefore(w, box.children[i] || null);
   });
   old.forEach(w => w.remove());
@@ -737,6 +739,7 @@ function btDragBegin() {
     const slots = [...battleView.querySelectorAll('#btYouBoard .slot')];
     slots.forEach(s => s.classList.add('drop-zone'));
     const next = slots.find(s => !s.querySelector('.card')); if (next) next.classList.add('drop-next');
+    btMarkSlotBonus(c);                                  // Nestle / Flank: where it earns its bonus
   } else if (d.kind === 'spell') battleView.querySelector('.table').classList.add('cast-zone');
   else if (d.kind === 'attack') {
     // light up everything this card may legally hit: enemy cards, and the enemy Calm when no Watch stands in the way
@@ -810,6 +813,7 @@ function btDragCleanup() {
   battleView.classList.remove('attack-drag');
   if (d && d.origin) d.origin.classList.remove('drag-origin');
   battleView.querySelectorAll('.drop-zone, .drop-next, .drop-hover, .cast-zone, .atk-blocked').forEach(x => x.classList.remove('drop-zone', 'drop-next', 'drop-hover', 'cast-zone', 'atk-blocked'));
+  btClearSlotBonus();
   battleView.querySelectorAll('#btOppBoard .card.targetable').forEach(x => { if (!battle || !battle.sel) x.classList.remove('targetable'); });
 }
 function btDragEnd(e) {
@@ -830,6 +834,7 @@ function btDragEnd(e) {
     return;
   }
   battle.sel = null; btHideTip();
+  if (btIsModal(c)) { btPlayModal(c); return; }          // a choose-one spell asks which half first
   if (kind === 'aimed') btDoPlay(c.uid, { kind: 'card', uid: +t.card.dataset.uid });
   else btDoPlay(c.uid, undefined, kind === 'creature' ? t.index : undefined);
 }
@@ -849,6 +854,7 @@ function btOnHandCard(c) {
   }
   if (battle.sel && battle.sel.kind === 'play' && battle.sel.uid === c.uid) {       // a second tap plays it
     if (!chk.ok) { btToast(chk.why); return; }
+    if (btIsModal(c)) { battle.sel = null; btHideTip(); btPlayModal(c); return; }
     if (BattleEngine.spellNeedsTarget(c)) {                                          // aimed spells wait for a target
       battle.sel = { kind: 'spell', uid: c.uid };
       btShowTip(c, 'Now tap a glowing enemy card to aim it.');
@@ -882,7 +888,7 @@ function btOnBoardCard(side, c) {
     btRender();
   } else {
     if (battle.sel && battle.sel.kind === 'spell') {
-      const u = battle.sel.uid; battle.sel = null; btHideTip(); btDoPlay(u, { kind: 'card', uid: c.uid }); return;
+      const u = battle.sel.uid, mode = battle.sel.mode; battle.sel = null; btHideTip(); btDoPlay(u, { kind: 'card', uid: c.uid }, undefined, mode); return;
     }
     if (battle.sel && battle.sel.kind === 'attack') {
       const legal = BattleEngine.legalTargets(G, 0, battle.sel.uid).some(t => t.kind === 'card' && t.uid === c.uid);
@@ -966,6 +972,7 @@ function btFlush(G) { const evs = G.events.splice(0); if (typeof replayNote === 
 async function btAnimate(evs, token) {
   for (const e of evs) {
     if (!btAlive(token)) return;
+    if (BT_NEW_EVENTS.has(e.type)) { await btInteractEvent(e, token); continue; }   // Snares, Glimpse (js/battle-interact.js)
     if (e.type === 'play') {
       btRender({ entering: e.card.uid });
       if (e.who === 0) { sfx('play'); buzz(HAP.play); } else sfx('flip');
@@ -995,7 +1002,8 @@ async function btAnimate(evs, token) {
       const def = cardDef(e.card.id);
       btRender();
       btSpellFlash(def);
-      btSetMsg(`${e.who === 0 ? 'You cast' : battle.npc.name + ' casts'} ${def.icon} ${def.name}`);
+      const half = e.mode != null && BattleEngine.SPELLS[e.card.spell].modes ? BattleEngine.SPELLS[e.card.spell].modes[e.mode] : null;   // a choose-one spell says which half
+      btSetMsg(`${e.who === 0 ? 'You cast' : battle.npc.name + ' casts'} ${def.icon} ${def.name}${half ? ` ${half.icon}` : ''}`);
       if (e.target) { const t = document.querySelector(`#battleView .card[data-uid="${e.target.uid}"]`); if (t) t.classList.add('spell-aim'); }
       if (e.who === 0) { sfx('rare'); buzz(HAP.play); } else sfx('flip');
       await btWait(e.who === 0 ? 260 : 480);
@@ -1005,7 +1013,7 @@ async function btAnimate(evs, token) {
     } else if (e.type === 'zap') {
       const t = document.querySelector(`#battleView .card[data-uid="${e.uid}"]`);
       if (t) { if (e.blocked) btShieldFx(t); else btSlashFx(t, true); }
-      if (t) { t.classList.add('hurt-flash'); btFloater(t, e.pierce ? '🌠' : e.blocked ? '🫧 blocked' : (({ thorns: '🌵 -', sting: '🐝 -', chill: '❄️ -' })[e.tag] || '✨ -') + e.dmg, e.blocked ? 'blk' : 'dmg'); if (!e.blocked) btImpact(t, 5); }
+      if (t) { t.classList.add('hurt-flash'); btFloater(t, e.pierce ? '🌠' : e.blocked ? '🫧 blocked' : (({ thorns: '🌵 -', sting: '🐝 -', chill: '❄️ -', snare: '🪤 -' })[e.tag] || '✨ -') + e.dmg, e.blocked ? 'blk' : 'dmg'); if (!e.blocked) btImpact(t, 5); }
       sfx('tap'); await btWait(260);
     } else if (e.type === 'bounce') {
       const t = document.querySelector(`#battleView .card[data-uid="${e.card.uid}"]`);
@@ -1014,7 +1022,8 @@ async function btAnimate(evs, token) {
     } else if (e.type === 'buff' || e.type === 'mendcard' || e.type === 'readied') {
       const t = document.querySelector(`#battleView .card[data-uid="${e.uid}"]`);
       if (t && e.type === 'mendcard') sfx('heal');
-      if (t) btFloater(t, e.type === 'buff' ? (e.skin ? '🧱 +2♥ +1⚔' : e.rally ? '📯 +1 ⚔' : '🌞 +1 ⚔') : e.type === 'mendcard' ? `+${e.amt || 1} ♥` : '🌬️ ready', 'heal');
+      if (t) btFloater(t, e.type === 'buff' ? (e.skin ? '🧱 +2♥ +1⚔' : e.rally ? '📯 +1 ⚔' : e.nestle ? `🪺 +${e.amt}/+${e.amt}` : e.flank ? `🏹 +${e.amt} ⚔` : e.combo ? `🔗 +${e.amt}/+${e.amt}` : e.moons ? '🌔 +1/+1' : '🌞 +1 ⚔') : e.type === 'mendcard' ? `+${e.amt || 1} ♥` : '🌬️ ready', 'heal');
+      if (t && (e.nestle || e.flank || e.combo)) { btRender(); await btWait(200); }
       await btWait(120);
     } else if (e.type === 'summon') {
       btRender({ entering: e.card.uid });
@@ -1097,16 +1106,14 @@ function btSpellFlash(def) {
   field.appendChild(f); setTimeout(() => f.remove(), 900);
 }
 
-async function btDoPlay(uid, target, slotIndex) {
+// slotIndex: the slot a creature was dropped on (it matters for Nestle and Flank); mode: the half of a choose-one spell.
+async function btDoPlay(uid, target, slotIndex, mode) {
   const token = battle.token; battle.busy = true;
-  const r = BattleEngine.playCard(battle.G, 0, uid, target);
+  const r = BattleEngine.playCard(battle.G, 0, uid, target, { slot: typeof slotIndex === 'number' ? slotIndex : undefined, mode });
   if (r && !r.ok) btToast(r.why);
-  if (r && r.ok && typeof slotIndex === 'number') {      // a card dragged onto a particular slot lands there (board order is cosmetic)
-    const board = battle.G.p[0].board, last = board[board.length - 1];
-    if (last && last.uid === uid) { board.pop(); board.splice(Math.min(slotIndex, board.length), 0, last); }
-  }
   await btAnimate(btFlush(battle.G), token);
   if (!btAlive(token)) return;
+  if (battle.G.pending) { await btGlimpsePick(token); if (!btAlive(token)) return; }   // Glimpse: choose the card to keep
   battle.busy = false;
   if (battle.G.over) return btFinish();
   btRender();
@@ -1133,6 +1140,7 @@ async function btOpponentTurn(token) {
       if (G.p[1].fate && BattleEngine.fateReady(G, 1).ok && BattleEngine.useFate(G, 1).ok) { await btAnimate(btFlush(G), token); if (!btAlive(token)) return; continue; }   // a trial foe's Fate
       break;
     }
+    await btTelegraph(a, token); if (!btAlive(token)) return;   // the card it is about to play lifts in its hand
     BattleEngine.applyAction(G, 1, a);
     await btAnimate(btFlush(G), token); if (!btAlive(token)) return;
     if (G.over) break;
@@ -1174,6 +1182,9 @@ function btFinish() {
   if (battle.npc && battle.npc.adaptive && !battle.npc.isBoss && !yielded && !battle.neutral && typeof npcMemBattle === 'function') npcMemBattle(battle.npc, won);   // what this neighbour remembers (js/npc-memory.js)
   if (won && !yielded && !battle.dungeon && !battle.neutral) noteBattleResult(true, battle.playedKw || []);
   if (battle.spellsCast) bumpStat('spellsCast', battle.spellsCast);
+  if (battle.snaresSprung) bumpStat('snaresSprung', battle.snaresSprung);   // build 336
+  if (battle.glimpses) bumpStat('glimpses', battle.glimpses);
+  if (battle.combos) bumpStat('followUps', battle.combos);
   if (!battle.puzzle && !battle.neutral) settleMastery(won && !yielded);
   const winPeb = won && !yielded && !battle.puzzle && !battle.neutral ? cardBonus('winPebbles') + (hasPerk('bounty') ? 1 : 0) + (eventIs('tourney') ? 3 : 0) : 0;
   if (winPeb) { addPebbles(winPeb, 'charms'); setTimeout(() => toast(`🏅 Win bonus: +${winPeb} 🫧`), 1200); }
@@ -1319,6 +1330,7 @@ function closeBattle(retry) {
   const leave = () => {
     battleEndOverlay.classList.add('hidden');
     btGet('mulliganOverlay').classList.add('hidden');
+    btResetInteract();
     inBattle = false;
     btHideTip();
     battleView.classList.add('hidden');

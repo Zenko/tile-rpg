@@ -8,7 +8,7 @@ module.exports = async (page, assert) => {
   const titles = await q("[...document.querySelectorAll('#pmSettingsView .st-title, #stg-help .st-title, #stg-danger .st-title')].map(e => e.textContent)");
   assert.deepStrictEqual(titles, ['Gameplay', 'Appearance', 'Sound & feel', 'Notifications', 'Privacy', 'Backup', 'Help & data', 'Danger zone'], 'the groups: ' + titles.join(' | '));
   assert.ok(await q("!document.getElementById('talkStyleSeg') && !document.getElementById('bigTextToggle')"), 'the removed controls are gone');
-  assert.ok(await q("document.querySelectorAll('#stg-privacy .st-row').length === 3 && /Sends your name, level, district/.test(document.getElementById('stg-privacy').textContent) && /Only the game's maker/.test(document.getElementById('stg-privacy').textContent)"), 'each privacy switch says what is sent and who sees it');
+  assert.ok(await q("document.querySelectorAll('#stg-privacy .st-row').length === 4 && /Sends your name, level, district/.test(document.getElementById('stg-privacy').textContent) && /Only the game's maker/.test(document.getElementById('stg-privacy').textContent)"), 'each privacy switch says what is sent and who sees it');
   // the window slides down from the top and back up, like the tab window (a closed menu must not already be on screen)
   await q("closePlayerMenu()"); await page.waitForTimeout(500);
   assert.ok(await q("document.getElementById('playerMenu').classList.contains('hidden')"), 'it closes');

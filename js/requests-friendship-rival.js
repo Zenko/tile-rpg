@@ -484,15 +484,20 @@ function dropRequestsFor(f) {
 function notePlayerPlay(ev) {
   if (battle) {                                         // numbers for the results window (see btRenderEndStats)
     const st = battle.stats || (battle.stats = { played: 0, dealt: 0, taken: 0, ko: 0 });
-    if ((ev.type === 'play' || ev.type === 'spell') && ev.who === 0) st.played++;
+    if ((ev.type === 'play' || ev.type === 'spell' || ev.type === 'snareset') && ev.who === 0) st.played++;
     else if (ev.type === 'attack' && !ev.blocked) { if (ev.who === 0) st.dealt += ev.dmg || 0; else st.taken += ev.dmg || 0; }
     else if (ev.type === 'faint' && ev.who === 1) st.ko++;
   }
-  if (battle && (ev.type === 'spell' || ev.type === 'play') && ev.who === 0 && ev.card) {            // mastery: every card you put down counts
+  if (battle && ev.who === 0) {                         // build 336: Snares that caught something, Glimpse choices and Follow-ups, for quests and milestones
+    if (ev.type === 'snare') battle.snaresSprung = (battle.snaresSprung || 0) + 1;
+    else if (ev.type === 'picked') battle.glimpses = (battle.glimpses || 0) + 1;
+    else if (ev.type === 'buff' && ev.combo) battle.combos = (battle.combos || 0) + 1;
+  }
+  if (battle && (ev.type === 'spell' || ev.type === 'play' || ev.type === 'snareset') && ev.who === 0 && ev.card) {            // mastery: every card you put down counts
     if (!battle.mastery) battle.mastery = {};
     const b = BattleEngine.baseIdOf(ev.card.id); battle.mastery[b] = (battle.mastery[b] || 0) + 1;
   }
-  if (battle && ev.type === 'spell' && ev.who === 0) { battle.spellsCast = (battle.spellsCast || 0) + 1; return; }
+  if (battle && (ev.type === 'spell' || ev.type === 'snareset') && ev.who === 0) { battle.spellsCast = (battle.spellsCast || 0) + 1; return; }
   if (!battle || ev.type !== 'play' || ev.who !== 0 || !ev.card) return;
   if (!battle.playedKw) battle.playedKw = [];
   (ev.card.kw || []).forEach(k => { if (!battle.playedKw.includes(k)) battle.playedKw.push(k); });

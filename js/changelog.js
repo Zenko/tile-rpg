@@ -18,6 +18,12 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'new', x: 'Snares: four new spells you set face down instead of casting. They wait on the corner of your deck and spring by themselves on your opponent\'s turn: one hurts an attacker before it strikes, one stops an attack on your Calm, one catches a big card as it is played, and one answers when your card falls. You can see when they have Snares set, never which ones.' },
+  { t: 'new', x: 'Cards that ask you to decide: 🪺 Nestle grows the cards on either side of where you drop it, 🏹 Flank likes the ends of your row, 🔗 Follow-up grows when it is the second card you play in a turn, and 🔭 Glimpse shows you the top three cards of your deck to keep one. Two choose-one spells, Crossroads and Twin Moons, ask which half you want.' },
+  { t: 'new', x: '18 new cards in packs to go with them, and a letter from the Card Shop with three to try once you have won a match.' },
+  { t: 'new', x: 'Trading with testers: tap 🔁 next to someone in Who\'s Playing to offer one of your spare cards for one of theirs. It arrives as a letter they can say yes or no to; your card is set aside while they decide and comes back if they say no. Only spares can be traded. Switch it off in Settings.' },
+  { t: 'better', x: 'Reading the table: tap your deck in a match to see what is left in it (theirs shows how many cards and Snares they have), the card your opponent is about to play lifts in their hand first, and a 😊 button sends a little reaction they sometimes answer.' },
+  { t: 'better', x: 'Dragging a card onto a particular slot now really matters for the new placement cards, and the slots where it earns its bonus are marked while you drag.' },
 ];
 
 const RELEASES = [

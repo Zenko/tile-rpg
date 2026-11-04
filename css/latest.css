@@ -3813,3 +3813,102 @@ html.reduce-motion .home-screen *, html.reduce-motion .hr-prop.fresh::after { an
 .sl-card .ac-cost { position: absolute; top: 3px; left: 5px; font-weight: 800; }
 .sl-sheet .controls { flex-wrap: wrap; margin-top: 10px; }
 .pip.lost { background: var(--c-pink-71); }
+
+/* ============================================================
+   THE INTERACTIVE TABLE (build 336, js/battle-interact.js)
+   Snares on the piles, the choose-one / Glimpse sheet, Nestle and Flank drop marks, Follow-up glow, the card the opponent
+   is about to play, the deck tracker and reactions. Only transform / opacity animate (HANDOFF §9).
+   ============================================================ */
+#battleView .pile { cursor: pointer; }
+#battleView .snare-tray { position: absolute; left: -10px; top: -8px; z-index: 21; display: flex; flex-direction: column; gap: 3px; pointer-events: none; }
+#battleView .snare { display: grid; place-items: center; width: 24px; height: 18px; border-radius: 5px; font-size: .72rem; background: var(--stone); border: 1.5px solid var(--accent); box-shadow: 0 2px 5px var(--shadow); transform: rotate(-8deg); }
+#battleView .snare.mine { border-style: dashed; }
+#battleView .snare .card-art-img { width: 14px; height: 14px; }
+#battleView .snare.snare-new { animation: snare_set .45s cubic-bezier(.3,1.4,.5,1); }
+#battleView .snare.snare-spring { animation: snare_spring .7s ease forwards; }
+@keyframes snare_set { from { transform: scale(.2) rotate(-40deg); opacity: 0; } to { transform: rotate(-8deg); opacity: 1; } }
+@keyframes snare_spring { 0% { transform: rotate(-8deg) scale(1); } 40% { transform: rotate(10deg) scale(1.7); } 100% { transform: rotate(0) scale(2.2); opacity: 0; } }
+
+/* Nestle / Flank: the slots where the dragged card would earn its bonus */
+#battleView .slot.slot-bonus { position: relative; outline: 2px dashed var(--accent); outline-offset: 2px; border-radius: 10px; }
+#battleView .slot.slot-bonus::after { content: attr(data-bonus); position: absolute; left: 50%; top: -14px; transform: translateX(-50%); white-space: nowrap; font-size: .6rem; font-weight: 700; padding: 1px 6px; border-radius: 999px; background: var(--accent); color: var(--on-accent); z-index: 25; pointer-events: none; }
+
+/* Follow-up: ready to follow */
+#battleView .hand .card.combo-ready { box-shadow: 0 0 0 2px var(--accent), 0 0 14px var(--accent); }
+#battleView .hand .card.combo-ready::before { content: '🔗'; position: absolute; top: -8px; right: -6px; z-index: 6; font-size: .8rem; }
+
+/* the card the opponent is about to play lifts out of its hand */
+#battleView .ohand .cback.considering { transform: translateY(-10px) rotate(var(--r, 0deg)) scale(1.18); transition: transform .2s ease; }
+
+/* choose one / Glimpse */
+#battleView .bt-choice { position: absolute; inset: 0; z-index: 40; display: flex; align-items: center; justify-content: center; padding: 16px; background: var(--overlay-bg); }
+#battleView .bt-choice.hidden, #battleView .bt-deck-sheet.hidden, #battleView .bt-emotes.hidden { display: none; }
+#battleView .btc-sheet { width: 100%; max-width: 360px; background: var(--stone); border: 1px solid var(--stone-edge); border-radius: 18px; padding: 14px; box-shadow: 0 12px 30px var(--shadow); animation: bt_cardIn .25s ease; }
+#battleView .btc-sheet.wide { max-width: 420px; }
+#battleView .btc-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+#battleView .btc-head b { display: block; font-size: 1rem; }
+#battleView .btc-head small { color: var(--ink-soft); font-size: .76rem; line-height: 1.3; }
+#battleView .btc-ic { font-size: 1.7rem; line-height: 1; }
+#battleView .btc-opts { display: grid; gap: 8px; }
+#battleView .btc-opt { display: flex; align-items: center; gap: 10px; text-align: left; padding: 11px 12px; border-radius: 14px; border: 1.5px solid var(--accent); background: transparent; color: var(--ink); font: inherit; font-size: .86rem; cursor: pointer; }
+#battleView .btc-opt:active { transform: scale(.97); }
+#battleView .btc-opt:disabled { opacity: .45; border-color: var(--stone-edge); cursor: default; }
+#battleView .btc-oi { font-size: 1.4rem; }
+#battleView .btc-ot small { display: block; color: var(--ink-soft); font-size: .7rem; }
+#battleView .btc-cancel { width: 100%; margin-top: 10px; }
+#battleView .btc-cards { display: flex; gap: 8px; justify-content: center; }
+#battleView .btc-pick { flex: 1 1 0; max-width: 118px; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; }
+#battleView .btc-pick .card { position: relative; width: 100%; height: auto; aspect-ratio: 3 / 4; }
+#battleView .btc-pick:active .card { transform: scale(.95); }
+#battleView .btc-pick small { font-size: .66rem; color: var(--ink-soft); text-align: center; line-height: 1.25; }
+
+/* deck tracker */
+#battleView .bt-deck-sheet { position: absolute; inset: 0; z-index: 40; display: flex; align-items: flex-end; justify-content: center; background: var(--overlay-bg); padding: 0 12px calc(12px + env(safe-area-inset-bottom)); }
+#battleView .bds-card { position: relative; width: 100%; max-width: 420px; max-height: 70vh; overflow: auto; background: var(--stone); border: 1px solid var(--stone-edge); border-radius: 18px; padding: 14px; box-shadow: 0 12px 30px var(--shadow); animation: bt_cardIn .25s ease; }
+#battleView .bds-card h3 { margin: 0 0 4px; font-size: 1rem; }
+#battleView .bds-x { position: absolute; top: 10px; right: 10px; width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--stone-edge); background: transparent; color: var(--ink); cursor: pointer; }
+#battleView .bds-sub, #battleView .bds-note, #battleView .bds-empty { font-size: .78rem; color: var(--ink-soft); margin: 4px 0 8px; }
+#battleView .bds-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+#battleView .bds-list li { display: flex; align-items: center; gap: 8px; font-size: .84rem; padding: 5px 6px; border-radius: 10px; background: var(--board-bg); }
+#battleView .bds-cost { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-size: .7rem; font-weight: 800; background: var(--water); color: var(--on-water); flex: none; }
+#battleView .bds-ic { width: 22px; text-align: center; }
+#battleView .bds-ic .card-art-img { width: 20px; height: 20px; }
+#battleView .bds-nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#battleView .bds-st { font-size: .72rem; color: var(--ink-soft); }
+
+/* reactions */
+#battleView .bt-emotes { position: absolute; right: 12px; bottom: calc(232px + env(safe-area-inset-bottom)); z-index: 35; display: flex; flex-wrap: wrap; gap: 6px; max-width: 170px; padding: 8px; background: var(--stone); border: 1px solid var(--stone-edge); border-radius: 16px; box-shadow: 0 8px 20px var(--shadow); animation: bt_cardIn .2s ease; }
+#battleView .bt-emote { width: 44px; height: 44px; border-radius: 50%; border: none; background: var(--board-bg); font-size: 1.4rem; cursor: pointer; }
+#battleView .bt-emote:active { transform: scale(.88); }
+#battleView .spirit { position: relative; }
+#battleView .bt-bubble { position: absolute; left: 70%; z-index: 30; font-size: 1.5rem; padding: 2px 8px; border-radius: 14px; background: var(--stone); border: 1px solid var(--stone-edge); box-shadow: 0 4px 10px var(--shadow); pointer-events: none; animation: bt_bubble 1.9s ease forwards; }
+#battleView .bt-bubble.you { bottom: 80%; }
+#battleView .bt-bubble.opp { top: 80%; }
+@keyframes bt_bubble { 0% { opacity: 0; transform: translateY(6px) scale(.6); } 12% { opacity: 1; transform: translateY(0) scale(1.08); } 20% { transform: scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: translateY(-6px); } }
+@media (prefers-reduced-motion: reduce) { #battleView .snare.snare-new, #battleView .snare.snare-spring, #battleView .bt-bubble { animation: none; } }
+
+/* ---- trading with testers (build 336, js/tester-trade.js): opened from Who's Playing, inside the player menu (z-index 50) ---- */
+#ttOverlay { z-index: 56; }
+#ttOverlay .tt-card { text-align: left; max-height: 86vh; overflow: auto; width: min(420px, calc(100vw - 32px)); }
+#ttOverlay h2 { margin: 0 0 6px; font-size: 1.1rem; }
+#ttOverlay h3 { margin: 12px 0 6px; font-size: .84rem; color: var(--ink-soft); font-weight: 700; }
+.tt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 6px; }
+.tt-chip { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px; border-radius: 12px; border: 1.5px solid var(--stone-edge); background: var(--board-bg); color: var(--ink); font: inherit; cursor: pointer; min-height: 44px; }
+.tt-chip .card-art-img, .tt-chip > .card-emoji { width: 28px; height: 28px; font-size: 1.4rem; }
+.tt-chip b { font-size: .72rem; text-align: center; line-height: 1.2; }
+.tt-chip small { font-size: .62rem; color: var(--ink-soft); text-align: center; }
+.tt-chip.sel { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+.tt-chip.rarity-ultra, .tt-chip.rarity-super { border-color: var(--epic); }
+.tt-chip.rarity-mythic { border-color: var(--mythic); }
+.tt-chip.sel.rarity-ultra, .tt-chip.sel.rarity-super, .tt-chip.sel.rarity-mythic { border-color: var(--accent); }
+.tt-empty { font-size: .8rem; color: var(--ink-soft); margin: 4px 0; }
+.tt-offers { display: grid; gap: 6px; }
+.tt-offer { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 12px; background: var(--board-bg); font-size: .8rem; }
+.tt-offer > span { flex: 1; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.tt-offer small { color: var(--ink-soft); width: 100%; }
+.tt-offer .btn { width: auto; min-height: 36px; padding: 4px 12px; font-size: .74rem; }
+.tt-pair { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 8px 0; }
+.tt-pair .tt-chip { cursor: default; width: 110px; }
+.tt-arrow { font-size: 1.3rem; color: var(--accent); }
+.so-trade { flex: none; min-height: 44px; min-width: 44px; padding: 6px 10px; margin-left: 6px; width: auto; background: transparent; border-color: var(--water); color: var(--ink); }
+.so-trades { display: block; width: 100%; margin: 0 0 8px; padding: 10px 12px; border-radius: 12px; border: 1.5px dashed var(--accent); background: transparent; color: var(--ink); font: inherit; font-weight: 700; text-align: left; cursor: pointer; }

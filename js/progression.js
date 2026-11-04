@@ -30,7 +30,7 @@ document.getElementById('tipOk').addEventListener('click', () => { document.getE
 const XP_PER_STAT = {
   steps: 0.25, summons: 120, atlasWins: 80, atlasGames: 20, cardsFound: 15, battlesWon: 40, bossesWon: 150, fishCaught: 18,
   favours: 30, spiritsMet: 10, districtsVisited: 60, decorationsPlaced: 12,
-  breadBaked: 8, breadShared: 10, spellsCast: 3, seedsPlanted: 3, seedsFound: 5, cropsHarvested: 5, rivalWins: 60,
+  breadBaked: 8, breadShared: 10, spellsCast: 3, snaresSprung: 6, glimpses: 4, followUps: 4, emotesSent: 0, testerTrades: 25, seedsPlanted: 3, seedsFound: 5, cropsHarvested: 5, rivalWins: 60,
   minigamesPlayed: 5, minigameGolds: 10, talks: 1, foilsFound: 20,
   donations: 6, expeditionsDone: 25, tradesDone: 15, cardsGifted: 10, challengesWon: 40, setsCompleted: 60, masteryRanks: 15, charmsSet: 2,
   tossWins: 2, knacksUsed: 3, draftWins: 20, draftClears: 60, ghostWins: 6, townActs: 3, townGames: 8, puddles: 1, puddleWorlds: 8, puddleWins: 12, portalsEntered: 10, riftRows: 20, dailyRifts: 10, stillMotes: 1, crafts: 6, craftSkills: 9, craftFails: 3, forgeFlawless: 4, masterworks: 12, portalFed: 1, portalsCrafted: 25, portalFizzles: 4, portalStonesUsed: 2, portalsHunted: 6, craftFoils: 10, craftsHelped: 1, craftMeterFull: 5, sketches: 4, sketchPerfect: 4, sketchClears: 10, stonesSkipped: 1,
@@ -91,7 +91,8 @@ const FEATURE_LEVELS = {
   draft: { level: 5, icon: '🎴', name: 'Draft Run' },
   ghost: { level: 8, icon: '👻', name: 'Lingering duels' },
   spread: { level: 6, icon: '🃏', name: 'Fate Spread' },
-  sealed: { level: 6, icon: '📦', name: 'Sealed League' }   // js/sealed.js
+  sealed: { level: 6, icon: '📦', name: 'Sealed League' },   // js/sealed.js
+  trade: { level: 6, icon: '🔁', name: 'Trading with testers' }   // js/tester-trade.js
 };
 function featureLocked(id) { return ensureLevel().level < FEATURE_LEVELS[id].level; }
 function featureLockText(id) { const f = FEATURE_LEVELS[id]; return `${f.icon} ${f.name} unlocks at level ${f.level}`; }

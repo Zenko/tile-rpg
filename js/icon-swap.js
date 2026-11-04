@@ -270,6 +270,10 @@
     lull: 'assets/icons/kw-lull.png',
     kin: 'assets/icons/kw-kin.png',
     sting: 'assets/icons/kw-sting.png',
+    nestle: 'assets/icons/kw-nestle.png',
+    flank: 'assets/icons/kw-flank.png',
+    combo: 'assets/icons/kw-combo.png',
+    glimpse: 'assets/icons/kw-glimpse.png',
     /* END GENERATED KW_ART */
   };
   var MARK = '⁣';  // invisible separator: n of them after a keyword's emoji = "keyword number n"

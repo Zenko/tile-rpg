@@ -9,7 +9,7 @@ module.exports = function loadEngine() {
   const js = name => fs.readFileSync(path.join(__dirname, '..', name.includes('/') ? '' : 'js', name), 'utf8');
   const ctx = vm.createContext({ console });
   // const/let at the top of the file are not properties of the context, so the exports are collected in the same script.
-  // As in index.html: js/game-config.js (the names players see), then the card data in content/cards.js, then the engine.
-  vm.runInContext(js('game-config.js') + '\n;' + js('content/cards.js') + '\n;' + js('data-and-engine.js') + '\n;' + js('weekly-rule.js') + '\n;' + js('depth-rules.js') + '\n;this.__engine = { BattleEngine, CARD_POOL, defOf: BattleEngine.defOf, WEEKLY_RULES, DEPTH_MAX, DEPTH_RARITY, depthProfile, depthMods, depthDeck };', ctx, { filename: 'js/data-and-engine.js' });
+  // As in index.html: js/game-config.js (the names players see), then the card data in content/cards.js and the words in content/text.js (keyword and spell text, build 336), then the engine.
+  vm.runInContext(js('game-config.js') + '\n;' + js('content/cards.js') + '\n;' + js('content/text.js') + '\n;' + js('data-and-engine.js') + '\n;' + js('weekly-rule.js') + '\n;' + js('depth-rules.js') + '\n;this.__engine = { BattleEngine, CARD_POOL, defOf: BattleEngine.defOf, WEEKLY_RULES, DEPTH_MAX, DEPTH_RARITY, depthProfile, depthMods, depthDeck };', ctx, { filename: 'js/data-and-engine.js' });
   return ctx.__engine;
 };

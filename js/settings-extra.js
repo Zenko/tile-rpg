@@ -12,7 +12,7 @@
    ============================================================ */
 const SETTINGS_DEFAULTS = { sound: true, haptics: true, music: true, musicVol: 0.5, sfxVol: 0.7, notifs: false, weatherAlerts: false, sharePresence: true, presenceChosen: false, ambient: true, theme: 'dark',
   textSize: 'normal', motion: 'full', hapticStrength: 'normal', quiet: { on: false, from: 22, to: 7 } };
-const SETTINGS_CLEARED = ['approach', 'menuHand', 'charFx', 'shareStats', 'shareDeck', 'adaptive', 'talkStyle'];   // not stored when they are at their default
+const SETTINGS_CLEARED = ['approach', 'menuHand', 'charFx', 'shareStats', 'shareDeck', 'shareTrades', 'adaptive', 'talkStyle'];   // not stored when they are at their default
 
 /* ---- the sync: show the saved choices ---- */
 function syncSettingsExtra() {

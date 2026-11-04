@@ -118,6 +118,7 @@ function pushPresence() {
     district: (DISTRICTS[state.currentDistrict] && DISTRICTS[state.currentDistrict].name) || '',
     lastSeen: Date.now(),
     deck: ghostDeckCode(),
+    spares: typeof ttSpareList === 'function' ? ttSpareList() : null,   // what other testers may ask for in a trade (js/tester-trade.js)
     sealed: typeof sealedPresence === 'function' ? sealedPresence() : null,   // this week's sealed league record (js/sealed.js)
   }).catch(() => { /* offline - this is just a nice-to-have glance, not core save data */ });
 }
@@ -231,6 +232,7 @@ async function fetchWhosPlaying() {
   renderSocialYou();
   if (typeof renderLadderCard === 'function') renderLadderCard();
   if (typeof challengeFetch === 'function') challengeFetch(true);   // any challenges waiting for you (js/challenges.js)
+  if (typeof ttFetch === 'function') { ttFetch(true); ttSettle(true); }   // trade offers to you, and answers to yours (js/tester-trade.js)
   const note = (icon, title, text) => `<div class="so-empty"><span>${icon}</span><b>${title}</b><small>${text}</small></div>`;
   if (!cloudAvailable() || !cloudReady) { box.innerHTML = note('📡', 'Not connected right now', 'Testers show up here when you are online.'); return; }
   box.innerHTML = note('⏳', 'Loading…', '');
@@ -248,6 +250,15 @@ async function fetchWhosPlaying() {
     }).join('')
       : note('🌱', 'Nobody sharing yet', 'Turn it on in Settings and be the first.');
     box.querySelectorAll('[data-ghost]').forEach(b => b.addEventListener('click', () => startGhostDuel(ghostRows[+b.dataset.ghost])));
+    // build 336: a 🔁 on every tester who shares spares opens the trade sheet; a row above the list shows your own open offers
+    rows.forEach((p, i) => {
+      if (p.id === (cloudUser && cloudUser.uid) || !Array.isArray(p.spares) || !p.spares.length || typeof ttOpen !== 'function') return;
+      const card = box.children[i]; if (!card) return;
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'btn so-trade'; b.textContent = '🔁'; b.title = words('trade.button'); b.setAttribute('aria-label', words('trade.button'));
+      b.addEventListener('click', () => ttOpen(p)); card.appendChild(b);
+    });
+    const outN = typeof ttOutState === 'function' ? Object.keys(ttOutState()).length : 0;
+    if (outN) { const b = document.createElement('button'); b.type = 'button'; b.className = 'so-trades'; b.textContent = words('trade.yourOffersN', { n: outN }); b.addEventListener('click', () => ttOpen(null)); box.prepend(b); }
   } catch (e) { box.innerHTML = note('📡', "Couldn't load right now", 'Try again in a moment.'); }
 }
 

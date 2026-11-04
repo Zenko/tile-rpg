@@ -104,6 +104,7 @@ function hoAct(a) {
     claimall: () => { mailState().list.filter(l => l.gift && !l.claimed).forEach(l => claimLetter(l.id)); }, del: () => { deleteLetter(arg); return true; },
     reply: () => hoReply(rest[0], rest[1]),
     chalwatch: () => { challengeWatch(arg); return true; }, chalplay: () => { challengeAnswer(arg); return true; },   // a challenge letter (js/challenges.js)
+    ttyes: () => { ttAnswer(arg, true); return true; }, ttno: () => { ttAnswer(arg, false); return true; },   // a trade offer from a tester (js/tester-trade.js)
     // bonsai
     plant: () => { calmState().bonsai = { since: Date.now(), trims: 0, trimDay: '', paid: 0 }; saveState(); sfx('claim'); u.say = 'A seedling goes into the pot. It grows with real days.'; },
     snip: () => hoSnip(+arg), bloom: () => hoBloom(),
@@ -262,7 +263,7 @@ function hoMail(stage, foot) {
     const reply = !fr ? '' : l.replied ? `<div class="ho-got">${(HOME_REPLIES.find(r => r.id === l.replied) || HOME_REPLIES[0]).icon} You wrote back</div>`
       : `<div class="ho-reply"><small>Write back to ${escapeHtml(l.from)}</small><div>${HOME_REPLIES.map(r => `<button type="button" class="ho-pill" data-ho="reply:${l.id}:${r.id}">${r.icon} ${r.label}</button>`).join('')}</div></div>`;
     stage.innerHTML = `<article class="ho-letter${u.anim ? ' unfold' : ''}"><header><span class="ho-seal">${l.icon}</span><div><b>${escapeHtml(l.subject)}</b><small>from ${escapeHtml(l.from)} · ${fmtLogTime(l.at)}</small></div></header>
-      <p>${escapeHtml(l.body)}</p>${gift}${reply}${typeof challengeLetterHtml === 'function' ? challengeLetterHtml(l) : ''}</article>`;
+      <p>${escapeHtml(l.body)}</p>${gift}${reply}${typeof challengeLetterHtml === 'function' ? challengeLetterHtml(l) : ''}${typeof ttLetterHtml === 'function' ? ttLetterHtml(l) : ''}</article>`;
     foot.innerHTML = `<div class="ho-row"><button type="button" class="ho-btn" data-ho="letters">← All letters</button>${l.gift && !l.claimed ? '' : `<button type="button" class="ho-btn ghost" data-ho="del:${l.id}">🗑️ Delete</button>`}</div>`;
     u.anim = false; u.popped = null;
     return;

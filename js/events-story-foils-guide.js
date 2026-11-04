@@ -240,6 +240,13 @@ document.getElementById('statsToggle').addEventListener('click', () => {
   if (prefs.shareStats !== false) pushStats();
   toast(prefs.shareStats === false ? '📈 Play stats are private' : '📈 Sharing anonymous play stats');
 });
+// Trading with testers (build 336, js/tester-trade.js): your spare cards ride along with your presence entry (on by default).
+document.getElementById('shareTradesToggle').addEventListener('click', () => {
+  sfx('tap');
+  prefs.shareTrades = prefs.shareTrades === false; savePrefs(); syncToggles();
+  if (prefs.sharePresence) pushPresence();
+  toast(words(prefs.shareTrades === false ? 'trade.private' : prefs.sharePresence ? 'trade.public' : 'trade.needPresence'));
+});
 // Lingering duels: your current deck rides along with your presence entry (on by default, with Share that I'm playing).
 document.getElementById('shareDeckToggle').addEventListener('click', () => {
   sfx('tap');

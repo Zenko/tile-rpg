@@ -372,6 +372,7 @@ function syncToggles() {
   document.getElementById('weatherAlertsToggle').classList.toggle('on', notifsEnabled('weatherAlerts'));
   document.getElementById('presenceToggle').classList.toggle('on', !!prefs.sharePresence);
   document.getElementById('shareDeckToggle').classList.toggle('on', prefs.shareDeck !== false);
+  document.getElementById('shareTradesToggle').classList.toggle('on', prefs.shareTrades !== false);
   document.getElementById('statsToggle').classList.toggle('on', prefs.shareStats !== false);
   [['musicVol', 'musicVolNum', prefs.musicVol, !(prefs.sound && prefs.music)], ['sfxVol', 'sfxVolNum', prefs.sfxVol, !prefs.sound]].forEach(([id, numId, v, off]) => {
     const el = document.getElementById(id), pct = Math.round(v * 100);
