@@ -98,7 +98,7 @@ function npcDeckPlan(f, tier) {
    Bosses, the Atlas and the rival are untouched. Tuning lives in NPC_WALK.
    ============================================================ */
 const NPC_WALK = {
-  stepMs: [760, 1050],      // between steps while going somewhere (the slide animation is 520 ms)
+  stepMs: [1100, 1500],     // between steps while going somewhere (build 341: was 760-1050; the slide animation, GRAVE_MOVE_MS, is 780 ms, so a step never starts before the last one ends)
   idleMs: [1500, 2600],     // between decisions while standing
   dwell: { home: [6000, 12000], bench: [7000, 14000], door: [3000, 6000], well: [4000, 8000], fountain: [4000, 8000], lamp: [3000, 6000], nets: [4000, 8000], friend: [7000, 13000], look: [3000, 6000] },
   radius: { steady: 7, bold: 12 },     // how far from home they will choose to go
@@ -381,7 +381,7 @@ const NPC_APPROACH = {
   every: { sometimes: 300000, often: 120000 },      // ms between one visit starting and the next being considered
   chance: { sometimes: 0.5, often: 0.8 },          // each time it is considered (every checkMs)
   daily: { sometimes: 4, often: 10 },
-  checkMs: 8000, radius: 14, idleMs: 3500, walkMs: 30000, waitMs: 22000, perNpcMs: 360000, ignoredMs: 720000, stepMs: [560, 760],
+  checkMs: 8000, radius: 14, idleMs: 3500, walkMs: 30000, waitMs: 22000, perNpcMs: 360000, ignoredMs: 720000, stepMs: [820, 1080],
   icons: { help: '❗', social: '💬', match: '⚔️' }
 };
 const NPC_APP = { last: 0, checkAt: 0, cur: null, pos: null, posAt: 0 };

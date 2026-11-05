@@ -5,11 +5,13 @@
    ============================================================ */
 const WANDER = {
   enabled: true,   // tests switch this off to hold fighters still
-  npc:  { minMs: 1300, maxMs: 2700, leash: 4, moveChance: 0.75 },
-  boss: { minMs: 1900, maxMs: 3600, leash: 5, moveChance: 0.55 },
+  // Build 341: about 45% longer between steps (was npc 1300-2700, boss 1900-3600) and a 50% longer slide (GRAVE_MOVE_MS), so neighbours amble rather than scurry.
+  // Measured over 90 s: the median gap between a walking neighbour's steps went from 1.2 s to 1.6 s.
+  npc:  { minMs: 1900, maxMs: 3800, leash: 4, moveChance: 0.75 },
+  boss: { minMs: 2600, maxMs: 4800, leash: 5, moveChance: 0.55 },
 };
 const GRAVE_MS = { npc: 90 * 1000, boss: 4 * 60 * 1000 };
-const GRAVE_MOVE_MS = 520;   // how long the slide from one tile to the next takes
+const GRAVE_MOVE_MS = 780;   // how long the slide from one tile to the next takes (build 341: was 520, a slower stroll)
 const EPITAPHS = [
   'Lost a friendly match. Resting for now.',
   'Sleeping off a hard-fought game.',
