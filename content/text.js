@@ -265,4 +265,16 @@ const TEXT = {
   'mail.tableTricks.subject': 'New tricks for the table',
   'mail.tableTricks.body': 'Fresh cards came in this week, and they ask you to think: a Snare you set face down that springs on their turn, a spell that lets you choose which half to cast, and a card that cares where you put it. Here are three to try. You can find more in any pack.',
   'mail.tableTricks.label': 'A gift from {name}',
+  // ---- weekly rules for the interactive table (build 340, js/weekly-rule.js) ----
+  'week.snare': 'Snares that hurt deal 2 more damage',
+  'week.nestle': '{kw} cards costing 2 or less +1 power',
+  'week.combo': '{kw} cards +1 power',
+  'week.flank': '{kw} gives +3 power instead of +2',
+  'week.glimpse': '{kw} cards +1 health',
+  // ---- the trade wishlist (build 340): starred cards ----
+  'trade.matchButton': 'Offer a trade: one of you has a card the other starred',
+  'trade.youStarred': 'you starred it',
+  'trade.theyStarred': 'they starred it',
+  'trade.matchNote': 'Starred cards come first: these are the swaps that would make someone’s day.',
+  'trade.starHint': 'Tip: star cards you are missing in Cards → Sets, and other testers will see what you hope for.',
 };

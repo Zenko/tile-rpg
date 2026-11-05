@@ -73,12 +73,13 @@ console.log(`  games that never ended (stalled): ${stuck}`);
 console.log(`  spells: ${inDeck} in decks, ${cast} cast (${inDeck ? (cast / inDeck * 100).toFixed(0) : 0}% of the spells in a deck are cast during a game)`);
 
 console.log('\nE. WEEKLY RULES (the deck each rule is aimed at, against the panel, without and with the rule; both sides get the rule)');
-const kwOf = r => { const m = r.mods; return m.swiftBonus ? 'swift' : m.mendBonus ? 'mend' : m.shieldHp ? 'shield' : m.bloomStart ? 'bloom' : m.echoBonus ? 'echo' : m.guardHp ? 'guard' : m.thornsBonus ? 'thorns' : m.drainBonus ? 'drain' : m.rallyBonus ? 'rally' : m.kwHp ? Object.keys(m.kwHp)[0] : m.kwPower ? Object.keys(m.kwPower)[0] : null; };
+const kwOf = r => { const m = r.mods; return m.snareBonus ? 'snare' : m.nestleBonus ? 'nestle' : m.comboBonus ? 'combo' : m.swiftBonus ? 'swift' : m.mendBonus ? 'mend' : m.shieldHp ? 'shield' : m.bloomStart ? 'bloom' : m.echoBonus ? 'echo' : m.guardHp ? 'guard' : m.thornsBonus ? 'thorns' : m.drainBonus ? 'drain' : m.rallyBonus ? 'rally' : m.kwHp ? Object.keys(m.kwHp)[0] : m.kwPower ? Object.keys(m.kwPower)[0] : null; };
 WEEKLY_RULES.forEach(r => {
   const k = kwOf(r), f = r.mods.weekFam && r.mods.weekFam.family;
-  const deck = f ? deckFrom(base.filter(c => fam(c.id) === f || c.spell)) : deckFrom(base.filter(c => c.kw.includes(k)).concat(base.filter(c => !c.kw.includes(k) && !c.spell && c.kw.length === 0)));
+  const deck = k === 'snare' ? deckFrom(base.filter(c => !c.spell)).slice(0, 8).concat(['bramble-snare', 'bramble-snare', 'pitfall', 'pitfall'])   // a Snare deck: two of each Snare that hurts
+    : f ? deckFrom(base.filter(c => fam(c.id) === f || c.spell)) : deckFrom(base.filter(c => c.kw.includes(k)).concat(base.filter(c => !c.kw.includes(k) && !c.spell && c.kw.length === 0)));
   const off = vsPanel(deck), on = vsPanel(deck, r.mods);
-  console.log('  ' + r.name.padEnd(18) + (f || BE.KEYWORDS[k].name).padEnd(10) + pct(off) + ' ->' + pct(on) + '  (' + (on - off >= 0 ? '+' : '') + (on - off).toFixed(0) + ')');
+  console.log('  ' + r.name.padEnd(18) + (f || (BE.KEYWORDS[k] ? BE.KEYWORDS[k].name : k)).padEnd(10) + pct(off) + ' ->' + pct(on) + '  (' + (on - off >= 0 ? '+' : '') + (on - off).toFixed(0) + ')');
 });
 
 console.log('\nF. COMPANION CHEERS (a random deck with the cheer against the same deck without it, same seeds, both seats; the AI uses it at the end of its turn)');

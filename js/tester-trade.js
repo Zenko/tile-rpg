@@ -29,6 +29,14 @@ function ttSpareList() {
   return Object.keys(a).filter(id => a[id] > 0 && cardDef(id) && !cardDef(id).token)
     .sort((x, y) => RELEASE_VALUE[cardDef(y).rarity] - RELEASE_VALUE[cardDef(x).rarity] || (x < y ? -1 : 1)).slice(0, TT_SPARES_MAX);
 }
+/* The wishlist (build 340) is your starred cards (js/pack-luck.js, Cards -> Sets): they ride on your presence document as `wants`,
+   the trade sheet puts the cards each side hopes for first with a ★, and Who's Playing marks a tester's 🔁 when a swap would suit. */
+function ttWantList() { return ttSharingOn() && typeof starred === 'function' ? starred() : null; }
+function ttMatch(p) {
+  const mineWanted = Array.isArray(p.wants) ? (ttSpareList() || []).filter(id => p.wants.includes(id)) : [];
+  const theirsWanted = Array.isArray(p.spares) && typeof starred === 'function' ? p.spares.filter(id => starred().includes(id)) : [];
+  return { mineWanted, theirsWanted, any: mineWanted.length > 0 || theirsWanted.length > 0 };
+}
 function ttTake(id) { const i = state.ownedCards.lastIndexOf(id); if (i < 0) return false; state.ownedCards.splice(i, 1); return true; }
 function ttReturn(id) { if (cardDef(id)) state.ownedCards.push(id); }
 
@@ -166,21 +174,23 @@ function ttOpen(p) {
   ttRender(); sfx('nav');
 }
 function ttClose() { ttUi = null; document.getElementById('ttOverlay').classList.add('hidden'); }
-function ttChip(id, sel, extra) {
+function ttChip(id, sel, extra, wished) {
   const d = cardDef(id);
-  return `<button type="button" class="tt-chip rarity-${d.rarity}${sel ? ' sel' : ''}" data-tt="${extra}:${id}">${cardArtHtml(d)}<b>${escapeHtml(d.name)}</b><small>${RARITY_LABEL[d.rarity]}${extra === 'want' && !ownedCardCounts()[id] ? ` · ${words('trade.newForYou')}` : ''}</small></button>`;
+  return `<button type="button" class="tt-chip rarity-${d.rarity}${sel ? ' sel' : ''}${wished ? ' wished' : ''}" data-tt="${extra}:${id}">${wished ? `<span class="tt-star" title="${words(extra === 'want' ? 'trade.youStarred' : 'trade.theyStarred')}">★</span>` : ''}${cardArtHtml(d)}<b>${escapeHtml(d.name)}</b><small>${wished ? words(extra === 'want' ? 'trade.youStarred' : 'trade.theyStarred') : RARITY_LABEL[d.rarity]}${!wished && extra === 'want' && !ownedCardCounts()[id] ? ` · ${words('trade.newForYou')}` : ''}</small></button>`;
 }
 function ttRender() {
   const box = document.getElementById('ttCard'); if (!box || !ttUi) return;
   const out = Object.entries(ttOutState()), p = ttUi.p;
-  const mine = ttSpareList() || [], theirs = p && Array.isArray(p.spares) ? p.spares.filter(id => cardDef(id)).slice(0, TT_SPARES_MAX) : [];
+  const m = p ? ttMatch(p) : { mineWanted: [], theirsWanted: [] }, first = list => (a, b) => (list.includes(b) ? 1 : 0) - (list.includes(a) ? 1 : 0);   // wished-for cards first
+  const mine = (ttSpareList() || []).slice().sort(first(m.mineWanted)), theirs = p && Array.isArray(p.spares) ? p.spares.filter(id => cardDef(id)).slice(0, TT_SPARES_MAX).sort(first(m.theirsWanted)) : [];
   const offers = out.length ? `<h3>${words('trade.yourOffers')}</h3><div class="tt-offers">${out.map(([id, o]) => `<div class="tt-offer"><span>${cardArtHtml(cardDef(o.give))} ⇄ ${cardArtHtml(cardDef(o.want))} <b>${escapeHtml(o.name)}</b><small>${fmtLogTime(o.at)}</small></span><button type="button" class="btn btn-ghost" data-tt="cancel:${id}">${words('trade.cancel')}</button></div>`).join('')}</div>` : '';
   let body = '';
   if (p) {
     const name = escapeHtml(String(p.name || 'A player').slice(0, 16));
     body = `<h2>🔁 ${words('trade.title', { name })}</h2>
-      <h3>${words('trade.pickGive')}</h3><div class="tt-grid">${mine.length ? mine.map(id => ttChip(id, ttUi.give === id, 'give')).join('') : `<p class="tt-empty">${words('trade.noSpares')}</p>`}</div>
-      <h3>${words('trade.pickWant', { name })}</h3><div class="tt-grid">${theirs.length ? theirs.map(id => ttChip(id, ttUi.want === id, 'want')).join('') : `<p class="tt-empty">${words('trade.theyHaveNone', { name })}</p>`}</div>`;
+      ${m.mineWanted.length || m.theirsWanted.length ? `<p class="tt-match">★ ${words('trade.matchNote')}</p>` : `<p class="tt-hint">${words('trade.starHint')}</p>`}
+      <h3>${words('trade.pickGive')}</h3><div class="tt-grid">${mine.length ? mine.map(id => ttChip(id, ttUi.give === id, 'give', m.mineWanted.includes(id))).join('') : `<p class="tt-empty">${words('trade.noSpares')}</p>`}</div>
+      <h3>${words('trade.pickWant', { name })}</h3><div class="tt-grid">${theirs.length ? theirs.map(id => ttChip(id, ttUi.want === id, 'want', m.theirsWanted.includes(id))).join('') : `<p class="tt-empty">${words('trade.theyHaveNone', { name })}</p>`}</div>`;
   } else body = `<h2>🔁 ${words('trade.titleMine')}</h2>${out.length ? '' : `<p class="tt-empty">${words('trade.noneOut')}</p>`}`;
   const ready = p && ttUi.give && ttUi.want;
   box.innerHTML = `${body}${offers}<div class="controls"><button type="button" class="btn btn-ghost" data-tt="close:">${words('trade.close')}</button>${p ? `<button type="button" class="btn" data-tt="send:"${ready ? '' : ' disabled'}>${words('trade.send')}</button>` : ''}</div>`;

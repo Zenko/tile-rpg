@@ -568,12 +568,25 @@ function renderTalkFriendship(f) {
   }
 }
 // Every neighbor has a favourite keyword, fixed by their name, and their signature deck is built around it.
-function signatureTheme(f) { let h = 7; const s = neighborKey(f); for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return SIG_THEMES[h % SIG_THEMES.length]; }
+// Build 340: about a quarter of neighbours now love one of the interactive-table keywords instead. Picked from a different part of the
+// same hash, so everyone else keeps the favourite they always had.
+const SIG_THEMES_NEW = ['nestle', 'flank', 'combo', 'glimpse'];
+function signatureTheme(f) {
+  let h = 7; const s = neighborKey(f); for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  const q = Math.floor(h / SIG_THEMES.length);                 // the part of the hash the old pick (h % 6) never looked at
+  if (q % 4 === 0) return SIG_THEMES_NEW[(Math.imul(h ^ (h >>> 16), 0x45d9f3b) >>> 0) % SIG_THEMES_NEW.length];   // mixed, so the four come up evenly
+  return SIG_THEMES[h % SIG_THEMES.length];
+}
 function signatureDeck(f) {
   const theme = signatureTheme(f), counts = {};
   const themed = CARD_POOL.filter(c => !c.exclusive && !c.spell && c.kw.includes(theme) && RARITY_ORDER.indexOf(c.rarity) <= 3);
   themed.forEach(c => { counts[c.id] = 2; });
   BASE_COMMONS.forEach(id => { counts[id] = Math.max(counts[id] || 0, 1); });
+  if (SIG_THEMES_NEW.includes(theme)) {   // a new-mechanic fan keeps every card of their keyword, and sets Snares too
+    const keep = themed.flatMap(c => [c.id, c.id]).concat(['bramble-snare', 'hush-snare']);
+    keep.forEach(id => { counts[id] = Math.max(counts[id] || 0, keep.filter(x => x === id).length); });
+    return BattleEngine.suggestDeck(counts, keep);
+  }
   return BattleEngine.suggestDeck(counts);
 }
 function startSignatureMatch(f) {

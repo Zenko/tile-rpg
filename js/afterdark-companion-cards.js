@@ -96,7 +96,8 @@ const COMPANION_PERKS = {
   medals:  { icon: '🎖️', text: `+1 ${GAME.currency.one} for every mini-game medal` },
   hearth:  { icon: '🍞', text: 'Bread bakes 20% faster' },
 };
-const KW_PERK = { guard: 'spirit', thorns: 'spirit', swift: 'finds', mend: 'crops', bloom: 'harvest', shield: 'chest', echo: 'fish', drain: 'fish', rally: 'xp', seed: 'craft', sting: 'bounty', kin: 'medals', lull: 'hearth' };
+const KW_PERK = { guard: 'spirit', thorns: 'spirit', swift: 'finds', mend: 'crops', bloom: 'harvest', shield: 'chest', echo: 'fish', drain: 'fish', rally: 'xp', seed: 'craft', sting: 'bounty', kin: 'medals', lull: 'hearth',
+                  nestle: 'hearth', flank: 'finds', combo: 'bounty', glimpse: 'chest' };   // build 340: the interactive-table keywords borrow the perk that fits (a new perk would also need a battle cheer)
 const DISTRICT_PERK = { square: 'xp', market: 'harvest', harbor: 'fish', garden: 'crops' };
 const BOSS_PERK = { square: 'spirit', market: 'chest', harbor: 'fish', garden: 'crops' };
 // Dreamer level needed. Cards by rarity (spells add `spell` levels on top), neighbours by district, bosses much later.

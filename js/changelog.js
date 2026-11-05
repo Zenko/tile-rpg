@@ -18,6 +18,13 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
+  { t: 'new', x: 'Five new weekly rules, one for each of the new mechanics: Snare Week, Nestle Week, Follow-up Week, Flank Week and Glimpse Week.' },
+  { t: 'new', x: 'Trade wishlist: the cards you star in Cards → Sets now show to other testers. In the trade sheet the cards each of you is hoping for come first with a ★, and a tester whose spares match your stars gets a highlighted 🔁 in Who\'s Playing.' },
+  { t: 'new', x: 'All 18 cards from Beta 8 now have drawn pictures, like the rest of the collection.' },
+  { t: 'better', x: 'Some neighbours have a new favourite: their signature deck is built around Nestle, Flank, Follow-up or Glimpse, and they bring Snares.' },
+  { t: 'better', x: 'The daily puzzle can now use placement cards and choose-one spells, and sometimes the other side has a Snare set that you have to spring first.' },
+  { t: 'better', x: 'The Workshop can add Nestle or Follow-up to a card, and a companion card with one of the new keywords lends a perk instead of plain XP.' },
+  { t: 'better', x: 'Opponents play Follow-up cards in the right order, leading with another card first.' },
 ];
 
 const RELEASES = [

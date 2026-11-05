@@ -119,6 +119,7 @@ function pushPresence() {
     lastSeen: Date.now(),
     deck: ghostDeckCode(),
     spares: typeof ttSpareList === 'function' ? ttSpareList() : null,   // what other testers may ask for in a trade (js/tester-trade.js)
+    wants: typeof ttWantList === 'function' ? ttWantList() : null,      // your starred cards: the trade wishlist (build 340)
     sealed: typeof sealedPresence === 'function' ? sealedPresence() : null,   // this week's sealed league record (js/sealed.js)
   }).catch(() => { /* offline - this is just a nice-to-have glance, not core save data */ });
 }
@@ -254,7 +255,8 @@ async function fetchWhosPlaying() {
     rows.forEach((p, i) => {
       if (p.id === (cloudUser && cloudUser.uid) || !Array.isArray(p.spares) || !p.spares.length || typeof ttOpen !== 'function') return;
       const card = box.children[i]; if (!card) return;
-      const b = document.createElement('button'); b.type = 'button'; b.className = 'btn so-trade'; b.textContent = '🔁'; b.title = words('trade.button'); b.setAttribute('aria-label', words('trade.button'));
+      const m = ttMatch(p), b = document.createElement('button'); b.type = 'button'; b.className = 'btn so-trade' + (m.any ? ' match' : ''); b.textContent = m.any ? '🔁★' : '🔁';
+      const lab = m.any ? words('trade.matchButton') : words('trade.button'); b.title = lab; b.setAttribute('aria-label', lab);
       b.addEventListener('click', () => ttOpen(p)); card.appendChild(b);
     });
     const outN = typeof ttOutState === 'function' ? Object.keys(ttOutState()).length : 0;

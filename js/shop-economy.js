@@ -13,7 +13,7 @@
    cards whose first keyword is seed) halves the fail chance, adds half again to the XP and the skill chance, and gives the new
    card a perkFoilChance of coming out Reborn. A fail never happens when losing the cards would break the full-deck promise. */
 const CRAFT = {
-  skills: ['guard', 'mend', 'bloom', 'echo', 'thorns', 'drain'],
+  skills: ['guard', 'mend', 'bloom', 'echo', 'thorns', 'drain', 'nestle', 'combo'],   // build 340: Nestle and Follow-up can be crafted on too
   refineSkillChance: 0.30,
   tradeSkillChance: 0.40,
   tradeCount: 3,

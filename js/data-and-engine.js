@@ -197,6 +197,24 @@ const CARD_ART = [
   'festival-marshal',
   'set-spirit',
   'prism-fox',
+  'nest-keeper',
+  'patchwork-bear',
+  'harbor-buoy',
+  'pinwheel',
+  'field-cricket',
+  'leaping-dolphin',
+  'domino-mouse',
+  'relay-finch',
+  'coral-dancer',
+  'leaf-reader',
+  'shell-seer',
+  'peacock-oracle',
+  'bramble-snare',
+  'hush-snare',
+  'pitfall',
+  'keepsake',
+  'crossroads',
+  'twin-moons',
   'market-cat',
   'lamplighter',
   'pebble-golem',
@@ -678,7 +696,7 @@ const BattleEngine = (function () {
      opts.mods   = the world's effect on a match, the same for both sides (battleWorld() in js/battle-ui.js builds it):
                    swiftBonus (+power to Flicker), bloomStart (+power to Bloom), shieldHp (+health to Haze), mendBonus (Rest restores
                    more), echoBonus (Startle hits harder), famHp { family, hp } (a district's "home turf": its family is tougher), and the weekly rule's
-                   thornsBonus / drainBonus / rallyBonus (Briar, Sip and Chorus stronger), kwPower / kwHp { keyword: n } (+power / +health to every card
+                   thornsBonus / drainBonus / rallyBonus (Briar, Sip and Chorus stronger), snareBonus / flankBonus / nestleBonus / comboBonus (build 340: Snare damage, Flank's power, Nestle's and Follow-up's +N/+N), kwPower / kwHp { keyword: n } (+power / +health to every card
                    with that keyword, only those costing up to kwMaxCost when it is set) and weekFam { family, power, hp, maxCost } (a whole family stronger, optionally only its cards up to maxCost).
      opts.twist  = { side, kind } - a district boss's rule twist (see TWISTS).
      opts.knack  = [idForPlayer0, idForPlayer1] - Dreamer’s Gift choices (see KNACKS); only the player uses one.
@@ -802,9 +820,10 @@ const BattleEngine = (function () {
     me.energy -= c.cost; me.board.splice(at, 0, c); me.played = (me.played || 0) + 1;
     emit(G, 'play', { who, card: c, slot: at });
     passiveOnPlay(G, who, c);
-    if (spot.nestle) [me.board[at - 1], me.board[at + 1]].forEach(x => { if (x) { x.power += RULES.nestle; x.grit += RULES.nestle; x.hp += RULES.nestle; emit(G, 'buff', { who, uid: x.uid, amt: RULES.nestle, nestle: true }); } });
-    if (spot.flank) { c.power += RULES.flank; emit(G, 'buff', { who, uid: c.uid, amt: RULES.flank, flank: true }); }
-    if (followUp && c.kw.includes('combo')) { c.power += RULES.combo; c.grit += RULES.combo; c.hp += RULES.combo; emit(G, 'buff', { who, uid: c.uid, amt: RULES.combo, combo: true }); }
+    const nest = RULES.nestle + ((G.mods && G.mods.nestleBonus) || 0), fol = RULES.combo + ((G.mods && G.mods.comboBonus) || 0);   // the weekly rule can lift both
+    if (spot.nestle) [me.board[at - 1], me.board[at + 1]].forEach(x => { if (x) { x.power += nest; x.grit += nest; x.hp += nest; emit(G, 'buff', { who, uid: x.uid, amt: nest, nestle: true }); } });
+    if (spot.flank) { const fl = RULES.flank + ((G.mods && G.mods.flankBonus) || 0); c.power += fl; emit(G, 'buff', { who, uid: c.uid, amt: fl, flank: true }); }
+    if (followUp && c.kw.includes('combo')) { c.power += fol; c.grit += fol; c.hp += fol; emit(G, 'buff', { who, uid: c.uid, amt: fol, combo: true }); }
     if (c.kw.includes('echo')) { const dmg = RULES.echo + ((G.mods && G.mods.echoBonus) || 0); op.spirit -= dmg; emit(G, 'spirit', { who: 1 - who, delta: -dmg, source: c, echo: true }); }
     if (c.kw.includes('rally')) me.board.forEach(x => { if (x !== c) { x.power += RULES.rally + rallyBonus(G); emit(G, 'buff', { who, uid: x.uid, amt: RULES.rally + rallyBonus(G), rally: true }); } });
     if (c.kw.includes('kin')) {
@@ -817,7 +836,7 @@ const BattleEngine = (function () {
     }
     if (c.kw.includes('lull') && op.board.length) lullCard(G, 1 - who, op.board.slice().sort((a, b) => b.power - a.power || b.hp - a.hp)[0]);
     if (c.kw.includes('glimpse')) openGlimpse(G, who);
-    if (c.cost >= 3 && me.board.includes(c)) { const s = spring(G, 1 - who, 'play'); if (s) zap(G, who, c, 3, false, 'snare'); }
+    if (c.cost >= 3 && me.board.includes(c)) { const s = spring(G, 1 - who, 'play'); if (s) zap(G, who, c, snareDmg(G), false, 'snare'); }
     checkEnd(G);
     return { ok: true };
   }
@@ -825,6 +844,7 @@ const BattleEngine = (function () {
   /* ---------- Snares (build 336) ----------
      spring(G, side, kind) is called at each moment a Snare can catch: `side` owns the Snares, and only the enemy's turn counts
      (a Snare never catches its owner's own play). The oldest matching Snare goes, is revealed (event 'snare'), and the caller applies its effect. */
+  function snareDmg(G) { return 3 + ((G.mods && G.mods.snareBonus) || 0); }   // Bramble Snare and Pitfall (Snare Week adds to it)
   function spring(G, side, kind) {
     if (G.over || G.active === side) return null;
     const list = snaresOf(G.p[side]), i = list.findIndex(s => SPELLS[s.spell].snare === kind);
@@ -1059,7 +1079,7 @@ const BattleEngine = (function () {
     a.attacks++;
     // Snares on the defending side spring before the blow lands: Hush stops an attack on the Calm, Bramble hurts the attacker first.
     if (target.kind === 'spirit' && spring(G, 1 - who, 'face')) { lullCard(G, who, a); emit(G, 'stopped', { who, uid: a.uid }); checkEnd(G); return { ok: true }; }
-    if (spring(G, 1 - who, 'attack')) { zap(G, who, a, 3, false, 'snare'); if (!me.board.includes(a)) { checkEnd(G); return { ok: true }; } }
+    if (spring(G, 1 - who, 'attack')) { zap(G, who, a, snareDmg(G), false, 'snare'); if (!me.board.includes(a)) { checkEnd(G); return { ok: true }; } }
     if (a.kw.includes('bloom')) { a.power += RULES.bloom; emit(G, 'grow', { card: a }); }
     if (target.kind === 'spirit') {
       const dmg = Math.min(a.power, RULES.faceCap);
@@ -1176,7 +1196,13 @@ const BattleEngine = (function () {
           else if (style === 'greedy') s += c.cost * 0.45;
           return s;
         };
-        const pick = (rng() < r) ? affordable[Math.floor(rng() * affordable.length)] : affordable.slice().sort((a, b) => score(b) - score(a))[0];
+        let pick = (rng() < r) ? affordable[Math.floor(rng() * affordable.length)] : affordable.slice().sort((a, b) => score(b) - score(a))[0];
+        // Follow-up: when the best play is a Follow-up card that has nothing to follow yet, lead with the best other card that still
+        // leaves room for it this turn (so the pair is played in the right order), rather than wasting its bonus.
+        if (pick.kw && pick.kw.includes('combo') && !me.played) {
+          const lead = affordable.filter(x => x !== pick && !(x.kw && x.kw.includes('combo')) && x.cost + pick.cost <= me.energy).sort((a, b) => score(b) - score(a))[0];
+          if (lead) pick = lead;
+        }
         if (rng() < r * 0.4) memo.stopPlaying = true;          // a gentle opponent sometimes just holds its cards
         else {
           const plan = pick.spell ? plans.get(pick.uid) : null;

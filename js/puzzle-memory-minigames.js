@@ -7,7 +7,8 @@
 const PUZZLE_CARDS = {
   theirs: ['pebble', 'toadstool', 'bubble', 'geode', 'geode', 'rice-cake', 'rice-cake', 'bramble', 'feather', 'hollow-log', 'hedgehog', 'bramble', 'hollow-log', 'folding-screen', 'torii-gate', 'firefly', 'origami-crane'],
   mine:   ['origami-crane', 'flintstone', 'feather', 'firefly', 'sprout', 'toadstool', 'gale', 'feather', 'morning-bugle', 'firefly', 'dusk-bat', 'feather'],
-  hand:   ['spark', 'gust', 'thunderclap', 'sunbeam', 'second-wind', 'harvest', 'origami-crane', 'flintstone', 'tide', 'temple-bell', 'paper-fan', 'morning-bugle', 'village-banner', 'feather', 'gale', 'temple-bell', 'tide'],
+  hand:   ['spark', 'gust', 'thunderclap', 'sunbeam', 'second-wind', 'harvest', 'origami-crane', 'flintstone', 'tide', 'temple-bell', 'paper-fan', 'morning-bugle', 'village-banner', 'feather', 'gale', 'temple-bell', 'tide', 'nest-keeper', 'pinwheel', 'field-cricket', 'crossroads', 'twin-moons'],
+  snares: ['bramble-snare', 'hush-snare'],   // build 340: sometimes they have a Snare set, and the answer has to spring it first
   filler: ['pebble', 'sprout', 'origami-crane', 'firefly']
 };
 function cloneBattle(G) { const c = JSON.parse(JSON.stringify(Object.assign({}, G, { rng: null, events: [], aiMemo: null }))); c.rng = Math.random; return c; }
@@ -15,7 +16,14 @@ function puzzleActions(G) {
   const E = BattleEngine, me = G.p[0], op = G.p[1], acts = [];
   me.hand.forEach(c => {
     if (!E.canPlay(G, 0, c.uid).ok) return;
-    if (E.spellNeedsTarget(c)) op.board.forEach(t => acts.push({ type: 'play', uid: c.uid, target: { kind: 'card', uid: t.uid } }));
+    const fx = c.spell && E.SPELLS[c.spell];
+    if (fx && fx.modes) fx.modes.forEach((m, mode) => {           // a choose-one spell: each castable half (and each target it can take)
+      if (!E.modeOk(G, 0, fx, mode)) return;
+      if (E.modeNeedsTarget(c, mode)) op.board.forEach(t => acts.push({ type: 'play', uid: c.uid, mode, target: { kind: 'card', uid: t.uid } }));
+      else acts.push({ type: 'play', uid: c.uid, mode });
+    });
+    else if (E.spellNeedsTarget(c)) op.board.forEach(t => acts.push({ type: 'play', uid: c.uid, target: { kind: 'card', uid: t.uid } }));
+    else if (!c.spell && (c.kw.includes('nestle') || c.kw.includes('flank'))) for (let slot = 0; slot <= me.board.length; slot++) acts.push({ type: 'play', uid: c.uid, slot });   // where it lands matters
     else acts.push({ type: 'play', uid: c.uid });
   });
   me.board.forEach(a => E.legalTargets(G, 0, a.uid).forEach(t => acts.push({ type: 'attack', uid: a.uid, target: t })));
@@ -51,6 +59,7 @@ function buildPuzzle(day) {
     for (let i = 0; i < nOpp; i++) op.board.push(E.makeCard(pick(PUZZLE_CARDS.theirs), uid++));
     for (let i = 0; i < nMine; i++) { const c = E.makeCard(pick(PUZZLE_CARDS.mine), uid++); c.ready = true; me.board.push(c); }
     for (let i = 0; i < nHand; i++) me.hand.push(E.makeCard(pick(PUZZLE_CARDS.hand), uid++));
+    op.snares = rnd() < 0.3 ? [E.makeCard(pick(PUZZLE_CARDS.snares), uid++)] : [];
     G.active = 0; G.turn = 8; me.turns = 5; op.turns = 4;
     me.maxEnergy = me.energy = 2 + Math.floor(rnd() * 3);
     if (naiveWins(G)) continue;

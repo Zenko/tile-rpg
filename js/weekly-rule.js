@@ -27,6 +27,12 @@ const WEEKLY_RULES = [
   { id: 'kin',    icon: KW.kin.icon, name: `${KW.kin.name} Week`, text: `${KW.kin.name} cards +1 power`, mods: { kwPower: { kin: 1 } } },
   { id: 'sting',  icon: KW.sting.icon, name: `${KW.sting.name} Week`, text: `${KW.sting.name} cards costing 2 or less +1 power`, mods: { kwPower: { sting: 1 }, kwMaxCost: 2 } },
   { id: 'seeds',  icon: KW.seed.icon, name: `${KW.seed.name} Week`, text: `${KW.seed.name} cards +2 health`, mods: { kwHp: { seed: 2 } } },
+  // Build 340: a week for each of the interactive-table mechanics (build 336). Calibrated like section E of scripts/battle-report.js, with full 12-card decks for the 3-card keywords: Snare +5, Nestle +6, Follow-up +8, Flank +9, Glimpse +5. (+1/+1 on Nestle or Follow-up, or +1 power on Flank or Glimpse, measured +16 to +22.)
+  { id: 'snare',  icon: '🪤', name: 'Snare Week', text: words('week.snare'), mods: { snareBonus: 2 } },
+  { id: 'nestle', icon: KW.nestle.icon, name: `${KW.nestle.name} Week`, text: words('week.nestle', { kw: KW.nestle.name }), mods: { kwPower: { nestle: 1 }, kwMaxCost: 2 } },
+  { id: 'combo',  icon: KW.combo.icon, name: `${KW.combo.name} Week`, text: words('week.combo', { kw: KW.combo.name }), mods: { kwPower: { combo: 1 } } },
+  { id: 'flank',  icon: KW.flank.icon, name: `${KW.flank.name} Week`, text: words('week.flank', { kw: KW.flank.name }), mods: { flankBonus: 1 } },
+  { id: 'glimpse', icon: KW.glimpse.icon, name: `${KW.glimpse.name} Week`, text: words('week.glimpse', { kw: KW.glimpse.name }), mods: { kwHp: { glimpse: 1 } } },
 ];
 function weeklyRule() {
   const [y, w] = weekKey().split('-W').map(Number);
