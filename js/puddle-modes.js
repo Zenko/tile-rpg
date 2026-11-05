@@ -411,7 +411,7 @@ function pwDeepTick(w, now, dt) {
 }
 function pwDeepOn() {
   if (PWD.stepBefore == null) PWD.stepBefore = STEP_MS;
-  STEP_MS = Math.max(STEP_MS, 240);                        // swimming is slower than walking
+  STEP_MS = Math.max(STEP_MS, 320);                        // swimming is slower than walking (build 341: 240 -> 320 with the walk at 230)
   townView.classList.add('pw-deep'); if (playerEl) playerEl.classList.add('pw-swim');
 }
 function pwDeepOff() {

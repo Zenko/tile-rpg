@@ -2,7 +2,7 @@
    TOWN MAP: drawing, camera, tap-to-walk, houses and the cellar dungeon.
    ============================================================ */
 const townView = document.getElementById('townGrid');
-const VIEW_COLS = 7; let STEP_MS = 170;   // `let`: a walk with your companion slows it down while it lasts (js/companion-activities.js)
+const VIEW_COLS = 7; let STEP_MS = 230;   // build 341: was 170 (about 6 tiles a second), now about 4.3, a calmer walk. `let`: a walk with your companion slows it down while it lasts (js/companion-activities.js)
 let viewRows = 7;
 const CAM_PAD_TOP = 70, CAM_PAD_BOTTOM = 0, CAM_BAND_BOTTOM = 96;   // px: the map may scroll past its top edge to clear the pill, but runs to the bottom edge of the screen with the dock on top of it; the player is kept in the band above CAM_BAND_BOTTOM
 let townWorld = null, townBuiltFor = null, tilePx = 48, playerEl = null, walkToken = 0;

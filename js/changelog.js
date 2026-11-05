@@ -18,7 +18,7 @@ function gameBuildLabel() { return RELEASES[0] ? `Beta (build ${BUILD})` : `buil
 
 // Bullets waiting for the next Beta update. tag: 'new' | 'better' | 'fixed'.
 const PENDING_CHANGES = [
-  { t: 'better', x: 'Neighbours and bosses now stroll more slowly around town: a longer pause between steps and a slower, smoother glide from tile to tile.' },
+  { t: 'better', x: 'A calmer pace around town: your character walks about a quarter slower, and neighbours and bosses amble with longer pauses between steps and a slower, smoother glide from tile to tile. Swimming in puddle worlds is slower too, so it still feels slower than walking.' },
   { t: 'new', x: 'Five new weekly rules, one for each of the new mechanics: Snare Week, Nestle Week, Follow-up Week, Flank Week and Glimpse Week.' },
   { t: 'new', x: 'Trade wishlist: the cards you star in Cards → Sets now show to other testers. In the trade sheet the cards each of you is hoping for come first with a ★, and a tester whose spares match your stars gets a highlighted 🔁 in Who\'s Playing.' },
   { t: 'new', x: 'All 18 cards from Beta 8 now have drawn pictures, like the rest of the collection.' },
