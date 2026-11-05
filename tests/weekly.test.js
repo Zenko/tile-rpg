@@ -1,7 +1,7 @@
 // Weekly Rule: one rule per week, numbers add onto the world's mods (objects merge), skipped for neutral matches. Every rule is checked.
 module.exports = async (page, assert) => {
   const r = await page.evaluate(() => {
-    const known = new Set(['swiftBonus', 'mendBonus', 'shieldHp', 'bloomStart', 'echoBonus', 'guardHp', 'thornsBonus', 'drainBonus', 'rallyBonus', 'kwPower', 'kwHp', 'kwMaxCost', 'weekFam']);
+    const known = new Set(['swiftBonus', 'mendBonus', 'shieldHp', 'bloomStart', 'echoBonus', 'guardHp', 'thornsBonus', 'drainBonus', 'rallyBonus', 'kwPower', 'kwHp', 'kwMaxCost', 'weekFam', 'snareBonus', 'flankBonus']);
     const rule = weeklyRule(), mods = { shieldHp: 1 }, chips = []; applyWeeklyRule(mods, chips);
     const key = Object.keys(rule.mods)[0], w = battleWorld({}, 'clear'), n = battleWorld({ playerDeck: [] }, 'clear');
     const each = WEEKLY_RULES.map(x => {
@@ -14,7 +14,7 @@ module.exports = async (page, assert) => {
   });
   assert.ok(r.ok && r.added && r.chips === 1, 'the rule adds onto mods and gives a chip');
   assert.ok(r.inWorld && !r.neutral, 'normal matches get it, draft matches do not');
-  assert.strictEqual(r.total, 17); assert.strictEqual(r.all, r.total, 'every rule has its own id');
+  assert.strictEqual(r.total, 22);   // 17, plus the five interactive-table weeks (build 340) assert.strictEqual(r.all, r.total, 'every rule has its own id');
   r.each.forEach(x => { assert.ok(x.known, x.id + ' only uses mods the engine knows'); assert.ok(x.chip, x.id + ' gives one chip with its text'); assert.ok(x.kept, x.id + ' keeps the mods already there'); });
   assert.strictEqual(r.rotation, r.total, 'a full run of weeks shows every rule once');
 };
