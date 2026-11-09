@@ -51,4 +51,7 @@ The game's current sprites are **vector** and use theme colour variables, so the
 ```
 python3 scripts/make-art-templates.py        # the four PSDs and the palette (pip install psd-tools pillow numpy)
 node scripts/render-sprite-reference.js      # the current-sprites sheet (needs Playwright)
+node scripts/capture-map-reference.js        # whole-district map screenshots, 256 px per tile like the templates (needs Playwright)
 ```
+
+The map screenshots are not kept in the repo because they follow the real calendar's season (the trees turn orange in autumn); run the last command whenever you want fresh ones.
